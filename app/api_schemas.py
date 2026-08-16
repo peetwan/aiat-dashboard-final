@@ -202,6 +202,19 @@ class DatabaseCoverageResponse(PublicApiModel):
     raw_data_storage: str
 
 
+class OperationsResponse(PublicApiModel):
+    schema_version: str
+    reviewed_at: str
+    status: str
+    summary: JsonObject
+    scheduler: JsonObject
+    last_connectivity_audit: JsonObject
+    refresh_sources: list[JsonObject]
+    snapshot_sources: list[JsonObject]
+    pipeline: list[JsonObject]
+    monitoring: JsonObject
+
+
 class ProvinceIdentity(PublicApiModel):
     province_code: str
     province_name_th: str

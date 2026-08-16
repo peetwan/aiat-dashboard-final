@@ -107,3 +107,35 @@ def test_executive_ui_is_summary_first_and_mobile_tabs_do_not_clip() -> None:
     assert ".panel-tabs button:nth-child(n + 4)" in styles
     assert ".research-stats span" in styles
     assert "white-space: normal" in styles
+
+
+def test_province_preview_is_one_glance_and_links_to_full_detail() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+
+    assert "ภาพรวม 20 วินาที" in template
+    assert 'id="fullProvinceLink"' in template
+    assert "ดูข้อมูลจังหวัดฉบับเต็ม" in template
+    assert "ตอบได้ตอนนี้" in script
+    assert "ยังตอบไม่ได้" in script
+    assert "`/province/${province.province_code}`" in script
+    assert ".overview-kpi-grid" in styles
+    assert ".overview-answer-grid" in styles
+    assert ".overview-full-cta" in styles
+
+
+def test_full_province_page_exposes_every_public_section_with_progressive_detail() -> None:
+    template = read("app/templates/province.html")
+    script = read("app/static/province.js")
+    styles = read("app/static/province.css")
+
+    for section_id in ("executive", "research", "people", "dimensions", "sources", "operations"):
+        assert f'id="{section_id}"' in template
+    assert 'id="peopleSearch"' in template
+    assert "/api/public/v1/operations" in script
+    assert "ดูทุก field ของรายการนี้" in script
+    assert "data-load-section" in script
+    assert "restricted" in template
+    assert ".record-search" in styles
+    assert "@media (max-width: 620px)" in styles

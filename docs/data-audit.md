@@ -21,8 +21,58 @@
 | Candidate/needs-review public sources | 11 |
 | Restricted values บน Cloud | 0 |
 | Operational candidate rows | 0 จนกว่าจะรัน API refresh |
+| Live connector audit | 6/6 สำเร็จ; 9,652 candidate records |
 
 Production ใช้ PostgreSQL เป็น serving database และตรวจความครบได้ที่ `/api/public/v1/database-coverage`
+
+## Audit ตามคำถามผู้บริหารจากภาพความต้องการ
+
+สถานะใช้ 3 ระดับ: **ตอบได้** = มี field/หลักฐานตรงคำถาม, **ตอบได้บางส่วน** = มีข้อมูลใกล้เคียงแต่ grain/definition ยังไม่ครบ, **ยังตอบไม่ได้** = ห้ามสร้างคำตอบจากการอนุมาน
+
+| คำถาม/ความต้องการ | สถานะปัจจุบัน | สิ่งที่ Dashboard แสดงแล้ว | ข้อมูลที่ต้องเพิ่มเพื่อให้ตอบได้จริง |
+|---|---|---|---|
+| Dashboard ต้องมีชีวิตและเห็นรายโครงการทันที | ยังตอบไม่ได้ | มี public projection แบบ revision และ 6 connector ที่เรียกซ้ำได้ | Production scheduler, persistent raw storage, alert, source watermark และ approval workflow; ห้าม auto-publish ก่อน review |
+| กลุ่มเป้าหมายเป็นใคร อยู่ที่ไหน ได้ประโยชน์อย่างไร | ตอบได้บางส่วน | Area-Based แสดงกลุ่ม/ธุรกิจ อำเภอ ตำบล; innovation มี `target_groups` และพื้นที่ | Target-group taxonomy, beneficiary ID แบบไม่ระบุตัวบุคคล, intervention, benefit type, baseline/target/result และวันที่วัด |
+| ออกแบบจากเป้าหมายใช้งาน เช่น wellness/ผู้สูงอายุ/โรค/เหตุฉุกเฉิน | ตอบได้บางส่วน | แยกมิติ development, housing, risk, livelihood, urban, culture | ชุดข้อมูลสุขภาพและ household อยู่ restricted; ต้องมี owner/privacy gate และ aggregate contract ที่ปลอดภัยก่อนเชื่อม |
+| ฐานข้อมูลหลายฝ่ายเชื่อมเป็นภาพรวมเดียว | ตอบได้บางส่วน | Registry 28 แหล่ง, serving database, source provenance และ 11 public projections | Canonical Project ID, organization ID, program/framework code, geography crosswalk และ shared `as_of` contract |
+| ข้อมูลถูกต้อง แม่นยำ ไม่ซ้ำ/ไม่ตกหล่น | ตอบได้บางส่วน | มี hash, unique key, manifest, privacy scan, unmapped lane และ regression tests | Source owner sign-off, reconciliation กับยอดควบคุม, completeness threshold และ accepted status; ปัจจุบัน accepted = 0 |
+| จำนวนโครงการที่ไหน ระดับจังหวัด/อำเภอ/ตำบล | ตอบได้บางส่วน | 73 provisional project groups, 156 project–province links; participant rows 996 ใน 55 จังหวัด | Project ID ทางการและ project–area bridge; ปัจจุบัน grouping จากชื่อ+ปีงบ+หน่วยวิจัย |
+| หัวหน้าโครงการ ทุน กรอบ และชื่อโครงการ | ตอบได้บางส่วน | AppTech มี research lead/funding บางผลงาน; Area-Based มีชื่อโครงการ ปี และหน่วยวิจัย | Project master จากระบบวิจัยหลักที่มี PI, fund, program/framework, contract และ organization IDs |
+| ผลผลิต ผลลัพธ์ ผลกระทบ เชิงปริมาณ/คุณภาพ | ตอบได้บางส่วน | มี innovation, TRL/SRL, IP, target group และ ROI/SROI บาง field | Outcome registry ที่มี indicator definition, unit, denominator, baseline, target, actual, measurement date และ evidence URL |
+| สถานะดำเนินงาน อยู่ระหว่าง/เสร็จสิ้น | ยังตอบไม่ได้ | แสดง `not_reported_by_source` ตรงไปตรงมา | Milestone/status history พร้อมวันที่, owner และนิยามสถานะกลาง |
+| ประเด็นนี้เคยให้ทุนหรือยัง งานวิจัยถูกใช้โดย บพท. หรือไม่ | ยังตอบไม่ได้ | ยังไม่มี cross-project topic/adoption relation ที่ยืนยันได้ | Controlled topic taxonomy, prior-award linkage, adoption/use case, adopting unit, date และหลักฐานการนำใช้ |
+| งบภาพรวมรายหน่วย/ฝ่าย/กรอบ/โครงการ/พื้นที่ | ยังตอบไม่ได้ | แสดงเฉพาะทุนที่ต้นทางผูกกับ innovation และเตือนว่าไม่ใช่งบจังหวัด | Official budget ledger ที่มี allocation grain, fiscal year, fund/program/project/unit/area keys |
+| สถานะเบิกจ่าย | ยังตอบไม่ได้ | ไม่สร้างค่าทดแทน | Disbursement transactions หรือ approved aggregate: committed, disbursed, balance, percent, cutoff date และ reconciliation total |
+
+ลำดับ data acquisition ที่มีผลต่อคำถามมากที่สุดคือ: **(1) Project master + Project ID, (2) official budget/disbursement ledger, (3) milestone/outcome registry, (4) target-group/benefit schema, (5) adoption/prior-funding linkage** หากยังไม่มี 5 ชุดนี้ การเพิ่มกราฟหรือจำนวน source จะไม่ทำให้ Dashboard ตอบคำถามเชิงนโยบายดีขึ้น
+
+## Audit ความจำเป็นของแต่ละแท็บ
+
+| แท็บ | ควรมีหรือไม่ | บทบาทที่ถูกต้อง | สิ่งที่ปรับใน release นี้ |
+|---|---|---|---|
+| ภาพรวม | ต้องมี | ตอบ “เกิดอะไรขึ้นและรู้อะไรแน่” ใน 20 วินาที | เปลี่ยนจากการ์ด 3 มุมเป็น 4 KPI + ตอบได้/ยังตอบไม่ได้ + decision chain + ปุ่มข้อมูลฉบับเต็ม |
+| โครงการและงบ | ต้องมี | ตอบ project/funding/output โดยรักษา grain | รวม summary, project records, innovation, requirements, funding caveat และ data gaps |
+| คนและพื้นที่ | ต้องมี | แสดงผู้เข้าร่วม/กลุ่มเป้าหมายและพื้นที่จริง ไม่ใช่ยอดรวมอย่างเดียว | ค้นหารายการได้และแสดง district/tambon; restricted records ไม่เผยแพร่ |
+| มิติการพัฒนา | ต้องมี | จัดข้อมูลตาม use case และ evidence stage | แยก metric ต่างหน่วย มีตัวเลขกำกับ และบอก missing dimensions |
+| คุณภาพข้อมูล/ต้นทาง | ต้องมี แต่เป็น supporting layer | ให้ผู้ใช้ตรวจ grain, วันที่, caveat และ URL โดยไม่แย่งพื้นที่จากคำตอบหลัก | อยู่ท้ายลำดับในหน้าเต็มและใช้ collapsed details |
+
+หน้า preview มีไว้เลือกและอ่านเร็ว ส่วน `/province/{code}` เป็นข้อมูลจังหวัดฉบับเต็ม 6 section เพื่อไม่อัดทุกอย่างลง side panel 700px
+
+## Live API connectivity audit — 16 สิงหาคม 2569
+
+ทดสอบแบบ read-only เฉพาะ executable allowlist; ไม่เรียก restricted, person/household, auth หรือ write route และไม่ promote ค่าเข้า public artifacts
+
+| Connector | ผล | Records seen | หมายเหตุ |
+|---|---|---:|---|
+| `f1_sradss_ppaos` | สำเร็จ | 169 | aggregate route เท่านั้น |
+| `f2_apptech_mtr` | สำเร็จ | 630 | มากกว่า public baseline 621 จำนวน 9 ระเบียน; ต้อง review diff |
+| `f2_apptech_mru` | สำเร็จ | 503 | 501 innovation + 2 requirements; แก้ request contract เป็น nested JSON |
+| `f2_learning_dashboard` | สำเร็จ | 89 | หลาย grain; unit และ source-wide `as_of` ยังไม่ระบุ |
+| `f2_learning_area_based` | สำเร็จ | 1,002 | participant/business grain ไม่ใช่ project count |
+| `f3_housing_portal` | สำเร็จ | 7,259 | เฉพาะ dataset ที่ policy อนุญาต values |
+| **รวม** | **6/6** | **9,652** | candidate only; public promotion = none |
+
+ทุก HTTP error ถูกเก็บ response + failed manifest ก่อน raise แล้ว และการทดสอบ `--strategy api` จะไม่ซ่อนความล้มเหลวด้วย snapshot fallback ส่วน `auto` ใช้ fallback ได้เฉพาะ source ที่ policy อนุญาต
 
 ## Source coverage findings
 
@@ -93,7 +143,7 @@ Source #25 (`spu_sukhothai_care`) ยังเป็น `sensitive_possible` แ
 - Source #24 (`f4_research_dashboard_psu`) ยังเป็น metadata-only และไม่มี verified structured project/budget API จึงยังไม่มี Project ID ทางการ, หัวหน้าโครงการ, สถานะดำเนินงาน หรืองบเบิกจ่ายสำหรับเติมใน Dashboard
 - 12 metadata-only sources ต้องมี structured endpoint, schema และ freshness contract ก่อนแสดงค่า
 - Learning Dashboard ยังไม่มี source-wide unit/`as_of` และครอบคลุม selected project participants
-- Operational refresh มี 6 executable plans แต่ยังไม่ควรเปิด cron จนมี persistent raw/manifest storage
+- Operational refresh มี 6 executable plans และ live audit ผ่าน 6/6 แต่ยังไม่เปิด cron จนมี persistent raw/manifest storage, retention และ alerting
 - Dashboard ไม่สร้าง composite score หรือคำแนะนำจัดสรรงบจากข้อมูลต่างหน่วย
 
 Classification และ publication rules ฉบับเต็มอยู่ใน [Data governance](data-governance.md)

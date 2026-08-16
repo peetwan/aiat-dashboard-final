@@ -17,12 +17,13 @@ AIAT Provincial Evidence Map เป็น public decision-support interface ไ�
 - Desktop ใช้ side panel; mobile ใช้ bottom sheet
 - Province panel โหลด `/summary` ก่อนและโหลด `/briefing` สำหรับรายละเอียด/provenance
 - เนื้อหาแบ่งเป็น 5 แท็บตามงานตัดสินใจ:
-  - **ภาพรวม** — ตัวเลขหลัก, decision chain, narrative และ context metrics
+  - **ภาพรวม** — 4 KPI ที่รักษา grain, สิ่งที่ตอบได้/ยังตอบไม่ได้, decision chain และปุ่มข้อมูลฉบับเต็ม
   - **โครงการและงบ** — provisional project groups, participant records, innovation, research/IP/ROI/SROI และ funding caveat
   - **คนและพื้นที่** — SRA/PPPConnext target groups และ area context
   - **มิติการพัฒนา** — context/need, input, activity, output, outcome labels
   - **คุณภาพข้อมูล** — grain, status, `as_of`, `fetched_at`, record count และ source URL
 - หน้า `/insights` รองรับ cross-province, national/non-geo, unmapped และ coverage 28 sources
+- หน้า `/province/{code}` เป็น progressive full-detail view 6 section: executive, research/funding, people/place, dimensions, provenance และ data operations
 - ชื่อจังหวัดและสีปรับตาม evidence coverage เพื่อไม่ให้แผนที่รก
 - ใช้ฟอนต์ Anuphan, contrast และ touch targets ที่รองรับ desktop/mobile
 
@@ -48,7 +49,9 @@ Province panel ออกแบบสำหรับการอ่านแบ�
 - กราฟแท่งและแนวโน้มต้องแสดงค่าตัวเลขที่อ่านได้โดยตรง ไม่ให้ผู้ใช้ต้องประมาณจากความยาวหรือสีเพียงอย่างเดียว
 - มุมมองคนและพื้นที่ต้องเริ่มจาก summary cards และกราฟประเภทพื้นที่ ก่อนรายการวัฒนธรรม/ท่องเที่ยวแบบยาว
 - รายละเอียดหลักฐานรายมิติ กฎคุณภาพ และ metadata ราย source ใช้ collapsed details เป็นค่าเริ่มต้น เพื่อลดความหนาแน่นโดยไม่ทิ้งข้อมูลตรวจสอบ
-- การ์ด 3 มุมในแท็บภาพรวมต้องรักษาความหมายของ grain และ `null`; gauge ใช้ได้เฉพาะ metric ที่มีช่วงคะแนนกำกับชัดเจน
+- แท็บภาพรวมต้องอ่านจบได้ใน 20 วินาที: project groups, participant records, innovations และ source coverage ต้องแยกกัน พร้อมบอก data gaps โดยไม่ใช้พื้นที่หนึ่งในสามกับ metric ที่ไม่มีค่า
+- หน้า full detail ต้องเปิดทุก field ใน public projection ได้ผ่าน collapsed details; รายการยาวแสดงครั้งละส่วน ค้นหาและโหลดเพิ่มได้ เพื่อคงความครบโดยไม่ทำลาย readability
+- สถานะ API ต้องบอกความต่างระหว่าง “connector ดึงได้”, “candidate ผ่าน validation” และ “public revision ได้รับอนุมัติ” อย่างชัดเจน
 - QA ต้องตรวจอย่างน้อยที่ `1440×1000`, `390×844` และ `320×800`: แท็บต้องอยู่ใน panel, decision chain/กราฟต้องไม่ล้น และค่าบนกราฟต้องมองเห็นครบ
 
 ## Reference patterns

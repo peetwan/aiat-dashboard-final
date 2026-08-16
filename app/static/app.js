@@ -675,18 +675,16 @@ function trimText(value, length = 180) {
 
 function renderExecutiveSignals(summary) {
   const signals = summary.readout?.context_metrics || [];
-  document.getElementById("executiveSignals").innerHTML = signals.length
-    ? signals
-        .map(
-          (signal) => `
-            <article class="decision-card">
-              <span>${escapeHtml(signal.label_th)}</span>
-              <strong>${escapeHtml(signal.display_value)}</strong>
-              <small>${escapeHtml(signal.unit || "")}</small>
-            </article>`,
-        )
-        .join("")
-    : '<article class="empty-data"><strong>ยังไม่มีค่าระดับจังหวัดที่สรุปได้</strong></article>';
+  const container = document.getElementById("executiveSignals");
+  container.hidden = !signals.length;
+  container.innerHTML = signals.map(
+    (signal) => `
+      <article class="decision-card">
+        <span>${escapeHtml(signal.label_th)}</span>
+        <strong>${escapeHtml(signal.display_value)}</strong>
+        <small>${escapeHtml(signal.unit || "")}</small>
+      </article>`,
+  ).join("");
 }
 
 function applyProjectDistrict(district) {
@@ -806,13 +804,19 @@ function renderResearchPortfolio(summary) {
 
 function renderDecisionNarrative(summary) {
   const facts = summary.readout?.observations || [];
-  document.getElementById("decisionNarrative").innerHTML = facts.length
-    ? facts.map((fact) => `
-        <article class="briefing-fact">
-          <i aria-hidden="true"></i>
-          <div><small>${escapeHtml(fact.label_th)}</small><p>${escapeHtml(fact.text_th)}</p></div>
-        </article>`).join("")
-    : '<article class="empty-data"><strong>ยังไม่มีข้อมูลเพียงพอสำหรับสรุปภาพจังหวัด</strong></article>';
+  const gaps = [
+    ...(summary.research_portfolio?.data_gaps_th || []).slice(0, 2),
+    ...(summary.missing_dimensions || []).slice(0, 2).map((item) => `ยังไม่มีข้อมูล ${item.label_th}`),
+  ];
+  const knownHtml = facts.length
+    ? facts.slice(0, 2).map((fact) => `<p><strong>${escapeHtml(fact.label_th)}</strong>${escapeHtml(fact.text_th)}</p>`).join("")
+    : "<p>ยังไม่มีข้อสรุปจากข้อมูลที่เชื่อมได้</p>";
+  const gapHtml = gaps.length
+    ? gaps.map((gap) => `<p>${escapeHtml(gap)}</p>`).join("")
+    : "<p>ไม่พบช่องว่างที่ระบบระบุ</p>";
+  document.getElementById("decisionNarrative").innerHTML = `
+    <article class="overview-answer known"><span>ตอบได้ตอนนี้</span>${knownHtml}</article>
+    <article class="overview-answer gap"><span>ยังตอบไม่ได้</span>${gapHtml}</article>`;
 }
 
 function renderDecisionChain(summary) {
@@ -851,82 +855,18 @@ function sraRank(code) {
 }
 
 function renderPillars(summary) {
-  const code = summary.province.province_code;
-  const catalogProvince = provinceByCode(code) || {};
   const portfolio = summary.research_portfolio || {};
-  const funding = portfolio.funding || {};
-
-  const fiscalYears = [...(portfolio.fiscal_years || [])].sort((a, b) =>
-    String(a.label_th).localeCompare(String(b.label_th), "th"),
-  );
-  const latestYear = fiscalYears.at(-1);
-  const hasProject = isObservedStatus(portfolio.project_count_status);
-  const projectCard = `
-    <button type="button" class="pillar-card pillar-projects" data-goto-tab="projects">
-      <span class="pillar-kicker"><i aria-hidden="true"></i>โครงการ บพท.</span>
-      <strong${hasProject ? "" : ' class="pillar-na"'}>${hasProject ? formatNumber(portfolio.project_count) : "—"}</strong>
-      <small>${hasProject ? "กลุ่มโครงการที่เชื่อมจังหวัดได้" : "ไม่พบโครงการในทะเบียน Area-Based ชุดนี้"}</small>
-      <div class="pillar-facts">
-        <span><b>${hasProject ? formatNumber(portfolio.district_count) : "—"}</b><small>อำเภอ</small></span>
-        <span><b>${hasProject ? formatNumber(portfolio.participant_record_count) : "—"}</b><small>ผู้เข้าร่วม</small></span>
-        <span><b>${latestYear ? escapeHtml(latestYear.label_th) : "—"}</b><small>ปีงบล่าสุด</small></span>
-      </div>
-    </button>`;
-
-  const score = catalogProvince.sra_overall_score;
-  let sraBody;
-  if (score !== null && score !== undefined) {
-    const rank = sraRank(code);
-    const dims = Object.entries(catalogProvince.sra_dimension_scores || {})
-      .filter(([, value]) => value !== null && value !== undefined)
-      .map(([key, value]) => ({ key, label: SRA_DIMENSION_LABELS[key] || key, value: Number(value) }))
-      .sort((a, b) => a.value - b.value);
-    const weakest = dims[0];
-    const scorePct = Math.min(100, Math.max(0, (Number(score) / 3) * 100));
-    sraBody = `
-      <strong>${Number(score).toFixed(2)}</strong>
-      <small>คะแนนทุนดำรงชีพรวม จากช่วงคะแนน 0–3</small>
-      <div class="pillar-gauge" aria-label="คะแนน ${Number(score).toFixed(2)} จาก 3"><i><b style="width:${scorePct.toFixed(1)}%"></b></i><span>0</span><span>3</span></div>
-      <div class="pillar-facts pillar-facts-two">
-        <span><b>${rank ? `${formatNumber(rank.rank)}/${formatNumber(rank.of)}` : "—"}</b><small>อันดับเปราะบาง</small></span>
-        <span><b>${weakest ? weakest.value.toFixed(2) : "—"}</b><small>${weakest ? escapeHtml(weakest.label) : "ทุนที่อ่อนสุด"}</small></span>
-      </div>`;
-  } else if (catalogProvince.sra_scope_status === "in_scope_no_current_value") {
-    sraBody = `
-      <strong class="pillar-na">—</strong>
-      <small>อยู่ใน 20 จังหวัดเป้าหมาย แต่ยังไม่มีคะแนนปัจจุบัน</small>
-      <p class="pillar-status-note">ไม่มีค่า ≠ คะแนนศูนย์</p>`;
-  } else {
-    sraBody = `
-      <strong class="pillar-na">—</strong>
-      <small>อยู่นอกขอบเขต 20 จังหวัดเป้าหมาย SRA-DSS</small>
-      <p class="pillar-status-note">จึงไม่มีคะแนนรายจังหวัดปี 2569</p>`;
-  }
-  const sraCard = `
-    <button type="button" class="pillar-card pillar-sra" data-goto-tab="dimensions">
-      <span class="pillar-kicker"><i aria-hidden="true"></i>ความเปราะบาง (SRA-DSS)</span>
-      ${sraBody}
-    </button>`;
-
-  const hasInnovation = isObservedStatus(portfolio.innovation_count_status);
-  const innovationCount = Number(catalogProvince.innovation_records ?? portfolio.innovation_count ?? 0);
-  const trlTop = [...(portfolio.trl_distribution || [])].sort((a, b) => (b.value || 0) - (a.value || 0))[0];
-  const users = Number(catalogProvince.apptech_registered_users || 0);
-  const interactions = Number(catalogProvince.apptech_interactions || 0);
-  const innovationCard = `
-    <button type="button" class="pillar-card pillar-innovation" data-goto-tab="projects">
-      <span class="pillar-kicker"><i aria-hidden="true"></i>นวัตกรรมพร้อมใช้</span>
-      <strong${hasInnovation ? "" : ' class="pillar-na"'}>${hasInnovation ? formatNumber(innovationCount) : "—"}</strong>
-      <small>${hasInnovation ? "รายการ AppTech ที่ผูกกับจังหวัด" : "ไม่พบนวัตกรรมในทะเบียน AppTech ชุดนี้"}</small>
-      <div class="pillar-facts">
-        <span><b>${funding.pmua_funding_entry_count ? formatNumber(funding.pmua_funding_entry_count) : "—"}</b><small>รายการทุน</small></span>
-        <span><b>${funding.pmua_amount_known_entries ? formatCompactNumber(funding.pmua_amount_baht) : "—"}</b><small>บาทที่ระบุ</small></span>
-        <span><b>${trlTop ? escapeHtml(trlTop.label_th) : (catalogProvince.apptech_registered_users !== null && catalogProvince.apptech_registered_users !== undefined ? formatNumber(users) : "—")}</b><small>${trlTop ? "ระดับที่พบมาก" : "ผู้ใช้ระบบ"}</small></span>
-      </div>
-    </button>`;
-
+  const cards = [
+    { label: "กลุ่มโครงการ", value: portfolio.project_count, note: "จัดกลุ่มชั่วคราว", tab: "projects", tone: "projects" },
+    { label: "ระเบียนผู้เข้าร่วม", value: portfolio.participant_record_count, note: "คนละ grain กับโครงการ", tab: "portfolio", tone: "people" },
+    { label: "นวัตกรรมพร้อมใช้", value: portfolio.innovation_count, note: "ผลงานที่เชื่อมจังหวัด", tab: "projects", tone: "innovation" },
+    { label: "แหล่งที่มีข้อมูล", value: summary.coverage?.available_source_count, note: `จาก ${formatNumber(summary.coverage?.public_source_count || 0)} แหล่งสาธารณะ`, tab: "sources", tone: "sources" },
+  ];
   const grid = document.getElementById("pillarGrid");
-  grid.innerHTML = projectCard + sraCard + innovationCard;
+  grid.innerHTML = cards.map((card) => `
+    <button type="button" class="overview-kpi tone-${card.tone}" data-goto-tab="${card.tab}">
+      <span>${escapeHtml(card.label)}</span><strong>${formatNumber(card.value || 0)}</strong><small>${escapeHtml(card.note)}</small>
+    </button>`).join("");
   grid.querySelectorAll("[data-goto-tab]").forEach((card) => {
     card.addEventListener("click", () => activatePanelTab(card.dataset.gotoTab));
   });
@@ -1576,6 +1516,7 @@ function renderProvincePanel(summary) {
   ensurePortfolioLoaded();
   document.getElementById("panelUpdated").textContent = `อัปเดตชุดสรุป ${formatDate(summary.generated_at)}`;
   document.getElementById("provinceApiLink").href = `/api/public/v1/provinces/${province.province_code}/briefing`;
+  document.getElementById("fullProvinceLink").href = `/province/${province.province_code}`;
   const requestedView = new URLSearchParams(window.location.search).get("view");
   if (["overview", "projects", "portfolio", "dimensions", "sources"].includes(requestedView)) activatePanelTab(requestedView, false);
   document.getElementById("provinceName").focus({ preventScroll: true });

@@ -17,19 +17,21 @@
 | Production database | PostgreSQL บน Railway |
 | Local database | SQLite สำหรับพัฒนาและทดสอบ |
 
-Dashboard มีหน้าแผนที่จังหวัด หน้า `/insights` สำหรับข้อมูลข้ามจังหวัด/non-geo และ Public API สำหรับ source coverage, province summaries, briefings และไฟล์ดาวน์โหลดที่มี provenance
+Dashboard มีหน้าแผนที่จังหวัด หน้า `/province/{code}` สำหรับข้อมูลจังหวัดฉบับเต็ม หน้า `/insights` สำหรับข้อมูลข้ามจังหวัด/non-geo และ Public API สำหรับ source coverage, province summaries, briefings, สถานะระบบอัปเดต และไฟล์ดาวน์โหลดที่มี provenance
 
 ## โครงสร้างข้อมูลเมื่อเลือกจังหวัด
 
 Province panel แบ่งเป็น 5 แท็บตามคำถามตัดสินใจ ไม่ได้แบ่งตามชื่อระบบต้นทาง:
 
-1. **ภาพรวม** — ตัวเลขหลักที่ตรวจกลับได้, เส้นทาง `Need → Input → Activity → Output → Outcome`, ข้อสังเกต และสถานะช่องว่าง
+1. **ภาพรวม** — “ภาพรวม 20 วินาที” มี 4 ตัวเลขหลัก, สิ่งที่ตอบได้/ยังตอบไม่ได้, เส้นทาง `Need → Input → Activity → Output → Outcome` และปุ่มเปิดข้อมูลฉบับเต็ม
 2. **โครงการและงบ** — กลุ่มโครงการชั่วคราว, ระเบียนผู้เข้าร่วม, หน่วยวิจัย, พื้นที่, นวัตกรรม, ทุนที่ต้นทางกรอก และความพร้อมของผลลัพธ์
 3. **คนและพื้นที่** — ครัวเรือน/กลุ่มเป้าหมาย, การช่วยเหลือและ OM ของ SRA-DSS, PPPConnext, เมือง, ที่อยู่อาศัย, วัฒนธรรมและท่องเที่ยว
 4. **มิติการพัฒนา** — แยกบริบท/ความต้องการ, ปัจจัยนำเข้า, กิจกรรม, ผลผลิต และผลลัพธ์โดยไม่รวม metric ต่างหน่วย
 5. **คุณภาพข้อมูล** — grain, record count, `as_of`, `fetched_at`, quality status, caveat และ URL ต้นทางราย source
 
 UI ใช้หลัก **summary-first**: ค่า KPI และกราฟที่มีตัวเลขกำกับอยู่ก่อนรายละเอียดหลักฐาน ส่วนรายการยาว กฎคุณภาพ และ metadata ราย source เปิดดูเพิ่มได้เมื่อจำเป็น แท็บทั้ง 5 แสดงครบโดยไม่เลื่อนแนวนอนทั้ง desktop และ mobile และการ์ดในแถวเดียวกันรักษาความสูงเท่ากัน
+
+หน้า `/province/{code}` แบ่งข้อมูลฉบับเต็มเป็น 6 section: สรุปผู้บริหาร, โครงการและงบ, คนและพื้นที่, รายมิติ, หลักฐาน/คุณภาพ และ API/รอบอัปเดต รายการทุกชุดค้นหาและโหลดเพิ่มได้ พร้อมเปิดทุก field ที่อยู่ใน public projection โดยไม่เปิดข้อมูล restricted
 
 Semantic contract ของ release นี้:
 
@@ -38,6 +40,8 @@ Semantic contract ของ release นี้:
 - SRA-DSS มีทะเบียนเป้าหมาย 20 จังหวัด: 15 จังหวัดมีคะแนนปี 2569 และ 5 จังหวัดอยู่ใน scope แต่คะแนนเป็น `null`; สถานะดังกล่าวไม่ใช่คะแนนศูนย์
 - AppTech มีนวัตกรรม 501 รายการและ 555 innovation–province links; 29 รายการเชื่อมหลายจังหวัด เงินทุนจึงเป็น funding attached to innovation ไม่ใช่งบจัดสรร/เบิกจ่ายของจังหวัด
 - Public source ทั้ง 11 แหล่งยังเป็น `candidate`/`needs_review`; accepted source = 0 จึงไม่ใช้ตัวเลขเป็น KPI รับรอง
+- Connectivity audit วันที่ 16 สิงหาคม 2569 ทดสอบ allowlisted connector สด 6/6 สำเร็จ เห็น candidate records 9,652 ระเบียน แต่ไม่มีผลต่อ public projection จนกว่าจะผ่าน diff/privacy/quality approval
+- Production ยังไม่เปิด automatic refresh และไม่ auto-promote ข้อมูล; แผนรอบดึงและ gate อยู่ใน `config/operations_policy.json`
 
 ## เริ่มใช้งานบนเครื่อง
 
@@ -83,6 +87,7 @@ AIAT evidence workspace
 | `/api/public/v1/sources` | 11 public candidate sources |
 | `/api/public/v1/source-coverage` | สถานะครบทั้ง 28 แหล่ง |
 | `/api/public/v1/database-coverage` | ความครบของ serving artifacts ใน database |
+| `/api/public/v1/operations` | ผลตรวจ connector ล่าสุด รอบดึงที่เสนอ และ publication gate |
 | `/api/public/v1/unmapped-records` | ข้อมูลที่ไม่เดาจังหวัดให้เอง |
 | `/api/public/v1/provinces/{code}/summary` | Executive summary รายจังหวัด |
 | `/api/public/v1/provinces/{code}/briefing` | รายการข้อมูลและ provenance รายจังหวัด |

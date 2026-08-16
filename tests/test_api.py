@@ -54,6 +54,14 @@ def test_dashboard_and_endpoint_inventory():
         assert "สำรวจรายละเอียดตามมิติ" not in page.text
         assert "↗" not in page.text
 
+        province_page = client.get("/province/76")
+        assert province_page.status_code == 200
+        assert "เพชรบุรี" in province_page.text
+        assert "ข้อมูลจังหวัดฉบับเต็ม" in province_page.text
+        assert 'id="operations"' in province_page.text
+        assert "/static/province.js" in province_page.text
+        assert client.get("/province/999").status_code == 404
+
         insights_page = client.get("/insights")
         assert insights_page.status_code == 200
         assert "AIAT Data Insights" in insights_page.text
@@ -359,6 +367,25 @@ def test_public_cors_and_restricted_sources_excluded():
         assert "f2_wallet_cluster_realtime" not in source_ids
 
 
+def test_public_operations_contract_reports_live_audit_without_claiming_automation():
+    with TestClient(app) as client:
+        response = client.get("/api/public/v1/operations")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["summary"]["registered_sources"] == 28
+        assert payload["summary"]["public_candidate_sources"] == 11
+        assert payload["summary"]["executable_connectors"] == 6
+        assert payload["summary"]["automatic_refresh_enabled"] is False
+        assert payload["summary"]["automatic_public_promotion_enabled"] is False
+        audit = payload["last_connectivity_audit"]
+        assert audit["successful_connectors"] == audit["configured_connectors"] == 6
+        assert audit["failed_connectors"] == 0
+        assert audit["records_seen_total"] == 9652
+        public_source_ids = {row["source_id"] for row in audit["results"]}
+        assert "f2_wallet_all_realtime" not in public_source_ids
+        assert "f3_healthcare_nonthaburi" not in public_source_ids
+
+
 def test_operational_records_always_filter_non_public_sources(monkeypatch):
     from app.database import SessionLocal
     from app.main import settings
@@ -482,7 +509,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 14
+    assert len(public_operations) == 15
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

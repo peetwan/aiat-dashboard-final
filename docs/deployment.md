@@ -57,19 +57,24 @@ docker build -t aiat-dashboard-final .
 - SRA target scope = 20, current numeric scores = 15, target-with-null = 5
 - Area-Based participant records = 996 และ project–province links = 156 โดยไม่ปน grain
 - หน้า `/`, `/insights`, จังหวัดตัวอย่าง และ mobile layout เปิดได้
+- หน้า `/province/{code}` โหลด summary, briefing และ operations ครบ; ค้นหา/โหลดเพิ่ม/เปิด field details ได้
+- `/api/public/v1/operations` รายงาน connector audit 6/6, 9,652 candidate records และ `automatic_refresh_enabled: false`
 - Operational/debug routes เช่น `/api/sources` ตอบ `404` บน production/PostgreSQL
 
 ## Operational refresh
 
-Collector ใช้งานผ่าน `python -m app.cli ingest --all` แต่ public projection จะไม่เปลี่ยนอัตโนมัติ ก่อนเปิด scheduled refresh ต้องมี persistent storage สำหรับ raw responses และ manifests
+Collector ใช้งานผ่าน `python -m app.cli ingest --all` แต่ public projection จะไม่เปลี่ยนอัตโนมัติ Live audit วันที่ 16 สิงหาคม 2569 ผ่าน 6/6 connector รวม 9,652 candidate records; ตัวเลขนี้เป็น records seen ระหว่าง audit ไม่ใช่ public release count
+
+Production ปัจจุบัน **ยังไม่มี daily scheduler** และค่าที่หน้า `/api/public/v1/operations` ต้องคง `automatic_refresh_enabled: false` จนกว่าจะผ่าน operation gate
 
 ลำดับที่แนะนำ:
 
-1. จัด persistent volume หรือ object storage สำหรับ runtime raw
-2. ทดสอบทีละ source
-3. ตั้ง schedule หลัง retention/traceability ผ่าน review
-4. Validate candidate rows
-5. Rebuild public projection และ deploy revision ใหม่
+1. จัด persistent volume หรือ object storage สำหรับ runtime raw/failed manifests
+2. กำหนด retention, run lock, alert destination และ bounded retry
+3. สร้าง Railway Scheduled Job แยกจาก Web Service; daily probe ตาม `config/operations_policy.json`
+4. Full fetch เฉพาะเมื่อ count/hash/watermark เปลี่ยน แล้ว validate schema/count/uniqueness/privacy/freshness
+5. เก็บเป็น candidate; owner ตรวจ diff และอนุมัติ
+6. Rebuild public projection, รัน tests, commit และ deploy revision ใหม่
 
 Restricted sources ไม่มี executable plan และถูก block ซ้ำใน ingestion guard
 

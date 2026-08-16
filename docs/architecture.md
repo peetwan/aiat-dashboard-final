@@ -29,7 +29,7 @@ Source registry 28 แหล่ง
 2. **Clean projection** — builder รักษา source grain, unit, `as_of`, quality status และ provenance
 3. **Executive serving** — แยกข้อมูลที่ผูกจังหวัด, non-geo และ unmapped โดยไม่เดา join key พร้อม semantic projection ระดับ `Need → Input → Activity → Output → Outcome`
 4. **Database serving** — sync 161 JSON artifacts พร้อม SHA-256 เข้า PostgreSQL หรือ SQLite
-5. **Public API/UI** — โหลด summary ก่อน แล้วโหลดรายละเอียดเมื่อผู้ใช้เลือกพื้นที่
+5. **Public API/UI** — โหลด summary ก่อนใน province preview และใช้ `/summary` + `/briefing` + `/operations` ในหน้า `/province/{code}`
 
 ค่าไม่ทราบใช้ `null`/`ไม่ระบุ`; ระบบไม่แทน null ด้วยศูนย์และไม่สร้าง composite score จาก metric ต่างหน่วย โดยเฉพาะ:
 
@@ -102,6 +102,35 @@ python -m app.cli status
 ```
 
 `--all` เลือกเฉพาะ public source ที่มี executable plan; metadata-only และ restricted ไม่ถูกเรียก API ทุก response ถูกเก็บพร้อม run manifest ใน runtime storage และแถว sanitized ถูกเขียนเข้า `dashboard_records`
+
+`config/operations_policy.json` เป็น operation contract ของรอบดึงที่เสนอ ผล connectivity audit ล่าสุด retry/alert policy และ publication gate ส่วน `/api/public/v1/operations` เปิดเฉพาะสถานะที่ปลอดภัยต่อสาธารณะ
+
+ข้อกำหนดของ collector:
+
+- เก็บ response body และ SHA-256 ก่อน raise เมื่อ HTTP 4xx/5xx เพื่อให้ failed run ตรวจย้อนหลังได้
+- `--strategy api` ต้อง fail ตรงไปตรงมา; snapshot fallback ใช้เฉพาะ `auto` และ source ที่อนุญาต
+- retry เฉพาะ timeout, 429 และ 5xx แบบ bounded; ไม่ retry/bypass 401 หรือ 403
+- `f2_apptech_mru` ใช้ JSON `{action, filter}` พร้อม Origin/Referer ตาม public frontend contract
+- Operational candidate แยกจาก `public_artifacts`; ไม่มี code path auto-promote
+
+## Maintainable refresh design
+
+```text
+Railway Scheduled Job (เสนอ; ยังไม่เปิด)
+        │
+        ├─ daily lightweight probes
+        │      └─ full fetch only when count/hash/watermark changes
+        │
+        └─ collect → evidence → validate → candidate → approve → publish
+                         │                         │
+                   alert + failed manifest   human/owner gate
+```
+
+- SRA ใช้ daily current-year aggregate fetch; connector อื่นใช้ daily probe แล้ว full fetch เมื่อ drift
+- Snapshot source ตรวจ weekly/monthly หรือตาม owner export
+- Web Service ไม่ fetch upstream ตอน `/health` หรือ page request
+- ก่อนเปิด schedule ต้องมี persistent raw storage, retention, alert destination และ run lock เพื่อป้องกันงานซ้อน
+- Public revision เปลี่ยนได้เฉพาะหลัง rebuild, tests, diff review, commit และ deploy
 
 ## Update cycle
 

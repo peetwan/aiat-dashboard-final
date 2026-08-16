@@ -25,6 +25,14 @@ class PolicyViolation(RuntimeError):
     pass
 
 
+class IngestionFetchError(RuntimeError):
+    """Preserve the failed-run manifest while surfacing the original cause."""
+
+    def __init__(self, message: str, manifest_path: Path):
+        super().__init__(message)
+        self.manifest_path = manifest_path
+
+
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -98,12 +106,19 @@ class ResponseRecorder:
         params: dict | None = None,
         data: dict | None = None,
         json_body: dict | None = None,
+        headers: dict | None = None,
     ) -> tuple[httpx.Response, Path]:
         if self.counter:
             time.sleep(self.settings.http_delay_seconds)
-        response = self.client.request(method, url, params=params, data=data, json=json_body)
-        response.raise_for_status()
         self.counter += 1
+        response = self.client.request(
+            method,
+            url,
+            params=params,
+            data=data,
+            json=json_body,
+            headers=headers,
+        )
         suffix = ".json" if "json" in response.headers.get("content-type", "").lower() else ".bin"
         path = self.root / f"{self.counter:04d}_{safe_filename(name)}{suffix}"
         path.write_bytes(response.content)
@@ -118,17 +133,31 @@ class ResponseRecorder:
                 "content_type": response.headers.get("content-type", ""),
             }
         )
+        # Persist the response before raising so a 4xx/5xx boundary remains
+        # auditable instead of leaving an empty raw run directory.
+        response.raise_for_status()
         return response, path
 
-    def write_manifest(self, source_id: str, run_id: str, records_seen: int) -> Path:
+    def write_manifest(
+        self,
+        source_id: str,
+        run_id: str,
+        records_seen: int,
+        *,
+        status: str = "complete",
+        error: str | None = None,
+    ) -> Path:
         manifest = {
             "manifest_version": "0.1.0",
             "source_id": source_id,
             "run_id": run_id,
             "fetched_at": utc_now().isoformat(),
+            "status": status,
             "records_seen": records_seen,
             "artifacts": self.artifacts,
         }
+        if error:
+            manifest["error"] = error[:2000]
         path = self.root / "manifest.json"
         path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return path
@@ -177,7 +206,7 @@ class IngestionPipeline:
                 try:
                     records, manifest_path = self._fetch_api(source, run_id)
                 except Exception as exc:
-                    if source.get("snapshot_fallback", False):
+                    if strategy == "auto" and source.get("snapshot_fallback", False):
                         fallback_note = f"API failed; snapshot fallback used: {type(exc).__name__}: {exc}"
                         records, manifest_path = self._load_snapshot(source, run_id)
                         actual_strategy = "api_then_snapshot"
@@ -213,6 +242,9 @@ class IngestionPipeline:
         except Exception as exc:
             run.status = "failed"
             run.finished_at = utc_now()
+            failed_manifest = getattr(exc, "manifest_path", None)
+            if failed_manifest:
+                run.manifest_path = relative_path(failed_manifest)
             run.error_message = f"{type(exc).__name__}: {exc}"[:4000]
             self.session.commit()
             raise
@@ -283,6 +315,15 @@ class IngestionPipeline:
                 raise RuntimeError(f"ไม่รู้จัก API driver: {driver}")
             manifest = recorder.write_manifest(source["source_id"], run_id, len(records))
             return records, manifest
+        except Exception as exc:
+            manifest = recorder.write_manifest(
+                source["source_id"],
+                run_id,
+                0,
+                status="failed",
+                error=f"{type(exc).__name__}: {exc}",
+            )
+            raise IngestionFetchError(f"{type(exc).__name__}: {exc}", manifest) from exc
         finally:
             recorder.close()
 
@@ -335,8 +376,9 @@ class IngestionPipeline:
             offset = 0
             total = None
             while total is None or offset < total:
-                form = dict(dataset["form"])
-                form.update(
+                request_template = dict(dataset["form"])
+                action = request_template.pop("action")
+                request_template.update(
                     {
                         "startlimit": offset,
                         "endlimit": page_size,
@@ -348,7 +390,11 @@ class IngestionPipeline:
                     "POST",
                     dataset["url"],
                     name=f"{dataset['name']}_offset_{offset:05d}",
-                    data=form,
+                    json_body={"action": action, "filter": request_template},
+                    headers={
+                        "Origin": "https://38rat.nstru.ac.th",
+                        "Referer": "https://38rat.nstru.ac.th/",
+                    },
                 )
                 envelope = response.json().get("data") or {}
                 rows = envelope.get("data") or []
@@ -529,6 +575,8 @@ class IngestionPipeline:
             if self._limit_reached(len(records)):
                 break
         run_root = self.settings.raw_root / source["source_id"] / run_id
+        if run_root.exists():
+            run_root = run_root / "snapshot_fallback"
         run_root.mkdir(parents=True, exist_ok=False)
         manifest = {
             "manifest_version": "0.1.0",

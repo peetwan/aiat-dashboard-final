@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 import csv
+import json
 
+import httpx
 import pytest
 from sqlalchemy import select
 
 from app.catalog import source_config, sync_catalog
 from app.database import SessionLocal
-from app.ingestion import IngestionPipeline, PolicyViolation
-from app.models import DashboardRecord
+from app.ingestion import (
+    IngestionFetchError,
+    IngestionPipeline,
+    PolicyViolation,
+    ResponseRecorder,
+)
+from app.models import DashboardRecord, IngestionRun
 from app.settings import Settings
 
 
@@ -127,3 +134,98 @@ def test_learning_dashboard_driver_keeps_all_source_grains_separate():
     ]
     assert all(record["unit"] is None and record["as_of"] is None for _, record in records)
     assert all(record["scope_warning_th"] == "selected project scope" for _, record in records)
+
+
+def test_apptech_mru_driver_uses_nested_json_contract_and_browser_origin_headers():
+    payload = {"data": {"data": [{"innovationid": "1"}], "totaldata": 1}}
+    plan = {
+        "page_size": 12,
+        "datasets": [
+            {
+                "name": "innovation",
+                "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
+                "form": {
+                    "action": "fetch_innovationAll_JSON",
+                    "innovationgroup": "All",
+                    "orderby": 1,
+                },
+            }
+        ],
+    }
+    recorder = StubRecorder(payload)
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        records = IngestionPipeline(session, settings)._fetch_apptech_mru(plan, recorder)
+
+    request = recorder.calls[0][2]
+    assert request["json_body"]["action"] == "fetch_innovationAll_JSON"
+    assert "action" not in request["json_body"]["filter"]
+    assert request["json_body"]["filter"]["startlimit"] == 0
+    assert request["headers"]["Origin"] == "https://38rat.nstru.ac.th"
+    assert records == [("innovation", {"innovationid": "1"})]
+
+
+def test_response_recorder_keeps_http_error_body_before_raising(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    settings = Settings(
+        database_url="sqlite:///unused.sqlite",
+        http_delay_seconds=0,
+    )
+    recorder = ResponseRecorder("sample", "failed-run", settings)
+    recorder.client.close()
+    recorder.client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                400,
+                json={"status": False, "message": "invalid request"},
+                request=request,
+            )
+        )
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
+        recorder.request("POST", "https://example.test/api", name="bad_request")
+    manifest_path = recorder.write_manifest(
+        "sample",
+        "failed-run",
+        0,
+        status="failed",
+        error="HTTPStatusError: 400",
+    )
+    recorder.close()
+
+    response_path = tmp_path / "data/runtime/raw/sample/failed-run/0001_bad_request.json"
+    assert json.loads(response_path.read_text(encoding="utf-8"))["message"] == "invalid request"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "failed"
+    assert manifest["artifacts"][0]["http_status"] == 400
+    assert manifest["artifacts"][0]["sha256"]
+
+
+def test_explicit_api_strategy_never_hides_failure_with_snapshot_fallback(tmp_path, monkeypatch):
+    failed_manifest = tmp_path / "manifest.json"
+    failed_manifest.write_text("{}\n", encoding="utf-8")
+    settings = Settings(database_url="sqlite:///unused.sqlite")
+
+    with SessionLocal() as session:
+        sync_catalog(session)
+        pipeline = IngestionPipeline(session, settings)
+
+        def fail_api(*_args, **_kwargs):
+            raise IngestionFetchError("upstream failed", failed_manifest)
+
+        monkeypatch.setattr(pipeline, "_fetch_api", fail_api)
+        monkeypatch.setattr(
+            pipeline,
+            "_load_snapshot",
+            lambda *_args, **_kwargs: pytest.fail("explicit api must not use snapshot fallback"),
+        )
+
+        with pytest.raises(IngestionFetchError):
+            pipeline.ingest_source("f2_apptech_mtr", strategy="api")
+
+        run = session.scalar(select(IngestionRun))
+        assert run is not None
+        assert run.status == "failed"
+        assert run.strategy == "api"
+        assert run.manifest_path

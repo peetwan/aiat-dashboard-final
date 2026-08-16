@@ -18,6 +18,7 @@ from app.api_schemas import (
     ExecutiveSummaryResponse,
     HealthResponse,
     LearningDashboardResponse,
+    OperationsResponse,
     ProvinceFeatureCollectionResponse,
     ProvinceResponse,
     ProvincialBriefingResponse,
@@ -46,6 +47,7 @@ from app.public_data import (
     source_insights,
     unmapped_records,
 )
+from app.operations import operations_status
 from app.settings import PROJECT_ROOT, get_settings
 
 
@@ -270,6 +272,25 @@ def insights_dashboard(request: Request):
     )
 
 
+@app.get("/province/{province_code}", response_class=HTMLResponse)
+def province_detail_dashboard(request: Request, province_code: str):
+    code = province_code.strip().zfill(2)
+    province = next(
+        (row for row in public_catalog()["provinces"] if row["province_code"] == code),
+        None,
+    )
+    if province is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรหัสจังหวัด")
+    return templates.TemplateResponse(
+        request=request,
+        name="province.html",
+        context={
+            "app_name": settings.app_name,
+            "province": province,
+        },
+    )
+
+
 @app.get("/health", response_model=HealthResponse)
 def health():
     try:
@@ -424,6 +445,16 @@ def public_database_coverage():
         "operational_candidate_records": contract["approved_operational_records"],
         "raw_data_storage": "immutable_evidence_outside_serving_database",
     }
+
+
+@app.get(
+    "/api/public/v1/operations",
+    tags=["Public data"],
+    response_model=OperationsResponse,
+)
+def public_operations():
+    """Explain connector coverage, refresh cadence, and publication gates."""
+    return operations_status()
 
 
 @app.get(

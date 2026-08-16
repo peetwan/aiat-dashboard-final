@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "reviewed_at": "2026-08-16T14:39:30+00:00",
+  "status": "manual_refresh_with_publication_gate",
+  "scheduler": {
+    "enabled": false,
+    "status_th": "ยังไม่ได้เปิดดึงข้อมูลอัตโนมัติบน Production",
+    "reason_th": "ต้องมี persistent raw storage, failed-run manifest, retention policy และ alerting ก่อนเปิด schedule",
+    "recommended_runtime": "Railway Scheduled Job แยกจาก Web Service",
+    "timezone": "Asia/Bangkok"
+  },
+  "last_connectivity_audit": {
+    "audited_at": "2026-08-16T14:39:30+00:00",
+    "mode": "read_only_allowlisted_connectors",
+    "configured_connectors": 6,
+    "successful_connectors": 6,
+    "failed_connectors": 0,
+    "records_seen_total": 9652,
+    "promotion_effect": "none_candidate_only",
+    "results": [
+      {"source_id": "f1_sradss_ppaos", "status": "complete", "records_seen": 169, "note_th": "public aggregate routes only; person/household detail excluded"},
+      {"source_id": "f2_apptech_mtr", "status": "complete", "records_seen": 630, "note_th": "เพิ่มจาก public baseline 621 จำนวน 9 ระเบียน; ต้อง review diff ก่อน publish"},
+      {"source_id": "f2_apptech_mru", "status": "complete", "records_seen": 503, "note_th": "501 innovation + 2 requirements; auth/write routes excluded"},
+      {"source_id": "f2_learning_dashboard", "status": "complete", "records_seen": 89, "note_th": "หลาย grain; unit และ source-wide as_of ยังไม่ระบุ"},
+      {"source_id": "f2_learning_area_based", "status": "complete", "records_seen": 1002, "note_th": "participant/business grain; ไม่ใช่จำนวนโครงการ"},
+      {"source_id": "f3_housing_portal", "status": "complete", "records_seen": 7259, "note_th": "เฉพาะ datasets ที่ value policy อนุญาต"}
+    ]
+  },
+  "refresh_sources": [
+    {"source_id": "f1_sradss_ppaos", "cadence": "daily", "time_local": "02:15", "strategy": "current-year aggregate fetch", "change_trigger": "snapshot_date or updated_at", "publish": "manual approval after validation"},
+    {"source_id": "f2_apptech_mtr", "cadence": "daily_probe", "time_local": "02:35", "strategy": "totalCount probe; full fetch on change", "change_trigger": "totalCount or record hash drift", "publish": "manual approval after privacy/diff review"},
+    {"source_id": "f2_apptech_mru", "cadence": "daily_probe", "time_local": "02:50", "strategy": "totaldata probe; full fetch on change", "change_trigger": "innovation/requirement totaldata", "publish": "manual approval after schema/diff review"},
+    {"source_id": "f2_learning_dashboard", "cadence": "daily_probe", "time_local": "03:05", "strategy": "schema and response-hash probe", "change_trigger": "schema keys, row count or response hash", "publish": "manual approval because unit/as_of are missing"},
+    {"source_id": "f2_learning_area_based", "cadence": "daily_probe", "time_local": "03:20", "strategy": "row-count and updatedAt-watermark probe", "change_trigger": "count, unique IDs or watermark", "publish": "manual approval after geography/privacy checks"},
+    {"source_id": "f3_housing_portal", "cadence": "daily_probe", "time_local": "03:35", "strategy": "CKAN resource metadata probe; full fetch on change", "change_trigger": "resource.last_modified, URL or hash", "publish": "manual approval after unit/privacy checks"}
+  ],
+  "snapshot_sources": [
+    {"source_id": "f1_pppconnext", "cadence": "weekly_or_owner_export", "reason_th": "live BI shell เคยตอบ 404"},
+    {"source_id": "f2_culturalmap_university", "cadence": "weekly_or_on_change", "reason_th": "ใช้ structured external export"},
+    {"source_id": "f2_rmutdb", "cadence": "monthly_or_export_change", "reason_th": "record API มี auth boundary"},
+    {"source_id": "f3_city_capital_open_data", "cadence": "weekly_or_on_change", "reason_th": "static structured bundle"},
+    {"source_id": "f3_ruamthiao_lamphun", "cadence": "weekly_or_on_change", "reason_th": "static public bundle"}
+  ],
+  "pipeline": [
+    {"stage": "collect", "rule_th": "เรียกเฉพาะ allowlist; จำกัด request; restricted/auth routes ถูก block"},
+    {"stage": "evidence", "rule_th": "เก็บ response และ manifest พร้อม hash แม้ HTTP ล้มเหลว"},
+    {"stage": "validate", "rule_th": "ตรวจ schema, count, uniqueness, null, geography, privacy และ freshness"},
+    {"stage": "candidate", "rule_th": "เขียน operational candidate แยกจาก public serving artifacts"},
+    {"stage": "approve", "rule_th": "owner/quality review diff; ห้าม auto-promote"},
+    {"stage": "publish", "rule_th": "build deterministic artifacts, test, commit และ deploy revision ใหม่"}
+  ],
+  "monitoring": {
+    "alerts": ["connector failure", "schema drift", "record-count anomaly", "stale watermark", "privacy violation", "manifest/hash mismatch"],
+    "retry_policy": "retry เฉพาะ timeout, 429 และ 5xx แบบ bounded exponential backoff; ไม่ retry 401/403",
+    "freshness_policy": "ใช้ source watermark เมื่อมี; fetched_at ไม่ใช้แทน as_of",
+    "public_health_policy": "หน้า /health ตรวจ serving database เท่านั้นและไม่เรียก upstream API สด"
+  }
+}

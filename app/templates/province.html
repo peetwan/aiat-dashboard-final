@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ข้อมูลจังหวัด{{ province.province_name_th }}แบบละเอียด ครบทั้งโครงการ คน พื้นที่ ผลผลิต มิติการพัฒนา และแหล่งข้อมูล" />
+    <meta name="theme-color" content="#f4f6f2" />
+    <title>{{ province.province_name_th }} · ข้อมูลจังหวัดฉบับเต็ม | AIAT</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/province.css" />
+  </head>
+  <body data-province-code="{{ province.province_code }}">
+    <a class="skip-link" href="#provinceDetailMain">ข้ามไปยังข้อมูลจังหวัด</a>
+
+    <header class="detail-topbar">
+      <a class="detail-brand" href="/" aria-label="กลับหน้าแผนที่ AIAT">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>AIAT</strong><small>Provincial Evidence Map</small></span>
+      </a>
+      <nav aria-label="เมนูหลัก">
+        <a href="/?province={{ province.province_code }}&view=overview">← กลับแผนที่</a>
+        <a href="/insights">ภาพรวมประเทศ</a>
+        <a href="/docs" target="_blank" rel="noreferrer">Public API</a>
+      </nav>
+    </header>
+
+    <main id="provinceDetailMain">
+      <section class="detail-hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><i></i> ข้อมูลจังหวัดฉบับเต็ม</p>
+          <div class="title-row"><h1>{{ province.province_name_th }}</h1><span>{{ province.province_name_en }}</span></div>
+          <p class="hero-lead">รวมข้อมูลสาธารณะที่เชื่อมกับจังหวัดไว้ในหน้าเดียว เริ่มจากคำตอบสำคัญ แล้วเปิดดูรายการและหลักฐานได้ครบตามแหล่งข้อมูล</p>
+          <div class="hero-meta">
+            <span>{{ province.region }}</span><span>รหัส {{ province.province_code }}</span>
+            <span id="detailCoverage">กำลังตรวจความครอบคลุม</span>
+          </div>
+        </div>
+        <aside class="hero-status">
+          <span>สถานะข้อมูล</span>
+          <strong>Candidate / Needs review</strong>
+          <p>ใช้สำรวจและตั้งคำถามได้ แต่ยังไม่ใช่ KPI ที่รับรองแล้ว</p>
+          <small id="detailGenerated">กำลังโหลดวันที่ชุดข้อมูล</small>
+        </aside>
+      </section>
+
+      <nav class="section-nav" aria-label="สารบัญข้อมูลจังหวัด">
+        <a href="#executive">สรุป</a>
+        <a href="#research">โครงการและงบ</a>
+        <a href="#people">คนและพื้นที่</a>
+        <a href="#dimensions">รายมิติ</a>
+        <a href="#sources">แหล่งข้อมูล</a>
+        <a href="#operations">ระบบอัปเดต</a>
+      </nav>
+
+      <div class="detail-loading" id="detailLoading" aria-live="polite">
+        <span></span><span></span><span></span><p>กำลังรวบรวมข้อมูลทุกส่วนของจังหวัด</p>
+      </div>
+
+      <div id="detailContent" hidden>
+        <section class="detail-section" id="executive">
+          <header class="section-title"><div><small>01 · Executive readout</small><h2>ภาพรวมที่เข้าใจได้ใน 20 วินาที</h2></div><p>ตัวเลขหลัก แยกสิ่งที่ตอบได้และยังตอบไม่ได้</p></header>
+          <div class="executive-kpis" id="executiveKpis"></div>
+          <div class="answer-board">
+            <article class="answer-card answer-known"><header><i>✓</i><div><strong>สิ่งที่ข้อมูลตอบได้</strong><span>มีหลักฐานระดับจังหวัด</span></div></header><div id="knownAnswers"></div></article>
+            <article class="answer-card answer-gap"><header><i>!</i><div><strong>สิ่งที่ยังตอบไม่ได้</strong><span>ต้องเพิ่มข้อมูลหรือปิด definition gate</span></div></header><div id="missingAnswers"></div></article>
+          </div>
+          <div class="detail-chain" id="detailDecisionChain"></div>
+          <div class="executive-readout" id="executiveReadout"></div>
+        </section>
+
+        <section class="detail-section" id="research">
+          <header class="section-title"><div><small>02 · Research & funding</small><h2>โครงการ งบ ผลผลิต และผลลัพธ์</h2></div><p>รักษา grain โครงการ ผู้เข้าร่วม และนวัตกรรมแยกกัน</p></header>
+          <div id="researchSummary"></div>
+          <div class="subsection" id="projectRecords"></div>
+          <div class="subsection" id="innovationRecords"></div>
+          <div class="subsection" id="requirementRecords"></div>
+        </section>
+
+        <section class="detail-section" id="people">
+          <header class="section-title"><div><small>03 · People & place</small><h2>คน กลุ่มเป้าหมาย และข้อมูลพื้นที่</h2></div><p>ค้นหารายการได้ โดยไม่แสดงข้อมูล restricted</p></header>
+          <label class="record-search"><span>ค้นหาทุกข้อมูลในส่วนนี้</span><input id="peopleSearch" type="search" placeholder="โครงการ กลุ่ม/ธุรกิจ อำเภอ วัฒนธรรม เมือง หรือที่อยู่อาศัย" autocomplete="off" /></label>
+          <div class="people-sections" id="peopleSections"></div>
+        </section>
+
+        <section class="detail-section" id="dimensions">
+          <header class="section-title"><div><small>04 · Development dimensions</small><h2>ข้อมูลรายมิติ</h2></div><p>กราฟทุกชุดมีตัวเลขกำกับและไม่รวม metric ต่างหน่วย</p></header>
+          <div class="dimension-grid" id="detailDimensions"></div>
+          <div class="missing-dimensions" id="missingDimensions"></div>
+        </section>
+
+        <section class="detail-section" id="sources">
+          <header class="section-title"><div><small>05 · Evidence & provenance</small><h2>ข้อมูลมาจากไหนและพร้อมแค่ไหน</h2></div><p>กดแต่ละแหล่งเพื่อดู grain วันที่ และข้อจำกัด</p></header>
+          <div class="quality-banner" id="detailQuality"></div>
+          <div class="source-list" id="detailSources"></div>
+        </section>
+
+        <section class="detail-section operations-section" id="operations">
+          <header class="section-title"><div><small>06 · Data operations</small><h2>API และรอบการอัปเดต</h2></div><p>แยกการดึงข้อมูลออกจากการอนุมัติเผยแพร่</p></header>
+          <div id="operationsStatus"></div>
+        </section>
+      </div>
+
+      <section class="detail-error" id="detailError" hidden>
+        <strong>โหลดข้อมูลจังหวัดไม่สำเร็จ</strong><p>กรุณาลองเปิดหน้านี้ใหม่อีกครั้ง</p><button type="button" id="retryDetail">ลองใหม่</button>
+      </section>
+    </main>
+
+    <footer class="detail-footer"><p>AIAT Provincial Evidence Map · ไม่ใช้ค่าที่ไม่ทราบแทนศูนย์ และไม่สร้างคะแนนจัดสรรงบอัตโนมัติ</p><a href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a></footer>
+    <script src="/static/province.js" defer></script>
+  </body>
+</html>
