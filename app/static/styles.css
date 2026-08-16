@@ -1946,3 +1946,93 @@
     body.panel-open .map-corner { opacity: 0; pointer-events: none; }
   }
 }
+
+/* Executive overview additions: three-pillar cards, PPPConnext poverty
+   households, municipal city conditions, and housing dataset links. Thai
+   text keeps zero tracking and roomy line-heights throughout. */
+@layer lightmap {
+  .pillars-section { padding-top: 20px; }
+  .pillar-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .pillar-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+    padding: 16px 15px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: var(--ink-strong);
+    transition: border-color 150ms ease;
+  }
+  .pillar-card:hover { border-color: rgba(20, 29, 24, 0.35); }
+  .pillar-card:focus-visible { outline: 3px solid #61b58a; outline-offset: 2px; }
+  .pillar-kicker { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: 11px; font-weight: 750; letter-spacing: 0; }
+  .pillar-kicker i { width: 8px; height: 8px; border-radius: 50%; }
+  .pillar-projects .pillar-kicker i { background: #2e7d51; }
+  .pillar-sra .pillar-kicker i { background: #c96a2c; }
+  .pillar-innovation .pillar-kicker i { background: #3a78a8; }
+  .pillar-card > strong { font-size: 30px; font-weight: 780; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .pillar-card > small { color: var(--ink-soft); font-size: 11.5px; line-height: 1.5; }
+  .pillar-card ul { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .pillar-card li { color: #40564c; font-size: 11.5px; line-height: 1.55; }
+  .pillar-scores { display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: 6px; }
+  .pillar-score-row { display: grid; grid-template-columns: minmax(88px, 1fr) minmax(36px, 1.1fr) auto; align-items: center; gap: 7px; }
+  .pillar-score-row span { color: #40564c; font-size: 11px; line-height: 1.45; }
+  .pillar-score-row i { height: 6px; overflow: hidden; background: #efe6da; border-radius: 99px; }
+  .pillar-score-row i b { display: block; height: 100%; background: #dd8a4a; border-radius: inherit; }
+  .pillar-score-row strong { font-size: 11px; font-variant-numeric: tabular-nums; }
+  .pillar-score-row.is-weakest span { color: #8a3d10; font-weight: 750; }
+  .pillar-score-row.is-weakest i b { background: #b4551d; }
+  .pillar-flag { margin: 6px 0 0; padding: 6px 9px; background: rgba(180, 85, 29, 0.09); border-radius: 8px; color: #8a3d10; font-size: 11px; line-height: 1.5; }
+  .pillar-note { margin: 4px 0 0; color: var(--ink-soft); font-size: 11.5px; line-height: 1.55; }
+  .pillar-na { color: var(--ink-soft); }
+
+  .poverty-section { background: rgba(180, 85, 29, 0.05); }
+  .poverty-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .poverty-stats article { padding: 13px; border: 1px solid var(--hairline); background: #fff; border-radius: 12px; }
+  .poverty-stats span { display: block; color: var(--ink-soft); font-size: 11px; line-height: 1.4; }
+  .poverty-stats strong { display: block; margin-top: 5px; font-size: 24px; font-weight: 780; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .poverty-rows { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+  .poverty-row { display: grid; grid-template-columns: minmax(118px, 0.9fr) minmax(52px, 1.2fr) auto; align-items: center; gap: 8px; }
+  .poverty-row span { color: #40564c; font-size: 11.5px; line-height: 1.5; }
+  .poverty-row i { height: 8px; overflow: hidden; background: #ece6dc; border-radius: 99px; }
+  .poverty-row i b { display: block; height: 100%; border-radius: inherit; }
+  .poverty-row strong { font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .poverty-row strong small { color: var(--ink-soft); font-size: 10px; }
+  .poverty-benchmark { margin: 12px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.6; }
+  .poverty-benchmark a { color: var(--green); font-weight: 700; }
+
+  .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .city-card dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px; margin: 10px 0 0; }
+  .city-card dt { color: var(--ink-soft); font-size: 10.5px; line-height: 1.4; }
+  .city-card dd { margin: 2px 0 0; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .housing-links { display: flex; flex-direction: column; gap: 8px; }
+  .housing-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 56px;
+    padding: 10px 13px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    border-radius: 12px;
+  }
+  .housing-link strong { display: block; font-size: 12.5px; line-height: 1.5; }
+  .housing-link small { display: block; margin-top: 2px; color: var(--ink-soft); font-size: 11px; line-height: 1.45; }
+  .housing-link a { flex: 0 0 auto; padding: 8px 13px; background: var(--ink-strong); color: #f4f6f2; border-radius: 9px; font-size: 11px; font-weight: 750; text-decoration: none; }
+
+  @media (max-width: 720px) {
+    .pillar-grid { grid-template-columns: 1fr; }
+  }
+}
+
+@layer lightmap {
+  .housing-more { margin: 4px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.5; }
+}

@@ -64,10 +64,10 @@
         <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
           <div><strong id="legendTitle">โครงการ บพท. รวมรายภาค</strong><small id="legendNote">สีเข้ม = โครงการรวมมาก</small></div>
           <ol id="legendItems">
-            <li><i style="background:#a9d3b8"></i><span>1–99</span></li>
-            <li><i style="background:#63ac79"></i><span>100–199</span></li>
-            <li><i style="background:#2e7d51"></i><span>200–299</span></li>
-            <li><i style="background:#14532e"></i><span>300+</span></li>
+            <li><i style="background:#a9d3b8"></i><span>1–49</span></li>
+            <li><i style="background:#63ac79"></i><span>50–119</span></li>
+            <li><i style="background:#2e7d51"></i><span>120–239</span></li>
+            <li><i style="background:#14532e"></i><span>240+</span></li>
           </ol>
         </section>
       </div>
@@ -106,6 +106,14 @@
 
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
+              <div class="panel-section pillars-section">
+                <div class="section-heading"><span>สามแกนหลักของจังหวัด</span><small>กดการ์ดเพื่อดูรายละเอียด</small></div>
+                <div class="pillar-grid" id="pillarGrid"></div>
+              </div>
+              <div class="panel-section poverty-section" id="povertySection" hidden>
+                <div class="section-heading"><span>ครัวเรือนยากจนที่สำรวจ (PPPConnext)</span><small id="povertyNote"></small></div>
+                <div id="povertyContent"></div>
+              </div>
               <div class="panel-section research-section" id="researchSection" hidden>
                 <div class="section-heading"><span>โครงการวิจัยและทุน บพท.</span><small id="researchScope"></small></div>
                 <div id="researchPortfolio"></div>
@@ -166,6 +174,16 @@
                 </div>
                 <div class="record-list" id="cultureItems"></div>
                 <button class="load-more" id="loadMoreCulture" type="button" hidden>แสดงรายการเพิ่มเติม</button>
+              </div>
+
+              <div class="panel-section" id="citySection" hidden>
+                <div class="section-heading"><span>สภาพเมืองรายเทศบาล</span><small id="cityNote"></small></div>
+                <div class="city-grid" id="cityItems"></div>
+              </div>
+
+              <div class="panel-section" id="housingSection" hidden>
+                <div class="section-heading"><span>ที่อยู่อาศัยและความเสี่ยงเมือง</span><small id="housingNote"></small></div>
+                <div class="housing-links" id="housingItems"></div>
               </div>
             </section>
 
