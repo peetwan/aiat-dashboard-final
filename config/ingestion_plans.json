@@ -1,0 +1,116 @@
+{
+  "plan_version": "0.1.0",
+  "notes_th": "Executable allowlist เท่านั้น; endpoint catalog ทั้งหมดอยู่ใน source_catalog.json",
+  "sources": {
+    "f1_sradss_ppaos": {
+      "driver": "sradss",
+      "requests": [
+        {
+          "name": "summary_updated_at",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_summary_updated_at.php",
+          "params": {"_nc": "1"}
+        },
+        {
+          "name": "provinces",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces.php",
+          "params": {"year": "$SRA_YEAR"}
+        },
+        {
+          "name": "poverty_map_core",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_map_core.php",
+          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+        },
+        {
+          "name": "poverty_situation",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_situation.php",
+          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+        },
+        {
+          "name": "provinces_summary",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces_summary.php",
+          "params": {"year": "$SRA_YEAR", "prov": "ALL"}
+        },
+        {
+          "name": "continuous_poor",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_continuous_poor.php",
+          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+        },
+        {
+          "name": "data_analysis",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_data_analysis.php",
+          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+        }
+      ],
+      "explicit_exclusions": [
+        "data_household_detail.php",
+        "data_household_map.php",
+        "*_detail.php ที่เป็น person/household",
+        "endpoint ที่ตอบ 401 หรือ login"
+      ]
+    },
+    "f2_apptech_mtr": {
+      "driver": "apptech_mtr",
+      "url": "https://app.rinmp.com/api/appTechPublic",
+      "page_size": 99,
+      "database_projection": "ลบ ownerContact, email, phone, address และ credential-shaped fields ก่อนเข้า database"
+    },
+    "f2_apptech_mru": {
+      "driver": "apptech_mru",
+      "page_size": 12,
+      "datasets": [
+        {
+          "name": "innovation",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
+          "form": {
+            "action": "fetch_innovationAll_JSON",
+            "innovationgroup": "All",
+            "affiliationid": "All",
+            "innovationtype": "All",
+            "orderby": 1,
+            "cus_search1": ""
+          }
+        },
+        {
+          "name": "requirement",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/requirement.php",
+          "form": {
+            "action": "fetch_requirementAll_JSON",
+            "orderby": 1,
+            "cus_search1": ""
+          }
+        },
+        {
+          "name": "news",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/news.php",
+          "form": {
+            "action": "fetch_newsAll_JSON",
+            "orderby": 1,
+            "cus_search1": ""
+          }
+        }
+      ],
+      "explicit_exclusions": [
+        "/backend/ajax/auth/*",
+        "/backend/ajax/user/*",
+        "write actions"
+      ]
+    },
+    "f2_learning_area_based": {
+      "driver": "pmua_area_based",
+      "url": "https://lesuper.app/api/opendata/pmua/area-based"
+    },
+    "f3_housing_portal": {
+      "driver": "housing_ckan",
+      "package_show_url": "https://data.thaihousingportal.com/api/3/action/package_show",
+      "datasets": [
+        {"id": "demand", "value_policy": "schema_only"},
+        {"id": "demandgap", "value_policy": "values"},
+        {"id": "economic", "value_policy": "values"},
+        {"id": "housingindex", "value_policy": "values"},
+        {"id": "housingsupply", "value_policy": "values"},
+        {"id": "policy-assessment", "value_policy": "blocked"},
+        {"id": "population", "value_policy": "values"}
+      ]
+    }
+  }
+}

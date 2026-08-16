@@ -1,0 +1,2275 @@
+{
+  "catalog_version": "0.1.0",
+  "generated_from": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01",
+  "policy": {
+    "approval_recorded_at": "2026-08-16",
+    "approved_by": "peet",
+    "approved_public_source_count": 10,
+    "restricted_sources_are_never_deployed": true,
+    "candidate_records_are_not_kpi_facts": true
+  },
+  "sources": [
+    {
+      "ordinal": 1,
+      "source_id": "f1_sradss_ppaos",
+      "name_th": "ระบบฐานข้อมูล SRA-DSS",
+      "url": "https://sradss.ppaos.com/",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 1083458,
+      "notes_th": "ใส่ข้อมูลจริงครบ และมี endpoint สำหรับดึงซ้ำ อย่าเรียก endpoint ครัวเรือน/บุคคล",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_gender_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_other_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_poverty_level_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_scope_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_age_gender_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_gender_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_indicator_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_poverty_level_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_province_registry_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_scope_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_survey_year_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_tambon_registry_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_assistance_dimension_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_assistance_total_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_assist_side_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_assist_year_side_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_five_dim_section_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_five_dim_survey_series_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_five_dim_year_series_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_groupwork_year_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_model_group_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_om_total_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_om_year_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_project_area_series_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_project_metric_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_province_core_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_province_group_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_report_family_district_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_report_person_district_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_research_card_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_star_district_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_survey_year_household_rows.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_extended_district_transition_rows.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "634465d2894b0461b0befbe9529e4d15af88d595c57d647326c3bfde9f6fa161",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/auth_status.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "1f7988c4979ca6a9bc7050f6eed1c93b8aaf647d80faab60c9ffe11aa3b924c4",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/data_core.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "43579f46aa610c1421ce24484294d83f02d7170314a2c6270f9025a541f9b3c1",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/data_household_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "hc=<value>&prov=<value>&survey_no=<value>&survey_year=<value>"
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=household record detail"
+        },
+        {
+          "endpoint_id": "0af906dbde60f829af17709f1a5fc3333a302bb993e10de91ea659f6138ff334",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/data_household_map.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "amp=<value>&prov=<value>&tambon=<value>&welfare=<value>&year=<value>"
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=household map points"
+        },
+        {
+          "endpoint_id": "4551007b7c8b714a7fd296cc6dca7a719f6abf809c781cace052945d4a2848b5",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/data_tambons.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "amp=<value>&prov=<value>&year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "99e801fb32be1e86b3b8a2a1f696792294b0c264ee7cccb2fb4808d470ce46ba",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/kpi_bubble_api.php",
+          "kind": "dashboard_api",
+          "access": "error",
+          "team_action": "check_before_calling",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ตรวจก่อนเรียก (access=error)"
+        },
+        {
+          "endpoint_id": "43408da2337fba8f8d0959ecd5a20323a58a68406625896c7eb1c0a06988b4e7",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_continuous_poor.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "5400033819016a4d1a937b388f9a493c40b3fa89b3d2e177e7604f6c1a960c4f",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_continuous_poor_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=person-level export (citizen ID column)"
+        },
+        {
+          "endpoint_id": "e912d882ee35077dd61cb6ece673038981dfc740a858c4c861ea1156444cdf13",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_data_analysis.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "4b6d057d47da0bfaf442540b6fd17233803925570300aa4ccf1d8862b7aa36f8",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_drive_assistance_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=assistance detail export"
+        },
+        {
+          "endpoint_id": "fd254f1bb169476d26e04debf41d82c8b0162878b75c9117d6030348fddff7a0",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_drive_assistance_summary.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "80778822b0e1c2a8064c57d3e245b52171158ca8233eb82648abf5519846621d",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_drive_project_overview.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "ce66722aa7c78fa11ae22dc9bf70136ddbad3caa561fc975262da030884769ef",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_drive_project_overview_drill.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "ae1acc2cecf965bbbf3f219f0597b7bf8d2a73e3499e49cf8628f056a98b2fa3",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_drive_transition_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=transition detail export"
+        },
+        {
+          "endpoint_id": "443e4ad4b3e8e1b5834ab44af10567d19ced48072ebb716623169e2b5673fc84",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_five_dim_compare_chart.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "1a6b9e77c608114717eb940b9e715e450c4e1cb3f6f12bf81c69b0e4256654c2",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_five_dim_transition.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "3000c2ba0579191eaab779153393eb019838cfbb0e111d09242a88e913713d72",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_household_photo.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=household photo asset"
+        },
+        {
+          "endpoint_id": "868eb16e7e6182b221655829afb61fe4706156ecc89337e2e2c0d13fbedacdf4",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_geo_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=person-level export (citizen ID column)"
+        },
+        {
+          "endpoint_id": "0b2af7d2189a097f79718f27851ff14079c52e2d29a079ff0fabf7ef7fdae19d",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_map_core.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "2022d6aea2c6c94167add5bd96f53953f45a6989b15004d23d1a6dffed905763",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_situation.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "5c03937a68d7b237f6f9ca91922e5da259f964c0a424fce4ea67fd1cc3fdc2eb",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_situation_detail.php",
+          "kind": "dashboard_api",
+          "access": "error",
+          "team_action": "do_not_call_person_or_household",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — เป็นข้อมูลบุคคล/ครัวเรือน; restricted_reason=person-level export (citizen ID column)"
+        },
+        {
+          "endpoint_id": "03dfb4e6e3f6cc3efd9e11c82798d557a76c4b31cb9ea01afe141620fd3bc3ad",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "5998931f2df343f7af39e5eab93bd4423af80667b47d6d6635ddfe58fbe1601a",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces_summary.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "d5661606ad9b35536bc7107b939371081c31bd1c408f7dc3abbbf45723d20e04",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/ppaos_summary_updated_at.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "2e0db5da7c8b0661442c994c5975e019eeed80b88fe37e345510246616f936df",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/report_family.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "amp=<value>&prov=<value>&year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "820cb45a53bae4353d974a5736c4db15ca1c03537a1d20246d1f728ee99468cf",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/report_five_dim.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "amp=<value>&dim=<value>&prov=<value>&tmb=<value>&year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "e0d006165f4bca084d29fcfc74feca93cfc74217c9b66b596c6c9dd7b40376b2",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/report_person.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "amp=<value>&prov=<value>&year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "f19ccadeb0ee54b07af9cb6f852fd2045db1c021ed40a42b44ffdd42249e1266",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_assist.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "amp=<value>&prov=<value>&year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "153b5006c1f33ea7a81fd48cdcf208016cdf0b3248128d0a4959880188c0846b",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_assist_bundle.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "4b3d5e56a83145a463b14eb6df136ce844d7b58326558560ae3d90a48bdace0b",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_core.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "_t=<value>&prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "214ea28d723d50a64e842b955095bc9713c3b18c0668d95f344e3af5c29b1917",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_groups.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "year=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "e3fcb8d293af50f758553cb44fa78afa29aaa06b6222ee008a3b84ef11da8050",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_groupwork_years.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "163298ca5b828a1022afc9c7c81b7e322cdc068877bdf99c16450ccc20e12de6",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_model_groups_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "c817b649f17320e53cfbc32442fa3badb0da2ed21b929489cdc317f1fb3a8c3d",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_model_groups_drill.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "metric=<value>&model_key=<value>"
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "f87b547c55937438aefde2e7181f77192b4533ab0c2f637be0969e9ec17c1afe",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_model_groups_income_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "f0bc1920fd05d96169b3334301faf82a37832660e6d4308336fe4f0c2cf68b35",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_model_groups_income_drill.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "metric=<value>&model_key=<value>"
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "10a1eec7fbfd069209a87dae5b304fc166c3e2245747c66b76a1e50a5226c523",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_model_groups_summary.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "8f4139b362eb800feb125c3033dc3ad1d21915bc4b818475d927329d8b5c3b4d",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_om.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "7b9e4e5d29fa692258d43cf884109604ddc5912a87175e15cdc8fea4d4463089",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_poverty_districts.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "3cd805d4bc4ac8f9a341ccfdf10515e7c990b1aa95636418e1f754ac3e660daf",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_project_overview.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "7c6c57e4956f13b476b342b12510c74e9433047f4766950b9d68fef52d942645",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_project_overview_detail.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "87aabe034cc1857bd2fe2d839044144dd2ef4c937cb60c2cd1d0709e00596d03",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_project_overview_drill.php",
+          "kind": "dashboard_api",
+          "access": "auth_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "focus_area_id=<value>&metric=<value>"
+          },
+          "notes_th": "อย่าเรียก — ต้อง login"
+        },
+        {
+          "endpoint_id": "5ada4fcafb60bc3bd125fa84dc95f311d2812807370014bb451df3c472431cff",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/sradss_research_summary.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "_ts=<value>"
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "47f6d8ed9c05ab147f7460185c6448ead6193779dce570cd6d74f8f646388384",
+          "method": "GET",
+          "url": "https://sradss.ppaos.com/dashboard/api/system_usage_stats.php",
+          "kind": "dashboard_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เรียกได้โดยไม่ต้อง login"
+        }
+      ]
+    },
+    {
+      "ordinal": 2,
+      "source_id": "f1_pppconnext",
+      "name_th": "PPPConnext BI",
+      "url": "http://www.ppaos.com/ppaos/frontend/web/",
+      "acquisition_mode": "snapshot_only",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 997293,
+      "notes_th": "หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/02_f1_pppconnext/data.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "42e734517ab74ecd8bfdb378841107a1e5d06985bcbd932ea12eea55f3d698ae",
+          "method": "GET",
+          "url": "http://www.ppaos.com/ppaos/frontend/web/",
+          "kind": "no_live_api",
+          "access": "http_404",
+          "team_action": "use_snapshot_csv",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว"
+        }
+      ]
+    },
+    {
+      "ordinal": 3,
+      "source_id": "f2_culturalmap_university",
+      "name_th": "แผนที่วัฒนธรรมไทย Cultural Mapping (ภาคมหาวิทยาลัย)",
+      "url": "https://www.culturalmapthailand.info/",
+      "acquisition_mode": "snapshot_only",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 5619,
+      "notes_th": "Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/activities.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/map_inspiration.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/products.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/recreation.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/team.json"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "9a00746c6570b15b90b06fdf069dfd628770f5aa4aca78b3b6e5d338afe23716",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/activity",
+          "kind": "activities",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "3a913105741dfe78a7f695fd904c2aeb717ca16f10f06b59d6866a10733777f2",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/map",
+          "kind": "map_inspiration",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "8223732ee2e6799f39299a0b9071ca0be92502774b8eb5ece4e68f9bd5607575",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/json-mark.php?key=&CatId=&CulTypeId=&CulProvince=&UniCode=",
+          "kind": "map_inspiration",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "ee1347f4ea5fcb528e681eebff43fc70db56e2c4e2364752c2b1c32d3d78228a",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/culturalproduct",
+          "kind": "products",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "26a5ab483aa98b4f0900f5023e55319c947e03cbee1fbbf686385f1d71a31c07",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/ReAll",
+          "kind": "recreation",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "ad11eef05175b8d36af4857b0361f432e71fd5c135db073c4c1f28260eba72a8",
+          "method": "GET",
+          "url": "https://www.culturalmapthailand.info/team",
+          "kind": "team",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        }
+      ]
+    },
+    {
+      "ordinal": 6,
+      "source_id": "f2_rmutdb",
+      "name_th": "ห้องสมุดนวัตกรรม RMUTDB",
+      "url": "https://rmutdb.net/",
+      "acquisition_mode": "snapshot_only",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 2001,
+      "notes_th": "ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/06_f2_rmutdb/data.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "3e55246f234bf415465b31c01d131688a04133b7367ce69a7254b530ae5cc272",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/ebook",
+          "kind": "public_page",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "หน้าห้องสมุด e-book สาธารณะ ไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "be8f42f3eb5fc806a6ad134b599f6e24ff34a64884aad6599bb1729c125197db",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/all.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: ห้องสมุดนวัตกรรมและเทคโนโลยีพร้อมใช้"
+        },
+        {
+          "endpoint_id": "74e6a283652b3aa14e6162c2da8c8896c8af8dbd4943f638fedde0ab8f7a570b",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/agriculture.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มเกษตร"
+        },
+        {
+          "endpoint_id": "f6ed5cbfc9992a01c6fcc804d6dbb0406f183e56342f178629f8c0bfc0124680",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/transport.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มขนส่ง"
+        },
+        {
+          "endpoint_id": "75bb59e3ea99e7891f7484a850ad29d83ab5fa20813a83a004a06e77259e0165",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/energy.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มพลังงาน"
+        },
+        {
+          "endpoint_id": "8023daa677b521dedc9686e4cfd627ccc40bac8ee2abd2933c2a48673805a83c",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/medical.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มการแพทย์"
+        },
+        {
+          "endpoint_id": "71c7e186d2cd5294938847795e06f379d7debbdd646bf19483c7d885fff382d0",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/social.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มสังคม"
+        },
+        {
+          "endpoint_id": "a4b92e33cd16dd9f0cb876bbcba8d2c36d2ab0592b423f54ca699770b442b742",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/textile.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มสิ่งทอ"
+        },
+        {
+          "endpoint_id": "279612b59c669da48fb57371ceb9bcb69ebde268e17110bb1f079d7235738e4f",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/environment.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มสิ่งแวดล้อม"
+        },
+        {
+          "endpoint_id": "5974edd098cb04e0bc1ee80833e23e76dddfb570dcac7cdfb4eb8256eaca8a5a",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/food.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มอาหาร"
+        },
+        {
+          "endpoint_id": "1dcf4ef3e7c1688ab21279c8370804ea95f8d8668dac629bfbe192fbe08d8f42",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/industrial.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มอุตสาหกรรม"
+        },
+        {
+          "endpoint_id": "84590fda0de56db5a1511a0708af39724c7cbc0c68713fc4183b84376db90277",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/resource-stuff/e-book/other.pdf",
+          "kind": "public_pdf_export",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "PDF สาธารณะ: เทคโนโลยีกลุ่มอื่นๆ"
+        },
+        {
+          "endpoint_id": "89afe75e2728d88e7ab671041d653952628101a24cb4bc148b21c9ee38d1af60",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/rmutdbinno/api/",
+          "kind": "json_api_auth_required",
+          "access": "http_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "JSON API ตอบ 401 — อย่า bypass และอย่าใช้ key จากหน้าเว็บ"
+        },
+        {
+          "endpoint_id": "a39d52cff399da036b8cd7911ac67026c8834f4c4138725a00db308002175a32",
+          "method": "GET",
+          "url": "https://www.rmutdb.net/rmutdbinno/api/innovation/data/dashboard",
+          "kind": "json_api_auth_required",
+          "access": "http_401",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "JSON API ตอบ 401 — อย่า bypass และอย่าใช้ key จากหน้าเว็บ"
+        }
+      ]
+    },
+    {
+      "ordinal": 7,
+      "source_id": "f2_apptech_mtr",
+      "name_th": "AppTech เครือข่าย มทร. / RinMP",
+      "url": "https://rinmp.com/",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 621,
+      "notes_th": "ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/07_f2_apptech_mtr/data.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "87d57459473fd6f8dde7bb4bbcae56d2f4ecc8e44ebe96b4ad93560f1bc0d971",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/appTechPublic",
+          "kind": "public_record_api",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public pagination; local payloads retained for Silver candidate"
+        },
+        {
+          "endpoint_id": "6fcd99cb9ca726c901fc53bdc7b1a2a47464cb615633f3d54bd1bfb26f227254",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/custom/appTechPublic/listAppTechInnovatorMapData",
+          "kind": "public_api_profile",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public GET profile; full custom payload not persisted"
+        },
+        {
+          "endpoint_id": "c25c3f88cd09780ceed48f98f1dfdfd801cc0bdc27aca6e71815453bc690c1e1",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/custom/appTechPublic/listAppTechInstituteMapData",
+          "kind": "public_api_profile",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public GET profile; full custom payload not persisted"
+        },
+        {
+          "endpoint_id": "7d89bfad0f26dba11cd24717dd4492fb8e0bd34835fa8b1aabbc0b7b358ad02a",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/custom/appTechPublic/listAppTechInteractionMapData",
+          "kind": "public_api_profile",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public GET profile; full custom payload not persisted"
+        },
+        {
+          "endpoint_id": "4da603d0cad03c013598a408b71a1c6a03b4937b5a42e4155ed62ddc304fa8ce",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/custom/appTechPublic/listAppTechOwnerProfile",
+          "kind": "public_api_profile",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public GET profile; full custom payload not persisted"
+        },
+        {
+          "endpoint_id": "61d0e44717e6fbba0a2e9a5f7aa917d49aa01d409e7123a31f058e79615502cd",
+          "method": "GET",
+          "url": "https://app.rinmp.com/api/custom/appTechPublic/listAppTechStatisticData",
+          "kind": "public_api_profile",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "bounded public GET profile; full custom payload not persisted"
+        }
+      ]
+    },
+    {
+      "ordinal": 8,
+      "source_id": "f2_apptech_mru",
+      "name_th": "AppTech เครือข่าย มรภ. / 38RAT",
+      "url": "https://38rat.nstru.ac.th/",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 503,
+      "notes_th": "ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_innovation.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_requirement.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "3da6627cc5b7496d2ce9eb5b4f4650057482b2c56ad7cb559209f238a29efba9",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
+          "kind": "public_record_api",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "action=fetch_innovationAll_JSON"
+          },
+          "notes_th": "public JSON; server page size 12; no CORS"
+        },
+        {
+          "endpoint_id": "5e7c276791aa87682bca2bb5cc59b7e72c95968c085e5161c9a19e00bc79ccd5",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/news.php",
+          "kind": "public_record_api",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "action=fetch_newsAll_JSON"
+          },
+          "notes_th": "public JSON; server page size 12; no CORS"
+        },
+        {
+          "endpoint_id": "a28b1811629710dd24ec6b427f5b5f8dc18004f7fec754da28fa45e296f232e3",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/public/requirement.php",
+          "kind": "public_record_api",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "action=fetch_requirementAll_JSON"
+          },
+          "notes_th": "public JSON; server page size 12; no CORS"
+        },
+        {
+          "endpoint_id": "bc391344914b750ce06453c93713eccf003dee9f0e8e73e2e7eba773b483b193",
+          "method": "GET",
+          "url": "https://38rat.nstru.ac.th/page/innovationdetail.php",
+          "kind": "server_rendered_detail_page",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "field ชุดเต็มต่อ record อยู่บนหน้านี้; endpoint JSON ที่ให้ข้อมูลเดียวกัน อยู่ฝั่ง /ajax/user/* ซึ่งต้อง login"
+        },
+        {
+          "endpoint_id": "f08af5188b79c4c49906dc3dc88b9b17663488d383b6db16dcd7a1bbfb26ec54",
+          "method": "GET",
+          "url": "https://38rat.nstru.ac.th/page/requirementdetail.php",
+          "kind": "server_rendered_detail_page",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "field ชุดเต็มต่อ record อยู่บนหน้านี้; endpoint JSON ที่ให้ข้อมูลเดียวกัน อยู่ฝั่ง /ajax/user/* ซึ่งต้อง login"
+        },
+        {
+          "endpoint_id": "b2e894b29f55872581ee8bdda37e2458ba653402d0db710238eb3ec7fa948b24",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/auth/user.php",
+          "kind": "auth_boundary",
+          "access": "login",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ต้อง login — อย่า bypass"
+        },
+        {
+          "endpoint_id": "f185b24b1308969b51f060fee327bd4f935c84b71662a176c25112c537f2b9ed",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/auth/admin.php",
+          "kind": "auth_boundary",
+          "access": "login",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ต้อง login — อย่า bypass"
+        },
+        {
+          "endpoint_id": "d6b8b1edcf2598cf94b977b7f3910de9eff3fbb95266b51fb3e170da881cf169",
+          "method": "POST",
+          "url": "https://38rat.nstru.ac.th/backend/ajax/auth/resetpassword.php",
+          "kind": "auth_boundary",
+          "access": "login",
+          "team_action": "do_not_call_needs_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ต้อง login — อย่า bypass"
+        }
+      ]
+    },
+    {
+      "ordinal": 11,
+      "source_id": "f2_learning_area_based",
+      "name_th": "Dashboard LE - Area Based",
+      "url": "https://lesuper.app/opendata/pmua/area-based",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 1002,
+      "notes_th": "ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/11_f2_learning_area_based/data.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "8d7696f01ef5984112c39fb977709c2b9edbed07a7fa9fc44b5029dca673a8b2",
+          "method": "GET",
+          "url": "https://lesuper.app/api/opendata/pmua/area-based",
+          "kind": "candidate",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": ""
+        }
+      ]
+    },
+    {
+      "ordinal": 12,
+      "source_id": "f2_wallet_all_realtime",
+      "name_th": "กระเป๋าตังค์ครัวเรือนและธุรกิจ (realtime)",
+      "url": "https://lesuper.app/opendata/superapp/gen4/integrated/all",
+      "acquisition_mode": "blocked",
+      "snapshot_fallback": false,
+      "readiness_status": "restricted",
+      "cloud_policy": "restricted_local_only",
+      "production_values_allowed": false,
+      "expected_record_count": 934,
+      "notes_th": "ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data/cashSeries.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data/cSeries.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data/debtseries.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data/deSeries.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/12_f2_wallet_all_realtime/data/timeseries.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "af060c08ed1cd07fdd18bde38d12fbe0634b875ce018e566fbcce1c9b20d7d0a",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/hh",
+          "kind": "public_aggregate_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+          },
+          "notes_th": "aggregate ครัวเรือนรายเดือน ไม่ต้อง login; GET=405"
+        },
+        {
+          "endpoint_id": "d3a2b6ad19fabe6ec95822bbcbe5614ca5f81311f1755247d54d343027c47941",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/bu",
+          "kind": "public_aggregate_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+          },
+          "notes_th": "aggregate ธุรกิจรายเดือน ไม่ต้อง login; GET=405"
+        }
+      ]
+    },
+    {
+      "ordinal": 13,
+      "source_id": "f2_wallet_cluster_realtime",
+      "name_th": "กระเป๋าตังค์เปรียบเทียบตามกลุ่มธุรกิจ (realtime)",
+      "url": "https://lesuper.app/opendata/superapp/gen4/integrated/cluster",
+      "acquisition_mode": "blocked",
+      "snapshot_fallback": false,
+      "readiness_status": "restricted",
+      "cloud_policy": "restricted_local_only",
+      "production_values_allowed": false,
+      "expected_record_count": 140,
+      "notes_th": "ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/13_f2_wallet_cluster_realtime/data.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/13_f2_wallet_cluster_realtime/data/categories.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "1c04784910a6efe4e9a9b0e9b309cdafa56e18feccb48fdf0d3820a6a3306829",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/cluster/hh",
+          "kind": "public_aggregate_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "aggregate ครัวเรือนแยกกลุ่มธุรกิจ ไม่ต้อง login"
+        },
+        {
+          "endpoint_id": "fa5c0b14ec5ae516bcef9746b7c3ad3498b70af6e5d21436cb7d7b832985123b",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/cluster/bu",
+          "kind": "public_aggregate_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": true,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "aggregate ธุรกิจแยกกลุ่ม ไม่ต้อง login"
+        }
+      ]
+    },
+    {
+      "ordinal": 14,
+      "source_id": "f3_city_capital_open_data",
+      "name_th": "แพลตฟอร์มข้อมูลเปิดระดับการพัฒนาทุนของเมือง",
+      "url": "https://evaluatethecity.netlify.app/",
+      "acquisition_mode": "snapshot_only",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 702,
+      "notes_th": "เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/14_f3_city_capital_open_data/data/latest.json"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "79673d9bf0dd5542766b1cb68e62509167a84fd5756d6191c9bb4c72cdc14695",
+          "method": "GET",
+          "url": "https://evaluatethecity.netlify.app/",
+          "kind": "city_metric_observations",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        }
+      ]
+    },
+    {
+      "ordinal": 16,
+      "source_id": "f3_ruamthiao_lamphun",
+      "name_th": "ร่วมเที่ยว (ลำพูน)",
+      "url": "https://visit-lamphun.web.app/app/homepage",
+      "acquisition_mode": "snapshot_only",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 54,
+      "notes_th": "สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/contact.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/homepage.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/komepage.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/recommend.json",
+        "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/travel.json"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "124adcbfd8447c098aaaa645bf1caac15a476eb67413410ec4d8ec56d753347d",
+          "method": "GET",
+          "url": "https://visit-lamphun.web.app/app/contact",
+          "kind": "contact",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "03dc1650072c2506990251f4c695d6f055d8ce4f406279089d5f4356784506ed",
+          "method": "GET",
+          "url": "https://visit-lamphun.web.app/app/homepage",
+          "kind": "homepage",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "579b86fda5976a0e735f3d995484589a05577e72c00024d0b21b540db476543f",
+          "method": "GET",
+          "url": "https://visit-lamphun.web.app/app/komepage",
+          "kind": "komepage",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "4d40191e4d7185cb1a680d2b94c058ef259a1737f4f11045dcb0ee678f5c98b4",
+          "method": "GET",
+          "url": "https://visit-lamphun.web.app/app/recommend",
+          "kind": "recommend",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        },
+        {
+          "endpoint_id": "f974ef675f4f1547efb4d892178c19576c735061fa46066d21da159e08816ef7",
+          "method": "GET",
+          "url": "https://visit-lamphun.web.app/app/travel",
+          "kind": "travel",
+          "access": "public_observed_by_external_team_scraper",
+          "team_action": "review_before_repeat",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "เก็บจาก public source; ห้ามเดา auth/parameter เพิ่ม"
+        }
+      ]
+    },
+    {
+      "ordinal": 23,
+      "source_id": "f3_housing_portal",
+      "name_th": "Thai Housing Portal",
+      "url": "https://thai-housing-portal.vercel.app/",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": true,
+      "readiness_status": "needs_review",
+      "cloud_policy": "project_owner_approved_public",
+      "production_values_allowed": true,
+      "expected_record_count": 7259,
+      "notes_th": "ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์",
+      "snapshot_origin_files": [
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_demandgap_e7b75d00-b4aa-43ff-879c-873ae0818f55.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_4d53d17c-4478-44a6-9f3f-62fed6eb401b.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_8d5d066d-b402-4ec3-8da0-b16052f5e77d.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_99e20346-622e-428e-8df0-a1ed01706676.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_ad35ac7c-8650-4c1f-acc2-8304bd7e906e.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_bef9a148-0e0c-4fa3-96b6-12159c901546.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_019897e5-fea6-4868-8078-b740b69a618a.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_06ba7a1a-8f49-4149-bbdd-9c6d5be59c99.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_0ea1cde7-58bb-4570-b586-f8f0bb827f07.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_19061812-2ed6-43a9-abce-3100bfbc4a17.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_197a5259-80a8-4c19-b90f-0bb9430d0037.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_26df3a30-6005-47dc-bd09-484044b4d9d1.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_2b50aa18-868a-40da-8223-0636b4346fb4.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_51b9cc37-cc96-4b33-900c-fa74408dcde0.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_63f4004e-f6d9-45ad-b1fd-7e272c25064c.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_68fb09c1-3b96-4e75-8b77-ede887044f75.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_6ba0e3d0-7d36-4d65-9117-93cae52c514a.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_75436ffc-f88b-4092-a8c5-d1e4eec9c45f.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_77dc8d62-f094-4dec-ad74-74ab6b8479f8.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_7d51f36e-7072-4a2a-8067-4f10d97d5485.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_7e1a583e-fd2d-4c36-8234-443477a399e8.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_8213a57b-61fc-4463-b710-31ab26809abc.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_9450647c-5c7e-4ad3-b8a8-cf4b51ea6a40.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_a54587b2-4d0b-4b03-9f2c-3d4e2a0af77d.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_b1343c05-53f7-4b6b-9ec8-b3fb194bf6f7.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_bc16752a-d9b5-4fd6-9e93-cce69839acb0.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_be2024ec-108f-4063-82c2-d3f49ca6703a.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_d5715732-308e-4e0e-aa2d-be2984ac5d9d.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_d9dd729e-3d23-445e-a126-4c7b69d7a578.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingindex_e1c7b569-a7ae-49b3-a0a3-a28fdcbcacd8.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingsupply_2ce0a98f-3b96-4c29-884a-95af15f81d37.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingsupply_75ea83f7-a18b-419d-85e7-43cd4ade0719.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingsupply_7e63e9c4-42b9-4016-b247-0f63ea15a99d.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_housingsupply_fee35685-dee6-479f-b422-a64db1b6e260.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_054937eb-4643-4fb8-affa-8742e040202a.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_2680b7e2-8121-4835-829c-41392bfc41e8.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_2d9d9adb-d01d-4111-9d6d-c6a706d5cfa6.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_827aca76-9e90-43ed-86a2-cb9cb8651280.csv",
+        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_8596f1eb-57fc-4911-8da9-84cec1450725.csv"
+      ],
+      "endpoints": [
+        {
+          "endpoint_id": "3cfde82fdbfcd56bfc34feb5bd06ac273b86a024e835bda231595b98c814ed02",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action",
+          "kind": "rest_api",
+          "access": "static_candidate",
+          "team_action": "check_before_calling",
+          "restricted": false,
+          "runtime_enabled": false,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "CKAN catalog — ทีมดึง resource จาก URL ในไฟล์นี้ได้เลย"
+        },
+        {
+          "endpoint_id": "320621667f743ee9056318eab4e5ecca6f50f7a3c80bd58427434375abeb6118",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_list",
+          "kind": "candidate",
+          "access": "http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "CKAN catalog — ทีมดึง resource จาก URL ในไฟล์นี้ได้เลย"
+        },
+        {
+          "endpoint_id": "28a461ba096800dec17be8e3bd0c9c1028cee5acc2b5af305615be066a65c54e",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=demand",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=demand"
+          },
+          "notes_th": "CKAN dataset `demand`"
+        },
+        {
+          "endpoint_id": "446a6e6249a74277ca0f3df7566c11cb4adb49b60eb8f66123ec03e5df2469b9",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/67f58c26-0cde-410d-9ed2-c55ea2303c91/resource/ae090999-5a29-42c5-8518-40f5ece5b081/download/housing_demand_clean_stage_2.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความต้องการที่อยู่อาศัยรายจังหวัด (พื้นที่โครงการ)"
+        },
+        {
+          "endpoint_id": "d8c1f0dfd8e894fe9bd59c386ff1de77aef24735258367d2cffb85f71245aed9",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=demandgap",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=demandgap"
+          },
+          "notes_th": "CKAN dataset `demandgap`"
+        },
+        {
+          "endpoint_id": "11d6c32a8f9f1afe12c0281a1cd53c1471ab473eba44824ca2f74c47311cd761",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/be0cdad4-35ef-4fa6-9183-ffe1e714cbab/resource/e7b75d00-b4aa-43ff-879c-873ae0818f55/download/merged_demand.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ช่องว่างระหว่างอุปสงค์และอุปทานที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "f3a8b4423c64927fcf4547f0fb9f912bf4a0efb3477bf9496ce3709eb866671b",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=economic",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=economic"
+          },
+          "notes_th": "CKAN dataset `economic`"
+        },
+        {
+          "endpoint_id": "44ff30edae404ad3e27248e7a5bce5858bfbed9098a7c80ba57eb4e4317e26ab",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/0d4a1747-8cd6-4f67-ade8-2dcd9948dd10/resource/99e20346-622e-428e-8df0-a1ed01706676/download/household_by_income_by_tenure.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ระดับรายได้เฉลี่ยจำแนกตามประเภทกรรมสิทธิ์"
+        },
+        {
+          "endpoint_id": "513a43105c633291c4eb0e8da7c8e795a81d6450e8c40321c2704c541fb7f502",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/0d4a1747-8cd6-4f67-ade8-2dcd9948dd10/resource/bef9a148-0e0c-4fa3-96b6-12159c901546/download/expenditure_percentage_house_burden.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนค่าใช้จ่ายด้านที่อยู่อาศัย จำแนกตามประเภทกรรมสิทธิ์ ที่อยู่อาศัย และระดับรายได้"
+        },
+        {
+          "endpoint_id": "05b34269c55db3dfb26b5fb500808bd99ed546aafc15c032aac3d70e5bb1f10b",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/0d4a1747-8cd6-4f67-ade8-2dcd9948dd10/resource/ad35ac7c-8650-4c1f-acc2-8304bd7e906e/download/expenditure_percentage_other.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนค่าใช้จ่ายด้านอื่น ๆ จำแนกตามประเภทกรรมสิทธิ์ ที่อยู่อาศัย และระดับรายได้"
+        },
+        {
+          "endpoint_id": "c525e6e4b2c34f697008de8dbc25a4a3e0c72a441b49be3f8a3660fb6c08d9ff",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/0d4a1747-8cd6-4f67-ade8-2dcd9948dd10/resource/4d53d17c-4478-44a6-9f3f-62fed6eb401b/download/monthly_rent_mortgage_cost.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ค่าเช่าเฉลี่ยรายเดือน"
+        },
+        {
+          "endpoint_id": "d83997ba055968312240828b456c1029ea69cfadc03a6dc0d4b29ed646f73ef0",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/0d4a1747-8cd6-4f67-ade8-2dcd9948dd10/resource/8d5d066d-b402-4ec3-8da0-b16052f5e77d/download/average_expenditure.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "รายจ่ายเฉลี่ยตามระดับรายได้"
+        },
+        {
+          "endpoint_id": "935df6d60e3226c9fc081722d019cd18f99d48c04940d96d1b520a4507a7165d",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=housingindex",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=housingindex"
+          },
+          "notes_th": "CKAN dataset `housingindex`"
+        },
+        {
+          "endpoint_id": "6b56bb28cece370633343b24d25c5b6dfcf9e9f0888aec6d7ddefebdb90da154",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/d9dd729e-3d23-445e-a126-4c7b69d7a578/download/affordability_index.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ดัชนีความสามารถในการจ่ายที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "300262105be52ca9ebd5e60eb10dcdeac5fbbe2165112f1cc17e44c40fad30f2",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/9450647c-5c7e-4ad3-b8a8-cf4b51ea6a40/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนค่าใช้จ่ายครัวเรือน"
+        },
+        {
+          "endpoint_id": "f108532051e67b3d63ad16b4a6439ced21e3f97fddd1efb0792cd37ffff60188",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/7e1a583e-fd2d-4c36-8234-443477a399e8/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ภาระที่อยู่อาศัยตามกลุ่มรายได้"
+        },
+        {
+          "endpoint_id": "99c9af872a44bf362fef0e86797b93c861e37794c1c246e07ea554a00bf59c31",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/63f4004e-f6d9-45ad-b1fd-7e272c25064c/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ภาระค่าใช้จ่ายที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "e08267fdd7ca8f7cc72034ac1bec12293a09fe99eb823a824e41545323112706",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/19061812-2ed6-43a9-abce-3100bfbc4a17/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราภาระค่าใช้จ่ายที่อยู่อาศัย (มากกว่า 30%)"
+        },
+        {
+          "endpoint_id": "e7e1cfded1691fce84423b86a829eee146b1fe4b0ea4cd82b32e96f2f7fe9674",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/be2024ec-108f-4063-82c2-d3f49ca6703a/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราภาระค่าใช้จ่ายที่อยู่อาศัยเกินกำลัง (มากกว่า 40%)"
+        },
+        {
+          "endpoint_id": "a4e8d84bebb73ebcaaf192093cc78942e01faf7307da218b3779e52786ef0d5d",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/197a5259-80a8-4c19-b90f-0bb9430d0037/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราส่วนราคาบ้านต่อรายได้"
+        },
+        {
+          "endpoint_id": "e9c6f41d063a4b8787745d3b0fc5032bc64e7525bfd61e4d214831e0de3be9e8",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/75436ffc-f88b-4092-a8c5-d1e4eec9c45f/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "การเข้าถึงสินเชื่อที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "098b1f236dd5b57b99cfc61a91867cad1b6edff0cd5872256883c728719e2412",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/77dc8d62-f094-4dec-ad74-74ab6b8479f8/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความมั่นคงในกรรมสิทธิ์ที่ดิน"
+        },
+        {
+          "endpoint_id": "50b4d0b2dd249690e980b9be14a525b0a2b84b95044bb51b5ab9ac4231d6bfe3",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/b1343c05-53f7-4b6b-9ec8-b3fb194bf6f7/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราส่วนค่าใช้จ่ายของครัวเรือนที่มีผู้มีภาวะพึ่งพิง"
+        },
+        {
+          "endpoint_id": "a77931720d8696418ae9b724b9c658900f6a367ff855700a72fa2da9609beb67",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/51b9cc37-cc96-4b33-900c-fa74408dcde0/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราที่อยู่อาศัยไม่เหมาะสม (Overcrowding)"
+        },
+        {
+          "endpoint_id": "f1a92c81d5cf1c80ecdf6323dee2087222afba8d781735785d27af3964a3c028",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/68fb09c1-3b96-4e75-8b77-ede887044f75/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความหนาแน่นของที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "52d938b1dc03b42a11a5d8d028a76b9fa1f799d8916f098f37ce00b1137789f5",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/a54587b2-4d0b-4b03-9f2c-3d4e2a0af77d/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความหนาแน่นที่อยู่อาศัยต่อประชากร 1,000 คน"
+        },
+        {
+          "endpoint_id": "3b307aee9f193ebb1508ac350650e914825d9101a6d58f02d410ab8a2801fabe",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/8213a57b-61fc-4463-b710-31ab26809abc/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราอุปทาน"
+        },
+        {
+          "endpoint_id": "b2f6bc1157257a370fe998df050f6c8e567ec43316d02f8ad926e27e617f0b44",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/d5715732-308e-4e0e-aa2d-be2984ac5d9d/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราความต้องการที่อยู่อาศัยต่อประชากร 1,000 คน"
+        },
+        {
+          "endpoint_id": "a38be2a4a7889261ce2baa46b2aa6347bc7aa7dccf2b090c4c4d3577a8851c0a",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/26df3a30-6005-47dc-bd09-484044b4d9d1/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความมั่นคงแข็งแรงของอาคารและความปลอดภัย"
+        },
+        {
+          "endpoint_id": "914f879332ef6244f2b1cfaef2588f6f919511e5f152bf0d72a8e99c6eec52e9",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/0ea1cde7-58bb-4570-b586-f8f0bb827f07/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนพื้นที่สีเขียวในย่าน"
+        },
+        {
+          "endpoint_id": "801a9a0d70a0c69fdd1b909bcab530fc30d5ceb6a201950ffb08dbee8e686fad",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/bc16752a-d9b5-4fd6-9e93-cce69839acb0/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความหนาแน่นของสิ่งอำนวยความสะดวกในย่าน"
+        },
+        {
+          "endpoint_id": "93baf118304815af9aeb1372e4cb0405792cfd5b094acad088f91027ffe6ec17",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/2b50aa18-868a-40da-8223-0636b4346fb4/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความเสี่ยงการเกิดภัยพิบัติ (น้ำท่วม) - ประชากรที่ได้รับผลกระทบ"
+        },
+        {
+          "endpoint_id": "e6459cc670089e6e84763e47117d62da375094a7ba9d41429854749000a93a18",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/7d51f36e-7072-4a2a-8067-4f10d97d5485/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ความเสี่ยงการเกิดภัยพิบัติ (น้ำท่วม) - พื้นที่เสี่ยง"
+        },
+        {
+          "endpoint_id": "e56c527fe3c8574bf5d7c38813026109cf50063193d20c5f1cb20bd66b8f112f",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/e1c7b569-a7ae-49b3-a0a3-a28fdcbcacd8/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราการเข้าถึงระบบขนส่งสาธารณะ"
+        },
+        {
+          "endpoint_id": "30d28210ba969b0bb38b528df3ee501dc25ce5279e6277a8d22cfcca65ad31b1",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/06ba7a1a-8f49-4149-bbdd-9c6d5be59c99/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราการเข้าถึงพื้นที่สีเขียว"
+        },
+        {
+          "endpoint_id": "eefe9fa400546b9dc1b35d66b21e6b6520f4d9270d936ca9baade9645ca17137",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/019897e5-fea6-4868-8078-b740b69a618a/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "การเข้าถึงสิ่งอำนวยความสะดวกในเมือง"
+        },
+        {
+          "endpoint_id": "032e1a974adc2480722e9d21cc26cf0d565f3a42dc246e99ad1f0f1556a20fed",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/69140522-f57a-4360-b329-abb5795271b5/resource/6ba0e3d0-7d36-4d65-9117-93cae52c514a/download/untitled.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อัตราการเข้าถึงพื้นที่วัฒนธรรม"
+        },
+        {
+          "endpoint_id": "eb4630d8cd003bdef0a0f1866d37659ff439cad09057929b585c650dafbd9bc4",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=housingsupply",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=housingsupply"
+          },
+          "notes_th": "CKAN dataset `housingsupply`"
+        },
+        {
+          "endpoint_id": "33140cdcebe19b491dd87fef92ec4a771ed6a1b7c82cffa42c5376802ecf1ce8",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/10bb39ea-e712-469e-8a63-104f014ae5ce/resource/2ce0a98f-3b96-4c29-884a-95af15f81d37/download/housing_supply.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "อุปทานที่อยู่อาศัยตามระดับราคา"
+        },
+        {
+          "endpoint_id": "6f7e826ba56f09e4422becc929488befad870264aaa644bdef37b6f1558b939f",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/10bb39ea-e712-469e-8a63-104f014ae5ce/resource/75ea83f7-a18b-419d-85e7-43cd4ade0719/download/housing_supply_average_price.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "ราคาที่อยู่อาศัยเฉลี่ย"
+        },
+        {
+          "endpoint_id": "1b23e29b552dbaa685c60b6292e2d93ca4b7348f53317d960d004d9d8b7ef202",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/10bb39ea-e712-469e-8a63-104f014ae5ce/resource/fee35685-dee6-479f-b422-a64db1b6e260/download/supply_ratio_by_tenure.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนที่อยู่อาศัยจำแนกตามประเภทกรรมสิทธิ์"
+        },
+        {
+          "endpoint_id": "fe5040d53c1388022b104f10befc72402e6c4b344f695b39b70b0bdc7f8c91af",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/10bb39ea-e712-469e-8a63-104f014ae5ce/resource/7e63e9c4-42b9-4016-b247-0f63ea15a99d/download/supply_ratio_by_income.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "สัดส่วนที่อยู่อาศัยจำแนกตามกลุ่มรายได้"
+        },
+        {
+          "endpoint_id": "9ea0dfef70224c9036e9bb68b692403619085145a5e4dbf9c15cb11ee1ba1dfc",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=policy-assessment",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=policy-assessment"
+          },
+          "notes_th": "CKAN dataset `policy-assessment`"
+        },
+        {
+          "endpoint_id": "92547a095299251b2eaf79fdaee722e7257e9a6cf11c5e0e039153d613823520",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/39edd2b9-01c8-4fca-a388-bae015de03ba/resource/3dcc96ea-6545-4ca1-88d5-58ad51ad2c18/download/policy_assessment_template.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "policy_assessment_template.csv"
+        },
+        {
+          "endpoint_id": "2751bdf09b217fbda418cea40169bb0acf00922a75df33fe8e685c917139f24c",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/api/3/action/package_show?id=population",
+          "kind": "ckan_package_show",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "id=population"
+          },
+          "notes_th": "CKAN dataset `population`"
+        },
+        {
+          "endpoint_id": "f4b6a70b0a40528bddfe7557ffd846d4bdc6746db678e44bddb78628347225a2",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/de890f50-5dc3-48f3-b032-5a9ed0871cde/resource/8596f1eb-57fc-4911-8da9-84cec1450725/download/cwt_id.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "รหัสจังหวัด"
+        },
+        {
+          "endpoint_id": "37889a843758f4b24c0b0cc58c69ce2650afe1b2826b94986b975d5a6163b618",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/de890f50-5dc3-48f3-b032-5a9ed0871cde/resource/827aca76-9e90-43ed-86a2-cb9cb8651280/download/population_data.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "จำนวนประชากรรายปี"
+        },
+        {
+          "endpoint_id": "4a61a383d5f5ef06a46bedd8f60a580e910527ef87a4fc2847db3b4642017484",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/de890f50-5dc3-48f3-b032-5a9ed0871cde/resource/2680b7e2-8121-4835-829c-41392bfc41e8/download/household_by_income.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "จำนวนครัวเรือนจำแนกตามระดับรายได้"
+        },
+        {
+          "endpoint_id": "8d76e693b6ca1b3ca69f2f343a3919d1f8d207454e99fcfefca31f90f81facd0",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/de890f50-5dc3-48f3-b032-5a9ed0871cde/resource/2d9d9adb-d01d-4111-9d6d-c6a706d5cfa6/download/household_by_tenure.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "จำนวนครัวเรือนจำแนกตามระดับรายได้และกรรมสิทธิ์ที่อยู่อาศัย"
+        },
+        {
+          "endpoint_id": "99b9797cf1ff4784098bd95d5bc91ed409b68b39f19e1054e503c8a688ae375c",
+          "method": "GET",
+          "url": "https://data.thaihousingportal.com/dataset/de890f50-5dc3-48f3-b032-5a9ed0871cde/resource/054937eb-4643-4fb8-affa-8742e040202a/download/household_size.csv",
+          "kind": "ckan_resource_download",
+          "access": "public",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "จำนวนสมาชิกครัวเรือนเฉลี่ยจำแนกตามประเภทที่อยู่อาศัย"
+        }
+      ]
+    }
+  ]
+}

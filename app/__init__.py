@@ -1,0 +1,1 @@
+"""AIAT dashboard service."""

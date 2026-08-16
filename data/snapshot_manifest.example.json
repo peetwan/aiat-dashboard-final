@@ -1,0 +1,16 @@
+{
+  "manifest_version": "0.1.0",
+  "notes_th": "ตัวอย่าง manifest สำหรับ private object storage หรือ Railway Volume; ห้าม commit signed URL",
+  "sources": [
+    {
+      "source_id": "f1_pppconnext",
+      "files": [
+        {
+          "url": "https://private-object-storage.example/snapshot.csv.gz",
+          "sha256": "REPLACE_WITH_SHA256",
+          "filename": "data.csv.gz"
+        }
+      ]
+    }
+  ]
+}

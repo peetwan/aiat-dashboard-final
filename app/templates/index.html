@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ app_name }}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">AIAT · DATA CONTROL ROOM</p>
+          <h1>{{ app_name }}</h1>
+          <p class="subtitle">API-first ingestion, snapshot fallback และ PostgreSQL catalog สำหรับ Railway</p>
+        </div>
+        <div class="environment">
+          <span class="dot"></span>
+          {{ app_env }}
+        </div>
+      </header>
+
+      <section class="notice">
+        <strong>Candidate dashboard เท่านั้น</strong>
+        ข้อมูลยังเป็น needs_review ไม่ใช่ KPI หรือข้อเท็จจริงสำหรับเผยแพร่
+        {% if not values_enabled %} · ค่ารายแถวถูกล็อกไว้ตามค่าเริ่มต้น{% endif %}
+      </section>
+
+      <section id="summary" class="summary-grid" aria-label="สรุประบบ"></section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">SOURCE ROUTING</p>
+            <h2>เส้นทางข้อมูลทั้งหมด</h2>
+          </div>
+          <div class="legend">
+            <span><i class="api"></i> API-first</span>
+            <span><i class="snapshot"></i> Snapshot</span>
+            <span><i class="blocked"></i> Blocked</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Source</th>
+                <th>เส้นทาง</th>
+                <th>Cloud policy</th>
+                <th>อ้างอิง</th>
+                <th>Loaded</th>
+                <th>Endpoint</th>
+              </tr>
+            </thead>
+            <tbody id="sourceRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">INGESTION LOG</p>
+            <h2>รอบดึงข้อมูลล่าสุด</h2>
+          </div>
+        </div>
+        <div id="runs" class="run-list"></div>
+      </section>
+
+      <dialog id="endpointDialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">ENDPOINT INVENTORY</p>
+            <h2 id="endpointTitle">Endpoints</h2>
+          </div>
+          <button id="closeDialog" class="ghost-button">ปิด</button>
+        </div>
+        <div id="endpointList" class="endpoint-list"></div>
+      </dialog>
+    </main>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
