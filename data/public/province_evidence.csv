@@ -1,78 +1,78 @@
-﻿province_code,province_name_th,province_name_en,region,evidence_source_count,sra_overall_score,area_based_participant_records,innovation_records,cultural_records,housing_observations,pppconnext_aggregate_rows,apptech_registered_users,apptech_interactions,city_capital_cities,quality_status
-81,กระบี่,Krabi,ภาคใต้,3,,0,7,1,0,0,4.0,0,0,candidate_needs_review
-10,กรุงเทพมหานคร,Bangkok,ภาคกลาง,5,,7,116,361,987,0,6.0,6.0,0,candidate_needs_review
-71,กาญจนบุรี,Kanchanaburi,ภาคตะวันตก,4,,3,8,129,0,0,48.0,3.0,0,candidate_needs_review
-46,กาฬสินธุ์,Kalasin,ภาคตะวันออกเฉียงเหนือ,6,1.96,3,0,5,0,15,5.0,4.0,1,candidate_needs_review
-62,กำแพงเพชร,Kamphaeng Phet,ภาคกลาง,4,,27,21,20,0,0,0,0,0,candidate_needs_review
-40,ขอนแก่น,Khon Kaen,ภาคตะวันออกเฉียงเหนือ,5,,15,3,34,488,0,0,21.0,0,candidate_needs_review
-22,จันทบุรี,Chanthaburi,ภาคตะวันออก,3,,10,0,66,0,0,31.0,5.0,0,candidate_needs_review
-24,ฉะเชิงเทรา,Chachoengsao,ภาคตะวันออก,5,,22,7,52,584,0,2.0,1.0,0,candidate_needs_review
-20,ชลบุรี,Chon Buri,ภาคตะวันออก,5,,3,1,59,0,0,33.0,4.0,1,candidate_needs_review
-18,ชัยนาท,Chai Nat,ภาคกลาง,6,1.9,1,16,52,0,15,7.0,3.0,0,candidate_needs_review
-36,ชัยภูมิ,Chaiyaphum,ภาคตะวันออกเฉียงเหนือ,4,,1,2,64,0,0,28.0,5.0,0,candidate_needs_review
-86,ชุมพร,Chumphon,ภาคใต้,3,,15,0,0,0,0,0,3.0,1,candidate_needs_review
-92,ตรัง,Trang,ภาคใต้,3,,42,3,0,0,0,135.0,5.0,0,candidate_needs_review
-23,ตราด,Trat,ภาคตะวันออก,1,,0,0,0,0,0,0,2.0,0,candidate_needs_review
-63,ตาก,Tak,ภาคตะวันตก,3,,0,2,18,0,0,0,11.0,0,candidate_needs_review
-26,นครนายก,Nakhon Nayok,ภาคกลาง,2,,0,0,2,0,0,6.0,1.0,0,candidate_needs_review
-73,นครปฐม,Nakhon Pathom,ภาคกลาง,4,,11,2,48,0,0,0,1.0,0,candidate_needs_review
-48,นครพนม,Nakhon Phanom,ภาคตะวันออกเฉียงเหนือ,3,,64,0,12,0,0,12.0,1.0,0,candidate_needs_review
-30,นครราชสีมา,Nakhon Ratchasima,ภาคตะวันออกเฉียงเหนือ,5,,12,6,169,0,15,164.0,16.0,0,candidate_needs_review
-80,นครศรีธรรมราช,Nakhon Si Thammarat,ภาคใต้,5,,62,95,132,0,0,32.0,5.0,2,candidate_needs_review
-60,นครสวรรค์,Nakhon Sawan,ภาคกลาง,4,,0,0,99,0,6,1.0,0,1,candidate_needs_review
-12,นนทบุรี,Nonthaburi,ภาคกลาง,3,,1,0,0,0,0,1.0,1.0,2,candidate_needs_review
-96,นราธิวาส,Narathiwat,ภาคใต้,6,1.9,25,1,1,0,15,1.0,1.0,0,candidate_needs_review
-55,น่าน,Nan,ภาคเหนือ,3,,34,2,0,0,0,0,10.0,0,candidate_needs_review
-38,บึงกาฬ,Bueng Kan,ภาคตะวันออกเฉียงเหนือ,3,,0,1,54,0,0,0,0,0,candidate_needs_review
-31,บุรีรัมย์,Buri Ram,ภาคตะวันออกเฉียงเหนือ,6,1.67,9,5,2,0,15,13.0,2.0,0,candidate_needs_review
-13,ปทุมธานี,Pathum Thani,ภาคกลาง,4,,29,0,84,814,0,52.0,10.0,0,candidate_needs_review
-77,ประจวบคีรีขันธ์,Prachuap Khiri Khan,ภาคตะวันตก,2,,11,0,0,0,0,65.0,2.0,0,candidate_needs_review
-25,ปราจีนบุรี,Prachin Buri,ภาคตะวันออก,3,,20,0,58,0,0,16.0,2.0,0,candidate_needs_review
-94,ปัตตานี,Pattani,ภาคใต้,6,2.05,87,2,106,0,15,56.0,8.0,0,candidate_needs_review
-14,พระนครศรีอยุธยา,Phra Nakhon Si Ayutthaya,ภาคกลาง,4,,29,3,102,0,0,2.0,6.0,0,candidate_needs_review
-56,พะเยา,Phayao,ภาคเหนือ,3,,32,0,278,0,0,8.0,2.0,0,candidate_needs_review
-82,พังงา,Phangnga,ภาคใต้,2,,0,8,0,0,0,0,0,0,candidate_needs_review
-93,พัทลุง,Phatthalung,ภาคใต้,4,,15,0,29,0,15,63.0,17.0,0,candidate_needs_review
-66,พิจิตร,Phichit,ภาคกลาง,1,,0,0,0,0,0,0,0,0,candidate_needs_review
-65,พิษณุโลก,Phitsanulok,ภาคกลาง,6,,5,28,54,0,15,1.0,1.0,1,candidate_needs_review
-83,ภูเก็ต,Phuket,ภาคใต้,3,,0,11,0,676,0,0,0,0,candidate_needs_review
-44,มหาสารคาม,Maha Sarakham,ภาคตะวันออกเฉียงเหนือ,4,,7,21,300,0,0,10.0,3.0,0,candidate_needs_review
-49,มุกดาหาร,Mukdahan,ภาคตะวันออกเฉียงเหนือ,4,1.91,6,0,0,0,15,0,1.0,0,candidate_needs_review
-95,ยะลา,Yala,ภาคใต้,7,2.1,18,6,48,627,15,1.0,3.0,0,candidate_needs_review
-35,ยโสธร,Yasothon,ภาคตะวันออกเฉียงเหนือ,4,,1,0,2,0,15,0,0,0,candidate_needs_review
-85,ระนอง,Ranong,ภาคใต้,3,,0,6,0,55,0,0,0,0,candidate_needs_review
-21,ระยอง,Rayong,ภาคตะวันออก,3,,1,2,0,0,0,49.0,7.0,0,candidate_needs_review
-70,ราชบุรี,Ratchaburi,ภาคตะวันตก,3,,0,3,208,0,0,29.0,5.0,0,candidate_needs_review
-45,ร้อยเอ็ด,Roi Et,ภาคตะวันออกเฉียงเหนือ,8,2.05,11,5,57,417,15,131.0,18.0,1,candidate_needs_review
-16,ลพบุรี,Lop Buri,ภาคกลาง,4,,1,2,64,0,0,0,0,0,candidate_needs_review
-52,ลำปาง,Lampang,ภาคเหนือ,6,,11,4,93,0,15,267.0,39.0,1,candidate_needs_review
-51,ลำพูน,Lamphun,ภาคเหนือ,5,,5,6,14,0,0,10.0,9.0,1,candidate_needs_review
-33,ศรีสะเกษ,Si Sa Ket,ภาคตะวันออกเฉียงเหนือ,7,1.97,0,6,111,530,15,0,1.0,1,candidate_needs_review
-47,สกลนคร,Sakon Nakhon,ภาคตะวันออกเฉียงเหนือ,6,2.05,34,0,86,0,15,143.0,8.0,1,candidate_needs_review
-90,สงขลา,Songkhla,ภาคใต้,5,,2,4,505,654,0,257.0,21.0,0,candidate_needs_review
-91,สตูล,Satun,ภาคใต้,3,,0,1,46,0,0,60.0,2.0,0,candidate_needs_review
-11,สมุทรปราการ,Samut Prakan,ภาคกลาง,4,,13,4,152,0,0,137.0,6.0,0,candidate_needs_review
-75,สมุทรสงคราม,Samut Songkhram,ภาคกลาง,4,,1,17,55,0,0,12.0,2.0,0,candidate_needs_review
-74,สมุทรสาคร,Samut Sakhon,ภาคกลาง,3,,0,16,95,0,0,0,0,0,candidate_needs_review
-19,สระบุรี,Saraburi,ภาคกลาง,4,,3,1,0,0,0,0,10.0,1,candidate_needs_review
-27,สระแก้ว,Sa Kaeo,ภาคตะวันออก,3,,1,7,0,0,0,22.0,0,0,candidate_needs_review
-17,สิงห์บุรี,Sing Buri,ภาคกลาง,2,,0,1,0,0,0,0,1.0,0,candidate_needs_review
-72,สุพรรณบุรี,Suphan Buri,ภาคกลาง,3,,31,6,0,0,0,46.0,9.0,0,candidate_needs_review
-84,สุราษฎร์ธานี,Surat Thani,ภาคใต้,4,,0,6,14,586,0,0,0,0,candidate_needs_review
-32,สุรินทร์,Surin,ภาคตะวันออกเฉียงเหนือ,5,2.01,13,0,118,0,15,0,2.0,0,candidate_needs_review
-64,สุโขทัย,Sukhothai,ภาคกลาง,2,,0,0,91,0,0,99.0,13.0,0,candidate_needs_review
-43,หนองคาย,Nong Khai,ภาคตะวันออกเฉียงเหนือ,2,,0,1,0,0,0,0,1.0,0,candidate_needs_review
-39,หนองบัวลำภู,Nong Bua Lam Phu,ภาคตะวันออกเฉียงเหนือ,3,,0,1,2,0,0,0,1.0,0,candidate_needs_review
-37,อำนาจเจริญ,Amnat Charoen,ภาคตะวันออกเฉียงเหนือ,4,2.0,0,1,0,0,15,0,1.0,0,candidate_needs_review
-41,อุดรธานี,Udon Thani,ภาคตะวันออกเฉียงเหนือ,4,,8,23,5,0,0,0,4.0,0,candidate_needs_review
-53,อุตรดิตถ์,Uttaradit,ภาคเหนือ,4,,22,7,35,0,0,0,1.0,0,candidate_needs_review
-61,อุทัยธานี,Uthai Thani,ภาคกลาง,1,,0,0,0,0,0,0,0,0,candidate_needs_review
-34,อุบลราชธานี,Ubon Ratchathani,ภาคตะวันออกเฉียงเหนือ,6,2.07,3,1,265,0,15,0,1.0,0,candidate_needs_review
-15,อ่างทอง,Ang Thong,ภาคกลาง,3,,2,1,0,0,0,0,2.0,0,candidate_needs_review
-57,เชียงราย,Chiang Rai,ภาคเหนือ,5,,17,7,415,0,0,91.0,19.0,1,candidate_needs_review
-50,เชียงใหม่,Chiang Mai,ภาคเหนือ,6,,122,18,226,522,0,62.0,13.0,1,candidate_needs_review
-76,เพชรบุรี,Phetchaburi,ภาคตะวันตก,4,,30,7,41,0,0,0,4.0,0,candidate_needs_review
-67,เพชรบูรณ์,Phetchabun,ภาคกลาง,3,,24,3,0,0,0,0,2.0,0,candidate_needs_review
-42,เลย,Loei,ภาคตะวันออกเฉียงเหนือ,5,2.01,10,9,0,0,15,0,0,0,candidate_needs_review
-54,แพร่,Phrae,ภาคเหนือ,5,,4,1,53,0,0,5.0,0,1,candidate_needs_review
-58,แม่ฮ่องสอน,Mae Hong Son,ภาคเหนือ,5,1.94,0,1,66,0,15,133.0,2.0,0,candidate_needs_review
+﻿province_code,province_name_th,province_name_en,region,evidence_source_count,sra_overall_score,area_based_participant_records,innovation_records,cultural_records,housing_observations,pppconnext_aggregate_rows,learning_dashboard_business_records,apptech_registered_users,apptech_interactions,city_capital_cities,quality_status
+81,กระบี่,Krabi,ภาคใต้,4,,0,7,1,0,0,3,4.0,0,0,candidate_needs_review
+10,กรุงเทพมหานคร,Bangkok,ภาคกลาง,6,,7,116,361,988,0,12,6.0,6.0,0,candidate_needs_review
+71,กาญจนบุรี,Kanchanaburi,ภาคตะวันตก,5,,3,8,129,0,0,5,48.0,3.0,0,candidate_needs_review
+46,กาฬสินธุ์,Kalasin,ภาคตะวันออกเฉียงเหนือ,6,1.96,3,0,5,0,15,0,5.0,4.0,1,candidate_needs_review
+62,กำแพงเพชร,Kamphaeng Phet,ภาคกลาง,5,,27,21,20,0,0,4,0,0,0,candidate_needs_review
+40,ขอนแก่น,Khon Kaen,ภาคตะวันออกเฉียงเหนือ,6,,15,3,34,489,0,9,0,21.0,0,candidate_needs_review
+22,จันทบุรี,Chanthaburi,ภาคตะวันออก,4,,10,0,66,0,0,3,31.0,5.0,0,candidate_needs_review
+24,ฉะเชิงเทรา,Chachoengsao,ภาคตะวันออก,6,,22,7,52,585,0,5,2.0,1.0,0,candidate_needs_review
+20,ชลบุรี,Chon Buri,ภาคตะวันออก,6,,3,1,59,0,0,3,33.0,4.0,1,candidate_needs_review
+18,ชัยนาท,Chai Nat,ภาคกลาง,7,1.9,1,16,52,0,15,3,7.0,3.0,0,candidate_needs_review
+36,ชัยภูมิ,Chaiyaphum,ภาคตะวันออกเฉียงเหนือ,5,,1,2,64,0,0,2,28.0,5.0,0,candidate_needs_review
+86,ชุมพร,Chumphon,ภาคใต้,4,,15,0,0,0,0,2,0,3.0,1,candidate_needs_review
+92,ตรัง,Trang,ภาคใต้,4,,42,3,0,0,0,9,135.0,5.0,0,candidate_needs_review
+23,ตราด,Trat,ภาคตะวันออก,1,,0,0,0,0,0,0,0,2.0,0,candidate_needs_review
+63,ตาก,Tak,ภาคตะวันตก,4,,0,2,18,0,0,1,0,11.0,0,candidate_needs_review
+26,นครนายก,Nakhon Nayok,ภาคกลาง,3,,0,0,2,0,0,1,6.0,1.0,0,candidate_needs_review
+73,นครปฐม,Nakhon Pathom,ภาคกลาง,5,,11,2,48,0,0,1,0,1.0,0,candidate_needs_review
+48,นครพนม,Nakhon Phanom,ภาคตะวันออกเฉียงเหนือ,4,,64,0,12,0,0,4,12.0,1.0,0,candidate_needs_review
+30,นครราชสีมา,Nakhon Ratchasima,ภาคตะวันออกเฉียงเหนือ,6,,12,6,169,0,15,8,164.0,16.0,0,candidate_needs_review
+80,นครศรีธรรมราช,Nakhon Si Thammarat,ภาคใต้,6,,62,95,132,0,0,38,32.0,5.0,2,candidate_needs_review
+60,นครสวรรค์,Nakhon Sawan,ภาคกลาง,5,,0,0,99,0,6,2,1.0,0,1,candidate_needs_review
+12,นนทบุรี,Nonthaburi,ภาคกลาง,4,,1,0,0,0,0,7,1.0,1.0,2,candidate_needs_review
+96,นราธิวาส,Narathiwat,ภาคใต้,7,1.9,25,1,1,0,15,3,1.0,1.0,0,candidate_needs_review
+55,น่าน,Nan,ภาคเหนือ,4,,34,2,0,0,0,25,0,10.0,0,candidate_needs_review
+38,บึงกาฬ,Bueng Kan,ภาคตะวันออกเฉียงเหนือ,3,,0,1,54,0,0,0,0,0,0,candidate_needs_review
+31,บุรีรัมย์,Buri Ram,ภาคตะวันออกเฉียงเหนือ,7,1.67,9,5,2,0,15,1,13.0,2.0,0,candidate_needs_review
+13,ปทุมธานี,Pathum Thani,ภาคกลาง,5,,29,0,84,815,0,2,52.0,10.0,0,candidate_needs_review
+77,ประจวบคีรีขันธ์,Prachuap Khiri Khan,ภาคตะวันตก,3,,11,0,0,0,0,1,65.0,2.0,0,candidate_needs_review
+25,ปราจีนบุรี,Prachin Buri,ภาคตะวันออก,3,,20,0,58,0,0,0,16.0,2.0,0,candidate_needs_review
+94,ปัตตานี,Pattani,ภาคใต้,7,2.05,87,2,106,0,15,12,56.0,8.0,0,candidate_needs_review
+14,พระนครศรีอยุธยา,Phra Nakhon Si Ayutthaya,ภาคกลาง,5,,29,3,102,0,0,20,2.0,6.0,0,candidate_needs_review
+56,พะเยา,Phayao,ภาคเหนือ,4,,32,0,278,0,0,12,8.0,2.0,0,candidate_needs_review
+82,พังงา,Phangnga,ภาคใต้,3,,0,8,0,0,0,1,0,0,0,candidate_needs_review
+93,พัทลุง,Phatthalung,ภาคใต้,5,,15,0,29,0,15,10,63.0,17.0,0,candidate_needs_review
+66,พิจิตร,Phichit,ภาคกลาง,2,,0,0,0,0,0,2,0,0,0,candidate_needs_review
+65,พิษณุโลก,Phitsanulok,ภาคกลาง,7,,5,28,54,0,15,5,1.0,1.0,1,candidate_needs_review
+83,ภูเก็ต,Phuket,ภาคใต้,4,,0,11,0,677,0,1,0,0,0,candidate_needs_review
+44,มหาสารคาม,Maha Sarakham,ภาคตะวันออกเฉียงเหนือ,5,,7,21,300,0,0,2,10.0,3.0,0,candidate_needs_review
+49,มุกดาหาร,Mukdahan,ภาคตะวันออกเฉียงเหนือ,4,1.91,6,0,0,0,15,0,0,1.0,0,candidate_needs_review
+95,ยะลา,Yala,ภาคใต้,8,2.1,18,6,48,628,15,4,1.0,3.0,0,candidate_needs_review
+35,ยโสธร,Yasothon,ภาคตะวันออกเฉียงเหนือ,4,,1,0,2,0,15,0,0,0,0,candidate_needs_review
+85,ระนอง,Ranong,ภาคใต้,4,,0,6,0,55,0,3,0,0,0,candidate_needs_review
+21,ระยอง,Rayong,ภาคตะวันออก,4,,1,2,0,0,0,2,49.0,7.0,0,candidate_needs_review
+70,ราชบุรี,Ratchaburi,ภาคตะวันตก,4,,0,3,208,0,0,3,29.0,5.0,0,candidate_needs_review
+45,ร้อยเอ็ด,Roi Et,ภาคตะวันออกเฉียงเหนือ,9,2.05,11,5,57,419,15,10,131.0,18.0,1,candidate_needs_review
+16,ลพบุรี,Lop Buri,ภาคกลาง,4,,1,2,64,0,0,0,0,0,0,candidate_needs_review
+52,ลำปาง,Lampang,ภาคเหนือ,7,,11,4,93,0,15,1,267.0,39.0,1,candidate_needs_review
+51,ลำพูน,Lamphun,ภาคเหนือ,6,,5,6,14,0,0,8,10.0,9.0,1,candidate_needs_review
+33,ศรีสะเกษ,Si Sa Ket,ภาคตะวันออกเฉียงเหนือ,8,1.97,0,6,111,532,15,6,0,1.0,1,candidate_needs_review
+47,สกลนคร,Sakon Nakhon,ภาคตะวันออกเฉียงเหนือ,7,2.05,34,0,86,0,15,9,143.0,8.0,1,candidate_needs_review
+90,สงขลา,Songkhla,ภาคใต้,6,,2,4,505,655,0,10,257.0,21.0,0,candidate_needs_review
+91,สตูล,Satun,ภาคใต้,4,,0,1,46,0,0,3,60.0,2.0,0,candidate_needs_review
+11,สมุทรปราการ,Samut Prakan,ภาคกลาง,5,,13,4,152,0,0,4,137.0,6.0,0,candidate_needs_review
+75,สมุทรสงคราม,Samut Songkhram,ภาคกลาง,5,,1,17,55,0,0,3,12.0,2.0,0,candidate_needs_review
+74,สมุทรสาคร,Samut Sakhon,ภาคกลาง,4,,0,16,95,0,0,1,0,0,0,candidate_needs_review
+19,สระบุรี,Saraburi,ภาคกลาง,5,,3,1,0,0,0,2,0,10.0,1,candidate_needs_review
+27,สระแก้ว,Sa Kaeo,ภาคตะวันออก,4,,1,7,0,0,0,2,22.0,0,0,candidate_needs_review
+17,สิงห์บุรี,Sing Buri,ภาคกลาง,2,,0,1,0,0,0,0,0,1.0,0,candidate_needs_review
+72,สุพรรณบุรี,Suphan Buri,ภาคกลาง,4,,31,6,0,0,0,4,46.0,9.0,0,candidate_needs_review
+84,สุราษฎร์ธานี,Surat Thani,ภาคใต้,5,,0,6,14,587,0,1,0,0,0,candidate_needs_review
+32,สุรินทร์,Surin,ภาคตะวันออกเฉียงเหนือ,6,2.01,13,0,118,0,15,4,0,2.0,0,candidate_needs_review
+64,สุโขทัย,Sukhothai,ภาคกลาง,2,,0,0,91,0,0,0,99.0,13.0,0,candidate_needs_review
+43,หนองคาย,Nong Khai,ภาคตะวันออกเฉียงเหนือ,2,,0,1,0,0,0,0,0,1.0,0,candidate_needs_review
+39,หนองบัวลำภู,Nong Bua Lam Phu,ภาคตะวันออกเฉียงเหนือ,3,,0,1,2,0,0,0,0,1.0,0,candidate_needs_review
+37,อำนาจเจริญ,Amnat Charoen,ภาคตะวันออกเฉียงเหนือ,5,2.0,0,1,0,0,15,7,0,1.0,0,candidate_needs_review
+41,อุดรธานี,Udon Thani,ภาคตะวันออกเฉียงเหนือ,5,,8,23,5,0,0,2,0,4.0,0,candidate_needs_review
+53,อุตรดิตถ์,Uttaradit,ภาคเหนือ,5,,22,7,35,0,0,2,0,1.0,0,candidate_needs_review
+61,อุทัยธานี,Uthai Thani,ภาคกลาง,2,,0,0,0,0,0,1,0,0,0,candidate_needs_review
+34,อุบลราชธานี,Ubon Ratchathani,ภาคตะวันออกเฉียงเหนือ,7,2.07,3,1,265,0,15,1,0,1.0,0,candidate_needs_review
+15,อ่างทอง,Ang Thong,ภาคกลาง,3,,2,1,0,0,0,0,0,2.0,0,candidate_needs_review
+57,เชียงราย,Chiang Rai,ภาคเหนือ,6,,17,7,415,0,0,17,91.0,19.0,1,candidate_needs_review
+50,เชียงใหม่,Chiang Mai,ภาคเหนือ,7,,122,18,226,523,0,21,62.0,13.0,1,candidate_needs_review
+76,เพชรบุรี,Phetchaburi,ภาคตะวันตก,5,,30,7,41,0,0,3,0,4.0,0,candidate_needs_review
+67,เพชรบูรณ์,Phetchabun,ภาคกลาง,4,,24,3,0,0,0,6,0,2.0,0,candidate_needs_review
+42,เลย,Loei,ภาคตะวันออกเฉียงเหนือ,6,2.01,10,9,0,0,15,5,0,0,0,candidate_needs_review
+54,แพร่,Phrae,ภาคเหนือ,6,,4,1,53,0,0,8,5.0,0,1,candidate_needs_review
+58,แม่ฮ่องสอน,Mae Hong Son,ภาคเหนือ,6,1.94,0,1,66,0,15,2,133.0,2.0,0,candidate_needs_review

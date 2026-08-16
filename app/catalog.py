@@ -12,6 +12,12 @@ from app.settings import PROJECT_ROOT
 
 CATALOG_PATH = PROJECT_ROOT / "config" / "source_catalog.json"
 PLANS_PATH = PROJECT_ROOT / "config" / "ingestion_plans.json"
+CATALOG_CONTRACT = {
+    "registry_source_count": 28,
+    "approved_public_source_count": 11,
+    "metadata_only_source_count": 12,
+    "restricted_source_count": 5,
+}
 
 
 def load_catalog(path: Path = CATALOG_PATH) -> dict:
@@ -29,8 +35,43 @@ def source_config(source_id: str) -> dict:
     raise KeyError(f"ไม่พบ source_id: {source_id}")
 
 
+def validate_catalog_contract(catalog: dict) -> None:
+    sources = catalog.get("sources")
+    if not isinstance(sources, list):
+        raise ValueError("source catalog must contain a sources array")
+    source_ids = [item.get("source_id") for item in sources]
+    public_ids = {
+        item["source_id"]
+        for item in sources
+        if item.get("cloud_policy") == "project_owner_approved_public"
+    }
+    approved_ids = {
+        item["source_id"] for item in sources if item.get("production_values_allowed") is True
+    }
+    actual = {
+        "registry_source_count": len(sources),
+        "approved_public_source_count": len(public_ids),
+        "metadata_only_source_count": sum(
+            item.get("cloud_policy") == "metadata_only" for item in sources
+        ),
+        "restricted_source_count": sum(
+            item.get("cloud_policy") == "restricted_local_only" for item in sources
+        ),
+    }
+    policy = catalog.get("policy", {})
+    if len(source_ids) != len(set(source_ids)):
+        raise ValueError("source catalog contains duplicate source_id values")
+    if actual != CATALOG_CONTRACT:
+        raise ValueError(f"source catalog contract mismatch: {actual}")
+    if {key: policy.get(key) for key in CATALOG_CONTRACT} != CATALOG_CONTRACT:
+        raise ValueError("source catalog policy summary does not match its required contract")
+    if public_ids != approved_ids:
+        raise ValueError("public cloud policy and production approval source sets differ")
+
+
 def sync_catalog(session: Session) -> None:
     catalog = load_catalog()
+    validate_catalog_contract(catalog)
     known_source_ids: list[str] = []
     for item in catalog["sources"]:
         known_source_ids.append(item["source_id"])

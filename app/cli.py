@@ -5,26 +5,31 @@ import json
 
 from sqlalchemy import func, select
 
-from app.catalog import load_catalog, sync_catalog
+from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, init_db
 from app.ingestion import IngestionPipeline, PolicyViolation
-from app.models import DashboardRecord, IngestionRun, Source
+from app.models import DashboardRecord, IngestionRun, PublicArtifact, Source
+from app.public_artifacts import database_artifact_counts, sync_public_artifacts
 
 
 def initialize() -> None:
     init_db()
     with SessionLocal() as session:
         sync_catalog(session)
+        sync_public_artifacts(session)
 
 
 def command_ingest(args: argparse.Namespace) -> int:
     initialize()
     source_ids = args.source
     if args.all:
+        executable = set(load_ingestion_plans().get("sources", {}))
         source_ids = [
             item["source_id"]
             for item in load_catalog()["sources"]
-            if item["cloud_policy"] != "restricted_local_only"
+            if item.get("production_values_allowed")
+            and item["cloud_policy"] != "restricted_local_only"
+            and item["source_id"] in executable
         ]
     if not source_ids:
         raise SystemExit("ระบุ --source SOURCE_ID หรือ --all")
@@ -76,16 +81,34 @@ def command_status() -> int:
                 )
             )
         failed = session.scalar(select(func.count()).select_from(IngestionRun).where(IngestionRun.status == "failed"))
+        print(
+            json.dumps(
+                {
+                    "serving_database": {
+                        "public_artifacts": session.scalar(
+                            select(func.count()).select_from(PublicArtifact)
+                        )
+                        or 0,
+                        "groups": database_artifact_counts(session),
+                    }
+                },
+                ensure_ascii=False,
+            )
+        )
         return 1 if failed else 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="AIAT dashboard database workflow")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    subparsers.add_parser("init-db", help="สร้างตารางและ sync source catalog")
+    subparsers.add_parser("init-db", help="สร้างตารางและ sync catalog + public serving artifacts")
     ingest = subparsers.add_parser("ingest", help="ดึง API หรือ replay snapshot เข้า database")
     ingest.add_argument("--source", action="append", default=[])
-    ingest.add_argument("--all", action="store_true")
+    ingest.add_argument(
+        "--all",
+        action="store_true",
+        help="เรียกเฉพาะ source สาธารณะที่มี executable API plan",
+    )
     ingest.add_argument("--strategy", choices=["auto", "api", "snapshot"], default="auto")
     subparsers.add_parser("status", help="ดูสถานะ source และจำนวน record")
     args = parser.parse_args()

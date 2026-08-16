@@ -1,64 +1,72 @@
-# Deploy Public Evidence Atlas บน Railway
+# Deploy บน Railway พร้อม PostgreSQL
 
-Docker image เดียวเปิด public dashboard, public API และ optional operational ingestion ได้ โดย wallet sources ไม่ถูกบรรจุใน `data/public/`
+Production ใช้หนึ่ง web service และหนึ่ง PostgreSQL service ใน project เดียวกัน หน้าเว็บไม่ต่อฐานข้อมูลตรงจาก browser; FastAPI ต่อผ่าน private networkแล้วเสิร์ฟ Public API
 
-## Mode A — Public dashboard (แนะนำสำหรับ go-live แรก)
-
-Public projection ถูกเก็บแบบ read-only ใน image จึงไม่ต้องรอ PostgreSQL พร้อม ใช้ SQLite เฉพาะ metadata/runtime ภายใน service:
+## Variables ของ web service
 
 ~~~text
 APP_ENV=production
-DATABASE_URL=sqlite:///./data/runtime/dashboard.sqlite
+DATABASE_URL=${{Postgres.DATABASE_URL}}
 PUBLIC_DATA_VALUES_ENABLED=false
 ALLOW_PENDING_OWNER_SOURCES=false
-MAX_RECORDS_PER_SOURCE=0
+MAX_RECORDS_PER_SOURCE=10000
 SRA_YEAR=2569
 ~~~
 
-ค่า `PUBLIC_DATA_VALUES_ENABLED=false` ปิดเฉพาะ operational raw-record endpoint; `/api/public/v1/*` และ `/downloads/*` ยังเปิดตามปกติ เพราะเป็น public projection ที่ผ่าน allowlist แล้ว
+ชื่อ `Postgres` ใน reference ต้องตรงกับชื่อ database service บน Railway ตัวแปรนี้เป็น private service reference ไม่ต้องคัดลอกรหัสผ่านมาใส่ Git
 
-## Mode B — Full pipeline พร้อม PostgreSQL
+`PUBLIC_DATA_VALUES_ENABLED=false` ปิด operational row payload endpoint แต่ไม่ปิด cleaned public API เพราะ public projection ผ่าน publication gate แยกแล้ว
 
-เมื่อ database พร้อมและทดสอบ connection แล้ว เปลี่ยนเฉพาะ:
+## สิ่งที่เกิดตอน startup
 
-~~~text
-DATABASE_URL=${{Postgres.DATABASE_URL}}
+1. FastAPI เชื่อม PostgreSQL และสร้างตารางที่ยังไม่มี
+2. sync metadata ครบ 28 source และ verified endpoint inventory
+3. sync cleaned public artifacts 161 ชุดพร้อม content hash
+4. `/health` พร้อมเมื่อสัญญา serving ครบเท่านั้น: 28 sources, 141 endpoints, policy 11/12/5 และ public artifacts 161 ชุด
+
+จึงไม่ต้องรัน raw ingestion เพื่อให้ Dashboard เปิดได้ และไม่ต้อง upload raw หลายล้านแถวขึ้น Cloud
+
+## Pre-deploy
+
+~~~powershell
+python tools/build_source_catalog.py
+python tools/build_learning_dashboard.py
+python tools/build_source_insights.py
+python tools/build_public_data.py
+python tools/build_provincial_briefings.py
+python tools/build_executive_summaries.py
+python tools/build_source_coverage.py
+python -m pytest -q
+docker build -t aiat-dashboard-final .
 ~~~
 
-จากนั้นสร้าง scheduled service จาก image เดียวกัน:
+จากนั้น commit/push repository และ deploy service โดยใช้ `Dockerfile` กับ health check `/health`
 
-- Start command: `python -m app.cli ingest --all`
-- Schedule: weekly ในช่วงแรก
-- ไม่มี public domain
-- ใช้ `DATABASE_URL` เดียวกับ web service
+## Production verification
 
-API-first จะ fallback ไป snapshot ตาม policy แต่ scheduler ไม่ทำให้ public projection เปลี่ยนอัตโนมัติ ต้อง build/validate projection และ deploy image ใหม่เพื่อให้ public data เปลี่ยนอย่างตรวจสอบได้
+- `/health` → `database_backend: postgresql`
+- `/api/public/v1/database-coverage` → `status: complete`
+- source catalog = 28
+- province briefings = 77
+- executive summaries = 77
+- restricted values published = 0
+- `/`, `/insights`, จังหวัดตัวอย่าง และ mobile layout เปิดได้
+- operational/debug routes เช่น `/api/sources` ต้องตอบ `404` บน production/PostgreSQL
 
-## Railway setup
+## Operational API refresh
 
-1. New Project → Deploy from GitHub repo
-2. เลือก repository `peetwan/aiat-dashboard-final`
-3. ตั้ง variables ตาม Mode A
-4. Health check path: `/health`
-5. Generate Domain
-6. ตรวจหน้า `/`, `/health`, `/api/public/v1/overview` และไฟล์ download อย่างน้อยหนึ่งไฟล์
+ตัว collector พร้อมใช้งานผ่าน `python -m app.cli ingest --all` แต่ public projection จะไม่เปลี่ยนอัตโนมัติ การเปิด cron ควรทำเมื่อมี persistent raw storage/manifest retention ก่อน เพื่อไม่ให้ traceability หายเมื่อ container จบงาน
 
-ถ้าต้องการ Mode B ให้เพิ่ม PostgreSQL service ภายหลัง ไม่จำเป็นต้องลบ service เดิมเพื่อเปิด public dashboard
+แนะนำลำดับ:
 
-## Raw snapshot fallback
+1. mount persistent storage หรือ object storage สำหรับ runtime raw
+2. ทดสอบทีละ source
+3. ตั้ง cron weekly
+4. review/validate candidate rows
+5. rebuild public projection และ deploy revision ใหม่
 
-ไฟล์ raw ขนาดใหญ่ไม่ควรอยู่ใน Git image:
+restricted source ไม่เข้า executable plan และถูก block ซ้ำใน ingestion guard
 
-- Mount Railway Volume แล้วตั้ง `SNAPSHOT_ROOT` ไปยัง volume หรือ
-- ดาวน์โหลดจาก private object storage เข้า volume และตรวจ SHA-256 กับ manifest
+## Raw snapshot
 
-ห้าม commit signed URL, token, `.env`, database หรือไฟล์ credential
-
-## Pre-deploy checklist
-
-1. `python tools/build_public_data.py`
-2. ตรวจว่า manifest มี 10 public sources, 77 province boundaries และไม่มี wallet source
-3. `python -m pytest -q`
-4. `docker build -t aiat-dashboard-final .`
-5. ตรวจ desktop/mobile, WebGL fallback, API และ download
-6. push GitHub แล้ว deploy
+อย่า commit token, signed URL, `.env`, database dump หรือ credential ลง Git ถ้าต้องใช้ snapshot fallback ให้ mount storage และตรวจ SHA-256 กับ manifest ก่อน replay

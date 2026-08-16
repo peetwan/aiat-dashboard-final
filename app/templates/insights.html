@@ -35,11 +35,39 @@
       </section>
 
       <nav class="source-index" aria-label="ข้ามไปยังแหล่งข้อมูล">
+        <a href="#coverage">28 แหล่งข้อมูล</a>
+        <a href="#unmapped">ข้อมูลไม่ผูกพื้นที่</a>
         <a href="#ppp">ครัวเรือน</a>
         <a href="#apptech">นวัตกรรม</a>
         <a href="#city">ทุนเมือง</a>
         <a href="#rmutdb">ทะเบียนผลงาน</a>
       </nav>
+
+      <section class="source-section coverage-section" id="coverage" aria-labelledby="coverageTitle">
+        <header class="section-head coverage-head">
+          <div><span>Source audit</span><h2 id="coverageTitle">ทะเบียน 28 แหล่งข้อมูล</h2></div>
+          <p>เห็นทันทีว่าแหล่งใดมีข้อมูลพร้อมใช้ ผูกจังหวัดได้ หรือยังอยู่ระหว่างตรวจ</p>
+        </header>
+        <div class="coverage-ledger" id="sourceCoverageMeta" aria-live="polite"></div>
+        <div class="coverage-state" id="sourceCoverageState" role="status">กำลังโหลดทะเบียนแหล่งข้อมูล</div>
+        <div class="source-coverage-grid" id="sourceCoverageGrid"></div>
+      </section>
+
+      <section class="source-section learning-summary-section" id="learningSummary" hidden>
+        <header class="section-head compact-head">
+          <div><span>Dashboard LE</span><h2>ภาพรวมจากแหล่งที่ 10</h2></div>
+          <p>สรุปเฉพาะค่าที่ public projection ระบุไว้ โดยคงหน่วยของต้นทาง</p>
+        </header>
+        <div class="learning-summary-grid" id="learningSummaryGrid"></div>
+      </section>
+
+      <section class="source-section loose-data-section" id="unmapped" hidden>
+        <header class="section-head compact-head">
+          <div><span>Outside the map</span><h2>ข้อมูลที่ไม่ควรหายไปจากภาพรวม</h2></div>
+          <p>รายการระดับประเทศและรายการที่ยังไม่มีรหัสจังหวัด แสดงแยกจากแผนที่อย่างชัดเจน</p>
+        </header>
+        <div class="loose-data-grid" id="looseDataGrid"></div>
+      </section>
 
       <div id="pageLoading" class="page-loading" role="status">กำลังจัดข้อมูล</div>
       <div id="pageError" class="page-error" hidden>โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</div>

@@ -1,0 +1,179 @@
+from __future__ import annotations
+
+import csv
+import json
+from pathlib import Path
+
+
+DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = DASHBOARD_ROOT.parent
+CATALOG_PATH = DASHBOARD_ROOT / "config/source_catalog.json"
+COVERAGE_PATH = DASHBOARD_ROOT / "data/public/source_coverage.json"
+REGISTRY_PATH = PROJECT_ROOT / "config/source_registry.json"
+MERGED_ROOT = PROJECT_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
+
+PUBLIC_CANDIDATES = {
+    "f1_sradss_ppaos",
+    "f1_pppconnext",
+    "f2_culturalmap_university",
+    "f2_rmutdb",
+    "f2_apptech_mtr",
+    "f2_apptech_mru",
+    "f2_learning_dashboard",
+    "f2_learning_area_based",
+    "f3_city_capital_open_data",
+    "f3_ruamthiao_lamphun",
+    "f3_housing_portal",
+}
+
+RESTRICTED = {
+    "f2_target_household",
+    "f2_wallet_all_realtime",
+    "f2_wallet_cluster_realtime",
+    "f3_nonthaburi_city_learning",
+    "f3_healthcare_nonthaburi",
+}
+
+
+def read_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_catalog_covers_registry_and_keeps_value_lanes_separate():
+    registry = read_json(REGISTRY_PATH)
+    catalog = read_json(CATALOG_PATH)
+    registry_ids = [source["source_id"] for source in registry["sources"]]
+    catalog_ids = [source["source_id"] for source in catalog["sources"]]
+    assert len(catalog_ids) == registry["total_records"] == 28
+    assert catalog_ids == registry_ids
+    assert [source["ordinal"] for source in catalog["sources"]] == list(range(1, 29))
+
+    by_id = {source["source_id"]: source for source in catalog["sources"]}
+    assert {source_id for source_id, source in by_id.items() if source["production_values_allowed"]} == PUBLIC_CANDIDATES
+    assert {source_id for source_id, source in by_id.items() if source["value_visibility"] == "restricted_local_only"} == RESTRICTED
+    assert sum(source["value_visibility"] == "metadata_only" for source in by_id.values()) == 12
+
+    for source_id in RESTRICTED:
+        source = by_id[source_id]
+        assert source["acquisition_mode"] == "blocked"
+        assert source["expected_record_count"] == 0
+        assert source["snapshot_origin_files"] == []
+        assert all(endpoint["restricted"] for endpoint in source["endpoints"])
+        assert not any(endpoint["runtime_enabled"] for endpoint in source["endpoints"])
+
+    for source in by_id.values():
+        if source["value_visibility"] == "metadata_only":
+            assert source["acquisition_mode"] == "metadata_only"
+            assert source["expected_record_count"] == 0
+            assert source["snapshot_origin_files"] == []
+            assert source["endpoints"] == []
+
+
+def test_learning_dashboard_uses_verified_post_and_66_province_rows():
+    catalog = read_json(CATALOG_PATH)
+    source = next(
+        source for source in catalog["sources"] if source["source_id"] == "f2_learning_dashboard"
+    )
+    assert source["acquisition_mode"] == "api_first"
+    assert source["production_values_allowed"] is True
+    assert source["readiness_status"] == "needs_review"
+    assert source["expected_record_count"] == 66
+    assert source["snapshot_origin_files"] == []
+    assert len(source["endpoints"]) == 1
+    endpoint = source["endpoints"][0]
+    assert endpoint["method"] == "POST"
+    assert endpoint["url"] == "https://lesuper.app/api/opendata/pmua"
+    assert endpoint["request_template"] == {"json": {}}
+    assert endpoint["runtime_enabled"] is True
+    assert endpoint["restricted"] is False
+    assert "raw response" in source["notes_th"]
+    assert "selected-project scope" in source["notes_th"]
+
+
+def test_every_catalog_endpoint_has_local_evidence_and_is_not_invented():
+    index_rows = list(
+        csv.DictReader((MERGED_ROOT / "00_INDEX.csv").open(encoding="utf-8-sig", newline=""))
+    )
+    allowed: set[tuple[str, str, str]] = set()
+    for row in index_rows:
+        relative = Path(row["data_location"].replace("\\", "/"))
+        data_location = PROJECT_ROOT / relative
+        if not data_location.exists():
+            data_location = MERGED_ROOT / relative
+        endpoint_path = data_location / "endpoints.csv"
+        for endpoint in csv.DictReader(endpoint_path.open(encoding="utf-8-sig", newline="")):
+            allowed.add((row["source_id"], endpoint.get("method", "GET").upper(), endpoint["url"]))
+
+    observation = read_json(
+        PROJECT_ROOT
+        / "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json"
+    )["network"]
+    allowed.add(
+        (
+            "f2_learning_dashboard",
+            observation["method_observed"].upper(),
+            observation["endpoint"],
+        )
+    )
+
+    catalog = read_json(CATALOG_PATH)
+    actual = {
+        (source["source_id"], endpoint["method"], endpoint["url"])
+        for source in catalog["sources"]
+        for endpoint in source["endpoints"]
+    }
+    assert actual <= allowed
+
+
+def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
+    payload = read_json(COVERAGE_PATH)
+    summary = payload["summary"]
+    assert summary["registry_source_count"] == 28
+    assert summary["catalog_metadata_source_count"] == 28
+    assert summary["public_candidate_source_count"] == 11
+    assert summary["metadata_only_source_count"] == 12
+    assert summary["restricted_local_only_source_count"] == 5
+    assert summary["sources_with_merged_index_entry"] == 12
+    assert summary["public_candidates_with_observed_count"] == 11
+    assert summary["restricted_value_leak_count"] == 0
+
+    sources = {source["source_id"]: source for source in payload["sources"]}
+    assert len(sources) == 28
+    sra = sources["f1_sradss_ppaos"]
+    omission = sra["geo"]["known_omissions"][0]
+    assert sra["geo"]["linked_area_count"] == 15
+    assert omission["count"] == 5
+    assert omission["labels_th"] == ["นครราชสีมา", "ยโสธร", "ลำปาง", "พิษณุโลก", "พัทลุง"]
+
+    culture = sources["f2_culturalmap_university"]
+    assert culture["records"]["observed_count"] == 5619
+    assert culture["records"]["serving_projection_count"] == 5258
+    assert culture["records"]["additional_public_non_map_count"] == 361
+    assert culture["geo"]["known_omissions"][0]["count"] == 361
+
+    learning = sources["f2_learning_dashboard"]
+    assert learning["records"]["observed_count"] == 66
+    assert learning["records"]["observed_count_basis"] == "verified_province_rows_excluding_header"
+    assert learning["public_visibility"]["production_values_allowed"] is True
+    assert learning["status"]["fact_acceptance"] == "candidate_needs_review"
+
+    assert sources["f2_cultural_market_civil"]["public_visibility"]["classification"] == "metadata_only"
+    assert sources["f2_icommunity"]["public_visibility"]["classification"] == "metadata_only"
+    household = sources["f2_target_household"]
+    assert household["public_visibility"]["classification"] == "restricted_local_only"
+    assert household["records"]["observed_count"] is None
+    assert household["records"]["local_record_count_withheld"] is True
+
+    rmutdb = sources["f2_rmutdb"]
+    assert rmutdb["geo"]["linkability"] == "not_province_scoped"
+    assert rmutdb["geo"]["linked_area_count"] == 0
+
+    housing = sources["f3_housing_portal"]
+    assert housing["records"]["observed_count"] == 7259
+    assert housing["records"]["serving_projection_count"] == 6953
+    assert housing["records"]["additional_public_non_map_count"] == 306
+    assert housing["records"]["serving_projection_count"] + 306 == housing["records"]["observed_count"]
+    assert housing["geo"]["linked_area_count"] == 12
+    housing_omission = housing["geo"]["known_omissions"][0]
+    assert housing_omission["kind"] == "public_rows_with_unassigned_province_outside_map_projection"
+    assert housing_omission["count"] == 306

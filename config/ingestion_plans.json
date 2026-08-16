@@ -95,6 +95,21 @@
         "write actions"
       ]
     },
+    "f2_learning_dashboard": {
+      "driver": "learning_dashboard",
+      "url": "https://lesuper.app/api/opendata/pmua",
+      "method": "POST",
+      "body_mode": "json_empty",
+      "expected_keys": [
+        "provinces",
+        "entityTypes",
+        "categories",
+        "geography",
+        "geographyImpact",
+        "impactSummary"
+      ],
+      "scope_warning_th": "ข้อมูลครอบคลุมผู้เข้าร่วมโครงการที่ต้นทางเลือก ไม่ใช่ธุรกิจชุมชนทั้งหมด; ต้นทางไม่ระบุหน่วยหรือ as_of ระดับชุดข้อมูล"
+    },
     "f2_learning_area_based": {
       "driver": "pmua_area_based",
       "url": "https://lesuper.app/api/opendata/pmua/area-based"

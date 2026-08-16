@@ -109,6 +109,12 @@ SOURCE_JOIN_AUDIT = [
         "serving_use": "province_summary_and_records",
     },
     {
+        "source_id": "f2_learning_dashboard",
+        "join_status": "exact_province_name_against_official_boundary",
+        "dimension": "development",
+        "serving_use": "selected_project_scope_province_aggregate",
+    },
+    {
         "source_id": "f3_city_capital_open_data",
         "join_status": "official_dla_municipality_crosswalk",
         "dimension": "urban",
@@ -160,6 +166,13 @@ def safe_float(value: Any) -> float | None:
 def clean_text(value: Any) -> str | None:
     text = " ".join(str(value or "").strip().split())
     return text or None
+
+
+def compact_text(value: Any, limit: int = 180) -> str | None:
+    text = clean_text(value)
+    if text is None or len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
 
 
 def format_value(value: float, style: str) -> str:
@@ -466,10 +479,12 @@ def build_livelihood_dimension(briefing: dict[str, Any]) -> dict[str, Any] | Non
 def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
     sections = briefing.get("sections", {})
     projects = sections.get("area_based", {}).get("items", [])
+    learning = sections.get("learning_dashboard", {}).get("items", [])
     innovations = sections.get("innovation", {}).get("items", [])
+    requirements = sections.get("requirements", {}).get("items", [])
     tourism = sections.get("tourism", {}).get("items", [])
     apptech = sections.get("apptech_mtr", {}).get("items", [])
-    if not projects and not innovations and not tourism and not apptech:
+    if not projects and not learning and not innovations and not requirements and not tourism and not apptech:
         return None
 
     project_districts = distribution(
@@ -481,7 +496,35 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
     innovation_categories = distribution(
         innovations, lambda item: item.get("category"), "innovation_categories", "หมวดนวัตกรรม"
     )
-    breakdowns = [item for item in (project_districts, project_years, innovation_categories) if item]
+    requirement_categories = distribution(
+        requirements,
+        lambda item: item.get("category"),
+        "requirement_categories",
+        "หมวดโจทย์หรือความต้องการ",
+    )
+    breakdowns = [
+        item
+        for item in (
+            project_districts,
+            project_years,
+            innovation_categories,
+            requirement_categories,
+        )
+        if item
+    ]
+    if learning:
+        aggregate = learning[0]
+        breakdowns.append({
+            "key": "learning_dashboard_business_records",
+            "kind": "scores",
+            "label_th": aggregate.get("metric_label_th") or "Dashboard LE",
+            "items": [{
+                "label_th": "ค่าจังหวัดตามต้นทาง",
+                "value": aggregate.get("value", 0),
+                "display_value": f"{aggregate.get('value', 0):,.0f}",
+            }],
+            "note_th": aggregate.get("scope_warning_th"),
+        })
     if apptech:
         activity = apptech[0]
         breakdowns.append({
@@ -511,6 +554,8 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         summary = f"โครงการที่เชื่อมได้กระจุกใน{' และ '.join(districts)}"
     elif categories:
         summary = f"นวัตกรรมที่เชื่อมได้เด่นในหมวด{' และ '.join(categories)}"
+    elif requirements:
+        summary = "มีโจทย์หรือความต้องการสาธารณะที่ต้นทางผูกกับจังหวัด"
     else:
         summary = "มีหลักฐานโครงการหรือนวัตกรรมที่เชื่อมกับจังหวัด"
 
@@ -542,10 +587,19 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
             ),
             "source_url": item.get("source_url"),
         })
+    for item in requirements[:2]:
+        highlights.append({
+            "kind": "requirement",
+            "title_th": item.get("title") or "ไม่ระบุชื่อโจทย์หรือความต้องการ",
+            "detail_th": compact_text(item.get("description")) or clean_text(item.get("category")),
+            "source_url": item.get("source_url"),
+        })
     source_ids = []
     if projects:
         source_ids.append("f2_learning_area_based")
-    if innovations:
+    if learning:
+        source_ids.append("f2_learning_dashboard")
+    if innovations or requirements:
         source_ids.append("f2_apptech_mru")
     if tourism:
         source_ids.append("f3_ruamthiao_lamphun")

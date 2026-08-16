@@ -2,48 +2,37 @@
 
 อัปเดต: 2026-08-16
 
-## ผลล่าสุด
+## ผล audit
 
-- Public catalog มี 10 source; 9 source เชื่อมพื้นที่ได้ด้วย key ที่ตรวจแล้ว
-- PPPConnext เชื่อมได้ 21 จังหวัดจาก curated BI aggregate 660 แถว
-- AppTech MTR มี API aggregate ครบ 77 จังหวัด แต่แยกผู้ใช้ การปฏิสัมพันธ์ และผลงานออกจากกัน
-- City Capital เชื่อมเทศบาล 18/18 แห่งกับ 16 จังหวัดด้วยทะเบียน DLA
-- RMUTDB ไม่ผูกจังหวัด เพราะเจ้าของผลงานไม่ใช่สถานที่ใช้งานนวัตกรรม
-- Wallet 2 source เป็น restricted local-only และไม่อยู่ใน public artifact หรือ API
+- Registry ครบ 28 source; public candidate 11, metadata-only 12, restricted local-only 5
+- ข้อมูลระดับจังหวัดใช้ exact code/name หรือ official crosswalk เท่านั้น
+- Learning Dashboard เชื่อม 66 จังหวัดและแยกตาราง entity/category/region/impact ที่ไม่ใช่ province ออกจากกัน
+- Area-Based มี 1,002 records: 996 เชื่อม 55 จังหวัด และ 6 แถวอยู่ใน unmapped section โดยไม่เดาพื้นที่
+- PPPConnext ใช้ curated aggregate 660 แถว; generic BI chart points ไม่ถูกเทลง UI
+- City Capital คง grain 18 เทศบาล/39 metrics และเชื่อม 16 จังหวัดด้วยทะเบียน DLA
+- RMUTDB เป็น national/non-geo catalog เพราะ affiliation ไม่ใช่พื้นที่ใช้งาน
+- SRA-DSS มี overall ตัวเลข 15 จาก 20 จังหวัดในทะเบียน; 5 จังหวัดที่เป็น null ไม่ถูกแทนด้วยศูนย์
+- Housing public projection มี 7,259 แถว; อีก 306 แถวที่ไม่มีจังหวัดต้องอยู่ non-geo/unmapped ไม่ถูกทิ้งหรือเดา
+- Wallet/household/health และ ArcGIS sensitive lanes ไม่มี values บน Railway
 
-## มิติใน Serving layer
+## มิติที่ผู้บริหารเห็นทันที
 
-| มิติ | ข้อมูล | วิธีอ่าน |
+| มิติ | ตัวอย่างข้อมูล | หลักอ่าน |
 |---|---|---|
-| ที่อยู่อาศัยและกำลังซื้อ | ราคาบ้านต่อรายได้, การผ่านสินเชื่อ, ความแออัด, ประชากร | เทียบ median ของจังหวัดที่มี metric เดียวกัน |
-| ความเสี่ยงและความเปราะบาง | น้ำท่วม, SRA-DSS 5 มิติ | คงคะแนน provisional และไม่ตีความทิศทางแทนต้นทาง |
-| ครัวเรือนและทุนดำรงชีพ | PPPConnext aggregate | แสดงค่าแยก metric และ widget; ไม่รวมต่างหน่วย |
-| โครงการและนวัตกรรม | Area-Based, AppTech MRU, AppTech MTR, Ruam Thiao | แยกรายการผลงานออกจาก aggregate ผู้ใช้/กิจกรรม |
-| บริการเมืองและคุณภาพชีวิต | City Capital 39 metric | คงระดับเทศบาล; เทียบ median ของ 18 เมืองใน snapshot |
-| ทุนวัฒนธรรม | Cultural Map | จัดกลุ่มหมวด อำเภอ และชนิดทุนวัฒนธรรม |
+| ที่อยู่อาศัยและกำลังซื้อ | ราคาบ้านต่อรายได้, การผ่านสินเชื่อ, ความแออัด | เทียบ metric เดียวกันและคงหน่วยต้นทาง |
+| ความเสี่ยงและความเปราะบาง | น้ำท่วม, SRA-DSS | แสดง definition status; ไม่ตีความทิศทางแทนต้นทาง |
+| ครัวเรือนและทุนดำรงชีพ | PPPConnext aggregate | ไม่รวม metric ต่างหน่วยเป็นคะแนนเดียว |
+| เศรษฐกิจชุมชน | Learning Dashboard, Area-Based | ระบุชัดว่าเป็น selected-project/participant scope |
+| โครงการและนวัตกรรม | AppTech/Area-Based และความต้องการพื้นที่ | แยกรายการผลงาน ความต้องการ และ platform activity |
+| บริการเมือง | City Capital 39 metrics | คงระดับเทศบาล; benchmark เฉพาะ 18 เมืองใน snapshot |
+| วัฒนธรรมและท่องเที่ยว | Cultural Map, Ruam Thiao | จุดมีพิกัดอยู่บน map; non-point/tourism อยู่ในข้อมูลพื้นที่/insights |
 
-## Join contract
+## UX contract
 
-- ใช้รหัสจังหวัดจากต้นทางเมื่อมี
-- ชื่อจังหวัดผ่าน crosswalk 77 จังหวัดใน pipeline เท่านั้น
-- เทศบาลใช้ exact `ประเภท + ชื่อ` กับทะเบียน DLA
-- สถานะไม่มี record ไม่ถูกแทนด้วยศูนย์
-- ค่า aggregate ระดับเมืองไม่ถูกยกเป็น KPI จังหวัด
-
-## Pipeline
-
-~~~text
-public API / immutable raw snapshot
-  clean schema + keep source grain
-  audited geography crosswalk
-  same-metric median where valid
-  source insights + provincial briefing
-  compact executive summary + public API
-~~~
-
-## ขอบเขต
-
-- ไม่มี composite score, budget score หรือ ranking จังหวัดที่สร้างขึ้นใหม่
-- `near median` ใช้ส่วนต่างไม่เกิน 10% เฉพาะ metric เดียวกัน
-- ทุก metric คง source URL, provenance และสถานะ candidate/needs_review
-- `as_of` ที่ต้นทางไม่ระบุจะแสดงว่าไม่ระบุ
+- หน้าแรกให้แผนที่เด่นและบอกเพียงวิธีคลิกจังหวัด
+- เมื่อเลือกจังหวัด แสดง context metrics และข้อสังเกตก่อน technical coverage
+- รายมิติแสดงทุกกลุ่มที่มีข้อมูลโดยไม่ใช้ dropdown ซ้อน
+- รายการยาวโหลดเมื่อเปิด “ข้อมูลพื้นที่”
+- non-geo, unmapped และสถานะ 28 URL อยู่หน้า `/insights`
+- ไม่มี composite score, budget ranking, ลูกศรเชิงตัดสิน หรือ raw spreadsheet table
+- ค่า `null` คือไม่มีข้อมูล ไม่ใช่ศูนย์

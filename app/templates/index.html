@@ -91,7 +91,7 @@
 
           <nav class="panel-tabs" aria-label="หมวดข้อมูลจังหวัด">
             <button class="active" type="button" data-panel-tab="overview" aria-selected="true">ภาพรวม</button>
-            <button type="button" data-panel-tab="portfolio" aria-selected="false">โครงการ</button>
+            <button type="button" data-panel-tab="portfolio" aria-selected="false">ข้อมูลพื้นที่</button>
             <button type="button" data-panel-tab="dimensions" aria-selected="false">รายมิติ</button>
             <button type="button" data-panel-tab="sources" aria-selected="false">ต้นทาง</button>
           </nav>
@@ -119,6 +119,17 @@
               <div class="panel-section" id="innovationSection" hidden>
                 <div class="section-heading"><span>นวัตกรรมในพื้นที่</span></div>
                 <div class="record-list" id="innovationItems"></div>
+              </div>
+
+              <div class="panel-section" id="requirementsSection" hidden>
+                <div class="section-heading"><span>โจทย์ความต้องการในพื้นที่</span></div>
+                <div class="record-list" id="requirementItems"></div>
+              </div>
+
+              <div class="panel-section tourism-section" id="tourismSection" hidden>
+                <div class="section-heading"><span>การเดินทางและท่องเที่ยวลำพูน</span><small id="tourismUpdated"></small></div>
+                <div class="tourism-facts" id="tourismFacts"></div>
+                <div class="tourism-content" id="tourismItems"></div>
               </div>
 
               <div class="panel-section" id="cultureSection" hidden>

@@ -273,6 +273,8 @@ class IngestionPipeline:
                 records = self._fetch_apptech_mtr(plan, recorder)
             elif driver == "apptech_mru":
                 records = self._fetch_apptech_mru(plan, recorder)
+            elif driver == "learning_dashboard":
+                records = self._fetch_learning_dashboard(plan, recorder)
             elif driver == "pmua_area_based":
                 records = self._fetch_pmua(plan, recorder)
             elif driver == "housing_ckan":
@@ -364,6 +366,89 @@ class IngestionPipeline:
         response, _ = recorder.request("GET", plan["url"], name="area_based")
         rows = response.json().get("data") or []
         records = [("area_based", row) for row in rows if isinstance(row, dict)]
+        limit = self.settings.max_records_per_source
+        return records[:limit] if limit > 0 else records
+
+    def _fetch_learning_dashboard(
+        self,
+        plan: dict,
+        recorder: ResponseRecorder,
+    ) -> list[tuple[str, dict]]:
+        response, _ = recorder.request(
+            "POST",
+            plan["url"],
+            name="learning_dashboard",
+            json_body={} if plan.get("body_mode") == "json_empty" else None,
+        )
+        payload = response.json()
+        expected_keys = set(plan.get("expected_keys", []))
+        missing = sorted(expected_keys - set(payload))
+        if missing:
+            raise RuntimeError(f"learning dashboard response missing keys: {', '.join(missing)}")
+
+        scope_warning = plan.get("scope_warning_th")
+        records: list[tuple[str, dict]] = []
+        table_names = ("provinces", "entityTypes", "categories", "geography")
+        for table_name in table_names:
+            table = payload.get(table_name)
+            if not isinstance(table, list) or not table or not isinstance(table[0], list):
+                raise RuntimeError(f"learning dashboard {table_name} is not a header-array table")
+            headers = table[0]
+            if len(headers) != 2:
+                raise RuntimeError(f"learning dashboard {table_name} header width must be 2")
+            for row_number, row in enumerate(table[1:], start=1):
+                if not isinstance(row, list) or len(row) != 2:
+                    raise RuntimeError(
+                        f"learning dashboard {table_name} row {row_number} width must be 2"
+                    )
+                records.append(
+                    (
+                        table_name,
+                        {
+                            "source_row_number": row_number,
+                            "label_field": headers[0],
+                            "value_field": headers[1],
+                            "label": row[0],
+                            "value": row[1],
+                            "unit": None,
+                            "as_of": None,
+                            "scope_warning_th": scope_warning,
+                        },
+                    )
+                )
+
+        impact_rows = payload.get("geographyImpact")
+        if not isinstance(impact_rows, list) or not all(
+            isinstance(row, dict) for row in impact_rows
+        ):
+            raise RuntimeError("learning dashboard geographyImpact must be an object array")
+        records.extend(
+            (
+                "geographyImpact",
+                {
+                    "source_row_number": row_number,
+                    **row,
+                    "unit": None,
+                    "as_of": None,
+                    "scope_warning_th": scope_warning,
+                },
+            )
+            for row_number, row in enumerate(impact_rows, start=1)
+        )
+        impact_summary = payload.get("impactSummary")
+        if not isinstance(impact_summary, dict):
+            raise RuntimeError("learning dashboard impactSummary must be an object")
+        records.append(
+            (
+                "impactSummary",
+                {
+                    **impact_summary,
+                    "unit": None,
+                    "as_of": None,
+                    "scope_warning_th": scope_warning,
+                },
+            )
+        )
         limit = self.settings.max_records_per_source
         return records[:limit] if limit > 0 else records
 

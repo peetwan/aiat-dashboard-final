@@ -1,54 +1,51 @@
 # AIAT Provincial Evidence Map
 
-Public Executive Dashboard แบบ map-first สำหรับเปิดข้อมูลจริงของแต่ละจังหวัดจากข้อมูลสาธารณะ 10 แหล่ง ผู้ใช้คลิกพื้นที่บนแผนที่สามมิติแล้วระบบเรียก Gold Provincial API เพื่อแสดงตัวชี้วัด โครงการ นวัตกรรม ทุนวัฒนธรรม และแถวข้อมูลจาก URL ต้นทาง
+Public Executive Dashboard แบบ map-first สำหรับอ่านข้อมูลจังหวัดจาก URL สาธารณะของหน่วยงานรัฐและมหาวิทยาลัย ข้อมูลถูก clean, แยก grain และสรุปก่อนแสดงผล จึงไม่เท raw cell จำนวนมากให้ผู้บริหารตีความเอง
 
-ข้อมูลทั้งหมดในรุ่นนี้ยังเป็น `candidate` หรือ `needs_review` จึงไม่ถูกเรียกว่า KPI และไม่ถูกนำไปรวมเป็นคะแนนแนะนำงบอัตโนมัติ ส่วน `f2_wallet_all_realtime` และ `f2_wallet_cluster_realtime` ถูกตัดออกจาก public projection และคงเป็น local-only
+สถานะปัจจุบัน:
 
-## สิ่งที่มีในหน้าเว็บ
+- Registry และ database catalog ครบ 28 URL
+- 11 source มี public candidate data สำหรับ Dashboard
+- 12 source เป็น metadata/discovery เพราะยังไม่มี structured data contract ที่ยืนยันแล้ว
+- 5 source เป็น restricted local-only; เผยแพร่เฉพาะ metadata และไม่มีค่าข้อมูลบน Railway
+- แผนที่ WebGL ครบ 77 จังหวัด พร้อม briefing และ executive summary จังหวัดละหนึ่งชุด
+- Public serving artifacts 161 ชุดถูก sync เข้า PostgreSQL ตอนแอปเริ่มทำงาน
+- ข้อมูลทุกชุดยังเป็น `candidate` หรือ `needs_review` ไม่ใช่ KPI หรือคำแนะนำจัดสรรงบอัตโนมัติ
 
-- แผนที่ประเทศไทย 77 จังหวัดแบบ WebGL/3D ด้วย MapLibre GL JS 5.12
-- สี/ความสูงของจังหวัดตามจำนวนแหล่งหลักฐาน พร้อม adaptive labels ที่เพิ่มชื่อเมื่อ zoom
-- Provincial command panel แบบ 4 tabs ที่เปิดเมื่อคลิกจังหวัด
-- ฟอนต์ Anuphan และ responsive bottom sheet สำหรับมือถือ
-- “ข้อมูลสำคัญต่อการตัดสินใจ” ใช้ค่าจริง เช่น house-price-to-income, overcrowding, การผ่านสินเชื่อ และพื้นที่เสี่ยงน้ำท่วม
-- รายการชื่อจริงจาก Area-Based, AppTech และ Cultural Map พร้อมรายละเอียดและ URL ต้นทาง
-- “รายมิติ” ใช้ serving pipeline ที่ clean และ join ระดับจังหวัดแล้ว แสดง comparison, distribution และรายการสำคัญทันทีโดยไม่ใช้ dropdown หรือ raw cells
-- โหลด executive summary ขนาดเล็กก่อน และโหลด Gold JSON ฉบับเต็มเฉพาะเมื่อเปิดดูรายการโครงการ
-- สถานะครบทั้ง 10 URL ว่า `มีข้อมูล`, `ไม่มีรายการจังหวัดนี้` หรือ `ไม่ผูกจังหวัด`
-- จุดวัฒนธรรมสาธารณะ 5,258 จุดแบบเปิดปิดได้
-- หน้า `/insights` สำหรับอ่าน PPPConnext, AppTech MTR, City Capital และ RMUTDB โดยไม่ต้องเลือกจังหวัด
-- Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256
-- Operational API/ingestion/database เดิมสำหรับผู้ดูแลระบบ
+## หน้าเว็บมีอะไร
+
+- แผนที่ประเทศไทยแบบ WebGL/3D คลิกจังหวัดเพื่ออ่านข้อมูลจริง
+- สรุปสถานการณ์รายมิติ เช่น ที่อยู่อาศัย ความเสี่ยง ทุนดำรงชีพ เมือง โครงการ นวัตกรรม และวัฒนธรรม
+- รายการโครงการ นวัตกรรม และท่องเที่ยวโหลดเมื่อเปิดดูข้อมูลพื้นที่
+- หน้า `/insights` แสดงภาพรวมข้ามจังหวัด, non-geo data, unmapped records และสถานะครบทั้ง 28 URL
+- สีและชื่อจังหวัดปรับตามความครอบคลุม โดยไม่ทำให้จังหวัดที่ข้อมูลน้อยรกแผนที่
+- ฟอนต์ Anuphan, contrast และ layout สำหรับ desktop/mobile
+- Public JSON API, CSV, GeoJSON และไฟล์ดาวน์โหลดพร้อม provenance
 
 ## โครงสร้างสำหรับมือใหม่
 
 ~~~text
 dashboard_final/
 ├─ app/
-│  ├─ main.py             FastAPI routes: public + operations
-│  ├─ public_data.py      โหลด public projection แบบ read-only
-│  ├─ ingestion.py        API-first + snapshot fallback
-│  ├─ database.py         SQLite หรือ PostgreSQL
-│  ├─ static/             WebGL UI, CSS และ JavaScript
-│  └─ templates/          หน้า Public Evidence Atlas
+│  ├─ main.py              หน้าเว็บและ API routes
+│  ├─ models.py            ตาราง PostgreSQL/SQLite
+│  ├─ public_artifacts.py  sync serving JSON เข้า database
+│  ├─ public_data.py       อ่าน database ก่อน ใช้ไฟล์เป็น fallback
+│  ├─ ingestion.py         API allowlist สำหรับ operational refresh
+│  ├─ static/              JavaScript และ CSS
+│  └─ templates/           หน้า map และ insights
 ├─ config/
-│  ├─ source_catalog.json ทะเบียน 12 source และ policy
-│  └─ ingestion_plans.json allowlist ของ API ที่เรียกได้
+│  ├─ source_catalog.json  metadata/policy ครบ 28 URL
+│  └─ ingestion_plans.json API ที่เรียกได้จริงเท่านั้น
 ├─ data/
-│  ├─ public/             ไฟล์ aggregate ที่ push/deploy ได้
-│  │  ├─ source_insights.json  ข้อมูล clean สำหรับหน้าภาพรวม
-│  │  └─ provincial_briefings/ serving JSON ครบ 77 จังหวัด
-│  ├─ snapshots/          raw fallback บนเครื่อง ไม่ push Git
-│  └─ runtime/            database/raw fetch runs ไม่ push Git
-├─ tools/
-│  ├─ build_source_insights.py audit/clean/join 4 source เพิ่มเติม
-│  ├─ build_public_data.py สร้าง map/catalog projection
-│  ├─ build_provincial_briefings.py สร้าง serving data รายจังหวัด
-│  └─ build_executive_summaries.py ย่อยเป็นมิติสำหรับผู้บริหาร
-├─ tests/                 API, privacy และ publication tests
-├─ WORKFLOW.md            data flow ตั้งแต่ source ถึง dashboard
-├─ DEPLOY_RAILWAY.md      วิธี deploy public-only หรือ full pipeline
-└─ DESIGN_REFERENCES.md   Mobbin และ public-dashboard references
+│  ├─ public/              cleaned serving artifacts ที่ deploy ได้
+│  ├─ snapshots/           local fallback; ไม่ push raw อัตโนมัติ
+│  └─ runtime/             local DB และ runtime fetch; ไม่ commit
+├─ tools/                  builders สำหรับ clean/join/summarize
+├─ tests/                  data, API, policy และ UI contract tests
+├─ SOURCE_MATRIX.md        ตารางครบ 28 source
+├─ WORKFLOW.md             data flow ฉบับอ่านง่าย
+└─ DEPLOY_RAILWAY.md       วิธี deploy พร้อม PostgreSQL
 ~~~
 
 ## เริ่มบนเครื่อง
@@ -61,56 +58,45 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python -m app.cli init-db
-uvicorn app.main:app --reload
+python -m app.server
 ~~~
 
-เปิด http://localhost:8000
+เปิด `http://localhost:8000`
+
+`init-db` จะสร้างตาราง, sync source catalog 28 แถว และนำ cleaned public artifactsเข้า serving database โดยไม่แตะ raw evidence
 
 ## Public Data API
 
 | Endpoint | เนื้อหา |
 |---|---|
-| `/api/public/v1/overview` | summary, metric definitions และ methodology |
-| `/api/public/v1/sources` | 10 public sources พร้อม URL/readiness |
-| `/api/public/v1/provinces` | public evidence projection รายจังหวัด |
-| `/api/public/v1/provinces/{code}` | จังหวัดเดียวด้วยรหัส 2 หลัก |
-| `/api/public/v1/provinces/{code}/briefing` | Gold projection: ค่าจริงและรายการครบของจังหวัด |
-| `/api/public/v1/provinces/{code}/summary` | ข้อมูลรายมิติที่ clean และ benchmark แล้ว |
-| `/api/public/v1/source-insights` | ภาพรวม 4 source พร้อมผล audit และ geography links |
-| `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด + metric properties |
-| `/api/public/v1/map/cultural-points` | GeoJSON จุดวัฒนธรรม 5,258 จุด |
+| `/api/public/v1/overview` | ภาพรวม นิยาม metric และคำเตือน |
+| `/api/public/v1/sources` | 11 public candidate sources |
+| `/api/public/v1/source-coverage` | สถานะครบทั้ง 28 URL |
+| `/api/public/v1/database-coverage` | หลักฐานว่า serving artifacts อยู่ใน database ครบ |
+| `/api/public/v1/unmapped-records` | ข้อมูลสาธารณะที่ไม่เดาจังหวัดให้เอง |
+| `/api/public/v1/learning-dashboard` | Source 10 แบบ clean พร้อม scope warning |
+| `/api/public/v1/provinces/{code}/summary` | สรุปรายมิติสำหรับผู้บริหาร |
+| `/api/public/v1/provinces/{code}/briefing` | รายการและ provenance ของจังหวัด |
+| `/api/public/v1/source-insights` | ข้อมูลข้ามจังหวัดและ non-geo |
+| `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด |
+| `/api/public/v1/map/cultural-points` | จุดวัฒนธรรมที่ผ่าน public projection |
 | `/docs` | OpenAPI explorer |
 
-ไฟล์ดาวน์โหลดอยู่ที่ `/downloads/` ได้แก่ `province_evidence.csv`, `source_inventory.csv`, `cultural_points.geojson`, `thailand_provinces.geojson` และ `manifest.json`
+ไฟล์ cleaned data ดาวน์โหลดได้ที่ `/downloads/` เช่น `source_coverage.json`, `unmapped_records.json`, `province_evidence.csv` และ GeoJSON
 
-## สร้าง public projection ใหม่
+## สร้างข้อมูลใหม่
 
-รันจาก workspace หลักที่มี merged evidence:
+รันตามลำดับจากโฟลเดอร์นี้ หลัง data layer หลักผ่าน validation แล้ว:
 
 ~~~powershell
+python tools/build_source_catalog.py
+python tools/build_learning_dashboard.py
 python tools/build_source_insights.py
 python tools/build_public_data.py
 python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
+python tools/build_source_coverage.py
+python -m pytest -q
 ~~~
 
-หากต้องการ refresh ขอบเขตจังหวัดจาก ArcGIS REST ของกรมป้องกันและบรรเทาสาธารณภัย:
-
-~~~powershell
-python tools/build_public_data.py --refresh-boundaries
-~~~
-
-pipeline จะตรวจ public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และสร้าง serving JSON พร้อม byte size/SHA-256 รายจังหวัด
-
-## Operational ingestion
-
-~~~powershell
-python tools/prepare_snapshots.py
-python -m app.cli ingest --source f2_learning_area_based
-python -m app.cli ingest --source f3_housing_portal
-python -m app.cli status
-~~~
-
-ค่า row-level ใน `/api/records?include_payload=true` ยังคงปิดเมื่อ `PUBLIC_DATA_VALUES_ENABLED=false` ส่วน public aggregate API เปิดได้เสมอเพราะผ่าน publication projection แยกแล้ว
-
-ก่อน deploy ให้อ่าน [WORKFLOW.md](WORKFLOW.md), [SECURITY.md](SECURITY.md) และ [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md)
+อ่าน [WORKFLOW.md](WORKFLOW.md), [SECURITY.md](SECURITY.md) และ [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) ก่อน deploy

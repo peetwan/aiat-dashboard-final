@@ -2,24 +2,49 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, func, select, text
 
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, engine, init_db
-from app.models import DashboardRecord, Endpoint, IngestionRun, Source
+from app.models import DashboardRecord, Endpoint, IngestionRun, PublicArtifact, Source
+from app.api_schemas import (
+    CulturalPointFeatureCollectionResponse,
+    DatabaseCoverageResponse,
+    ExecutiveSummaryResponse,
+    HealthResponse,
+    LearningDashboardResponse,
+    ProvinceFeatureCollectionResponse,
+    ProvinceResponse,
+    ProvincialBriefingResponse,
+    PublicCatalogResponse,
+    PublicOverviewResponse,
+    PublicSourceResponse,
+    SourceCoverageResponse,
+    SourceInsightsResponse,
+    UnmappedRecordsResponse,
+)
+from app.public_artifacts import (
+    REQUIRED_ARTIFACT_COUNT,
+    REQUIRED_GROUP_COUNTS,
+    database_artifact_counts,
+    sync_public_artifacts,
+)
 from app.public_data import (
     PUBLIC_DATA_ROOT,
     cultural_points,
     executive_summary,
+    learning_dashboard,
     province_boundaries,
     provincial_briefing,
     public_catalog,
+    source_coverage,
     source_insights,
+    unmapped_records,
 )
 from app.settings import PROJECT_ROOT, get_settings
 
@@ -27,12 +52,182 @@ from app.settings import PROJECT_ROOT, get_settings
 settings = get_settings()
 templates = Jinja2Templates(directory=PROJECT_ROOT / "app" / "templates")
 
+EXPECTED_PUBLIC_ARTIFACTS = REQUIRED_ARTIFACT_COUNT
+EXPECTED_SOURCE_COUNT = 28
+EXPECTED_PUBLIC_SOURCE_COUNT = 11
+EXPECTED_METADATA_SOURCE_COUNT = 12
+EXPECTED_RESTRICTED_SOURCE_COUNT = 5
+EXPECTED_ENDPOINT_COUNT = 141
+EXPECTED_RUNTIME_ENDPOINT_COUNT = 90
+STARTUP_SYNC_LOCK_ID = 0x4149415453594E43  # ASCII "AIATSYNC", signed bigint-safe.
+
+
+def _debug_api_enabled() -> bool:
+    return (
+        settings.app_env.lower() in {"local", "development", "dev", "test"}
+        and engine.dialect.name == "sqlite"
+    )
+
+
+def _sync_serving_database() -> None:
+    """Serialize startup seed work on PostgreSQL and stay lightweight on SQLite."""
+
+    if engine.dialect.name != "postgresql":
+        with SessionLocal() as session:
+            sync_catalog(session)
+            sync_public_artifacts(session)
+        return
+
+    # A session-level lock is intentional: both sync functions commit their own
+    # transactions. Binding the ORM session to this checked-out connection keeps
+    # the lock held across those commits until both synchronized sets are ready.
+    with engine.connect() as connection:
+        connection.execute(
+            text("SELECT pg_advisory_lock(:lock_id)"),
+            {"lock_id": STARTUP_SYNC_LOCK_ID},
+        )
+        # End the transaction started by SELECT without releasing the
+        # session-level lock. The ORM can then own and commit each sync
+        # transaction normally on this same checked-out connection.
+        connection.commit()
+        try:
+            with SessionLocal(bind=connection) as session:
+                sync_catalog(session)
+                sync_public_artifacts(session)
+        finally:
+            connection.execute(
+                text("SELECT pg_advisory_unlock(:lock_id)"),
+                {"lock_id": STARTUP_SYNC_LOCK_ID},
+            )
+            connection.commit()
+
+
+def _serving_contract_snapshot(session) -> dict:
+    """Return the fail-closed serving contract from database state only."""
+
+    artifact_counts = database_artifact_counts(session)
+    artifact_total = sum(artifact_counts.values())
+    all_source_ids = set(session.scalars(select(Source.source_id)).all())
+    approved_ids = set(
+        session.scalars(
+            select(Source.source_id).where(Source.production_values_allowed.is_(True))
+        ).all()
+    )
+    public_policy_ids = set(
+        session.scalars(
+            select(Source.source_id).where(
+                Source.cloud_policy == "project_owner_approved_public"
+            )
+        ).all()
+    )
+    metadata_ids = set(
+        session.scalars(
+            select(Source.source_id).where(Source.cloud_policy == "metadata_only")
+        ).all()
+    )
+    restricted_ids = set(
+        session.scalars(
+            select(Source.source_id).where(Source.cloud_policy == "restricted_local_only")
+        ).all()
+    )
+    catalog_payload = session.scalar(
+        select(PublicArtifact.payload).where(PublicArtifact.artifact_key == "catalog")
+    )
+    catalog_rows = catalog_payload.get("sources", []) if isinstance(catalog_payload, dict) else []
+    published_ids = [
+        row.get("source_id")
+        for row in catalog_rows
+        if isinstance(row, dict) and isinstance(row.get("source_id"), str)
+    ] if isinstance(catalog_rows, list) else []
+    published_id_set = set(published_ids)
+    published_ids_match_approved = (
+        isinstance(catalog_rows, list)
+        and len(catalog_rows) == EXPECTED_PUBLIC_SOURCE_COUNT
+        and len(published_ids) == len(catalog_rows)
+        and len(published_id_set) == len(published_ids)
+        and published_id_set == approved_ids
+    )
+    restricted_catalog_sources = published_id_set & restricted_ids
+    disallowed_operational_records = (
+        session.scalar(
+            select(func.count())
+            .select_from(DashboardRecord)
+            .join(Source, DashboardRecord.source_id == Source.source_id)
+            .where(Source.production_values_allowed.is_(False))
+        )
+        or 0
+    )
+    approved_operational_records = (
+        session.scalar(
+            select(func.count())
+            .select_from(DashboardRecord)
+            .join(Source, DashboardRecord.source_id == Source.source_id)
+            .where(Source.production_values_allowed.is_(True))
+        )
+        or 0
+    )
+    endpoint_total = session.scalar(select(func.count()).select_from(Endpoint)) or 0
+    runtime_endpoint_total = (
+        session.scalar(
+            select(func.count()).select_from(Endpoint).where(
+                Endpoint.runtime_enabled.is_(True),
+                Endpoint.restricted.is_(False),
+            )
+        )
+        or 0
+    )
+    policy_partitions_are_exact = (
+        approved_ids == public_policy_ids
+        and not (approved_ids & metadata_ids)
+        and not (approved_ids & restricted_ids)
+        and not (metadata_ids & restricted_ids)
+        and approved_ids | metadata_ids | restricted_ids == all_source_ids
+    )
+    complete = (
+        artifact_total == EXPECTED_PUBLIC_ARTIFACTS
+        and artifact_counts == REQUIRED_GROUP_COUNTS
+        and len(all_source_ids) == EXPECTED_SOURCE_COUNT
+        and len(approved_ids) == EXPECTED_PUBLIC_SOURCE_COUNT
+        and len(public_policy_ids) == EXPECTED_PUBLIC_SOURCE_COUNT
+        and len(metadata_ids) == EXPECTED_METADATA_SOURCE_COUNT
+        and len(restricted_ids) == EXPECTED_RESTRICTED_SOURCE_COUNT
+        and policy_partitions_are_exact
+        and published_ids_match_approved
+        and not restricted_catalog_sources
+        and disallowed_operational_records == 0
+        and endpoint_total == EXPECTED_ENDPOINT_COUNT
+        and runtime_endpoint_total == EXPECTED_RUNTIME_ENDPOINT_COUNT
+    )
+    return {
+        "complete": complete,
+        "artifact_counts": artifact_counts,
+        "artifact_total": artifact_total,
+        "source_total": len(all_source_ids),
+        "approved_total": len(approved_ids),
+        "public_policy_total": len(public_policy_ids),
+        "metadata_only_total": len(metadata_ids),
+        "restricted_source_total": len(restricted_ids),
+        "published_catalog_source_count": len(published_ids),
+        "published_catalog_ids_match_approved": published_ids_match_approved,
+        "restricted_catalog_sources_published": len(restricted_catalog_sources),
+        "disallowed_operational_records": disallowed_operational_records,
+        "approved_operational_records": approved_operational_records,
+        "endpoint_total": endpoint_total,
+        "runtime_endpoint_total": runtime_endpoint_total,
+    }
+
+
+def _require_local_debug_api() -> None:
+    """Hide operational inventory, run, error and record routes in production."""
+
+    if not _debug_api_enabled():
+        raise HTTPException(status_code=404, detail="Not Found")
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    with SessionLocal() as session:
-        sync_catalog(session)
+    _sync_serving_database()
     yield
 
 
@@ -75,20 +270,67 @@ def insights_dashboard(request: Request):
     )
 
 
-@app.get("/health")
+@app.get("/health", response_model=HealthResponse)
 def health():
-    with SessionLocal() as session:
-        session.execute(text("SELECT 1"))
-    return {"status": "ok", "database": "connected", "app_env": settings.app_env}
+    try:
+        with SessionLocal() as session:
+            session.execute(text("SELECT 1"))
+            contract = _serving_contract_snapshot(session)
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "database": "disconnected",
+                "database_backend": engine.dialect.name,
+                "public_artifacts": 0,
+                "public_artifacts_expected": EXPECTED_PUBLIC_ARTIFACTS,
+                "source_catalog_rows": 0,
+                "public_value_sources": 0,
+                "metadata_only_sources": 0,
+                "restricted_local_only_sources": 0,
+                "published_catalog_ids_match_approved": False,
+                "restricted_values_published": 0,
+                "app_env": settings.app_env,
+            },
+        )
+    payload = {
+        "status": "ok" if contract["complete"] else "unhealthy",
+        "database": "connected",
+        "database_backend": engine.dialect.name,
+        "public_artifacts": contract["artifact_total"],
+        "public_artifacts_expected": EXPECTED_PUBLIC_ARTIFACTS,
+        "source_catalog_rows": contract["source_total"],
+        "public_value_sources": contract["approved_total"],
+        "metadata_only_sources": contract["metadata_only_total"],
+        "restricted_local_only_sources": contract["restricted_source_total"],
+        "published_catalog_ids_match_approved": contract[
+            "published_catalog_ids_match_approved"
+        ],
+        "restricted_values_published": contract["disallowed_operational_records"],
+        "app_env": settings.app_env,
+    }
+    return JSONResponse(
+        status_code=200 if contract["complete"] else 503,
+        content=payload,
+    )
 
 
-@app.get("/api/public/v1/catalog", tags=["Public data"])
+@app.get(
+    "/api/public/v1/catalog",
+    tags=["Public data"],
+    response_model=PublicCatalogResponse,
+)
 def public_data_catalog():
     """Return the complete approved public projection and its semantic labels."""
     return public_catalog()
 
 
-@app.get("/api/public/v1/overview", tags=["Public data"])
+@app.get(
+    "/api/public/v1/overview",
+    tags=["Public data"],
+    response_model=PublicOverviewResponse,
+)
 def public_data_overview():
     catalog = public_catalog()
     return {
@@ -103,18 +345,101 @@ def public_data_overview():
     }
 
 
-@app.get("/api/public/v1/source-insights", tags=["Public data"])
+@app.get(
+    "/api/public/v1/source-insights",
+    tags=["Public data"],
+    response_model=SourceInsightsResponse,
+)
 def public_source_insights():
     """Return cleaned source dashboards and audited geography links."""
     return source_insights()
 
 
-@app.get("/api/public/v1/sources", tags=["Public data"])
+@app.get(
+    "/api/public/v1/source-coverage",
+    tags=["Public data"],
+    response_model=SourceCoverageResponse,
+)
+def public_source_coverage():
+    """Return audit/dashboard coverage for every registered source."""
+    return source_coverage()
+
+
+@app.get(
+    "/api/public/v1/unmapped-records",
+    tags=["Public data"],
+    response_model=UnmappedRecordsResponse,
+)
+def public_unmapped_records():
+    """Return public records intentionally kept outside the province map."""
+    return unmapped_records()
+
+
+@app.get(
+    "/api/public/v1/learning-dashboard",
+    tags=["Public data"],
+    response_model=LearningDashboardResponse,
+)
+def public_learning_dashboard():
+    """Return the cleaned Source 10 aggregate and its explicit scope caveat."""
+    return learning_dashboard()
+
+
+@app.get(
+    "/api/public/v1/database-coverage",
+    tags=["Public data"],
+    response_model=DatabaseCoverageResponse,
+)
+def public_database_coverage():
+    """Prove which cleaned public artifacts are synchronized to the serving DB."""
+    with SessionLocal() as session:
+        contract = _serving_contract_snapshot(session)
+    artifact_counts = contract["artifact_counts"]
+    province_briefings = artifact_counts.get("provincial_briefing", 0)
+    executive_summaries = artifact_counts.get("executive_summary", 0)
+    return {
+        "status": "complete" if contract["complete"] else "incomplete",
+        "database_backend": engine.dialect.name,
+        "serving_mode": "database_seeded_from_validated_public_artifacts",
+        "source_catalog_rows": contract["source_total"],
+        "endpoint_catalog_rows": contract["endpoint_total"],
+        "runtime_enabled_endpoints": contract["runtime_endpoint_total"],
+        "public_value_sources": contract["approved_total"],
+        "public_policy_sources": contract["public_policy_total"],
+        "metadata_only_sources": contract["metadata_only_total"],
+        "restricted_local_only_sources": contract["restricted_source_total"],
+        "published_catalog_source_count": contract["published_catalog_source_count"],
+        "published_catalog_ids_match_approved": contract[
+            "published_catalog_ids_match_approved"
+        ],
+        "restricted_catalog_sources_published": contract[
+            "restricted_catalog_sources_published"
+        ],
+        "public_artifacts_in_database": contract["artifact_total"],
+        "public_artifacts_expected": EXPECTED_PUBLIC_ARTIFACTS,
+        "artifact_groups": artifact_counts,
+        "province_briefings": province_briefings,
+        "executive_summaries": executive_summaries,
+        "restricted_values_published": contract["disallowed_operational_records"],
+        "operational_candidate_records": contract["approved_operational_records"],
+        "raw_data_storage": "immutable_evidence_outside_serving_database",
+    }
+
+
+@app.get(
+    "/api/public/v1/sources",
+    tags=["Public data"],
+    response_model=list[PublicSourceResponse],
+)
 def public_data_sources():
     return public_catalog()["sources"]
 
 
-@app.get("/api/public/v1/provinces", tags=["Public data"])
+@app.get(
+    "/api/public/v1/provinces",
+    tags=["Public data"],
+    response_model=list[ProvinceResponse],
+)
 def public_data_provinces(
     has_evidence: bool = Query(False, description="Return only provinces covered by at least one public metric"),
 ):
@@ -124,7 +449,11 @@ def public_data_provinces(
     return provinces
 
 
-@app.get("/api/public/v1/provinces/{province_code}", tags=["Public data"])
+@app.get(
+    "/api/public/v1/provinces/{province_code}",
+    tags=["Public data"],
+    response_model=ProvinceResponse,
+)
 def public_data_province(province_code: str):
     code = province_code.strip().zfill(2)
     province = next(
@@ -136,7 +465,11 @@ def public_data_province(province_code: str):
     return province
 
 
-@app.get("/api/public/v1/provinces/{province_code}/briefing", tags=["Public data"])
+@app.get(
+    "/api/public/v1/provinces/{province_code}/briefing",
+    tags=["Public data"],
+    response_model=ProvincialBriefingResponse,
+)
 def public_data_provincial_briefing(province_code: str):
     """Return actual source values and complete province-scoped public projections."""
     try:
@@ -145,7 +478,11 @@ def public_data_provincial_briefing(province_code: str):
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายจังหวัด") from error
 
 
-@app.get("/api/public/v1/provinces/{province_code}/summary", tags=["Public data"])
+@app.get(
+    "/api/public/v1/provinces/{province_code}/summary",
+    tags=["Public data"],
+    response_model=ExecutiveSummaryResponse,
+)
 def public_data_executive_summary(province_code: str):
     """Return a compact, cleaned and benchmarked province-level executive view."""
     try:
@@ -154,17 +491,29 @@ def public_data_executive_summary(province_code: str):
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายมิติของจังหวัด") from error
 
 
-@app.get("/api/public/v1/map/provinces", tags=["Public data"])
+@app.get(
+    "/api/public/v1/map/provinces",
+    tags=["Public data"],
+    response_model=ProvinceFeatureCollectionResponse,
+)
 def public_map_provinces():
     return province_boundaries()
 
 
-@app.get("/api/public/v1/map/cultural-points", tags=["Public data"])
+@app.get(
+    "/api/public/v1/map/cultural-points",
+    tags=["Public data"],
+    response_model=CulturalPointFeatureCollectionResponse,
+)
 def public_map_cultural_points():
     return cultural_points()
 
 
-@app.get("/api/summary")
+@app.get(
+    "/api/summary",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def summary():
     with SessionLocal() as session:
         source_count = session.scalar(select(func.count()).select_from(Source)) or 0
@@ -179,6 +528,7 @@ def summary():
             or 0
         )
         records = session.scalar(select(func.count()).select_from(DashboardRecord)) or 0
+        public_artifacts = session.scalar(select(func.count()).select_from(PublicArtifact)) or 0
         production_approved_sources = (
             session.scalar(
                 select(func.count()).select_from(Source).where(
@@ -235,6 +585,7 @@ def summary():
             "endpoints_catalogued": endpoint_count,
             "safe_runtime_endpoints": safe_endpoints,
             "candidate_records_loaded": records,
+            "public_serving_artifacts": public_artifacts,
             "production_approved_sources": production_approved_sources,
             "complete_runs": complete_runs,
             "failed_runs": failed_runs,
@@ -250,7 +601,11 @@ def summary():
         }
 
 
-@app.get("/api/sources")
+@app.get(
+    "/api/sources",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def sources():
     with SessionLocal() as session:
         record_counts = dict(
@@ -309,7 +664,11 @@ def sources():
         return result
 
 
-@app.get("/api/connectivity")
+@app.get(
+    "/api/connectivity",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def connectivity():
     catalog = load_catalog()
     api_plans = load_ingestion_plans().get("sources", {})
@@ -336,7 +695,11 @@ def connectivity():
     return result
 
 
-@app.get("/api/sources/{source_id}/endpoints")
+@app.get(
+    "/api/sources/{source_id}/endpoints",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def endpoints(source_id: str):
     with SessionLocal() as session:
         if not session.get(Source, source_id):
@@ -359,7 +722,11 @@ def endpoints(source_id: str):
         ]
 
 
-@app.get("/api/runs")
+@app.get(
+    "/api/runs",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def runs(limit: int = Query(20, ge=1, le=200)):
     with SessionLocal() as session:
         items = session.scalars(
@@ -383,7 +750,11 @@ def runs(limit: int = Query(20, ge=1, le=200)):
         ]
 
 
-@app.get("/api/records")
+@app.get(
+    "/api/records",
+    dependencies=[Depends(_require_local_debug_api)],
+    include_in_schema=_debug_api_enabled(),
+)
 def records(
     source_id: str | None = None,
     limit: int = Query(50, ge=1, le=500),
@@ -395,7 +766,13 @@ def records(
             detail="ปิดการแสดงค่าจริงอยู่; ต้องผ่าน owner/privacy gate ก่อน",
         )
     with SessionLocal() as session:
-        query = select(DashboardRecord).order_by(desc(DashboardRecord.id)).limit(limit)
+        query = (
+            select(DashboardRecord)
+            .join(Source, DashboardRecord.source_id == Source.source_id)
+            .where(Source.production_values_allowed.is_(True))
+            .order_by(desc(DashboardRecord.id))
+            .limit(limit)
+        )
         if source_id:
             query = query.where(DashboardRecord.source_id == source_id)
         items = session.scalars(query).all()

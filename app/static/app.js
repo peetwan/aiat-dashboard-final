@@ -207,7 +207,7 @@ function openPanelLoading(province) {
   state.cultureQuery = "";
   document.getElementById("portfolioLoading").hidden = false;
   document.getElementById("portfolioEmpty").hidden = true;
-  ["areaSection", "innovationSection", "cultureSection"].forEach((id) => {
+  ["areaSection", "innovationSection", "requirementsSection", "tourismSection", "cultureSection"].forEach((id) => {
     document.getElementById(id).hidden = true;
   });
   const cultureSearch = document.getElementById("cultureSearch");
@@ -284,6 +284,126 @@ function renderInnovations(section) {
         </article>`;
     })
     .join("");
+}
+
+function localizedText(value) {
+  if (value === null || value === undefined) return "";
+  if (typeof value !== "object") return String(value);
+  return String(value.TH ?? value.th ?? value.EN ?? value.en ?? "");
+}
+
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function renderRequirements(section = {}) {
+  const wrapper = document.getElementById("requirementsSection");
+  const items = section.items || [];
+  wrapper.hidden = section.status !== "available" || items.length === 0;
+  if (wrapper.hidden) return;
+  document.getElementById("requirementItems").innerHTML = items.map((item) => {
+    const area = item.area || item.areas?.[0] || {};
+    const location = [
+      firstRequirementValue(item.subdistrict, item.tambon, area.tambon),
+      firstRequirementValue(item.district, item.amphoe, area.amphoe),
+    ].filter(Boolean).join(" · ");
+    const sourceUrl = safeExternalUrl(item.source_url);
+    return `
+      <article class="data-card requirement-card">
+        <div class="record-kicker"><span>${escapeHtml(item.category || item.category_label || "โจทย์ความต้องการ")}</span><span>${escapeHtml(location || "ยืนยันระดับจังหวัด")}</span></div>
+        <h3>${escapeHtml(item.title || item.requirement_title || item.name || "ไม่ระบุชื่อโจทย์")}</h3>
+        <p>${escapeHtml(trimText(item.summary || item.description || "โจทย์จากทะเบียนสาธารณะของ AppTech", 180))}</p>
+        <footer><span>${escapeHtml(item.owner_affiliation_name || item.organization || item.scope_note_th || "ข้อมูล candidate")}</span>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">ต้นทาง</a>` : ""}</footer>
+      </article>`;
+  }).join("");
+}
+
+function firstRequirementValue(...values) {
+  return values.find((value) => value !== null && value !== undefined && value !== "") || "";
+}
+
+function tourismPage(section, pageId) {
+  return (section?.items || []).find((item) => item.page_id === pageId) || { data: {} };
+}
+
+function renderTourism(section = {}) {
+  const wrapper = document.getElementById("tourismSection");
+  const available = section.status === "available" && (section.items || []).length > 0;
+  wrapper.hidden = !available;
+  if (!available) return;
+
+  const contactPage = tourismPage(section, "contact");
+  const homePage = tourismPage(section, "homepage");
+  const lanternPage = tourismPage(section, "komepage");
+  const recommendPage = tourismPage(section, "recommend");
+  const travelPage = tourismPage(section, "travel");
+  const contact = contactPage.data || {};
+  const travel = travelPage.data || {};
+  const categories = recommendPage.data?.categories || [];
+  const recommendations = categories.flatMap((category) =>
+    (category.items || []).map((item) => ({ ...item, category_th: localizedText(category.label) })),
+  );
+  const stations = homePage.data?.map?.stations || [];
+  const lanternGroupCount = Number(lanternPage.data?.lantern_group_count || 0);
+  const trainServices = travel.train?.services || [];
+  const tramServices = travel.tourism_tram?.services || [];
+  const otherTransport = travel.other_transport || [];
+  const serviceAvailability = contact.service_availability || [];
+  const scrapedAt = (section.items || []).map((item) => item.scraped_at).filter(Boolean).sort().at(-1);
+
+  document.getElementById("tourismUpdated").textContent = scrapedAt ? `snapshot ${formatDate(scrapedAt)}` : "public snapshot";
+  document.getElementById("tourismFacts").innerHTML = [
+    ["เรื่องแนะนำ", recommendations.length],
+    ["สถานีหลัก", stations.length],
+    ["เที่ยวรถ", trainServices.length + tramServices.length],
+    ["กลุ่มทำโคม", lanternGroupCount],
+  ].map(([label, value]) => `<article><span>${escapeHtml(label)}</span><strong>${formatNumber(value)}</strong></article>`).join("");
+
+  const recommendationCards = recommendations.map((item) => {
+    const imageUrl = safeExternalUrl(item.image_url);
+    return `
+      <article class="tourism-place">
+        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : ""}
+        <div><span>${escapeHtml(item.category_th || "แนะนำ")}</span><strong>${escapeHtml(localizedText(item.title) || "ไม่ระบุชื่อ")}</strong><p>${escapeHtml(trimText(localizedText(item.description), 125))}</p></div>
+      </article>`;
+  }).join("");
+
+  const trainRows = trainServices.map((service) => `
+    <article class="schedule-row">
+      <time>${escapeHtml(service.departure_time || "ไม่ระบุเวลา")}</time>
+      <div><strong>${escapeHtml(localizedText(service.origin?.name))} – ${escapeHtml(localizedText(service.destination?.name))}</strong><span>${escapeHtml(localizedText(service.description) || "รถไฟโดยสาร")}</span></div>
+      <b>${service.fare?.amount !== null && service.fare?.amount !== undefined ? `${formatNumber(service.fare.amount)} บาท` : "ไม่ระบุราคา"}</b>
+    </article>`).join("");
+  const tramRows = tramServices.map((service) => `
+    <article class="schedule-row tram-row">
+      <time>${escapeHtml(service.departure_time || "ไม่ระบุเวลา")}</time>
+      <div><strong>รถรางท่องเที่ยว</strong><span>${escapeHtml(localizedText(service.route_name))}</span></div>
+      <b>${service.fare?.amount !== null && service.fare?.amount !== undefined ? `${formatNumber(service.fare.amount)} บาท` : "ไม่ระบุราคา"}</b>
+    </article>`).join("");
+
+  const stationRows = stations.map((station) => {
+    const nearbyCount = Number(station.nearby_count || 0);
+    return `<article class="tourism-station"><strong>${escapeHtml(localizedText(station.name))}</strong><span>${formatNumber(nearbyCount)} จุดใกล้เคียง</span></article>`;
+  }).join("");
+  const transportTags = otherTransport.map((item) => `<span>${escapeHtml(localizedText(item.name) || item.type)}</span>`).join("");
+  const serviceTags = serviceAvailability
+    .map((item) => localizedText(item.label).replace(/\s*:\s*$/, ""))
+    .filter(Boolean)
+    .map((label) => `<span>${escapeHtml(label)}</span>`)
+    .join("");
+
+  const sourceUrl = safeExternalUrl(recommendPage.source_url || travelPage.source_url || homePage.source_url);
+  document.getElementById("tourismItems").innerHTML = `
+    ${recommendationCards ? `<section class="tourism-block"><header><h3>ของดีและจุดแนะนำ</h3><span>${formatNumber(recommendations.length)} รายการ</span></header><div class="tourism-place-grid">${recommendationCards}</div></section>` : ""}
+    ${(trainRows || tramRows) ? `<section class="tourism-block"><header><h3>ตารางเดินทาง</h3><span>รถไฟและรถราง</span></header><div class="schedule-list">${trainRows}${tramRows}</div>${transportTags ? `<div class="transport-tags">${transportTags}</div>` : ""}</section>` : ""}
+    ${stationRows ? `<section class="tourism-block"><header><h3>จุดตั้งต้นเที่ยวเมือง</h3><span>จำนวนจุดใกล้เคียง</span></header><div class="station-grid">${stationRows}</div></section>` : ""}
+    ${serviceTags ? `<section class="tourism-block tourism-service-summary"><header><h3>บริการที่มีในข้อมูลต้นทาง</h3><span>${formatNumber(serviceAvailability.length)} บริการ</span></header><div class="transport-tags">${serviceTags}</div></section>` : ""}
+    ${sourceUrl ? `<a class="tourism-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดข้อมูลท่องเที่ยวต้นทาง</a>` : ""}`;
 }
 
 function renderCulture(section) {
@@ -449,8 +569,10 @@ async function ensurePortfolioLoaded() {
     state.currentBriefing = briefing;
     renderAreaProjects(briefing.sections.area_based);
     renderInnovations(briefing.sections.innovation);
+    renderRequirements(briefing.sections.requirements);
+    renderTourism(briefing.sections.tourism);
     renderCulture(briefing.sections.culture);
-    const hasPortfolio = ["area_based", "innovation", "culture"].some(
+    const hasPortfolio = ["area_based", "innovation", "requirements", "tourism", "culture"].some(
       (key) => briefing.sections[key]?.status === "available",
     );
     document.getElementById("portfolioEmpty").hidden = hasPortfolio;

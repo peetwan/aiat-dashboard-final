@@ -1,110 +1,95 @@
-# Data workflow สำหรับ Public Evidence Atlas
+# Data workflow สำหรับ Public Evidence Map
 
-## ภาพรวมสองเส้นทาง
+## ภาพรวม
 
 ~~~text
-source registry + endpoint inventory
-                 |
-          policy / access gate
-                 |
-       +---------+----------+
-       |                    |
-       v                    v
-Serving projection     operational ingest
-(build-time, read-only) (scheduled/runtime)
-       |                    |
-       v                    v
-data/public/*          immutable Bronze raw + SHA-256
-manifest + hashes            |
-       |                     v
-       |               privacy projection
-       |                     |
-       |                PostgreSQL/SQLite
-       +----------+----------+
-                  v
-        FastAPI public API + WebGL UI
+Registry 28 URL
+    |
+    +-- 11 public candidate --> immutable evidence --> clean/join/summarize
+    |                                                |
+    |                                         data/public/*
+    |                                                |
+    |                                      PostgreSQL serving DB
+    |                                                |
+    |                                    FastAPI + WebGL dashboard
+    |
+    +-- 12 metadata-only ----> source status/catalog; ไม่มีค่าที่แต่งขึ้น
+    |
+    +-- 5 restricted --------> local-only; Cloud มี metadata แต่ไม่มี payload/value
 ~~~
 
-Public dashboard เปิดได้แม้ยังไม่รัน operational ingestion เพราะ `data/public/` เป็น projection ที่สร้างจาก merged evidence และตรวจ hash แล้ว ส่วน database ใช้เก็บ ingestion run และข้อมูลเชิงปฏิบัติการเมื่อเปิดใช้งานภายหลัง
+ไฟล์ `data/public/*` เป็น deployment seed ที่ตรวจย้อนกลับได้ ส่วน API และหน้าเว็บอ่าน `public_artifacts` ใน database ก่อน ไฟล์ทำหน้าที่ fallback เมื่อใช้ CLI ก่อน initialize เท่านั้น
 
-## 1. Public projection
+## ชั้นข้อมูล
 
-รันจากโฟลเดอร์ `dashboard_final`:
+1. **Evidence** — raw/API/export เดิมอยู่นอก repo Dashboard และไม่ถูกแก้ไข
+2. **Clean projection** — builder คง source grain, unit, `as_of`, quality status และ provenance; ถ้าต้นทางไม่ระบุให้เป็น `null/ไม่ระบุ`
+3. **Executive serving** — สรุปเฉพาะข้อมูลที่เปรียบเทียบกันได้ แยก geo, non-geo และ unmapped
+4. **Database serving** — startup sync 161 JSON artifacts พร้อม SHA-256 เข้า PostgreSQL
+5. **Public API/UI** — หน้า map โหลด summary ก่อน แล้วค่อยโหลดรายการเมื่อผู้ใช้เปิดข้อมูลพื้นที่
+
+## Builder order
 
 ~~~powershell
+python tools/build_source_catalog.py
+python tools/build_learning_dashboard.py
 python tools/build_source_insights.py
 python tools/build_public_data.py
 python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
+python tools/build_source_coverage.py
 ~~~
 
-ตัว builder จะ:
+ผลหลัก:
 
-1. รับเฉพาะ 10 source ที่ owner อนุมัติให้เผยแพร่
-2. ตัด 2 wallet source ออกจาก public artifacts โดยอัตโนมัติ
-3. อ่าน merged evidence โดยไม่แก้ raw เดิม
-4. audit geography ของ PPPConnext, AppTech MTR และ City Capital; แยก RMUTDB เป็น non-geo
-5. สร้าง source insight ที่คง field, หน่วย, เวลา และ URL ต้นทาง
-6. สร้าง source-shaped provincial briefing ที่คง record และ provenance ฉบับเต็ม
-7. สร้าง executive summary โดย clean, group และเปรียบเทียบเฉพาะ metric เดียวกัน ไม่สร้างคะแนนนโยบายใหม่
-8. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
-9. เขียน manifest พร้อม SHA-256 ของ output ทั้ง 77 จังหวัด
+- `source_catalog.json` — metadata/policy 28 source
+- `source_coverage.json` — สถานะ database/API/dashboard ของทุก URL
+- `public_dashboard.json` — province profile 77 จังหวัด
+- `source_insights.json` — source-level/non-geo analysis
+- `unmapped_records.json` — แถวที่ไม่มี province key โดยไม่เดาพื้นที่
+- `provincial_briefings/{code}.json` — รายการจริงของจังหวัด
+- `executive_summaries/{code}.json` — ข้อมูลย่อยรายมิติ ไม่มี raw table
+- GeoJSON 2 ชุด — province polygon และ cultural points
 
-ไฟล์สำคัญ:
+## วิธีตัดสินว่าจะวางข้อมูลที่ไหน
 
-- `public_dashboard.json` — overview, source metadata และ province profiles
-- `province_evidence.csv` — ตารางสัญญาณรายจังหวัด
-- `source_inventory.csv` — source, endpoint และ provenance สำหรับประชาชน
-- `thailand_provinces.geojson` — polygon สำหรับ WebGL map
-- `cultural_points.geojson` — จุดข้อมูลวัฒนธรรมสำหรับ cluster layer
-- `provincial_briefings/{code}.json` — ค่าจริง รายการจริง source coverage และ provenance รายจังหวัด
-- `executive_summaries/{code}.json` — สรุปรายมิติที่ clean แล้ว ไม่มี raw rows และพร้อมแสดงผลทันที
-- `source_insights.json` — ภาพรวม 4 source, distributions และ geography link ที่ audit แล้ว
+| ลักษณะข้อมูล | ปลายทาง |
+|---|---|
+| มีรหัส/ชื่อจังหวัดที่ match exact | แผนที่ + provincial summary/briefing |
+| เป็น municipality และมี official crosswalk | เก็บ grain เมือง แล้วเชื่อมจังหวัดเพื่อค้นหา |
+| ไม่มี geography ที่ยืนยัน | `/insights` หรือ non-geo section |
+| จังหวัดว่าง/จับคู่ไม่ได้ | `unmapped_records.json`; ห้ามเติมจากชื่อหน่วยงานเอง |
+| มีเฉพาะหน้าเว็บ/metadata | source coverage; ไม่สร้างตัวเลขสมมติ |
+| restricted local-only | metadata บน Cloud, values อยู่ local เท่านั้น |
 
-## 2. Public API
+## API refresh workflow
 
-API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS สำหรับ `GET` เพื่อให้ website ภายนอกนำข้อมูลสาธารณะไปใช้ต่อได้:
+`config/ingestion_plans.json` มี executable allowlist สำหรับ source ที่ endpoint ยืนยันแล้วเท่านั้น ปัจจุบันรวม SRA-DSS, AppTech MTR, AppTech MRU, Learning Dashboard, Area-Based และ Housing Portal
 
-- `/overview`
-- `/sources`
-- `/provinces`
-- `/provinces/{province_code}`
-- `/provinces/{province_code}/briefing`
-- `/provinces/{province_code}/summary`
-- `/map/provinces`
-- `/map/cultural-points`
-- `/catalog`
-- `/source-insights`
+~~~powershell
+python -m app.cli ingest --source f2_learning_dashboard
+python -m app.cli ingest --all
+python -m app.cli status
+~~~
 
-ไฟล์ projection ยังดาวน์โหลดตรงได้จาก `/downloads/` และไม่ต้องเปิด raw payload gate
+`--all` เลือกเฉพาะ public source ที่มี executable plan; metadata-only และ restricted ไม่ถูกเรียก API การ ingest สร้าง immutable runtime response + manifest และเก็บ sanitized rows ใน `dashboard_records` แต่ไม่ promote เข้า public KPI อัตโนมัติ ต้องกลับผ่าน clean/build/test ก่อนเสมอ
 
-## 3. Operational ingestion
+## Database contract
 
-1. `config/source_catalog.json` เก็บครบ 12 source และ endpoint inventory
-2. `app/ingestion.py` ตรวจ `cloud_policy` ก่อน fetch ทุกครั้ง
-3. `api_first` ใช้ API ก่อนและ fallback ไป approved snapshot เมื่อ API ล้มเหลว
-4. `snapshot_only` อ่านไฟล์ที่วางใน `data/snapshots/<source_id>/`
-5. API fetch ทุกครั้งสร้าง immutable run folder, SHA-256 และ manifest
-6. privacy projection ลบ email, phone, address, token, cookie และ credential-shaped fields
-7. database เก็บ source ID, record ID, hash, fetched time และ quality status เพื่อย้อนกลับได้
+- `sources` — 28 rows ตาม registry
+- `endpoints` — verified inventory; ไม่มี endpoint ที่เดาขึ้นเอง
+- `public_artifacts` — cleaned data ที่ API/Dashboard อ่านจริง
+- `dashboard_records` — operational candidate rows จาก API refresh
+- `ingestion_runs` — run status, timestamps, counts และ manifest path
 
-## 4. Provincial panel semantics
+ตรวจ serving completeness ที่ `/api/public/v1/database-coverage` ต้องได้ 28 sources, 77 briefings, 77 summaries, restricted values 0 และสถานะ `complete`
 
-เมื่อผู้ใช้คลิกจังหวัด frontend จะเรียก `/api/public/v1/provinces/{code}/summary` ซึ่งเป็น serving projection ขนาดเล็กที่สรุปและเปรียบเทียบไว้แล้ว ส่วน `/briefing` ฉบับเต็มจะโหลดเมื่อเปิดแท็บโครงการเท่านั้น
+## Update cycle
 
-ชั้นรายมิติแสดงทุกกลุ่มพร้อมอ่านโดยไม่ใช้ dropdown หรือ raw cells หน้า `/insights` แสดงข้อมูลข้ามพื้นที่และ RMUTDB ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
-
-## 5. Source routing
-
-- API-first: `f1_sradss_ppaos`, `f2_apptech_mtr`, `f2_apptech_mru`, `f2_learning_area_based`, `f3_housing_portal`
-- Snapshot-only: `f1_pppconnext`, `f2_rmutdb`
-- Snapshot ที่คง external provenance: `f2_culturalmap_university`, `f3_city_capital_open_data`, `f3_ruamthiao_lamphun`
-- Local-only และไม่อยู่ใน public artifacts: `f2_wallet_all_realtime`, `f2_wallet_cluster_realtime`
-
-## 6. Update cycle
-
-1. อัปเดต source ตาม registry และเก็บ raw run ใหม่
-2. รวม/validate ที่ data layer หลัก
-3. รัน `tools/build_source_insights.py`, `tools/build_public_data.py`, `tools/build_provincial_briefings.py` และ `tools/build_executive_summaries.py`
-4. ตรวจ diff ของ manifest, Gold values และ provenance URL
-5. รัน test, เปิดดู desktop/mobile แล้วจึง deploy
+1. เก็บ raw runใหม่ตามกติกา workspace หลัก
+2. validate schema, privacy, geography และ provenance
+3. รัน builders ตามลำดับ
+4. ตรวจ diff ของ values, counts, hashes และ unmapped records
+5. รัน tests และ QA desktop/mobile
+6. commit/push แล้ว deploy
+7. ตรวจ PostgreSQL backend และ database coverage บน production

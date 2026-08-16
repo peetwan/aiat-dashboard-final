@@ -4,7 +4,8 @@ import csv
 import hashlib
 import json
 import math
-from collections import defaultdict
+import re
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -17,6 +18,13 @@ MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_te
 STAGED_ROOT = WORKSPACE_ROOT / "data/staged"
 OUTPUT_ROOT = PROJECT_ROOT / "data/public/provincial_briefings"
 SOURCE_INSIGHTS_PATH = PROJECT_ROOT / "data/public/source_insights.json"
+LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
+LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
+UNMAPPED_PATH = PROJECT_ROOT / "data/public/unmapped_records.json"
+REQUIREMENT_PATH = (
+    STAGED_ROOT
+    / "f2_apptech_mru/20260805T_apptech_mru_silver_02/silver/apptech_mru_public_requirement.jsonl"
+)
 
 
 def read_json(path: Path) -> Any:
@@ -77,6 +85,10 @@ def normalize_text(value: Any) -> str:
     return " ".join(str(value or "").strip().split()).replace("จังหวัด", "")
 
 
+def exact_text(value: Any) -> str:
+    return " ".join(str(value or "").strip().split())
+
+
 def canonical_code(value: Any) -> str | None:
     if value in (None, "", "\\N", "_unknown", "_multi_province"):
         return None
@@ -99,6 +111,362 @@ def compact_provenance(row: dict[str, Any]) -> dict[str, Any]:
         "as_of": clean(row.get("as_of")),
         "quality_status": clean(row.get("quality_status")),
         "record_hash": clean(row.get("source_record_sha256")),
+    }
+
+
+CONTACT_CLAUSE_RE = re.compile(
+    r"(?i)(?:ติดต่อ|โทร(?:ศัพท์)?|เบอร์(?:โทร)?|อีเมล|อีเมล์|"
+    r"\bcontact\b|\bphone\b|\btel(?:ephone)?\b|\be-?mail\b|"
+    r"\bline(?:\s*id)?\b|ไลน์|\bfacebook\b|เฟซบุ๊ก|"
+    r"\binstagram\b|\btiktok\b)\s*[:：]?\s*[^\n;|]*"
+)
+ADDRESS_CLAUSE_RE = re.compile(
+    r"(?i)(?:ที่อยู่|address|เลขที่\s*\d+|หมู่(?:ที่)?\s*\d+|ซอย|ถนน)"
+    r"\s*[:：]?\s*[^\n;|]*"
+)
+EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+PHONE_RE = re.compile(
+    r"(?<![\dA-Za-z])(?:\+?66|0)\s*\d(?:[\s().-]*\d){7,9}(?!\d)"
+)
+PUBLIC_URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)\S+")
+SOCIAL_HANDLE_RE = re.compile(r"(?<![\w@])@[A-Za-z0-9._-]{2,}")
+
+
+def sanitize_public_text(value: Any) -> str | None:
+    """Return descriptive text with contact/address fragments removed.
+
+    This is a defensive backstop. Public projections still use strict field
+    whitelists, so structured contact fields never reach this function.
+    """
+
+    text = exact_text(value)
+    if not text:
+        return None
+    for pattern in (
+        CONTACT_CLAUSE_RE,
+        ADDRESS_CLAUSE_RE,
+        EMAIL_RE,
+        PHONE_RE,
+        PUBLIC_URL_RE,
+        SOCIAL_HANDLE_RE,
+    ):
+        text = pattern.sub(" ", text)
+    text = re.sub(r"[;|]+", " ", text)
+    text = re.sub(r"\s+([,.;:])", r"\1", text)
+    text = re.sub(r"\s{2,}", " ", text).strip(" \t\r\n,.;:|-–—")
+    return text or None
+
+
+def project_localized_text(value: Any, *, sanitize: bool = False) -> dict[str, str] | str | None:
+    """Keep only display languages understood by the public UI."""
+
+    if isinstance(value, dict):
+        projected: dict[str, str] = {}
+        for language in ("TH", "EN", "CN", "th", "en", "cn"):
+            text = sanitize_public_text(value.get(language)) if sanitize else clean(value.get(language))
+            if text is not None:
+                projected[language] = str(text)
+        return projected or None
+    return sanitize_public_text(value) if sanitize else clean(value)
+
+
+def canonical_json_sha256(value: Any) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def project_cultural_record(
+    row: dict[str, Any], source_artifact: Path
+) -> tuple[str | None, dict[str, Any]]:
+    """Create the executive-safe Cultural Map briefing record.
+
+    The map source contains people, free-form histories, stakeholders,
+    addresses, media and assessment narratives. None of those fields are
+    copied to province briefings. The public map retains its independently
+    reviewed coordinate projection; briefing cards do not need coordinates.
+    """
+
+    data = row.get("data") or {}
+    location = data.get("location") or {}
+    administrative = location.get("administrative") or {}
+    province = administrative.get("province") or {}
+    amphure = administrative.get("amphure") or {}
+    tambon = administrative.get("tambon") or {}
+    classification = data.get("classification") or {}
+    names = data.get("names") or {}
+    warnings = row.get("validation_warnings") or []
+    code = canonical_code(province.get("code"))
+    item = {
+        "record_id": clean(row.get("external_id")),
+        "record_code": clean((data.get("identifiers") or {}).get("record_code")),
+        "title_th": sanitize_public_text(names.get("th")) or sanitize_public_text(row.get("title")),
+        "title_en": sanitize_public_text(names.get("en")),
+        "category": clean((classification.get("primary_category") or {}).get("name_th")),
+        "cultural_type": clean((classification.get("cultural_type") or {}).get("name_th")),
+        "province_code": code,
+        "province_name_th": clean(province.get("name_th")),
+        "amphoe": clean(amphure.get("name_th")),
+        "tambon": clean(tambon.get("name_th")),
+        "source_url": clean(row.get("source_url")),
+        "provenance": {
+            "source_artifact": source_artifact.relative_to(WORKSPACE_ROOT).as_posix(),
+            "recorded_at": clean((data.get("dates") or {}).get("recorded")),
+            "record_hash": canonical_json_sha256(row),
+        },
+        "quality": {
+            "status": "has_validation_warnings" if warnings else "projected_from_source",
+            "warning_count": len(warnings),
+        },
+    }
+    return code, item
+
+
+def _safe_fare(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    amount = safe_float(value.get("amount"))
+    currency = clean(value.get("currency"))
+    if amount is None and currency is None:
+        return None
+    return {"amount": amount, "currency": currency}
+
+
+def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Project a Ruam Thiao page without copying its payload wholesale."""
+
+    page_id = clean(payload.get("page_id"))
+    data = payload.get("data") or {}
+    projected: dict[str, Any]
+    record_count = 0
+
+    if page_id == "recommend":
+        categories = []
+        for category in data.get("categories") or []:
+            items = []
+            for item in category.get("items") or []:
+                items.append({
+                    "record_id": clean(item.get("item_id")),
+                    "title": project_localized_text(item.get("title"), sanitize=True),
+                    "description": project_localized_text(item.get("description"), sanitize=True),
+                })
+            record_count += len(items)
+            categories.append({
+                "label": project_localized_text(category.get("label"), sanitize=True),
+                "items": items,
+            })
+        projected = {"categories": categories}
+    elif page_id == "homepage":
+        stations = []
+        for station in (data.get("map") or {}).get("stations") or []:
+            stations.append({
+                "name": project_localized_text(station.get("name"), sanitize=True),
+                "nearby_count": len(station.get("venues") or []),
+            })
+        record_count = len(stations)
+        projected = {"map": {"stations": stations}}
+    elif page_id == "komepage":
+        record_count = len(data.get("lantern_production_groups") or [])
+        projected = {"lantern_group_count": record_count}
+    elif page_id == "travel":
+        train = data.get("train") or {}
+        tram = data.get("tourism_tram") or {}
+        train_services = []
+        for service in train.get("services") or []:
+            train_services.append({
+                "service_days": [clean(day) for day in service.get("service_days") or [] if clean(day)],
+                "origin": {
+                    "name": project_localized_text((service.get("origin") or {}).get("name"), sanitize=True),
+                },
+                "destination": {
+                    "name": project_localized_text((service.get("destination") or {}).get("name"), sanitize=True),
+                },
+                "departure_time": clean(service.get("departure_time")),
+                "arrival_time": clean(service.get("arrival_time")),
+                "fare": _safe_fare(service.get("fare")),
+                "description": project_localized_text(service.get("description"), sanitize=True),
+            })
+        tram_services = []
+        for service in tram.get("services") or []:
+            tram_services.append({
+                "route_name": project_localized_text(service.get("route_name"), sanitize=True),
+                "departure_time": clean(service.get("departure_time")),
+                "fare": _safe_fare(service.get("fare")),
+            })
+        other_transport = []
+        for service in data.get("other_transport") or []:
+            other_transport.append({
+                "type": clean(service.get("type")),
+                "name": project_localized_text(service.get("name"), sanitize=True),
+            })
+        record_count = len(train_services) + len(tram_services) + len(other_transport)
+        projected = {
+            "train": {
+                "service_days": [
+                    {
+                        "label": project_localized_text(item.get("label"), sanitize=True),
+                        "days": [clean(day) for day in item.get("days") or [] if clean(day)],
+                    }
+                    for item in train.get("service_days") or []
+                ],
+                "services": train_services,
+            },
+            "tourism_tram": {
+                "operating_days": [clean(day) for day in tram.get("operating_days") or [] if clean(day)],
+                "closed_days": [clean(day) for day in tram.get("closed_days") or [] if clean(day)],
+                "services": tram_services,
+            },
+            "other_transport": other_transport,
+        }
+    elif page_id == "contact":
+        emergency_rows = data.get("emergency_numbers") or []
+        service_labels = [
+            project_localized_text(item.get("service"), sanitize=True)
+            for item in emergency_rows
+        ] + [
+            project_localized_text(item.get("name"), sanitize=True)
+            for item in data.get("service_contacts") or []
+        ]
+        service_labels = [item for item in service_labels if item]
+        # The source manifest counts the six emergency rows as the page records.
+        # Service-contact names are nested labels, not additional stable records.
+        record_count = len(emergency_rows)
+        projected = {
+            "service_availability": [
+                {"label": label}
+                for label in service_labels
+            ],
+            "service_availability_label_count": len(service_labels),
+        }
+    else:
+        raise ValueError(f"unsupported tourism page_id: {page_id!r}")
+
+    warnings = payload.get("warnings") or []
+    return {
+        "page_id": page_id,
+        "source_url": clean(payload.get("source_url")),
+        "scraped_at": clean(payload.get("scraped_at")),
+        "record_count": record_count,
+        "data": projected,
+        "provenance": {
+            "source_url": clean(payload.get("source_url")),
+            "scraped_at": clean(payload.get("scraped_at")),
+            "bundle_sha256": clean(payload.get("bundle_sha256")),
+        },
+        "quality": {
+            "status": "has_warnings" if warnings else "projected_from_source",
+            "warning_count": len(warnings),
+        },
+    }
+
+
+def project_requirement_record(
+    row: dict[str, Any], code_by_exact_name: dict[str, str]
+) -> tuple[list[str], dict[str, Any], list[str]]:
+    if row.get("record_type") != "apptech_mru_public_requirement":
+        raise ValueError("requirement projection received a non-requirement record")
+    fields = row.get("normalized_fields")
+    if not isinstance(fields, dict):
+        raise ValueError("requirement record has no normalized_fields object")
+
+    safe_areas: list[dict[str, Any]] = []
+    linked_codes: set[str] = set()
+    unmatched_names: set[str] = set()
+    for area in fields.get("areas") or []:
+        if not isinstance(area, dict):
+            continue
+        province_name = exact_text(area.get("province"))
+        code = code_by_exact_name.get(province_name)
+        if code:
+            linked_codes.add(code)
+        elif province_name:
+            unmatched_names.add(province_name)
+        safe_areas.append({
+            "tambon": clean(area.get("tambon")),
+            "amphoe": clean(area.get("amphoe")),
+            "province": province_name or None,
+            "province_code": code,
+        })
+
+    provenance = row.get("provenance") or {}
+    quality = row.get("quality") or {}
+    item = {
+        "record_id": clean(fields.get("record_id")) or clean(row.get("source_record_id")),
+        "record_grain": "one_public_requirement",
+        "title": clean(fields.get("title")),
+        "description": clean(fields.get("description")),
+        "category": clean(fields.get("category_label")),
+        "areas": safe_areas,
+        "source_url": clean(provenance.get("detail_url")) or clean(provenance.get("source_url")),
+        "provenance": {
+            "endpoint_url": clean(provenance.get("list_endpoint")),
+            "fetched_at": clean(provenance.get("fetched_at")),
+            "as_of": clean(provenance.get("as_of")),
+            "run_id": clean(provenance.get("run_id")),
+            "record_hash": clean(provenance.get("detail_artifact_sha256")),
+            "quality_status": clean(quality.get("confidence")),
+        },
+        "scope_note_th": "เป็นโจทย์หรือความต้องการหนึ่งรายการ ไม่ใช่ผลงานนวัตกรรมและไม่รวมกับยอด innovation",
+    }
+    return sorted(linked_codes), item, sorted(unmatched_names)
+
+
+def housing_unmapped_reason(
+    row: dict[str, Any], resolved_code: str | None, valid_codes: set[str]
+) -> str:
+    if resolved_code is not None and resolved_code not in valid_codes:
+        return "source_province_code_not_in_official_crosswalk"
+    if row.get("partition_type") == "area_name_noncanonical":
+        return "source_geography_not_at_province_grain"
+    if clean(row.get("partition_key")) in {None, "_unmapped", "_unknown"}:
+        return "source_geography_missing"
+    return "source_geography_not_in_exact_crosswalk"
+
+
+def project_unmapped_housing_record(
+    row: dict[str, Any],
+    metadata: dict[str, Any],
+    resolved_code: str | None,
+    valid_codes: set[str],
+) -> dict[str, Any]:
+    resource_id = row.get("resource_id") or row.get("dataset_id", "").rsplit(":", 1)[-1]
+    geography_keys = (
+        "cwt_id",
+        "cwt_dc",
+        "province_id",
+        "province_name",
+        "province_name_th",
+        "area_name",
+    )
+    values = source_fields(row)
+    return {
+        "reason": housing_unmapped_reason(row, resolved_code, valid_codes),
+        "dataset_id": clean(row.get("dataset_id")),
+        "dataset_key": clean(row.get("dataset_key")) or clean(metadata.get("dataset_key")),
+        "dataset_title": clean(row.get("dataset_title")) or clean(metadata.get("dataset_title")),
+        "resource_id": resource_id,
+        "resource_name": clean(row.get("resource_name")) or clean(metadata.get("resource_name")),
+        "source_url": clean(metadata.get("resource_url")) or clean(row.get("source_endpoint")),
+        "source_geography": {
+            "partition_type": clean(row.get("partition_type")),
+            "partition_key": clean(row.get("partition_key")),
+            "resolved_candidate_code": resolved_code,
+            "fields": {
+                key: values[key]
+                for key in geography_keys
+                if clean(values.get(key)) is not None
+            },
+        },
+        "record": {
+            "row_number": clean(row.get("row_number")) or clean(row.get("source_record_id")),
+            "record_grain": "one_approved_public_projection_row",
+            "values": values,
+            "provenance": compact_provenance(row),
+        },
     }
 
 
@@ -257,11 +625,14 @@ def add_housing_signals(briefing: dict[str, Any]) -> None:
 def build() -> None:
     dashboard = read_json(PROJECT_ROOT / "data/public/public_dashboard.json")
     catalog = read_json(PROJECT_ROOT / "config/source_catalog.json")
+    restricted_source_ids = sorted(
+        source["source_id"]
+        for source in catalog["sources"]
+        if source.get("cloud_policy") == "restricted_local_only"
+    )
     public_sources = {
         source["source_id"]: source
-        for source in catalog["sources"]
-        if source.get("production_values_allowed")
-        and source.get("cloud_policy") != "restricted_local_only"
+        for source in dashboard["sources"]
     }
     generated_at = datetime.now(timezone.utc).isoformat()
     code_by_name = {
@@ -285,8 +656,12 @@ def build() -> None:
             "executive_signals": [],
             "sections": {
                 "sra": initial_section("f1_sradss_ppaos", "สถานการณ์ความเปราะบาง SRA-DSS"),
+                "learning_dashboard": initial_section(
+                    "f2_learning_dashboard", "ภาพรวมธุรกิจชุมชนในกลุ่มผู้เข้าร่วมโครงการ"
+                ),
                 "area_based": initial_section("f2_learning_area_based", "โครงการพัฒนาระดับพื้นที่"),
                 "innovation": initial_section("f2_apptech_mru", "นวัตกรรมพร้อมใช้ในพื้นที่"),
+                "requirements": initial_section("f2_apptech_mru", "โจทย์หรือความต้องการจากพื้นที่"),
                 "housing": {
                     **initial_section("f3_housing_portal", "ที่อยู่อาศัยและความเสี่ยงเมือง"),
                     "resource_groups": [],
@@ -301,10 +676,7 @@ def build() -> None:
             "quality": {
                 "status": "candidate_needs_review",
                 "note_th": "แสดงค่าตามต้นทางและ derivation ที่ระบุเท่านั้น ไม่สร้างคะแนนจัดสรรงบอัตโนมัติ",
-                "restricted_source_ids_excluded": [
-                    "f2_wallet_all_realtime",
-                    "f2_wallet_cluster_realtime",
-                ],
+                "restricted_source_ids_excluded": restricted_source_ids,
             },
         }
 
@@ -328,11 +700,10 @@ def build() -> None:
 
     # Area-Based: keep every project record attached to a province.
     area_path = BASE_RUN / "11_f2_learning_area_based/data.csv"
+    area_unmapped: list[dict[str, Any]] = []
     for row in csv_rows(area_path):
         code = code_by_name.get(normalize_text(row.get("source_fields__province")))
-        if code not in briefings:
-            continue
-        briefings[code]["sections"]["area_based"]["items"].append({
+        item = {
             "record_id": clean(row.get("source_fields__id")),
             "project_name": clean(row.get("source_fields__projectName")),
             "fiscal_year": clean(row.get("source_fields__fiscalYear")),
@@ -343,7 +714,22 @@ def build() -> None:
             "updated_at": clean(row.get("source_fields__updatedAt")),
             "source_url": clean(row.get("source_endpoint")),
             "provenance": compact_provenance(row),
-        })
+        }
+        if code not in briefings:
+            source_province = clean(row.get("source_fields__province"))
+            area_unmapped.append(
+                {
+                    "reason": (
+                        "source_province_missing"
+                        if source_province is None
+                        else "province_name_not_in_exact_crosswalk"
+                    ),
+                    "source_province": source_province,
+                    "record": item,
+                }
+            )
+            continue
+        briefings[code]["sections"]["area_based"]["items"].append(item)
 
     # AppTech MRU: use the richer validated Silver projection, while the list is refreshed by API.
     innovation_path = (
@@ -382,45 +768,30 @@ def build() -> None:
                 "fetched_at": provenance.get("fetched_at"),
             })
 
+    requirement_unmapped: list[dict[str, Any]] = []
+    for row in jsonl_rows(REQUIREMENT_PATH):
+        codes, item, unmatched_names = project_requirement_record(row, code_by_name)
+        for code in codes:
+            if code in briefings:
+                briefings[code]["sections"]["requirements"]["items"].append(item)
+        if not codes or unmatched_names:
+            requirement_unmapped.append({
+                "reason": (
+                    "province_name_not_in_exact_crosswalk"
+                    if unmatched_names
+                    else "source_province_missing"
+                ),
+                "source_provinces": unmatched_names,
+                "record": item,
+            })
+
     # Cultural Map: all province records, including records without coordinates.
     cultural_path = MERGE_RUN / "03_f2_culturalmap_university/data/map_inspiration.json"
     cultural_root = read_json(cultural_path)
     for row in cultural_root["data"]["records"]:
-        data = row.get("data") or {}
-        location = data.get("location") or {}
-        administrative = location.get("administrative") or {}
-        code = canonical_code((administrative.get("province") or {}).get("code"))
+        code, item = project_cultural_record(row, cultural_path)
         if code not in briefings:
             continue
-        classification = data.get("classification") or {}
-        assessment = data.get("assessment") or {}
-        names = data.get("names") or {}
-        media = data.get("media") or {}
-        dates = data.get("dates") or {}
-        description = data.get("description") or {}
-        item = {
-            "record_id": row.get("external_id"),
-            "record_code": (data.get("identifiers") or {}).get("record_code"),
-            "title_th": names.get("th") or row.get("title"),
-            "title_en": names.get("en"),
-            "category": (classification.get("primary_category") or {}).get("name_th"),
-            "cultural_type": (classification.get("cultural_type") or {}).get("name_th"),
-            "risk_status_code": (assessment.get("risk") or {}).get("status_code"),
-            "risk_reason": (assessment.get("risk") or {}).get("reason"),
-            "history": description.get("history"),
-            "potential": description.get("potential"),
-            "stakeholders": description.get("stakeholders"),
-            "amphoe": (administrative.get("amphure") or {}).get("name_th"),
-            "tambon": (administrative.get("tambon") or {}).get("name_th"),
-            "coordinates": {
-                "latitude": (location.get("coordinates") or {}).get("latitude"),
-                "longitude": (location.get("coordinates") or {}).get("longitude"),
-            },
-            "recorded_at": dates.get("recorded"),
-            "image_url": ((media.get("images") or [{}])[0] or {}).get("url"),
-            "source_url": row.get("source_url"),
-            "validation_warnings": row.get("validation_warnings") or [],
-        }
         briefings[code]["sections"]["culture"]["items"].append(item)
 
     # Housing: every approved flattened record, grouped by CKAN resource.
@@ -433,12 +804,25 @@ def build() -> None:
         for item in read_json(housing_metadata_path)["resources"]
     }
     grouped_rows: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    housing_unmapped: list[dict[str, Any]] = []
+    housing_total_records = 0
+    valid_province_codes = set(briefings)
     housing_dir = BASE_RUN / "23_f3_housing_portal/data"
     housing_paths = sorted(housing_dir.glob("*.csv"))
     for path in housing_paths:
         for row in csv_rows(path):
+            housing_total_records += 1
             code = resolve_row_code(row, code_by_name)
             if code not in briefings:
+                resource_id = row.get("resource_id") or row.get("dataset_id", "").rsplit(":", 1)[-1]
+                housing_unmapped.append(
+                    project_unmapped_housing_record(
+                        row,
+                        housing_metadata.get(resource_id, {}),
+                        code,
+                        valid_province_codes,
+                    )
+                )
                 continue
             resource_id = row.get("resource_id") or row.get("dataset_id", "").rsplit(":", 1)[-1]
             grouped_rows[code][resource_id].append({
@@ -466,17 +850,19 @@ def build() -> None:
         groups.sort(key=lambda item: (item["dataset_key"] or "", item["resource_name"] or ""))
         briefings[code]["sections"]["housing"]["resource_groups"] = groups
         briefings[code]["sections"]["housing"]["items"] = []
+    housing_mapped_records = sum(
+        len(rows)
+        for resources in grouped_rows.values()
+        for rows in resources.values()
+    )
+    if housing_mapped_records + len(housing_unmapped) != housing_total_records:
+        raise RuntimeError("housing projection reconciliation failed")
 
     # Ruam Thiao is explicitly Lamphun-scoped in its source definition.
     tourism_files = sorted((MERGE_RUN / "16_f3_ruamthiao_lamphun/data").glob("*.json"))
     if "51" in briefings:
         briefings["51"]["sections"]["tourism"]["items"] = [
-            {
-                "page_id": payload.get("page_id"),
-                "source_url": payload.get("source_url"),
-                "scraped_at": payload.get("scraped_at"),
-                "data": payload.get("data"),
-            }
+            project_tourism_payload(payload)
             for payload in (read_json(path) for path in tourism_files)
         ]
 
@@ -491,6 +877,10 @@ def build() -> None:
     for code, briefing in briefings.items():
         links = source_insights["province_links"].get(code, {})
         briefing["sections"]["pppconnext"]["items"] = links.get("f1_pppconnext") or []
+
+        learning = links.get("f2_learning_dashboard")
+        if learning:
+            briefing["sections"]["learning_dashboard"]["items"] = [learning]
 
         apptech = links.get("f2_apptech_mtr")
         if apptech:
@@ -538,16 +928,17 @@ def build() -> None:
     not_province_scoped = {
         "f2_rmutdb": "ทะเบียนไม่มี field จังหวัดที่ยืนยันแล้ว",
     }
-    section_source = {
-        "f1_sradss_ppaos": "sra",
-        "f2_culturalmap_university": "culture",
-        "f2_apptech_mru": "innovation",
-        "f2_learning_area_based": "area_based",
-        "f3_housing_portal": "housing",
-        "f3_ruamthiao_lamphun": "tourism",
-        "f1_pppconnext": "pppconnext",
-        "f2_apptech_mtr": "apptech_mtr",
-        "f3_city_capital_open_data": "city_capital",
+    source_sections = {
+        "f1_sradss_ppaos": ("sra",),
+        "f2_learning_dashboard": ("learning_dashboard",),
+        "f2_culturalmap_university": ("culture",),
+        "f2_apptech_mru": ("innovation", "requirements"),
+        "f2_learning_area_based": ("area_based",),
+        "f3_housing_portal": ("housing",),
+        "f3_ruamthiao_lamphun": ("tourism",),
+        "f1_pppconnext": ("pppconnext",),
+        "f2_apptech_mtr": ("apptech_mtr",),
+        "f3_city_capital_open_data": ("city_capital",),
     }
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -572,13 +963,22 @@ def build() -> None:
                     "note_th": not_province_scoped[source_id],
                 })
             else:
-                section = briefing["sections"].get(section_source.get(source_id, ""))
-                records = section["total_records"] if section else 0
+                record_breakdown = {
+                    section_id: briefing["sections"][section_id]["total_records"]
+                    for section_id in source_sections.get(source_id, ())
+                }
+                records = sum(record_breakdown.values())
                 item.update({
                     "status": "available" if records else "source_has_no_record_for_province",
                     "records": records,
-                    "note_th": None,
+                    "note_th": (
+                        "innovation และ requirements เป็นคนละ grain; แสดงแยกใน record_breakdown"
+                        if source_id == "f2_apptech_mru"
+                        else None
+                    ),
                 })
+                if source_id == "f2_apptech_mru":
+                    item["record_breakdown"] = record_breakdown
             coverage.append(item)
         briefing["source_coverage"] = sorted(coverage, key=lambda item: public_sources[item["source_id"]]["ordinal"])
         briefing["available_source_ids"] = [
@@ -594,19 +994,63 @@ def build() -> None:
         sra_path,
         area_path,
         innovation_path,
+        REQUIREMENT_PATH,
         cultural_path,
         housing_metadata_path,
         *housing_paths,
         *tourism_files,
         SOURCE_INSIGHTS_PATH,
         PROJECT_ROOT / "data/public/source_insights_manifest.json",
+        LEARNING_PATH,
+        LEARNING_MANIFEST_PATH,
     ]
+    learning_unmatched = source_insights["sources"]["f2_learning_dashboard"].get(
+        "unmatched_province_rows", []
+    )
+    unmapped_payload = {
+        "schema_version": "1.0.0",
+        "generated_at": generated_at,
+        "publication_status": "public_candidate_projection",
+        "total_records": (
+            len(area_unmapped)
+            + len(learning_unmatched)
+            + len(requirement_unmapped)
+            + len(housing_unmapped)
+        ),
+        "sources": {
+            "f2_learning_area_based": {
+                "record_count": len(area_unmapped),
+                "items": area_unmapped,
+            },
+            "f2_learning_dashboard": {
+                "record_count": len(learning_unmatched),
+                "items": learning_unmatched,
+            },
+            "f2_apptech_mru": {
+                "dataset": "public_requirement",
+                "record_count": len(requirement_unmapped),
+                "items": requirement_unmapped,
+            },
+            "f3_housing_portal": {
+                "record_count": len(housing_unmapped),
+                "approved_projection_records": housing_total_records,
+                "province_linked_records": housing_mapped_records,
+                "reason_counts": dict(sorted(Counter(
+                    item["reason"] for item in housing_unmapped
+                ).items())),
+                "items": housing_unmapped,
+            },
+        },
+        "methodology_th": "เก็บรายการที่จับคู่จังหวัดไม่ได้โดยไม่เดาหรือเติมค่าพื้นที่",
+    }
+    write_json(UNMAPPED_PATH, unmapped_payload)
     index = {
         "schema_version": "2.0.0",
         "generated_at": generated_at,
         "province_count": len(briefings),
         "source_count": len(public_sources),
         "inputs": [manifest_entry(path) for path in input_paths],
+        "unmapped": manifest_entry(UNMAPPED_PATH),
         "files": [
             {
                 "path": path.name,

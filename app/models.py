@@ -91,3 +91,26 @@ class DashboardRecord(Base):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     as_of: Mapped[str | None] = mapped_column(String(100), nullable=True)
     payload: Mapped[dict] = mapped_column(JSON)
+
+
+class PublicArtifact(Base):
+    """Versioned serving artifact used by the public dashboard and API.
+
+    The immutable/raw evidence remains outside this table.  Only the cleaned,
+    public projection committed under ``data/public`` is synchronized here.
+    """
+
+    __tablename__ = "public_artifacts"
+    __table_args__ = (
+        Index("ix_public_artifacts_group", "artifact_group"),
+        Index("ix_public_artifacts_province", "province_code"),
+    )
+
+    artifact_key: Mapped[str] = mapped_column(String(200), primary_key=True)
+    artifact_group: Mapped[str] = mapped_column(String(60))
+    province_code: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    source_path: Mapped[str] = mapped_column(Text)
+    item_count: Mapped[int] = mapped_column(Integer, default=0)
+    payload: Mapped[dict] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

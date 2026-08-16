@@ -12,6 +12,24 @@ from app.models import DashboardRecord
 from app.settings import Settings
 
 
+class StubJsonResponse:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def json(self):
+        return self.payload
+
+
+class StubRecorder:
+    def __init__(self, payload):
+        self.payload = payload
+        self.calls = []
+
+    def request(self, method, url, **kwargs):
+        self.calls.append((method, url, kwargs))
+        return StubJsonResponse(self.payload), None
+
+
 def test_snapshot_ingestion_sanitizes_contact_fields(tmp_path):
     source_root = tmp_path / "f2_rmutdb"
     source_root.mkdir()
@@ -75,3 +93,37 @@ def test_production_allows_approved_source_but_blocks_wallet():
         pipeline._guard_source(source_config("f2_apptech_mtr"))
         with pytest.raises(PolicyViolation):
             pipeline.ingest_source("f2_wallet_cluster_realtime")
+
+
+def test_learning_dashboard_driver_keeps_all_source_grains_separate():
+    payload = {
+        "provinces": [["Province", "ธุรกิจชุมชน"], ["สงขลา", 10]],
+        "entityTypes": [["Entity Type", "Popularity"], ["กลุ่ม", 2]],
+        "categories": [["Category", "Popularity"], ["อาหาร", 3]],
+        "geography": [["Geography", "Popularity"], ["ภาคใต้", 4]],
+        "geographyImpact": [{"geography": "ภาคใต้", "employee": 5}],
+        "impactSummary": {"totalEmployeeAmount": 5},
+    }
+    plan = {
+        "url": "https://lesuper.app/api/opendata/pmua",
+        "body_mode": "json_empty",
+        "expected_keys": list(payload),
+        "scope_warning_th": "selected project scope",
+    }
+    recorder = StubRecorder(payload)
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        records = IngestionPipeline(session, settings)._fetch_learning_dashboard(plan, recorder)
+
+    assert recorder.calls[0][0] == "POST"
+    assert recorder.calls[0][2]["json_body"] == {}
+    assert [dataset for dataset, _ in records] == [
+        "provinces",
+        "entityTypes",
+        "categories",
+        "geography",
+        "geographyImpact",
+        "impactSummary",
+    ]
+    assert all(record["unit"] is None and record["as_of"] is None for _, record in records)
+    assert all(record["scope_warning_th"] == "selected project scope" for _, record in records)

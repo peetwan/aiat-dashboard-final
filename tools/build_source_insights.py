@@ -32,6 +32,20 @@ CITY_CROSSWALK_PATH = (
 )
 OUTPUT_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 MANIFEST_PATH = PROJECT_ROOT / "data/public/source_insights_manifest.json"
+LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
+LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
+CULTURAL_ROOT = (
+    WORKSPACE_ROOT
+    / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
+    / "03_f2_culturalmap_university/data"
+)
+CULTURAL_DATASETS = {
+    "map_inspiration": ("map_inspiration.json", 5_258, "province_point_records"),
+    "products": ("products.json", 226, "supporting_records_not_geo_joined"),
+    "activities": ("activities.json", 43, "supporting_records_not_geo_joined"),
+    "recreation": ("recreation.json", 80, "supporting_records_not_geo_joined"),
+    "team": ("team.json", 12, "source_team_records_not_geo_joined"),
+}
 
 
 CITY_GROUP_LABELS = {
@@ -332,6 +346,57 @@ def build_rmutdb() -> dict[str, Any]:
     }
 
 
+def build_cultural_supporting_coverage() -> dict[str, Any]:
+    datasets: list[dict[str, Any]] = []
+    supporting_records = 0
+    total_records = 0
+    for dataset_id, (filename, expected_count, geography_status) in CULTURAL_DATASETS.items():
+        path = CULTURAL_ROOT / filename
+        payload = read_json(path)
+        records = (payload.get("data") or {}).get("records")
+        if not isinstance(records, list):
+            raise RuntimeError(f"cultural dataset {dataset_id} has no records array")
+        if len(records) != expected_count:
+            raise RuntimeError(
+                f"cultural dataset {dataset_id} expected {expected_count} records, found {len(records)}"
+            )
+        total_records += len(records)
+        if dataset_id != "map_inspiration":
+            supporting_records += len(records)
+        datasets.append({
+            "dataset_id": dataset_id,
+            "record_count": len(records),
+            "grain": "one_public_source_record",
+            "geography_status": geography_status,
+        })
+
+    return {
+        "source_id": "f2_culturalmap_university",
+        "name_th": "แผนที่วัฒนธรรมไทย Cultural Mapping (ภาคมหาวิทยาลัย)",
+        "source_url": "https://www.culturalmapthailand.info/",
+        "acquisition": "external_team_public_snapshot",
+        "freshness_status": "source_as_of_unknown",
+        "quality_status": "candidate_needs_review",
+        "grain_th": "นับแยกตาม dataset ต้นทาง; 361 supporting records ไม่ถูกบวกเป็นจุดแผนที่หรือผูกจังหวัด",
+        "readout_th": "เปิดเผยเฉพาะยอดรวมของ Products, Activities, Re-Creation และ Team; ไม่ส่ง contact หรือแถวข้อมูลสนับสนุน",
+        "coverage": {
+            "map_records": 5_258,
+            "supporting_records": supporting_records,
+            "total_records": total_records,
+            "datasets": datasets,
+        },
+        "privacy_projection": {
+            "supporting_records_exposed": False,
+            "contact_fields_exposed": False,
+            "aggregate_counts_only": True,
+        },
+        "evidence": [
+            f"data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/{filename}"
+            for filename, _, _ in CULTURAL_DATASETS.values()
+        ],
+    }
+
+
 def build_city(
     code_by_name: dict[str, str],
 ) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]]]:
@@ -467,6 +532,32 @@ def build() -> None:
     apptech, apptech_links = build_apptech()
     city, city_links = build_city(code_by_name)
     rmutdb = build_rmutdb()
+    cultural = build_cultural_supporting_coverage()
+    learning_payload = read_json(LEARNING_PATH)
+    learning_source = learning_payload["source"]
+    learning = {
+        "source_id": learning_source["source_id"],
+        "name_th": learning_source["name_th"],
+        "source_url": learning_source["url"],
+        "endpoint_url": learning_source["endpoint_url"],
+        "acquisition": "public_aggregate_api_snapshot",
+        "freshness_status": "source_as_of_unknown",
+        "quality_status": learning_payload["quality"]["status"],
+        "grain_th": "ตาราง aggregate ระดับจังหวัดและภาพรวมกลุ่มจากผู้เข้าร่วมโครงการที่ต้นทางเลือก",
+        "readout_th": "ผูกเฉพาะชื่อจังหวัดที่ตรงกับขอบเขตทางการ และเก็บตารางที่ไม่ใช่จังหวัดแยกโดยไม่รวมหน่วย",
+        "scope_warning_th": learning_payload["quality"]["scope_warning_th"],
+        "coverage": learning_payload["coverage"],
+        "provinces": learning_payload["province_rows"],
+        "unmatched_province_rows": learning_payload["unmatched_province_rows"],
+        "non_province_tables": learning_payload["non_province_tables"],
+        "non_province_impact": learning_payload["non_province_impact"],
+        "evidence": learning_payload["evidence"],
+    }
+    learning_links = learning_payload["province_links"]
+    area_rows = list(csv_rows(BASE_RUN / "11_f2_learning_area_based/data.csv"))
+    area_missing_province_count = sum(
+        not clean(row.get("source_fields__province")) for row in area_rows
+    )
     generated_at = datetime.now(timezone.utc).isoformat()
     payload = {
         "schema_version": "1.0.0",
@@ -479,20 +570,37 @@ def build() -> None:
                 "f2_apptech_mtr",
                 "f3_city_capital_open_data",
             ],
+            "supplemental_geo_linkable_source_ids": ["f2_learning_dashboard"],
+            "all_geo_linkable_source_ids": [
+                "f1_pppconnext",
+                "f2_apptech_mtr",
+                "f3_city_capital_open_data",
+                "f2_learning_dashboard",
+            ],
             "non_geo_source_ids": ["f2_rmutdb"],
+            "aggregate_only_projection_source_ids": ["f2_culturalmap_university"],
             "join_policy": "authoritative_or_source_confirmed_geography_only",
+            "unmapped_public_records": {
+                "f2_learning_area_based": {
+                    "records": area_missing_province_count,
+                    "reason": "source_province_missing",
+                }
+            },
         },
         "sources": {
             "f1_pppconnext": ppp,
             "f2_apptech_mtr": apptech,
             "f3_city_capital_open_data": city,
             "f2_rmutdb": rmutdb,
+            "f2_culturalmap_university": cultural,
+            "f2_learning_dashboard": learning,
         },
         "province_links": {
             code: {
                 "f1_pppconnext": ppp_links.get(code, []),
                 "f2_apptech_mtr": apptech_links.get(code),
                 "f3_city_capital_open_data": city_links.get(code, []),
+                "f2_learning_dashboard": learning_links.get(code),
             }
             for code in sorted(code_by_name.values())
         },
@@ -501,6 +609,8 @@ def build() -> None:
             "apptech_mtr": "source API province code and label; aggregate grains kept separate",
             "city_capital": "exact municipality type+name match against official DLA registry",
             "rmutdb": "not joined; owner affiliation is not innovation location",
+            "culturalmap": "map records retain their own province points; four supporting datasets are aggregate counts only and expose no contact fields",
+            "learning_dashboard": "exact Thai province name against the official 77-province boundary; non-province tables remain separate",
         },
     }
     write_json(OUTPUT_PATH, payload)
@@ -514,6 +624,9 @@ def build() -> None:
         BASE_RUN / "06_f2_rmutdb/data.csv",
         CITY_PATH,
         CITY_CROSSWALK_PATH,
+        LEARNING_PATH,
+        LEARNING_MANIFEST_PATH,
+        *[CULTURAL_ROOT / values[0] for values in CULTURAL_DATASETS.values()],
     ]
     manifest = {
         "manifest_version": "1.0.0",
@@ -528,6 +641,9 @@ def build() -> None:
         "ppp_linked_provinces": ppp["coverage"]["linked_provinces"],
         "apptech_province_rows": len(apptech_links),
         "city_linked": city["coverage"]["linked_cities"],
+        "learning_linked_provinces": learning["coverage"]["linked_provinces"],
+        "area_based_unmapped_records": area_missing_province_count,
+        "cultural_supporting_records": cultural["coverage"]["supporting_records"],
         "rmutdb_geo_joined": False,
     }, ensure_ascii=False))
 

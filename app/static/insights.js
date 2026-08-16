@@ -4,6 +4,413 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
 }
 
+function compactText(value, limit = 150) {
+  const text = String(value ?? "").trim();
+  return text.length > limit ? `${text.slice(0, limit).trim()}…` : text;
+}
+
+function safeUrl(value) {
+  try {
+    const url = new URL(String(value || ""), window.location.origin);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function objectArray(value, keyName = "source_id") {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  if (Array.isArray(value.items)) return value.items;
+  return Object.entries(value).map(([key, item]) =>
+    item && typeof item === "object" && !Array.isArray(item) ? { [keyName]: key, ...item } : { [keyName]: key, value: item },
+  );
+}
+
+function pathValue(payload, path) {
+  return path.split(".").reduce((value, key) => value?.[key], payload);
+}
+
+function firstDefined(...values) {
+  return values.find((value) => value !== undefined && value !== null && value !== "");
+}
+
+function firstFinite(...values) {
+  for (const value of values) {
+    const parsed = Number(value);
+    if (value !== null && value !== "" && Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+
+function sourceRows(payload) {
+  if (Array.isArray(payload)) return payload;
+  for (const path of ["sources", "source_coverage", "registry.sources", "coverage.sources", "items"]) {
+    const rows = objectArray(pathValue(payload, path));
+    if (rows.length) return rows;
+  }
+  return [];
+}
+
+function coverageClass(source) {
+  const visibility = source.public_visibility || {};
+  const status = [source.public_status, source.serving_status, source.usable_status, source.readiness_status, source.status?.audit, source.status?.readiness, source.status?.network_api_export]
+    .filter(Boolean).join(" ").toLowerCase();
+  const sensitivity = String(firstDefined(source.sensitivity_lane, source.sensitivity, source.cloud_policy, "") || "").toLowerCase();
+  const publicCount = firstFinite(
+    source.public_record_count,
+    source.public_rows,
+    source.serving_record_count,
+    source.records?.serving_projection_count,
+    source.records?.additional_public_non_map_count,
+    source.public_projection?.record_count,
+    source.public_projection?.rows,
+  );
+  const usableCount = firstFinite(source.usable_record_count, source.usable_rows, source.latest_usable_asset?.record_count, source.latest_usable_asset?.rows);
+  if (visibility.classification === "restricted_local_only" || /restricted|local.only|high|sensitive/.test(sensitivity) || source.railway_allowed === false) return "local-only";
+  if (visibility.current_public_data_artifact === true || source.public_projection_available === true || source.usable_data === true || source.usable === true || (publicCount ?? usableCount ?? 0) > 0 || /public.ready|serving|published/.test(status)) return "ready";
+  if (visibility.classification === "metadata_only") return "discovery";
+  if (/blocked|timeout|unreachable|auth/.test(status)) return "blocked";
+  if (/page|discovery|map.only|asset.only/.test(status)) return "discovery";
+  return "review";
+}
+
+function geographyLabel(source) {
+  const explicit = firstDefined(source.geo_linkability, source.geography_status, source.geo_status, source.geography?.status, source.geo?.status, source.geo?.linkability);
+  const normalized = String(explicit ?? "").toLowerCase();
+  const linkable = firstDefined(source.geo_linkable, source.province_linkable, source.geography?.linkable, source.geo?.linkable);
+  if (linkable === true || /province|geo.linkable|linked|exact/.test(normalized)) return "ผูกจังหวัดได้";
+  if (/non.geo|national|not.province/.test(normalized)) return "ข้อมูลระดับประเทศ";
+  if (/not.expected/.test(normalized)) return "ไม่ใช้มิติพื้นที่";
+  if (linkable === false || /unmapped|unknown|not.linked/.test(normalized)) return "ยังไม่ผูกจังหวัด";
+  return "ไม่ระบุระดับพื้นที่";
+}
+
+function modeLabel(value) {
+  const mode = String(value || "").toLowerCase();
+  if (/api|network/.test(mode)) return "API";
+  if (/gis/.test(mode)) return "GIS / directory";
+  if (/export|snapshot|structured/.test(mode)) return "Raw snapshot";
+  if (/dashboard|portal/.test(mode)) return "Dashboard";
+  return String(value || "Metadata").replaceAll("_", " ");
+}
+
+function normalizeSource(source, index) {
+  const state = coverageClass(source);
+  const statusLabels = {
+    ready: "พร้อมใช้บน Dashboard",
+    review: "กำลังตรวจข้อมูล",
+    discovery: "มีหลักฐานหน้าเว็บ",
+    blocked: "ยังเข้าถึงข้อมูลไม่ได้",
+    "local-only": "ใช้เฉพาะในเครื่อง",
+  };
+  const publicCount = firstFinite(
+    source.public_record_count,
+    source.public_rows,
+    source.serving_record_count,
+    source.records?.serving_projection_count,
+    source.records?.observed_count,
+    source.public_projection?.record_count,
+    source.public_projection?.rows,
+  );
+  const usableCount = firstFinite(source.usable_record_count, source.usable_rows, source.latest_usable_asset?.record_count, source.latest_usable_asset?.rows);
+  return {
+    original: source,
+    ordinal: firstFinite(source.ordinal, source.order, source.source_ordinal) ?? index + 1,
+    sourceId: firstDefined(source.source_id, source.id, source.slug, `source-${index + 1}`),
+    name: firstDefined(source.name_th, source.source_name_th, source.title_th, source.name, source.source_id, `แหล่งข้อมูล ${index + 1}`),
+    group: firstDefined(source.group, source.phase, source.team, ""),
+    mode: modeLabel(firstDefined(source.access_mode, source.acquisition_mode, source.mode, source.status?.network_api_export, source.source_type, source.latest_usable_asset?.access_mode, "Metadata")),
+    statusClass: state,
+    statusLabel: source.public_visibility?.classification === "metadata_only" ? "มีเฉพาะ Metadata" : statusLabels[state],
+    geography: geographyLabel(source),
+    count: state === "ready" ? publicCount ?? usableCount : null,
+    nonMapCount: firstFinite(source.records?.additional_public_non_map_count),
+    note: firstDefined(source.note_th, source.notes_th?.[1], source.notes_th?.[0], source.gap_th, source.status_reason_th, source.status_reason, source.next_safe_action, source.geo?.known_omissions?.[0]?.reason_th, source.gaps?.[0], ""),
+    url: safeUrl(firstDefined(source.url, source.normalized_url, source.source_url, source.raw_url, "")),
+  };
+}
+
+function renderSourceCoverage(payload) {
+  const sources = sourceRows(payload)
+    .map(normalizeSource)
+    .sort((a, b) => a.ordinal - b.ordinal);
+  const state = document.getElementById("sourceCoverageState");
+  if (!sources.length) {
+    state.textContent = "ยังไม่มีทะเบียน public projection สำหรับรอบนี้";
+    return [];
+  }
+
+  const ready = sources.filter((source) => source.statusClass === "ready").length;
+  const linked = sources.filter((source) => source.geography === "ผูกจังหวัดได้").length;
+  const localOnly = sources.filter((source) => source.statusClass === "local-only").length;
+  document.getElementById("sourceCoverageMeta").innerHTML = [
+    `<span><strong>${number.format(sources.length)}</strong> URL ในทะเบียน</span>`,
+    `<span><strong>${number.format(ready)}</strong> พร้อมใช้</span>`,
+    `<span><strong>${number.format(linked)}</strong> ผูกจังหวัดได้</span>`,
+    localOnly ? `<span><strong>${number.format(localOnly)}</strong> เก็บเฉพาะในเครื่อง</span>` : "",
+  ].join("");
+  state.textContent = sources.length === 28 ? "แสดงครบทั้ง 28 แหล่ง" : `แสดง ${number.format(sources.length)} จาก 28 แหล่งที่อยู่ในทะเบียน`;
+  state.classList.toggle("is-warning", sources.length !== 28);
+  document.getElementById("sourceCoverageGrid").innerHTML = sources.map((source) => `
+    <article class="source-coverage-card is-${source.statusClass}">
+      <header><span class="source-order">${String(source.ordinal).padStart(2, "0")}</span><div><small>${escapeHtml(source.group || source.sourceId)}</small><h3>${escapeHtml(source.name)}</h3></div><b>${escapeHtml(source.statusLabel)}</b></header>
+      <div class="source-coverage-tags"><span>${escapeHtml(source.mode)}</span><span>${escapeHtml(source.geography)}</span>${source.count !== null ? `<span>${number.format(source.count)} รายการ public</span>` : ""}${source.nonMapCount ? `<span>${number.format(source.nonMapCount)} รายการนอกแผนที่</span>` : ""}</div>
+      ${source.note ? `<p>${escapeHtml(compactText(source.note))}</p>` : ""}
+      ${source.url ? `<a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">เปิด URL ต้นทาง</a>` : ""}
+    </article>`).join("");
+  return sources;
+}
+
+function collectLooseData(payload) {
+  const paths = {
+    unmapped: ["unmapped_records", "unmapped", "records.unmapped", "public_projection.unmapped_records", "geography.unmapped_records"],
+    non_geo: ["non_geo_records", "non_geo", "records.non_geo", "public_projection.non_geo_records", "geography.non_geo_records"],
+  };
+  const rows = [];
+  Object.entries(paths).forEach(([scope, candidates]) => {
+    for (const path of candidates) {
+      const value = pathValue(payload, path);
+      const items = objectArray(value);
+      if (items.length) {
+        items.forEach((item) => rows.push({ scope, ...item }));
+        break;
+      }
+    }
+  });
+  sourceRows(payload).forEach((source) => {
+    const omissions = source.geo?.known_omissions || [];
+    omissions.forEach((omission) => rows.push({
+      scope: "map_omission",
+      source_id: source.source_id,
+      source_name_th: source.name_th,
+      title_th: source.name_th,
+      summary_th: [omission.labels_th?.join(" · "), omission.reason_th].filter(Boolean).join(" — "),
+      record_count: omission.count,
+      source_url: source.url,
+    }));
+    const linkability = String(source.geo?.linkability || "").toLowerCase();
+    if (/not.province|non.geo|national/.test(linkability)) {
+      rows.push({
+        scope: "non_geo",
+        source_id: source.source_id,
+        source_name_th: source.name_th,
+        title_th: source.name_th,
+        summary_th: source.notes_th?.[1] || source.notes_th?.[0] || "ต้นทางไม่ได้ระบุพื้นที่ใช้งานที่ผูกจังหวัดได้",
+        record_count: source.records?.serving_projection_count,
+        grain_th: source.records?.serving_projection_grain || source.geo?.grain,
+        source_url: source.url,
+      });
+    }
+  });
+  return rows;
+}
+
+function collectUnmappedProjection(payload) {
+  const rows = [];
+  objectArray(payload?.sources).forEach((source) => {
+    const items = source.items || [];
+    if (items.length > 24) {
+      const reasonLabels = {
+        source_geography_missing: "ต้นทางไม่ระบุพื้นที่",
+        source_geography_not_at_province_grain: "ข้อมูลต่ำกว่าหรือไม่ใช่ระดับจังหวัด",
+        source_province_code_not_in_official_crosswalk: "รหัสต้นทางไม่ตรงทะเบียนจังหวัด",
+      };
+      const reasonMetrics = Object.entries(source.reason_counts || {}).map(([reason, count]) => ({
+        label_th: reasonLabels[reason] || reason,
+        display_value: `${number.format(count)} แถว`,
+      }));
+      rows.push({
+        scope: "unmapped",
+        source_id: source.source_id,
+        title_th: source.source_id === "f3_housing_portal" ? "ข้อมูลที่อยู่อาศัยนอกชั้นจังหวัด" : source.source_id,
+        summary_th: "เก็บไว้ครบใน public database แต่ไม่บังคับผูกจังหวัด เพราะ grain หรือรหัสพื้นที่จากต้นทางยังไม่ผ่าน exact crosswalk",
+        record_count: source.record_count || items.length,
+        source_url: items.find((item) => item.source_url)?.source_url,
+        display_metrics: [
+          { label_th: "รายการที่ไม่ผูกจังหวัด", display_value: number.format(source.record_count || items.length) },
+          ...reasonMetrics,
+        ],
+      });
+      return;
+    }
+    items.forEach((item) => {
+      const record = item.record || {};
+      rows.push({
+        scope: "unmapped",
+        source_id: source.source_id,
+        title_th: firstDefined(record.project_name, record.title, "รายการที่ไม่ระบุจังหวัด"),
+        summary_th: [record.business_name, record.research_unit].filter(Boolean).join(" · "),
+        source_url: record.source_url,
+        display_metrics: [
+          record.fiscal_year ? { label_th: "ปีงบประมาณ", display_value: record.fiscal_year } : null,
+          record.subdistrict ? { label_th: "ตำบลจากต้นทาง", display_value: record.subdistrict } : null,
+          { label_th: "เหตุผล", display_value: item.reason === "source_province_missing" ? "ต้นทางไม่ระบุจังหวัด" : item.reason || "ยังจับคู่พื้นที่ไม่ได้" },
+        ].filter(Boolean),
+      });
+    });
+  });
+  return rows;
+}
+
+function looseMetrics(item) {
+  const structured = objectArray(firstDefined(item.display_metrics, item.metrics), "label_th");
+  if (structured.length) {
+    return structured.slice(0, 4).map((metric) => ({
+      label: firstDefined(metric.label_th, metric.label, metric.name_th, metric.label_th, "ค่า"),
+      value: firstDefined(metric.display_value, metric.value, metric.count, "ไม่ระบุ"),
+    }));
+  }
+  return [
+    ["จำนวนรายการ", firstFinite(item.record_count, item.records, item.public_record_count, item.usable_record_count)],
+    ["ระดับข้อมูล", firstDefined(item.grain_th, item.grain, item.scope_th)],
+    ["สถานะพื้นที่", firstDefined(item.geo_status_th, item.geography_status_th)],
+  ].filter(([, value]) => value !== null && value !== undefined && value !== "").map(([label, value]) => ({ label, value }));
+}
+
+function renderLooseData(payload, unmappedPayload = null) {
+  let rows = [...collectLooseData(payload), ...collectUnmappedProjection(unmappedPayload)];
+  if (!rows.length) return;
+  if (rows.length > 32) {
+    const grouped = new Map();
+    rows.forEach((row) => {
+      const key = `${row.scope}:${firstDefined(row.source_id, row.name_th, "unknown")}`;
+      const current = grouped.get(key) || { ...row, record_count: 0 };
+      current.record_count += firstFinite(row.record_count, row.records, 1) || 1;
+      grouped.set(key, current);
+    });
+    rows = [...grouped.values()];
+  }
+  document.getElementById("unmapped").hidden = false;
+  document.getElementById("looseDataGrid").innerHTML = rows.map((item) => {
+    const title = firstDefined(item.title_th, item.name_th, item.label_th, item.source_name_th, item.source_id, "ข้อมูลจาก public projection");
+    const note = firstDefined(item.summary_th, item.note_th, item.reason_th, item.description_th, item.status_reason, "");
+    const metrics = looseMetrics(item);
+    const sourceUrl = safeUrl(firstDefined(item.url, item.source_url, ""));
+    return `
+      <article class="loose-data-card">
+        <span>${item.scope === "non_geo" ? "ข้อมูลระดับประเทศ" : item.scope === "map_omission" ? "ข้อมูลนอกชั้นแผนที่" : "ยังไม่ผูกจังหวัด"}</span>
+        <h3>${escapeHtml(title)}</h3>
+        ${note ? `<p>${escapeHtml(compactText(note))}</p>` : ""}
+        ${metrics.length ? `<dl>${metrics.map((metric) => `<div><dt>${escapeHtml(metric.label)}</dt><dd>${escapeHtml(metric.value)}</dd></div>`).join("")}</dl>` : ""}
+        ${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดหลักฐานต้นทาง</a>` : ""}
+      </article>`;
+  }).join("");
+}
+
+function learningSummaryItems(payload, sources) {
+  const learning = sources.find((source) => source.ordinal === 10 || source.sourceId === "f2_learning_dashboard")?.original || {};
+  const candidates = [
+    learning.executive_summaries,
+    learning.executive_summary,
+    payload.source_10_executive_summaries,
+    payload.executive_summaries?.f2_learning_dashboard,
+    payload.executive_summaries?.source_10,
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (typeof candidate === "string") return [{ text_th: candidate }];
+    if (Array.isArray(candidate)) return candidate;
+    if (Array.isArray(candidate.items)) return candidate.items;
+    if (Array.isArray(candidate.observations)) return candidate.observations;
+    if (typeof candidate === "object") return [candidate];
+  }
+  return [];
+}
+
+function renderLearningSummary(payload, sources) {
+  const items = learningSummaryItems(payload, sources);
+  if (!items.length) return;
+  document.getElementById("learningSummary").hidden = false;
+  document.getElementById("learningSummaryGrid").innerHTML = items.map((item) => {
+    const title = firstDefined(item.title_th, item.label_th, item.name_th, "ภาพรวมจาก Dashboard LE");
+    const text = firstDefined(item.summary_th, item.text_th, item.readout_th, item.description_th, "");
+    const metrics = looseMetrics(item);
+    return `<article class="learning-summary-card"><span>Source 10</span><h3>${escapeHtml(title)}</h3>${text ? `<p>${escapeHtml(compactText(text, 220))}</p>` : ""}${metrics.length ? `<div>${metrics.map((metric) => `<small>${escapeHtml(metric.label)} <strong>${escapeHtml(metric.value)}</strong></small>`).join("")}</div>` : ""}</article>`;
+  }).join("");
+}
+
+function renderLearningDashboard(payload) {
+  if (!payload?.coverage) return;
+  const source = payload.source || payload;
+  const tables = payload.non_province_tables || {};
+  const tableLabels = {
+    entity_types: "รูปแบบองค์กรในชุดข้อมูล",
+    categories: "หมวดกิจกรรมในชุดข้อมูล",
+    geography: "ภาพรวมตามภูมิภาค",
+  };
+  const cards = [{
+    title: "ขอบเขตข้อมูลที่เชื่อมจังหวัด",
+    text: payload.quality?.scope_warning_th || payload.scope_warning_th || source.notes_th || payload.readout_th,
+    metrics: [
+      { label: "จังหวัดที่เชื่อมได้", value: number.format(payload.coverage.linked_provinces) },
+      { label: "แถวระดับจังหวัด", value: number.format(payload.coverage.province_rows) },
+    ],
+  }];
+  Object.entries(tables).forEach(([key, table]) => {
+    const rows = [...(table.rows || [])].sort((a, b) => Number(b.value || 0) - Number(a.value || 0)).slice(0, 5);
+    if (!rows.length) return;
+    cards.push({
+      title: tableLabels[key] || key,
+      text: "ค่าตามหมวดของต้นทาง ไม่ถูกรวมเป็นคะแนน",
+      metrics: rows.map((row) => ({ label: row.label, value: number.format(row.value) })),
+    });
+  });
+  const impact = payload.non_province_impact || {};
+  const impactSummary = impact.summary || {};
+  const impactMetrics = [
+    ["การใช้ทรัพยากรท้องถิ่น", impactSummary.totalResourceConsumption],
+    ["มูลค่าทรัพยากรท้องถิ่น", impactSummary.totalResourceExpense],
+    ["การจ้างงานท้องถิ่น", firstDefined(impactSummary.totalEmployeeAmount, impactSummary.totalEmplyeeAmount)],
+    ["ค่าใช้จ่ายการจ้างงาน", impactSummary.totalEmployeeExpense],
+  ].filter(([, value]) => Number.isFinite(Number(value))).map(([label, value]) => ({ label, value: number.format(value) }));
+  if (impactMetrics.length) {
+    cards.push({
+      title: "ผลรวมที่ยังไม่ผูกจังหวัด",
+      text: "ต้นทางไม่ระบุหน่วยและวันที่อ้างอิง จึงแสดงแยกจากแผนที่และไม่ใช้จัดอันดับพื้นที่",
+      metrics: impactMetrics,
+    });
+  }
+  document.getElementById("learningSummary").hidden = false;
+  document.getElementById("learningSummaryGrid").innerHTML = cards.map((card) => `
+    <article class="learning-summary-card">
+      <span>Source 10 · Candidate</span>
+      <h3>${escapeHtml(card.title)}</h3>
+      ${card.text ? `<p>${escapeHtml(compactText(card.text, 240))}</p>` : ""}
+      <div>${card.metrics.map((metric) => `<small>${escapeHtml(metric.label)} <strong>${escapeHtml(metric.value)}</strong></small>`).join("")}</div>
+    </article>`).join("");
+}
+
+async function fetchPublicJson(...paths) {
+  for (const path of paths) {
+    try {
+      const response = await fetch(path, { cache: "no-store" });
+      if (response.ok) return response.json();
+    } catch {
+      // Try the static public projection when the API is not mounted in development.
+    }
+  }
+  return null;
+}
+
+async function loadSourceCoverage() {
+  const [payload, learningPayload, unmappedPayload] = await Promise.all([
+    fetchPublicJson("/api/public/v1/source-coverage", "/downloads/source_coverage.json"),
+    fetchPublicJson("/api/public/v1/learning-dashboard", "/downloads/learning_dashboard.json"),
+    fetchPublicJson("/api/public/v1/unmapped-records", "/downloads/unmapped_records.json"),
+  ]);
+  if (payload) {
+    const sources = renderSourceCoverage(payload);
+    renderLearningSummary(payload, sources);
+    renderLooseData(payload, unmappedPayload);
+  } else {
+    document.getElementById("sourceCoverageState").textContent = "ทะเบียน public projection ยังไม่ถูกสร้างใน environment นี้";
+    document.getElementById("sourceCoverageState").classList.add("is-warning");
+  }
+  if (learningPayload) renderLearningDashboard(learningPayload);
+  if (!payload && unmappedPayload) renderLooseData({}, unmappedPayload);
+}
+
 function fact(label, value, note = "") {
   return `<article class="fact"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ""}</article>`;
 }
@@ -132,6 +539,7 @@ async function loadInsights() {
     renderApptech(payload.sources.f2_apptech_mtr);
     renderCity(payload.sources.f3_city_capital_open_data);
     renderRmut(payload.sources.f2_rmutdb);
+    if (payload.sources.f2_learning_dashboard) renderLearningDashboard(payload.sources.f2_learning_dashboard);
     document.getElementById("pageLoading").hidden = true;
     document.getElementById("insightContent").hidden = false;
     if (window.location.hash) document.querySelector(window.location.hash)?.scrollIntoView();
@@ -143,3 +551,4 @@ async function loadInsights() {
 }
 
 loadInsights();
+loadSourceCoverage();

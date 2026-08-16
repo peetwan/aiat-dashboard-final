@@ -18,6 +18,8 @@ WORKSPACE_ROOT = PROJECT_ROOT.parent
 BASE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final"
 MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
 OUTPUT_DIR = PROJECT_ROOT / "data/public"
+LEARNING_PATH = OUTPUT_DIR / "learning_dashboard.json"
+LEARNING_MANIFEST_PATH = OUTPUT_DIR / "learning_dashboard_manifest.json"
 
 BOUNDARY_LAYER = (
     "https://gis-portal.disaster.go.th/arcgis/rest/services/MapDX/"
@@ -103,18 +105,66 @@ def normalize_text(value: Any) -> str:
     return " ".join(str(value or "").strip().split()).replace("จังหวัด", "")
 
 
+def resolve_housing_code(
+    row: dict[str, Any], code_by_name: dict[str, str]
+) -> str | None:
+    for value in (
+        row.get("source_fields__cwt_id"),
+        row.get("source_fields__province_id"),
+        row.get("partition_key"),
+    ):
+        code = canonical_code(value)
+        if code:
+            return code
+    for value in (
+        row.get("source_fields__cwt_dc"),
+        row.get("source_fields__cwt_name"),
+        row.get("source_fields__province_name"),
+        row.get("source_fields__province_name_th"),
+        row.get("source_fields__area_name"),
+        row.get("partition_key"),
+    ):
+        code = code_by_name.get(normalize_text(value))
+        if code:
+            return code
+    return None
+
+
+def housing_unmapped_reason(
+    row: dict[str, Any], resolved_code: str | None, valid_codes: set[str]
+) -> str:
+    if resolved_code is not None and resolved_code not in valid_codes:
+        return "source_province_code_not_in_official_crosswalk"
+    if row.get("partition_type") == "area_name_noncanonical":
+        return "source_geography_not_at_province_grain"
+    if row.get("partition_key") in (None, "", "\\N", "_unmapped", "_unknown"):
+        return "source_geography_missing"
+    return "source_geography_not_in_exact_crosswalk"
+
+
 def build_public_data(refresh_boundaries: bool) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     catalog_path = PROJECT_ROOT / "config/source_catalog.json"
     catalog = read_json(catalog_path)
+    restricted_source_ids = sorted(
+        source["source_id"]
+        for source in catalog["sources"]
+        if source.get("cloud_policy") == "restricted_local_only"
+    )
+    restricted_source_count = len(restricted_source_ids)
     public_sources = [
         source
         for source in catalog["sources"]
         if source.get("production_values_allowed")
         and source.get("cloud_policy") != "restricted_local_only"
     ]
-    if len(public_sources) != 10:
-        raise RuntimeError(f"Expected 10 approved public sources, received {len(public_sources)}")
+    learning_payload = read_json(LEARNING_PATH)
+    learning_source = learning_payload["source"]
+    if not any(source["source_id"] == learning_source["source_id"] for source in public_sources):
+        public_sources.append(learning_source)
+    public_sources.sort(key=lambda source: source["ordinal"])
+    if len(public_sources) != 11:
+        raise RuntimeError(f"Expected 11 approved public sources, received {len(public_sources)}")
 
     boundaries = fetch_boundaries(refresh_boundaries)
     boundary_by_code: dict[str, dict[str, Any]] = {}
@@ -145,6 +195,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "cultural_records": 0,
             "housing_observations": 0,
             "pppconnext_aggregate_rows": 0,
+            "learning_dashboard_business_records": 0,
             "apptech_registered_users": 0,
             "apptech_interactions": 0,
             "city_capital_cities": 0,
@@ -153,7 +204,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "quality_status": "candidate_needs_review",
         }
 
-    input_paths: list[Path] = [catalog_path]
+    input_paths: list[Path] = [catalog_path, LEARNING_PATH, LEARNING_MANIFEST_PATH]
 
     # SRA-DSS: preserve the source's provisional score and unit without interpreting it.
     sra_path = BASE_RUN / "01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv"
@@ -172,11 +223,16 @@ def build_public_data(refresh_boundaries: bool) -> None:
     # Area-based: one row is one participating unit, explicitly not the area's population.
     area_path = BASE_RUN / "11_f2_learning_area_based/data.csv"
     input_paths.append(area_path)
+    area_unmapped_reason_counts: dict[str, int] = defaultdict(int)
     for row in csv_rows(area_path):
         province_name = normalize_text(row.get("source_fields__province"))
         code = code_by_th.get(province_name) or canonical_code(row.get("partition_key"))
         if code in profiles:
             profiles[code]["area_based_participant_records"] += 1
+        elif not province_name:
+            area_unmapped_reason_counts["source_province_missing"] += 1
+        else:
+            area_unmapped_reason_counts["province_name_not_in_crosswalk"] += 1
 
     # AppTech MRU: count a record once per distinct province listed in its public areas field.
     innovation_path = BASE_RUN / "08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_innovation.csv"
@@ -239,12 +295,16 @@ def build_public_data(refresh_boundaries: bool) -> None:
 
     # Housing portal: technical observation count by source province id; values remain available upstream.
     housing_dir = BASE_RUN / "23_f3_housing_portal/data"
+    housing_unmapped_reason_counts: dict[str, int] = defaultdict(int)
     for housing_path in sorted(housing_dir.glob("*.csv")):
         input_paths.append(housing_path)
         for row in csv_rows(housing_path):
-            code = canonical_code(row.get("source_fields__cwt_id"))
+            code = resolve_housing_code(row, code_by_th)
             if code in profiles:
                 profiles[code]["housing_observations"] += 1
+            else:
+                reason = housing_unmapped_reason(row, code, set(profiles))
+                housing_unmapped_reason_counts[reason] += 1
 
     # Audited source-level pipeline: retain the original grain for each geography link.
     source_insights_path = OUTPUT_DIR / "source_insights.json"
@@ -254,6 +314,8 @@ def build_public_data(refresh_boundaries: bool) -> None:
         if code not in profiles:
             continue
         profiles[code]["pppconnext_aggregate_rows"] = len(links.get("f1_pppconnext") or [])
+        learning = links.get("f2_learning_dashboard") or {}
+        profiles[code]["learning_dashboard_business_records"] = learning.get("value", 0)
         apptech = links.get("f2_apptech_mtr") or {}
         profiles[code]["apptech_registered_users"] = apptech.get("registered_users", 0)
         profiles[code]["apptech_interactions"] = apptech.get("interactions", 0)
@@ -266,6 +328,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "cultural_records": "f2_culturalmap_university",
         "housing_observations": "f3_housing_portal",
         "pppconnext_aggregate_rows": "f1_pppconnext",
+        "learning_dashboard_business_records": "f2_learning_dashboard",
         "city_capital_cities": "f3_city_capital_open_data",
     }
     numeric_metrics = list(metric_sources)
@@ -304,6 +367,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "cultural_records": profile["cultural_records"],
                 "housing_observations": profile["housing_observations"],
                 "pppconnext_aggregate_rows": profile["pppconnext_aggregate_rows"],
+                "learning_dashboard_business_records": profile["learning_dashboard_business_records"],
                 "apptech_registered_users": profile["apptech_registered_users"],
                 "apptech_interactions": profile["apptech_interactions"],
                 "city_capital_cities": profile["city_capital_cities"],
@@ -314,25 +378,41 @@ def build_public_data(refresh_boundaries: bool) -> None:
 
     source_inventory = []
     for source in public_sources:
-        source_inventory.append(
-            {
-                "ordinal": source["ordinal"],
-                "source_id": source["source_id"],
-                "name_th": source["name_th"],
-                "url": source["url"],
-                "acquisition_mode": source["acquisition_mode"],
-                "expected_record_count": source["expected_record_count"],
-                "readiness_status": source["readiness_status"],
-                "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-                "notes_th": source["notes_th"],
-            }
-        )
+        item = {
+            "ordinal": source["ordinal"],
+            "source_id": source["source_id"],
+            "name_th": source["name_th"],
+            "url": source["url"],
+            "acquisition_mode": source["acquisition_mode"],
+            "expected_record_count": source["expected_record_count"],
+            "readiness_status": source["readiness_status"],
+            "quality_label_th": source.get(
+                "quality_label_th",
+                "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+            ),
+            "notes_th": source.get("notes_th", ""),
+        }
+        if source["source_id"] in {
+            "f2_culturalmap_university",
+            "f2_learning_dashboard",
+        }:
+            source_insight = source_insights["sources"][source["source_id"]]
+            item["projection_coverage"] = source_insight["coverage"]
+            if source["source_id"] == "f2_culturalmap_university":
+                item["privacy_projection"] = source_insight["privacy_projection"]
+        source_inventory.append(item)
 
     expected_total = sum(item["expected_record_count"] for item in source_inventory)
     evidence_province_count = sum(
         1 for profile in profiles.values() if profile["evidence_source_count"] > 0
     )
     generated_at = datetime.now(timezone.utc).isoformat()
+    learning_unmatched_count = learning_payload["coverage"]["unmatched_province_rows"]
+    unmapped_public_records = (
+        sum(area_unmapped_reason_counts.values())
+        + learning_unmatched_count
+        + sum(housing_unmapped_reason_counts.values())
+    )
     public_catalog = {
         "schema_version": "1.0.0",
         "generated_at": generated_at,
@@ -343,14 +423,41 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "candidate_records_referenced": expected_total,
             "provinces_with_evidence": evidence_province_count,
             "geocoded_cultural_points": len(cultural_features),
-            "restricted_sources_excluded": 2,
+            "cultural_supporting_records": source_insights["sources"]
+            ["f2_culturalmap_university"]["coverage"]["supporting_records"],
+            "restricted_sources_excluded": restricted_source_count,
+            "unmapped_public_records": unmapped_public_records,
+        },
+        "unmapped": {
+            "total_records": unmapped_public_records,
+            "by_source": {
+                "f2_learning_area_based": {
+                    "records": sum(area_unmapped_reason_counts.values()),
+                    "reason_counts": dict(sorted(area_unmapped_reason_counts.items())),
+                },
+                "f2_learning_dashboard": {
+                    "records": learning_unmatched_count,
+                    "reason_counts": {
+                        "province_name_not_in_exact_crosswalk": learning_unmatched_count
+                    },
+                },
+                "f3_housing_portal": {
+                    "records": sum(housing_unmapped_reason_counts.values()),
+                    "reason_counts": dict(sorted(housing_unmapped_reason_counts.items())),
+                },
+            },
+            "download_path": "/downloads/unmapped_records.json",
         },
         "themes": [
             {
                 "id": "community",
                 "name_th": "ความเป็นอยู่และพื้นที่",
                 "description_th": "คะแนนต้นทาง SRA-DSS และหน่วยเข้าร่วมโครงการ Area-Based",
-                "source_ids": ["f1_sradss_ppaos", "f2_learning_area_based"],
+                "source_ids": [
+                    "f1_sradss_ppaos",
+                    "f2_learning_dashboard",
+                    "f2_learning_area_based",
+                ],
             },
             {
                 "id": "innovation",
@@ -407,6 +514,11 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "unit": "aggregate rows",
                 "semantic_status": "candidate_aggregate_rows",
             },
+            "learning_dashboard_business_records": {
+                "label_th": "ธุรกิจชุมชนในกลุ่มผู้เข้าร่วมโครงการตามต้นทาง",
+                "unit": None,
+                "semantic_status": "selected_project_scope_unit_and_as_of_unknown",
+            },
             "apptech_registered_users": {
                 "label_th": "ผู้ใช้ที่ API AppTech ผูกกับจังหวัด",
                 "unit": "users",
@@ -429,7 +541,8 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "budget_simulator_th": "ผู้ใช้กำหนดงบและสัดส่วนเอง ระบบคำนวณผลรวมเท่านั้น ไม่มีการแนะนำอัตโนมัติ",
             "map_height_th": "ความสูงเป็นค่าที่ normalize เพื่อการแสดงผลภายใน metric เดียว ห้ามเปรียบเทียบข้าม metric",
             "province_join_th": "ใช้รหัสจังหวัดจากต้นทางและขอบเขตจังหวัดของ ปภ.; ไม่ join ด้วยชื่อเมื่อมีรหัส",
-            "privacy_th": "เผยแพร่เฉพาะ aggregate/ทะเบียนสาธารณะและตัด 2 wallet sources ออกจาก public data",
+            "privacy_th": "เผยแพร่เฉพาะ aggregate/ทะเบียนสาธารณะและตัด source ที่เป็น restricted_local_only ออกจาก public data",
+            "unmapped_th": "เก็บแถวที่ไม่มีจังหวัดไว้ใน unmapped_records.json โดยไม่เดาพื้นที่",
         },
     }
 
@@ -441,7 +554,9 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "features": cultural_features,
     }
 
-    boundaries["generated_at"] = generated_at
+    # Keep the cached official boundary stable across ordinary rebuilds. A refresh
+    # replaces this timestamp, while metric-only builds remain content-addressable.
+    boundaries.setdefault("generated_at", generated_at)
     boundaries["quality_status"] = "reference_boundary_with_candidate_metrics"
 
     catalog_output = OUTPUT_DIR / "public_dashboard.json"
@@ -465,6 +580,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "cultural_records",
         "housing_observations",
         "pppconnext_aggregate_rows",
+        "learning_dashboard_business_records",
         "apptech_registered_users",
         "apptech_interactions",
         "city_capital_cities",
@@ -513,7 +629,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
             }
             for path in outputs
         ],
-        "excluded_source_ids": ["f2_wallet_all_realtime", "f2_wallet_cluster_realtime"],
+        "excluded_source_ids": restricted_source_ids,
     }
     write_json(OUTPUT_DIR / "manifest.json", manifest)
     print(
