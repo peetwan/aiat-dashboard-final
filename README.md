@@ -1,96 +1,82 @@
 # AIAT Provincial Evidence Map
 
-Public Executive Dashboard แบบ map-first สำหรับอ่านข้อมูลจังหวัดจาก URL สาธารณะของหน่วยงานรัฐและมหาวิทยาลัย ข้อมูลถูก clean, แยก grain และสรุปก่อนแสดงผล จึงไม่เท raw cell จำนวนมากให้ผู้บริหารตีความเอง
+แดชบอร์ดสาธารณะแบบ map-first สำหรับสำรวจหลักฐานระดับจังหวัดจากแหล่งข้อมูลภาครัฐและมหาวิทยาลัย 28 แหล่ง ระบบแยกข้อมูลตาม grain รักษา provenance และแสดงเฉพาะ projection ที่ผ่าน publication/privacy gate แล้ว โดยไม่เท raw records หรือข้อมูล restricted ขึ้น Cloud
 
-สถานะปัจจุบัน:
+> สถานะข้อมูล: ทุกค่าที่เผยแพร่ยังเป็น `candidate` หรือ `needs_review` ไม่ใช่ KPI ที่รับรองแล้ว และไม่ควรใช้จัดลำดับงบประมาณโดยอัตโนมัติ
 
-- Registry และ database catalog ครบ 28 URL
-- 11 source มี public candidate data สำหรับ Dashboard
-- 12 source เป็น metadata/discovery เพราะยังไม่มี structured data contract ที่ยืนยันแล้ว
-- 5 source เป็น restricted local-only; เผยแพร่เฉพาะ metadata และไม่มีค่าข้อมูลบน Railway
-- แผนที่ WebGL ครบ 77 จังหวัด พร้อม briefing และ executive summary จังหวัดละหนึ่งชุด
-- Public serving artifacts 161 ชุดถูก sync เข้า PostgreSQL ตอนแอปเริ่มทำงาน
-- ข้อมูลทุกชุดยังเป็น `candidate` หรือ `needs_review` ไม่ใช่ KPI หรือคำแนะนำจัดสรรงบอัตโนมัติ
+## ภาพรวมระบบ
 
-## หน้าเว็บมีอะไร
+| รายการ | สถานะปัจจุบัน |
+|---|---:|
+| Source registry | 28 แหล่ง |
+| Public candidate | 11 แหล่ง |
+| Metadata-only | 12 แหล่ง |
+| Restricted local-only | 5 แหล่ง |
+| จังหวัด | 77 จังหวัด |
+| Public serving artifacts | 161 ชุด |
+| Production database | PostgreSQL บน Railway |
+| Local database | SQLite สำหรับพัฒนาและทดสอบ |
 
-- แผนที่ประเทศไทยแบบ 2D flat choropleth โทนสว่าง อ่านง่ายสำหรับคนทั่วไป คลิกจังหวัดเพื่ออ่านข้อมูลจริง
-- บล็อก "โครงการวิจัยและทุน บพท." ตอบคำถามผู้บริหาร: จำนวนโครงการรายปี/รายหน่วยวิจัย/รายอำเภอ ทุนที่ปรากฏในทะเบียนนวัตกรรม และ drill-down กดอำเภอเพื่อเจอผู้ประกอบการ/กลุ่มเป้าหมายจริง พร้อมระบุตรงๆ ว่าข้อมูลใดที่แหล่งสาธารณะยังไม่มี (PI, สถานะเบิกจ่าย)
-- แท็บ "โครงการวิจัย" มีตัวกรองปีงบประมาณ อำเภอ และช่องค้นหาโครงการ/ผู้ประกอบการ
-- สรุปสถานการณ์รายมิติ เช่น ที่อยู่อาศัย ความเสี่ยง ทุนดำรงชีพ เมือง โครงการ นวัตกรรม และวัฒนธรรม
-- รายการท่องเที่ยวและทุนวัฒนธรรมโหลดเมื่อเปิดดูข้อมูลพื้นที่
-- หน้า `/insights` แสดงภาพรวมข้ามจังหวัด, non-geo data, unmapped records และสถานะครบทั้ง 28 URL
-- สีและชื่อจังหวัดปรับตามความครอบคลุม โดยไม่ทำให้จังหวัดที่ข้อมูลน้อยรกแผนที่
-- ฟอนต์ Anuphan, contrast และ layout สำหรับ desktop/mobile
-- Public JSON API, CSV, GeoJSON และไฟล์ดาวน์โหลดพร้อม provenance
+Dashboard มีหน้าแผนที่จังหวัด หน้า `/insights` สำหรับข้อมูลข้ามจังหวัด/non-geo และ Public API สำหรับ source coverage, province summaries, briefings และไฟล์ดาวน์โหลดที่มี provenance
 
-## โครงสร้างสำหรับมือใหม่
+## เริ่มใช้งานบนเครื่อง
 
-~~~text
-dashboard_final/
-├─ app/
-│  ├─ main.py              หน้าเว็บและ API routes
-│  ├─ models.py            ตาราง PostgreSQL/SQLite
-│  ├─ public_artifacts.py  sync serving JSON เข้า database
-│  ├─ public_data.py       อ่าน database ก่อน ใช้ไฟล์เป็น fallback
-│  ├─ ingestion.py         API allowlist สำหรับ operational refresh
-│  ├─ static/              JavaScript และ CSS
-│  └─ templates/           หน้า map และ insights
-├─ config/
-│  ├─ source_catalog.json  metadata/policy ครบ 28 URL
-│  └─ ingestion_plans.json API ที่เรียกได้จริงเท่านั้น
-├─ data/
-│  ├─ public/              cleaned serving artifacts ที่ deploy ได้
-│  ├─ snapshots/           local fallback; ไม่ push raw อัตโนมัติ
-│  └─ runtime/             local DB และ runtime fetch; ไม่ commit
-├─ tools/                  builders สำหรับ clean/join/summarize
-├─ tests/                  data, API, policy และ UI contract tests
-├─ SOURCE_MATRIX.md        ตารางครบ 28 source
-├─ WORKFLOW.md             data flow ฉบับอ่านง่าย
-└─ DEPLOY_RAILWAY.md       วิธี deploy พร้อม PostgreSQL
-~~~
+ต้องใช้ Python 3.12 ขึ้นไป:
 
-## เริ่มบนเครื่อง
-
-ใช้ Python 3.12:
-
-~~~powershell
-cd dashboard_final
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python -m app.cli init-db
 python -m app.server
-~~~
+```
 
-เปิด `http://localhost:8000`
+เปิด `http://localhost:8000` และ OpenAPI explorer ที่ `http://localhost:8000/docs`
 
-`init-db` จะสร้างตาราง, sync source catalog 28 แถว และนำ cleaned public artifactsเข้า serving database โดยไม่แตะ raw evidence
+`init-db` จะสร้างตาราง, sync catalog 28 แหล่ง และนำ cleaned public artifacts เข้า serving database โดยไม่ fetch หรือแก้ raw evidence
 
-## Public Data API
+## เส้นทางข้อมูล
+
+```text
+AIAT evidence workspace
+        │
+        ├─ public candidate ── clean / validate / summarize
+        │                                  │
+        │                           data/public/*
+        │                                  │
+        │                     PostgreSQL / local SQLite
+        │                                  │
+        │                         FastAPI + MapLibre UI
+        │
+        ├─ metadata-only ────── source catalog เท่านั้น
+        └─ restricted ───────── local-only; ไม่มี values บน Cloud
+```
+
+อ่านรายละเอียดที่ [สถาปัตยกรรมและ data workflow](docs/architecture.md)
+
+## Public API หลัก
 
 | Endpoint | เนื้อหา |
 |---|---|
+| `/health` | สุขภาพระบบและ database backend |
 | `/api/public/v1/overview` | ภาพรวม นิยาม metric และคำเตือน |
 | `/api/public/v1/sources` | 11 public candidate sources |
-| `/api/public/v1/source-coverage` | สถานะครบทั้ง 28 URL |
-| `/api/public/v1/database-coverage` | หลักฐานว่า serving artifacts อยู่ใน database ครบ |
-| `/api/public/v1/unmapped-records` | ข้อมูลสาธารณะที่ไม่เดาจังหวัดให้เอง |
-| `/api/public/v1/learning-dashboard` | Source 10 แบบ clean พร้อม scope warning |
-| `/api/public/v1/provinces/{code}/summary` | สรุปรายมิติสำหรับผู้บริหาร |
-| `/api/public/v1/provinces/{code}/briefing` | รายการและ provenance ของจังหวัด |
+| `/api/public/v1/source-coverage` | สถานะครบทั้ง 28 แหล่ง |
+| `/api/public/v1/database-coverage` | ความครบของ serving artifacts ใน database |
+| `/api/public/v1/unmapped-records` | ข้อมูลที่ไม่เดาจังหวัดให้เอง |
+| `/api/public/v1/provinces/{code}/summary` | Executive summary รายจังหวัด |
+| `/api/public/v1/provinces/{code}/briefing` | รายการข้อมูลและ provenance รายจังหวัด |
 | `/api/public/v1/source-insights` | ข้อมูลข้ามจังหวัดและ non-geo |
 | `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด |
 | `/api/public/v1/map/cultural-points` | จุดวัฒนธรรมที่ผ่าน public projection |
-| `/docs` | OpenAPI explorer |
 
-ไฟล์ cleaned data ดาวน์โหลดได้ที่ `/downloads/` เช่น `source_coverage.json`, `unmapped_records.json`, `province_evidence.csv` และ GeoJSON
+ไฟล์ดาวน์โหลดอยู่ที่ `/downloads/` เช่น `source_coverage.json`, `province_evidence.csv`, `unmapped_records.json` และ GeoJSON
 
-## สร้างข้อมูลใหม่
+## สร้าง public artifacts ใหม่
 
-รันตามลำดับจากโฟลเดอร์นี้ หลัง data layer หลักผ่าน validation แล้ว:
+รันตามลำดับหลัง data layer หลักผ่าน validation แล้ว:
 
-~~~powershell
+```powershell
 python tools/build_source_catalog.py
 python tools/build_learning_dashboard.py
 python tools/build_source_insights.py
@@ -99,6 +85,37 @@ python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
 python tools/build_source_coverage.py
 python -m pytest -q
-~~~
+```
 
-อ่าน [WORKFLOW.md](WORKFLOW.md), [SECURITY.md](SECURITY.md) และ [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) ก่อน deploy
+Builder จะคง `source_id`, grain, unit, `as_of`, quality status และ provenance; ถ้าต้นทางไม่ระบุ ระบบใช้ `null`/`ไม่ระบุ` แทนการเดา
+
+## เอกสาร
+
+| เอกสาร | ใช้เมื่อ |
+|---|---|
+| [Architecture](docs/architecture.md) | ต้องการเข้าใจ data flow, database และ update cycle |
+| [Data governance](docs/data-governance.md) | ตรวจ publication approval, privacy และ source classification |
+| [Data audit](docs/data-audit.md) | ตรวจ coverage, geography, dimensions และข้อจำกัด |
+| [Deployment](docs/deployment.md) | deploy หรือ verify ระบบบน Railway/PostgreSQL |
+| [Design](docs/design.md) | ทำความเข้าใจ UX contract และเหตุผลด้านการออกแบบ |
+
+## โครงสร้าง repository
+
+```text
+app/            FastAPI, database models, API และหน้าเว็บ
+config/         source catalog และ ingestion allowlist
+data/public/    cleaned deployment seeds ที่ตรวจย้อนกลับได้
+docs/           เอกสารหลัก 5 เรื่อง
+tests/          data, API, privacy, policy และ UI contracts
+tools/          deterministic builders สำหรับ public artifacts
+```
+
+## กติกาสำคัญ
+
+- ห้าม commit `.env`, token, cookie, API key, signed URL, database dump หรือ raw payload
+- ห้ามนำข้อมูล household, health, financial หรือ person-level ขึ้น Cloud
+- `HTTP 200`, `candidate` และ `needs_review` ไม่ได้แปลว่า fact ผ่านการรับรอง
+- ห้าม join จังหวัดจากชื่อหน่วยงานหรือบริบทโดยไม่มี exact match/official crosswalk
+- Operational ingestion ไม่ promote ข้อมูลเข้า public artifacts อัตโนมัติ
+
+ก่อน deploy ให้อ่าน [Data governance](docs/data-governance.md) และ [Deployment](docs/deployment.md) แล้วรัน test suite ทุกครั้ง
