@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
@@ -705,6 +705,181 @@ def build_culture_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+PMUA_FUNDER_KEYWORD = "บพท."
+
+
+def count_breakdown(
+    items: Iterable[dict[str, Any]],
+    getter: Callable[[dict[str, Any]], Any],
+    limit: int,
+) -> list[dict[str, Any]]:
+    counts = Counter(
+        value
+        for item in items
+        if (value := clean_text(getter(item))) is not None
+    )
+    total = sum(counts.values())
+    return [
+        {
+            "label_th": label,
+            "value": count,
+            "share_pct": round(count / total * 100, 1) if total else 0,
+        }
+        for label, count in counts.most_common(limit)
+    ]
+
+
+def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
+    """Answer the recurring executive questions with honest linked-record counts.
+
+    Grain note: counts describe records the public sources attach to this
+    province, not the official PMU-A allocation ledger. Fields the executives
+    asked for that no public source provides are listed in data_gaps_th
+    instead of being approximated.
+    """
+
+    sections = briefing.get("sections", {})
+    projects = sections.get("area_based", {}).get("items", [])
+    innovations = sections.get("innovation", {}).get("items", [])
+    if not projects and not innovations:
+        return None
+
+    year_counts = Counter(
+        clean_text(item.get("fiscal_year")) or "ไม่ระบุปี" for item in projects
+    )
+    fiscal_years = [
+        {"label_th": year, "value": count}
+        for year, count in sorted(year_counts.items())
+    ]
+
+    universities = count_breakdown(
+        projects, lambda item: item.get("research_unit"), limit=8
+    )
+
+    district_map: dict[str, Counter] = defaultdict(Counter)
+    for item in projects:
+        district = clean_text(item.get("district"))
+        if district is None:
+            continue
+        subdistrict = clean_text(item.get("subdistrict"))
+        district_map[district][subdistrict or "ไม่ระบุตำบล"] += 1
+    districts = [
+        {
+            "label_th": district,
+            "value": sum(subdistricts.values()),
+            "subdistricts": [
+                {"label_th": name, "value": count}
+                for name, count in subdistricts.most_common(6)
+            ],
+        }
+        for district, subdistricts in district_map.items()
+    ]
+    districts.sort(key=lambda item: item["value"], reverse=True)
+    districts = districts[:12]
+
+    seen_businesses: set[str] = set()
+    businesses: list[dict[str, Any]] = []
+    for item in sorted(
+        projects, key=lambda entry: str(entry.get("fiscal_year") or ""), reverse=True
+    ):
+        name = clean_text(item.get("business_name"))
+        if name is None or name in seen_businesses:
+            continue
+        seen_businesses.add(name)
+        if len(businesses) < 12:
+            businesses.append({
+                "name_th": name,
+                "project_th": compact_text(item.get("project_name"), 120),
+                "district_th": clean_text(item.get("district")),
+                "fiscal_year": clean_text(item.get("fiscal_year")),
+            })
+
+    pmua_funded_count = 0
+    pmua_amount_baht = 0.0
+    pmua_amount_known = 0
+    for item in innovations:
+        for entry in item.get("funding") or []:
+            funder = clean_text(entry.get("funder")) or ""
+            if PMUA_FUNDER_KEYWORD not in funder:
+                continue
+            pmua_funded_count += 1
+            amount = safe_float(entry.get("amount_baht"))
+            if amount is not None:
+                pmua_amount_baht += amount
+                pmua_amount_known += 1
+
+    innovation_values = [
+        value
+        for item in innovations
+        if (value := safe_float(item.get("innovation_value_baht"))) is not None
+    ]
+    trl_distribution = count_breakdown(
+        innovations,
+        lambda item: (
+            f"TRL {int(level)}"
+            if (level := safe_float(item.get("trl_level"))) is not None
+            else None
+        ),
+        limit=9,
+    )
+    target_groups = count_breakdown(
+        innovations,
+        lambda item: (item.get("target_groups") or [None])[0],
+        limit=5,
+    )
+    latest_update = max(
+        (clean_text(item.get("updated_at")) for item in projects if clean_text(item.get("updated_at"))),
+        default=None,
+    )
+
+    return {
+        "title_th": "โครงการวิจัยและทุน บพท. ที่เชื่อมกับจังหวัด",
+        "scope_note_th": (
+            "นับเฉพาะรายการจากแหล่งสาธารณะที่ผูกกับจังหวัดนี้ได้ "
+            "ไม่ใช่ยอดจัดสรรทุนทางการของ บพท. และยังเป็นข้อมูล candidate"
+        ),
+        "project_count": len(projects),
+        "university_count": len({
+            university["label_th"] for university in universities
+        }) if universities else 0,
+        "district_count": len(district_map),
+        "business_count": len(seen_businesses),
+        "innovation_count": len(innovations),
+        "fiscal_years": fiscal_years,
+        "universities": universities,
+        "districts": districts,
+        "businesses": businesses,
+        "funding": {
+            "label_th": f"ทุนที่ระบุผู้ให้ทุน {PMUA_FUNDER_KEYWORD} ในทะเบียนนวัตกรรม",
+            "pmua_funded_count": pmua_funded_count,
+            "pmua_amount_baht": round(pmua_amount_baht, 2),
+            "pmua_amount_known_entries": pmua_amount_known,
+            "innovation_value_baht_total": round(sum(innovation_values), 2),
+            "innovation_value_known_entries": len(innovation_values),
+            "note_th": (
+                "รวมจากมูลค่าที่ต้นทางกรอกไว้เท่านั้น หลายรายการกรอก 0 หรือเว้นว่าง "
+                "จึงใช้เทียบเคียงไม่ใช่ยอดงบประมาณจริง"
+            ),
+        },
+        "trl_distribution": trl_distribution,
+        "target_groups": target_groups,
+        "latest_update": latest_update,
+        "data_gaps_th": [
+            "ชื่อหัวหน้าโครงการ/ผู้รับทุนรายคน ยังไม่มีในแหล่งข้อมูลสาธารณะที่เชื่อมได้",
+            "สถานะดำเนินงานรายโครงการ (อยู่ระหว่าง/เสร็จสิ้น) ต้นทางไม่ระบุ",
+            "งบประมาณจัดสรรและสถานะเบิกจ่ายรายกรอบ/รายฝ่าย ต้องใช้ระบบภายในของ บพท.",
+        ],
+        "source_ids": [
+            source_id
+            for source_id, present in (
+                ("f2_learning_area_based", bool(projects)),
+                ("f2_apptech_mru", bool(innovations)),
+            )
+            if present
+        ],
+    }
+
+
 def coverage_label(available_count: int) -> str:
     if available_count >= 4:
         return "ข้อมูลค่อนข้างครบ"
@@ -804,6 +979,7 @@ def build_summary(
             "observations": build_observations(dimensions),
             "context_metrics": context_metrics[:3],
         },
+        "research_portfolio": build_research_portfolio(briefing),
         "dimensions": dimensions,
         "missing_dimensions": [
             {"key": key, "label_th": label}

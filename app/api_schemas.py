@@ -254,6 +254,7 @@ class ExecutiveSummaryResponse(PublicApiModel):
     publication_status: str
     province: ProvinceIdentity
     readout: JsonObject
+    research_portfolio: JsonObject | None = None
     dimensions: list[ExecutiveDimension]
     missing_dimensions: list[JsonObject]
     coverage: JsonObject

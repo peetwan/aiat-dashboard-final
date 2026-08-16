@@ -245,6 +245,25 @@ def test_public_projection_and_downloads_are_available():
         assert "urban" in lampang_dimensions
         assert lampang_dimensions["urban"]["metrics"][0]["benchmark_label_th"] == "ค่ากลาง 18 เมือง"
 
+        portfolio = executive["research_portfolio"]
+        assert portfolio["project_count"] == len(
+            songkhla_briefing["sections"]["area_based"]["items"]
+        )
+        assert portfolio["innovation_count"] == len(
+            songkhla_briefing["sections"]["innovation"]["items"]
+        )
+        assert portfolio["project_count"] == sum(
+            entry["value"] for entry in portfolio["fiscal_years"]
+        )
+        assert portfolio["scope_note_th"]
+        assert portfolio["data_gaps_th"]
+        assert all(
+            district["value"] >= 1 and district["label_th"] for district in portfolio["districts"]
+        )
+        funding = portfolio["funding"]
+        assert funding["pmua_funded_count"] >= funding["pmua_amount_known_entries"] >= 0
+        assert "note_th" in funding
+
         boundary = client.get("/api/public/v1/map/provinces").json()
         assert boundary["type"] == "FeatureCollection"
         assert len(boundary["features"]) == 77

@@ -14,8 +14,13 @@ const state = {
   briefingLoading: false,
   cultureVisible: 12,
   cultureQuery: "",
+  projectQuery: "",
+  projectYear: "",
+  projectDistrict: "",
   hoverPopup: null,
 };
+
+const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -59,7 +64,7 @@ function activatePanelTab(tabName, updateUrl = true) {
     url.searchParams.set("view", tabName);
     window.history.replaceState({}, "", url);
   }
-  if (tabName === "portfolio") ensurePortfolioLoaded();
+  if (tabName === "projects" || tabName === "portfolio") ensurePortfolioLoaded();
 }
 
 function provinceByCode(code) {
@@ -92,40 +97,25 @@ function renderOverview() {
 
 function metricPaint() {
   const sourceCount = ["coalesce", ["get", "evidence_source_count"], 0];
+  // Flat single-hue scale that stays readable on the light canvas.
   const richnessColor = [
     "step",
     sourceCount,
-    "#10241d",
-    1, "#18352b",
-    2, "#21523f",
-    3, "#2f7859",
-    4, "#48ac7a",
-    6, "#75e7ab",
-    8, "#baf3d2",
+    "#e4eae3",
+    1, "#cfe4d4",
+    2, "#a9d3b8",
+    3, "#7fbf97",
+    4, "#54a578",
+    6, "#2f875c",
+    8, "#176747",
   ];
   return {
     baseColor: richnessColor,
     color: [
       "case",
       ["boolean", ["feature-state", "selected"], false],
-      "#f4cf72",
-      ["boolean", ["feature-state", "hover"], false],
-      "#b9ffd8",
+      "#0f4a32",
       richnessColor,
-    ],
-    height: [
-      "+",
-      [
-        "*",
-        ["+", 1, sourceCount],
-        ["interpolate", ["linear"], ["zoom"], 2.8, 40, 7, 520, 11, 900],
-      ],
-      [
-        "case",
-        ["boolean", ["feature-state", "selected"], false],
-        ["interpolate", ["linear"], ["zoom"], 2.8, 180, 7, 1200, 11, 1800],
-        0,
-      ],
     ],
   };
 }
@@ -133,7 +123,7 @@ function metricPaint() {
 function updateLabelVisibility() {
   if (!state.mapLoaded) return;
   const zoom = state.map.getZoom();
-  const threshold = zoom < 7.5 ? 4 : zoom < 9 ? 3 : zoom < 10.5 ? 2 : 0;
+  const threshold = zoom < 5.4 ? 4 : zoom < 6.4 ? 2 : zoom < 7.4 ? 1 : 0;
   state.labelMarkers.forEach(({ element, code, sourceCount }) => {
     const emphasized = code === state.selectedCode || code === state.hoveredCode;
     const hidden = sourceCount < threshold && !emphasized;
@@ -181,11 +171,11 @@ function fitProvince(province) {
   const isMobile = window.matchMedia("(max-width: 720px)").matches;
   state.map.easeTo({
     center: province.centroid,
-    zoom: isMobile ? 6.1 : 6.65,
-    pitch: 56,
-    bearing: -10,
+    zoom: isMobile ? 6.4 : 7,
+    pitch: 0,
+    bearing: 0,
     padding: isMobile ? { top: 72, right: 18, bottom: 360, left: 18 } : { top: 80, right: 660, bottom: 60, left: 60 },
-    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900,
+    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
   });
 }
 
@@ -205,13 +195,25 @@ function openPanelLoading(province) {
   state.briefingLoading = false;
   state.cultureVisible = 12;
   state.cultureQuery = "";
+  state.projectQuery = "";
+  state.projectYear = "";
+  state.projectDistrict = "";
   document.getElementById("portfolioLoading").hidden = false;
   document.getElementById("portfolioEmpty").hidden = true;
+  document.getElementById("projectsLoading").hidden = false;
+  document.getElementById("projectsEmpty").hidden = true;
+  document.getElementById("researchSection").hidden = true;
   ["areaSection", "innovationSection", "requirementsSection", "tourismSection", "cultureSection"].forEach((id) => {
     document.getElementById(id).hidden = true;
   });
   const cultureSearch = document.getElementById("cultureSearch");
   if (cultureSearch) cultureSearch.value = "";
+  const projectSearch = document.getElementById("projectSearch");
+  if (projectSearch) projectSearch.value = "";
+  ["projectYearFilter", "projectDistrictFilter"].forEach((id) => {
+    const select = document.getElementById(id);
+    if (select) select.value = "";
+  });
   activatePanelTab("overview", false);
 }
 
@@ -236,6 +238,103 @@ function renderExecutiveSignals(summary) {
     : '<article class="empty-data"><strong>ยังไม่มีค่าระดับจังหวัดที่สรุปได้</strong></article>';
 }
 
+function applyProjectDistrict(district) {
+  state.projectDistrict = district;
+  state.projectYear = "";
+  state.projectQuery = "";
+  const search = document.getElementById("projectSearch");
+  if (search) search.value = "";
+  activatePanelTab("projects");
+  if (state.currentBriefing) {
+    populateProjectFilters(state.currentBriefing.sections.area_based);
+    renderAreaProjects(state.currentBriefing.sections.area_based);
+  }
+}
+
+function researchBars(entries, unitLabel) {
+  const max = Math.max(...entries.map((entry) => Number(entry.value) || 0), 1);
+  return `<div class="research-bars">${entries
+    .map(
+      (entry) => `
+        <div class="research-bar-row">
+          <span>${escapeHtml(entry.label_th)}</span>
+          <i><b style="width:${Math.max(4, (Number(entry.value) / max) * 100).toFixed(1)}%"></b></i>
+          <strong>${formatNumber(entry.value)}${unitLabel ? ` ${unitLabel}` : ""}</strong>
+        </div>`,
+    )
+    .join("")}</div>`;
+}
+
+function renderResearchPortfolio(summary) {
+  const section = document.getElementById("researchSection");
+  const portfolio = summary.research_portfolio;
+  if (!portfolio) {
+    section.hidden = true;
+    return;
+  }
+  section.hidden = false;
+  document.getElementById("researchScope").textContent = portfolio.scope_note_th || "";
+
+  const stats = [
+    ["โครงการที่เชื่อมได้", portfolio.project_count, "โครงการ"],
+    ["หน่วยวิจัยที่รับทุน", portfolio.university_count, "แห่ง"],
+    ["อำเภอที่มีโครงการ", portfolio.district_count, "อำเภอ"],
+    ["นวัตกรรมพร้อมใช้", portfolio.innovation_count, "รายการ"],
+  ];
+  const statHtml = `<div class="research-stats">${stats
+    .map(
+      ([label, value, unit]) => `
+        <article><span>${escapeHtml(label)}</span><strong>${formatNumber(value)}</strong><small>${escapeHtml(unit)}</small></article>`,
+    )
+    .join("")}</div>`;
+
+  const yearsHtml = portfolio.fiscal_years?.length
+    ? `<section class="research-block"><h4>โครงการรายปีงบประมาณ</h4>${researchBars(portfolio.fiscal_years, "โครงการ")}</section>`
+    : "";
+  const universitiesHtml = portfolio.universities?.length
+    ? `<section class="research-block"><h4>มหาวิทยาลัย/หน่วยวิจัยที่รับทุน</h4>${researchBars(portfolio.universities, "")}</section>`
+    : "";
+  const districtsHtml = portfolio.districts?.length
+    ? `<section class="research-block"><h4>กดอำเภอเพื่อดูโครงการและตัวคนในพื้นที่</h4><div class="district-chips">${portfolio.districts
+        .map(
+          (district) => `
+            <button type="button" class="district-chip" data-district="${escapeHtml(district.label_th)}">
+              <strong>อ.${escapeHtml(district.label_th)}</strong><span>${formatNumber(district.value)} โครงการ</span>
+            </button>`,
+        )
+        .join("")}</div></section>`
+    : "";
+
+  const funding = portfolio.funding || {};
+  const fundingHtml = `
+    <section class="research-block funding-block">
+      <h4>${escapeHtml(funding.label_th || "ทุนที่ปรากฏในข้อมูล")}</h4>
+      <div class="funding-grid">
+        <article><span>นวัตกรรมที่ระบุทุน บพท.</span><strong>${formatNumber(funding.pmua_funded_count || 0)}</strong><small>รายการ</small></article>
+        <article><span>มูลค่าทุน บพท. ที่ต้นทางกรอก</span><strong>${formatNumber(funding.pmua_amount_baht || 0)}</strong><small>บาท</small></article>
+        <article><span>มูลค่านวัตกรรมรวมที่กรอก</span><strong>${formatNumber(funding.innovation_value_baht_total || 0)}</strong><small>บาท</small></article>
+      </div>
+      ${funding.note_th ? `<small class="funding-note">${escapeHtml(funding.note_th)}</small>` : ""}
+    </section>`;
+
+  const gapsHtml = portfolio.data_gaps_th?.length
+    ? `<details class="research-gaps"><summary>ข้อมูลที่ผู้บริหารถามถึงแต่ยังไม่มีในแหล่งสาธารณะ (${portfolio.data_gaps_th.length})</summary><ul>${portfolio.data_gaps_th
+        .map((gap) => `<li>${escapeHtml(gap)}</li>`)
+        .join("")}</ul></details>`
+    : "";
+
+  document.getElementById("researchPortfolio").innerHTML = `
+    ${statHtml}
+    <div class="research-grid">${yearsHtml}${universitiesHtml}</div>
+    ${districtsHtml}
+    ${fundingHtml}
+    ${gapsHtml}`;
+
+  document.querySelectorAll(".district-chip").forEach((chip) => {
+    chip.addEventListener("click", () => applyProjectDistrict(chip.dataset.district));
+  });
+}
+
 function renderDecisionNarrative(summary) {
   const facts = summary.readout?.observations || [];
   document.getElementById("decisionNarrative").innerHTML = facts.length
@@ -247,20 +346,48 @@ function renderDecisionNarrative(summary) {
     : '<article class="empty-data"><strong>ยังไม่มีข้อมูลเพียงพอสำหรับสรุปภาพจังหวัด</strong></article>';
 }
 
+function populateProjectFilters(section) {
+  const items = section.items || [];
+  const years = [...new Set(items.map((item) => item.fiscal_year).filter(Boolean))].sort();
+  const districts = [...new Set(items.map((item) => item.district).filter(Boolean))].sort((a, b) =>
+    String(a).localeCompare(String(b), "th"),
+  );
+  const yearSelect = document.getElementById("projectYearFilter");
+  const districtSelect = document.getElementById("projectDistrictFilter");
+  yearSelect.innerHTML = '<option value="">ทุกปี</option>' + years.map((year) => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`).join("");
+  districtSelect.innerHTML = '<option value="">ทุกอำเภอ</option>' + districts.map((district) => `<option value="${escapeHtml(district)}">${escapeHtml(district)}</option>`).join("");
+  yearSelect.value = state.projectYear && years.includes(state.projectYear) ? state.projectYear : "";
+  districtSelect.value = state.projectDistrict && districts.includes(state.projectDistrict) ? state.projectDistrict : "";
+}
+
 function renderAreaProjects(section) {
   const container = document.getElementById("areaProjects");
   document.getElementById("areaSection").hidden = section.status !== "available";
-  container.innerHTML = (section.items || [])
+  if (section.status !== "available") return;
+  const query = state.projectQuery.trim().toLocaleLowerCase("th");
+  const filtered = (section.items || []).filter((item) => {
+    if (state.projectYear && item.fiscal_year !== state.projectYear) return false;
+    if (state.projectDistrict && item.district !== state.projectDistrict) return false;
+    if (!query) return true;
+    return [item.project_name, item.business_name, item.research_unit, item.district, item.subdistrict]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase("th")
+      .includes(query);
+  });
+  document.getElementById("projectResultCount").textContent =
+    `แสดง ${formatNumber(filtered.length)} จาก ${formatNumber((section.items || []).length)} โครงการ`;
+  container.innerHTML = filtered
     .map(
       (item) => `
         <article class="data-card project-card">
-          <div class="record-kicker"><span>ปีงบประมาณ ${escapeHtml(item.fiscal_year || "ไม่ระบุ")}</span><span>${escapeHtml(item.district || "ไม่ระบุอำเภอ")}</span></div>
+          <div class="record-kicker"><span>ปีงบประมาณ ${escapeHtml(item.fiscal_year || "ไม่ระบุ")}</span><span>${escapeHtml([item.district ? `อ.${item.district}` : "", item.subdistrict ? `ต.${item.subdistrict}` : ""].filter(Boolean).join(" · ") || "ไม่ระบุพื้นที่")}</span></div>
           <h3>${escapeHtml(item.project_name || "ไม่ระบุชื่อโครงการ")}</h3>
-          <p>${escapeHtml(item.business_name || "ไม่ระบุหน่วยธุรกิจ")}</p>
+          <p class="project-people"><span>ผู้ประกอบการ/กลุ่มเป้าหมาย</span><strong>${escapeHtml(item.business_name || "ต้นทางไม่ระบุ")}</strong></p>
           <footer><span>${escapeHtml(item.research_unit || "ไม่ระบุหน่วยวิจัย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง</a></footer>
         </article>`,
     )
-    .join("");
+    .join("") || '<article class="empty-data"><strong>ไม่พบโครงการที่ตรงกับตัวกรอง</strong><span>ลองล้างคำค้นหรือเลือกทุกปี/ทุกอำเภอ</span></article>';
 }
 
 function renderInnovations(section) {
@@ -544,6 +671,7 @@ function renderProvincePanel(summary) {
   document.getElementById("provinceEnglish").textContent = province.province_name_en;
   document.getElementById("coverageLabel").textContent = summary.coverage?.label_th || "ข้อมูลยังบาง";
   document.getElementById("coverageCount").textContent = `เชื่อม ${formatNumber(summary.coverage?.available_source_count || 0)} จาก ${formatNumber(summary.coverage?.public_source_count || 10)} แหล่ง`;
+  renderResearchPortfolio(summary);
   renderExecutiveSignals(summary);
   renderDecisionNarrative(summary);
   renderAllData(summary);
@@ -551,7 +679,7 @@ function renderProvincePanel(summary) {
   document.getElementById("panelUpdated").textContent = `อัปเดตชุดสรุป ${formatDate(summary.generated_at)}`;
   document.getElementById("provinceApiLink").href = `/api/public/v1/provinces/${province.province_code}/briefing`;
   const requestedView = new URLSearchParams(window.location.search).get("view");
-  if (["overview", "portfolio", "dimensions", "sources"].includes(requestedView)) activatePanelTab(requestedView, false);
+  if (["overview", "projects", "portfolio", "dimensions", "sources"].includes(requestedView)) activatePanelTab(requestedView, false);
   document.getElementById("provinceName").focus({ preventScroll: true });
 }
 
@@ -561,27 +689,40 @@ async function ensurePortfolioLoaded() {
   state.briefingLoading = true;
   document.getElementById("portfolioLoading").hidden = false;
   document.getElementById("portfolioEmpty").hidden = true;
+  document.getElementById("projectsLoading").hidden = false;
+  document.getElementById("projectsEmpty").hidden = true;
   try {
     const response = await fetch(`/api/public/v1/provinces/${code}/briefing`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Province briefing API ${response.status}`);
     const briefing = await response.json();
     if (state.selectedCode !== code) return;
     state.currentBriefing = briefing;
+    populateProjectFilters(briefing.sections.area_based);
     renderAreaProjects(briefing.sections.area_based);
     renderInnovations(briefing.sections.innovation);
     renderRequirements(briefing.sections.requirements);
     renderTourism(briefing.sections.tourism);
     renderCulture(briefing.sections.culture);
-    const hasPortfolio = ["area_based", "innovation", "requirements", "tourism", "culture"].some(
+    const hasProjects = ["area_based", "innovation", "requirements"].some(
       (key) => briefing.sections[key]?.status === "available",
     );
+    const hasPortfolio = ["tourism", "culture"].some(
+      (key) => briefing.sections[key]?.status === "available",
+    );
+    document.getElementById("projectsEmpty").hidden = hasProjects;
     document.getElementById("portfolioEmpty").hidden = hasPortfolio;
   } catch (error) {
     console.error(error);
-    document.getElementById("portfolioEmpty").textContent = "โหลดรายการโครงการไม่สำเร็จ";
-    document.getElementById("portfolioEmpty").hidden = false;
+    ["projectsEmpty", "portfolioEmpty"].forEach((id) => {
+      const element = document.getElementById(id);
+      element.textContent = "โหลดรายการโครงการไม่สำเร็จ";
+      element.hidden = false;
+    });
   } finally {
-    if (state.selectedCode === code) document.getElementById("portfolioLoading").hidden = true;
+    if (state.selectedCode === code) {
+      document.getElementById("portfolioLoading").hidden = true;
+      document.getElementById("projectsLoading").hidden = true;
+    }
     state.briefingLoading = false;
   }
 }
@@ -661,13 +802,13 @@ function toggleCulturalPoints() {
 function resetMap() {
   closePanel();
   if (!state.mapLoaded) return;
-  state.map.easeTo({
-    center: [101.15, 12.25],
-    zoom: window.matchMedia("(max-width: 720px)").matches ? 3.0 : 3.25,
-    pitch: 40,
-    bearing: -8,
-    padding: { top: 0, right: 0, bottom: 0, left: 0 },
-    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900,
+  state.map.fitBounds(THAILAND_BOUNDS, {
+    padding: window.matchMedia("(max-width: 720px)").matches
+      ? { top: 84, right: 16, bottom: 96, left: 16 }
+      : { top: 96, right: 60, bottom: 80, left: 60 },
+    pitch: 0,
+    bearing: 0,
+    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
   });
 }
 
@@ -689,6 +830,18 @@ function bindEvents() {
     state.cultureVisible = 12;
     if (state.currentBriefing) renderCulture(state.currentBriefing.sections.culture);
   });
+  document.getElementById("projectSearch").addEventListener("input", (event) => {
+    state.projectQuery = event.target.value;
+    if (state.currentBriefing) renderAreaProjects(state.currentBriefing.sections.area_based);
+  });
+  document.getElementById("projectYearFilter").addEventListener("change", (event) => {
+    state.projectYear = event.target.value;
+    if (state.currentBriefing) renderAreaProjects(state.currentBriefing.sections.area_based);
+  });
+  document.getElementById("projectDistrictFilter").addEventListener("change", (event) => {
+    state.projectDistrict = event.target.value;
+    if (state.currentBriefing) renderAreaProjects(state.currentBriefing.sections.area_based);
+  });
   document.getElementById("loadMoreCulture").addEventListener("click", () => {
     state.cultureVisible += 12;
     if (state.currentBriefing) renderCulture(state.currentBriefing.sections.culture);
@@ -709,18 +862,26 @@ function initMap() {
     style: {
       version: 8,
       sources: {},
-      layers: [{ id: "background", type: "background", paint: { "background-color": "#06110e" } }],
+      layers: [{ id: "background", type: "background", paint: { "background-color": "#edf1ec" } }],
     },
-    center: [101.15, 12.25],
-    zoom: window.matchMedia("(max-width: 720px)").matches ? 3.0 : 3.25,
-    pitch: 40,
-    bearing: -8,
-    minZoom: 2.8,
+    bounds: THAILAND_BOUNDS,
+    fitBoundsOptions: {
+      padding: window.matchMedia("(max-width: 720px)").matches
+        ? { top: 84, right: 16, bottom: 96, left: 16 }
+        : { top: 96, right: 60, bottom: 80, left: 60 },
+    },
+    minZoom: 3.6,
     maxZoom: 13,
     maxBounds: [[88, 0], [114, 27]],
+    pitch: 0,
+    bearing: 0,
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchPitch: false,
     antialias: true,
     attributionControl: false,
   });
+  map.touchZoomRotate?.disableRotation();
   state.map = map;
   state.hoverPopup = new window.maplibregl.Popup({
     closeButton: false,
@@ -738,21 +899,13 @@ function initMap() {
       type: "fill",
       source: "provinces",
       paint: {
-        "fill-color": paint.baseColor,
-        "fill-opacity": 0.9,
-      },
-    });
-    map.addLayer({
-      id: "province-extrusion",
-      type: "fill-extrusion",
-      source: "provinces",
-      minzoom: 5.2,
-      paint: {
-        "fill-extrusion-color": paint.color,
-        "fill-extrusion-height": paint.height,
-        "fill-extrusion-base": 0,
-        "fill-extrusion-opacity": 0.88,
-        "fill-extrusion-vertical-gradient": false,
+        "fill-color": paint.color,
+        "fill-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          1,
+          0.94,
+        ],
       },
     });
     map.addLayer({
@@ -760,9 +913,36 @@ function initMap() {
       type: "line",
       source: "provinces",
       paint: {
-        "line-color": ["case", ["boolean", ["feature-state", "selected"], false], "#fff1bd", "rgba(220,255,239,0.64)"],
-        "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 2.4, 0.72],
-        "line-opacity": 0.82,
+        "line-color": "#ffffff",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.7, 8, 1.4],
+        "line-opacity": 0.95,
+      },
+    });
+    map.addLayer({
+      id: "province-highlight",
+      type: "line",
+      source: "provinces",
+      paint: {
+        "line-color": [
+          "case",
+          ["boolean", ["feature-state", "selected"], false],
+          "#0f4a32",
+          "#1d7a52",
+        ],
+        "line-width": [
+          "case",
+          ["boolean", ["feature-state", "selected"], false],
+          3,
+          2.2,
+        ],
+        "line-opacity": [
+          "case",
+          ["boolean", ["feature-state", "selected"], false],
+          1,
+          ["boolean", ["feature-state", "hover"], false],
+          1,
+          0,
+        ],
       },
     });
 
@@ -780,10 +960,10 @@ function initMap() {
       filter: ["has", "point_count"],
       layout: { visibility: "none" },
       paint: {
-        "circle-color": "#f4cf72",
+        "circle-color": "#e39b17",
         "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 7, 100, 16, 800, 25],
         "circle-stroke-width": 2,
-        "circle-stroke-color": "#06110e",
+        "circle-stroke-color": "#ffffff",
         "circle-opacity": 0.92,
       },
     });
@@ -794,10 +974,10 @@ function initMap() {
       filter: ["!", ["has", "point_count"]],
       layout: { visibility: "none" },
       paint: {
-        "circle-color": "#f4cf72",
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2, 10, 5],
+        "circle-color": "#e39b17",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.5, 10, 5.5],
         "circle-stroke-width": 1,
-        "circle-stroke-color": "#06110e",
+        "circle-stroke-color": "#ffffff",
         "circle-opacity": 0.9,
       },
     });

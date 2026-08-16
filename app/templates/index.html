@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="แผนที่ข้อมูลสาธารณะรายจังหวัดสำหรับผู้บริหาร สำรวจตัวเลข หลักฐาน และแหล่งข้อมูลของแต่ละพื้นที่" />
-    <meta name="theme-color" content="#06110e" />
+    <meta name="theme-color" content="#eef1ec" />
     <title>AIAT Provincial Evidence Map</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,8 +18,7 @@
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
 
     <main class="atlas-shell">
-      <div id="provinceMap" class="province-map" role="application" aria-label="แผนที่สามมิติข้อมูลสาธารณะรายจังหวัดของประเทศไทย"></div>
-      <div class="map-texture" aria-hidden="true"></div>
+      <div id="provinceMap" class="province-map" role="application" aria-label="แผนที่ข้อมูลสาธารณะรายจังหวัดของประเทศไทย"></div>
 
       <header class="map-header">
         <a class="brand" href="/" aria-label="AIAT Provincial Evidence Map หน้าแรก">
@@ -57,9 +56,9 @@
         <div><strong>ความครอบคลุมข้อมูล</strong><small>จำนวนแหล่งที่ผูกกับจังหวัดได้</small></div>
         <ol>
           <li><i data-level="low"></i><span>0–1</span></li>
-          <li><i data-level="medium"></i><span>2</span></li>
-          <li><i data-level="good"></i><span>3</span></li>
-          <li><i data-level="high"></i><span>4–8 แหล่ง</span></li>
+          <li><i data-level="medium"></i><span>2–3</span></li>
+          <li><i data-level="good"></i><span>4–5</span></li>
+          <li><i data-level="high"></i><span>6+ แหล่ง</span></li>
         </ol>
       </section>
 
@@ -91,6 +90,7 @@
 
           <nav class="panel-tabs" aria-label="หมวดข้อมูลจังหวัด">
             <button class="active" type="button" data-panel-tab="overview" aria-selected="true">ภาพรวม</button>
+            <button type="button" data-panel-tab="projects" aria-selected="false">โครงการวิจัย</button>
             <button type="button" data-panel-tab="portfolio" aria-selected="false">ข้อมูลพื้นที่</button>
             <button type="button" data-panel-tab="dimensions" aria-selected="false">รายมิติ</button>
             <button type="button" data-panel-tab="sources" aria-selected="false">ต้นทาง</button>
@@ -98,6 +98,10 @@
 
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
+              <div class="panel-section research-section" id="researchSection" hidden>
+                <div class="section-heading"><span>โครงการวิจัยและทุน บพท.</span><small id="researchScope"></small></div>
+                <div id="researchPortfolio"></div>
+              </div>
               <div class="panel-section briefing-section executive-overview">
                 <div class="section-heading"><span>ภาพที่เห็นจากข้อมูล</span></div>
                 <div class="briefing-narrative" id="decisionNarrative"></div>
@@ -108,11 +112,22 @@
               </div>
             </section>
 
-            <section class="panel-view" data-panel-view="portfolio" hidden>
-              <div class="portfolio-loading" id="portfolioLoading"><span></span><span></span><span></span></div>
-              <div class="portfolio-empty" id="portfolioEmpty" hidden>ยังไม่มีรายการโครงการหรือนวัตกรรมที่ผูกกับจังหวัดนี้</div>
+            <section class="panel-view" data-panel-view="projects" hidden>
+              <div class="portfolio-loading" id="projectsLoading"><span></span><span></span><span></span></div>
+              <div class="portfolio-empty" id="projectsEmpty" hidden>ยังไม่มีรายการโครงการหรือนวัตกรรมที่ผูกกับจังหวัดนี้</div>
               <div class="panel-section" id="areaSection" hidden>
-                <div class="section-heading"><span>โครงการพัฒนาระดับพื้นที่</span></div>
+                <div class="section-heading"><span>โครงการพัฒนาระดับพื้นที่</span><small id="projectResultCount"></small></div>
+                <div class="collection-tools project-tools">
+                  <label><span>ค้นหาโครงการ ผู้ประกอบการ หรือพื้นที่</span><input id="projectSearch" type="search" placeholder="ชื่อโครงการ กลุ่ม/ธุรกิจ อำเภอ ตำบล" autocomplete="off" /></label>
+                  <div class="filter-row">
+                    <label><span>ปีงบประมาณ</span>
+                      <select id="projectYearFilter"><option value="">ทุกปี</option></select>
+                    </label>
+                    <label><span>อำเภอ</span>
+                      <select id="projectDistrictFilter"><option value="">ทุกอำเภอ</option></select>
+                    </label>
+                  </div>
+                </div>
                 <div class="record-list" id="areaProjects"></div>
               </div>
 
@@ -125,7 +140,11 @@
                 <div class="section-heading"><span>โจทย์ความต้องการในพื้นที่</span></div>
                 <div class="record-list" id="requirementItems"></div>
               </div>
+            </section>
 
+            <section class="panel-view" data-panel-view="portfolio" hidden>
+              <div class="portfolio-loading" id="portfolioLoading"><span></span><span></span><span></span></div>
+              <div class="portfolio-empty" id="portfolioEmpty" hidden>ยังไม่มีข้อมูลพื้นที่เพิ่มเติมของจังหวัดนี้</div>
               <div class="panel-section tourism-section" id="tourismSection" hidden>
                 <div class="section-heading"><span>การเดินทางและท่องเที่ยวลำพูน</span><small id="tourismUpdated"></small></div>
                 <div class="tourism-facts" id="tourismFacts"></div>
