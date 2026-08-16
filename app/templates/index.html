@@ -44,21 +44,30 @@
 
       <div class="map-prompt" id="mapPrompt" aria-live="polite">
         <span class="prompt-pointer" aria-hidden="true"></span>
-        <div><strong>เลือกจังหวัดเพื่อเปิดข้อมูลจริง</strong><small>ตัวชี้วัด โครงการ นวัตกรรม และหลักฐานจาก URL ต้นทาง</small></div>
+        <div><strong id="promptTitle">เลือกภาค แล้วเจาะลงรายจังหวัด</strong><small id="promptHint">ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง</small></div>
       </div>
 
       <div class="map-actions" aria-label="เครื่องมือแผนที่">
         <button id="resetMap" type="button" title="กลับไปมุมมองทั้งประเทศ" aria-label="กลับไปมุมมองทั้งประเทศ">⌂</button>
+        <button id="backToCountry" type="button" hidden>← ทุกภาค</button>
         <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
       </div>
 
-      <section class="evidence-legend" aria-label="คำอธิบายระดับความครอบคลุมข้อมูล">
-        <div><strong>ความครอบคลุมข้อมูล</strong><small>จำนวนแหล่งที่ผูกกับจังหวัดได้</small></div>
-        <ol>
-          <li><i data-level="low"></i><span>0–1</span></li>
-          <li><i data-level="medium"></i><span>2–3</span></li>
-          <li><i data-level="good"></i><span>4–5</span></li>
-          <li><i data-level="high"></i><span>6+ แหล่ง</span></li>
+      <div class="mode-dock" role="group" aria-label="เลือกมุมมองข้อมูลบนแผนที่">
+        <span class="dock-label">มุมมอง</span>
+        <button type="button" class="active" data-map-mode="projects"><i></i>โครงการ บพท.</button>
+        <button type="button" data-map-mode="sra"><i></i>ความเปราะบาง</button>
+        <button type="button" data-map-mode="innovation"><i></i>นวัตกรรม</button>
+        <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
+      </div>
+
+      <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
+        <div><strong id="legendTitle">โครงการพัฒนาพื้นที่ที่เชื่อมได้</strong><small id="legendNote">สีเข้ม = โครงการมาก</small></div>
+        <ol id="legendItems">
+          <li><i style="background:#a9d3b8"></i><span>1–4</span></li>
+          <li><i style="background:#63ac79"></i><span>5–14</span></li>
+          <li><i style="background:#2e7d51"></i><span>15–39</span></li>
+          <li><i style="background:#14532e"></i><span>40+</span></li>
         </ol>
       </section>
 
@@ -71,20 +80,18 @@
           <header class="panel-head">
             <div>
               <span class="api-chip"><i></i> ข้อมูลจังหวัด</span>
-              <p id="provinceMeta">จังหวัด</p>
             </div>
             <button class="panel-close" id="closePanel" type="button" aria-label="ปิดข้อมูลจังหวัด">×</button>
           </header>
 
           <section class="province-title-block province-hero">
-            <div>
+            <div class="hero-text">
               <h1 id="provinceName" tabindex="-1">จังหวัด</h1>
               <p id="provinceEnglish"></p>
             </div>
-            <div class="coverage-summary" id="coverageRing">
-              <span>ความครอบคลุม</span>
-              <strong id="coverageLabel">—</strong>
-              <small id="coverageCount">กำลังตรวจข้อมูล</small>
+            <div class="hero-chips">
+              <span class="hero-chip" id="provinceMeta">จังหวัด</span>
+              <span class="hero-chip coverage-chip"><i aria-hidden="true"></i><strong id="coverageLabel">—</strong><small id="coverageCount">กำลังตรวจข้อมูล</small></span>
             </div>
           </section>
 

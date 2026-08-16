@@ -18,9 +18,134 @@ const state = {
   projectYear: "",
   projectDistrict: "",
   hoverPopup: null,
+  mapMode: "projects",
+  selectedRegion: null,
+  regions: {},
+  regionMarkers: [],
 };
 
 const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
+const NO_DATA_COLOR = "#e7ebe6";
+
+// Executive map lenses: each colors provinces by one source-backed metric.
+const MAP_MODES = {
+  projects: {
+    label: "โครงการ บพท.",
+    legendTitle: "โครงการพัฒนาพื้นที่ที่เชื่อมได้",
+    legendNote: "ทะเบียนสาธารณะ PMU-A · สีเข้ม = โครงการมาก",
+    zeroLabel: "ไม่มีในทะเบียน",
+    value: (province) => Number(province.area_based_participant_records || 0) || null,
+    format: (value) => `${formatNumber(value)} โครงการ`,
+    steps: [
+      { min: 40, color: "#14532e", label: "40+" },
+      { min: 15, color: "#2e7d51", label: "15–39" },
+      { min: 5, color: "#63ac79", label: "5–14" },
+      { min: 1, color: "#a9d3b8", label: "1–4" },
+    ],
+  },
+  sra: {
+    label: "ความเปราะบาง",
+    legendTitle: "คะแนนทุนดำรงชีพรวม (SRA-DSS)",
+    legendNote: "จังหวัดเป้าหมายแก้จน · สีเข้ม = คะแนนทุนต่ำกว่า ตามนิยามต้นทาง",
+    zeroLabel: "ไม่ใช่จังหวัดเป้าหมาย",
+    value: (province) =>
+      province.sra_overall_score === null || province.sra_overall_score === undefined
+        ? null
+        : Number(province.sra_overall_score),
+    format: (value) => `คะแนนรวม ${value.toFixed(2)}`,
+    steps: [
+      { max: 1.8, color: "#b4551d", label: "≤ 1.80" },
+      { max: 1.95, color: "#dd8a4a", label: "1.81–1.95" },
+      { max: Infinity, color: "#f2c49a", label: "> 1.95" },
+    ],
+  },
+  innovation: {
+    label: "นวัตกรรม",
+    legendTitle: "นวัตกรรมพร้อมใช้ที่เชื่อมได้",
+    legendNote: "ทะเบียน AppTech · สีเข้ม = นวัตกรรมมาก",
+    zeroLabel: "ไม่มีในทะเบียน",
+    value: (province) => Number(province.innovation_records || 0) || null,
+    format: (value) => `${formatNumber(value)} นวัตกรรม`,
+    steps: [
+      { min: 40, color: "#1d5482", label: "40+" },
+      { min: 15, color: "#3a78a8", label: "15–39" },
+      { min: 5, color: "#6ba3cd", label: "5–14" },
+      { min: 1, color: "#b0cde4", label: "1–4" },
+    ],
+  },
+  coverage: {
+    label: "ความครอบคลุมข้อมูล",
+    legendTitle: "ความครอบคลุมข้อมูล",
+    legendNote: "จำนวนแหล่งที่ผูกกับจังหวัดได้ · สีเข้ม = หลายแหล่ง",
+    zeroLabel: "0 แหล่ง",
+    value: (province) => Number(province.evidence_source_count || 0) || null,
+    format: (value) => `เชื่อมได้ ${formatNumber(value)} แหล่ง`,
+    steps: [
+      { min: 6, color: "#176747", label: "6+" },
+      { min: 4, color: "#54a578", label: "4–5" },
+      { min: 2, color: "#a9d3b8", label: "2–3" },
+      { min: 1, color: "#cfe4d4", label: "1" },
+    ],
+  },
+};
+
+function modeColor(mode, value) {
+  if (value === null || value === undefined) return NO_DATA_COLOR;
+  const config = MAP_MODES[mode];
+  if (config.steps[0].max !== undefined) {
+    for (const step of config.steps) {
+      if (value <= step.max) return step.color;
+    }
+    return NO_DATA_COLOR;
+  }
+  for (const step of config.steps) {
+    if (value >= step.min) return step.color;
+  }
+  return NO_DATA_COLOR;
+}
+
+function buildFillExpression(mode) {
+  const expression = ["match", ["get", "province_code"]];
+  state.catalog.provinces.forEach((province) => {
+    expression.push(province.province_code, modeColor(mode, MAP_MODES[mode].value(province)));
+  });
+  expression.push(NO_DATA_COLOR);
+  return [
+    "case",
+    ["boolean", ["feature-state", "selected"], false],
+    "#0f4a32",
+    expression,
+  ];
+}
+
+function renderLegend() {
+  const config = MAP_MODES[state.mapMode];
+  document.getElementById("legendTitle").textContent = config.legendTitle;
+  document.getElementById("legendNote").textContent = config.legendNote;
+  const ordered = config.steps[0].max !== undefined ? config.steps : [...config.steps].reverse();
+  document.getElementById("legendItems").innerHTML =
+    ordered
+      .map((step) => `<li><i style="background:${step.color}"></i><span>${escapeHtml(step.label)}</span></li>`)
+      .join("") +
+    `<li><i style="background:${NO_DATA_COLOR}"></i><span>${escapeHtml(config.zeroLabel)}</span></li>`;
+}
+
+function setMapMode(mode) {
+  if (!MAP_MODES[mode]) return;
+  state.mapMode = mode;
+  document.querySelectorAll("[data-map-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.mapMode === mode);
+  });
+  renderLegend();
+  if (state.mapLoaded) {
+    state.map.setPaintProperty("province-base", "fill-color", buildFillExpression(mode));
+  }
+}
+
+function setPrompt(title, hint) {
+  document.getElementById("promptTitle").textContent = title;
+  document.getElementById("promptHint").textContent = hint;
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -95,43 +220,145 @@ function renderOverview() {
   select.insertAdjacentHTML("beforeend", options.join(""));
 }
 
-function metricPaint() {
-  const sourceCount = ["coalesce", ["get", "evidence_source_count"], 0];
-  // Flat single-hue scale that stays readable on the light canvas.
-  const richnessColor = [
-    "step",
-    sourceCount,
-    "#e4eae3",
-    1, "#cfe4d4",
-    2, "#a9d3b8",
-    3, "#7fbf97",
-    4, "#54a578",
-    6, "#2f875c",
-    8, "#176747",
-  ];
-  return {
-    baseColor: richnessColor,
-    color: [
-      "case",
-      ["boolean", ["feature-state", "selected"], false],
-      "#0f4a32",
-      richnessColor,
-    ],
-  };
-}
-
 function updateLabelVisibility() {
   if (!state.mapLoaded) return;
-  const zoom = state.map.getZoom();
-  const threshold = zoom < 5.4 ? 4 : zoom < 6.4 ? 2 : zoom < 7.4 ? 1 : 0;
-  state.labelMarkers.forEach(({ element, code, sourceCount }) => {
+  state.labelMarkers.forEach(({ element, code, region }) => {
     const emphasized = code === state.selectedCode || code === state.hoveredCode;
-    const hidden = sourceCount < threshold && !emphasized;
-    element.classList.toggle("is-secondary", hidden);
-    element.style.display = hidden ? "none" : "block";
+    const visible = (state.selectedRegion && region === state.selectedRegion) || emphasized;
+    element.classList.toggle("is-secondary", !visible);
+    element.style.display = visible ? "block" : "none";
     element.classList.toggle("is-active", code === state.selectedCode);
     element.classList.toggle("is-hovered", code === state.hoveredCode);
   });
+  state.regionMarkers.forEach(({ element }) => {
+    element.style.display = state.selectedRegion ? "none" : "flex";
+  });
+}
+
+function computeRegions() {
+  const regions = {};
+  state.catalog.provinces.forEach((province) => {
+    const region = province.region;
+    if (!regions[region]) {
+      regions[region] = { name: region, codes: [], centroids: [] };
+    }
+    regions[region].codes.push(province.province_code);
+    if (province.centroid?.every((value) => Number.isFinite(Number(value)))) {
+      regions[region].centroids.push(province.centroid);
+    }
+  });
+  const boundsByCode = {};
+  (state.boundaries.features || []).forEach((feature) => {
+    const code = feature.properties?.province_code;
+    if (!code) return;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const walk = (coords) => {
+      if (typeof coords[0] === "number") {
+        minX = Math.min(minX, coords[0]);
+        maxX = Math.max(maxX, coords[0]);
+        minY = Math.min(minY, coords[1]);
+        maxY = Math.max(maxY, coords[1]);
+        return;
+      }
+      coords.forEach(walk);
+    };
+    walk(feature.geometry.coordinates);
+    boundsByCode[code] = [minX, minY, maxX, maxY];
+  });
+  Object.values(regions).forEach((region) => {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    region.codes.forEach((code) => {
+      const box = boundsByCode[code];
+      if (!box) return;
+      minX = Math.min(minX, box[0]);
+      minY = Math.min(minY, box[1]);
+      maxX = Math.max(maxX, box[2]);
+      maxY = Math.max(maxY, box[3]);
+    });
+    region.bounds = [[minX, minY], [maxX, maxY]];
+    const centroids = region.centroids;
+    region.center = centroids.length
+      ? [
+          centroids.reduce((sum, point) => sum + Number(point[0]), 0) / centroids.length,
+          centroids.reduce((sum, point) => sum + Number(point[1]), 0) / centroids.length,
+        ]
+      : null;
+  });
+  state.regions = regions;
+}
+
+function addRegionMarkers() {
+  Object.values(state.regions).forEach((region) => {
+    if (!region.center) return;
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = "region-label";
+    element.innerHTML = `<strong>${escapeHtml(region.name)}</strong><span>${formatNumber(region.codes.length)} จังหวัด</span>`;
+    element.setAttribute("aria-label", `ซูมเข้าไปดู${region.name}`);
+    element.addEventListener("click", (event) => {
+      event.stopPropagation();
+      selectRegion(region.name);
+    });
+    const marker = new window.maplibregl.Marker({ element, anchor: "center" })
+      .setLngLat(region.center)
+      .addTo(state.map);
+    state.regionMarkers.push({ marker, element, name: region.name });
+  });
+}
+
+function applyRegionFocus() {
+  if (!state.mapLoaded) return;
+  const hoverOpacity = ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.94];
+  if (!state.selectedRegion) {
+    state.map.setPaintProperty("province-base", "fill-opacity", hoverOpacity);
+    return;
+  }
+  const codes = state.regions[state.selectedRegion]?.codes || [];
+  state.map.setPaintProperty("province-base", "fill-opacity", [
+    "*",
+    hoverOpacity,
+    ["match", ["get", "province_code"], codes, 1, 0.3],
+  ]);
+}
+
+function selectRegion(name, moveMap = true) {
+  const region = state.regions[name];
+  if (!region) return;
+  state.selectedRegion = name;
+  state.hoverPopup?.remove();
+  document.getElementById("backToCountry").hidden = false;
+  setPrompt(`${name}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+  applyRegionFocus();
+  updateLabelVisibility();
+  if (moveMap && state.mapLoaded && region.bounds) {
+    state.map.fitBounds(region.bounds, {
+      padding: window.matchMedia("(max-width: 720px)").matches
+        ? { top: 92, right: 24, bottom: 110, left: 24 }
+        : { top: 110, right: 90, bottom: 110, left: 90 },
+      pitch: 0,
+      bearing: 0,
+      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
+    });
+  }
+}
+
+function backToCountry() {
+  state.selectedRegion = null;
+  closePanel();
+  document.getElementById("backToCountry").hidden = true;
+  setPrompt("เลือกภาค แล้วเจาะลงรายจังหวัด", "ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง");
+  applyRegionFocus();
+  updateLabelVisibility();
+  if (state.mapLoaded) {
+    state.map.fitBounds(THAILAND_BOUNDS, {
+      padding: window.matchMedia("(max-width: 720px)").matches
+        ? { top: 84, right: 16, bottom: 96, left: 16 }
+        : { top: 96, right: 60, bottom: 80, left: 60 },
+      pitch: 0,
+      bearing: 0,
+      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
+    });
+  }
 }
 
 function addProvinceLabels() {
@@ -141,8 +368,6 @@ function addProvinceLabels() {
     element.type = "button";
     element.className = "province-map-label";
     element.textContent = province.province_name_th;
-    const sourceCount = Number(province.evidence_source_count || 0);
-    element.dataset.richness = String(sourceCount);
     element.setAttribute("aria-label", `เปิดข้อมูลจังหวัด${province.province_name_th}`);
     element.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -151,7 +376,7 @@ function addProvinceLabels() {
     const marker = new window.maplibregl.Marker({ element, anchor: "center" })
       .setLngLat(province.centroid)
       .addTo(state.map);
-    state.labelMarkers.push({ marker, element, code: province.province_code, sourceCount });
+    state.labelMarkers.push({ marker, element, code: province.province_code, region: province.region });
   });
   updateLabelVisibility();
 }
@@ -738,6 +963,12 @@ async function selectProvince(code, moveMap = true) {
   const provinceMeta = provinceByCode(normalized);
   if (!provinceMeta) return;
   state.hoverPopup?.remove();
+  if (provinceMeta.region && state.selectedRegion !== provinceMeta.region) {
+    state.selectedRegion = provinceMeta.region;
+    document.getElementById("backToCountry").hidden = false;
+    setPrompt(`${provinceMeta.region}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+    applyRegionFocus();
+  }
 
   const previousCode = state.selectedCode;
   setFeatureSelection(normalized);
@@ -800,16 +1031,7 @@ function toggleCulturalPoints() {
 }
 
 function resetMap() {
-  closePanel();
-  if (!state.mapLoaded) return;
-  state.map.fitBounds(THAILAND_BOUNDS, {
-    padding: window.matchMedia("(max-width: 720px)").matches
-      ? { top: 84, right: 16, bottom: 96, left: 16 }
-      : { top: 96, right: 60, bottom: 80, left: 60 },
-    pitch: 0,
-    bearing: 0,
-    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
-  });
+  backToCountry();
 }
 
 function bindEvents() {
@@ -818,7 +1040,11 @@ function bindEvents() {
   });
   document.getElementById("closePanel").addEventListener("click", closePanel);
   document.getElementById("resetMap").addEventListener("click", resetMap);
+  document.getElementById("backToCountry").addEventListener("click", backToCountry);
   document.getElementById("togglePoints").addEventListener("click", toggleCulturalPoints);
+  document.querySelectorAll("[data-map-mode]").forEach((button) => {
+    button.addEventListener("click", () => setMapMode(button.dataset.mapMode));
+  });
   document.getElementById("retryProvince").addEventListener("click", () => {
     if (state.selectedCode) selectProvince(state.selectedCode, false);
   });
@@ -893,13 +1119,12 @@ function initMap() {
   map.on("load", () => {
     state.mapLoaded = true;
     map.addSource("provinces", { type: "geojson", data: state.boundaries, promoteId: "province_code" });
-    const paint = metricPaint();
     map.addLayer({
       id: "province-base",
       type: "fill",
       source: "provinces",
       paint: {
-        "fill-color": paint.color,
+        "fill-color": buildFillExpression(state.mapMode),
         "fill-opacity": [
           "case",
           ["boolean", ["feature-state", "hover"], false],
@@ -991,9 +1216,15 @@ function initMap() {
       map.setFeatureState({ source: "provinces", id: code }, { hover: true });
       const province = provinceByCode(code);
       if (province) {
+        const config = MAP_MODES[state.mapMode];
+        const value = config.value(province);
+        const valueLine = value === null ? config.zeroLabel : config.format(value);
+        const hint = !state.selectedRegion
+          ? `คลิกเพื่อซูม${escapeHtml(province.region)}`
+          : "คลิกเพื่อเปิดข้อมูล";
         state.hoverPopup
           .setLngLat(event.lngLat)
-          .setHTML(`<strong>${escapeHtml(province.province_name_th)}</strong><span>เชื่อมได้ ${formatNumber(province.evidence_source_count)} แหล่ง</span><small>คลิกเพื่อเปิดข้อมูล</small>`)
+          .setHTML(`<strong>${escapeHtml(province.province_name_th)}</strong><span>${escapeHtml(valueLine)}</span><small>${hint}</small>`)
           .addTo(map);
       }
       updateLabelVisibility();
@@ -1007,7 +1238,13 @@ function initMap() {
     });
     map.on("click", "province-base", (event) => {
       const code = event.features?.[0]?.properties?.province_code;
-      if (code) selectProvince(code, true);
+      if (!code) return;
+      const region = provinceByCode(code)?.region;
+      if (!state.selectedRegion || state.selectedRegion !== region) {
+        selectRegion(region);
+        return;
+      }
+      selectProvince(code, true);
     });
     map.on("click", "cultural-clusters", async (event) => {
       const feature = event.features?.[0];
@@ -1019,9 +1256,9 @@ function initMap() {
       const code = event.features?.[0]?.properties?.province_code;
       if (code) selectProvince(code, true);
     });
-    map.on("zoomend", updateLabelVisibility);
-
     addProvinceLabels();
+    addRegionMarkers();
+    applyRegionFocus();
     if (state.selectedCode) {
       map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: true });
       fitProvince(provinceByCode(state.selectedCode));
@@ -1049,6 +1286,8 @@ async function loadDashboard() {
       pointResponse.json(),
     ]);
     renderOverview();
+    computeRegions();
+    renderLegend();
     bindEvents();
     initMap();
 
