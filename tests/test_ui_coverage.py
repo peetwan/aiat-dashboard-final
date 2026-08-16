@@ -33,7 +33,7 @@ def test_province_panel_separates_decisions_projects_people_and_quality() -> Non
     for label in ("ภาพรวม", "โครงการและงบ", "คนและพื้นที่", "มิติการพัฒนา", "คุณภาพข้อมูล"):
         assert label in template
     for element_id in (
-        "decisionChain",
+        "overviewFlow",
         "researchSection",
         "sraAreaSection",
         "povertySection",
@@ -109,20 +109,42 @@ def test_executive_ui_is_summary_first_and_mobile_tabs_do_not_clip() -> None:
     assert "white-space: normal" in styles
 
 
-def test_province_preview_is_one_glance_and_links_to_full_detail() -> None:
+def test_province_preview_visualizes_only_province_data_and_links_to_full_detail() -> None:
     template = read("app/templates/index.html")
     script = read("app/static/app.js")
     styles = read("app/static/styles.css")
+    overview_template = template.split('data-panel-view="overview"', 1)[1].split('data-panel-view="projects"', 1)[0]
+    overview_script = script.split("function renderOverview(summary)", 1)[1].split("function renderSraArea", 1)[0]
+    overview_styles = styles.split("/* Province preview:", 1)[1].split("/* Executive readability pass:", 1)[0]
 
-    assert "ภาพรวม 20 วินาที" in template
-    assert 'id="fullProvinceLink"' in template
-    assert "ดูข้อมูลจังหวัดฉบับเต็ม" in template
-    assert "ตอบได้ตอนนี้" in script
-    assert "ยังตอบไม่ได้" in script
+    assert "ข้อมูลสำคัญของจังหวัด" in overview_template
+    for element_id in (
+        "overviewMetrics",
+        "overviewFlow",
+        "overviewTrlChart",
+        "overviewOutcomeChart",
+        "overviewDistricts",
+        "overviewFunding",
+        "fullProvinceLink",
+    ):
+        assert f'id="{element_id}"' in overview_template
+    assert "เปิดข้อมูลจังหวัดฉบับเต็ม" in overview_template
+    assert "ตอบได้ตอนนี้" not in overview_script
+    assert "ยังตอบไม่ได้" not in overview_script
+    assert "available_source_count" not in overview_script
+    assert "public_source_count" not in overview_script
+    assert 'id="coverageLabel"' not in template
+    assert 'id="coverageCount"' not in template
+    assert "trl_distribution" in overview_script
+    assert "TRL" in overview_template
+    assert "ROI / SROI" in overview_script
     assert "`/province/${province.province_code}`" in script
-    assert ".overview-kpi-grid" in styles
-    assert ".overview-answer-grid" in styles
-    assert ".overview-full-cta" in styles
+    assert ".province-kpi-grid" in overview_styles
+    assert ".overview-flow" in overview_styles
+    assert ".overview-bar-row" in overview_styles
+    assert ".overview-full-cta" in overview_styles
+    assert "gradient" not in overview_styles
+    assert "→" not in overview_template
 
 
 def test_full_province_page_exposes_every_public_section_with_progressive_detail() -> None:

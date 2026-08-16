@@ -92,7 +92,6 @@
             </div>
             <div class="hero-chips">
               <span class="hero-chip" id="provinceMeta">จังหวัด</span>
-              <span class="hero-chip coverage-chip"><i aria-hidden="true"></i><strong id="coverageLabel">—</strong><small id="coverageCount">กำลังตรวจข้อมูล</small></span>
             </div>
           </section>
 
@@ -107,14 +106,33 @@
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
               <div class="panel-section overview-glance-section">
-                <div class="section-heading"><span>ภาพรวม 20 วินาที</span><small>ตัวเลขหลักและข้อจำกัดที่ต้องรู้ทันที</small></div>
-                <div class="overview-kpi-grid" id="pillarGrid"></div>
-                <div class="overview-answer-grid briefing-narrative" id="decisionNarrative"></div>
-                <div class="overview-chain-heading"><span>เส้นทางหลักฐาน</span><small>โจทย์ → ทุน → ทำงาน → ผลผลิต → ผลลัพธ์</small></div>
-                <div class="decision-chain overview-chain" id="decisionChain"></div>
-                <div class="decision-grid overview-context" id="executiveSignals"></div>
+                <div class="section-heading overview-heading"><span>ข้อมูลสำคัญของจังหวัด</span><small>โครงการ คน พื้นที่ และผลงานที่เชื่อมได้</small></div>
+                <div class="province-kpi-grid" id="overviewMetrics"></div>
+
+                <section class="overview-viz-card overview-flow-card">
+                  <header><h3>จากโครงการถึงข้อมูลผลลัพธ์</h3><small>ตัวเลขแต่ละจุดเป็นคนละหน่วยนับ</small></header>
+                  <div class="overview-flow" id="overviewFlow"></div>
+                </section>
+
+                <div class="overview-viz-grid" id="overviewVizGrid">
+                  <section class="overview-viz-card" id="overviewTrlSection">
+                    <header><h3>ระดับความพร้อมของนวัตกรรม</h3><small>สัดส่วนรายการตาม TRL</small></header>
+                    <div class="overview-bars" id="overviewTrlChart"></div>
+                  </section>
+                  <section class="overview-viz-card" id="overviewOutcomeSection">
+                    <header><h3>ข้อมูลที่พบในทะเบียนผลงาน</h3><small id="overviewOutcomeNote"></small></header>
+                    <div class="overview-bars" id="overviewOutcomeChart"></div>
+                  </section>
+                </div>
+
+                <section class="overview-viz-card overview-geography" id="overviewGeographySection">
+                  <header><h3>พื้นที่ดำเนินงาน</h3><strong id="overviewDistrictCount"></strong></header>
+                  <div class="overview-districts" id="overviewDistricts"></div>
+                </section>
+
+                <section class="overview-funding" id="overviewFunding" hidden></section>
                 <a class="overview-full-cta" id="fullProvinceLink" href="#">
-                  <span><strong>ดูข้อมูลจังหวัดฉบับเต็ม</strong><small>โครงการ คน พื้นที่ ทุกมิติ แหล่งข้อมูล และสถานะ API</small></span><b>ดูเพิ่มเติม →</b>
+                  <span><strong>เปิดข้อมูลจังหวัดฉบับเต็ม</strong><small>ดูรายละเอียดโครงการ คน พื้นที่ และคุณภาพข้อมูล</small></span><b>เปิดหน้า</b>
                 </a>
               </div>
             </section>

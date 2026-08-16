@@ -48,7 +48,7 @@ def test_dashboard_and_endpoint_inventory():
         assert "โครงการและงบ" in page.text
         assert "คนและพื้นที่" in page.text
         assert "คุณภาพข้อมูล" in page.text
-        assert 'id="decisionChain"' in page.text
+        assert 'id="overviewFlow"' in page.text
         assert 'id="dataQualitySummary"' in page.text
         assert 'href="/insights"' in page.text
         assert "สำรวจรายละเอียดตามมิติ" not in page.text

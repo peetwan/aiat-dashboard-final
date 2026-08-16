@@ -17,7 +17,7 @@ AIAT Provincial Evidence Map เป็น public decision-support interface ไ�
 - Desktop ใช้ side panel; mobile ใช้ bottom sheet
 - Province panel โหลด `/summary` ก่อนและโหลด `/briefing` สำหรับรายละเอียด/provenance
 - เนื้อหาแบ่งเป็น 5 แท็บตามงานตัดสินใจ:
-  - **ภาพรวม** — 4 KPI ที่รักษา grain, สิ่งที่ตอบได้/ยังตอบไม่ได้, decision chain และปุ่มข้อมูลฉบับเต็ม
+  - **ภาพรวม** — 3 ตัวเลขจังหวัดขนาดใหญ่, flow แบบเส้นจากโครงการถึงการติดตามผล, กราฟ TRL/ทะเบียนผลงาน, อำเภอ และทุนที่ผูกกับนวัตกรรม; source coverage อยู่ในแท็บคุณภาพข้อมูลเท่านั้น
   - **โครงการและงบ** — provisional project groups, participant records, innovation, research/IP/ROI/SROI และ funding caveat
   - **คนและพื้นที่** — SRA/PPPConnext target groups และ area context
   - **มิติการพัฒนา** — context/need, input, activity, output, outcome labels
@@ -52,7 +52,7 @@ Province panel ออกแบบสำหรับการอ่านแบ�
 - แท็บภาพรวมต้องอ่านจบได้ใน 20 วินาที: project groups, participant records, innovations และ source coverage ต้องแยกกัน พร้อมบอก data gaps โดยไม่ใช้พื้นที่หนึ่งในสามกับ metric ที่ไม่มีค่า
 - หน้า full detail ต้องเปิดทุก field ใน public projection ได้ผ่าน collapsed details; รายการยาวแสดงครั้งละส่วน ค้นหาและโหลดเพิ่มได้ เพื่อคงความครบโดยไม่ทำลาย readability
 - สถานะ API ต้องบอกความต่างระหว่าง “connector ดึงได้”, “candidate ผ่าน validation” และ “public revision ได้รับอนุมัติ” อย่างชัดเจน
-- QA ต้องตรวจอย่างน้อยที่ `1440×1000`, `390×844` และ `320×800`: แท็บต้องอยู่ใน panel, decision chain/กราฟต้องไม่ล้น และค่าบนกราฟต้องมองเห็นครบ
+- QA ต้องตรวจอย่างน้อยที่ `1440×1000`, `390×844` และ `320×800`: แท็บต้องอยู่ใน panel, flow/กราฟต้องไม่ล้น และค่าบนกราฟต้องมองเห็นครบ
 
 ## Reference patterns
 
