@@ -20,6 +20,7 @@ const state = {
   hoverPopup: null,
   mapMode: "projects",
   selectedRegion: null,
+  hoveredRegion: null,
   regions: {},
   regionMarkers: [],
 };
@@ -36,6 +37,7 @@ const MAP_MODES = {
     zeroLabel: "ไม่มีในทะเบียน",
     value: (province) => Number(province.area_based_participant_records || 0) || null,
     format: (value) => `${formatNumber(value)} โครงการ`,
+    summarize: (total) => `${formatNumber(total)} โครงการ`,
     steps: [
       { min: 40, color: "#14532e", label: "40+" },
       { min: 15, color: "#2e7d51", label: "15–39" },
@@ -53,6 +55,7 @@ const MAP_MODES = {
         ? null
         : Number(province.sra_overall_score),
     format: (value) => `คะแนนรวม ${value.toFixed(2)}`,
+    summarize: (total, withData) => `คะแนนเฉลี่ย ${(total / withData).toFixed(2)}`,
     steps: [
       { max: 1.8, color: "#b4551d", label: "≤ 1.80" },
       { max: 1.95, color: "#dd8a4a", label: "1.81–1.95" },
@@ -66,6 +69,7 @@ const MAP_MODES = {
     zeroLabel: "ไม่มีในทะเบียน",
     value: (province) => Number(province.innovation_records || 0) || null,
     format: (value) => `${formatNumber(value)} นวัตกรรม`,
+    summarize: (total) => `${formatNumber(total)} นวัตกรรม`,
     steps: [
       { min: 40, color: "#1d5482", label: "40+" },
       { min: 15, color: "#3a78a8", label: "15–39" },
@@ -80,6 +84,7 @@ const MAP_MODES = {
     zeroLabel: "0 แหล่ง",
     value: (province) => Number(province.evidence_source_count || 0) || null,
     format: (value) => `เชื่อมได้ ${formatNumber(value)} แหล่ง`,
+    summarize: (total, withData) => `เฉลี่ย ${(total / withData).toFixed(1)} แหล่งต่อจังหวัด`,
     steps: [
       { min: 6, color: "#176747", label: "6+" },
       { min: 4, color: "#54a578", label: "4–5" },
@@ -105,17 +110,27 @@ function modeColor(mode, value) {
 }
 
 function buildFillExpression(mode) {
+  // Selection is drawn as an ink outline so the mode color stays truthful.
   const expression = ["match", ["get", "province_code"]];
   state.catalog.provinces.forEach((province) => {
     expression.push(province.province_code, modeColor(mode, MAP_MODES[mode].value(province)));
   });
   expression.push(NO_DATA_COLOR);
-  return [
-    "case",
-    ["boolean", ["feature-state", "selected"], false],
-    "#0f4a32",
-    expression,
-  ];
+  return expression;
+}
+
+function regionSummary(mode, regionName) {
+  const config = MAP_MODES[mode];
+  let total = 0;
+  let withData = 0;
+  (state.regions[regionName]?.codes || []).forEach((code) => {
+    const value = config.value(provinceByCode(code) || {});
+    if (value !== null && value !== undefined) {
+      total += value;
+      withData += 1;
+    }
+  });
+  return { total, withData };
 }
 
 function renderLegend() {
@@ -293,8 +308,10 @@ function addRegionMarkers() {
     const element = document.createElement("button");
     element.type = "button";
     element.className = "region-label";
-    element.innerHTML = `<strong>${escapeHtml(region.name)}</strong><span>${formatNumber(region.codes.length)} จังหวัด</span>`;
+    element.innerHTML = `<strong>${escapeHtml(region.name.replace(/^ภาค/, ""))}</strong><span>${formatNumber(region.codes.length)}</span>`;
     element.setAttribute("aria-label", `ซูมเข้าไปดู${region.name}`);
+    element.addEventListener("mouseenter", () => setHoveredRegion(region.name));
+    element.addEventListener("mouseleave", () => setHoveredRegion(null));
     element.addEventListener("click", (event) => {
       event.stopPropagation();
       selectRegion(region.name);
@@ -308,23 +325,41 @@ function addRegionMarkers() {
 
 function applyRegionFocus() {
   if (!state.mapLoaded) return;
-  const hoverOpacity = ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.94];
-  if (!state.selectedRegion) {
-    state.map.setPaintProperty("province-base", "fill-opacity", hoverOpacity);
+  if (state.selectedRegion) {
+    const codes = state.regions[state.selectedRegion]?.codes || [];
+    state.map.setPaintProperty("province-base", "fill-opacity", [
+      "*",
+      ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.94],
+      ["match", ["get", "province_code"], codes, 1, 0.28],
+    ]);
     return;
   }
-  const codes = state.regions[state.selectedRegion]?.codes || [];
-  state.map.setPaintProperty("province-base", "fill-opacity", [
-    "*",
-    hoverOpacity,
-    ["match", ["get", "province_code"], codes, 1, 0.3],
-  ]);
+  // Country view: provinces are not individually interactive — the whole
+  // hovered region brightens while the rest recede.
+  if (state.hoveredRegion) {
+    const codes = state.regions[state.hoveredRegion]?.codes || [];
+    state.map.setPaintProperty("province-base", "fill-opacity", [
+      "match", ["get", "province_code"], codes, 1, 0.45,
+    ]);
+    return;
+  }
+  state.map.setPaintProperty("province-base", "fill-opacity", 0.94);
+}
+
+function setHoveredRegion(name) {
+  if (state.hoveredRegion === name) return;
+  state.hoveredRegion = name;
+  state.regionMarkers.forEach(({ element, name: markerName }) => {
+    element.classList.toggle("is-hovered", markerName === name);
+  });
+  applyRegionFocus();
 }
 
 function selectRegion(name, moveMap = true) {
   const region = state.regions[name];
   if (!region) return;
   state.selectedRegion = name;
+  setHoveredRegion(null);
   state.hoverPopup?.remove();
   document.getElementById("backToCountry").hidden = false;
   setPrompt(`${name}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
@@ -344,6 +379,7 @@ function selectRegion(name, moveMap = true) {
 
 function backToCountry() {
   state.selectedRegion = null;
+  setHoveredRegion(null);
   closePanel();
   document.getElementById("backToCountry").hidden = true;
   setPrompt("เลือกภาค แล้วเจาะลงรายจังหวัด", "ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง");
@@ -1098,7 +1134,7 @@ function initMap() {
     },
     minZoom: 3.6,
     maxZoom: 13,
-    maxBounds: [[88, 0], [114, 27]],
+    maxBounds: [[93.5, 3.2], [109.5, 22.5]],
     pitch: 0,
     bearing: 0,
     pitchWithRotate: false,
@@ -1151,21 +1187,21 @@ function initMap() {
         "line-color": [
           "case",
           ["boolean", ["feature-state", "selected"], false],
-          "#0f4a32",
-          "#1d7a52",
+          "#141d18",
+          "#2c4237",
         ],
         "line-width": [
           "case",
           ["boolean", ["feature-state", "selected"], false],
-          3,
-          2.2,
+          2.6,
+          1.8,
         ],
         "line-opacity": [
           "case",
           ["boolean", ["feature-state", "selected"], false],
           1,
           ["boolean", ["feature-state", "hover"], false],
-          1,
+          0.9,
           0,
         ],
       },
@@ -1210,38 +1246,73 @@ function initMap() {
     map.on("mousemove", "province-base", (event) => {
       map.getCanvas().style.cursor = "pointer";
       const code = event.features?.[0]?.properties?.province_code;
-      if (!code || code === state.hoveredCode) return;
+      const province = code ? provinceByCode(code) : null;
+      if (!province) return;
+
+      if (!state.selectedRegion) {
+        // Country view is region-only: no per-province hover or popup.
+        if (state.hoveredCode) {
+          map.setFeatureState({ source: "provinces", id: state.hoveredCode }, { hover: false });
+          state.hoveredCode = null;
+        }
+        setHoveredRegion(province.region);
+        const summary = regionSummary(state.mapMode, province.region);
+        const config = MAP_MODES[state.mapMode];
+        const detail = summary.withData
+          ? `${escapeHtml(config.summarize(summary.total, summary.withData))} · มีข้อมูล ${formatNumber(summary.withData)} จังหวัด`
+          : "ยังไม่มีข้อมูลในมุมมองนี้";
+        state.hoverPopup
+          .setLngLat(event.lngLat)
+          .setHTML(`<strong>${escapeHtml(province.region)}</strong><span>${detail}</span><small>คลิกเพื่อซูมเข้าภาค</small>`)
+          .addTo(map);
+        return;
+      }
+
+      setHoveredRegion(null);
+      if (code === state.hoveredCode) return;
       if (state.hoveredCode) map.setFeatureState({ source: "provinces", id: state.hoveredCode }, { hover: false });
       state.hoveredCode = code;
       map.setFeatureState({ source: "provinces", id: code }, { hover: true });
-      const province = provinceByCode(code);
-      if (province) {
-        const config = MAP_MODES[state.mapMode];
-        const value = config.value(province);
-        const valueLine = value === null ? config.zeroLabel : config.format(value);
-        const hint = !state.selectedRegion
-          ? `คลิกเพื่อซูม${escapeHtml(province.region)}`
-          : "คลิกเพื่อเปิดข้อมูล";
-        state.hoverPopup
-          .setLngLat(event.lngLat)
-          .setHTML(`<strong>${escapeHtml(province.province_name_th)}</strong><span>${escapeHtml(valueLine)}</span><small>${hint}</small>`)
-          .addTo(map);
-      }
+      const config = MAP_MODES[state.mapMode];
+      const value = config.value(province);
+      const valueLine = value === null ? config.zeroLabel : config.format(value);
+      const inActiveRegion = province.region === state.selectedRegion;
+      const hint = inActiveRegion
+        ? (code === state.selectedCode ? "คลิกอีกครั้งเพื่อยกเลิก" : "คลิกเพื่อเปิดข้อมูล")
+        : `คลิกเพื่อไป${escapeHtml(province.region)}`;
+      state.hoverPopup
+        .setLngLat(event.lngLat)
+        .setHTML(`<strong>${escapeHtml(province.province_name_th)}</strong><span>${escapeHtml(valueLine)}</span><small>${hint}</small>`)
+        .addTo(map);
       updateLabelVisibility();
     });
     map.on("mouseleave", "province-base", () => {
       map.getCanvas().style.cursor = "";
       if (state.hoveredCode) map.setFeatureState({ source: "provinces", id: state.hoveredCode }, { hover: false });
       state.hoveredCode = null;
+      setHoveredRegion(null);
       state.hoverPopup?.remove();
       updateLabelVisibility();
     });
-    map.on("click", "province-base", (event) => {
-      const code = event.features?.[0]?.properties?.province_code;
-      if (!code) return;
-      const region = provinceByCode(code)?.region;
-      if (!state.selectedRegion || state.selectedRegion !== region) {
-        selectRegion(region);
+    map.on("click", (event) => {
+      const culturalHits = map.queryRenderedFeatures(event.point, {
+        layers: ["cultural-clusters", "cultural-point"],
+      });
+      if (culturalHits.length) return;
+      const features = map.queryRenderedFeatures(event.point, { layers: ["province-base"] });
+      if (!features.length) {
+        if (state.selectedCode) closePanel();
+        return;
+      }
+      const code = features[0]?.properties?.province_code;
+      const province = code ? provinceByCode(code) : null;
+      if (!province) return;
+      if (!state.selectedRegion || state.selectedRegion !== province.region) {
+        selectRegion(province.region);
+        return;
+      }
+      if (code === state.selectedCode) {
+        closePanel();
         return;
       }
       selectProvince(code, true);
@@ -1259,10 +1330,23 @@ function initMap() {
     addProvinceLabels();
     addRegionMarkers();
     applyRegionFocus();
+    // Lock the first view: the whole country always fits the screen and the
+    // user cannot zoom out past it.
+    map.setMinZoom(Math.max(3.2, map.getZoom() - 0.15));
     if (state.selectedCode) {
       map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: true });
       fitProvince(provinceByCode(state.selectedCode));
     }
+  });
+
+  window.addEventListener("resize", () => {
+    if (!state.mapLoaded || state.selectedRegion || state.selectedCode) return;
+    map.fitBounds(THAILAND_BOUNDS, {
+      padding: window.matchMedia("(max-width: 720px)").matches
+        ? { top: 84, right: 16, bottom: 96, left: 16 }
+        : { top: 96, right: 60, bottom: 80, left: 60 },
+      duration: 0,
+    });
   });
 
   map.on("error", (event) => {

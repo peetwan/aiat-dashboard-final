@@ -1690,3 +1690,146 @@
     body.panel-open .mode-dock { opacity: 0; pointer-events: none; }
   }
 }
+
+/* Premium editorial pass: restrained ink-and-ivory chrome, region-only
+   country view, selection drawn as outline instead of a paint-over. */
+@layer lightmap {
+  :root {
+    --paper: #f1f2ed;
+    --ink-strong: #141d18;
+    --ink-soft: #5a675f;
+    --green: #17573f;
+    --green-deep: #123f2e;
+    --hairline: rgba(20, 29, 24, 0.12);
+    --card: rgba(255, 255, 255, 0.92);
+  }
+
+  body { background: var(--paper); }
+  .atlas-shell { background: var(--paper); }
+
+  /* Region chips: single-line, ink, quiet until hovered */
+  .region-label {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(20, 29, 24, 0.88);
+    border-radius: 10px;
+    box-shadow: 0 6px 22px rgba(16, 26, 20, 0.22);
+    backdrop-filter: blur(6px);
+  }
+  .region-label strong { color: #f4f6f2; font-size: 13px; font-weight: 700; letter-spacing: 0.01em; }
+  .region-label span { color: rgba(233, 240, 233, 0.55); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .region-label:hover, .region-label.is-hovered {
+    background: #f4f6f2;
+    border-color: rgba(20, 29, 24, 0.2);
+    transform: translateY(-1px);
+  }
+  .region-label:hover strong, .region-label.is-hovered strong { color: var(--ink-strong); }
+  .region-label:hover span, .region-label.is-hovered span { color: var(--ink-soft); }
+
+  /* Header: straighten the brand, hairline surfaces */
+  .brand { border-color: var(--hairline); background: var(--card); border-radius: 12px; box-shadow: 0 4px 18px rgba(16, 26, 20, 0.08); }
+  .brand-mark { background: var(--ink-strong); border-radius: 8px; transform: none; }
+  .brand-mark i { background: #8fe0b6; }
+  .brand strong { letter-spacing: 0.05em; }
+  .province-picker { border-color: var(--hairline); background: var(--card); border-radius: 12px; box-shadow: 0 8px 30px rgba(16, 26, 20, 0.1); }
+  .picker-dot { background: var(--green); box-shadow: none; }
+  .picker-chevron { color: var(--ink-soft); font-size: 18px; }
+  .live-state, .header-meta a { border-color: var(--hairline); background: var(--card); border-radius: 10px; }
+  .header-meta a { color: #f4f6f2; background: var(--ink-strong); border-color: var(--ink-strong); }
+  .header-meta .insights-link { color: var(--ink-strong); background: var(--card); border-color: var(--hairline); }
+  .live-state i { background: var(--green); box-shadow: none; }
+
+  /* Prompt: quiet caption, no gimmick pointer */
+  .map-prompt { padding: 9px 14px; border-color: var(--hairline); background: var(--card); border-radius: 10px; box-shadow: 0 4px 16px rgba(16, 26, 20, 0.07); }
+  .prompt-pointer { display: none; }
+  .map-prompt strong { font-size: 12px; font-weight: 700; }
+  .map-prompt small { color: var(--ink-soft); }
+
+  .map-actions button { border-color: var(--hairline); background: var(--card); border-radius: 10px; box-shadow: 0 4px 16px rgba(16, 26, 20, 0.07); }
+  #backToCountry { color: #f4f6f2; background: var(--ink-strong); border-color: var(--ink-strong); }
+  #backToCountry[hidden] { display: none; }
+
+  /* Mode dock: ink active state, squared geometry */
+  .mode-dock { min-height: 52px; padding: 5px; border-color: var(--hairline); background: var(--card); border-radius: 14px; box-shadow: 0 10px 34px rgba(16, 26, 20, 0.12); }
+  .mode-dock .dock-label { color: var(--ink-soft); }
+  .mode-dock button { min-height: 40px; border-radius: 10px; font-size: 12px; }
+  .mode-dock button:hover { background: rgba(20, 29, 24, 0.05); }
+  .mode-dock button.active { color: #f4f6f2; background: var(--ink-strong); }
+  .mode-dock button i { width: 7px; height: 7px; }
+
+  /* Legend: hairline card, square swatches */
+  .evidence-legend { width: 264px; padding: 13px 14px; border-color: var(--hairline); background: var(--card); border-radius: 12px; box-shadow: 0 8px 28px rgba(16, 26, 20, 0.1); }
+  .evidence-legend strong { color: var(--ink-strong); font-size: 12px; }
+  .evidence-legend small { color: var(--ink-soft); }
+  .evidence-legend ol { margin-top: 9px; gap: 5px 10px; }
+  .evidence-legend li { color: var(--ink-soft); font-size: 10px; }
+  .evidence-legend i { width: 11px; height: 11px; border-radius: 3px; }
+
+  .evidence-popup .maplibregl-popup-content { border-color: var(--hairline); border-radius: 10px; box-shadow: 0 10px 30px rgba(16, 26, 20, 0.16); }
+  .evidence-popup span { color: var(--green); font-weight: 650; }
+
+  .province-map-label { border-color: var(--hairline); background: rgba(255, 255, 255, 0.92); border-radius: 8px; box-shadow: 0 2px 10px rgba(16, 26, 20, 0.1); }
+  .province-map-label:hover, .province-map-label.is-hovered, .province-map-label.is-active {
+    color: #f4f6f2;
+    background: var(--ink-strong);
+    border-color: var(--ink-strong);
+    transform: translateY(-1px);
+  }
+
+  /* Panel: squarer, calmer, single accent */
+  .province-panel { border: 1px solid var(--hairline); background: #f7f8f4; border-radius: 20px; box-shadow: 0 24px 80px rgba(16, 26, 20, 0.18); }
+  .panel-content { background: #f7f8f4; }
+  .panel-head { padding-top: 14px; }
+  .api-chip { color: var(--green); }
+  .api-chip i { background: var(--green); box-shadow: none; }
+  .panel-close { background: rgba(20, 29, 24, 0.06); border-radius: 12px; }
+  .panel-close:hover { background: var(--ink-strong); transform: none; }
+
+  .province-title-block h1 { color: var(--ink-strong); letter-spacing: -0.03em; }
+  .hero-chip { border-color: var(--hairline); border-radius: 10px; }
+  .coverage-chip i { background: var(--green); }
+
+  .panel-tabs { border: 1px solid var(--hairline); background: rgba(20, 29, 24, 0.045); border-radius: 12px; }
+  .panel-tabs button { border-radius: 9px; }
+  .panel-tabs button.active { color: #f4f6f2; background: var(--ink-strong); box-shadow: none; }
+  .panel-tabs button:hover:not(.active) { color: var(--ink-strong); background: rgba(255, 255, 255, 0.85); }
+
+  .panel-section { padding: 24px 26px; }
+  .research-section, .briefing-section, .executive-overview { background: transparent; }
+  .decision-section { background: rgba(20, 29, 24, 0.035); }
+  .section-heading > span { font-size: 15px; letter-spacing: -0.01em; }
+  .section-heading small { color: var(--ink-soft); }
+
+  .research-stats article, .research-block, .executive-dimension, .data-card, .clean-metric, .decision-card {
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    box-shadow: none;
+  }
+  .research-stats strong { font-size: 25px; letter-spacing: -0.02em; }
+  .research-stats span, .funding-grid span, .decision-card > span { color: var(--ink-soft); }
+  .research-bar-row > i b { background: var(--green); }
+  .district-chip { border: 1px solid var(--hairline); background: #fff; border-radius: 10px; }
+  .district-chip:hover { background: var(--ink-strong); border-color: var(--ink-strong); transform: none; }
+  .district-chip:hover strong, .district-chip:hover span { color: #f4f6f2; }
+  .funding-grid article { background: rgba(20, 29, 24, 0.04); border-radius: 10px; }
+  .research-gaps { border-color: var(--hairline); }
+
+  .data-card:hover { transform: none; border-color: rgba(20, 29, 24, 0.28); box-shadow: none; }
+  .decision-card:hover { border-color: rgba(20, 29, 24, 0.28); }
+  .project-people { background: rgba(23, 87, 63, 0.07); border-radius: 10px; }
+  .record-kicker span { color: var(--green); background: rgba(23, 87, 63, 0.09); }
+  .load-more, .panel-footer > a { border-radius: 10px; }
+  .panel-footer { border: 1px solid var(--hairline); background: rgba(20, 29, 24, 0.035); }
+  .briefing-fact { border-color: var(--hairline); border-radius: 12px; }
+  .source-row { border-color: var(--hairline); border-radius: 12px; }
+  .tourism-block, .tourism-facts article { border-color: var(--hairline); }
+
+  @media (max-width: 720px) {
+    .region-label { padding: 7px 11px; }
+    .region-label strong { font-size: 12px; }
+    .province-panel { border-radius: 18px; }
+  }
+}
