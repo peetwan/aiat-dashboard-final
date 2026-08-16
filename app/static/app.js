@@ -44,6 +44,15 @@ const MAP_MODES = {
       { min: 5, color: "#63ac79", label: "5–14" },
       { min: 1, color: "#a9d3b8", label: "1–4" },
     ],
+    regionLegendTitle: "โครงการ บพท. รวมรายภาค",
+    regionLegendNote: "สีเข้ม = โครงการรวมมาก · คลิกภาคเพื่อดูรายจังหวัด",
+    regionValue: (summary) => (summary.withData ? summary.total : null),
+    regionSteps: [
+      { min: 300, color: "#14532e", label: "300+" },
+      { min: 200, color: "#2e7d51", label: "200–299" },
+      { min: 100, color: "#63ac79", label: "100–199" },
+      { min: 1, color: "#a9d3b8", label: "1–99" },
+    ],
   },
   sra: {
     label: "ความเปราะบาง",
@@ -57,6 +66,14 @@ const MAP_MODES = {
     format: (value) => `คะแนนรวม ${value.toFixed(2)}`,
     summarize: (total, withData) => `คะแนนเฉลี่ย ${(total / withData).toFixed(2)}`,
     steps: [
+      { max: 1.8, color: "#b4551d", label: "≤ 1.80" },
+      { max: 1.95, color: "#dd8a4a", label: "1.81–1.95" },
+      { max: Infinity, color: "#f2c49a", label: "> 1.95" },
+    ],
+    regionLegendTitle: "คะแนนทุนเฉลี่ยรายภาค (SRA-DSS)",
+    regionLegendNote: "สีเข้ม = คะแนนเฉลี่ยต่ำกว่า · คลิกภาคเพื่อดูรายจังหวัด",
+    regionValue: (summary) => (summary.withData ? summary.total / summary.withData : null),
+    regionSteps: [
       { max: 1.8, color: "#b4551d", label: "≤ 1.80" },
       { max: 1.95, color: "#dd8a4a", label: "1.81–1.95" },
       { max: Infinity, color: "#f2c49a", label: "> 1.95" },
@@ -76,6 +93,15 @@ const MAP_MODES = {
       { min: 5, color: "#6ba3cd", label: "5–14" },
       { min: 1, color: "#b0cde4", label: "1–4" },
     ],
+    regionLegendTitle: "นวัตกรรมพร้อมใช้รวมรายภาค",
+    regionLegendNote: "สีเข้ม = นวัตกรรมรวมมาก · คลิกภาคเพื่อดูรายจังหวัด",
+    regionValue: (summary) => (summary.withData ? summary.total : null),
+    regionSteps: [
+      { min: 300, color: "#1d5482", label: "300+" },
+      { min: 200, color: "#28679a", label: "200–299" },
+      { min: 100, color: "#3a78a8", label: "100–199" },
+      { min: 1, color: "#b0cde4", label: "1–99" },
+    ],
   },
   coverage: {
     label: "ความครอบคลุมข้อมูล",
@@ -91,32 +117,73 @@ const MAP_MODES = {
       { min: 2, color: "#a9d3b8", label: "2–3" },
       { min: 1, color: "#cfe4d4", label: "1" },
     ],
+    regionLegendTitle: "ความครอบคลุมข้อมูลเฉลี่ยรายภาค",
+    regionLegendNote: "สีเข้ม = เฉลี่ยหลายแหล่งต่อจังหวัด · คลิกภาคเพื่อดูรายจังหวัด",
+    regionValue: (summary) => (summary.withData ? summary.total / summary.withData : null),
+    regionSteps: [
+      { min: 5.5, color: "#176747", label: "5.5+" },
+      { min: 4.5, color: "#54a578", label: "4.5–5.4" },
+      { min: 3, color: "#a9d3b8", label: "3.0–4.4" },
+      { min: 0.01, color: "#cfe4d4", label: "< 3.0" },
+    ],
   },
 };
 
-function modeColor(mode, value) {
+function colorFromSteps(steps, value) {
   if (value === null || value === undefined) return NO_DATA_COLOR;
-  const config = MAP_MODES[mode];
-  if (config.steps[0].max !== undefined) {
-    for (const step of config.steps) {
+  if (steps[0].max !== undefined) {
+    for (const step of steps) {
       if (value <= step.max) return step.color;
     }
     return NO_DATA_COLOR;
   }
-  for (const step of config.steps) {
+  for (const step of steps) {
     if (value >= step.min) return step.color;
   }
   return NO_DATA_COLOR;
 }
 
+function modeColor(mode, value) {
+  return colorFromSteps(MAP_MODES[mode].steps, value);
+}
+
+function regionColor(mode, regionName) {
+  const config = MAP_MODES[mode];
+  return colorFromSteps(config.regionSteps, config.regionValue(regionSummary(mode, regionName)));
+}
+
 function buildFillExpression(mode) {
-  // Selection is drawn as an ink outline so the mode color stays truthful.
+  // Country level paints whole regions by their aggregate; inside a region
+  // provinces get their own colors. Selection is drawn as an ink outline so
+  // the mode color stays truthful.
   const expression = ["match", ["get", "province_code"]];
-  state.catalog.provinces.forEach((province) => {
-    expression.push(province.province_code, modeColor(mode, MAP_MODES[mode].value(province)));
-  });
+  if (!state.selectedRegion) {
+    const colorByRegion = {};
+    Object.keys(state.regions).forEach((name) => {
+      colorByRegion[name] = regionColor(mode, name);
+    });
+    state.catalog.provinces.forEach((province) => {
+      expression.push(province.province_code, colorByRegion[province.region] || NO_DATA_COLOR);
+    });
+  } else {
+    state.catalog.provinces.forEach((province) => {
+      expression.push(province.province_code, modeColor(mode, MAP_MODES[mode].value(province)));
+    });
+  }
   expression.push(NO_DATA_COLOR);
   return expression;
+}
+
+function applyFillForLevel() {
+  if (!state.mapLoaded) return;
+  state.map.setPaintProperty("province-base", "fill-color", buildFillExpression(state.mapMode));
+}
+
+function updateRegionMarkerColors() {
+  state.regionMarkers.forEach(({ element, name }) => {
+    const dot = element.querySelector("i");
+    if (dot) dot.style.background = regionColor(state.mapMode, name);
+  });
 }
 
 function regionSummary(mode, regionName) {
@@ -135,14 +202,20 @@ function regionSummary(mode, regionName) {
 
 function renderLegend() {
   const config = MAP_MODES[state.mapMode];
-  document.getElementById("legendTitle").textContent = config.legendTitle;
-  document.getElementById("legendNote").textContent = config.legendNote;
-  const ordered = config.steps[0].max !== undefined ? config.steps : [...config.steps].reverse();
+  const atCountry = !state.selectedRegion;
+  const steps = atCountry ? config.regionSteps : config.steps;
+  document.getElementById("legendTitle").textContent = atCountry
+    ? config.regionLegendTitle
+    : config.legendTitle;
+  document.getElementById("legendNote").textContent = atCountry
+    ? config.regionLegendNote
+    : config.legendNote;
+  const ordered = steps[0].max !== undefined ? steps : [...steps].reverse();
   document.getElementById("legendItems").innerHTML =
     ordered
       .map((step) => `<li><i style="background:${step.color}"></i><span>${escapeHtml(step.label)}</span></li>`)
       .join("") +
-    `<li><i style="background:${NO_DATA_COLOR}"></i><span>${escapeHtml(config.zeroLabel)}</span></li>`;
+    `<li><i style="background:${NO_DATA_COLOR}"></i><span>${escapeHtml(atCountry ? "ไม่มีข้อมูล" : config.zeroLabel)}</span></li>`;
 }
 
 function setMapMode(mode) {
@@ -152,9 +225,8 @@ function setMapMode(mode) {
     button.classList.toggle("active", button.dataset.mapMode === mode);
   });
   renderLegend();
-  if (state.mapLoaded) {
-    state.map.setPaintProperty("province-base", "fill-color", buildFillExpression(mode));
-  }
+  updateRegionMarkerColors();
+  applyFillForLevel();
 }
 
 function setPrompt(title, hint) {
@@ -308,7 +380,7 @@ function addRegionMarkers() {
     const element = document.createElement("button");
     element.type = "button";
     element.className = "region-label";
-    element.innerHTML = `<strong>${escapeHtml(region.name.replace(/^ภาค/, ""))}</strong><span>${formatNumber(region.codes.length)}</span>`;
+    element.innerHTML = `<i aria-hidden="true"></i><strong>${escapeHtml(region.name.replace(/^ภาค/, ""))}</strong><span>${formatNumber(region.codes.length)}</span>`;
     element.setAttribute("aria-label", `ซูมเข้าไปดู${region.name}`);
     element.addEventListener("mouseenter", () => setHoveredRegion(region.name));
     element.addEventListener("mouseleave", () => setHoveredRegion(null));
@@ -363,6 +435,8 @@ function selectRegion(name, moveMap = true) {
   state.hoverPopup?.remove();
   document.getElementById("backToCountry").hidden = false;
   setPrompt(`${name}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+  applyFillForLevel();
+  renderLegend();
   applyRegionFocus();
   updateLabelVisibility();
   if (moveMap && state.mapLoaded && region.bounds) {
@@ -416,6 +490,9 @@ function backToCountry() {
   closePanel();
   document.getElementById("backToCountry").hidden = true;
   setPrompt("เลือกภาค แล้วเจาะลงรายจังหวัด", "ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง");
+  applyFillForLevel();
+  renderLegend();
+  updateRegionMarkerColors();
   applyRegionFocus();
   updateLabelVisibility();
   if (state.mapLoaded) lockCountryView(true);
@@ -1027,6 +1104,8 @@ async function selectProvince(code, moveMap = true) {
     state.selectedRegion = provinceMeta.region;
     document.getElementById("backToCountry").hidden = false;
     setPrompt(`${provinceMeta.region}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+    applyFillForLevel();
+    renderLegend();
     applyRegionFocus();
   }
 
@@ -1352,6 +1431,7 @@ function initMap() {
     });
     addProvinceLabels();
     addRegionMarkers();
+    updateRegionMarkerColors();
     applyRegionFocus();
     lockCountryView();
     if (state.selectedCode) {

@@ -1841,3 +1841,46 @@
     .atlas-shell { height: 100dvh; }
   }
 }
+
+/* Thai typography pass: Thai script carries stacked vowels and tone marks,
+   so negative tracking and tight line-heights make it look crushed. Zero
+   tracking on Thai text, roomier line-heights, and readable sizes for the
+   tourism/culture cards that still used 10px type. */
+@layer lightmap {
+  .province-title-block h1 { letter-spacing: 0; }
+  .data-card h3 { letter-spacing: 0; line-height: 1.55; }
+  .section-heading > span { letter-spacing: 0; }
+  .decision-card > strong, .research-stats strong { letter-spacing: 0; }
+  .briefing-fact p { line-height: 1.65; }
+  .executive-dimension > header p { line-height: 1.65; }
+
+  .tourism-block h3 { font-size: 15px; line-height: 1.5; }
+  .tourism-block header span { font-size: 12px; }
+  .tourism-facts span { font-size: 12px; line-height: 1.5; }
+  .tourism-facts strong { font-size: 22px; }
+  .tourism-place { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 11px; }
+  .tourism-place img { width: 72px; height: 72px; }
+  .tourism-place span { font-size: 11px; }
+  .tourism-place strong { margin-top: 4px; font-size: 14px; line-height: 1.5; }
+  .tourism-place p { margin-top: 5px; font-size: 12px; line-height: 1.6; }
+  .schedule-row { min-height: 62px; padding: 11px 13px; gap: 12px; }
+  .schedule-row time { font-size: 15px; }
+  .schedule-row div strong { font-size: 13px; line-height: 1.5; }
+  .schedule-row div span { margin-top: 3px; font-size: 11.5px; line-height: 1.55; }
+  .schedule-row b { font-size: 12px; }
+  .tourism-station { padding: 12px; }
+  .tourism-station strong { font-size: 13px; line-height: 1.5; }
+  .tourism-station span { margin-top: 4px; font-size: 11.5px; }
+  .transport-tags span { padding: 7px 11px; font-size: 11.5px; line-height: 1.4; }
+  .tourism-source-link { font-size: 13px; }
+
+  .culture-card { grid-template-columns: 76px 1fr; gap: 13px; }
+  .culture-card > img { width: 76px; height: 76px; }
+  .culture-card > div > p { font-size: 13px; line-height: 1.6; }
+  .collection-tools label > span { font-size: 11px; }
+
+  @media (max-width: 720px) {
+    .tourism-place strong { font-size: 15px; }
+    .tourism-place p, .schedule-row div span, .tourism-station span { font-size: 12.5px; }
+  }
+}
