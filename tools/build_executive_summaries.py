@@ -60,7 +60,7 @@ DIMENSION_LABELS = {
     "housing": "ที่อยู่อาศัยและกำลังซื้อ",
     "risk": "ความเสี่ยงและความเปราะบาง",
     "livelihood": "ครัวเรือนและทุนดำรงชีพ",
-    "development": "โครงการและนวัตกรรม",
+    "development": "การดำเนินงานและผลผลิต",
     "urban": "บริการเมืองและคุณภาพชีวิต",
     "culture": "ทุนวัฒนธรรม",
 }
@@ -399,6 +399,79 @@ def sra_scores(briefing: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def sra_program_breakdowns(briefing: dict[str, Any]) -> list[dict[str, Any]]:
+    section = briefing.get("sections", {}).get("sra", {})
+    breakdowns: list[dict[str, Any]] = []
+    assistance = section.get("assistance_trend") or []
+    if assistance:
+        breakdowns.append({
+            "key": "sra_assistance_households_trend",
+            "kind": "trend",
+            "evidence_stage": "activity",
+            "label_th": "ครัวเรือนที่ได้รับความช่วยเหลือตาม SRA-DSS",
+            "items": [
+                {
+                    "label_th": item.get("year") or "ไม่ระบุปี",
+                    "value": item.get("households") or 0,
+                    "display_value": f"{(item.get('households') or 0):,.0f} ครัวเรือน",
+                }
+                for item in assistance
+            ],
+            "note_th": "aggregate candidate ตามต้นทาง; ไม่ใช่จำนวนผู้รับประโยชน์ของโครงการ บพท. ทั้งหมด",
+        })
+    assistance_dimensions = section.get("assistance_dimensions_latest") or []
+    if assistance_dimensions:
+        total_budget = sum(
+            safe_float(item.get("budget_baht")) or 0
+            for item in assistance_dimensions
+        )
+        breakdowns.append({
+            "key": "sra_assistance_budget_dimensions",
+            "kind": "distribution",
+            "evidence_stage": "input",
+            "label_th": "งบช่วยเหลือรายมิติที่ SRA-DSS รายงาน ปี 2569",
+            "items": [
+                {
+                    "label_th": item.get("dimension_title") or item.get("dimension_key") or "ไม่ระบุมิติ",
+                    "value": safe_float(item.get("budget_baht")) or 0,
+                    "share_pct": (
+                        round((safe_float(item.get("budget_baht")) or 0) / total_budget * 100, 1)
+                        if total_budget
+                        else 0
+                    ),
+                    "display_value": f"{(safe_float(item.get('budget_baht')) or 0):,.0f} บาท",
+                }
+                for item in assistance_dimensions
+            ],
+            "note_th": "งบช่วยเหลือจาก SRA-DSS ไม่ใช่งบจัดสรรวิจัยรายจังหวัด",
+        })
+    project_metrics = section.get("project_metrics_latest") or []
+    if project_metrics:
+        breakdowns.append({
+            "key": "sra_project_metrics_latest",
+            "kind": "scores",
+            "evidence_stage": "activity",
+            "label_th": "ตัวชี้วัดโครงการตามต้นทาง SRA-DSS ปี 2569",
+            "items": [
+                {
+                    "label_th": item.get("metric_label") or item.get("metric_key") or "ไม่ระบุตัวชี้วัด",
+                    "value": safe_float(item.get("value")) or 0,
+                    "display_value": " ".join(
+                        value
+                        for value in (
+                            f"{(safe_float(item.get('value')) or 0):,.0f}",
+                            clean_text(item.get("unit")),
+                        )
+                        if value
+                    ),
+                }
+                for item in project_metrics
+            ],
+            "note_th": "คงชื่อ หน่วย และค่าแบบ provisional จากต้นทาง; ไม่รวมต่างหน่วยเป็นคะแนนเดียว",
+        })
+    return breakdowns
+
+
 def build_risk_dimension(
     briefing: dict[str, Any],
     benchmarks: dict[str, dict[str, Any]],
@@ -407,27 +480,31 @@ def build_risk_dimension(
     flood = signals.get("flood_risk_area_level_4_5")
     metrics = [metric_context(flood, benchmarks[flood["key"]])] if flood and flood["key"] in benchmarks else []
     scores = sra_scores(briefing)
-    if not metrics and not scores:
+    sra_program = sra_program_breakdowns(briefing)
+    if not metrics and not scores and not sra_program:
         return None
     if metrics and metrics[0]["attention"]:
         summary = "พื้นที่เสี่ยงน้ำท่วมระดับ 4–5 สูงกว่าค่ากลางของจังหวัดที่มีข้อมูล"
     elif scores:
         summary = f"คะแนนตามต้นทางสูงสุดอยู่ที่มิติ{scores['items'][0]['label_th']}"
+    elif sra_program:
+        summary = "อยู่ในขอบเขตจังหวัดเป้าหมาย SRA-DSS แต่คะแนนปี 2569 ยังไม่มีค่า; แสดง aggregate การดำเนินงานแบบ candidate"
     else:
         summary = "ความเสี่ยงน้ำท่วมอยู่ใกล้หรือต่ำกว่าค่ากลางของจังหวัดที่มีข้อมูล"
     source_ids = []
     if metrics:
         source_ids.append("f3_housing_portal")
-    if scores:
+    if scores or sra_program:
         source_ids.append("f1_sradss_ppaos")
     return {
         "key": "risk",
         "label_th": DIMENSION_LABELS["risk"],
         "summary_th": summary,
         "metrics": metrics,
-        "breakdowns": [scores] if scores else [],
+        "breakdowns": ([scores] if scores else []) + sra_program,
         "highlights": [],
         "source_ids": source_ids,
+        "evidence_stage": "context_and_program_activity",
     }
 
 
@@ -478,7 +555,7 @@ def build_livelihood_dimension(briefing: dict[str, Any]) -> dict[str, Any] | Non
 
 def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
     sections = briefing.get("sections", {})
-    projects = sections.get("area_based", {}).get("items", [])
+    projects = sections.get("project_master", {}).get("items", [])
     learning = sections.get("learning_dashboard", {}).get("items", [])
     innovations = sections.get("innovation", {}).get("items", [])
     requirements = sections.get("requirements", {}).get("items", [])
@@ -487,21 +564,37 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
     if not projects and not learning and not innovations and not requirements and not tourism and not apptech:
         return None
 
+    project_district_rows = [
+        {"district": area.get("district")}
+        for project in projects
+        for area in project.get("geography") or []
+    ]
     project_districts = distribution(
-        projects, lambda item: item.get("district"), "project_districts", "พื้นที่ดำเนินโครงการ"
+        project_district_rows,
+        lambda item: item.get("district"),
+        "project_districts",
+        "พื้นที่ดำเนินโครงการ (หนึ่งโครงการอาจอยู่หลายอำเภอ)",
     )
+    if project_districts:
+        project_districts["evidence_stage"] = "activity"
     project_years = distribution(
         projects, lambda item: item.get("fiscal_year"), "project_years", "ปีงบประมาณของโครงการ"
     )
+    if project_years:
+        project_years["evidence_stage"] = "activity"
     innovation_categories = distribution(
         innovations, lambda item: item.get("category"), "innovation_categories", "หมวดนวัตกรรม"
     )
+    if innovation_categories:
+        innovation_categories["evidence_stage"] = "output"
     requirement_categories = distribution(
         requirements,
         lambda item: item.get("category"),
         "requirement_categories",
         "หมวดโจทย์หรือความต้องการ",
     )
+    if requirement_categories:
+        requirement_categories["evidence_stage"] = "need"
     breakdowns = [
         item
         for item in (
@@ -524,6 +617,7 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
                 "display_value": f"{aggregate.get('value', 0):,.0f}",
             }],
             "note_th": aggregate.get("scope_warning_th"),
+            "evidence_stage": "activity",
         })
     if apptech:
         activity = apptech[0]
@@ -544,6 +638,7 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
                 },
             ],
             "note_th": "เป็นคนละ grain กับจำนวนผลงานนวัตกรรม",
+            "evidence_stage": "activity",
         })
 
     districts = [item["label_th"] for item in (project_districts or {}).get("items", [])[:2]]
@@ -556,8 +651,14 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         summary = f"นวัตกรรมที่เชื่อมได้เด่นในหมวด{' และ '.join(categories)}"
     elif requirements:
         summary = "มีโจทย์หรือความต้องการสาธารณะที่ต้นทางผูกกับจังหวัด"
+    elif learning:
+        summary = "มี aggregate ผู้เข้าร่วมโครงการจาก Learning Dashboard; หน่วยและ as-of ยังไม่ยืนยัน"
+    elif apptech:
+        summary = "มีข้อมูลกิจกรรมแพลตฟอร์ม AppTech ระดับจังหวัด; ไม่ใช่หลักฐานจำนวนโครงการหรือนวัตกรรม"
+    elif tourism:
+        summary = "มีข้อมูลบริการและเนื้อหาท่องเที่ยวสาธารณะที่ผูกกับจังหวัด"
     else:
-        summary = "มีหลักฐานโครงการหรือนวัตกรรมที่เชื่อมกับจังหวัด"
+        summary = "ยังไม่มีหลักฐานโครงการหรือนวัตกรรมที่ผูกกับจังหวัดในทะเบียนที่ใช้"
 
     highlights = []
     sorted_projects = sorted(
@@ -566,12 +667,20 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         reverse=True,
     )
     for item in sorted_projects[:2]:
+        area_names = [
+            area.get("district")
+            for area in item.get("geography") or []
+            if area.get("district")
+        ]
         highlights.append({
             "kind": "project",
             "title_th": item.get("project_name") or "ไม่ระบุชื่อโครงการ",
             "detail_th": " · ".join(
                 value
-                for value in (clean_text(item.get("district")), clean_text(item.get("research_unit")))
+                for value in (
+                    " / ".join(area_names[:2]) or None,
+                    clean_text(item.get("research_unit")),
+                )
                 if value
             ),
             "source_url": item.get("source_url"),
@@ -613,6 +722,7 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         "breakdowns": breakdowns,
         "highlights": highlights,
         "source_ids": source_ids,
+        "evidence_stage": "activity_and_output",
     }
 
 
@@ -729,20 +839,16 @@ def count_breakdown(
     ]
 
 
-def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
-    """Answer the recurring executive questions with honest linked-record counts.
-
-    Grain note: counts describe records the public sources attach to this
-    province, not the official PMU-A allocation ledger. Fields the executives
-    asked for that no public source provides are listed in data_gaps_th
-    instead of being approximated.
-    """
+def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any]:
+    """Build a decision-safe portfolio without treating participant rows as projects."""
 
     sections = briefing.get("sections", {})
-    projects = sections.get("area_based", {}).get("items", [])
-    innovations = sections.get("innovation", {}).get("items", [])
-    if not projects and not innovations:
-        return None
+    project_section = sections.get("project_master", {})
+    participant_section = sections.get("area_based", {})
+    innovation_section = sections.get("innovation", {})
+    projects = project_section.get("items", [])
+    participant_records = participant_section.get("items", [])
+    innovations = innovation_section.get("items", [])
 
     year_counts = Counter(
         clean_text(item.get("fiscal_year")) or "ไม่ระบุปี" for item in projects
@@ -751,28 +857,43 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
         {"label_th": year, "value": count}
         for year, count in sorted(year_counts.items())
     ]
-
     universities = count_breakdown(
         projects, lambda item: item.get("research_unit"), limit=8
     )
+    university_count = len({
+        value
+        for item in projects
+        if (value := clean_text(item.get("research_unit"))) is not None
+    })
 
-    district_map: dict[str, Counter] = defaultdict(Counter)
-    for item in projects:
-        district = clean_text(item.get("district"))
-        if district is None:
-            continue
-        subdistrict = clean_text(item.get("subdistrict"))
-        district_map[district][subdistrict or "ไม่ระบุตำบล"] += 1
+    district_project_ids: dict[str, set[str]] = defaultdict(set)
+    subdistrict_project_ids: dict[str, dict[str, set[str]]] = defaultdict(
+        lambda: defaultdict(set)
+    )
+    for project in projects:
+        project_id = str(project.get("project_group_id") or "")
+        for area in project.get("geography") or []:
+            district = clean_text(area.get("district"))
+            if district is None:
+                continue
+            district_project_ids[district].add(project_id)
+            subdistricts = area.get("subdistricts") or ["ไม่ระบุตำบล"]
+            for subdistrict in subdistricts:
+                subdistrict_project_ids[district][subdistrict].add(project_id)
     districts = [
         {
             "label_th": district,
-            "value": sum(subdistricts.values()),
+            "value": len(project_ids),
             "subdistricts": [
-                {"label_th": name, "value": count}
-                for name, count in subdistricts.most_common(6)
+                {"label_th": name, "value": len(ids)}
+                for name, ids in sorted(
+                    subdistrict_project_ids[district].items(),
+                    key=lambda entry: len(entry[1]),
+                    reverse=True,
+                )[:6]
             ],
         }
-        for district, subdistricts in district_map.items()
+        for district, project_ids in district_project_ids.items()
     ]
     districts.sort(key=lambda item: item["value"], reverse=True)
     districts = districts[:12]
@@ -780,7 +901,9 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
     seen_businesses: set[str] = set()
     businesses: list[dict[str, Any]] = []
     for item in sorted(
-        projects, key=lambda entry: str(entry.get("fiscal_year") or ""), reverse=True
+        participant_records,
+        key=lambda entry: str(entry.get("fiscal_year") or ""),
+        reverse=True,
     ):
         name = clean_text(item.get("business_name"))
         if name is None or name in seen_businesses:
@@ -794,15 +917,18 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
                 "fiscal_year": clean_text(item.get("fiscal_year")),
             })
 
-    pmua_funded_count = 0
+    pmua_funded_innovation_ids: set[str] = set()
+    pmua_funding_entry_count = 0
     pmua_amount_baht = 0.0
     pmua_amount_known = 0
     for item in innovations:
+        record_id = str(item.get("record_id") or "")
         for entry in item.get("funding") or []:
             funder = clean_text(entry.get("funder")) or ""
             if PMUA_FUNDER_KEYWORD not in funder:
                 continue
-            pmua_funded_count += 1
+            pmua_funded_innovation_ids.add(record_id)
+            pmua_funding_entry_count += 1
             amount = safe_float(entry.get("amount_baht"))
             if amount is not None:
                 pmua_amount_baht += amount
@@ -828,54 +954,305 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any] | None:
         limit=5,
     )
     latest_update = max(
-        (clean_text(item.get("updated_at")) for item in projects if clean_text(item.get("updated_at"))),
+        (
+            clean_text(item.get("latest_source_update"))
+            for item in projects
+            if clean_text(item.get("latest_source_update"))
+        ),
         default=None,
+    )
+    research_leads = {
+        name
+        for item in innovations
+        for researcher in item.get("research_leads") or []
+        if (name := clean_text(researcher.get("name"))) is not None
+    }
+    roi_known = sum(
+        1
+        for item in innovations
+        if clean_text(item.get("roi_indicator")) or clean_text(item.get("roi_unit"))
+    )
+    sroi_known = sum(
+        1
+        for item in innovations
+        if clean_text(item.get("sroi_indicator")) or clean_text(item.get("sroi_unit"))
+    )
+    ip_known = sum(
+        1
+        for item in innovations
+        if any(clean_text(value) for value in (item.get("ip") or {}).values())
+    )
+    multi_province_innovations = sum(
+        1 for item in innovations if (safe_float(item.get("linked_province_count")) or 0) > 1
     )
 
     return {
-        "title_th": "โครงการวิจัยและทุน บพท. ที่เชื่อมกับจังหวัด",
+        "title_th": "โครงการ งบที่เชื่อมโยง และผลลัพธ์ที่มีหลักฐาน",
         "scope_note_th": (
-            "นับเฉพาะรายการจากแหล่งสาธารณะที่ผูกกับจังหวัดนี้ได้ "
-            "ไม่ใช่ยอดจัดสรรทุนทางการของ บพท. และยังเป็นข้อมูล candidate"
+            "จำนวนโครงการเป็นการจัดกลุ่มเบื้องต้นจากชื่อโครงการ+ปีงบประมาณ+หน่วยวิจัย "
+            "ส่วนจำนวนผู้เข้าร่วมคง grain แยกกัน; ทุกค่าเป็น candidate"
         ),
         "project_count": len(projects),
-        "university_count": len({
-            university["label_th"] for university in universities
-        }) if universities else 0,
-        "district_count": len(district_map),
+        "project_count_status": (
+            "provisional_grouping" if projects else "not_found_in_area_based_registry"
+        ),
+        "project_grouping_method": "project_name_fiscal_year_research_unit",
+        "participant_record_count": len(participant_records),
+        "participant_record_status": (
+            "available" if participant_records else "not_found_in_area_based_registry"
+        ),
+        "university_count": university_count,
+        "district_count": len(district_project_ids),
         "business_count": len(seen_businesses),
         "innovation_count": len(innovations),
+        "innovation_count_status": (
+            "available" if innovations else "not_found_in_apptech_registry"
+        ),
         "fiscal_years": fiscal_years,
         "universities": universities,
         "districts": districts,
-        "businesses": businesses,
         "funding": {
-            "label_th": f"ทุนที่ระบุผู้ให้ทุน {PMUA_FUNDER_KEYWORD} ในทะเบียนนวัตกรรม",
-            "pmua_funded_count": pmua_funded_count,
+            "label_th": "ทุนของนวัตกรรมที่เชื่อมกับจังหวัด (ไม่ใช่งบจัดสรรจังหวัด)",
+            "pmua_funded_count": len(pmua_funded_innovation_ids),
+            "pmua_funded_innovation_count": len(pmua_funded_innovation_ids),
+            "pmua_funding_entry_count": pmua_funding_entry_count,
             "pmua_amount_baht": round(pmua_amount_baht, 2),
             "pmua_amount_known_entries": pmua_amount_known,
             "innovation_value_baht_total": round(sum(innovation_values), 2),
             "innovation_value_known_entries": len(innovation_values),
+            "allocation_status": "linked_innovation_funding_not_provincial_allocation",
+            "multi_province_innovation_count": multi_province_innovations,
+            "cross_province_sum_warning": multi_province_innovations > 0,
             "note_th": (
-                "รวมจากมูลค่าที่ต้นทางกรอกไว้เท่านั้น หลายรายการกรอก 0 หรือเว้นว่าง "
-                "จึงใช้เทียบเคียงไม่ใช่ยอดงบประมาณจริง"
+                "แสดงยอดเต็มที่ต้นทางกรอกกับนวัตกรรมซึ่งอาจเชื่อมหลายจังหวัด "
+                "ห้ามรวมข้ามจังหวัดหรือใช้แทนงบจัดสรร/เบิกจ่ายของจังหวัด"
             ),
         },
         "trl_distribution": trl_distribution,
-        "target_groups": target_groups,
+        "outcome_coverage": {
+            "research_lead_names": len(research_leads),
+            "ip_records": ip_known,
+            "roi_records": roi_known,
+            "sroi_records": sroi_known,
+            "note_th": "ROI/SROI เป็น field ที่ต้นทางกรอกและมีความครบต่ำ; ไม่ใช้เป็น KPI รวม",
+        },
         "latest_update": latest_update,
         "data_gaps_th": [
-            "ชื่อหัวหน้าโครงการ/ผู้รับทุนรายคน ยังไม่มีในแหล่งข้อมูลสาธารณะที่เชื่อมได้",
+            "ยังไม่มี Project ID ทางการสำหรับเชื่อม Area-Based กับระบบโครงการหลัก",
+            "ชื่อหัวหน้าโครงการของ Area-Based ยังไม่มี; ชื่อนักวิจัยที่มีอยู่เป็นของทะเบียนนวัตกรรม",
             "สถานะดำเนินงานรายโครงการ (อยู่ระหว่าง/เสร็จสิ้น) ต้นทางไม่ระบุ",
             "งบประมาณจัดสรรและสถานะเบิกจ่ายรายกรอบ/รายฝ่าย ต้องใช้ระบบภายในของ บพท.",
         ],
         "source_ids": [
             source_id
             for source_id, present in (
-                ("f2_learning_area_based", bool(projects)),
+                ("f2_learning_area_based", bool(participant_records)),
                 ("f2_apptech_mru", bool(innovations)),
             )
             if present
+        ],
+    }
+
+
+def compact_source_coverage(briefing: dict[str, Any]) -> list[dict[str, Any]]:
+    """Keep the summary fast; the briefing endpoint carries field-level details."""
+
+    keys = (
+        "source_id",
+        "name_th",
+        "url",
+        "acquisition_mode",
+        "readiness_status",
+        "status",
+        "records",
+        "note_th",
+        "quality_label_th",
+        "data_grain_th",
+        "observed_as_of",
+        "observed_fetched_at",
+    )
+    return [
+        {key: source.get(key) for key in keys}
+        for source in briefing.get("source_coverage", [])
+    ]
+
+
+def build_decision_chain(
+    briefing: dict[str, Any], portfolio: dict[str, Any]
+) -> list[dict[str, Any]]:
+    sections = briefing.get("sections", {})
+    ppp_records = sections.get("pppconnext", {}).get("items", [])
+    poverty_households = next(
+        (
+            safe_float(item.get("value"))
+            for item in ppp_records
+            if item.get("metric_name") == "จำนวนครัวเรือน"
+            and safe_float(item.get("value")) is not None
+        ),
+        None,
+    )
+    sra = sections.get("sra", {})
+    latest_assistance = max(
+        sra.get("assistance_trend") or [],
+        key=lambda item: str(item.get("year") or ""),
+        default=None,
+    )
+    funding = portfolio.get("funding") or {}
+    outcomes = portfolio.get("outcome_coverage") or {}
+    apptech_items = sections.get("apptech_mtr", {}).get("items", [])
+    apptech = apptech_items[0] if apptech_items else {}
+
+    need_metrics = []
+    if poverty_households is not None:
+        need_metrics.append({
+            "label_th": "ครัวเรือนที่สำรวจใน PPPConnext",
+            "value": poverty_households,
+            "display_value": f"{poverty_households:,.0f} ครัวเรือน",
+        })
+    if sra.get("scope_status") == "in_scope":
+        need_metrics.append({
+            "label_th": "ขอบเขตจังหวัดเป้าหมาย SRA-DSS",
+            "value": None,
+            "display_value": (
+                "มีคะแนนปี 2569"
+                if sra.get("score_status") == "in_scope_value_available"
+                else "อยู่ในขอบเขต แต่คะแนนปี 2569 ไม่มีค่า"
+            ),
+        })
+
+    input_metrics = []
+    if funding.get("pmua_amount_known_entries"):
+        input_metrics.append({
+            "label_th": "ทุนที่ระบุในนวัตกรรมที่เชื่อมจังหวัด",
+            "value": funding.get("pmua_amount_baht"),
+            "display_value": f"{funding.get('pmua_amount_baht', 0):,.0f} บาท",
+        })
+    if latest_assistance and safe_float(latest_assistance.get("budget_baht")) is not None:
+        input_metrics.append({
+            "label_th": f"งบช่วยเหลือ SRA-DSS ปี {latest_assistance.get('year')}",
+            "value": latest_assistance.get("budget_baht"),
+            "display_value": f"{latest_assistance.get('budget_baht', 0):,.0f} บาท",
+        })
+
+    activity_metrics = []
+    if portfolio.get("project_count_status") == "provisional_grouping":
+        activity_metrics.extend([
+            {
+                "label_th": "กลุ่มโครงการที่เชื่อมได้",
+                "value": portfolio.get("project_count"),
+                "display_value": f"{portfolio.get('project_count', 0):,.0f} กลุ่มโครงการ",
+            },
+            {
+                "label_th": "หน่วย/ผู้ประกอบการเข้าร่วม",
+                "value": portfolio.get("participant_record_count"),
+                "display_value": f"{portfolio.get('participant_record_count', 0):,.0f} records",
+            },
+        ])
+    elif apptech:
+        activity_metrics.append({
+            "label_th": "กิจกรรมแพลตฟอร์ม AppTech",
+            "value": apptech.get("interactions"),
+            "display_value": f"{(apptech.get('interactions') or 0):,.0f} interactions",
+        })
+
+    output_metrics = []
+    if portfolio.get("innovation_count_status") == "available":
+        output_metrics.extend([
+            {
+                "label_th": "นวัตกรรมที่เชื่อมจังหวัด",
+                "value": portfolio.get("innovation_count"),
+                "display_value": f"{portfolio.get('innovation_count', 0):,.0f} รายการ",
+            },
+            {
+                "label_th": "ระเบียนที่มีข้อมูลทรัพย์สินทางปัญญา",
+                "value": outcomes.get("ip_records"),
+                "display_value": f"{outcomes.get('ip_records', 0):,.0f} รายการ",
+            },
+        ])
+
+    outcome_records = (outcomes.get("roi_records") or 0) + (outcomes.get("sroi_records") or 0)
+    outcome_metrics = (
+        [
+            {
+                "label_th": "ระเบียนที่กรอก ROI/SROI",
+                "value": outcome_records,
+                "display_value": f"{outcome_records:,.0f} ช่องข้อมูล",
+            }
+        ]
+        if outcome_records
+        else []
+    )
+
+    return [
+        {
+            "key": "need",
+            "label_th": "สถานการณ์/ความต้องการ",
+            "evidence_stage": "context",
+            "status": "available" if need_metrics else "not_available",
+            "metrics": need_metrics,
+            "note_th": "บริบทพื้นที่ ไม่ใช่ผลลัพธ์ของโครงการ",
+        },
+        {
+            "key": "input",
+            "label_th": "ทรัพยากร/งบที่เชื่อมได้",
+            "evidence_stage": "input",
+            "status": "limited" if input_metrics else "not_available",
+            "metrics": input_metrics,
+            "note_th": "ยังไม่มีงบจัดสรรและสถานะเบิกจ่ายทางการรายจังหวัด",
+        },
+        {
+            "key": "activity",
+            "label_th": "การดำเนินงาน",
+            "evidence_stage": "activity",
+            "status": "available" if activity_metrics else "not_available",
+            "metrics": activity_metrics,
+            "note_th": "กลุ่มโครงการเป็น provisional grouping; participant records แสดงแยก",
+        },
+        {
+            "key": "output",
+            "label_th": "ผลผลิต",
+            "evidence_stage": "output",
+            "status": "available" if output_metrics else "not_available",
+            "metrics": output_metrics,
+            "note_th": "ทะเบียนนวัตกรรมไม่เท่ากับผลผลิตที่รับรองของทุกโครงการ",
+        },
+        {
+            "key": "outcome",
+            "label_th": "ผลลัพธ์/ผลกระทบ",
+            "evidence_stage": "outcome_impact",
+            "status": "limited" if outcome_metrics else "not_available",
+            "metrics": outcome_metrics,
+            "note_th": "ROI/SROI มีความครบต่ำและยังไม่ใช้เป็น KPI รวม",
+        },
+    ]
+
+
+def build_data_quality_overview(briefing: dict[str, Any]) -> dict[str, Any]:
+    sources = briefing.get("source_coverage", [])
+    accepted = sum(
+        1
+        for source in sources
+        if str(source.get("readiness_status") or "").lower() == "accepted"
+    )
+    with_as_of = sum(1 for source in sources if source.get("observed_as_of"))
+    fetched_values = [
+        str(source["observed_fetched_at"])
+        for source in sources
+        if source.get("observed_fetched_at")
+    ]
+    return {
+        "status": "candidate_needs_review" if accepted < len(sources) else "accepted",
+        "public_source_count": len(sources),
+        "accepted_source_count": accepted,
+        "candidate_or_review_source_count": len(sources) - accepted,
+        "sources_with_explicit_as_of": with_as_of,
+        "sources_without_explicit_as_of": len(sources) - with_as_of,
+        "latest_observed_fetch": max(fetched_values, default=None),
+        "rules_th": [
+            "ค่าว่างและไม่พบในทะเบียนไม่แสดงเป็นศูนย์",
+            "จำนวนโครงการแยกจาก participant records",
+            "งบที่ผูกกับนวัตกรรมไม่ตีความเป็นงบจัดสรรจังหวัด",
+            "ไม่มี source ที่ accepted จะไม่เรียกค่าบนหน้านี้ว่า KPI รับรอง",
         ],
     }
 
@@ -969,6 +1346,7 @@ def build_summary(
         for metric in attention_metrics[:2]
     )
     present_keys = {dimension["key"] for dimension in dimensions}
+    research_portfolio = build_research_portfolio(briefing)
     return {
         "schema_version": "1.0.0",
         "generated_at": generated_at,
@@ -979,7 +1357,9 @@ def build_summary(
             "observations": build_observations(dimensions),
             "context_metrics": context_metrics[:3],
         },
-        "research_portfolio": build_research_portfolio(briefing),
+        "research_portfolio": research_portfolio,
+        "decision_chain": build_decision_chain(briefing, research_portfolio),
+        "data_quality_overview": build_data_quality_overview(briefing),
         "dimensions": dimensions,
         "missing_dimensions": [
             {"key": key, "label_th": label}
@@ -992,7 +1372,7 @@ def build_summary(
             "public_source_count": len(briefing.get("source_coverage", [])),
             "available_source_ids": available_source_ids,
         },
-        "source_coverage": briefing.get("source_coverage", []),
+        "source_coverage": compact_source_coverage(briefing),
         "quality": briefing.get("quality", {}),
         "methodology": {
             "join_level": "province",
@@ -1000,6 +1380,9 @@ def build_summary(
             "near_median_rule": "absolute_relative_difference_lte_10_percent",
             "policy_score_created": False,
             "raw_rows_included": False,
+            "unknown_value_policy": "null_and_not_found_are_never_rendered_as_zero",
+            "project_count_method": "provisional_project_name_fiscal_year_research_unit_grouping",
+            "funding_attribution": "linked_innovation_funding_not_provincial_allocation",
         },
     }
 

@@ -301,12 +301,12 @@
         "province_name_th": "กรุงเทพมหานคร",
         "province_name_en": "Bangkok",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 7,
         "innovation_records": 116,
         "cultural_records": 361,
         "housing_observations": 988,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.057377,
         "idx_innovation_records": 1.0,
@@ -319,7 +319,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 12,
-        "idx_learning_dashboard_business_records": 0.315789
+        "idx_learning_dashboard_business_records": 0.315789,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 5,
+        "idx_area_based_project_groups": 0.454545
       }
     },
     {
@@ -554,12 +558,12 @@
         "province_name_th": "สมุทรปราการ",
         "province_name_en": "Samut Prakan",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 13,
         "innovation_records": 4,
         "cultural_records": 152,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.106557,
         "idx_innovation_records": 0.034483,
@@ -572,7 +576,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -735,12 +743,12 @@
         "province_name_th": "นนทบุรี",
         "province_name_en": "Nonthaburi",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.0,
@@ -753,7 +761,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 1.0,
         "learning_dashboard_business_records": 7,
-        "idx_learning_dashboard_business_records": 0.184211
+        "idx_learning_dashboard_business_records": 0.184211,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -956,12 +968,12 @@
         "province_name_th": "ปทุมธานี",
         "province_name_en": "Pathum Thani",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 29,
         "innovation_records": 0,
         "cultural_records": 84,
         "housing_observations": 815,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.237705,
         "idx_innovation_records": 0.0,
@@ -974,7 +986,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -1421,12 +1437,12 @@
         "province_name_th": "พระนครศรีอยุธยา",
         "province_name_en": "Phra Nakhon Si Ayutthaya",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 29,
         "innovation_records": 3,
         "cultural_records": 102,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.237705,
         "idx_innovation_records": 0.025862,
@@ -1439,7 +1455,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 20,
-        "idx_learning_dashboard_business_records": 0.526316
+        "idx_learning_dashboard_business_records": 0.526316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -1758,12 +1778,12 @@
         "province_name_th": "อ่างทอง",
         "province_name_en": "Ang Thong",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 2,
         "innovation_records": 1,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.016393,
         "idx_innovation_records": 0.008621,
@@ -1776,7 +1796,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -2519,12 +2543,12 @@
         "province_name_th": "ลพบุรี",
         "province_name_en": "Lop Buri",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 2,
         "cultural_records": 64,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.017241,
@@ -2537,7 +2561,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -2888,12 +2916,12 @@
         "province_name_th": "สิงห์บุรี",
         "province_name_en": "Sing Buri",
         "evidence_source_count": 2,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 1,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.222222,
+        "idx_evidence_source_count": 0.2,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -2906,7 +2934,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -3410,7 +3442,7 @@
         "innovation_records": 16,
         "cultural_records": 52,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.904762,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.137931,
@@ -3423,7 +3455,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -4082,12 +4118,12 @@
         "province_name_th": "สระบุรี",
         "province_name_en": "Saraburi",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 3,
         "innovation_records": 1,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.02459,
         "idx_innovation_records": 0.008621,
@@ -4100,7 +4136,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -5459,12 +5499,12 @@
         "province_name_th": "ชลบุรี",
         "province_name_en": "Chon Buri",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 3,
         "innovation_records": 1,
         "cultural_records": 59,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.02459,
         "idx_innovation_records": 0.008621,
@@ -5477,7 +5517,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -6294,12 +6338,12 @@
         "province_name_th": "ระยอง",
         "province_name_en": "Rayong",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 2,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.017241,
@@ -6312,7 +6356,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -7253,12 +7301,12 @@
         "province_name_th": "จันทบุรี",
         "province_name_en": "Chanthaburi",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 10,
         "innovation_records": 0,
         "cultural_records": 66,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.081967,
         "idx_innovation_records": 0.0,
@@ -7271,7 +7319,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -8734,12 +8786,12 @@
         "province_name_th": "ตราด",
         "province_name_en": "Trat",
         "evidence_source_count": 1,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.111111,
+        "idx_evidence_source_count": 0.1,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -8752,7 +8804,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -9471,12 +9527,12 @@
         "province_name_th": "ฉะเชิงเทรา",
         "province_name_en": "Chachoengsao",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 22,
         "innovation_records": 7,
         "cultural_records": 52,
         "housing_observations": 585,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.180328,
         "idx_innovation_records": 0.060345,
@@ -9489,7 +9545,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 5,
-        "idx_learning_dashboard_business_records": 0.131579
+        "idx_learning_dashboard_business_records": 0.131579,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -10184,12 +10244,12 @@
         "province_name_th": "ปราจีนบุรี",
         "province_name_en": "Prachin Buri",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 20,
         "innovation_records": 0,
         "cultural_records": 58,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.163934,
         "idx_innovation_records": 0.0,
@@ -10202,7 +10262,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -10589,12 +10653,12 @@
         "province_name_th": "นครนายก",
         "province_name_en": "Nakhon Nayok",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 2,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -10607,7 +10671,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -11310,12 +11378,12 @@
         "province_name_th": "สระแก้ว",
         "province_name_en": "Sa Kaeo",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 7,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.060345,
@@ -11328,7 +11396,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -12770,13 +12842,13 @@
         "province_code": "30",
         "province_name_th": "นครราชสีมา",
         "province_name_en": "Nakhon Ratchasima",
-        "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "evidence_source_count": 7,
+        "sra_overall_score": null,
         "area_based_participant_records": 12,
         "innovation_records": 6,
         "cultural_records": 169,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.098361,
         "idx_innovation_records": 0.051724,
@@ -12789,7 +12861,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 8,
-        "idx_learning_dashboard_business_records": 0.210526
+        "idx_learning_dashboard_business_records": 0.210526,
+        "sra_scope_status": "in_scope_no_current_value",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 5,
+        "idx_area_based_project_groups": 0.454545
       }
     },
     {
@@ -14409,7 +14485,7 @@
         "innovation_records": 5,
         "cultural_records": 2,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.795238,
         "idx_area_based_participant_records": 0.07377,
         "idx_innovation_records": 0.043103,
@@ -14422,7 +14498,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -15990,7 +16070,7 @@
         "innovation_records": 0,
         "cultural_records": 118,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.957143,
         "idx_area_based_participant_records": 0.106557,
         "idx_innovation_records": 0.0,
@@ -16003,7 +16083,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -17067,7 +17151,7 @@
         "innovation_records": 6,
         "cultural_records": 111,
         "housing_observations": 532,
-        "idx_evidence_source_count": 0.888889,
+        "idx_evidence_source_count": 0.8,
         "idx_sra_overall_score": 0.938095,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.051724,
@@ -17080,7 +17164,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 6,
-        "idx_learning_dashboard_business_records": 0.157895
+        "idx_learning_dashboard_business_records": 0.157895,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -18444,7 +18532,7 @@
         "innovation_records": 1,
         "cultural_records": 265,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.985714,
         "idx_area_based_participant_records": 0.02459,
         "idx_innovation_records": 0.008621,
@@ -18457,7 +18545,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -19331,13 +19423,13 @@
         "province_code": "35",
         "province_name_th": "ยโสธร",
         "province_name_en": "Yasothon",
-        "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "evidence_source_count": 5,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 0,
         "cultural_records": 2,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.0,
@@ -19350,7 +19442,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "in_scope_no_current_value",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -20481,12 +20577,12 @@
         "province_name_th": "ชัยภูมิ",
         "province_name_en": "Chaiyaphum",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 2,
         "cultural_records": 64,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.017241,
@@ -20499,7 +20595,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -21147,7 +21247,7 @@
         "innovation_records": 1,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.952381,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -21160,7 +21260,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 7,
-        "idx_learning_dashboard_business_records": 0.184211
+        "idx_learning_dashboard_business_records": 0.184211,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -21867,12 +21971,12 @@
         "province_name_th": "บึงกาฬ",
         "province_name_en": "Bueng Kan",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 1,
         "cultural_records": 54,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -21885,7 +21989,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -22492,12 +22600,12 @@
         "province_name_th": "หนองบัวลำภู",
         "province_name_en": "Nong Bua Lam Phu",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 1,
         "cultural_records": 2,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -22510,7 +22618,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -23865,12 +23977,12 @@
         "province_name_th": "ขอนแก่น",
         "province_name_en": "Khon Kaen",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 15,
         "innovation_records": 3,
         "cultural_records": 34,
         "housing_observations": 489,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.122951,
         "idx_innovation_records": 0.025862,
@@ -23883,7 +23995,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 9,
-        "idx_learning_dashboard_business_records": 0.236842
+        "idx_learning_dashboard_business_records": 0.236842,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -25326,12 +25442,12 @@
         "province_name_th": "อุดรธานี",
         "province_name_en": "Udon Thani",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 8,
         "innovation_records": 23,
         "cultural_records": 5,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.065574,
         "idx_innovation_records": 0.198276,
@@ -25344,7 +25460,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -26580,7 +26700,7 @@
         "innovation_records": 9,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.957143,
         "idx_area_based_participant_records": 0.081967,
         "idx_innovation_records": 0.077586,
@@ -26593,7 +26713,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 5,
-        "idx_learning_dashboard_business_records": 0.131579
+        "idx_learning_dashboard_business_records": 0.131579,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -27488,12 +27612,12 @@
         "province_name_th": "หนองคาย",
         "province_name_en": "Nong Khai",
         "evidence_source_count": 2,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 1,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.222222,
+        "idx_evidence_source_count": 0.2,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -27506,7 +27630,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -28241,12 +28369,12 @@
         "province_name_th": "มหาสารคาม",
         "province_name_en": "Maha Sarakham",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 7,
         "innovation_records": 21,
         "cultural_records": 300,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.057377,
         "idx_innovation_records": 0.181034,
@@ -28259,7 +28387,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -29411,7 +29543,7 @@
         "innovation_records": 5,
         "cultural_records": 57,
         "housing_observations": 419,
-        "idx_evidence_source_count": 1.0,
+        "idx_evidence_source_count": 0.9,
         "idx_sra_overall_score": 0.97619,
         "idx_area_based_participant_records": 0.090164,
         "idx_innovation_records": 0.043103,
@@ -29424,7 +29556,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 10,
-        "idx_learning_dashboard_business_records": 0.263158
+        "idx_learning_dashboard_business_records": 0.263158,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -30496,7 +30632,7 @@
         "innovation_records": 0,
         "cultural_records": 5,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.933333,
         "idx_area_based_participant_records": 0.02459,
         "idx_innovation_records": 0.0,
@@ -30509,7 +30645,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -31873,7 +32013,7 @@
         "innovation_records": 0,
         "cultural_records": 86,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.97619,
         "idx_area_based_participant_records": 0.278689,
         "idx_innovation_records": 0.0,
@@ -31886,7 +32026,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 9,
-        "idx_learning_dashboard_business_records": 0.236842
+        "idx_learning_dashboard_business_records": 0.236842,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 5,
+        "idx_area_based_project_groups": 0.454545
       }
     },
     {
@@ -32721,12 +32865,12 @@
         "province_name_th": "นครพนม",
         "province_name_en": "Nakhon Phanom",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 64,
         "innovation_records": 0,
         "cultural_records": 12,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.52459,
         "idx_innovation_records": 0.0,
@@ -32739,7 +32883,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -33387,7 +33535,7 @@
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.909524,
         "idx_area_based_participant_records": 0.04918,
         "idx_innovation_records": 0.0,
@@ -33400,7 +33548,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -35423,12 +35575,12 @@
         "province_name_th": "เชียงใหม่",
         "province_name_en": "Chiang Mai",
         "evidence_source_count": 7,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 122,
         "innovation_records": 18,
         "cultural_records": 226,
         "housing_observations": 523,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 1.0,
         "idx_innovation_records": 0.155172,
@@ -35441,7 +35593,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 21,
-        "idx_learning_dashboard_business_records": 0.552632
+        "idx_learning_dashboard_business_records": 0.552632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 11,
+        "idx_area_based_project_groups": 1.0
       }
     },
     {
@@ -36252,12 +36408,12 @@
         "province_name_th": "ลำพูน",
         "province_name_en": "Lamphun",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 5,
         "innovation_records": 6,
         "cultural_records": 14,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.040984,
         "idx_innovation_records": 0.051724,
@@ -36270,7 +36426,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 8,
-        "idx_learning_dashboard_business_records": 0.210526
+        "idx_learning_dashboard_business_records": 0.210526,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -37624,13 +37784,13 @@
         "province_code": "52",
         "province_name_th": "ลำปาง",
         "province_name_en": "Lampang",
-        "evidence_source_count": 7,
-        "sra_overall_score": 0,
+        "evidence_source_count": 8,
+        "sra_overall_score": null,
         "area_based_participant_records": 11,
         "innovation_records": 4,
         "cultural_records": 93,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.8,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.090164,
         "idx_innovation_records": 0.034483,
@@ -37643,7 +37803,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "in_scope_no_current_value",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -38546,12 +38710,12 @@
         "province_name_th": "อุตรดิตถ์",
         "province_name_en": "Uttaradit",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 22,
         "innovation_records": 7,
         "cultural_records": 35,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.180328,
         "idx_innovation_records": 0.060345,
@@ -38564,7 +38728,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -39435,12 +39603,12 @@
         "province_name_th": "แพร่",
         "province_name_en": "Phrae",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 4,
         "innovation_records": 1,
         "cultural_records": 53,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.032787,
         "idx_innovation_records": 0.008621,
@@ -39453,7 +39621,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 8,
-        "idx_learning_dashboard_business_records": 0.210526
+        "idx_learning_dashboard_business_records": 0.210526,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -40568,12 +40740,12 @@
         "province_name_th": "น่าน",
         "province_name_en": "Nan",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 34,
         "innovation_records": 2,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.278689,
         "idx_innovation_records": 0.017241,
@@ -40586,7 +40758,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 25,
-        "idx_learning_dashboard_business_records": 0.657895
+        "idx_learning_dashboard_business_records": 0.657895,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -41289,12 +41465,12 @@
         "province_name_th": "พะเยา",
         "province_name_en": "Phayao",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 32,
         "innovation_records": 0,
         "cultural_records": 278,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.262295,
         "idx_innovation_records": 0.0,
@@ -41307,7 +41483,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 12,
-        "idx_learning_dashboard_business_records": 0.315789
+        "idx_learning_dashboard_business_records": 0.315789,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -42342,12 +42522,12 @@
         "province_name_th": "เชียงราย",
         "province_name_en": "Chiang Rai",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 17,
         "innovation_records": 7,
         "cultural_records": 415,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.139344,
         "idx_innovation_records": 0.060345,
@@ -42360,7 +42540,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 17,
-        "idx_learning_dashboard_business_records": 0.447368
+        "idx_learning_dashboard_business_records": 0.447368,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -43968,7 +44152,7 @@
         "innovation_records": 1,
         "cultural_records": 66,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.92381,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -43981,7 +44165,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -45008,12 +45196,12 @@
         "province_name_th": "นครสวรรค์",
         "province_name_en": "Nakhon Sawan",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 99,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -45026,7 +45214,11 @@
         "idx_pppconnext_aggregate_rows": 0.4,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -45809,12 +46001,12 @@
         "province_name_th": "อุทัยธานี",
         "province_name_en": "Uthai Thani",
         "evidence_source_count": 2,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.222222,
+        "idx_evidence_source_count": 0.2,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -45827,7 +46019,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -46654,12 +46850,12 @@
         "province_name_th": "กำแพงเพชร",
         "province_name_en": "Kamphaeng Phet",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 27,
         "innovation_records": 21,
         "cultural_records": 20,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.221311,
         "idx_innovation_records": 0.181034,
@@ -46672,7 +46868,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -49051,12 +49251,12 @@
         "province_name_th": "ตาก",
         "province_name_en": "Tak",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 2,
         "cultural_records": 18,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.017241,
@@ -49069,7 +49269,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -49940,12 +50144,12 @@
         "province_name_th": "สุโขทัย",
         "province_name_en": "Sukhothai",
         "evidence_source_count": 2,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 91,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.222222,
+        "idx_evidence_source_count": 0.2,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -49958,7 +50162,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 0,
-        "idx_learning_dashboard_business_records": 0.0
+        "idx_learning_dashboard_business_records": 0.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -51044,13 +51252,13 @@
         "province_code": "65",
         "province_name_th": "พิษณุโลก",
         "province_name_en": "Phitsanulok",
-        "evidence_source_count": 7,
-        "sra_overall_score": 0,
+        "evidence_source_count": 8,
+        "sra_overall_score": null,
         "area_based_participant_records": 5,
         "innovation_records": 28,
         "cultural_records": 54,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.8,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.040984,
         "idx_innovation_records": 0.241379,
@@ -51063,7 +51271,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 5,
-        "idx_learning_dashboard_business_records": 0.131579
+        "idx_learning_dashboard_business_records": 0.131579,
+        "sra_scope_status": "in_scope_no_current_value",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -51646,12 +51858,12 @@
         "province_name_th": "พิจิตร",
         "province_name_en": "Phichit",
         "evidence_source_count": 2,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.222222,
+        "idx_evidence_source_count": 0.2,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.0,
@@ -51664,7 +51876,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -52851,12 +53067,12 @@
         "province_name_th": "เพชรบูรณ์",
         "province_name_en": "Phetchabun",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 24,
         "innovation_records": 3,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.196721,
         "idx_innovation_records": 0.025862,
@@ -52869,7 +53085,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 6,
-        "idx_learning_dashboard_business_records": 0.157895
+        "idx_learning_dashboard_business_records": 0.157895,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 3,
+        "idx_area_based_project_groups": 0.272727
       }
     },
     {
@@ -53444,12 +53664,12 @@
         "province_name_th": "ราชบุรี",
         "province_name_en": "Ratchaburi",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 3,
         "cultural_records": 208,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.025862,
@@ -53462,7 +53682,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -54641,12 +54865,12 @@
         "province_name_th": "กาญจนบุรี",
         "province_name_en": "Kanchanaburi",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 3,
         "innovation_records": 8,
         "cultural_records": 129,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.02459,
         "idx_innovation_records": 0.068966,
@@ -54659,7 +54883,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 5,
-        "idx_learning_dashboard_business_records": 0.131579
+        "idx_learning_dashboard_business_records": 0.131579,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -55470,12 +55698,12 @@
         "province_name_th": "สุพรรณบุรี",
         "province_name_en": "Suphan Buri",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 31,
         "innovation_records": 6,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.254098,
         "idx_innovation_records": 0.051724,
@@ -55488,7 +55716,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -55855,12 +56087,12 @@
         "province_name_th": "นครปฐม",
         "province_name_en": "Nakhon Pathom",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 11,
         "innovation_records": 2,
         "cultural_records": 48,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.090164,
         "idx_innovation_records": 0.017241,
@@ -55873,7 +56105,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -56088,12 +56324,12 @@
         "province_name_th": "สมุทรสาคร",
         "province_name_en": "Samut Sakhon",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 16,
         "cultural_records": 95,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.137931,
@@ -56106,7 +56342,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -56277,12 +56517,12 @@
         "province_name_th": "สมุทรสงคราม",
         "province_name_en": "Samut Songkhram",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 1,
         "innovation_records": 17,
         "cultural_records": 55,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.008197,
         "idx_innovation_records": 0.146552,
@@ -56295,7 +56535,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -56926,12 +57170,12 @@
         "province_name_th": "เพชรบุรี",
         "province_name_en": "Phetchaburi",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 30,
         "innovation_records": 7,
         "cultural_records": 41,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.245902,
         "idx_innovation_records": 0.060345,
@@ -56944,7 +57188,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -57911,12 +58159,12 @@
         "province_name_th": "ประจวบคีรีขันธ์",
         "province_name_en": "Prachuap Khiri Khan",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 11,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.090164,
         "idx_innovation_records": 0.0,
@@ -57929,7 +58177,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -58806,12 +59058,12 @@
         "province_name_th": "นครศรีธรรมราช",
         "province_name_en": "Nakhon Si Thammarat",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 62,
         "innovation_records": 95,
         "cultural_records": 132,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.508197,
         "idx_innovation_records": 0.818966,
@@ -58824,7 +59076,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 1.0,
         "learning_dashboard_business_records": 38,
-        "idx_learning_dashboard_business_records": 1.0
+        "idx_learning_dashboard_business_records": 1.0,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 7,
+        "idx_area_based_project_groups": 0.636364
       }
     },
     {
@@ -60429,12 +60685,12 @@
         "province_name_th": "กระบี่",
         "province_name_en": "Krabi",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 7,
         "cultural_records": 1,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.060345,
@@ -60447,7 +60703,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -61432,12 +61692,12 @@
         "province_name_th": "พังงา",
         "province_name_en": "Phangnga",
         "evidence_source_count": 3,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 8,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.333333,
+        "idx_evidence_source_count": 0.3,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.068966,
@@ -61450,7 +61710,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -62335,12 +62599,12 @@
         "province_name_th": "ภูเก็ต",
         "province_name_en": "Phuket",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 11,
         "cultural_records": 0,
         "housing_observations": 677,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.094828,
@@ -62353,7 +62617,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -65048,12 +65316,12 @@
         "province_name_th": "สุราษฎร์ธานี",
         "province_name_en": "Surat Thani",
         "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 6,
         "cultural_records": 14,
         "housing_observations": 587,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.5,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.051724,
@@ -65066,7 +65334,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 1,
-        "idx_learning_dashboard_business_records": 0.026316
+        "idx_learning_dashboard_business_records": 0.026316,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -66827,12 +67099,12 @@
         "province_name_th": "ระนอง",
         "province_name_en": "Ranong",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 6,
         "cultural_records": 0,
         "housing_observations": 55,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.051724,
@@ -66845,7 +67117,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -68754,12 +69030,12 @@
         "province_name_th": "ชุมพร",
         "province_name_en": "Chumphon",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 15,
         "innovation_records": 0,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.122951,
         "idx_innovation_records": 0.0,
@@ -68772,7 +69048,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.5,
         "learning_dashboard_business_records": 2,
-        "idx_learning_dashboard_business_records": 0.052632
+        "idx_learning_dashboard_business_records": 0.052632,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -69559,12 +69839,12 @@
         "province_name_th": "สงขลา",
         "province_name_en": "Songkhla",
         "evidence_source_count": 6,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 2,
         "innovation_records": 4,
         "cultural_records": 505,
         "housing_observations": 655,
-        "idx_evidence_source_count": 0.666667,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.016393,
         "idx_innovation_records": 0.034483,
@@ -69577,7 +69857,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 10,
-        "idx_learning_dashboard_business_records": 0.263158
+        "idx_learning_dashboard_business_records": 0.263158,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 2,
+        "idx_area_based_project_groups": 0.181818
       }
     },
     {
@@ -71394,12 +71678,12 @@
         "province_name_th": "สตูล",
         "province_name_en": "Satun",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 0,
         "innovation_records": 1,
         "cultural_records": 46,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.0,
         "idx_innovation_records": 0.008621,
@@ -71412,7 +71696,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 0,
+        "idx_area_based_project_groups": 0.0
       }
     },
     {
@@ -72661,12 +72949,12 @@
         "province_name_th": "ตรัง",
         "province_name_en": "Trang",
         "evidence_source_count": 4,
-        "sra_overall_score": 0,
+        "sra_overall_score": null,
         "area_based_participant_records": 42,
         "innovation_records": 3,
         "cultural_records": 0,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.444444,
+        "idx_evidence_source_count": 0.4,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.344262,
         "idx_innovation_records": 0.025862,
@@ -72679,7 +72967,11 @@
         "idx_pppconnext_aggregate_rows": 0.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 9,
-        "idx_learning_dashboard_business_records": 0.236842
+        "idx_learning_dashboard_business_records": 0.236842,
+        "sra_scope_status": "out_of_scope",
+        "sra_as_of": null,
+        "area_based_project_groups": 5,
+        "idx_area_based_project_groups": 0.454545
       }
     },
     {
@@ -73073,13 +73365,13 @@
         "province_code": "93",
         "province_name_th": "พัทลุง",
         "province_name_en": "Phatthalung",
-        "evidence_source_count": 5,
-        "sra_overall_score": 0,
+        "evidence_source_count": 6,
+        "sra_overall_score": null,
         "area_based_participant_records": 15,
         "innovation_records": 0,
         "cultural_records": 29,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.555556,
+        "idx_evidence_source_count": 0.6,
         "idx_sra_overall_score": 0.0,
         "idx_area_based_participant_records": 0.122951,
         "idx_innovation_records": 0.0,
@@ -73092,7 +73384,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 10,
-        "idx_learning_dashboard_business_records": 0.263158
+        "idx_learning_dashboard_business_records": 0.263158,
+        "sra_scope_status": "in_scope_no_current_value",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 1,
+        "idx_area_based_project_groups": 0.090909
       }
     },
     {
@@ -73512,7 +73808,7 @@
         "innovation_records": 2,
         "cultural_records": 106,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.97619,
         "idx_area_based_participant_records": 0.713115,
         "idx_innovation_records": 0.017241,
@@ -73525,7 +73821,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 12,
-        "idx_learning_dashboard_business_records": 0.315789
+        "idx_learning_dashboard_business_records": 0.315789,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 9,
+        "idx_area_based_project_groups": 0.818182
       }
     },
     {
@@ -74385,7 +74685,7 @@
         "innovation_records": 6,
         "cultural_records": 48,
         "housing_observations": 628,
-        "idx_evidence_source_count": 0.888889,
+        "idx_evidence_source_count": 0.8,
         "idx_sra_overall_score": 1.0,
         "idx_area_based_participant_records": 0.147541,
         "idx_innovation_records": 0.051724,
@@ -74398,7 +74698,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 4,
-        "idx_learning_dashboard_business_records": 0.105263
+        "idx_learning_dashboard_business_records": 0.105263,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     },
     {
@@ -74966,7 +75270,7 @@
         "innovation_records": 1,
         "cultural_records": 1,
         "housing_observations": 0,
-        "idx_evidence_source_count": 0.777778,
+        "idx_evidence_source_count": 0.7,
         "idx_sra_overall_score": 0.904762,
         "idx_area_based_participant_records": 0.204918,
         "idx_innovation_records": 0.008621,
@@ -74979,7 +75283,11 @@
         "idx_pppconnext_aggregate_rows": 1.0,
         "idx_city_capital_cities": 0.0,
         "learning_dashboard_business_records": 3,
-        "idx_learning_dashboard_business_records": 0.078947
+        "idx_learning_dashboard_business_records": 0.078947,
+        "sra_scope_status": "in_scope_value_available",
+        "sra_as_of": "2569",
+        "area_based_project_groups": 4,
+        "idx_area_based_project_groups": 0.363636
       }
     }
   ],

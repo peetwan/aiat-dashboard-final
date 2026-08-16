@@ -19,6 +19,24 @@
 
 Dashboard มีหน้าแผนที่จังหวัด หน้า `/insights` สำหรับข้อมูลข้ามจังหวัด/non-geo และ Public API สำหรับ source coverage, province summaries, briefings และไฟล์ดาวน์โหลดที่มี provenance
 
+## โครงสร้างข้อมูลเมื่อเลือกจังหวัด
+
+Province panel แบ่งเป็น 5 แท็บตามคำถามตัดสินใจ ไม่ได้แบ่งตามชื่อระบบต้นทาง:
+
+1. **ภาพรวม** — ตัวเลขหลักที่ตรวจกลับได้, เส้นทาง `Need → Input → Activity → Output → Outcome`, ข้อสังเกต และสถานะช่องว่าง
+2. **โครงการและงบ** — กลุ่มโครงการชั่วคราว, ระเบียนผู้เข้าร่วม, หน่วยวิจัย, พื้นที่, นวัตกรรม, ทุนที่ต้นทางกรอก และความพร้อมของผลลัพธ์
+3. **คนและพื้นที่** — ครัวเรือน/กลุ่มเป้าหมาย, การช่วยเหลือและ OM ของ SRA-DSS, PPPConnext, เมือง, ที่อยู่อาศัย, วัฒนธรรมและท่องเที่ยว
+4. **มิติการพัฒนา** — แยกบริบท/ความต้องการ, ปัจจัยนำเข้า, กิจกรรม, ผลผลิต และผลลัพธ์โดยไม่รวม metric ต่างหน่วย
+5. **คุณภาพข้อมูล** — grain, record count, `as_of`, `fetched_at`, quality status, caveat และ URL ต้นทางราย source
+
+Semantic contract ของ release นี้:
+
+- Area-Based 1,002 แถวเป็น participant/business grain: เชื่อมจังหวัดได้ 996 แถวใน 55 จังหวัด และมี 6 แถวอยู่ unmapped
+- จำนวนโครงการเป็น **provisional grouping** จาก `project_name + fiscal_year + research_unit` เพราะต้นทางไม่มี Project ID ทางการ: ได้ 73 กลุ่มไม่ซ้ำ และ 156 project–province links
+- SRA-DSS มีทะเบียนเป้าหมาย 20 จังหวัด: 15 จังหวัดมีคะแนนปี 2569 และ 5 จังหวัดอยู่ใน scope แต่คะแนนเป็น `null`; สถานะดังกล่าวไม่ใช่คะแนนศูนย์
+- AppTech มีนวัตกรรม 501 รายการและ 555 innovation–province links; 29 รายการเชื่อมหลายจังหวัด เงินทุนจึงเป็น funding attached to innovation ไม่ใช่งบจัดสรร/เบิกจ่ายของจังหวัด
+- Public source ทั้ง 11 แหล่งยังเป็น `candidate`/`needs_review`; accepted source = 0 จึงไม่ใช้ตัวเลขเป็น KPI รับรอง
+
 ## เริ่มใช้งานบนเครื่อง
 
 ต้องใช้ Python 3.12 ขึ้นไป:
@@ -88,6 +106,15 @@ python -m pytest -q
 ```
 
 Builder จะคง `source_id`, grain, unit, `as_of`, quality status และ provenance; ถ้าต้นทางไม่ระบุ ระบบใช้ `null`/`ไม่ระบุ` แทนการเดา
+
+หลัง build ให้รัน regression suite ของ Dashboard และ validator ระดับ workspace:
+
+```powershell
+python -m pytest -q
+python ..\scripts\validate_all.py
+```
+
+Regression suite ตรวจ 77 จังหวัด รวม project/participant grain, SRA scope/null semantics, funding attribution, privacy และ API/UI contract
 
 ## เอกสาร
 

@@ -26,6 +26,28 @@ def test_province_panel_has_clean_tourism_and_requirement_sections() -> None:
     assert "<table" not in template.lower()
 
 
+def test_province_panel_separates_decisions_projects_people_and_quality() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+
+    for label in ("ภาพรวม", "โครงการและงบ", "คนและพื้นที่", "มิติการพัฒนา", "คุณภาพข้อมูล"):
+        assert label in template
+    for element_id in (
+        "decisionChain",
+        "researchSection",
+        "sraAreaSection",
+        "povertySection",
+        "dataQualitySummary",
+    ):
+        assert f'id="{element_id}"' in template
+    assert "briefing.sections.project_master" in script
+    assert "briefing.sections.area_based" not in script
+    assert "province.area_based_project_groups" in script
+    assert "in_scope_no_current_value" in script
+    assert "ไม่แทนข้อมูลที่ไม่พบด้วยศูนย์" in script
+    assert "linked_province_count" in script
+
+
 def test_insights_exposes_all_source_coverage_without_controls() -> None:
     template = read("app/templates/insights.html")
     script = read("app/static/insights.js")

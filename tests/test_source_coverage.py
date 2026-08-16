@@ -141,7 +141,11 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     assert len(sources) == 28
     sra = sources["f1_sradss_ppaos"]
     omission = sra["geo"]["known_omissions"][0]
-    assert sra["geo"]["linked_area_count"] == 15
+    assert sra["geo"]["linked_area_count"] == 20
+    assert sra["geo"]["current_map_area_count"] == 20
+    assert sra["geo"]["numeric_value_area_count"] == 15
+    assert sra["records"]["serving_projection_count"] == 20
+    assert sra["records"]["serving_numeric_value_count"] == 15
     assert omission["count"] == 5
     assert omission["labels_th"] == ["นครราชสีมา", "ยโสธร", "ลำปาง", "พิษณุโลก", "พัทลุง"]
 

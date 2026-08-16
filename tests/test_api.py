@@ -44,7 +44,12 @@ def test_dashboard_and_endpoint_inventory():
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
         assert 'data-panel-tab="dimensions"' in page.text
-        assert "ภาพสถานการณ์รายมิติ" in page.text
+        assert "มิติการพัฒนาตามหลักฐานที่มี" in page.text
+        assert "โครงการและงบ" in page.text
+        assert "คนและพื้นที่" in page.text
+        assert "คุณภาพข้อมูล" in page.text
+        assert 'id="decisionChain"' in page.text
+        assert 'id="dataQualitySummary"' in page.text
         assert 'href="/insights"' in page.text
         assert "สำรวจรายละเอียดตามมิติ" not in page.text
         assert "↗" not in page.text
@@ -173,6 +178,15 @@ def test_public_projection_and_downloads_are_available():
         assert any(metric["key"] == "house_price_income_ratio" for metric in dimensions["housing"]["metrics"])
         assert any(metric["comparison"] == "above" for metric in dimensions["housing"]["metrics"])
         assert executive["methodology"]["raw_rows_included"] is False
+        assert executive["methodology"]["unknown_value_policy"] == "null_and_not_found_are_never_rendered_as_zero"
+        assert [stage["key"] for stage in executive["decision_chain"]] == [
+            "need",
+            "input",
+            "activity",
+            "output",
+            "outcome",
+        ]
+        assert executive["data_quality_overview"]["accepted_source_count"] == 0
         assert "sections" not in executive
         assert "f2_wallet_all_realtime" not in {
             item["source_id"] for item in executive["source_coverage"]
@@ -247,6 +261,9 @@ def test_public_projection_and_downloads_are_available():
 
         portfolio = executive["research_portfolio"]
         assert portfolio["project_count"] == len(
+            songkhla_briefing["sections"]["project_master"]["items"]
+        )
+        assert portfolio["participant_record_count"] == len(
             songkhla_briefing["sections"]["area_based"]["items"]
         )
         assert portfolio["innovation_count"] == len(
@@ -261,8 +278,46 @@ def test_public_projection_and_downloads_are_available():
             district["value"] >= 1 and district["label_th"] for district in portfolio["districts"]
         )
         funding = portfolio["funding"]
-        assert funding["pmua_funded_count"] >= funding["pmua_amount_known_entries"] >= 0
+        assert funding["pmua_funded_innovation_count"] <= funding["pmua_funding_entry_count"]
+        assert funding["pmua_amount_known_entries"] <= funding["pmua_funding_entry_count"]
+        assert funding["allocation_status"] == "linked_innovation_funding_not_provincial_allocation"
         assert "note_th" in funding
+
+        phetchaburi = client.get("/api/public/v1/provinces/76/briefing").json()
+        assert phetchaburi["sections"]["area_based"]["total_records"] == 30
+        assert phetchaburi["sections"]["project_master"]["total_records"] == 1
+
+        sra_states = client.get("/api/public/v1/provinces").json()
+        scope_counts = {
+            state: sum(item["sra_scope_status"] == state for item in sra_states)
+            for state in {
+                "in_scope_value_available",
+                "in_scope_no_current_value",
+                "out_of_scope",
+            }
+        }
+        assert scope_counts == {
+            "in_scope_value_available": 15,
+            "in_scope_no_current_value": 5,
+            "out_of_scope": 57,
+        }
+        missing_score_names = {
+            item["province_name_th"]
+            for item in sra_states
+            if item["sra_scope_status"] == "in_scope_no_current_value"
+        }
+        assert missing_score_names == {
+            "นครราชสีมา",
+            "ยโสธร",
+            "ลำปาง",
+            "พิษณุโลก",
+            "พัทลุง",
+        }
+        assert all(
+            item["sra_overall_score"] is None
+            for item in sra_states
+            if item["sra_scope_status"] == "in_scope_no_current_value"
+        )
 
         boundary = client.get("/api/public/v1/map/provinces").json()
         assert boundary["type"] == "FeatureCollection"

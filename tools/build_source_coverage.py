@@ -29,8 +29,9 @@ SRA_MISSING_SCORE_PROVINCES = [
 
 SERVING_PROJECTIONS = {
     "f1_sradss_ppaos": {
-        "count": 15,
-        "grain": "province_numeric_overall_score",
+        "count": 20,
+        "numeric_value_count": 15,
+        "grain": "province_target_registry_rows_20_with_15_numeric_scores",
         "evidence": (
             "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/"
             "01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv"
@@ -193,7 +194,7 @@ def geo_profile(
     if source_id == "f1_sradss_ppaos":
         grain = "province_aggregate"
         linkability = "province_candidate"
-        linked_area_count = 15
+        linked_area_count = 20
         known_omissions.append(
             {
                 "kind": "registered_province_without_numeric_overall_score",
@@ -230,6 +231,7 @@ def geo_profile(
         "related_area_count": related_area_count,
         "decision": decision,
         "current_map_area_count": province_projection_count,
+        "numeric_value_area_count": 15 if source_id == "f1_sradss_ppaos" else None,
         "known_omissions": known_omissions,
     }
 
@@ -368,6 +370,7 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                     "observed_count": observed_count,
                     "observed_count_basis": count_basis,
                     "serving_projection_count": serving_count,
+                    "serving_numeric_value_count": projection.get("numeric_value_count"),
                     "serving_projection_grain": projection.get("grain"),
                     "additional_public_non_map_count": additional_non_map_count,
                     "not_all_raw_rows_are_served": not_all_raw_rows_are_served,

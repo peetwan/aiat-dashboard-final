@@ -17,6 +17,8 @@
 | Province briefings | 77 |
 | Executive summaries | 77 |
 | Public serving artifacts | 161 |
+| Accepted public sources | 0 |
+| Candidate/needs-review public sources | 11 |
 | Restricted values บน Cloud | 0 |
 | Operational candidate rows | 0 จนกว่าจะรัน API refresh |
 
@@ -26,14 +28,14 @@ Production ใช้ PostgreSQL เป็น serving database และตรว
 
 | Source | สิ่งที่พบ | วิธีนำเสนอ |
 |---|---|---|
-| SRA-DSS | Registry มี 20 จังหวัด แต่ overall ปี 2569 มีตัวเลข 15 จังหวัด | แสดง 15 จังหวัด; อีก 5 จังหวัดคง `null` ไม่แทนด้วย 0 |
+| SRA-DSS | Registry มี 20 จังหวัด แต่ overall ปี 2569 มีตัวเลข 15 จังหวัด | แสดง target scope ครบ 20 จังหวัด; 15 จังหวัดมี score และอีก 5 จังหวัดคง `null` ไม่แทนด้วย 0 |
 | PPPConnext | Full BI มี 997,293 chart points แต่ geography semantics ไม่ครบ | ใช้ curated aggregate 660 แถว; generic points คงเป็น evidence |
 | Cultural Map | มี 5,258 จุดและ supporting records 361 แถว | แสดงจุดกับ sanitized aggregate; ไม่แสดง contact fields |
 | RMUTDB | 2,001 records ไม่มี location ระดับ record | แสดงเป็น national/non-geo catalog |
 | AppTech MTR | 621 registry rows, aggregate ครบ 77 จังหวัด | แยก registry overview จาก provincial interaction metrics |
 | AppTech MRU | มี requirement 2 แถวที่ต่าง grain จาก innovation | แสดงเป็น “โจทย์หรือความต้องการจากพื้นที่” แยกต่างหาก |
 | Learning Dashboard | Aggregate 66 จังหวัดและ lookup tables หลาย grain | Exact province join; lookup อื่นอยู่ source insight; unit/`as_of` คง `null` |
-| Area-Based | 1,002 records; 996 เชื่อม 55 จังหวัดและ 6 แถวไม่มีจังหวัด | 996 อยู่ province views; 6 อยู่ unmapped section |
+| Area-Based | 1,002 participant/business records; 996 เชื่อม 55 จังหวัดและ 6 แถวไม่มีจังหวัด | แยก 996 participant rows ออกจาก 73 provisional project groups / 156 project–province links; 6 แถวอยู่ unmapped |
 | City Capital | 18 เทศบาล × 39 metrics | คง grain เทศบาล; เชื่อม 16 จังหวัดด้วยทะเบียน DLA |
 | Ruam Thiao | 5 payloads รวม 54 records | แสดง tourism/transport/place/service โดยตัด contact cells |
 | Housing | 7,259 public rows; 6,953 ผูก 12 จังหวัดและ 306 ไม่มีจังหวัด | แยก province briefings กับ unassigned/non-map projection |
@@ -75,7 +77,10 @@ Source #25 (`spu_sukhothai_care`) ยังเป็น `sensitive_possible` แ
 ## UX and interpretation contract
 
 - หน้าแรกให้แผนที่เด่นและอธิบายวิธีเลือกจังหวัดแบบสั้น
-- เมื่อเลือกจังหวัด แสดง context และข้อสังเกตก่อน technical coverage
+- เมื่อเลือกจังหวัด แสดง 5 แท็บ: ภาพรวม, โครงการและงบ, คนและพื้นที่, มิติการพัฒนา และคุณภาพข้อมูล
+- ภาพรวมต้องมีเส้นทาง `Need → Input → Activity → Output → Outcome` และแสดงช่องที่ไม่มีหลักฐานอย่างตรงไปตรงมา
+- “โครงการ” ใช้ provisional grouping จากชื่อโครงการ+ปีงบ+หน่วยวิจัย; participant records แสดงเป็นคนละ metric
+- เงินทุน AppTech เป็นค่าที่ติดกับ innovation record และอาจเชื่อมหลายจังหวัด; ไม่ใช่งบจัดสรรหรือเบิกจ่ายจังหวัด
 - รายการยาวโหลดเมื่อเปิดรายละเอียดพื้นที่
 - Non-geo, unmapped และสถานะครบ 28 แหล่งอยู่หน้า `/insights`
 - ไม่มี composite score, budget ranking, ลูกศรเชิงตัดสิน หรือ raw spreadsheet dump
@@ -85,6 +90,7 @@ Source #25 (`spu_sukhothai_care`) ยังเป็น `sensitive_possible` แ
 ## Remaining limitations
 
 - ทุก public value ยังเป็น `candidate`/`needs_review`; `HTTP 200` ไม่ใช่ fact acceptance
+- Source #24 (`f4_research_dashboard_psu`) ยังเป็น metadata-only และไม่มี verified structured project/budget API จึงยังไม่มี Project ID ทางการ, หัวหน้าโครงการ, สถานะดำเนินงาน หรืองบเบิกจ่ายสำหรับเติมใน Dashboard
 - 12 metadata-only sources ต้องมี structured endpoint, schema และ freshness contract ก่อนแสดงค่า
 - Learning Dashboard ยังไม่มี source-wide unit/`as_of` และครอบคลุม selected project participants
 - Operational refresh มี 6 executable plans แต่ยังไม่ควรเปิด cron จนมี persistent raw/manifest storage

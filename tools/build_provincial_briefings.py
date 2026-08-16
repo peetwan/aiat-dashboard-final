@@ -16,6 +16,14 @@ WORKSPACE_ROOT = PROJECT_ROOT.parent
 BASE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final"
 MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
 STAGED_ROOT = WORKSPACE_ROOT / "data/staged"
+SRA_REGISTRY_PATH = (
+    BASE_RUN
+    / "01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_province_registry_rows.csv"
+)
+SRA_EXTENDED_ROOT = (
+    STAGED_ROOT
+    / "f1_sradss_ppaos/20260804T_sradss_extended_silver_01/silver"
+)
 OUTPUT_ROOT = PROJECT_ROOT / "data/public/provincial_briefings"
 SOURCE_INSIGHTS_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
@@ -477,6 +485,8 @@ def source_meta(source: dict[str, Any]) -> dict[str, Any]:
         "url": source["url"],
         "acquisition_mode": source["acquisition_mode"],
         "readiness_status": source["readiness_status"],
+        "quality_label_th": source.get("quality_label_th"),
+        "source_note_th": source.get("notes_th"),
     }
 
 
@@ -487,6 +497,143 @@ def initial_section(source_id: str, title_th: str) -> dict[str, Any]:
         "status": "source_has_no_record_for_province",
         "total_records": 0,
         "items": [],
+    }
+
+
+SOURCE_GRAIN_TH = {
+    "f1_sradss_ppaos": "จังหวัด × ปี; คะแนนและ aggregate โครงการ/การช่วยเหลือตามต้นทาง",
+    "f1_pppconnext": "แถว aggregate จาก widget ระดับจังหวัด/อำเภอ",
+    "f2_culturalmap_university": "หนึ่งระเบียนทุนวัฒนธรรม",
+    "f2_rmutdb": "หนึ่งระเบียนองค์ความรู้; ยังไม่มีจังหวัดที่ยืนยันได้",
+    "f2_apptech_mtr": "aggregate กิจกรรมแพลตฟอร์มรายจังหวัด",
+    "f2_apptech_mru": "หนึ่งนวัตกรรมหรือหนึ่งโจทย์ความต้องการ",
+    "f2_learning_dashboard": "aggregate ผู้เข้าร่วมโครงการที่ต้นทางเลือก",
+    "f2_learning_area_based": "หนึ่งหน่วย/ผู้ประกอบการเข้าร่วม; ไม่ใช่หนึ่งโครงการ",
+    "f3_city_capital_open_data": "หนึ่งเทศบาล; ไม่ใช่ค่ารวมทั้งจังหวัด",
+    "f3_ruamthiao_lamphun": "หนึ่งระเบียนเนื้อหาหน้าสาธารณะของลำพูน",
+    "f3_housing_portal": "หนึ่ง observation จาก resource ที่เชื่อมจังหวัดได้",
+}
+
+
+def provisional_project_groups(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Group participant-grain Area-Based rows without inventing a project ID."""
+
+    grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    for item in items:
+        key = tuple(
+            exact_text(item.get(field)) or "ไม่ระบุ"
+            for field in ("project_name", "fiscal_year", "research_unit")
+        )
+        grouped[key].append(item)
+
+    projects: list[dict[str, Any]] = []
+    for key, participants in grouped.items():
+        project_name, fiscal_year, research_unit = key
+        businesses = sorted({
+            name
+            for item in participants
+            if (name := clean(item.get("business_name"))) is not None
+        })
+        geography: dict[str, set[str]] = defaultdict(set)
+        for item in participants:
+            district = clean(item.get("district")) or "ไม่ระบุอำเภอ"
+            subdistrict = clean(item.get("subdistrict"))
+            if subdistrict:
+                geography[district].add(subdistrict)
+            else:
+                geography.setdefault(district, set())
+        updated_values = [
+            value
+            for item in participants
+            if (value := clean(item.get("updated_at"))) is not None
+        ]
+        group_seed = "\u001f".join(key)
+        projects.append({
+            "project_group_id": hashlib.sha256(group_seed.encode("utf-8")).hexdigest()[:16],
+            "official_project_id": None,
+            "project_name": project_name,
+            "fiscal_year": fiscal_year,
+            "research_unit": research_unit,
+            "grouping_method": "project_name_fiscal_year_research_unit",
+            "definition_status": "provisional_grouping_no_official_project_id",
+            "project_status": "not_reported_by_source",
+            "budget_status": "official_allocation_and_disbursement_not_available",
+            "participant_record_count": len(participants),
+            "business_count": len(businesses),
+            "businesses": businesses,
+            "geography": [
+                {
+                    "district": district,
+                    "subdistricts": sorted(subdistricts),
+                }
+                for district, subdistricts in sorted(geography.items())
+            ],
+            "participants": [
+                {
+                    "record_id": item.get("record_id"),
+                    "business_name": item.get("business_name"),
+                    "district": item.get("district"),
+                    "subdistrict": item.get("subdistrict"),
+                    "source_url": item.get("source_url"),
+                    "provenance": item.get("provenance"),
+                }
+                for item in participants
+            ],
+            "latest_source_update": max(updated_values, default=None),
+            "source_url": next(
+                (item.get("source_url") for item in participants if item.get("source_url")),
+                None,
+            ),
+        })
+    return sorted(
+        projects,
+        key=lambda item: (
+            str(item.get("fiscal_year") or ""),
+            str(item.get("project_name") or ""),
+        ),
+        reverse=True,
+    )
+
+
+def section_observation(sections: list[dict[str, Any]]) -> tuple[str | None, str | None]:
+    """Return latest explicit as-of and fetch timestamps without inferring either."""
+
+    as_of_values: list[str] = []
+    fetched_values: list[str] = []
+    for section in sections:
+        candidates = list(section.get("items") or [])
+        for key in (
+            "assistance_trend",
+            "assistance_dimensions_latest",
+            "om_trend",
+            "project_metrics_latest",
+        ):
+            candidates.extend(section.get(key) or [])
+        if section.get("om_total"):
+            candidates.append(section["om_total"])
+        for item in candidates:
+            provenance = item.get("provenance") or {}
+            as_of = clean(item.get("as_of")) or clean(provenance.get("as_of"))
+            fetched = clean(item.get("fetched_at")) or clean(provenance.get("fetched_at"))
+            if as_of:
+                as_of_values.append(str(as_of))
+            if fetched:
+                fetched_values.append(str(fetched))
+    return max(as_of_values, default=None), max(fetched_values, default=None)
+
+
+def compact_nested_provenance(row: dict[str, Any]) -> dict[str, Any]:
+    provenance = row.get("provenance") or {}
+    return {
+        "endpoint_url": clean(provenance.get("endpoint_url")),
+        "fetched_at": clean(provenance.get("fetched_at")),
+        "as_of": clean(provenance.get("as_of")),
+        "quality_status": clean(row.get("quality_status"))
+        or clean(provenance.get("quality_status")),
+        "definition_status": clean(row.get("definition_status"))
+        or clean(provenance.get("definition_status")),
+        "freshness_status": clean(provenance.get("freshness_status")),
+        "record_hash": clean(provenance.get("content_hash")),
     }
 
 
@@ -655,11 +802,36 @@ def build() -> None:
             },
             "executive_signals": [],
             "sections": {
-                "sra": initial_section("f1_sradss_ppaos", "สถานการณ์ความเปราะบาง SRA-DSS"),
+                "sra": {
+                    **initial_section("f1_sradss_ppaos", "สถานการณ์และการดำเนินงาน SRA-DSS"),
+                    "scope_status": "out_of_scope",
+                    "scope_as_of": "2569",
+                    "score_status": "out_of_scope",
+                    "assistance_trend": [],
+                    "assistance_dimensions_latest": [],
+                    "om_total": None,
+                    "om_trend": [],
+                    "project_metrics_latest": [],
+                    "quality_note_th": (
+                        "aggregate สาธารณะสถานะ needs_review/definition provisional; "
+                        "ไม่ใช่งบจัดสรรโครงการของจังหวัด"
+                    ),
+                },
                 "learning_dashboard": initial_section(
                     "f2_learning_dashboard", "ภาพรวมธุรกิจชุมชนในกลุ่มผู้เข้าร่วมโครงการ"
                 ),
-                "area_based": initial_section("f2_learning_area_based", "โครงการพัฒนาระดับพื้นที่"),
+                "area_based": initial_section(
+                    "f2_learning_area_based",
+                    "หน่วย/ผู้ประกอบการเข้าร่วม Area-Based",
+                ),
+                "project_master": {
+                    **initial_section(
+                        "f2_learning_area_based",
+                        "กลุ่มโครงการจากทะเบียน Area-Based",
+                    ),
+                    "grouping_method": "project_name_fiscal_year_research_unit",
+                    "definition_status": "provisional_grouping_no_official_project_id",
+                },
                 "innovation": initial_section("f2_apptech_mru", "นวัตกรรมพร้อมใช้ในพื้นที่"),
                 "requirements": initial_section("f2_apptech_mru", "โจทย์หรือความต้องการจากพื้นที่"),
                 "housing": {
@@ -680,16 +852,29 @@ def build() -> None:
             },
         }
 
-    # SRA-DSS: province aggregates only. Songkhla is intentionally absent from year 2569.
+    # SRA-DSS: target scope and current score availability are distinct states.
+    for row in csv_rows(SRA_REGISTRY_PATH):
+        if str(row.get("as_of") or "").strip() != "2569":
+            continue
+        code = canonical_code(row.get("province_code"))
+        if code not in briefings:
+            continue
+        section = briefings[code]["sections"]["sra"]
+        section["scope_status"] = "in_scope"
+        section["score_status"] = "in_scope_no_current_value"
+
     sra_path = BASE_RUN / "01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv"
     for row in csv_rows(sra_path):
         code = canonical_code(row.get("province_code"))
         value = safe_float(row.get("value"))
-        if code not in briefings or value is None or not clean(row.get("metric_key")):
+        metric_key = clean(row.get("metric_key"))
+        if code not in briefings or not metric_key:
             continue
         section = briefings[code]["sections"]["sra"]
+        if value is None:
+            continue
         section["items"].append({
-            "metric_key": row["metric_key"],
+            "metric_key": metric_key,
             "value": value,
             "unit": clean(row.get("unit")),
             "as_of": clean(row.get("as_of")),
@@ -697,8 +882,94 @@ def build() -> None:
             "source_url": clean(row.get("source_endpoint")),
             "definition_status": clean(row.get("definition_status")),
         })
+        if metric_key == "overall":
+            section["score_status"] = "in_scope_value_available"
 
-    # Area-Based: keep every project record attached to a province.
+    sra_extended_paths = {
+        "assistance_total": SRA_EXTENDED_ROOT / "assistance_total_rows.jsonl",
+        "assistance_dimension": SRA_EXTENDED_ROOT / "assistance_dimension_rows.jsonl",
+        "om_total": SRA_EXTENDED_ROOT / "om_total_rows.jsonl",
+        "om_year": SRA_EXTENDED_ROOT / "om_year_rows.jsonl",
+        "project_metric": SRA_EXTENDED_ROOT / "project_metric_rows.jsonl",
+    }
+    for row in jsonl_rows(sra_extended_paths["assistance_total"]):
+        code = canonical_code(row.get("scope_key"))
+        if row.get("scope_type") != "province" or code not in briefings:
+            continue
+        briefings[code]["sections"]["sra"]["assistance_trend"].append({
+            "year": clean(row.get("year")),
+            "households": safe_float(row.get("total_households")),
+            "episodes": safe_float(row.get("total_episodes")),
+            "budget_baht": safe_float(row.get("total_budget_baht")),
+            "as_of": clean(row.get("year")),
+            "provenance": compact_nested_provenance(row),
+        })
+    for row in jsonl_rows(sra_extended_paths["assistance_dimension"]):
+        code = canonical_code(row.get("scope_key"))
+        if (
+            row.get("scope_type") != "province"
+            or str(row.get("year") or "") != "2569"
+            or code not in briefings
+        ):
+            continue
+        briefings[code]["sections"]["sra"]["assistance_dimensions_latest"].append({
+            "year": "2569",
+            "dimension_key": clean(row.get("dimension_key")),
+            "dimension_title": clean(row.get("dimension_title")),
+            "households": safe_float(row.get("households")),
+            "episodes": safe_float(row.get("episode_count")),
+            "budget_baht": safe_float(row.get("budget_baht")),
+            "household_share_pct": safe_float(row.get("share_pct")),
+            "budget_share_pct": safe_float(row.get("budget_share_pct")),
+            "as_of": "2569",
+            "provenance": compact_nested_provenance(row),
+        })
+    for row in jsonl_rows(sra_extended_paths["om_total"]):
+        code = canonical_code(row.get("scope_key"))
+        if row.get("scope_type") != "province" or code not in briefings:
+            continue
+        briefings[code]["sections"]["sra"]["om_total"] = {
+            "om_count": safe_float(row.get("total_om")),
+            "chain_count": safe_float(row.get("total_chain")),
+            "capital_baht": safe_float(row.get("total_capital_baht")),
+            "as_of": None,
+            "provenance": compact_nested_provenance(row),
+        }
+    for row in jsonl_rows(sra_extended_paths["om_year"]):
+        code = canonical_code(row.get("scope_key"))
+        if row.get("scope_type") != "province" or code not in briefings:
+            continue
+        briefings[code]["sections"]["sra"]["om_trend"].append({
+            "year": clean(row.get("year")),
+            "om_count": safe_float(row.get("om_count")),
+            "chain_count": safe_float(row.get("chain_count")),
+            "capital_baht": safe_float(row.get("capital_baht")),
+            "as_of": None,
+            "provenance": compact_nested_provenance(row),
+        })
+    for row in jsonl_rows(sra_extended_paths["project_metric"]):
+        code = canonical_code(row.get("scope_key"))
+        if (
+            row.get("scope_type") != "province"
+            or str(row.get("year") or "") != "2569"
+            or code not in briefings
+        ):
+            continue
+        briefings[code]["sections"]["sra"]["project_metrics_latest"].append({
+            "year": "2569",
+            "metric_key": clean(row.get("metric_key")),
+            "metric_label": clean(row.get("metric_label")),
+            "metric_group": clean(row.get("metric_group")),
+            "unit": clean(row.get("unit")),
+            "value": safe_float(row.get("value")),
+            "target_value": safe_float(row.get("target_value")),
+            "target_pct": safe_float(row.get("target_pct")),
+            "data_model": clean(row.get("data_model")),
+            "as_of": "2569",
+            "provenance": compact_nested_provenance(row),
+        })
+
+    # Area-Based: keep every participant record attached to a province.
     area_path = BASE_RUN / "11_f2_learning_area_based/data.csv"
     area_unmapped: list[dict[str, Any]] = []
     for row in csv_rows(area_path):
@@ -731,6 +1002,12 @@ def build() -> None:
             continue
         briefings[code]["sections"]["area_based"]["items"].append(item)
 
+    for briefing in briefings.values():
+        participant_items = briefing["sections"]["area_based"]["items"]
+        briefing["sections"]["project_master"]["items"] = (
+            provisional_project_groups(participant_items)
+        )
+
     # AppTech MRU: use the richer validated Silver projection, while the list is refreshed by API.
     innovation_path = (
         STAGED_ROOT
@@ -755,6 +1032,7 @@ def build() -> None:
                 "innovation_type": fields.get("innovation_type_label"),
                 "category": fields.get("category_label"),
                 "trl_level": fields.get("trl_level"),
+                "srl_level": fields.get("srl_level"),
                 "innovation_value_baht": fields.get("innovation_value_baht"),
                 "funding": fields.get("funding") or [],
                 "roi_indicator": fields.get("roi_indicator"),
@@ -763,7 +1041,29 @@ def build() -> None:
                 "sroi_unit": fields.get("sroi_unit"),
                 "target_groups": fields.get("target_groups") or [],
                 "highlights": fields.get("highlights") or [],
+                "research_leads": [
+                    {
+                        "name": clean(researcher.get("name")),
+                        "faculty": clean(researcher.get("faculty")),
+                        "institute": clean(researcher.get("institute")),
+                    }
+                    for researcher in (fields.get("principal_researchers") or [])
+                ],
+                "co_researcher_count": len(fields.get("co_researchers") or []),
+                "ip": {
+                    "type": clean(fields.get("ip_type")),
+                    "rights_owner": clean(fields.get("ip_rights_owner")),
+                    "asset_name": clean(fields.get("ip_asset_name")),
+                    "application_number": clean(fields.get("ip_application_number")),
+                    "patent_number": clean(fields.get("ip_patent_number")),
+                },
+                "views_count": safe_float(fields.get("views_count")),
                 "areas": fields.get("areas") or [],
+                "linked_province_count": len({
+                    normalize_text(area.get("province"))
+                    for area in fields.get("areas") or []
+                    if normalize_text(area.get("province"))
+                }),
                 "source_url": provenance.get("detail_url") or provenance.get("endpoint_url"),
                 "fetched_at": provenance.get("fetched_at"),
             })
@@ -944,18 +1244,39 @@ def build() -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     written_files: list[Path] = []
     for code, briefing in briefings.items():
-        for section in briefing["sections"].values():
+        for section_id, section in briefing["sections"].items():
             if section["source_id"] == "f3_housing_portal":
                 total = sum(group["row_count"] for group in section["resource_groups"])
+            elif section_id == "sra":
+                total = (
+                    len(section["items"])
+                    + len(section["assistance_trend"])
+                    + len(section["assistance_dimensions_latest"])
+                    + len(section["om_trend"])
+                    + len(section["project_metrics_latest"])
+                    + (1 if section.get("om_total") else 0)
+                )
             else:
                 total = len(section["items"])
             section["total_records"] = total
             section["status"] = "available" if total else "source_has_no_record_for_province"
+            if section_id == "sra" and section["scope_status"] == "in_scope" and not section["items"]:
+                section["score_status"] = "in_scope_no_current_value"
 
         add_housing_signals(briefing)
         coverage = []
         for source_id, source in public_sources.items():
             item = source_meta(source)
+            section_objects = [
+                briefing["sections"][section_id]
+                for section_id in source_sections.get(source_id, ())
+            ]
+            observed_as_of, observed_fetched_at = section_observation(section_objects)
+            item.update({
+                "data_grain_th": SOURCE_GRAIN_TH.get(source_id, "ไม่ระบุ grain"),
+                "observed_as_of": observed_as_of,
+                "observed_fetched_at": observed_fetched_at,
+            })
             if source_id in not_province_scoped:
                 item.update({
                     "status": "not_province_scoped",
@@ -974,11 +1295,26 @@ def build() -> None:
                     "note_th": (
                         "innovation และ requirements เป็นคนละ grain; แสดงแยกใน record_breakdown"
                         if source_id == "f2_apptech_mru"
-                        else None
+                        else (
+                            "นับ participant records; จำนวนโครงการเป็นการจัดกลุ่มเบื้องต้นจากชื่อ+ปี+หน่วยวิจัย"
+                            if source_id == "f2_learning_area_based"
+                            else (
+                                "อยู่ในขอบเขตจังหวัดเป้าหมาย แต่คะแนนปี 2569 เป็นค่าว่าง; aggregate ชุดอื่นยังแสดงแบบ candidate"
+                                if source_id == "f1_sradss_ppaos"
+                                and briefing["sections"]["sra"]["score_status"]
+                                == "in_scope_no_current_value"
+                                else None
+                            )
+                        )
                     ),
                 })
                 if source_id == "f2_apptech_mru":
                     item["record_breakdown"] = record_breakdown
+                elif source_id == "f2_learning_area_based":
+                    item["record_breakdown"] = {
+                        "participant_records": briefing["sections"]["area_based"]["total_records"],
+                        "provisional_project_groups": briefing["sections"]["project_master"]["total_records"],
+                    }
             coverage.append(item)
         briefing["source_coverage"] = sorted(coverage, key=lambda item: public_sources[item["source_id"]]["ordinal"])
         briefing["available_source_ids"] = [
@@ -991,7 +1327,9 @@ def build() -> None:
     input_paths = [
         PROJECT_ROOT / "config/source_catalog.json",
         PROJECT_ROOT / "data/public/public_dashboard.json",
+        SRA_REGISTRY_PATH,
         sra_path,
+        *sra_extended_paths.values(),
         area_path,
         innovation_path,
         REQUIREMENT_PATH,

@@ -190,6 +190,9 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "centroid": [centroid_x, centroid_y] if centroid_x is not None and centroid_y is not None else None,
             "sra_overall_score": None,
             "sra_dimension_scores": {},
+            "sra_scope_status": "out_of_scope",
+            "sra_as_of": None,
+            "area_based_project_groups": 0,
             "area_based_participant_records": 0,
             "innovation_records": 0,
             "cultural_records": 0,
@@ -206,7 +209,23 @@ def build_public_data(refresh_boundaries: bool) -> None:
 
     input_paths: list[Path] = [catalog_path, LEARNING_PATH, LEARNING_MANIFEST_PATH]
 
-    # SRA-DSS: preserve the source's provisional score and unit without interpreting it.
+    # SRA-DSS: preserve target scope separately from score availability.  The
+    # year-2569 registry contains 20 target provinces, while five of those
+    # provinces have null current scores.  Null must not mean out of scope.
+    sra_registry_path = (
+        BASE_RUN
+        / "01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_province_registry_rows.csv"
+    )
+    input_paths.append(sra_registry_path)
+    for row in csv_rows(sra_registry_path):
+        if str(row.get("as_of") or "").strip() != "2569":
+            continue
+        code = canonical_code(row.get("province_code"))
+        if code in profiles:
+            profiles[code]["sra_scope_status"] = "in_scope_no_current_value"
+            profiles[code]["sra_as_of"] = "2569"
+
+    # Preserve the source's provisional score and unit without interpreting it.
     sra_path = BASE_RUN / "01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv"
     input_paths.append(sra_path)
     for row in csv_rows(sra_path):
@@ -217,6 +236,8 @@ def build_public_data(refresh_boundaries: bool) -> None:
             continue
         if metric == "overall":
             profiles[code]["sra_overall_score"] = value
+            profiles[code]["sra_scope_status"] = "in_scope_value_available"
+            profiles[code]["sra_as_of"] = str(row.get("as_of") or "2569")
         elif metric in {"financial", "human", "natural_res", "physical", "social"}:
             profiles[code]["sra_dimension_scores"][metric] = value
 
@@ -224,15 +245,31 @@ def build_public_data(refresh_boundaries: bool) -> None:
     area_path = BASE_RUN / "11_f2_learning_area_based/data.csv"
     input_paths.append(area_path)
     area_unmapped_reason_counts: dict[str, int] = defaultdict(int)
+    area_project_groups_by_code: dict[str, set[tuple[str, str, str]]] = defaultdict(set)
     for row in csv_rows(area_path):
         province_name = normalize_text(row.get("source_fields__province"))
         code = code_by_th.get(province_name) or canonical_code(row.get("partition_key"))
         if code in profiles:
             profiles[code]["area_based_participant_records"] += 1
+            # The source row grain is one participating business/unit.  Until
+            # an official project ID exists, group only by source project name,
+            # fiscal year and research unit and expose the method as provisional.
+            project_key = tuple(
+                normalize_text(row.get(field)) or "ไม่ระบุ"
+                for field in (
+                    "source_fields__projectName",
+                    "source_fields__fiscalYear",
+                    "source_fields__researchUnit",
+                )
+            )
+            area_project_groups_by_code[code].add(project_key)
         elif not province_name:
             area_unmapped_reason_counts["source_province_missing"] += 1
         else:
             area_unmapped_reason_counts["province_name_not_in_crosswalk"] += 1
+
+    for code, project_groups in area_project_groups_by_code.items():
+        profiles[code]["area_based_project_groups"] = len(project_groups)
 
     # AppTech MRU: count a record once per distinct province listed in its public areas field.
     innovation_path = BASE_RUN / "08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_innovation.csv"
@@ -323,6 +360,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
 
     metric_sources = {
         "sra_overall_score": "f1_sradss_ppaos",
+        "area_based_project_groups": "f2_learning_area_based",
         "area_based_participant_records": "f2_learning_area_based",
         "innovation_records": "f2_apptech_mru",
         "cultural_records": "f2_culturalmap_university",
@@ -337,13 +375,16 @@ def build_public_data(refresh_boundaries: bool) -> None:
         for metric in numeric_metrics
     }
     for code, profile in profiles.items():
-        sources = [
+        sources = list(dict.fromkeys(
             source_id
             for metric, source_id in metric_sources.items()
             if profile[metric] not in (None, 0)
-        ]
+        ))
+        if profile["sra_scope_status"] != "out_of_scope" and "f1_sradss_ppaos" not in sources:
+            sources.append("f1_sradss_ppaos")
         # AppTech's public province API explicitly returns all 77 provinces, including zero activity.
-        sources.append("f2_apptech_mtr")
+        if "f2_apptech_mtr" not in sources:
+            sources.append("f2_apptech_mtr")
         profile["evidence_sources"] = sources
         profile["evidence_source_count"] = len(sources)
         profile["visual_index"] = {
@@ -361,7 +402,10 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "province_name_th": profile["province_name_th"],
                 "province_name_en": profile["province_name_en"],
                 "evidence_source_count": len(sources),
-                "sra_overall_score": profile["sra_overall_score"] or 0,
+                "sra_overall_score": profile["sra_overall_score"],
+                "sra_scope_status": profile["sra_scope_status"],
+                "sra_as_of": profile["sra_as_of"],
+                "area_based_project_groups": profile["area_based_project_groups"],
                 "area_based_participant_records": profile["area_based_participant_records"],
                 "innovation_records": profile["innovation_records"],
                 "cultural_records": profile["cultural_records"],
@@ -494,6 +538,11 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "unit": "records",
                 "semantic_status": "participant_records_not_population",
             },
+            "area_based_project_groups": {
+                "label_th": "กลุ่มโครงการ Area-Based ที่เชื่อมกับจังหวัด",
+                "unit": "provisional_project_groups",
+                "semantic_status": "provisional_name_year_research_unit_grouping_not_official_project_id",
+            },
             "innovation_records": {
                 "label_th": "ผลงาน AppTech ที่ระบุจังหวัด",
                 "unit": "records",
@@ -575,6 +624,9 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "region",
         "evidence_source_count",
         "sra_overall_score",
+        "sra_scope_status",
+        "sra_as_of",
+        "area_based_project_groups",
         "area_based_participant_records",
         "innovation_records",
         "cultural_records",

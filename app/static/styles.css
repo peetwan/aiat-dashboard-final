@@ -2044,3 +2044,124 @@
   .culture-card.no-image h3 { margin-top: 6px; }
   .tourism-place.no-image { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Province decision audit: semantic stages, provisional project groups,
+   SRA activity, and field-level data quality. */
+@layer lightmap {
+  .section-method-note {
+    margin: -4px 0 14px;
+    padding: 9px 11px;
+    border-left: 3px solid #d29a64;
+    background: #fbf4eb;
+    color: #6c5038;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .metric-na { color: var(--ink-soft) !important; }
+
+  .decision-chain {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(128px, 1fr));
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .decision-stage {
+    min-width: 128px;
+    padding: 11px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    border-radius: 12px;
+  }
+  .decision-stage > header { display: flex; align-items: center; gap: 8px; }
+  .decision-stage > header > i {
+    width: 23px;
+    height: 23px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    background: #e6eee8;
+    border-radius: 50%;
+    color: #245b42;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 800;
+  }
+  .decision-stage > header span { display: block; color: var(--ink-strong); font-size: 11.5px; font-weight: 750; line-height: 1.4; }
+  .decision-stage > header small { display: block; margin-top: 1px; color: var(--ink-soft); font-size: 9px; }
+  .decision-stage.status-not_available > header > i { background: #eceeeb; color: #7b837d; }
+  .decision-stage.status-limited > header > i { background: #f5e8d8; color: #98521f; }
+  .decision-stage-metrics { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .decision-stage-metrics p { margin: 0; }
+  .decision-stage-metrics span { display: block; color: var(--ink-soft); font-size: 9px; line-height: 1.35; }
+  .decision-stage-metrics strong { display: block; margin-top: 2px; color: var(--ink-strong); font-size: 12px; line-height: 1.35; }
+  .decision-stage-empty { color: #98a098; font-size: 18px; }
+  .decision-stage > footer { margin-top: 9px; color: #64736a; font-size: 9.5px; line-height: 1.5; }
+
+  .research-stats { grid-template-columns: repeat(auto-fit, minmax(106px, 1fr)); }
+  .funding-warning {
+    margin: 9px 0 0;
+    padding: 8px 10px;
+    background: #fff1e7;
+    border-radius: 8px;
+    color: #8b481f;
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+  .project-record-stats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .project-record-stats > span { padding: 6px 8px; background: #edf3ee; border-radius: 8px; color: #40564c; font-size: 10.5px; }
+  .project-record-stats strong { color: #173f2d; font-variant-numeric: tabular-nums; }
+  .project-geography { display: grid; gap: 3px; margin: 10px 0 0; }
+  .project-geography span { color: var(--ink-soft); font-size: 10px; }
+  .project-geography strong { font-size: 11.5px; font-weight: 600; line-height: 1.6; }
+  .project-data-gap { margin: 9px 0 0; padding: 7px 9px; background: #f4f4f1; border-radius: 8px; color: #68726c; font-size: 10.5px; line-height: 1.5; }
+  .project-participants { margin-top: 9px; border-top: 1px solid var(--hairline); }
+  .project-participants summary { padding: 9px 0 4px; color: #285f45; cursor: pointer; font-size: 10.5px; font-weight: 700; }
+  .project-participants ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; margin: 5px 0 3px; padding-left: 18px; }
+  .project-participants li { color: #506259; font-size: 10.5px; line-height: 1.45; }
+
+  .sra-area-section { background: #fcf7f1; }
+  .sra-area-summary, .sra-project-metrics, .quality-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 8px; }
+  .sra-area-summary article, .sra-project-metrics article, .quality-stats article {
+    padding: 11px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    border-radius: 11px;
+  }
+  .sra-area-summary span, .sra-project-metrics span, .quality-stats span { display: block; color: var(--ink-soft); font-size: 10px; line-height: 1.45; }
+  .sra-area-summary strong, .sra-project-metrics strong, .quality-stats strong { display: block; margin-top: 5px; color: var(--ink-strong); font-size: 20px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .sra-area-summary small, .sra-project-metrics small, .quality-stats small { display: block; margin-top: 3px; color: #64736a; font-size: 9px; line-height: 1.45; }
+  .sra-area-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 10px; }
+  .sra-detail-block { margin-top: 10px; padding: 12px; border: 1px solid var(--hairline); background: #fff; border-radius: 12px; }
+  .sra-area-grid .sra-detail-block { height: 100%; margin-top: 0; }
+  .sra-detail-block h4 { margin: 0 0 9px; color: #3f4f47; font-size: 11.5px; }
+  .sra-table { display: flex; flex-direction: column; gap: 5px; }
+  .sra-table p { display: grid; grid-template-columns: minmax(76px, 1fr) repeat(3, auto); align-items: center; gap: 7px; margin: 0; padding-bottom: 5px; border-bottom: 1px solid #edf0ec; }
+  .sra-table p:last-child { border-bottom: 0; }
+  .sra-table strong, .sra-table span { font-size: 9.5px; line-height: 1.4; }
+  .sra-table span { color: #5f6f66; text-align: right; white-space: nowrap; }
+
+  .evidence-stage { display: inline-flex; margin-left: 7px; padding: 3px 6px; background: #e8eee9; border-radius: 99px; color: #426252; font-size: 8.5px; font-weight: 700; vertical-align: middle; }
+  .evidence-stage.stage-input { background: #f5e9d9; color: #8e5629; }
+  .evidence-stage.stage-output { background: #e6eef6; color: #315f86; }
+
+  .quality-stats article.is-warning { border-color: #e9b48c; background: #fff7f0; }
+  .quality-stats article.is-warning strong { color: #9a4e1d; }
+  .quality-alert { margin: 10px 0 0; padding: 10px 12px; border-left: 3px solid #b4551d; background: #fff2e8; color: #75401f; font-size: 11px; line-height: 1.6; }
+  .quality-rules { margin: 10px 0 0; padding-left: 19px; color: #4f6157; font-size: 10.5px; line-height: 1.65; }
+  .source-row { align-items: start; }
+  .source-row .source-detail { gap: 2px; }
+  .source-row .source-detail > small { display: block; overflow: visible; -webkit-line-clamp: unset; }
+  .source-detail p { margin: 4px 0 0; color: #5c6c63; font-size: 9.5px; line-height: 1.45; overflow-wrap: anywhere; }
+  .source-detail p > span { display: inline; margin-right: 5px; color: #2f4439; font-weight: 700; }
+  .source-detail .source-note { margin-top: 6px; padding: 6px 8px; background: #f2f4f0; border-radius: 7px; }
+
+  @media (max-width: 720px) {
+    .decision-chain { grid-template-columns: repeat(5, minmax(150px, 1fr)); }
+    .sra-area-grid { grid-template-columns: 1fr; }
+    .sra-table p { grid-template-columns: minmax(86px, 1fr) auto; }
+    .sra-table p span:nth-of-type(n+2) { display: none; }
+    .project-participants ul { grid-template-columns: 1fr; }
+  }
+}

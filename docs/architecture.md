@@ -27,11 +27,15 @@ Source registry 28 แหล่ง
 
 1. **Evidence** — raw/API/export เดิมอยู่นอก repo Dashboard และเป็น immutable
 2. **Clean projection** — builder รักษา source grain, unit, `as_of`, quality status และ provenance
-3. **Executive serving** — แยกข้อมูลที่ผูกจังหวัด, non-geo และ unmapped โดยไม่เดา join key
+3. **Executive serving** — แยกข้อมูลที่ผูกจังหวัด, non-geo และ unmapped โดยไม่เดา join key พร้อม semantic projection ระดับ `Need → Input → Activity → Output → Outcome`
 4. **Database serving** — sync 161 JSON artifacts พร้อม SHA-256 เข้า PostgreSQL หรือ SQLite
 5. **Public API/UI** — โหลด summary ก่อน แล้วโหลดรายละเอียดเมื่อผู้ใช้เลือกพื้นที่
 
-ค่าไม่ทราบใช้ `null`/`ไม่ระบุ`; ระบบไม่แทน null ด้วยศูนย์และไม่สร้าง composite score จาก metric ต่างหน่วย
+ค่าไม่ทราบใช้ `null`/`ไม่ระบุ`; ระบบไม่แทน null ด้วยศูนย์และไม่สร้าง composite score จาก metric ต่างหน่วย โดยเฉพาะ:
+
+- SRA target scope แยกจาก score availability: 20 จังหวัดอยู่ในทะเบียนเป้าหมาย แต่มีคะแนนปัจจุบัน 15 จังหวัด
+- Area-Based participant rows แยกจาก provisional project groups; map และ summary ใช้ `area_based_project_groups` ไม่ใช้ participant count เป็นจำนวนโครงการ
+- Funding ที่ผูกกับนวัตกรรมหลายจังหวัดไม่ถูกตีความเป็น provincial allocation และห้ามรวมยอดรายจังหวัดเป็นยอดประเทศ
 
 ## Database design
 
@@ -56,8 +60,8 @@ Production ใช้ PostgreSQL ผ่าน `DATABASE_URL`; local default ใ�
 - `public_dashboard.json` — province profile 77 จังหวัด
 - `source_insights.json` — source-level และ non-geo analysis
 - `unmapped_records.json` — แถวที่ไม่มี province key โดยไม่เดาพื้นที่
-- `provincial_briefings/{code}.json` — รายการข้อมูลรายจังหวัด
-- `executive_summaries/{code}.json` — สรุปข้อมูลรายมิติ
+- `provincial_briefings/{code}.json` — รายการข้อมูลรายจังหวัด รวม `project_master`, participant records, SRA activity, innovation/IP/ROI/SROI และ source-level provenance
+- `executive_summaries/{code}.json` — สรุป 5 แท็บ, research portfolio, `decision_chain`, `data_quality_overview` และข้อมูลรายมิติ
 - GeoJSON — ขอบเขตจังหวัดและ cultural points
 
 ## Geography rules
@@ -84,6 +88,8 @@ python tools/build_source_coverage.py
 ```
 
 หลัง build ต้องตรวจ diff ของ values, counts, hashes และ unmapped records แล้วรัน `python -m pytest -q`
+
+Release ปัจจุบันมี 77 briefings + 77 executive summaries และ regression contract ตรวจว่า 996 participant rows ไม่ถูกนับเป็น 996 โครงการ, 156 project–province links ตรงกันทุก projection และ SRA `null` ไม่ถูกแทนด้วยศูนย์
 
 ## Operational refresh
 

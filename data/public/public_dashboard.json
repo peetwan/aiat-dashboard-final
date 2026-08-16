@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-16T09:30:43.649275+00:00",
+  "generated_at": "2026-08-16T13:40:40.628338+00:00",
   "publication_status": "public_candidate_projection",
   "warning_th": "ข้อมูลทุกชุดเป็น candidate/needs_review ใช้สำรวจหลักฐานและจำลองฉากทัศน์ ไม่ใช่คำสั่งจัดสรรงบหรือ KPI ที่รับรองแล้ว",
   "summary": {
@@ -93,6 +93,11 @@
       "label_th": "หน่วยเข้าร่วม Area-Based",
       "unit": "records",
       "semantic_status": "participant_records_not_population"
+    },
+    "area_based_project_groups": {
+      "label_th": "กลุ่มโครงการ Area-Based ที่เชื่อมกับจังหวัด",
+      "unit": "provisional_project_groups",
+      "semantic_status": "provisional_name_year_research_unit_grouping_not_official_project_id"
     },
     "innovation_records": {
       "label_th": "ผลงาน AppTech ที่ระบุจังหวัด",
@@ -322,6 +327,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 7,
       "cultural_records": 1,
@@ -341,6 +349,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.060345,
         "cultural_records": 0.00198,
@@ -348,7 +357,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -362,6 +371,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 5,
       "area_based_participant_records": 7,
       "innovation_records": 116,
       "cultural_records": 361,
@@ -383,6 +395,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.454545,
         "area_based_participant_records": 0.057377,
         "innovation_records": 1.0,
         "cultural_records": 0.714851,
@@ -390,7 +403,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -404,6 +417,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 3,
       "innovation_records": 8,
       "cultural_records": 129,
@@ -424,6 +440,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.02459,
         "innovation_records": 0.068966,
         "cultural_records": 0.255446,
@@ -431,7 +448,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -451,6 +468,9 @@
         "natural_res": 1.87,
         "social": 1.69
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 3,
       "area_based_participant_records": 3,
       "innovation_records": 0,
       "cultural_records": 5,
@@ -472,6 +492,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.933333,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.02459,
         "innovation_records": 0.0,
         "cultural_records": 0.009901,
@@ -479,7 +500,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -493,6 +514,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 27,
       "innovation_records": 21,
       "cultural_records": 20,
@@ -513,6 +537,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.221311,
         "innovation_records": 0.181034,
         "cultural_records": 0.039604,
@@ -520,7 +545,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -534,6 +559,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 4,
       "area_based_participant_records": 15,
       "innovation_records": 3,
       "cultural_records": 34,
@@ -555,6 +583,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.122951,
         "innovation_records": 0.025862,
         "cultural_records": 0.067327,
@@ -562,7 +591,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -576,6 +605,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 10,
       "innovation_records": 0,
       "cultural_records": 66,
@@ -595,6 +627,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.081967,
         "innovation_records": 0.0,
         "cultural_records": 0.130693,
@@ -602,7 +635,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -616,6 +649,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 22,
       "innovation_records": 7,
       "cultural_records": 52,
@@ -637,6 +673,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.180328,
         "innovation_records": 0.060345,
         "cultural_records": 0.10297,
@@ -644,7 +681,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -658,6 +695,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 3,
       "innovation_records": 1,
       "cultural_records": 59,
@@ -679,6 +719,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.02459,
         "innovation_records": 0.008621,
         "cultural_records": 0.116832,
@@ -686,7 +727,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -706,6 +747,9 @@
         "natural_res": 1.65,
         "social": 1.55
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 16,
       "cultural_records": 52,
@@ -728,6 +772,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.904762,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.137931,
         "cultural_records": 0.10297,
@@ -735,7 +780,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -749,6 +794,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 2,
       "cultural_records": 64,
@@ -769,6 +817,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.017241,
         "cultural_records": 0.126733,
@@ -776,7 +825,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -790,6 +839,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 15,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -809,6 +861,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.122951,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -816,7 +869,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -830,6 +883,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 5,
       "area_based_participant_records": 42,
       "innovation_records": 3,
       "cultural_records": 0,
@@ -849,6 +905,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.454545,
         "area_based_participant_records": 0.344262,
         "innovation_records": 0.025862,
         "cultural_records": 0.0,
@@ -856,7 +913,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -870,6 +927,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -886,6 +946,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -893,7 +954,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.111111
+        "evidence_source_count": 0.1
       }
     },
     {
@@ -907,6 +968,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 2,
       "cultural_records": 18,
@@ -926,6 +990,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.017241,
         "cultural_records": 0.035644,
@@ -933,7 +998,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -947,6 +1012,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 2,
@@ -965,6 +1033,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.00396,
@@ -972,7 +1041,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -986,6 +1055,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 11,
       "innovation_records": 2,
       "cultural_records": 48,
@@ -1006,6 +1078,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.090164,
         "innovation_records": 0.017241,
         "cultural_records": 0.09505,
@@ -1013,7 +1086,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -1027,6 +1100,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 4,
       "area_based_participant_records": 64,
       "innovation_records": 0,
       "cultural_records": 12,
@@ -1046,6 +1122,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.52459,
         "innovation_records": 0.0,
         "cultural_records": 0.023762,
@@ -1053,7 +1130,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1067,6 +1144,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "in_scope_no_current_value",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 5,
       "area_based_participant_records": 12,
       "innovation_records": 6,
       "cultural_records": 169,
@@ -1082,12 +1162,14 @@
         "f2_culturalmap_university",
         "f1_pppconnext",
         "f2_learning_dashboard",
+        "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.454545,
         "area_based_participant_records": 0.098361,
         "innovation_records": 0.051724,
         "cultural_records": 0.334653,
@@ -1095,7 +1177,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -1109,6 +1191,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 7,
       "area_based_participant_records": 62,
       "innovation_records": 95,
       "cultural_records": 132,
@@ -1130,6 +1215,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.636364,
         "area_based_participant_records": 0.508197,
         "innovation_records": 0.818966,
         "cultural_records": 0.261386,
@@ -1137,7 +1223,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 1.0,
         "city_capital_cities": 1.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -1151,6 +1237,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 99,
@@ -1171,6 +1260,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.19604,
@@ -1178,7 +1268,7 @@
         "pppconnext_aggregate_rows": 0.4,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -1192,6 +1282,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -1211,6 +1304,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -1218,7 +1312,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.184211,
         "city_capital_cities": 1.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1238,6 +1332,9 @@
         "natural_res": 1.92,
         "social": 1.09
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 4,
       "area_based_participant_records": 25,
       "innovation_records": 1,
       "cultural_records": 1,
@@ -1260,6 +1357,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.904762,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.204918,
         "innovation_records": 0.008621,
         "cultural_records": 0.00198,
@@ -1267,7 +1365,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -1281,6 +1379,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 4,
       "area_based_participant_records": 34,
       "innovation_records": 2,
       "cultural_records": 0,
@@ -1300,6 +1401,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.278689,
         "innovation_records": 0.017241,
         "cultural_records": 0.0,
@@ -1307,7 +1409,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.657895,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1321,6 +1423,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 54,
@@ -1339,6 +1444,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.106931,
@@ -1346,7 +1452,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -1366,6 +1472,9 @@
         "natural_res": 2.05,
         "social": 1.0
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 2,
       "area_based_participant_records": 9,
       "innovation_records": 5,
       "cultural_records": 2,
@@ -1388,6 +1497,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.795238,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.07377,
         "innovation_records": 0.043103,
         "cultural_records": 0.00396,
@@ -1395,7 +1505,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -1409,6 +1519,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 3,
       "area_based_participant_records": 29,
       "innovation_records": 0,
       "cultural_records": 84,
@@ -1429,6 +1542,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.237705,
         "innovation_records": 0.0,
         "cultural_records": 0.166337,
@@ -1436,7 +1550,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -1450,6 +1564,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 11,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -1468,6 +1585,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.090164,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -1475,7 +1593,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -1489,6 +1607,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 20,
       "innovation_records": 0,
       "cultural_records": 58,
@@ -1507,6 +1628,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.163934,
         "innovation_records": 0.0,
         "cultural_records": 0.114851,
@@ -1514,7 +1636,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -1534,6 +1656,9 @@
         "natural_res": 1.82,
         "social": 1.59
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 9,
       "area_based_participant_records": 87,
       "innovation_records": 2,
       "cultural_records": 106,
@@ -1556,6 +1681,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.97619,
+        "area_based_project_groups": 0.818182,
         "area_based_participant_records": 0.713115,
         "innovation_records": 0.017241,
         "cultural_records": 0.209901,
@@ -1563,7 +1689,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -1577,6 +1703,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 29,
       "innovation_records": 3,
       "cultural_records": 102,
@@ -1597,6 +1726,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.237705,
         "innovation_records": 0.025862,
         "cultural_records": 0.20198,
@@ -1604,7 +1734,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.526316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -1618,6 +1748,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 3,
       "area_based_participant_records": 32,
       "innovation_records": 0,
       "cultural_records": 278,
@@ -1637,6 +1770,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.262295,
         "innovation_records": 0.0,
         "cultural_records": 0.550495,
@@ -1644,7 +1778,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1658,6 +1792,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 8,
       "cultural_records": 0,
@@ -1676,6 +1813,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.068966,
         "cultural_records": 0.0,
@@ -1683,7 +1821,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -1697,6 +1835,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "in_scope_no_current_value",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 1,
       "area_based_participant_records": 15,
       "innovation_records": 0,
       "cultural_records": 29,
@@ -1711,12 +1852,14 @@
         "f2_culturalmap_university",
         "f1_pppconnext",
         "f2_learning_dashboard",
+        "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.122951,
         "innovation_records": 0.0,
         "cultural_records": 0.057426,
@@ -1724,7 +1867,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -1738,6 +1881,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -1755,6 +1901,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -1762,7 +1909,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.222222
+        "evidence_source_count": 0.2
       }
     },
     {
@@ -1776,6 +1923,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "in_scope_no_current_value",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 4,
       "area_based_participant_records": 5,
       "innovation_records": 28,
       "cultural_records": 54,
@@ -1792,12 +1942,14 @@
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
+        "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.040984,
         "innovation_records": 0.241379,
         "cultural_records": 0.106931,
@@ -1805,7 +1957,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.8
       }
     },
     {
@@ -1819,6 +1971,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 11,
       "cultural_records": 0,
@@ -1838,6 +1993,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.094828,
         "cultural_records": 0.0,
@@ -1845,7 +2001,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1859,6 +2015,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 3,
       "area_based_participant_records": 7,
       "innovation_records": 21,
       "cultural_records": 300,
@@ -1879,6 +2038,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.057377,
         "innovation_records": 0.181034,
         "cultural_records": 0.594059,
@@ -1886,7 +2046,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -1906,6 +2066,9 @@
         "natural_res": 1.94,
         "social": 1.32
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 1,
       "area_based_participant_records": 6,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -1925,6 +2088,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.909524,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.04918,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -1932,7 +2096,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1952,6 +2116,9 @@
         "natural_res": 2.03,
         "social": 1.75
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 4,
       "area_based_participant_records": 18,
       "innovation_records": 6,
       "cultural_records": 48,
@@ -1975,6 +2142,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 1.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.147541,
         "innovation_records": 0.051724,
         "cultural_records": 0.09505,
@@ -1982,7 +2150,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.888889
+        "evidence_source_count": 0.8
       }
     },
     {
@@ -1996,6 +2164,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "in_scope_no_current_value",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 0,
       "cultural_records": 2,
@@ -2009,12 +2180,14 @@
         "f2_learning_area_based",
         "f2_culturalmap_university",
         "f1_pppconnext",
+        "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.0,
         "cultural_records": 0.00396,
@@ -2022,7 +2195,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -2036,6 +2209,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 6,
       "cultural_records": 0,
@@ -2055,6 +2231,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.051724,
         "cultural_records": 0.0,
@@ -2062,7 +2239,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2076,6 +2253,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 2,
       "cultural_records": 0,
@@ -2095,6 +2275,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.017241,
         "cultural_records": 0.0,
@@ -2102,7 +2283,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2116,6 +2297,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 3,
       "cultural_records": 208,
@@ -2135,6 +2319,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.025862,
         "cultural_records": 0.411881,
@@ -2142,7 +2327,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2162,6 +2347,9 @@
         "natural_res": 1.93,
         "social": 1.46
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 4,
       "area_based_participant_records": 11,
       "innovation_records": 5,
       "cultural_records": 57,
@@ -2186,6 +2374,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.97619,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.090164,
         "innovation_records": 0.043103,
         "cultural_records": 0.112871,
@@ -2193,7 +2382,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 1.0
+        "evidence_source_count": 0.9
       }
     },
     {
@@ -2207,6 +2396,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 2,
       "cultural_records": 64,
@@ -2226,6 +2418,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.017241,
         "cultural_records": 0.126733,
@@ -2233,7 +2426,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2247,6 +2440,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "in_scope_no_current_value",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 3,
       "area_based_participant_records": 11,
       "innovation_records": 4,
       "cultural_records": 93,
@@ -2263,12 +2459,14 @@
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
+        "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.090164,
         "innovation_records": 0.034483,
         "cultural_records": 0.184158,
@@ -2276,7 +2474,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.8
       }
     },
     {
@@ -2290,6 +2488,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 5,
       "innovation_records": 6,
       "cultural_records": 14,
@@ -2311,6 +2512,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.040984,
         "innovation_records": 0.051724,
         "cultural_records": 0.027723,
@@ -2318,7 +2520,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -2338,6 +2540,9 @@
         "natural_res": 1.88,
         "social": 1.13
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 6,
       "cultural_records": 111,
@@ -2361,6 +2566,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.938095,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.051724,
         "cultural_records": 0.219802,
@@ -2368,7 +2574,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.157895,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.888889
+        "evidence_source_count": 0.8
       }
     },
     {
@@ -2388,6 +2594,9 @@
         "natural_res": 1.91,
         "social": 1.51
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 5,
       "area_based_participant_records": 34,
       "innovation_records": 0,
       "cultural_records": 86,
@@ -2410,6 +2619,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.97619,
+        "area_based_project_groups": 0.454545,
         "area_based_participant_records": 0.278689,
         "innovation_records": 0.0,
         "cultural_records": 0.170297,
@@ -2417,7 +2627,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -2431,6 +2641,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 2,
       "innovation_records": 4,
       "cultural_records": 505,
@@ -2452,6 +2665,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.016393,
         "innovation_records": 0.034483,
         "cultural_records": 1.0,
@@ -2459,7 +2673,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -2473,6 +2687,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 46,
@@ -2492,6 +2709,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.091089,
@@ -2499,7 +2717,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2513,6 +2731,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 13,
       "innovation_records": 4,
       "cultural_records": 152,
@@ -2533,6 +2754,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.106557,
         "innovation_records": 0.034483,
         "cultural_records": 0.30099,
@@ -2540,7 +2762,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -2554,6 +2776,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 17,
       "cultural_records": 55,
@@ -2574,6 +2799,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.146552,
         "cultural_records": 0.108911,
@@ -2581,7 +2807,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -2595,6 +2821,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 16,
       "cultural_records": 95,
@@ -2614,6 +2843,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.137931,
         "cultural_records": 0.188119,
@@ -2621,7 +2851,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2635,6 +2865,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 3,
       "innovation_records": 1,
       "cultural_records": 0,
@@ -2655,6 +2888,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.02459,
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
@@ -2662,7 +2896,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -2676,6 +2910,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 1,
       "innovation_records": 7,
       "cultural_records": 0,
@@ -2695,6 +2932,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.008197,
         "innovation_records": 0.060345,
         "cultural_records": 0.0,
@@ -2702,7 +2940,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2716,6 +2954,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 0,
@@ -2733,6 +2974,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
@@ -2740,7 +2982,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.222222
+        "evidence_source_count": 0.2
       }
     },
     {
@@ -2754,6 +2996,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 31,
       "innovation_records": 6,
       "cultural_records": 0,
@@ -2773,6 +3018,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.254098,
         "innovation_records": 0.051724,
         "cultural_records": 0.0,
@@ -2780,7 +3026,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -2794,6 +3040,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 6,
       "cultural_records": 14,
@@ -2814,6 +3063,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.051724,
         "cultural_records": 0.027723,
@@ -2821,7 +3071,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -2841,6 +3091,9 @@
         "natural_res": 1.85,
         "social": 1.0
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 2,
       "area_based_participant_records": 13,
       "innovation_records": 0,
       "cultural_records": 118,
@@ -2862,6 +3115,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.957143,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.106557,
         "innovation_records": 0.0,
         "cultural_records": 0.233663,
@@ -2869,7 +3123,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -2883,6 +3137,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 91,
@@ -2900,6 +3157,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.180198,
@@ -2907,7 +3165,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.222222
+        "evidence_source_count": 0.2
       }
     },
     {
@@ -2921,6 +3179,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 0,
@@ -2938,6 +3199,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
@@ -2945,7 +3207,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.222222
+        "evidence_source_count": 0.2
       }
     },
     {
@@ -2959,6 +3221,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 2,
@@ -2977,6 +3242,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.00396,
@@ -2984,7 +3250,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -3004,6 +3270,9 @@
         "natural_res": 1.81,
         "social": 1.7
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 0,
@@ -3024,6 +3293,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.952381,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
@@ -3031,7 +3301,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.184211,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -3045,6 +3315,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 2,
       "area_based_participant_records": 8,
       "innovation_records": 23,
       "cultural_records": 5,
@@ -3065,6 +3338,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.065574,
         "innovation_records": 0.198276,
         "cultural_records": 0.009901,
@@ -3072,7 +3346,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -3086,6 +3360,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 4,
       "area_based_participant_records": 22,
       "innovation_records": 7,
       "cultural_records": 35,
@@ -3106,6 +3383,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.180328,
         "innovation_records": 0.060345,
         "cultural_records": 0.069307,
@@ -3113,7 +3391,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -3127,6 +3405,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 0,
       "cultural_records": 0,
@@ -3144,6 +3425,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.0,
         "cultural_records": 0.0,
@@ -3151,7 +3433,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.222222
+        "evidence_source_count": 0.2
       }
     },
     {
@@ -3171,6 +3453,9 @@
         "natural_res": 2.01,
         "social": 1.61
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 2,
       "area_based_participant_records": 3,
       "innovation_records": 1,
       "cultural_records": 265,
@@ -3193,6 +3478,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.985714,
+        "area_based_project_groups": 0.181818,
         "area_based_participant_records": 0.02459,
         "innovation_records": 0.008621,
         "cultural_records": 0.524752,
@@ -3200,7 +3486,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -3214,6 +3500,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 2,
       "innovation_records": 1,
       "cultural_records": 0,
@@ -3232,6 +3521,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.016393,
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
@@ -3239,7 +3529,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.333333
+        "evidence_source_count": 0.3
       }
     },
     {
@@ -3253,6 +3543,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 4,
       "area_based_participant_records": 17,
       "innovation_records": 7,
       "cultural_records": 415,
@@ -3274,6 +3567,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.363636,
         "area_based_participant_records": 0.139344,
         "innovation_records": 0.060345,
         "cultural_records": 0.821782,
@@ -3281,7 +3575,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.447368,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -3295,6 +3589,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 11,
       "area_based_participant_records": 122,
       "innovation_records": 18,
       "cultural_records": 226,
@@ -3317,6 +3614,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 1.0,
         "area_based_participant_records": 1.0,
         "innovation_records": 0.155172,
         "cultural_records": 0.447525,
@@ -3324,7 +3622,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.552632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.777778
+        "evidence_source_count": 0.7
       }
     },
     {
@@ -3338,6 +3636,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 1,
       "area_based_participant_records": 30,
       "innovation_records": 7,
       "cultural_records": 41,
@@ -3358,6 +3659,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.090909,
         "area_based_participant_records": 0.245902,
         "innovation_records": 0.060345,
         "cultural_records": 0.081188,
@@ -3365,7 +3667,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.555556
+        "evidence_source_count": 0.5
       }
     },
     {
@@ -3379,6 +3681,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 3,
       "area_based_participant_records": 24,
       "innovation_records": 3,
       "cultural_records": 0,
@@ -3398,6 +3703,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.196721,
         "innovation_records": 0.025862,
         "cultural_records": 0.0,
@@ -3405,7 +3711,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.157895,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.444444
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -3425,6 +3731,9 @@
         "natural_res": 1.88,
         "social": 1.65
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 3,
       "area_based_participant_records": 10,
       "innovation_records": 9,
       "cultural_records": 0,
@@ -3446,6 +3755,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.957143,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.081967,
         "innovation_records": 0.077586,
         "cultural_records": 0.0,
@@ -3453,7 +3763,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -3467,6 +3777,9 @@
       ],
       "sra_overall_score": null,
       "sra_dimension_scores": {},
+      "sra_scope_status": "out_of_scope",
+      "sra_as_of": null,
+      "area_based_project_groups": 3,
       "area_based_participant_records": 4,
       "innovation_records": 1,
       "cultural_records": 53,
@@ -3488,6 +3801,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
+        "area_based_project_groups": 0.272727,
         "area_based_participant_records": 0.032787,
         "innovation_records": 0.008621,
         "cultural_records": 0.10495,
@@ -3495,7 +3809,7 @@
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     },
     {
@@ -3515,6 +3829,9 @@
         "natural_res": 1.64,
         "social": 1.67
       },
+      "sra_scope_status": "in_scope_value_available",
+      "sra_as_of": "2569",
+      "area_based_project_groups": 0,
       "area_based_participant_records": 0,
       "innovation_records": 1,
       "cultural_records": 66,
@@ -3536,6 +3853,7 @@
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.92381,
+        "area_based_project_groups": 0.0,
         "area_based_participant_records": 0.0,
         "innovation_records": 0.008621,
         "cultural_records": 0.130693,
@@ -3543,7 +3861,7 @@
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.666667
+        "evidence_source_count": 0.6
       }
     }
   ],

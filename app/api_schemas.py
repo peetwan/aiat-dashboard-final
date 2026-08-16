@@ -48,6 +48,9 @@ class ProvinceResponse(PublicApiModel):
     centroid: list[float]
     sra_overall_score: int | float | None
     sra_dimension_scores: dict[str, int | float | None]
+    sra_scope_status: str
+    sra_as_of: str | None
+    area_based_project_groups: int
     area_based_participant_records: int
     innovation_records: int
     cultural_records: int
@@ -216,6 +219,12 @@ class ProvinceSourceCoverage(PublicApiModel):
     status: str
     records: int | None
     note_th: str | None
+    quality_label_th: str | None = None
+    source_note_th: str | None = None
+    data_grain_th: str | None = None
+    observed_as_of: str | None = None
+    observed_fetched_at: str | None = None
+    record_breakdown: JsonObject | None = None
 
 
 class ProvinceBriefingSection(PublicApiModel):
@@ -254,7 +263,9 @@ class ExecutiveSummaryResponse(PublicApiModel):
     publication_status: str
     province: ProvinceIdentity
     readout: JsonObject
-    research_portfolio: JsonObject | None = None
+    research_portfolio: JsonObject
+    decision_chain: list[JsonObject]
+    data_quality_overview: JsonObject
     dimensions: list[ExecutiveDimension]
     missing_dimensions: list[JsonObject]
     coverage: JsonObject

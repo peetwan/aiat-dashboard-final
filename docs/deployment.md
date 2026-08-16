@@ -39,6 +39,7 @@ python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
 python tools/build_source_coverage.py
 python -m pytest -q
+python ..\scripts\validate_all.py
 docker build -t aiat-dashboard-final .
 ```
 
@@ -53,6 +54,8 @@ docker build -t aiat-dashboard-final .
 - Province briefings = 77
 - Executive summaries = 77
 - Restricted values published = 0
+- SRA target scope = 20, current numeric scores = 15, target-with-null = 5
+- Area-Based participant records = 996 และ project–province links = 156 โดยไม่ปน grain
 - หน้า `/`, `/insights`, จังหวัดตัวอย่าง และ mobile layout เปิดได้
 - Operational/debug routes เช่น `/api/sources` ตอบ `404` บน production/PostgreSQL
 

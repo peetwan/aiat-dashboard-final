@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-16T09:30:43.649275+00:00",
+  "generated_at": "2026-08-16T13:40:40.628338+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
@@ -16,7 +16,12 @@
     {
       "path": "dashboard_final/data/public/learning_dashboard_manifest.json",
       "bytes": 780,
-      "sha256": "f3753addd0522df97270162f300f117dc2efa931a708b1ba08fa22a25cceeda1"
+      "sha256": "325579ee132d7026c6722030efe4beb7a73c9ee5c756c472913763cf4ee6bb25"
+    },
+    {
+      "path": "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_province_registry_rows.csv",
+      "bytes": 64435,
+      "sha256": "916328efecd59eb0a4d3dcfbb59b5bd55da19ba1f5edde4da9f1228a7fd77057"
     },
     {
       "path": "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_current_year_2569_indicator_rows.csv",
@@ -236,19 +241,19 @@
     {
       "path": "dashboard_final/data/public/source_insights.json",
       "bytes": 490045,
-      "sha256": "ff135a935ebc6f6aac63c9ecab88d77e1455827d7533f84b2b12bd6aff2ae098"
+      "sha256": "3ca13457347ca8dff334504cebf3ee319fa945a5319c7da02921e3f286b2e719"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
-      "bytes": 125687,
-      "sha256": "6ffdf82ff22a17ccb3fa80bdba58c85a7b03d3bebf997b441a3fefe5e008d8f3"
+      "bytes": 137944,
+      "sha256": "a36717e328210cf0c88b732997b00e0fe2dbe9acc37baa76af95fc61d7be759f"
     },
     {
       "path": "data/public/province_evidence.csv",
-      "bytes": 9812,
-      "sha256": "066a451afbb70d1ec73ac9e142733949436d7f571fc77a663b2cf093a39018cb"
+      "bytes": 11423,
+      "sha256": "69b7fd0e41635750b8a2a8a0722b3d76fe84dce76a9798f671c10f44ec3e8a3c"
     },
     {
       "path": "data/public/source_inventory.csv",
@@ -262,8 +267,8 @@
     },
     {
       "path": "data/public/thailand_provinces.geojson",
-      "bytes": 1574953,
-      "sha256": "97e8498ccffb3875efa417945845c6828bdaa2657d31ef7f71226df5bbd51df2"
+      "bytes": 1587712,
+      "sha256": "659dcd9cf565473fa4806258fccfa9a2a364da64cfb45df5a75e085b71ce56cb"
     }
   ],
   "excluded_source_ids": [

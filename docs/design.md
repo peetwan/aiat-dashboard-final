@@ -15,19 +15,27 @@ AIAT Provincial Evidence Map เป็น public decision-support interface ไ�
 
 - Default view แสดงแผนที่ 77 จังหวัด, legend และตัวเลือกจังหวัด
 - Desktop ใช้ side panel; mobile ใช้ bottom sheet
-- Province panel เรียก `/api/public/v1/provinces/{code}/briefing`
-- เนื้อหาแบ่งเป็นภาพรวม, โครงการ/พื้นที่, ข้อมูลรายมิติ และแหล่งข้อมูล
+- Province panel โหลด `/summary` ก่อนและโหลด `/briefing` สำหรับรายละเอียด/provenance
+- เนื้อหาแบ่งเป็น 5 แท็บตามงานตัดสินใจ:
+  - **ภาพรวม** — ตัวเลขหลัก, decision chain, narrative และ context metrics
+  - **โครงการและงบ** — provisional project groups, participant records, innovation, research/IP/ROI/SROI และ funding caveat
+  - **คนและพื้นที่** — SRA/PPPConnext target groups และ area context
+  - **มิติการพัฒนา** — context/need, input, activity, output, outcome labels
+  - **คุณภาพข้อมูล** — grain, status, `as_of`, `fetched_at`, record count และ source URL
 - หน้า `/insights` รองรับ cross-province, national/non-geo, unmapped และ coverage 28 sources
 - ชื่อจังหวัดและสีปรับตาม evidence coverage เพื่อไม่ให้แผนที่รก
 - ใช้ฟอนต์ Anuphan, contrast และ touch targets ที่รองรับ desktop/mobile
 
 ## Visual encoding contract
 
-- `evidence_source_count` ใช้กำหนดระดับสีของจังหวัด
+- แผนที่มี lens สำหรับ project groups, SRA, innovation และ evidence coverage; project lens ใช้ provisional project-group count ไม่ใช้ participant rows
+- SRA region lens นับจังหวัดใน target registry ทั้ง 20 จังหวัด ส่วน province color ใช้คะแนนเฉพาะ 15 จังหวัดที่มีค่า
 - จำนวน records ไม่ถูกใช้เป็นค่าความสูง สี performance หรือ proxy ของความต้องการงบ
 - Metric card เปรียบเทียบภายใน metric/grain ที่เข้ากันได้เท่านั้น
 - รายการวัฒนธรรม ท่องเที่ยว และโครงการโหลดเมื่อเปิดรายละเอียดพื้นที่
 - Quality status, unit, `as_of` และ caveat ต้องอยู่ใกล้ค่าที่แสดง
+- ไม่แสดง `0` เมื่อสถานะคือ not-found/unknown; แสดง `—` และเหตุผลแทน
+- Funding ของ innovation ที่เชื่อมหลายจังหวัดต้องมีคำเตือนและห้ามใช้เป็น provincial allocation
 
 ## Reference patterns
 
@@ -60,5 +68,6 @@ Reference screens ที่ใช้ศึกษารูปแบบ interactio
 - UI ไม่แสดง raw table, contact field หรือ restricted value
 - Keyboard, touch, contrast และ responsive layout ใช้งานได้
 - Province panel และ `/insights` แสดง non-geo/unmapped อย่างตรงไปตรงมา
+- Project count, participant count และ innovation–province link ผ่าน regression test แยก grain ทั้ง 77 จังหวัด
 
 ข้อจำกัดข้อมูลที่ UI ต้องรักษาอยู่ใน [Data audit](data-audit.md)

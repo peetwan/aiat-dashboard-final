@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-16T09:30:46.210340+00:00",
+  "generated_at": "2026-08-16T13:40:43.297688+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -53,8 +53,9 @@
         "source_index_present": true,
         "observed_count": 1083458,
         "observed_count_basis": "merged_index_data_row_count",
-        "serving_projection_count": 15,
-        "serving_projection_grain": "province_numeric_overall_score",
+        "serving_projection_count": 20,
+        "serving_numeric_value_count": 15,
+        "serving_projection_grain": "province_target_registry_rows_20_with_15_numeric_scores",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
@@ -63,10 +64,11 @@
         "expected_by_registry": true,
         "grain": "province_aggregate",
         "linkability": "province_candidate",
-        "linked_area_count": 15,
+        "linked_area_count": 20,
         "related_area_count": null,
         "decision": null,
-        "current_map_area_count": 15,
+        "current_map_area_count": 20,
+        "numeric_value_area_count": 15,
         "known_omissions": [
           {
             "kind": "registered_province_without_numeric_overall_score",
@@ -138,6 +140,7 @@
         "observed_count": 997293,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 660,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "approved_aggregate_rows",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": true,
@@ -151,6 +154,7 @@
         "related_area_count": null,
         "decision": "province_aggregate_join_allowed_for_candidate_serving",
         "current_map_area_count": 21,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -209,6 +213,7 @@
         "observed_count": 5619,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 5258,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "geocoded_public_point_records",
         "additional_public_non_map_count": 361,
         "not_all_raw_rows_are_served": true,
@@ -222,6 +227,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 55,
+        "numeric_value_area_count": null,
         "known_omissions": [
           {
             "kind": "additional_public_non_point_records_outside_map_layer",
@@ -284,6 +290,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -297,6 +304,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -350,6 +358,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -363,6 +372,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -414,6 +424,7 @@
         "observed_count": 2001,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 2001,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "national_technology_catalog_records",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -427,6 +438,7 @@
         "related_area_count": null,
         "decision": "do_not_join_records_to_province",
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -483,6 +495,7 @@
         "observed_count": 621,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 77,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "province_aggregate_api_rows",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": true,
@@ -496,6 +509,7 @@
         "related_area_count": null,
         "decision": "province_api_aggregates_allowed_for_candidate_serving",
         "current_map_area_count": 77,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -554,6 +568,7 @@
         "observed_count": 503,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -567,6 +582,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 57,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -625,6 +641,7 @@
         "observed_count": null,
         "observed_count_basis": "restricted_local_only_count_withheld",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -638,6 +655,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -683,6 +701,7 @@
         "observed_count": 66,
         "observed_count_basis": "verified_province_rows_excluding_header",
         "serving_projection_count": 66,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "province_rows_excluding_header",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": true,
@@ -696,6 +715,7 @@
         "related_area_count": null,
         "decision": "candidate_needs_selected_project_scope_review",
         "current_map_area_count": 65,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -746,6 +766,7 @@
         "observed_count": 1002,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -759,6 +780,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 55,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -810,6 +832,7 @@
         "observed_count": null,
         "observed_count_basis": "restricted_local_only_count_withheld",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -823,6 +846,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -868,6 +892,7 @@
         "observed_count": null,
         "observed_count_basis": "restricted_local_only_count_withheld",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -881,6 +906,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -926,6 +952,7 @@
         "observed_count": 702,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 18,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "municipality_records",
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": true,
@@ -939,6 +966,7 @@
         "related_area_count": 18,
         "decision": "municipality_to_province_crosswalk_allowed_for_candidate_serving",
         "current_map_area_count": 16,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -993,6 +1021,7 @@
         "observed_count": null,
         "observed_count_basis": "restricted_local_only_count_withheld",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1006,6 +1035,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1051,6 +1081,7 @@
         "observed_count": 54,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1064,6 +1095,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1117,6 +1149,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1130,6 +1163,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1179,6 +1213,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1192,6 +1227,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1245,6 +1281,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1258,6 +1295,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1307,6 +1345,7 @@
         "observed_count": null,
         "observed_count_basis": "restricted_local_only_count_withheld",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1320,6 +1359,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1365,6 +1405,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1378,6 +1419,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1427,6 +1469,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1440,6 +1483,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1489,6 +1533,7 @@
         "observed_count": 7259,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 6953,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": "province_linked_public_package_rows",
         "additional_public_non_map_count": 306,
         "not_all_raw_rows_are_served": true,
@@ -1502,6 +1547,7 @@
         "related_area_count": null,
         "decision": "public_package_geo_audit_2026_08_16",
         "current_map_area_count": 12,
+        "numeric_value_area_count": null,
         "known_omissions": [
           {
             "kind": "public_rows_with_unassigned_province_outside_map_projection",
@@ -1563,6 +1609,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1576,6 +1623,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1625,6 +1673,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1638,6 +1687,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1687,6 +1737,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1700,6 +1751,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1749,6 +1801,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1762,6 +1815,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1811,6 +1865,7 @@
         "observed_count": null,
         "observed_count_basis": "no_approved_structured_projection",
         "serving_projection_count": null,
+        "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
@@ -1824,6 +1879,7 @@
         "related_area_count": null,
         "decision": null,
         "current_map_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
