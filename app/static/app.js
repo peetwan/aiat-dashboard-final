@@ -340,7 +340,7 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
 }
 
-function renderOverview() {
+function renderMapOverview() {
   const select = document.getElementById("provinceSelect");
   const options = [...state.catalog.provinces]
     .sort((a, b) => a.province_name_th.localeCompare(b.province_name_th, "th"))
@@ -822,7 +822,7 @@ function overviewBars(entries, widthAccessor) {
   }).join("");
 }
 
-function renderOverview(summary) {
+function renderProvinceOverview(summary) {
   const portfolio = summary.research_portfolio || {};
   const metrics = [
     { label: "กลุ่มโครงการ", value: portfolio.project_count, status: portfolio.project_count_status, note: "การจัดกลุ่มเบื้องต้น", tab: "projects" },
@@ -1536,7 +1536,7 @@ function renderProvincePanel(summary) {
   document.getElementById("provinceMeta").textContent = `${province.region} · รหัส ${province.province_code}`;
   document.getElementById("provinceName").textContent = province.province_name_th;
   document.getElementById("provinceEnglish").textContent = province.province_name_en;
-  renderOverview(summary);
+  renderProvinceOverview(summary);
   renderPeopleAreaOverview(summary, null);
   renderResearchPortfolio(summary);
   renderAllData(summary);
@@ -1993,7 +1993,7 @@ async function loadDashboard() {
       boundaryResponse.json(),
       pointResponse.json(),
     ]);
-    renderOverview();
+    renderMapOverview();
     computeRegions();
     renderLegend();
     bindEvents();

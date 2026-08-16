@@ -114,7 +114,7 @@ def test_province_preview_visualizes_only_province_data_and_links_to_full_detail
     script = read("app/static/app.js")
     styles = read("app/static/styles.css")
     overview_template = template.split('data-panel-view="overview"', 1)[1].split('data-panel-view="projects"', 1)[0]
-    overview_script = script.split("function renderOverview(summary)", 1)[1].split("function renderSraArea", 1)[0]
+    overview_script = script.split("function renderProvinceOverview(summary)", 1)[1].split("function renderSraArea", 1)[0]
     overview_styles = styles.split("/* Province preview:", 1)[1].split("/* Executive readability pass:", 1)[0]
 
     assert "ข้อมูลสำคัญของจังหวัด" in overview_template
@@ -145,6 +145,16 @@ def test_province_preview_visualizes_only_province_data_and_links_to_full_detail
     assert ".overview-full-cta" in overview_styles
     assert "gradient" not in overview_styles
     assert "→" not in overview_template
+
+
+def test_map_and_province_overviews_use_distinct_function_names() -> None:
+    script = read("app/static/app.js")
+
+    assert "function renderMapOverview()" in script
+    assert "function renderProvinceOverview(summary)" in script
+    assert "renderMapOverview();" in script
+    assert "renderProvinceOverview(summary);" in script
+    assert "function renderOverview(" not in script
 
 
 def test_full_province_page_exposes_every_public_section_with_progressive_detail() -> None:
