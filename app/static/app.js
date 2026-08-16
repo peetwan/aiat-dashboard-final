@@ -430,8 +430,10 @@ function setHoveredRegion(name) {
 }
 
 function regionPadding() {
+  // Mobile keeps a tall clear zone at the bottom: the legend/actions column
+  // and the mode dock live there, and province labels must stay tappable.
   return window.matchMedia("(max-width: 720px)").matches
-    ? { top: 92, right: 24, bottom: 110, left: 24 }
+    ? { top: 92, right: 24, bottom: 200, left: 24 }
     : { top: 110, right: 90, bottom: 110, left: 90 };
 }
 
@@ -469,8 +471,10 @@ function selectRegion(name, moveMap = true) {
 }
 
 function countryPadding() {
+  // Mobile bottom padding clears the overlay stack (dock + legend column) so
+  // the southern region chip never hides behind them.
   return window.matchMedia("(max-width: 720px)").matches
-    ? { top: 76, right: 12, bottom: 92, left: 12 }
+    ? { top: 76, right: 12, bottom: 190, left: 12 }
     : { top: 84, right: 48, bottom: 76, left: 48 };
 }
 
@@ -1264,11 +1268,7 @@ function initMap() {
       layers: [{ id: "background", type: "background", paint: { "background-color": "#edf1ec" } }],
     },
     bounds: THAILAND_BOUNDS,
-    fitBoundsOptions: {
-      padding: window.matchMedia("(max-width: 720px)").matches
-        ? { top: 76, right: 12, bottom: 92, left: 12 }
-        : { top: 84, right: 48, bottom: 76, left: 48 },
-    },
+    fitBoundsOptions: { padding: countryPadding() },
     minZoom: 2,
     maxZoom: 13,
     pitch: 0,
