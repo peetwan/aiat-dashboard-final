@@ -44,7 +44,7 @@ def test_province_panel_separates_decisions_projects_people_and_quality() -> Non
     assert "briefing.sections.area_based" not in script
     assert "province.area_based_project_groups" in script
     assert "in_scope_no_current_value" in script
-    assert "ไม่แทนข้อมูลที่ไม่พบด้วยศูนย์" in script
+    assert "ไม่แทนค่าที่ไม่พบด้วยศูนย์" in template
     assert "linked_province_count" in script
 
 
@@ -87,3 +87,23 @@ def test_successful_province_load_hides_the_error_state() -> None:
 
     assert ".panel-error[hidden]" in styles
     assert "display: none" in styles
+
+
+def test_executive_ui_is_summary_first_and_mobile_tabs_do_not_clip() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+
+    assert 'id="peopleOverviewSection"' in template
+    assert 'id="peopleAreaOverview"' in template
+    assert "renderPeopleAreaOverview(state.currentSummary, briefing)" in script
+    assert 'class="quality-ring"' in script
+    assert 'class="dimension-evidence"' in script
+    assert 'class="source-row ${escapeHtml(source.status)}"' in script
+    assert "item.display_value ||" in script
+    assert "width: min(700px, calc(100vw - 40px))" in styles
+    assert "grid-template-columns: repeat(6, minmax(0, 1fr))" in styles
+    assert ".panel-tabs button:nth-child(-n + 3)" in styles
+    assert ".panel-tabs button:nth-child(n + 4)" in styles
+    assert ".research-stats span" in styles
+    assert "white-space: normal" in styles

@@ -44,7 +44,7 @@ def test_dashboard_and_endpoint_inventory():
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
         assert 'data-panel-tab="dimensions"' in page.text
-        assert "มิติการพัฒนาตามหลักฐานที่มี" in page.text
+        assert "ภาพรวมรายมิติ" in page.text
         assert "โครงการและงบ" in page.text
         assert "คนและพื้นที่" in page.text
         assert "คุณภาพข้อมูล" in page.text

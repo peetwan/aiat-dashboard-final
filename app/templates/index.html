@@ -37,8 +37,8 @@
 
         <div class="header-meta">
           <span class="live-state"><i></i> Public API</span>
-          <a class="insights-link" href="/insights"><span>ภาพรวม</span></a>
-          <a href="/docs" target="_blank" rel="noreferrer"><span>API</span></a>
+          <a class="insights-link" href="/insights"><span class="desktop-label">ภาพรวม</span><span class="mobile-label">สรุป</span></a>
+          <a class="api-docs-link" href="/docs" target="_blank" rel="noreferrer"><span>API</span></a>
         </div>
       </header>
 
@@ -97,21 +97,21 @@
           </section>
 
           <nav class="panel-tabs" aria-label="หมวดข้อมูลจังหวัด">
-            <button class="active" type="button" data-panel-tab="overview" aria-selected="true">ภาพรวม</button>
-            <button type="button" data-panel-tab="projects" aria-selected="false">โครงการและงบ</button>
-            <button type="button" data-panel-tab="portfolio" aria-selected="false">คนและพื้นที่</button>
-            <button type="button" data-panel-tab="dimensions" aria-selected="false">มิติการพัฒนา</button>
-            <button type="button" data-panel-tab="sources" aria-selected="false">คุณภาพข้อมูล</button>
+            <button class="active" type="button" data-panel-tab="overview" aria-selected="true"><span>ภาพรวม</span></button>
+            <button type="button" data-panel-tab="projects" aria-selected="false"><span>โครงการและงบ</span></button>
+            <button type="button" data-panel-tab="portfolio" aria-selected="false"><span>คนและพื้นที่</span></button>
+            <button type="button" data-panel-tab="dimensions" aria-selected="false"><span>มิติการพัฒนา</span></button>
+            <button type="button" data-panel-tab="sources" aria-selected="false"><span>คุณภาพข้อมูล</span></button>
           </nav>
 
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
               <div class="panel-section pillars-section">
-                <div class="section-heading"><span>ตัวเลขหลักที่ตรวจกลับได้</span><small>กดการ์ดเพื่อดูรายละเอียด</small></div>
+                <div class="section-heading"><span>สรุปจังหวัดใน 3 มุม</span><small>กดการ์ดเพื่อดูรายละเอียด</small></div>
                 <div class="pillar-grid" id="pillarGrid"></div>
               </div>
               <div class="panel-section decision-chain-section">
-                <div class="section-heading"><span>เส้นทางจากปัญหาถึงผลกระทบ</span><small>แยกสิ่งที่มีหลักฐานออกจากช่องว่าง</small></div>
+                <div class="section-heading"><span>เส้นทางหลักฐาน</span><small>โจทย์ → ทุน → ทำงาน → ผลผลิต → ผลลัพธ์</small></div>
                 <div class="decision-chain" id="decisionChain"></div>
               </div>
               <div class="panel-section briefing-section executive-overview">
@@ -128,7 +128,7 @@
               <div class="portfolio-loading" id="projectsLoading"><span></span><span></span><span></span></div>
               <div class="portfolio-empty" id="projectsEmpty" hidden>ยังไม่มีรายการโครงการหรือนวัตกรรมที่ผูกกับจังหวัดนี้</div>
               <div class="panel-section research-section" id="researchSection" hidden>
-                <div class="section-heading"><span>ภาพรวมโครงการ ผลผลิต และงบที่เชื่อมได้</span><small id="researchScope"></small></div>
+                <div class="section-heading"><span>โครงการและงบที่เชื่อมได้</span><small id="researchScope"></small></div>
                 <div id="researchPortfolio"></div>
               </div>
               <div class="panel-section" id="areaSection" hidden>
@@ -162,6 +162,10 @@
             <section class="panel-view" data-panel-view="portfolio" hidden>
               <div class="portfolio-loading" id="portfolioLoading"><span></span><span></span><span></span></div>
               <div class="portfolio-empty" id="portfolioEmpty" hidden>ยังไม่มีข้อมูลพื้นที่เพิ่มเติมของจังหวัดนี้</div>
+              <div class="panel-section people-overview-section" id="peopleOverviewSection" hidden>
+                <div class="section-heading"><span>ภาพรวมคนและพื้นที่</span><small>สรุปก่อนดูรายการรายละเอียด</small></div>
+                <div id="peopleAreaOverview"></div>
+              </div>
               <div class="panel-section sra-area-section" id="sraAreaSection" hidden>
                 <div class="section-heading"><span>คน กลุ่มเป้าหมาย และการดำเนินงาน SRA-DSS</span><small id="sraAreaNote"></small></div>
                 <div class="sra-area-summary" id="sraAreaSummary"></div>
@@ -203,18 +207,18 @@
 
             <section class="panel-view" data-panel-view="dimensions" hidden>
               <div class="panel-section all-data-section">
-                <div class="section-heading"><span>มิติการพัฒนาตามหลักฐานที่มี</span><small>ป้ายกำกับระบุว่าเป็นบริบท ปัจจัยนำเข้า กิจกรรม ผลผลิต หรือผลลัพธ์</small></div>
+                <div class="section-heading"><span>ภาพรวมรายมิติ</span><small>กราฟแสดงค่าที่พบ พร้อมป้ายระดับหลักฐาน</small></div>
                 <div class="dimension-summary-list" id="allDataSections"></div>
               </div>
             </section>
 
             <section class="panel-view" data-panel-view="sources" hidden>
               <div class="panel-section data-quality-section">
-                <div class="section-heading"><span>คุณภาพและข้อจำกัดของข้อมูลจังหวัด</span><small>ไม่แทนค่าที่ไม่พบด้วยศูนย์</small></div>
+                <div class="section-heading"><span>สถานะความพร้อมของข้อมูล</span><small>ไม่แทนค่าที่ไม่พบด้วยศูนย์</small></div>
                 <div class="data-quality-summary" id="dataQualitySummary"></div>
               </div>
               <div class="panel-section source-section">
-                <div class="section-heading"><span>แหล่งข้อมูล ระดับข้อมูล และวันที่อ้างอิง</span></div>
+                <div class="section-heading"><span>รายละเอียดแหล่งข้อมูล</span><small>กดแต่ละแหล่งเพื่อดู grain และวันที่อ้างอิง</small></div>
                 <div class="province-sources" id="provinceSources"></div>
               </div>
               <footer class="panel-footer">

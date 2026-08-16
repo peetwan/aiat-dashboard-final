@@ -37,6 +37,20 @@ AIAT Provincial Evidence Map เป็น public decision-support interface ไ�
 - ไม่แสดง `0` เมื่อสถานะคือ not-found/unknown; แสดง `—` และเหตุผลแทน
 - Funding ของ innovation ที่เชื่อมหลายจังหวัดต้องมีคำเตือนและห้ามใช้เป็น provincial allocation
 
+## Executive readability and responsive contract
+
+Province panel ออกแบบสำหรับการอ่านแบบผู้บริหาร: เห็นภาพรวมในไม่กี่วินาที แล้วค่อยเปิดรายละเอียดหรือ provenance เมื่อจำเป็น โดยทุกแท็บใช้ลำดับ **summary → visualization → supporting evidence**
+
+- Desktop panel กว้าง `700px`; แท็บทั้ง 5 ช่องกว้างเท่ากันและอยู่ในแถวเดียว
+- Mobile แสดงแท็บครบใน grid 2 แถวโดยไม่ต้องเลื่อนแนวนอน; panel ต้องเริ่มใต้ header และไม่ทำให้หน้าเกิด horizontal overflow
+- ขนาดข้อความพื้นฐานใน panel คือ `15px`; หัวข้อ section คือ `18px` บน desktop และ `17px` บน mobile ส่วนข้อความในการ์ดบน mobile ต้องไม่น้อยกว่า `12px`
+- การ์ดที่อยู่ในแถวเดียวกันต้องสูงเท่ากัน ค่า KPI ต้องเด่นกว่าป้ายกำกับ และคำอธิบายต้องสั้นพอให้สแกนได้
+- กราฟแท่งและแนวโน้มต้องแสดงค่าตัวเลขที่อ่านได้โดยตรง ไม่ให้ผู้ใช้ต้องประมาณจากความยาวหรือสีเพียงอย่างเดียว
+- มุมมองคนและพื้นที่ต้องเริ่มจาก summary cards และกราฟประเภทพื้นที่ ก่อนรายการวัฒนธรรม/ท่องเที่ยวแบบยาว
+- รายละเอียดหลักฐานรายมิติ กฎคุณภาพ และ metadata ราย source ใช้ collapsed details เป็นค่าเริ่มต้น เพื่อลดความหนาแน่นโดยไม่ทิ้งข้อมูลตรวจสอบ
+- การ์ด 3 มุมในแท็บภาพรวมต้องรักษาความหมายของ grain และ `null`; gauge ใช้ได้เฉพาะ metric ที่มีช่วงคะแนนกำกับชัดเจน
+- QA ต้องตรวจอย่างน้อยที่ `1440×1000`, `390×844` และ `320×800`: แท็บต้องอยู่ใน panel, decision chain/กราฟต้องไม่ล้น และค่าบนกราฟต้องมองเห็นครบ
+
 ## Reference patterns
 
 แนวทางที่นำมาศึกษา ไม่ใช่หน้าจอที่คัดลอก:
@@ -67,6 +81,8 @@ Reference screens ที่ใช้ศึกษารูปแบบ interactio
 - ทุกค่ามี source/quality context ที่เพียงพอ
 - UI ไม่แสดง raw table, contact field หรือ restricted value
 - Keyboard, touch, contrast และ responsive layout ใช้งานได้
+- ผู้บริหารเห็น summary และค่าบน visualization ได้ก่อนรายละเอียดทางเทคนิค
+- การ์ดในแถวเดียวกันเสมอกัน และไม่มี horizontal overflow ที่ desktop/mobile QA viewports
 - Province panel และ `/insights` แสดง non-geo/unmapped อย่างตรงไปตรงมา
 - Project count, participant count และ innovation–province link ผ่าน regression test แยก grain ทั้ง 77 จังหวัด
 
