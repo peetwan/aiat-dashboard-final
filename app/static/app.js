@@ -1120,7 +1120,7 @@ function renderTourism(section = {}) {
   const recommendationCards = recommendations.map((item) => {
     const imageUrl = safeExternalUrl(item.image_url);
     return `
-      <article class="tourism-place">
+      <article class="tourism-place${imageUrl ? "" : " no-image"}">
         ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : ""}
         <div><span>${escapeHtml(item.category_th || "แนะนำ")}</span><strong>${escapeHtml(localizedText(item.title) || "ไม่ระบุชื่อ")}</strong><p>${escapeHtml(trimText(localizedText(item.description), 125))}</p></div>
       </article>`;
@@ -1176,16 +1176,21 @@ function renderCulture(section) {
   loadMore.hidden = visible.length >= filtered.length;
   document.getElementById("cultureItems").innerHTML = visible
     .map(
-      (item) => `
-        <article class="data-card culture-card">
-          ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : ""}
+      (item) => {
+        // Without an image the content used to fall into the 76px image
+        // column and render as a crushed one-word-per-line strip.
+        const imageUrl = safeExternalUrl(item.image_url);
+        return `
+        <article class="data-card culture-card${imageUrl ? "" : " no-image"}">
+          ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : ""}
           <div>
             <div class="record-kicker"><span>${escapeHtml(item.cultural_type || "ทุนวัฒนธรรม")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
             <h3>${escapeHtml(item.title_th || "ไม่ระบุชื่อ")}</h3>
             <p>${escapeHtml(trimText(item.risk_reason || item.history || "ต้นทางไม่ได้ระบุเหตุผลความเสี่ยง", 180))}</p>
             <footer><span>${escapeHtml([item.tambon, item.amphoe].filter(Boolean).join(" · ") || "ไม่ระบุพื้นที่ย่อย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง</a></footer>
           </div>
-        </article>`,
+        </article>`;
+      },
     )
     .join("") || '<article class="empty-data"><strong>ไม่พบรายการที่ตรงกับคำค้น</strong><span>ลองใช้ชื่ออำเภอหรือหมวดวัฒนธรรม</span></article>';
 }

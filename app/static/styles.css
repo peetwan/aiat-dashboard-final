@@ -2036,3 +2036,11 @@
 @layer lightmap {
   .housing-more { margin: 4px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.5; }
 }
+
+/* Cards whose source record has no image span the full card width instead
+   of being squeezed into the reserved image column. */
+@layer lightmap {
+  .culture-card.no-image { grid-template-columns: minmax(0, 1fr); }
+  .culture-card.no-image h3 { margin-top: 6px; }
+  .tourism-place.no-image { grid-template-columns: minmax(0, 1fr); }
+}
