@@ -57,7 +57,7 @@ docker build -t aiat-dashboard-final .
 - SRA target scope = 20, current numeric scores = 15, target-with-null = 5
 - Area-Based participant records = 996 และ project–province links = 156 โดยไม่ปน grain
 - หน้า `/`, `/insights`, จังหวัดตัวอย่าง และ mobile layout เปิดได้
-- หน้า `/province/{code}` โหลด summary, briefing และ operations ครบ; ค้นหา/โหลดเพิ่ม/เปิด field details ได้
+- หน้า `/province/{code}` โหลด summary, briefing และ operations ครบ; metric/chart แสดงค่า ค้นหา/กรอง/โหลดเพิ่มได้ และ record digest ไม่ dump raw field
 - `/api/public/v1/operations` รายงาน connector audit 6/6, 9,652 candidate records และ `automatic_refresh_enabled: false`
 - Operational/debug routes เช่น `/api/sources` ตอบ `404` บน production/PostgreSQL
 

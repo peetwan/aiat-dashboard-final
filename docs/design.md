@@ -23,7 +23,7 @@ AIAT Provincial Evidence Map เป็น public decision-support interface ไ�
   - **มิติการพัฒนา** — context/need, input, activity, output, outcome labels
   - **คุณภาพข้อมูล** — grain, status, `as_of`, `fetched_at`, record count และ source URL
 - หน้า `/insights` รองรับ cross-province, national/non-geo, unmapped และ coverage 28 sources
-- หน้า `/province/{code}` เป็น progressive full-detail view 6 section: executive, research/funding, people/place, dimensions, provenance และ data operations
+- หน้า `/province/{code}` เป็น progressive full-detail view 6 section: ภาพรวม, โครงการ/ผลผลิต, คน/พื้นที่, รายมิติ, provenance และ data operations โดยใช้ลำดับ metric strip → narrative/chart → curated record digest → source link
 - ชื่อจังหวัดและสีปรับตาม evidence coverage เพื่อไม่ให้แผนที่รก
 - ใช้ฟอนต์ Anuphan, contrast และ touch targets ที่รองรับ desktop/mobile
 
@@ -47,10 +47,11 @@ Province panel ออกแบบสำหรับการอ่านแบ�
 - ขนาดข้อความพื้นฐานใน panel คือ `15px`; หัวข้อ section คือ `18px` บน desktop และ `17px` บน mobile ส่วนข้อความในการ์ดบน mobile ต้องไม่น้อยกว่า `12px`
 - การ์ดที่อยู่ในแถวเดียวกันต้องสูงเท่ากัน ค่า KPI ต้องเด่นกว่าป้ายกำกับ และคำอธิบายต้องสั้นพอให้สแกนได้
 - กราฟแท่งและแนวโน้มต้องแสดงค่าตัวเลขที่อ่านได้โดยตรง ไม่ให้ผู้ใช้ต้องประมาณจากความยาวหรือสีเพียงอย่างเดียว
-- มุมมองคนและพื้นที่ต้องเริ่มจาก summary cards และกราฟประเภทพื้นที่ ก่อนรายการวัฒนธรรม/ท่องเที่ยวแบบยาว
+- มุมมองคนและพื้นที่ต้องมี category filter และ search ก่อนรายการแบบยาว; แต่ละรายการแสดงชื่อ บริบท ตัวเลขสำคัญ และรายละเอียดที่คัดตามชนิดข้อมูล
 - รายละเอียดหลักฐานรายมิติ กฎคุณภาพ และ metadata ราย source ใช้ collapsed details เป็นค่าเริ่มต้น เพื่อลดความหนาแน่นโดยไม่ทิ้งข้อมูลตรวจสอบ
 - แท็บภาพรวมต้องอ่านจบได้ใน 20 วินาที: project groups, participant records, innovations และ source coverage ต้องแยกกัน พร้อมบอก data gaps โดยไม่ใช้พื้นที่หนึ่งในสามกับ metric ที่ไม่มีค่า
-- หน้า full detail ต้องเปิดทุก field ใน public projection ได้ผ่าน collapsed details; รายการยาวแสดงครั้งละส่วน ค้นหาและโหลดเพิ่มได้ เพื่อคงความครบโดยไม่ทำลาย readability
+- หน้า full detail ห้าม dump object หรือทุก field จาก projection ลง UI; collapsed details แสดงเฉพาะ field ที่มนุษย์ใช้ตีความได้ตามชนิด record และเก็บ provenance ไว้ที่ลิงก์ต้นทาง รายการยาวต้องค้นหา กรอง และโหลดเพิ่มได้
+- Visual hierarchy ของหน้า full detail ใช้พื้นขาว เส้นแบ่ง typography และพื้นที่ว่างเป็นหลัก ลด rounded card ซ้ำ ๆ และไม่ใช้ gradient เพื่อให้ดูเหมือนรายงานข้อมูลมากกว่า template dashboard
 - สถานะ API ต้องบอกความต่างระหว่าง “connector ดึงได้”, “candidate ผ่าน validation” และ “public revision ได้รับอนุมัติ” อย่างชัดเจน
 - QA ต้องตรวจอย่างน้อยที่ `1440×1000`, `390×844` และ `320×800`: แท็บต้องอยู่ใน panel, flow/กราฟต้องไม่ล้น และค่าบนกราฟต้องมองเห็นครบ
 
@@ -67,6 +68,10 @@ Province panel ออกแบบสำหรับการอ่านแบ�
 
 Reference screens ที่ใช้ศึกษารูปแบบ interaction:
 
+- [Hotjar — Site overview](https://mobbin.com/screens/ad876ecb-7762-41be-b55a-2ed498b69728) — metric strip, filter hierarchy และ breakdown ที่สแกนเร็ว
+- [Profound — Prompt volume](https://mobbin.com/screens/8dfd92df-f43e-4951-8c89-d1f23e3cddbf) — split analysis และกราฟที่มีตัวเลขกำกับ
+- [Asana — Portfolio overview](https://mobbin.com/screens/6e0bb357-19e6-4156-88dc-1e1d8c522099) — summary hierarchy ก่อน supporting detail
+- [HoneyBook — Project detail](https://mobbin.com/screens/15790c8a-47c2-4600-a012-edc3b466c120) — context header, section navigation และ detail grouping
 - [Squarespace — Geography analytics](https://mobbin.com/screens/be6a849b-1fde-42ca-a6f2-f69ffcf4439c)
 - [Cloudflare — Account analytics](https://mobbin.com/screens/254f6c74-2e18-4638-ad6f-ff8dc6c5c297)
 - [Navattic — Analytics](https://mobbin.com/screens/a5be5a57-9c24-49a2-9ce5-ccd5edc17a1b)

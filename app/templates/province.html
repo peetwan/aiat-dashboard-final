@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="ข้อมูลจังหวัด{{ province.province_name_th }}แบบละเอียด ครบทั้งโครงการ คน พื้นที่ ผลผลิต มิติการพัฒนา และแหล่งข้อมูล" />
-    <meta name="theme-color" content="#f4f6f2" />
-    <title>{{ province.province_name_th }} · ข้อมูลจังหวัดฉบับเต็ม | AIAT</title>
+    <meta name="description" content="ภาพรวมข้อมูลจังหวัด{{ province.province_name_th }}ที่สรุปโครงการ พื้นที่ ผลผลิต และหลักฐานให้อ่านเข้าใจง่าย" />
+    <meta name="theme-color" content="#f5f6f2" />
+    <title>{{ province.province_name_th }} · ข้อมูลจังหวัด | AIAT</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,85 +21,121 @@
         <span><strong>AIAT</strong><small>Provincial Evidence Map</small></span>
       </a>
       <nav aria-label="เมนูหลัก">
-        <a href="/?province={{ province.province_code }}&view=overview">← กลับแผนที่</a>
+        <a class="back-link" href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a>
         <a href="/insights">ภาพรวมประเทศ</a>
-        <a href="/docs" target="_blank" rel="noreferrer">Public API</a>
+        <a href="/docs" target="_blank" rel="noreferrer">API และข้อมูลเปิด</a>
       </nav>
     </header>
 
     <main id="provinceDetailMain">
-      <section class="detail-hero">
-        <div class="hero-copy">
-          <p class="eyebrow"><i></i> ข้อมูลจังหวัดฉบับเต็ม</p>
-          <div class="title-row"><h1>{{ province.province_name_th }}</h1><span>{{ province.province_name_en }}</span></div>
-          <p class="hero-lead">รวมข้อมูลสาธารณะที่เชื่อมกับจังหวัดไว้ในหน้าเดียว เริ่มจากคำตอบสำคัญ แล้วเปิดดูรายการและหลักฐานได้ครบตามแหล่งข้อมูล</p>
-          <div class="hero-meta">
-            <span>{{ province.region }}</span><span>รหัส {{ province.province_code }}</span>
+      <section class="province-heading" aria-labelledby="provinceTitle">
+        <div class="heading-copy">
+          <p class="breadcrumb">ข้อมูลจังหวัดฉบับเต็ม <span>/</span> {{ province.region }}</p>
+          <div class="title-row">
+            <h1 id="provinceTitle">{{ province.province_name_th }}</h1>
+            <span lang="en">{{ province.province_name_en }}</span>
+          </div>
+          <p class="heading-lead">อ่านภาพรวมโครงการ ผู้เข้าร่วม พื้นที่ ผลผลิต และทุนวัฒนธรรมจากหลักฐานสาธารณะที่เชื่อมกับจังหวัดนี้</p>
+          <div class="heading-meta" aria-label="สถานะข้อมูล">
+            <span class="candidate-status"><i aria-hidden="true"></i> Candidate · รอตรวจรับรอง</span>
             <span id="detailCoverage">กำลังตรวจความครอบคลุม</span>
+            <span id="detailGenerated">กำลังโหลดวันที่ชุดข้อมูล</span>
           </div>
         </div>
-        <aside class="hero-status">
-          <span>สถานะข้อมูล</span>
-          <strong>Candidate / Needs review</strong>
-          <p>ใช้สำรวจและตั้งคำถามได้ แต่ยังไม่ใช่ KPI ที่รับรองแล้ว</p>
-          <small id="detailGenerated">กำลังโหลดวันที่ชุดข้อมูล</small>
+        <aside class="reading-note">
+          <span>วิธีอ่านหน้านี้</span>
+          <strong>ใช้มองแนวโน้ม ไม่ใช้จัดอันดับ</strong>
+          <p>ค่าที่ไม่ทราบจะแสดงเป็น “—” และตัวเลขทุนที่เชื่อมนวัตกรรมไม่ใช่งบจัดสรรของจังหวัด</p>
         </aside>
       </section>
 
       <nav class="section-nav" aria-label="สารบัญข้อมูลจังหวัด">
-        <a href="#executive">สรุป</a>
-        <a href="#research">โครงการและงบ</a>
+        <a href="#executive">ภาพรวม</a>
+        <a href="#research">โครงการและผลผลิต</a>
         <a href="#people">คนและพื้นที่</a>
-        <a href="#dimensions">รายมิติ</a>
-        <a href="#sources">แหล่งข้อมูล</a>
-        <a href="#operations">ระบบอัปเดต</a>
+        <a href="#dimensions">ภาพรายมิติ</a>
+        <a href="#sources">ที่มาข้อมูล</a>
+        <a href="#operations">การอัปเดต</a>
       </nav>
 
       <div class="detail-loading" id="detailLoading" aria-live="polite">
-        <span></span><span></span><span></span><p>กำลังรวบรวมข้อมูลทุกส่วนของจังหวัด</p>
+        <span></span><span></span><span></span><p>กำลังสรุปข้อมูลจังหวัด</p>
       </div>
 
       <div id="detailContent" hidden>
-        <section class="detail-section" id="executive">
-          <header class="section-title"><div><small>01 · Executive readout</small><h2>ภาพรวมที่เข้าใจได้ใน 20 วินาที</h2></div><p>ตัวเลขหลัก แยกสิ่งที่ตอบได้และยังตอบไม่ได้</p></header>
-          <div class="executive-kpis" id="executiveKpis"></div>
-          <div class="answer-board">
-            <article class="answer-card answer-known"><header><i>✓</i><div><strong>สิ่งที่ข้อมูลตอบได้</strong><span>มีหลักฐานระดับจังหวัด</span></div></header><div id="knownAnswers"></div></article>
-            <article class="answer-card answer-gap"><header><i>!</i><div><strong>สิ่งที่ยังตอบไม่ได้</strong><span>ต้องเพิ่มข้อมูลหรือปิด definition gate</span></div></header><div id="missingAnswers"></div></article>
+        <section class="detail-section" id="executive" aria-labelledby="executiveTitle">
+          <header class="section-title">
+            <div><small>01 · ภาพรวม</small><h2 id="executiveTitle">จังหวัดนี้มีข้อมูลอะไรบ้าง</h2></div>
+            <p>เริ่มจากตัวเลขที่มีความหมาย แล้วค่อยลงรายละเอียด</p>
+          </header>
+          <div class="metric-strip" id="executiveKpis"></div>
+          <div class="executive-layout">
+            <article class="story-panel">
+              <p class="panel-label">สิ่งที่เห็นจากข้อมูล</p>
+              <div id="executiveReadout"></div>
+            </article>
+            <article class="evidence-journey">
+              <p class="panel-label">หลักฐานตลอดเส้นทางโครงการ</p>
+              <div class="decision-chain" id="detailDecisionChain"></div>
+            </article>
           </div>
-          <div class="detail-chain" id="detailDecisionChain"></div>
-          <div class="executive-readout" id="executiveReadout"></div>
+          <div id="executiveGaps"></div>
         </section>
 
-        <section class="detail-section" id="research">
-          <header class="section-title"><div><small>02 · Research & funding</small><h2>โครงการ งบ ผลผลิต และผลลัพธ์</h2></div><p>รักษา grain โครงการ ผู้เข้าร่วม และนวัตกรรมแยกกัน</p></header>
+        <section class="detail-section" id="research" aria-labelledby="researchTitle">
+          <header class="section-title">
+            <div><small>02 · โครงการและผลผลิต</small><h2 id="researchTitle">จากโครงการไปสู่นวัตกรรม</h2></div>
+            <p>แยกโครงการ ผู้เข้าร่วม ผลผลิต และเงินทุนตาม grain จริง</p>
+          </header>
           <div id="researchSummary"></div>
           <div class="subsection" id="projectRecords"></div>
           <div class="subsection" id="innovationRecords"></div>
           <div class="subsection" id="requirementRecords"></div>
         </section>
 
-        <section class="detail-section" id="people">
-          <header class="section-title"><div><small>03 · People & place</small><h2>คน กลุ่มเป้าหมาย และข้อมูลพื้นที่</h2></div><p>ค้นหารายการได้ โดยไม่แสดงข้อมูล restricted</p></header>
-          <label class="record-search"><span>ค้นหาทุกข้อมูลในส่วนนี้</span><input id="peopleSearch" type="search" placeholder="โครงการ กลุ่ม/ธุรกิจ อำเภอ วัฒนธรรม เมือง หรือที่อยู่อาศัย" autocomplete="off" /></label>
+        <section class="detail-section" id="people" aria-labelledby="peopleTitle">
+          <header class="section-title">
+            <div><small>03 · คนและพื้นที่</small><h2 id="peopleTitle">ข้อมูลที่เกิดขึ้นในพื้นที่</h2></div>
+            <p>เลือกประเภทหรือค้นหา แล้วอ่านเฉพาะสาระสำคัญของแต่ละรายการ</p>
+          </header>
+          <div class="people-tools">
+            <div class="people-category-nav" id="peopleCategoryNav" aria-label="เลือกประเภทข้อมูล"></div>
+            <label class="record-search">
+              <span>ค้นหาในข้อมูลพื้นที่</span>
+              <input id="peopleSearch" type="search" placeholder="ชื่อโครงการ กลุ่ม อำเภอ วัฒนธรรม หรือหัวข้อ" autocomplete="off" />
+            </label>
+          </div>
           <div class="people-sections" id="peopleSections"></div>
+          <div id="peopleMissingSummary"></div>
         </section>
 
-        <section class="detail-section" id="dimensions">
-          <header class="section-title"><div><small>04 · Development dimensions</small><h2>ข้อมูลรายมิติ</h2></div><p>กราฟทุกชุดมีตัวเลขกำกับและไม่รวม metric ต่างหน่วย</p></header>
-          <div class="dimension-grid" id="detailDimensions"></div>
+        <section class="detail-section" id="dimensions" aria-labelledby="dimensionsTitle">
+          <header class="section-title">
+            <div><small>04 · ภาพรายมิติ</small><h2 id="dimensionsTitle">เห็นสัดส่วนและพื้นที่ได้ทันที</h2></div>
+            <p>แต่ละกราฟแยกหน่วย ไม่รวมคะแนนคนละความหมายเข้าด้วยกัน</p>
+          </header>
+          <div class="dimension-list" id="detailDimensions"></div>
           <div class="missing-dimensions" id="missingDimensions"></div>
         </section>
 
-        <section class="detail-section" id="sources">
-          <header class="section-title"><div><small>05 · Evidence & provenance</small><h2>ข้อมูลมาจากไหนและพร้อมแค่ไหน</h2></div><p>กดแต่ละแหล่งเพื่อดู grain วันที่ และข้อจำกัด</p></header>
+        <section class="detail-section" id="sources" aria-labelledby="sourcesTitle">
+          <header class="section-title">
+            <div><small>05 · ที่มาข้อมูล</small><h2 id="sourcesTitle">ตรวจสอบความพร้อมและหลักฐาน</h2></div>
+            <p>แสดง grain วันที่ และข้อจำกัดของแหล่งข้อมูล โดยไม่เปิด raw หรือข้อมูล restricted</p>
+          </header>
           <div class="quality-banner" id="detailQuality"></div>
           <div class="source-list" id="detailSources"></div>
         </section>
 
-        <section class="detail-section operations-section" id="operations">
-          <header class="section-title"><div><small>06 · Data operations</small><h2>API และรอบการอัปเดต</h2></div><p>แยกการดึงข้อมูลออกจากการอนุมัติเผยแพร่</p></header>
-          <div id="operationsStatus"></div>
+        <section class="detail-section operations-section" id="operations" aria-labelledby="operationsTitle">
+          <header class="section-title">
+            <div><small>06 · การอัปเดต</small><h2 id="operationsTitle">ข้อมูลเข้าระบบอย่างไร</h2></div>
+            <p>การดึงข้อมูลกับการอนุมัติเผยแพร่เป็นคนละขั้นตอน</p>
+          </header>
+          <details class="system-disclosure">
+            <summary>ดูสถานะการเชื่อมต่อและรอบอัปเดตล่าสุด</summary>
+            <div id="operationsStatus"></div>
+          </details>
         </section>
       </div>
 
@@ -108,7 +144,10 @@
       </section>
     </main>
 
-    <footer class="detail-footer"><p>AIAT Provincial Evidence Map · ไม่ใช้ค่าที่ไม่ทราบแทนศูนย์ และไม่สร้างคะแนนจัดสรรงบอัตโนมัติ</p><a href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a></footer>
+    <footer class="detail-footer">
+      <p>AIAT Provincial Evidence Map · ข้อมูลสาธารณะเพื่อการสำรวจ ไม่ใช่ KPI ที่รับรองแล้ว</p>
+      <a href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a>
+    </footer>
     <script src="/static/province.js" defer></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ const detailState = {
   operations: null,
   peopleSections: [],
   visibleBySection: {},
+  activePeopleSection: "all",
   query: "",
 };
 
@@ -19,13 +20,22 @@ const SECTION_ORDER = [
   "housing",
 ];
 
+const SECTION_LABELS = {
+  area_based: "ผู้เข้าร่วมโครงการ",
+  sra: "สถานการณ์พื้นที่",
+  pppconnext: "ครัวเรือนและทุนดำรงชีพ",
+  learning_dashboard: "ธุรกิจชุมชน",
+  apptech_mtr: "กิจกรรมแพลตฟอร์ม",
+  culture: "ทุนวัฒนธรรม",
+  tourism: "ท่องเที่ยว",
+  city_capital: "ทุนเมือง",
+  housing: "ที่อยู่อาศัย",
+};
+
 const FIELD_LABELS = {
-  project_group_id: "รหัสกลุ่มโครงการ",
   official_project_id: "Project ID ทางการ",
-  project_name: "ชื่อโครงการ",
   fiscal_year: "ปีงบประมาณ",
   research_unit: "หน่วยวิจัย",
-  grouping_method: "วิธีจัดกลุ่ม",
   definition_status: "สถานะนิยาม",
   project_status: "สถานะโครงการ",
   budget_status: "สถานะงบประมาณ",
@@ -33,41 +43,20 @@ const FIELD_LABELS = {
   business_count: "กลุ่ม/ธุรกิจ",
   businesses: "กลุ่ม/ธุรกิจที่เชื่อมได้",
   geography: "พื้นที่ดำเนินงาน",
-  participants: "ผู้เข้าร่วม",
   latest_source_update: "อัปเดตล่าสุดจากต้นทาง",
-  record_id: "รหัสระเบียน",
-  record_code: "รหัสข้อมูล",
-  title: "ชื่อรายการ",
-  title_th: "ชื่อรายการ",
-  title_en: "ชื่อภาษาอังกฤษ",
-  business_name: "ชื่อกลุ่ม/ธุรกิจ",
-  district: "อำเภอ/เขต",
-  amphoe: "อำเภอ/เขต",
-  subdistrict: "ตำบล/แขวง",
-  tambon: "ตำบล/แขวง",
-  province_name_th: "จังหวัด",
   category: "หมวด",
   cultural_type: "ลักษณะทุนวัฒนธรรม",
   owner_affiliation_name: "หน่วยงานเจ้าของผลงาน",
-  description: "รายละเอียด",
-  knowledge_technology: "องค์ความรู้/เทคโนโลยี",
   innovation_type: "ประเภทนวัตกรรม",
-  trl_level: "TRL",
-  srl_level: "SRL",
+  trl_level: "ระดับความพร้อมเทคโนโลยี",
+  srl_level: "ระดับความพร้อมสังคม",
   innovation_value_baht: "มูลค่านวัตกรรม",
   funding: "แหล่งทุนที่ต้นทางระบุ",
-  roi_indicator: "ROI",
-  roi_unit: "หน่วย ROI",
-  sroi_indicator: "SROI",
-  sroi_unit: "หน่วย SROI",
   target_groups: "กลุ่มเป้าหมาย",
-  highlights: "จุดเด่น",
   research_leads: "หัวหน้างานวิจัย/ผู้พัฒนา",
-  co_researcher_count: "ผู้ร่วมวิจัย",
   ip: "ทรัพย์สินทางปัญญา",
-  views_count: "จำนวนเข้าชม",
   areas: "พื้นที่ใช้งาน",
-  linked_province_count: "จำนวนจังหวัดที่เชื่อม",
+  linked_province_count: "จังหวัดที่เชื่อม",
   registered_users: "ผู้ใช้ลงทะเบียน",
   interactions: "การปฏิสัมพันธ์",
   institutes: "สถาบัน",
@@ -79,19 +68,43 @@ const FIELD_LABELS = {
   updated_at: "อัปเดตจากต้นทาง",
   fetched_at: "ดึงข้อมูลเมื่อ",
   quality_status: "สถานะคุณภาพ",
-  provenance: "ที่มาและร่องรอยข้อมูล",
+  district: "อำเภอ/เขต",
+  amphoe: "อำเภอ/เขต",
+  subdistrict: "ตำบล/แขวง",
+  tambon: "ตำบล/แขวง",
 };
 
 const STATUS_LABELS = {
   available: "มีข้อมูล",
   limited: "มีบางส่วน",
   not_available: "ยังไม่มีข้อมูล",
-  source_has_no_record_for_province: "ไม่พบระเบียนของจังหวัดนี้",
+  source_has_no_record_for_province: "ไม่พบข้อมูลจังหวัดนี้",
   not_province_scoped: "ไม่ใช่ข้อมูลระดับจังหวัด",
-  metadata_only: "มีเฉพาะ metadata",
+  metadata_only: "มีเฉพาะข้อมูลอธิบาย",
   blocked: "ไม่เผยแพร่ค่า",
-  candidate_needs_review: "Candidate / Needs review",
+  candidate_needs_review: "Candidate · รอตรวจรับรอง",
+  projected_from_source: "สรุปจากต้นทาง",
 };
+
+const GENERIC_DETAIL_KEYS = [
+  "metric_label_th",
+  "value",
+  "unit",
+  "as_of",
+  "scope_warning_th",
+  "registered_users",
+  "interactions",
+  "institutes",
+  "category",
+  "cultural_type",
+  "district",
+  "amphoe",
+  "subdistrict",
+  "tambon",
+  "updated_at",
+  "fetched_at",
+  "quality_status",
+];
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -103,12 +116,14 @@ function escapeHtml(value) {
 }
 
 function formatNumber(value, digits = 0) {
+  if (value === null || value === undefined || value === "") return "—";
   const number = Number(value);
   if (!Number.isFinite(number)) return "—";
   return new Intl.NumberFormat("th-TH", { maximumFractionDigits: digits }).format(number);
 }
 
 function formatMoney(value) {
+  if (value === null || value === undefined || value === "") return "ไม่ระบุ";
   const number = Number(value);
   return Number.isFinite(number) ? `${formatNumber(number)} บาท` : "ไม่ระบุ";
 }
@@ -129,24 +144,48 @@ function safeExternalUrl(value) {
   }
 }
 
-function fieldLabel(key) {
-  return FIELD_LABELS[key] || key.replaceAll("_", " ");
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== "";
 }
 
-function scalarText(value) {
-  if (value === null || value === undefined || value === "") return "ไม่ระบุ";
+function preferredObjectText(value) {
+  if (!value || typeof value !== "object") return "";
+  const preferred = [
+    value.label_th,
+    value.name_th,
+    value.name,
+    value.title_th,
+    value.title,
+    value.business_name,
+    value.funder,
+    value.amount_text,
+    value.rights_owner,
+    value.district,
+    value.amphoe,
+    value.subdistrict,
+    value.tambon,
+    value.province,
+    value.amount_baht,
+    value.value,
+  ].filter(hasValue);
+  if (preferred.length) return preferred.map((item) => String(item)).join(" · ");
+  return Object.values(value)
+    .filter((item) => ["string", "number"].includes(typeof item) && hasValue(item))
+    .slice(0, 4)
+    .join(" · ");
+}
+
+function humanValue(value) {
+  if (!hasValue(value)) return "ไม่ระบุ";
   if (typeof value === "boolean") return value ? "ใช่" : "ไม่ใช่";
   if (typeof value === "number") return formatNumber(value, 2);
   if (Array.isArray(value)) {
     if (!value.length) return "ไม่ระบุ";
-    return value.map((entry) => scalarText(entry)).join(" · ");
+    const items = value.map((item) => (typeof item === "object" ? preferredObjectText(item) : String(item))).filter(Boolean);
+    const visible = items.slice(0, 12).join(" · ");
+    return items.length > 12 ? `${visible} · และอีก ${formatNumber(items.length - 12)} รายการ` : visible;
   }
-  if (typeof value === "object") {
-    return Object.entries(value)
-      .filter(([, nested]) => nested !== null && nested !== "" && nested !== undefined)
-      .map(([key, nested]) => `${fieldLabel(key)}: ${scalarText(nested)}`)
-      .join(" · ") || "ไม่ระบุ";
-  }
+  if (typeof value === "object") return preferredObjectText(value) || "มีข้อมูลจากต้นทาง";
   return String(value);
 }
 
@@ -169,67 +208,133 @@ function setText(id, value) {
 
 function renderKpis(summary, briefing) {
   const portfolio = summary.research_portfolio || {};
-  const culture = briefing.sections?.culture?.total_records || 0;
-  const cards = [
-    [portfolio.project_count, "กลุ่มโครงการที่เชื่อมได้", "จัดกลุ่มชั่วคราว · ยังไม่มี Project ID ทางการ"],
-    [portfolio.participant_record_count, "ระเบียนผู้เข้าร่วม", "เป็น participant/business grain ไม่ใช่จำนวนโครงการ"],
-    [portfolio.innovation_count, "นวัตกรรมพร้อมใช้", "ผลงานที่ทะเบียนเชื่อมกับจังหวัด"],
-    [culture, "ทุนวัฒนธรรม", "จำนวนระเบียนที่บันทึกในพื้นที่"],
+  const culture = briefing.sections?.culture?.total_records;
+  const metrics = [
+    [portfolio.project_count, "กลุ่มโครงการ", "จัดกลุ่มเบื้องต้น"],
+    [portfolio.participant_record_count, "ระเบียนผู้เข้าร่วม", "ไม่ใช่จำนวนโครงการ"],
+    [portfolio.innovation_count, "นวัตกรรม", "ผลงานที่เชื่อมจังหวัด"],
+    [culture, "ทุนวัฒนธรรม", "ระเบียนที่บันทึกในพื้นที่"],
   ];
-  document.getElementById("executiveKpis").innerHTML = cards.map(([value, label, note]) => `
-    <article class="kpi-card"><span>${escapeHtml(label)}</span><strong>${formatNumber(value || 0)}</strong><small>${escapeHtml(note)}</small></article>
+  document.getElementById("executiveKpis").innerHTML = metrics.map(([value, label, note]) => `
+    <article class="metric-item">
+      <span>${escapeHtml(label)}</span>
+      <strong>${formatNumber(value)}</strong>
+      <small>${escapeHtml(note)}</small>
+    </article>
   `).join("");
-}
-
-function renderAnswerBoard(summary) {
-  const observations = summary.readout?.observations || [];
-  const availableStages = (summary.decision_chain || []).filter((row) => row.status === "available");
-  const known = [
-    ...observations.map((row) => `<p><strong>${escapeHtml(row.label_th)}</strong>${escapeHtml(row.text_th)}</p>`),
-    ...availableStages.map((row) => `<p><strong>${escapeHtml(row.label_th)}</strong>${escapeHtml(row.note_th || "มีหลักฐานเชื่อมระดับจังหวัด")}</p>`),
-  ];
-  const gaps = [
-    ...(summary.research_portfolio?.data_gaps_th || []).map((text) => `<p>${escapeHtml(text)}</p>`),
-    ...(summary.missing_dimensions || []).map((row) => `<p><strong>${escapeHtml(row.label_th)}</strong>ยังไม่มีข้อมูลสาธารณะที่เชื่อมจังหวัดนี้</p>`),
-  ];
-  document.getElementById("knownAnswers").innerHTML = known.length ? known.join("") : "<p>ยังไม่มีข้อสรุประดับจังหวัดที่ผ่านเงื่อนไข</p>";
-  document.getElementById("missingAnswers").innerHTML = gaps.length ? gaps.join("") : "<p>ไม่พบช่องว่างที่ระบบระบุ</p>";
-}
-
-function renderDecisionChain(summary) {
-  document.getElementById("detailDecisionChain").innerHTML = (summary.decision_chain || []).map((stage, index) => {
-    const metric = stage.metrics?.[0]?.display_value || "—";
-    return `<article class="chain-stage ${escapeHtml(stage.status || "not_available")}"><small>${String(index + 1).padStart(2, "0")}</small><strong>${escapeHtml(stage.label_th)}</strong><b>${escapeHtml(metric)}</b><p>${escapeHtml(stage.note_th || "")}</p></article>`;
-  }).join("");
 }
 
 function renderExecutiveReadout(summary) {
   const observations = summary.readout?.observations || [];
-  const rules = summary.data_quality_overview?.rules_th || [];
-  document.getElementById("executiveReadout").innerHTML = `
-    <article class="readout-card"><span>ข้อค้นพบจากข้อมูล</span>${observations.length ? observations.map((row) => `<p><strong>${escapeHtml(row.label_th)}</strong>${escapeHtml(row.text_th)}</p>`).join("") : "<p>ยังไม่มี observation</p>"}</article>
-    <article class="readout-card"><span>กติกาการอ่านตัวเลข</span>${rules.map((rule) => `<p>${escapeHtml(rule)}</p>`).join("")}</article>
-  `;
+  document.getElementById("executiveReadout").innerHTML = observations.length
+    ? observations.map((item, index) => `
+      <div class="insight-item">
+        <span>${String(index + 1).padStart(2, "0")}</span>
+        <div><strong>${escapeHtml(item.label_th)}</strong><p>${escapeHtml(item.text_th)}</p></div>
+      </div>
+    `).join("")
+    : `<div class="insight-empty"><strong>ยังสรุปแนวโน้มไม่ได้</strong><p>ข้อมูลที่เชื่อมจังหวัดนี้ยังไม่พอสำหรับข้อสังเกต</p></div>`;
+}
+
+function renderDecisionChain(summary) {
+  const stages = summary.decision_chain || [];
+  document.getElementById("detailDecisionChain").innerHTML = stages.map((stage) => {
+    const metric = stage.metrics?.map((item) => item.display_value).filter(Boolean).join(" · ");
+    return `
+      <div class="journey-step ${escapeHtml(stage.status || "not_available")}">
+        <i aria-hidden="true"></i>
+        <div>
+          <span>${escapeHtml(stage.label_th)}</span>
+          <strong>${escapeHtml(metric || STATUS_LABELS[stage.status] || "ยังไม่มีข้อมูล")}</strong>
+          <p>${escapeHtml(stage.note_th || "")}</p>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function renderExecutiveGaps(summary) {
+  const portfolioGaps = summary.research_portfolio?.data_gaps_th || [];
+  const missingDimensions = summary.missing_dimensions || [];
+  const total = portfolioGaps.length + missingDimensions.length;
+  document.getElementById("executiveGaps").innerHTML = total ? `
+    <details class="gap-disclosure">
+      <summary><span>ข้อมูลที่ยังตอบไม่ได้</span><strong>${formatNumber(total)} ประเด็น</strong></summary>
+      <div class="gap-columns">
+        ${portfolioGaps.length ? `<div><h3>โครงการและงบ</h3><ul>${portfolioGaps.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul></div>` : ""}
+        ${missingDimensions.length ? `<div><h3>มิติที่ยังไม่มีข้อมูลจังหวัด</h3><ul>${missingDimensions.map((row) => `<li><strong>${escapeHtml(row.label_th)}</strong>${row.note_th ? ` — ${escapeHtml(row.note_th)}` : ""}</li>`).join("")}</ul></div>` : ""}
+      </div>
+    </details>` : "";
+}
+
+function chartRows(items, { valueKey = "value", showShare = true } = {}) {
+  const values = items.map((item) => Number(item.share_pct ?? item[valueKey]) || 0);
+  const max = Math.max(...values, 1);
+  return items.map((item, index) => {
+    const raw = values[index];
+    const width = raw <= 0 ? 0 : Math.max(2, raw / max * 100);
+    const display = item.display_value
+      || (showShare && item.share_pct !== undefined
+        ? `${formatNumber(item[valueKey], 1)} · ${formatNumber(item.share_pct, 1)}%`
+        : formatNumber(item[valueKey], 1));
+    const aria = `${item.label_th} ${display}`;
+    return `
+      <div class="chart-row" role="img" aria-label="${escapeHtml(aria)}">
+        <div class="chart-row-label"><span>${escapeHtml(item.label_th)}</span><strong>${escapeHtml(display)}</strong></div>
+        <div class="chart-track"><i style="--bar-width:${width.toFixed(1)}%"></i></div>
+      </div>`;
+  }).join("");
 }
 
 function renderResearchSummary(summary) {
   const portfolio = summary.research_portfolio || {};
   const funding = portfolio.funding || {};
-  const stats = [
-    [portfolio.project_count, "กลุ่มโครงการ"],
-    [portfolio.university_count, "มหาวิทยาลัย"],
-    [portfolio.district_count, "อำเภอที่เชื่อม"],
-    [portfolio.business_count, "กลุ่ม/ธุรกิจ"],
-    [portfolio.innovation_count, "นวัตกรรม"],
-  ];
+  const trl = portfolio.trl_distribution || [];
+  const innovationCount = Number(portfolio.innovation_count) || 0;
+  const outcome = portfolio.outcome_coverage || {};
+  const outcomeRows = [
+    { label_th: "มีข้อมูลทรัพย์สินทางปัญญา", value: outcome.ip_records || 0 },
+    { label_th: "มีข้อมูล ROI", value: outcome.roi_records || 0 },
+    { label_th: "มีข้อมูล SROI", value: outcome.sroi_records || 0 },
+  ].map((item) => ({
+    ...item,
+    display_value: `${formatNumber(item.value)}/${formatNumber(innovationCount)} รายการ`,
+  }));
   document.getElementById("researchSummary").innerHTML = `
-    <div class="summary-grid">${stats.map(([value, label]) => `<article><span>${escapeHtml(label)}</span><strong>${formatNumber(value || 0)}</strong><small>Candidate</small></article>`).join("")}</div>
-    <div class="funding-panel">
-      <article><span>ทุนที่ระบุในนวัตกรรมซึ่งเชื่อมจังหวัด</span><strong>${formatMoney(funding.pmua_amount_baht)}</strong><small>${formatNumber(funding.pmua_funded_innovation_count || 0)} นวัตกรรม · ${formatNumber(funding.pmua_funding_entry_count || 0)} รายการทุน</small></article>
-      <article><span>มูลค่านวัตกรรมที่ระบุ</span><strong>${formatMoney(funding.innovation_value_baht_total)}</strong><small>${formatNumber(funding.innovation_value_known_entries || 0)} รายการที่มีตัวเลข</small></article>
+    <div class="portfolio-summary">
+      <div class="portfolio-facts">
+        <p class="panel-label">ขอบเขตผลงาน</p>
+        <div>
+          <span><strong>${formatNumber(portfolio.university_count)}</strong> มหาวิทยาลัย</span>
+          <span><strong>${formatNumber(portfolio.district_count)}</strong> อำเภอที่เชื่อม</span>
+          <span><strong>${formatNumber(portfolio.business_count)}</strong> กลุ่ม/ธุรกิจ</span>
+        </div>
+        <p>${escapeHtml(portfolio.scope_note_th || "")}</p>
+      </div>
+      <div class="money-readout">
+        <article>
+          <span>ทุนที่ระบุในนวัตกรรม</span>
+          <strong>${formatMoney(funding.pmua_amount_baht)}</strong>
+          <small>${formatNumber(funding.pmua_funded_innovation_count)} นวัตกรรมที่มีข้อมูลทุน</small>
+        </article>
+        <article>
+          <span>มูลค่านวัตกรรมที่ระบุ</span>
+          <strong>${formatMoney(funding.innovation_value_baht_total)}</strong>
+          <small>${formatNumber(funding.innovation_value_known_entries)} รายการที่มีตัวเลข</small>
+        </article>
+      </div>
     </div>
-    <p class="warning-note">${escapeHtml(funding.note_th || "ตัวเลขทุนนี้ไม่ใช่งบจัดสรรหรือยอดเบิกจ่ายของจังหวัด")}</p>
-    <details class="gap-list"><summary>ช่องว่างข้อมูลโครงการและงบ ${formatNumber(portfolio.data_gaps_th?.length || 0)} ข้อ</summary><ul>${(portfolio.data_gaps_th || []).map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul></details>
+    <p class="funding-note">${escapeHtml(funding.note_th || "ตัวเลขนี้ไม่ใช่งบจัดสรรหรือยอดเบิกจ่ายของจังหวัด")}</p>
+    <div class="research-charts">
+      <figure class="chart-panel">
+        <figcaption><span>ความพร้อมของนวัตกรรม</span><strong>ระดับ TRL</strong></figcaption>
+        <div>${trl.length ? chartRows(trl) : `<p class="empty-chart">ยังไม่มีข้อมูล TRL</p>`}</div>
+      </figure>
+      <figure class="chart-panel">
+        <figcaption><span>ความครบของผลลัพธ์</span><strong>จาก ${formatNumber(innovationCount)} นวัตกรรม</strong></figcaption>
+        <div>${chartRows(outcomeRows, { showShare: false })}</div>
+        <p class="chart-note">${escapeHtml(outcome.note_th || "")}</p>
+      </figure>
+    </div>
   `;
 }
 
@@ -238,111 +343,299 @@ function recordTitle(item, fallback) {
 }
 
 function recordMeta(item) {
-  return [item.fiscal_year, item.research_unit, item.category, item.innovation_type, item.district || item.amphoe, item.subdistrict || item.tambon]
-    .filter((value) => value !== null && value !== undefined && value !== "")
-    .slice(0, 4);
+  return [
+    item.fiscal_year,
+    item.research_unit,
+    item.category,
+    item.innovation_type,
+    item.district || item.amphoe,
+    item.subdistrict || item.tambon,
+  ].filter(hasValue).slice(0, 4);
 }
 
 function recordDescription(item) {
   const value = item.description || item.scope_warning_th || item.knowledge_technology || item.owner_affiliation_name || "";
-  return value.length > 240 ? `${value.slice(0, 237).trim()}…` : value;
+  return value.length > 260 ? `${value.slice(0, 257).trim()}…` : value;
 }
 
-function renderFieldList(item) {
-  const hiddenKeys = new Set(["title", "title_th", "source_url"]);
-  const fields = Object.entries(item).filter(([key]) => !hiddenKeys.has(key));
-  return `<div class="field-list">${fields.map(([key, value]) => `<p><span>${escapeHtml(fieldLabel(key))}</span><strong>${escapeHtml(scalarText(value))}</strong></p>`).join("")}</div>`;
+function renderFactList(rows) {
+  const visible = rows.filter(([, value]) => hasValue(value) && humanValue(value) !== "ไม่ระบุ");
+  if (!visible.length) return `<p class="fact-empty">ต้นทางไม่มีรายละเอียดเพิ่มเติมที่สรุปได้</p>`;
+  return `<dl class="record-facts">${visible.map(([label, value]) => `
+    <div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(humanValue(value))}</dd></div>
+  `).join("")}</dl>`;
 }
 
-function renderRecordCard(item, fallback = "รายการข้อมูล") {
+function recordSourceLink(item) {
   const sourceUrl = safeExternalUrl(item.source_url || item.endpoint_url || item.provenance?.endpoint_url);
-  return `<article class="record-card">
-    <h4>${escapeHtml(recordTitle(item, fallback))}</h4>
+  return sourceUrl
+    ? `<a class="record-source" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดหลักฐานต้นทาง</a>`
+    : "";
+}
+
+function renderProjectDigest(item, fallback) {
+  const areas = humanValue(item.geography);
+  const countLine = [
+    hasValue(item.participant_record_count) ? `${formatNumber(item.participant_record_count)} ระเบียนผู้เข้าร่วม` : "",
+    hasValue(item.business_count) ? `${formatNumber(item.business_count)} กลุ่ม/ธุรกิจ` : "",
+    areas !== "ไม่ระบุ" ? areas : "",
+  ].filter(Boolean).join(" · ");
+  return `<article class="record-card record-project">
+    <header><div><span class="record-kind">โครงการ</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div><span class="record-value">${formatNumber(item.participant_record_count)} records</span></header>
     <div class="record-meta">${recordMeta(item).map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</div>
-    ${recordDescription(item) ? `<p>${escapeHtml(recordDescription(item))}</p>` : ""}
-    <details><summary>ดูทุก field ของรายการนี้</summary>${renderFieldList(item)}</details>
-    ${sourceUrl ? `<a class="record-source" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดหลักฐานต้นทาง ↗</a>` : ""}
+    ${countLine ? `<p class="record-summary">${escapeHtml(countLine)}</p>` : ""}
+    <details><summary>ดูสาระสำคัญ</summary>${renderFactList([
+      [FIELD_LABELS.official_project_id, item.official_project_id],
+      [FIELD_LABELS.definition_status, item.definition_status],
+      [FIELD_LABELS.project_status, item.project_status],
+      [FIELD_LABELS.budget_status, item.budget_status],
+      [FIELD_LABELS.geography, item.geography],
+      [FIELD_LABELS.businesses, item.businesses],
+      [FIELD_LABELS.latest_source_update, item.latest_source_update],
+    ])}</details>
+    ${recordSourceLink(item)}
   </article>`;
 }
 
-function renderResearchSection(targetId, section, emptyText) {
+function renderInnovationDigest(item, fallback) {
+  const badges = [
+    hasValue(item.trl_level) ? `TRL ${item.trl_level}` : "",
+    hasValue(item.srl_level) ? `SRL ${item.srl_level}` : "",
+    item.category,
+  ].filter(Boolean);
+  return `<article class="record-card record-innovation">
+    <header><div><span class="record-kind">นวัตกรรม</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div>${hasValue(item.innovation_value_baht) ? `<span class="record-value">${escapeHtml(formatMoney(item.innovation_value_baht))}</span>` : ""}</header>
+    <div class="record-meta">${badges.map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</div>
+    ${recordDescription(item) ? `<p class="record-summary">${escapeHtml(recordDescription(item))}</p>` : ""}
+    <details><summary>ดูสาระสำคัญ</summary>${renderFactList([
+      [FIELD_LABELS.owner_affiliation_name, item.owner_affiliation_name],
+      [FIELD_LABELS.innovation_type, item.innovation_type],
+      [FIELD_LABELS.funding, item.funding],
+      [FIELD_LABELS.target_groups, item.target_groups],
+      [FIELD_LABELS.ip, item.ip],
+      [FIELD_LABELS.research_leads, item.research_leads],
+      [FIELD_LABELS.areas, item.areas],
+      [FIELD_LABELS.fetched_at, item.fetched_at],
+    ])}</details>
+    ${recordSourceLink(item)}
+  </article>`;
+}
+
+function renderGenericDigest(item, fallback, sectionKey) {
+  const displayValue = hasValue(item.value)
+    ? `${formatNumber(item.value, 2)}${item.unit ? ` ${item.unit}` : ""}`
+    : null;
+  const detailRows = GENERIC_DETAIL_KEYS
+    .filter((key) => hasValue(item[key]))
+    .map((key) => [FIELD_LABELS[key] || key.replaceAll("_", " "), item[key]]);
+  return `<article class="record-card record-${escapeHtml(sectionKey || "generic")}">
+    <header><div><span class="record-kind">${escapeHtml(SECTION_LABELS[sectionKey] || fallback)}</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div>${displayValue ? `<span class="record-value">${escapeHtml(displayValue)}</span>` : ""}</header>
+    <div class="record-meta">${recordMeta(item).map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</div>
+    ${recordDescription(item) ? `<p class="record-summary">${escapeHtml(recordDescription(item))}</p>` : ""}
+    <details><summary>ดูสาระสำคัญ</summary>${renderFactList(detailRows)}</details>
+    ${recordSourceLink(item)}
+  </article>`;
+}
+
+function renderRecordDigest(item, fallback = "รายการข้อมูล", kind = "generic") {
+  if (kind === "project") return renderProjectDigest(item, fallback);
+  if (kind === "innovation") return renderInnovationDigest(item, fallback);
+  return renderGenericDigest(item, fallback, kind);
+}
+
+function renderResearchSection(targetId, section, emptyText, kind) {
   const target = document.getElementById(targetId);
   const items = section?.items || [];
-  target.innerHTML = `<div class="subsection-head"><h3>${escapeHtml(section?.title_th || emptyText)}</h3><span>${formatNumber(section?.total_records || items.length)} รายการ</span></div>
-    ${items.length ? `<div class="record-grid">${items.map((item) => renderRecordCard(item, emptyText)).join("")}</div>` : `<p class="empty-block">${escapeHtml(emptyText)} — ต้นทางยังไม่มีระเบียนที่เชื่อมจังหวัดนี้</p>`}`;
+  target.innerHTML = `
+    <div class="subsection-head">
+      <div><span>${escapeHtml(kind === "project" ? "ACTIVITY" : kind === "innovation" ? "OUTPUT" : "NEED")}</span><h3>${escapeHtml(section?.title_th || emptyText)}</h3></div>
+      <strong>${formatNumber(section?.total_records ?? items.length)} รายการ</strong>
+    </div>
+    ${items.length
+      ? `<div class="record-grid">${items.map((item) => renderRecordDigest(item, emptyText, kind)).join("")}</div>`
+      : `<p class="empty-block">${escapeHtml(emptyText)} — ยังไม่มีระเบียนที่เชื่อมจังหวัดนี้</p>`}`;
 }
 
 function renderResearch(briefing, summary) {
   renderResearchSummary(summary);
-  renderResearchSection("projectRecords", briefing.sections?.project_master, "โครงการ");
-  renderResearchSection("innovationRecords", briefing.sections?.innovation, "นวัตกรรม");
-  renderResearchSection("requirementRecords", briefing.sections?.requirements, "โจทย์หรือความต้องการจากพื้นที่");
+  renderResearchSection("projectRecords", briefing.sections?.project_master, "โครงการ", "project");
+  renderResearchSection("innovationRecords", briefing.sections?.innovation, "นวัตกรรม", "innovation");
+  renderResearchSection("requirementRecords", briefing.sections?.requirements, "โจทย์หรือความต้องการจากพื้นที่", "requirements");
+}
+
+function renderPeopleCategoryNav() {
+  const available = detailState.peopleSections.filter(([, section]) => (section.items || []).length);
+  const buttons = [["all", { title_th: "ทั้งหมด", total_records: available.reduce((sum, [, section]) => sum + (section.items || []).length, 0) }], ...available];
+  document.getElementById("peopleCategoryNav").innerHTML = buttons.map(([key, section]) => `
+    <button type="button" data-people-category="${escapeHtml(key)}" aria-pressed="${key === detailState.activePeopleSection}">
+      ${escapeHtml(key === "all" ? "ทั้งหมด" : section.title_th || SECTION_LABELS[key] || key)}
+      <span>${formatNumber(section.total_records ?? section.items?.length ?? 0)}</span>
+    </button>
+  `).join("");
 }
 
 function renderPeopleSections() {
   const container = document.getElementById("peopleSections");
   const query = detailState.query.trim().toLocaleLowerCase("th-TH");
-  container.innerHTML = detailState.peopleSections.map(([key, section]) => {
+  const selected = detailState.peopleSections.filter(([key, section]) => {
+    if (!(section.items || []).length) return false;
+    return detailState.activePeopleSection === "all" || detailState.activePeopleSection === key;
+  });
+  container.innerHTML = selected.map(([key, section]) => {
     const items = section.items || [];
-    const filtered = query ? items.filter((item) => searchableText(item).toLocaleLowerCase("th-TH").includes(query)) : items;
+    const filtered = query
+      ? items.filter((item) => searchableText(item).toLocaleLowerCase("th-TH").includes(query))
+      : items;
     const visible = detailState.visibleBySection[key] || 12;
     const shown = filtered.slice(0, visible);
     const remaining = Math.max(0, filtered.length - shown.length);
     return `<section class="data-block" data-section="${escapeHtml(key)}">
-      <header><h3>${escapeHtml(section.title_th || key)}</h3><span>${query ? `พบ ${formatNumber(filtered.length)} จาก ${formatNumber(items.length)}` : `${formatNumber(section.total_records ?? items.length)} รายการ`} · ${escapeHtml(STATUS_LABELS[section.status] || section.status || "ไม่ระบุ")}</span></header>
-      ${shown.length ? `<div class="record-grid">${shown.map((item) => renderRecordCard(item, section.title_th)).join("")}</div>` : `<p class="empty-block">${query && items.length ? "ไม่พบรายการที่ตรงกับคำค้น" : "ต้นทางไม่มีระเบียนที่เชื่อมจังหวัดนี้"}</p>`}
-      ${remaining ? `<button class="load-more" type="button" data-load-section="${escapeHtml(key)}">ดูเพิ่มอีก ${formatNumber(Math.min(24, remaining))} รายการ · เหลือ ${formatNumber(remaining)}</button>` : ""}
+      <header>
+        <div><span>${escapeHtml(STATUS_LABELS[section.status] || section.status || "ไม่ระบุ")}</span><h3>${escapeHtml(section.title_th || SECTION_LABELS[key] || key)}</h3></div>
+        <strong>${query ? `พบ ${formatNumber(filtered.length)} จาก ${formatNumber(items.length)}` : `${formatNumber(section.total_records ?? items.length)} รายการ`}</strong>
+      </header>
+      ${shown.length
+        ? `<div class="record-grid">${shown.map((item) => renderRecordDigest(item, section.title_th, key)).join("")}</div>`
+        : `<p class="empty-block">ไม่พบรายการที่ตรงกับคำค้น</p>`}
+      ${remaining ? `<button class="load-more" type="button" data-load-section="${escapeHtml(key)}">ดูเพิ่มอีก ${formatNumber(Math.min(24, remaining))} รายการ <span>เหลือ ${formatNumber(remaining)}</span></button>` : ""}
     </section>`;
-  }).join("");
+  }).join("") || `<p class="empty-block">ยังไม่มีข้อมูลสาธารณะในหมวดนี้</p>`;
+  renderPeopleCategoryNav();
+}
+
+function renderPeopleMissingSummary() {
+  const missing = detailState.peopleSections.filter(([, section]) => !(section.items || []).length);
+  document.getElementById("peopleMissingSummary").innerHTML = missing.length ? `
+    <details class="missing-source-summary">
+      <summary>หมวดที่ยังไม่มีข้อมูลจังหวัดนี้ <strong>${formatNumber(missing.length)} หมวด</strong></summary>
+      <div>${missing.map(([key, section]) => `<span>${escapeHtml(section.title_th || SECTION_LABELS[key] || key)}</span>`).join("")}</div>
+    </details>` : "";
 }
 
 function setupPeople(briefing) {
-  detailState.peopleSections = SECTION_ORDER.map((key) => [key, briefing.sections?.[key]])
+  detailState.peopleSections = SECTION_ORDER
+    .map((key) => [key, briefing.sections?.[key]])
     .filter(([, section]) => section);
+  detailState.visibleBySection = {};
   detailState.peopleSections.forEach(([key]) => { detailState.visibleBySection[key] = 12; });
+  detailState.activePeopleSection = "all";
+  detailState.query = "";
+  document.getElementById("peopleSearch").value = "";
   renderPeopleSections();
-  document.getElementById("peopleSearch").addEventListener("input", (event) => {
-    detailState.query = event.target.value;
-    renderPeopleSections();
-  });
-  document.getElementById("peopleSections").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-load-section]");
-    if (!button) return;
-    const key = button.dataset.loadSection;
-    detailState.visibleBySection[key] = (detailState.visibleBySection[key] || 12) + 24;
-    renderPeopleSections();
-  });
+  renderPeopleMissingSummary();
+
+  const search = document.getElementById("peopleSearch");
+  if (!search.dataset.bound) {
+    search.dataset.bound = "true";
+    search.addEventListener("input", (event) => {
+      detailState.query = event.target.value;
+      renderPeopleSections();
+    });
+  }
+
+  const categoryNav = document.getElementById("peopleCategoryNav");
+  if (!categoryNav.dataset.bound) {
+    categoryNav.dataset.bound = "true";
+    categoryNav.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-people-category]");
+      if (!button) return;
+      detailState.activePeopleSection = button.dataset.peopleCategory;
+      renderPeopleSections();
+    });
+  }
+
+  const sections = document.getElementById("peopleSections");
+  if (!sections.dataset.bound) {
+    sections.dataset.bound = "true";
+    sections.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-load-section]");
+      if (!button) return;
+      const key = button.dataset.loadSection;
+      detailState.visibleBySection[key] = (detailState.visibleBySection[key] || 12) + 24;
+      renderPeopleSections();
+    });
+  }
+}
+
+function renderHighlights(items) {
+  if (!items.length) return "";
+  return `<div class="highlight-list"><span>รายการตัวอย่าง</span>${items.map((item) => {
+    const url = safeExternalUrl(item.source_url);
+    const content = `<strong>${escapeHtml(item.title_th)}</strong><small>${escapeHtml([item.detail_th, item.meta_th].filter(Boolean).join(" · "))}</small>`;
+    return url
+      ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${content}</a>`
+      : `<div>${content}</div>`;
+  }).join("")}</div>`;
 }
 
 function renderDimensions(summary) {
   const dimensions = summary.dimensions || [];
   document.getElementById("detailDimensions").innerHTML = dimensions.length ? dimensions.map((dimension) => `
-    <article class="dimension-card">
-      <header><h3>${escapeHtml(dimension.label_th)}</h3><p>${escapeHtml(dimension.summary_th || "")}</p></header>
-      ${(dimension.metrics || []).map((metric) => `<div class="breakdown"><h4>${escapeHtml(metric.label_th)}</h4><div class="bar-row"><span>${escapeHtml(metric.benchmark_label_th || "ค่าจังหวัด")}</span><div class="bar-track"><i style="width:100%"></i></div><strong>${escapeHtml(metric.display_value || scalarText(metric.value))}</strong></div></div>`).join("")}
-      ${(dimension.breakdowns || []).map((breakdown) => {
-        const items = breakdown.items || [];
-        const max = Math.max(...items.map((item) => Number(item.share_pct ?? item.value) || 0), 1);
-        return `<div class="breakdown"><h4>${escapeHtml(breakdown.label_th)}</h4>${items.map((item) => {
-          const value = Number(item.share_pct ?? item.value) || 0;
-          return `<div class="bar-row"><span title="${escapeHtml(item.label_th)}">${escapeHtml(item.label_th)}</span><div class="bar-track"><i style="width:${Math.max(2, value / max * 100)}%"></i></div><strong>${item.display_value ? escapeHtml(item.display_value) : `${formatNumber(item.value, 2)}${item.share_pct !== undefined ? ` · ${formatNumber(item.share_pct, 1)}%` : ""}`}</strong></div>`;
-        }).join("")}${breakdown.note_th ? `<p>${escapeHtml(breakdown.note_th)}</p>` : ""}</div>`;
-      }).join("")}
-      ${(dimension.highlights || []).length ? `<details class="gap-list"><summary>รายการตัวอย่าง ${formatNumber(dimension.highlights.length)}</summary><ul>${dimension.highlights.map((item) => `<li><strong>${escapeHtml(item.title_th)}</strong> — ${escapeHtml(item.detail_th || "")}</li>`).join("")}</ul></details>` : ""}
+    <article class="dimension-panel">
+      <header>
+        <div><span>${escapeHtml(dimension.evidence_stage || "บริบทพื้นที่")}</span><h3>${escapeHtml(dimension.label_th)}</h3></div>
+        <p>${escapeHtml(dimension.summary_th || "")}</p>
+      </header>
+      <div class="dimension-charts">
+        ${(dimension.metrics || []).map((metric) => `
+          <figure class="chart-panel">
+            <figcaption><span>ค่าจังหวัด</span><strong>${escapeHtml(metric.label_th)}</strong></figcaption>
+            ${chartRows([{ label_th: metric.benchmark_label_th || "ค่าจังหวัด", value: metric.value, display_value: metric.display_value }], { showShare: false })}
+          </figure>`).join("")}
+        ${(dimension.breakdowns || []).map((breakdown) => `
+          <figure class="chart-panel">
+            <figcaption><span>${escapeHtml(breakdown.kind === "scores" ? "ค่าตามต้นทาง" : "สัดส่วนข้อมูล")}</span><strong>${escapeHtml(breakdown.label_th)}</strong></figcaption>
+            ${(breakdown.items || []).length ? chartRows(breakdown.items, { showShare: breakdown.kind !== "scores" }) : `<p class="empty-chart">ยังไม่มีข้อมูล</p>`}
+            ${breakdown.note_th ? `<p class="chart-note">${escapeHtml(breakdown.note_th)}</p>` : ""}
+          </figure>`).join("")}
+      </div>
+      ${renderHighlights(dimension.highlights || [])}
     </article>
-  `).join("") : "<p class='empty-block'>ยังไม่มีมิติที่แสดงได้</p>";
+  `).join("") : `<p class="empty-block">ยังไม่มีมิติที่สรุปเป็นภาพได้</p>`;
+
   const missing = summary.missing_dimensions || [];
-  document.getElementById("missingDimensions").innerHTML = `<strong>มิติที่ยังไม่มีข้อมูลสาธารณะสำหรับจังหวัดนี้</strong><div>${missing.length ? missing.map((row) => `<span>${escapeHtml(row.label_th)}</span>`).join("") : "<span>ไม่มีช่องว่างที่ระบบระบุ</span>"}</div>`;
+  document.getElementById("missingDimensions").innerHTML = missing.length ? `
+    <details>
+      <summary>มิติที่ยังไม่มีข้อมูลสาธารณะ <strong>${formatNumber(missing.length)} มิติ</strong></summary>
+      <div>${missing.map((row) => `<span>${escapeHtml(row.label_th)}</span>`).join("")}</div>
+    </details>` : "";
 }
 
 function renderSources(summary) {
   const quality = summary.data_quality_overview || {};
+  const coverage = summary.coverage || {};
+  const latest = quality.latest_observed_fetch ? formatDate(quality.latest_observed_fetch) : "ไม่ระบุ";
   document.getElementById("detailQuality").innerHTML = `
-    <div class="quality-score"><strong>${formatNumber(quality.accepted_source_count || 0)}/${formatNumber(quality.public_source_count || 0)}</strong><span>แหล่งที่ผ่าน accepted</span></div>
-    <div class="quality-copy"><h3>${escapeHtml(STATUS_LABELS[quality.status] || "Candidate / Needs review")}</h3><p>มี as_of ชัดเจน ${formatNumber(quality.sources_with_explicit_as_of || 0)} แหล่ง · ไม่มี as_of ${formatNumber(quality.sources_without_explicit_as_of || 0)} แหล่ง · ดึงล่าสุดที่สังเกต ${escapeHtml(formatDate(quality.latest_observed_fetch))}</p></div>`;
+    <div class="quality-heading">
+      <span>สถานะชุดข้อมูล</span>
+      <strong>${escapeHtml(STATUS_LABELS[quality.status] || "Candidate · รอตรวจรับรอง")}</strong>
+      <p>ยังไม่มีแหล่งใดผ่าน accepted gate จึงไม่เรียกค่าบนหน้านี้ว่า KPI</p>
+    </div>
+    <div class="quality-facts">
+      <span><strong>${formatNumber(coverage.available_source_count)}</strong>/${formatNumber(coverage.public_source_count)} แหล่งมีข้อมูลจังหวัดนี้</span>
+      <span><strong>${formatNumber(quality.sources_with_explicit_as_of)}</strong> แหล่งระบุ as_of ชัดเจน</span>
+      <span>พบการดึงล่าสุด <strong>${escapeHtml(latest)}</strong></span>
+    </div>`;
+
   document.getElementById("detailSources").innerHTML = (summary.source_coverage || []).map((source) => {
     const url = safeExternalUrl(source.url);
-    return `<details class="source-row"><summary><div><h3>${escapeHtml(source.name_th)}</h3><small>${escapeHtml(source.source_id)} · ${escapeHtml(source.acquisition_mode || "ไม่ระบุวิธีดึง")}</small></div><span class="status-pill">${escapeHtml(STATUS_LABELS[source.status] || source.status || "ไม่ระบุ")}</span><strong class="source-count">${source.records === null || source.records === undefined ? "—" : formatNumber(source.records)} ระเบียน</strong></summary><div class="source-body"><p><span>ระดับข้อมูล · </span>${escapeHtml(source.data_grain_th || "ไม่ระบุ")}</p><p><span>as_of · </span>${escapeHtml(source.observed_as_of || "ไม่ระบุ")} · <span>fetched_at · </span>${escapeHtml(source.observed_fetched_at ? formatDate(source.observed_fetched_at) : "ไม่ระบุ")}</p><p>${escapeHtml(source.note_th || source.source_note_th || source.quality_label_th || "")}</p>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">เปิดแหล่งข้อมูล ↗</a>` : ""}</div></details>`;
+    const recordText = source.records === null || source.records === undefined ? "ไม่ใช่ข้อมูลจังหวัด" : `${formatNumber(source.records)} ระเบียน`;
+    return `<details class="source-row">
+      <summary>
+        <div><h3>${escapeHtml(source.name_th)}</h3><small>${escapeHtml(source.data_grain_th || "ไม่ระบุระดับข้อมูล")}</small></div>
+        <span class="status-pill">${escapeHtml(STATUS_LABELS[source.status] || source.status || "ไม่ระบุ")}</span>
+        <strong>${escapeHtml(recordText)}</strong>
+      </summary>
+      <div class="source-body">
+        <dl>
+          <div><dt>วิธีนำเข้า</dt><dd>${escapeHtml(source.acquisition_mode || "ไม่ระบุ")}</dd></div>
+          <div><dt>ข้อมูล ณ วันที่</dt><dd>${escapeHtml(source.observed_as_of || "ไม่ระบุ")}</dd></div>
+          <div><dt>ดึงข้อมูลเมื่อ</dt><dd>${escapeHtml(source.observed_fetched_at ? formatDate(source.observed_fetched_at) : "ไม่ระบุ")}</dd></div>
+          <div><dt>ข้อจำกัด</dt><dd>${escapeHtml(source.note_th || source.source_note_th || source.quality_label_th || "ไม่ระบุ")}</dd></div>
+        </dl>
+        ${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">เปิดแหล่งข้อมูล</a>` : ""}
+      </div>
+    </details>`;
   }).join("");
 }
 
@@ -350,28 +643,56 @@ function renderOperations(operations) {
   const summary = operations.summary || {};
   const scheduler = operations.scheduler || {};
   const audit = operations.last_connectivity_audit || {};
+  const sourceNames = Object.fromEntries((detailState.summary?.source_coverage || []).map((source) => [source.source_id, source.name_th]));
   document.getElementById("operationsStatus").innerHTML = `
     <div class="ops-overview">
-      <article><span>Connector ที่ทดสอบสด</span><strong>${formatNumber(audit.successful_connectors || 0)}/${formatNumber(audit.configured_connectors || 0)}</strong></article>
-      <article><span>Candidate records ที่เห็น</span><strong>${formatNumber(audit.records_seen_total || 0)}</strong></article>
-      <article><span>ดึงอัตโนมัติบน Production</span><strong>${summary.automatic_refresh_enabled ? "เปิด" : "ยังไม่เปิด"}</strong></article>
+      <article><span>Connector ที่ทดสอบสำเร็จ</span><strong>${formatNumber(audit.successful_connectors)}/${formatNumber(audit.configured_connectors)}</strong></article>
+      <article><span>Candidate records ที่พบ</span><strong>${formatNumber(audit.records_seen_total)}</strong></article>
+      <article><span>ดึงอัตโนมัติบน Production</span><strong>${summary.automatic_refresh_enabled ? "เปิดอยู่" : "ยังไม่เปิด"}</strong></article>
     </div>
-    <p class="ops-warning"><strong>${escapeHtml(scheduler.status_th || "สถานะ scheduler ไม่ระบุ")}</strong> · ${escapeHtml(scheduler.reason_th || "")}</p>
-    <div class="ops-pipeline">${(operations.pipeline || []).map((stage) => `<article class="ops-step"><b>${escapeHtml(stage.stage)}</b><span>${escapeHtml(stage.rule_th)}</span></article>`).join("")}</div>
-    <div class="ops-audit"><h3>ผลตรวจการเชื่อมต่อครั้งล่าสุด · ${escapeHtml(formatDate(audit.audited_at))}</h3><div class="ops-table">${(audit.results || []).map((row) => `<div class="ops-row"><span>${escapeHtml(row.source_id)}</span><strong>${formatNumber(row.records_seen)} records</strong><span>${escapeHtml(row.note_th)}</span></div>`).join("")}</div></div>
-    <a class="ops-link" href="/docs" target="_blank" rel="noreferrer">ดู Public API contract ↗</a>`;
+    <div class="scheduler-note"><strong>${escapeHtml(scheduler.status_th || "ยังไม่ระบุสถานะ scheduler")}</strong><p>${escapeHtml(scheduler.reason_th || "")}</p></div>
+    <ol class="ops-pipeline">${(operations.pipeline || []).map((stage) => `<li><span>${escapeHtml(stage.stage)}</span><p>${escapeHtml(stage.rule_th)}</p></li>`).join("")}</ol>
+    <div class="ops-audit">
+      <h3>ผลตรวจการเชื่อมต่อล่าสุด <span>${escapeHtml(formatDate(audit.audited_at))}</span></h3>
+      ${(audit.results || []).map((row) => `<div class="ops-row"><span>${escapeHtml(sourceNames[row.source_id] || row.source_id)}</span><strong>${formatNumber(row.records_seen)} records</strong><p>${escapeHtml(row.note_th)}</p></div>`).join("")}
+    </div>
+    <a class="ops-link" href="/docs" target="_blank" rel="noreferrer">ดูสัญญา Public API</a>`;
+}
+
+function setupSectionNavigation() {
+  const links = [...document.querySelectorAll(".section-nav a")];
+  const sections = links.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+  if (!links.length || !sections.length || document.body.dataset.sectionNavBound) return;
+  document.body.dataset.sectionNavBound = "true";
+  let ticking = false;
+  const update = () => {
+    const marker = window.scrollY + 150;
+    let active = sections[0];
+    sections.forEach((section) => {
+      if (section.offsetTop <= marker) active = section;
+    });
+    links.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${active.id}`));
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+  }, { passive: true });
+  update();
 }
 
 function renderPage(summary, briefing, operations) {
   detailState.summary = summary;
   detailState.briefing = briefing;
   detailState.operations = operations;
-  setText("detailCoverage", `เชื่อม ${formatNumber(summary.coverage?.available_source_count || 0)} จาก ${formatNumber(summary.coverage?.public_source_count || 0)} แหล่งสาธารณะ`);
-  setText("detailGenerated", `สร้างชุดข้อมูล ${formatDate(summary.generated_at)}`);
+  setText("detailCoverage", `${formatNumber(summary.coverage?.available_source_count)} จาก ${formatNumber(summary.coverage?.public_source_count)} แหล่งมีข้อมูล`);
+  setText("detailGenerated", `ชุดข้อมูล ${formatDate(summary.generated_at)}`);
   renderKpis(summary, briefing);
-  renderAnswerBoard(summary);
-  renderDecisionChain(summary);
   renderExecutiveReadout(summary);
+  renderDecisionChain(summary);
+  renderExecutiveGaps(summary);
   renderResearch(briefing, summary);
   setupPeople(briefing);
   renderDimensions(summary);
@@ -379,6 +700,7 @@ function renderPage(summary, briefing, operations) {
   renderOperations(operations);
   document.getElementById("detailLoading").hidden = true;
   document.getElementById("detailContent").hidden = false;
+  setupSectionNavigation();
 }
 
 async function loadDetail() {

@@ -157,7 +157,7 @@ def test_map_and_province_overviews_use_distinct_function_names() -> None:
     assert "function renderOverview(" not in script
 
 
-def test_full_province_page_exposes_every_public_section_with_progressive_detail() -> None:
+def test_full_province_page_summarizes_every_public_section_without_raw_field_dump() -> None:
     template = read("app/templates/province.html")
     script = read("app/static/province.js")
     styles = read("app/static/province.css")
@@ -166,8 +166,16 @@ def test_full_province_page_exposes_every_public_section_with_progressive_detail
         assert f'id="{section_id}"' in template
     assert 'id="peopleSearch"' in template
     assert "/api/public/v1/operations" in script
-    assert "ดูทุก field ของรายการนี้" in script
+    assert "ดูสาระสำคัญ" in script
+    assert "ดูทุก field ของรายการนี้" not in script
+    assert "Object.entries(item)" not in script
+    assert "renderProjectDigest" in script
+    assert "renderInnovationDigest" in script
+    assert 'role="img"' in script
+    assert "data-people-category" in script
     assert "data-load-section" in script
     assert "restricted" in template
     assert ".record-search" in styles
-    assert "@media (max-width: 620px)" in styles
+    assert ".metric-strip" in styles
+    assert ".chart-row" in styles
+    assert '@media (max-width: 480px)' in styles
