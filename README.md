@@ -7,11 +7,12 @@ Public Executive Dashboard แบบ map-first สำหรับเปิดข
 ## สิ่งที่มีในหน้าเว็บ
 
 - แผนที่ประเทศไทย 77 จังหวัดแบบ WebGL/3D ด้วย MapLibre GL JS 5.12
-- ชื่อจังหวัดบนแผนที่และตัวเลือกค้นหาสำหรับ keyboard/mobile
-- Provincial command panel ที่เปิดเมื่อคลิกจังหวัด
+- สี/ความสูงของจังหวัดตามจำนวนแหล่งหลักฐาน พร้อม adaptive labels ที่เพิ่มชื่อเมื่อ zoom
+- Provincial command panel แบบ 4 tabs ที่เปิดเมื่อคลิกจังหวัด
+- ฟอนต์ Anuphan และ responsive bottom sheet สำหรับมือถือ
 - “ข้อมูลสำคัญต่อการตัดสินใจ” ใช้ค่าจริง เช่น house-price-to-income, overcrowding, การผ่านสินเชื่อ และพื้นที่เสี่ยงน้ำท่วม
 - รายการชื่อจริงจาก Area-Based, AppTech และ Cultural Map พร้อมรายละเอียดและ URL ต้นทาง
-- “ข้อมูลอื่นทั้งหมด” แยกตาม CKAN resource และเปิด Gold JSON ฉบับเต็มได้
+- “ข้อมูลรายมิติ” แปล CKAN fields เป็นภาษาที่อ่านง่าย พร้อม mini chart และตัวเลือก drill-down; Gold JSON ฉบับเต็มยังเปิดตรวจได้
 - สถานะครบทั้ง 10 URL ว่า `มีข้อมูล`, `ไม่มีรายการจังหวัดนี้` หรือ `ไม่ผูกจังหวัด`
 - จุดวัฒนธรรมสาธารณะ 5,258 จุดแบบเปิดปิดได้
 - Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256

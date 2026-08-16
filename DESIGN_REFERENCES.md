@@ -4,6 +4,10 @@
 
 ## Mobbin MCP
 
+- [Squarespace — Geography analytics](https://mobbin.com/screens/be6a849b-1fde-42ca-a6f2-f69ffcf4439c): choropleth ที่ใช้ legend สั้นและไม่แสดงชื่อพื้นที่ทุกจุดพร้อมกัน
+- [Cloudflare — Account analytics](https://mobbin.com/screens/254f6c74-2e18-4638-ad6f-ff8dc6c5c297): map + ranked evidence และ filter hierarchy ที่แยกข้อมูลหลักจากรายละเอียด
+- [Navattic — Analytics](https://mobbin.com/screens/a5be5a57-9c24-49a2-9ce5-ccd5edc17a1b): KPI card ที่มีกราฟย่อและเปรียบเทียบภายใน metric เดียวกัน
+- [Hotjar — Custom dashboard](https://mobbin.com/screens/f43a5082-26d2-40d3-ba2a-6c4bee3958b5): tab/filter hierarchy และ progressive disclosure สำหรับ dashboard ที่มีข้อมูลมาก
 - [Deel — Global Hiring Guide](https://mobbin.com/screens/a6cb49ca-18e2-49d4-9a58-da555b0c4855): แนวคิด map-first hero และการเปิดรายละเอียดตามพื้นที่
 - [Profound — Answer Engine Insights](https://mobbin.com/screens/98b82305-3239-4d52-b0c9-0e7f701dc127): การเปิดรายละเอียดจากพื้นที่โดยไม่พาผู้ใช้ออกจาก context ของแผนที่
 - [Felt — Operational Map](https://mobbin.com/screens/e3ac649f-a644-4545-a798-9d50366385db): layer control และข้อมูลเชิงพื้นที่ที่เปิดดูได้โดยไม่ทำให้หน้าหนักเกินไป
@@ -25,9 +29,11 @@
 ## Design decisions ที่นำมาใช้จริง
 
 1. WebGL 3D province map กินพื้นที่เต็ม viewport และเป็น interaction หลักเพียงอย่างเดียว
-2. หน้าเริ่มต้นมีคำสั่งสั้นหนึ่งจุด ป้ายชื่อจังหวัด และช่องเลือกจังหวัด ไม่มี hero copy หรือตารางยาว
+2. หน้าเริ่มต้นมีคำสั่งสั้น ช่องเลือกจังหวัด และ legend ความครอบคลุม; default แสดงชื่อเฉพาะจังหวัดที่เชื่อมหลักฐานได้ 4–5 แหล่ง แล้วค่อยเพิ่มชื่อเมื่อ zoom
 3. คลิกจังหวัดแล้วเปิด command panel ด้านข้างบน desktop และ bottom sheet บน mobile
 4. Panel เรียก `/api/public/v1/provinces/{code}/briefing` และแสดงค่าจริงแทน record counts
-5. ลำดับข้อมูลเป็น executive signals → รายการโครงการ/นวัตกรรม/วัฒนธรรม → resource อื่นทั้งหมด
+5. Panel แบ่งเป็น 4 tabs: ภาพรวม → โครงการและพื้นที่ → ข้อมูลรายมิติ → แหล่งข้อมูล เพื่อไม่ให้เป็นหน้า scroll ยาวต่อกัน
 6. แหล่งข้อมูลครบ 10 URL แยก API-first กับ snapshot พร้อม availability, URL และ quality status
-7. แผนที่ใช้ความสูงคงที่ ไม่บิดความหมายด้วยจำนวน record; โทน dark atlas คงแผนที่ให้เด่น ส่วน panel ใช้พื้นสว่างเพื่ออ่านข้อมูลเร็ว
+7. สีและความสูงบนแผนที่ใช้ `evidence_source_count` เท่านั้น เพื่อสื่อ “ความครอบคลุมหลักฐาน” ไม่ใช้จำนวน record เป็น KPI และมี legend อธิบายตรงหน้า
+8. ข้อมูล CKAN ถูกแปล field เป็นคำไทย แบ่งหมวด แสดง mini chart และมีตัวเลือก drill-down; raw key คงอยู่ใน Gold JSON เพื่อการตรวจสอบเท่านั้น
+9. ใช้ Anuphan เป็นฟอนต์หลัก พร้อมขนาดตัวอักษรและ touch target ที่อ่านง่ายทั้ง desktop/mobile

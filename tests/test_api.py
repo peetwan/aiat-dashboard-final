@@ -28,6 +28,10 @@ def test_dashboard_and_endpoint_inventory():
         assert page.status_code == 200
         assert "Provincial Evidence Map" in page.text
         assert "เลือกจังหวัดเพื่อเปิดข้อมูล" in page.text
+        assert "Anuphan" in page.text
+        assert "ความครอบคลุมข้อมูล" in page.text
+        assert 'data-panel-tab="dimensions"' in page.text
+        assert "ข้อมูลรายมิติ" in page.text
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
