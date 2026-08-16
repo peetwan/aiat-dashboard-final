@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,6 +12,7 @@ from sqlalchemy import desc, func, select, text
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, engine, init_db
 from app.models import DashboardRecord, Endpoint, IngestionRun, Source
+from app.public_data import PUBLIC_DATA_ROOT, cultural_points, province_boundaries, public_catalog
 from app.settings import PROJECT_ROOT, get_settings
 
 
@@ -26,8 +28,21 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="0.2.0", lifespan=lifespan)
+app = FastAPI(
+    title="AIAT Public Evidence Atlas API",
+    description="Public candidate-data projection for evidence exploration and transparent budget scenarios.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
+app.mount("/downloads", StaticFiles(directory=PUBLIC_DATA_ROOT), name="public-downloads")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -48,6 +63,64 @@ def health():
     with SessionLocal() as session:
         session.execute(text("SELECT 1"))
     return {"status": "ok", "database": "connected", "app_env": settings.app_env}
+
+
+@app.get("/api/public/v1/catalog", tags=["Public data"])
+def public_data_catalog():
+    """Return the complete approved public projection and its semantic labels."""
+    return public_catalog()
+
+
+@app.get("/api/public/v1/overview", tags=["Public data"])
+def public_data_overview():
+    catalog = public_catalog()
+    return {
+        "schema_version": catalog["schema_version"],
+        "generated_at": catalog["generated_at"],
+        "publication_status": catalog["publication_status"],
+        "warning_th": catalog["warning_th"],
+        "summary": catalog["summary"],
+        "themes": catalog["themes"],
+        "metrics": catalog["metrics"],
+        "methodology": catalog["methodology"],
+    }
+
+
+@app.get("/api/public/v1/sources", tags=["Public data"])
+def public_data_sources():
+    return public_catalog()["sources"]
+
+
+@app.get("/api/public/v1/provinces", tags=["Public data"])
+def public_data_provinces(
+    has_evidence: bool = Query(False, description="Return only provinces covered by at least one public metric"),
+):
+    provinces = public_catalog()["provinces"]
+    if has_evidence:
+        provinces = [row for row in provinces if row["evidence_source_count"] > 0]
+    return provinces
+
+
+@app.get("/api/public/v1/provinces/{province_code}", tags=["Public data"])
+def public_data_province(province_code: str):
+    code = province_code.strip().zfill(2)
+    province = next(
+        (row for row in public_catalog()["provinces"] if row["province_code"] == code),
+        None,
+    )
+    if province is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรหัสจังหวัด")
+    return province
+
+
+@app.get("/api/public/v1/map/provinces", tags=["Public data"])
+def public_map_provinces():
+    return province_boundaries()
+
+
+@app.get("/api/public/v1/map/cultural-points", tags=["Public data"])
+def public_map_cultural_points():
+    return cultural_points()
 
 
 @app.get("/api/summary")

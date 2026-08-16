@@ -1,59 +1,98 @@
-# Database workflow
+# Data workflow สำหรับ Public Evidence Atlas
 
-## ภาพรวม
+## ภาพรวมสองเส้นทาง
 
 ~~~text
 source registry + endpoint inventory
                  |
-                 v
-        policy gate ก่อน fetch
+          policy / access gate
                  |
-        +--------+---------+
-        |                  |
-        v                  v
-  public API          approved snapshot
-        |                  |
-        +--------+---------+
-                 v
-       immutable raw + SHA-256
-                 |
-                 v
-       remove forbidden fields
-                 |
-                 v
-  PostgreSQL / SQLite candidate records
-                 |
-                 v
-       FastAPI + dashboard
+       +---------+----------+
+       |                    |
+       v                    v
+public projection      operational ingest
+(build-time, read-only) (scheduled/runtime)
+       |                    |
+       v                    v
+data/public/*          immutable raw + SHA-256
+manifest + hashes            |
+       |                     v
+       |               privacy projection
+       |                     |
+       |                PostgreSQL/SQLite
+       +----------+----------+
+                  v
+        FastAPI public API + WebGL UI
 ~~~
 
-## ลำดับงานปกติ
+Public dashboard เปิดได้แม้ยังไม่รัน operational ingestion เพราะ `data/public/` เป็น projection ที่สร้างจาก merged evidence และตรวจ hash แล้ว ส่วน database ใช้เก็บ ingestion run และข้อมูลเชิงปฏิบัติการเมื่อเปิดใช้งานภายหลัง
 
-1. config/source_catalog.json เก็บครบทั้ง 12 source และ 140 endpoints รวม blocked endpoints เพื่อ audit ได้
-2. app/ingestion.py ตรวจ cloud_policy ก่อนทุกครั้ง
-3. Source แบบ api_first จะลอง API ก่อน ถ้าล้มเหลวจึงอ่าน snapshot
-4. Source แบบ snapshot_only จะอ่าน CSV, JSON, JSONL หรือไฟล์ gzip ใน data/snapshots/source_id
-5. ทุก API fetch สร้าง run folder ใหม่ พร้อม response, SHA-256 และ manifest ห้าม overwrite
-6. ก่อนเข้า database ระบบลบ email, phone, address, token, cookie และ credential-shaped fields
-7. ทุก row เก็บ source_id, dataset_key, source_record_id, hash, fetched_at และ quality_status
-8. หน้า dashboard แสดง readiness/count เป็นค่าเริ่มต้น ค่าราย record ต้องผ่าน gate ก่อน
+## 1. Public projection
 
-## Source routing
+รันจากโฟลเดอร์ `dashboard_final`:
 
-- API-first: f1_sradss_ppaos, f2_apptech_mtr, f2_apptech_mru, f2_learning_area_based, f3_housing_portal
-- Snapshot-only: f1_pppconnext, f2_rmutdb
-- Snapshot พร้อม project-owner approval และต้องคง external provenance: f2_culturalmap_university, f3_city_capital_open_data, f3_ruamthiao_lamphun
-- ห้ามขึ้น Cloud: f2_wallet_all_realtime, f2_wallet_cluster_realtime
+~~~powershell
+python tools/build_public_data.py
+~~~
 
-## Local workflow
+ตัว builder จะ:
 
-ใช้ MAX_RECORDS_PER_SOURCE จำกัดจำนวนระหว่างพัฒนา ค่า 0 หมายถึงไม่จำกัด หลัง ingest ให้ดู manifest และรัน pytest ก่อนเสมอ
+1. รับเฉพาะ 10 source ที่ owner อนุมัติให้เผยแพร่
+2. ตัด 2 wallet source ออกจาก public artifacts โดยอัตโนมัติ
+3. อ่าน merged evidence โดยไม่แก้ raw เดิม
+4. คง signal รายจังหวัดแยกตามความหมายเดิม ไม่รวมเป็นคะแนนใหม่
+5. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
+6. เขียน `data/public/manifest.json` พร้อม SHA-256 ของทุก output
 
-## Railway workflow หลัง approval
+ไฟล์สำคัญ:
 
-1. production_values_allowed เปิดแล้วสำหรับ 10 source ตาม APPROVAL_RECORD.md
-2. ตั้ง APP_ENV=production และ DATABASE_URL จาก Railway PostgreSQL
-3. Web service เปิด FastAPI อย่างเดียว
-4. Cron service ใช้ image เดียวกันและรัน python -m app.cli ingest --all
-5. Raw fallback ให้วางบน private object storage หรือ Railway Volume และตรวจ SHA-256
-6. ตั้ง PUBLIC_DATA_VALUES_ENABLED=true เมื่อต้องการเปิดค่า candidate ของ 10 source โดยต้องคงป้าย needs_review
+- `public_dashboard.json` — overview, source metadata และ province profiles
+- `province_evidence.csv` — ตารางสัญญาณรายจังหวัด
+- `source_inventory.csv` — source, endpoint และ provenance สำหรับประชาชน
+- `thailand_provinces.geojson` — polygon สำหรับ WebGL map
+- `cultural_points.geojson` — จุดข้อมูลวัฒนธรรมสำหรับ cluster layer
+
+## 2. Public API
+
+API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS สำหรับ `GET` เพื่อให้ website ภายนอกนำข้อมูลสาธารณะไปใช้ต่อได้:
+
+- `/overview`
+- `/sources`
+- `/provinces`
+- `/provinces/{province_code}`
+- `/map/provinces`
+- `/map/cultural-points`
+- `/catalog`
+
+ไฟล์ projection ยังดาวน์โหลดตรงได้จาก `/downloads/` และไม่ต้องเปิด raw payload gate
+
+## 3. Operational ingestion
+
+1. `config/source_catalog.json` เก็บครบ 12 source และ endpoint inventory
+2. `app/ingestion.py` ตรวจ `cloud_policy` ก่อน fetch ทุกครั้ง
+3. `api_first` ใช้ API ก่อนและ fallback ไป approved snapshot เมื่อ API ล้มเหลว
+4. `snapshot_only` อ่านไฟล์ที่วางใน `data/snapshots/<source_id>/`
+5. API fetch ทุกครั้งสร้าง immutable run folder, SHA-256 และ manifest
+6. privacy projection ลบ email, phone, address, token, cookie และ credential-shaped fields
+7. database เก็บ source ID, record ID, hash, fetched time และ quality status เพื่อย้อนกลับได้
+
+## 4. Budget Lab semantics
+
+Budget Lab ไม่ใช้ expected record count เป็นตัวแทนความต้องการงบ ผู้ใช้ต้องเลือกจังหวัด กรอกงบ และกำหนดน้ำหนักเอง ระบบจึงคำนวณสัดส่วนให้รวมเท่ากับงบที่กรอก พร้อมข้อความกำกับว่าเป็น **user-defined scenario** เท่านั้น
+
+ก่อนนำไปใช้เป็นข้อเสนอนโยบาย ต้องเพิ่มสูตรที่มี owner, version, วันที่อนุมัติ, ตัวแปร, unit และข้อจำกัดอย่างชัดเจน
+
+## 5. Source routing
+
+- API-first: `f1_sradss_ppaos`, `f2_apptech_mtr`, `f2_apptech_mru`, `f2_learning_area_based`, `f3_housing_portal`
+- Snapshot-only: `f1_pppconnext`, `f2_rmutdb`
+- Snapshot ที่คง external provenance: `f2_culturalmap_university`, `f3_city_capital_open_data`, `f3_ruamthiao_lamphun`
+- Local-only และไม่อยู่ใน public artifacts: `f2_wallet_all_realtime`, `f2_wallet_cluster_realtime`
+
+## 6. Update cycle
+
+1. อัปเดต source ตาม registry และเก็บ raw run ใหม่
+2. รวม/validate ที่ data layer หลัก
+3. รัน `tools/build_public_data.py`
+4. ตรวจ diff ของ `data/public/manifest.json` และจำนวน records
+5. รัน test, เปิดดู desktop/mobile แล้วจึง deploy

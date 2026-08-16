@@ -1,0 +1,2641 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-16T05:03:54.269766+00:00",
+  "publication_status": "public_candidate_projection",
+  "warning_th": "ข้อมูลทุกชุดเป็น candidate/needs_review ใช้สำรวจหลักฐานและจำลองฉากทัศน์ ไม่ใช่คำสั่งจัดสรรงบหรือ KPI ที่รับรองแล้ว",
+  "summary": {
+    "public_sources": 10,
+    "candidate_records_referenced": 2098512,
+    "provinces_with_evidence": 74,
+    "geocoded_cultural_points": 5258,
+    "restricted_sources_excluded": 2
+  },
+  "themes": [
+    {
+      "id": "community",
+      "name_th": "ความเป็นอยู่และพื้นที่",
+      "description_th": "คะแนนต้นทาง SRA-DSS และหน่วยเข้าร่วมโครงการ Area-Based",
+      "source_ids": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based"
+      ]
+    },
+    {
+      "id": "innovation",
+      "name_th": "นวัตกรรมพร้อมใช้",
+      "description_th": "ทะเบียนนวัตกรรมจากเครือข่ายมหาวิทยาลัย 3 ระบบ",
+      "source_ids": [
+        "f2_rmutdb",
+        "f2_apptech_mtr",
+        "f2_apptech_mru"
+      ]
+    },
+    {
+      "id": "housing",
+      "name_th": "ที่อยู่อาศัยและเมือง",
+      "description_th": "ชุดข้อมูลประชากร เศรษฐกิจ อุปทาน และดัชนีที่อยู่อาศัย",
+      "source_ids": [
+        "f3_housing_portal",
+        "f3_city_capital_open_data"
+      ]
+    },
+    {
+      "id": "culture",
+      "name_th": "วัฒนธรรมและการท่องเที่ยว",
+      "description_th": "จุดวัฒนธรรมที่มีพิกัดและข้อมูลท่องเที่ยวลำพูน",
+      "source_ids": [
+        "f2_culturalmap_university",
+        "f3_ruamthiao_lamphun"
+      ]
+    }
+  ],
+  "metrics": {
+    "evidence_source_count": {
+      "label_th": "จำนวนแหล่งหลักฐานที่เชื่อมกับจังหวัด",
+      "unit": "sources",
+      "semantic_status": "technical_coverage_only"
+    },
+    "sra_overall_score": {
+      "label_th": "overall score จาก SRA-DSS",
+      "unit": "source_score",
+      "semantic_status": "provisional_source_definition"
+    },
+    "area_based_participant_records": {
+      "label_th": "หน่วยเข้าร่วม Area-Based",
+      "unit": "records",
+      "semantic_status": "participant_records_not_population"
+    },
+    "innovation_records": {
+      "label_th": "ผลงาน AppTech ที่ระบุจังหวัด",
+      "unit": "records",
+      "semantic_status": "candidate_records"
+    },
+    "cultural_records": {
+      "label_th": "จุดวัฒนธรรมที่มีพิกัด",
+      "unit": "records",
+      "semantic_status": "candidate_records"
+    },
+    "housing_observations": {
+      "label_th": "แถวข้อมูล Thai Housing Portal",
+      "unit": "observations",
+      "semantic_status": "technical_observation_count"
+    }
+  },
+  "sources": [
+    {
+      "ordinal": 1,
+      "source_id": "f1_sradss_ppaos",
+      "name_th": "ระบบฐานข้อมูล SRA-DSS",
+      "url": "https://sradss.ppaos.com/",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 1083458,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ข้อมูลจริงครบ และมี endpoint สำหรับดึงซ้ำ อย่าเรียก endpoint ครัวเรือน/บุคคล"
+    },
+    {
+      "ordinal": 2,
+      "source_id": "f1_pppconnext",
+      "name_th": "PPPConnext BI",
+      "url": "http://www.ppaos.com/ppaos/frontend/web/",
+      "acquisition_mode": "snapshot_only",
+      "expected_record_count": 997293,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว"
+    },
+    {
+      "ordinal": 3,
+      "source_id": "f2_culturalmap_university",
+      "name_th": "แผนที่วัฒนธรรมไทย Cultural Mapping (ภาคมหาวิทยาลัย)",
+      "url": "https://www.culturalmapthailand.info/",
+      "acquisition_mode": "snapshot_only",
+      "expected_record_count": 5619,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น"
+    },
+    {
+      "ordinal": 6,
+      "source_id": "f2_rmutdb",
+      "name_th": "ห้องสมุดนวัตกรรม RMUTDB",
+      "url": "https://rmutdb.net/",
+      "acquisition_mode": "snapshot_only",
+      "expected_record_count": 2001,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401"
+    },
+    {
+      "ordinal": 7,
+      "source_id": "f2_apptech_mtr",
+      "name_th": "AppTech เครือข่าย มทร. / RinMP",
+      "url": "https://rinmp.com/",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 621,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API"
+    },
+    {
+      "ordinal": 8,
+      "source_id": "f2_apptech_mru",
+      "name_th": "AppTech เครือข่าย มรภ. / 38RAT",
+      "url": "https://38rat.nstru.ac.th/",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 503,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass"
+    },
+    {
+      "ordinal": 11,
+      "source_id": "f2_learning_area_based",
+      "name_th": "Dashboard LE - Area Based",
+      "url": "https://lesuper.app/opendata/pmua/area-based",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 1002,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่"
+    },
+    {
+      "ordinal": 14,
+      "source_id": "f3_city_capital_open_data",
+      "name_th": "แพลตฟอร์มข้อมูลเปิดระดับการพัฒนาทุนของเมือง",
+      "url": "https://evaluatethecity.netlify.app/",
+      "acquisition_mode": "snapshot_only",
+      "expected_record_count": 702,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น"
+    },
+    {
+      "ordinal": 16,
+      "source_id": "f3_ruamthiao_lamphun",
+      "name_th": "ร่วมเที่ยว (ลำพูน)",
+      "url": "https://visit-lamphun.web.app/app/homepage",
+      "acquisition_mode": "snapshot_only",
+      "expected_record_count": 54,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น"
+    },
+    {
+      "ordinal": 23,
+      "source_id": "f3_housing_portal",
+      "name_th": "Thai Housing Portal",
+      "url": "https://thai-housing-portal.vercel.app/",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 7259,
+      "readiness_status": "needs_review",
+      "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
+      "notes_th": "ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์"
+    }
+  ],
+  "provinces": [
+    {
+      "province_code": "81",
+      "province_name_th": "กระบี่",
+      "province_name_en": "Krabi",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.0075570275943,
+        8.14029889504756
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 7,
+      "cultural_records": 1,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.00198,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "10",
+      "province_name_th": "กรุงเทพมหานคร",
+      "province_name_en": "Bangkok",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.622551598794,
+        13.7713526891625
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 7,
+      "innovation_records": 116,
+      "cultural_records": 361,
+      "housing_observations": 987,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.057377,
+        "innovation_records": 1.0,
+        "cultural_records": 0.714851,
+        "housing_observations": 1.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "71",
+      "province_name_th": "กาญจนบุรี",
+      "province_name_en": "Kanchanaburi",
+      "region": "ภาคตะวันตก",
+      "centroid": [
+        99.0477909647118,
+        14.5842089132824
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 3,
+      "innovation_records": 8,
+      "cultural_records": 129,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.02459,
+        "innovation_records": 0.068966,
+        "cultural_records": 0.255446,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "46",
+      "province_name_th": "กาฬสินธุ์",
+      "province_name_en": "Kalasin",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.621826405808,
+        16.6281640403992
+      ],
+      "sra_overall_score": 1.96,
+      "sra_dimension_scores": {
+        "human": 2.28,
+        "physical": 2.15,
+        "financial": 1.77,
+        "natural_res": 1.87,
+        "social": 1.69
+      },
+      "area_based_participant_records": 3,
+      "innovation_records": 0,
+      "cultural_records": 5,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.933333,
+        "area_based_participant_records": 0.02459,
+        "innovation_records": 0.0,
+        "cultural_records": 0.009901,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "62",
+      "province_name_th": "กำแพงเพชร",
+      "province_name_en": "Kamphaeng Phet",
+      "region": "ภาคกลาง",
+      "centroid": [
+        99.5346680556113,
+        16.3310587241103
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 27,
+      "innovation_records": 21,
+      "cultural_records": 20,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.221311,
+        "innovation_records": 0.181034,
+        "cultural_records": 0.039604,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "40",
+      "province_name_th": "ขอนแก่น",
+      "province_name_en": "Khon Kaen",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.578561937742,
+        16.408745747815
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 15,
+      "innovation_records": 3,
+      "cultural_records": 34,
+      "housing_observations": 488,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.122951,
+        "innovation_records": 0.025862,
+        "cultural_records": 0.067327,
+        "housing_observations": 0.494428,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "22",
+      "province_name_th": "จันทบุรี",
+      "province_name_en": "Chanthaburi",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        102.129867860373,
+        12.8808187696653
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 10,
+      "innovation_records": 0,
+      "cultural_records": 66,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.081967,
+        "innovation_records": 0.0,
+        "cultural_records": 0.130693,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "24",
+      "province_name_th": "ฉะเชิงเทรา",
+      "province_name_en": "Chachoengsao",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        101.425406431207,
+        13.6064660392141
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 22,
+      "innovation_records": 7,
+      "cultural_records": 52,
+      "housing_observations": 584,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.180328,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.10297,
+        "housing_observations": 0.591692,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "20",
+      "province_name_th": "ชลบุรี",
+      "province_name_en": "Chon Buri",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        101.202783246925,
+        13.1913007399982
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 3,
+      "innovation_records": 1,
+      "cultural_records": 59,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.02459,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.116832,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "18",
+      "province_name_th": "ชัยนาท",
+      "province_name_en": "Chai Nat",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.027866986341,
+        15.1327056539358
+      ],
+      "sra_overall_score": 1.9,
+      "sra_dimension_scores": {
+        "human": 2.37,
+        "physical": 1.98,
+        "financial": 1.95,
+        "natural_res": 1.65,
+        "social": 1.55
+      },
+      "area_based_participant_records": 1,
+      "innovation_records": 16,
+      "cultural_records": 52,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.904762,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.137931,
+        "cultural_records": 0.10297,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "36",
+      "province_name_th": "ชัยภูมิ",
+      "province_name_en": "Chaiyaphum",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        101.817422528327,
+        16.031557903004
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 2,
+      "cultural_records": 64,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.126733,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "86",
+      "province_name_th": "ชุมพร",
+      "province_name_en": "Chumphon",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.061431470236,
+        10.3447088450612
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 15,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.122951,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "92",
+      "province_name_th": "ตรัง",
+      "province_name_en": "Trang",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.594847642569,
+        7.54350858938633
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 42,
+      "innovation_records": 3,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.344262,
+        "innovation_records": 0.025862,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "23",
+      "province_name_th": "ตราด",
+      "province_name_en": "Trat",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        102.520793042463,
+        12.3171198457984
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [],
+      "evidence_source_count": 0,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.0
+      }
+    },
+    {
+      "province_code": "63",
+      "province_name_th": "ตาก",
+      "province_name_en": "Tak",
+      "region": "ภาคตะวันตก",
+      "centroid": [
+        98.7931872787572,
+        16.7184686800062
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 2,
+      "cultural_records": 18,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.035644,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "26",
+      "province_name_th": "นครนายก",
+      "province_name_en": "Nakhon Nayok",
+      "region": "ภาคกลาง",
+      "centroid": [
+        101.17113266572,
+        14.2171678036084
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 2,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.00396,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "73",
+      "province_name_th": "นครปฐม",
+      "province_name_en": "Nakhon Pathom",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.102728405429,
+        13.9243325633521
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 11,
+      "innovation_records": 2,
+      "cultural_records": 48,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.090164,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.09505,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "48",
+      "province_name_th": "นครพนม",
+      "province_name_en": "Nakhon Phanom",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        104.428777128633,
+        17.3840725974514
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 64,
+      "innovation_records": 0,
+      "cultural_records": 12,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.52459,
+        "innovation_records": 0.0,
+        "cultural_records": 0.023762,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "30",
+      "province_name_th": "นครราชสีมา",
+      "province_name_en": "Nakhon Ratchasima",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.109728465615,
+        14.9566151213805
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 12,
+      "innovation_records": 6,
+      "cultural_records": 169,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.098361,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.334653,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "80",
+      "province_name_th": "นครศรีธรรมราช",
+      "province_name_en": "Nakhon Si Thammarat",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.786906400885,
+        8.37892299082624
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 62,
+      "innovation_records": 95,
+      "cultural_records": 132,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.508197,
+        "innovation_records": 0.818966,
+        "cultural_records": 0.261386,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "60",
+      "province_name_th": "นครสวรรค์",
+      "province_name_en": "Nakhon Sawan",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.149782750479,
+        15.6834904805864
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 99,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.19604,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "12",
+      "province_name_th": "นนทบุรี",
+      "province_name_en": "Nonthaburi",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.392438393819,
+        13.9244517240787
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "96",
+      "province_name_th": "นราธิวาส",
+      "province_name_en": "Narathiwat",
+      "region": "ภาคใต้",
+      "centroid": [
+        101.718650008571,
+        6.177827875906
+      ],
+      "sra_overall_score": 1.9,
+      "sra_dimension_scores": {
+        "human": 2.71,
+        "physical": 2.18,
+        "financial": 1.55,
+        "natural_res": 1.92,
+        "social": 1.09
+      },
+      "area_based_participant_records": 25,
+      "innovation_records": 1,
+      "cultural_records": 1,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.904762,
+        "area_based_participant_records": 0.204918,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.00198,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "55",
+      "province_name_th": "น่าน",
+      "province_name_en": "Nan",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        100.835319500863,
+        18.8532698030324
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 34,
+      "innovation_records": 2,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.278689,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "38",
+      "province_name_th": "บึงกาฬ",
+      "province_name_en": "Bueng Kan",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.710173488855,
+        18.1488983414739
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 54,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.106931,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "31",
+      "province_name_th": "บุรีรัมย์",
+      "province_name_en": "Buri Ram",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.957130748211,
+        14.8212694373749
+      ],
+      "sra_overall_score": 1.67,
+      "sra_dimension_scores": {
+        "human": 2.29,
+        "physical": 1.93,
+        "financial": 1.05,
+        "natural_res": 2.05,
+        "social": 1.0
+      },
+      "area_based_participant_records": 9,
+      "innovation_records": 5,
+      "cultural_records": 2,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.795238,
+        "area_based_participant_records": 0.07377,
+        "innovation_records": 0.043103,
+        "cultural_records": 0.00396,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "13",
+      "province_name_th": "ปทุมธานี",
+      "province_name_en": "Pathum Thani",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.681814275684,
+        14.0649383931398
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 29,
+      "innovation_records": 0,
+      "cultural_records": 84,
+      "housing_observations": 814,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.237705,
+        "innovation_records": 0.0,
+        "cultural_records": 0.166337,
+        "housing_observations": 0.824721,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "77",
+      "province_name_th": "ประจวบคีรีขันธ์",
+      "province_name_en": "Prachuap Khiri Khan",
+      "region": "ภาคตะวันตก",
+      "centroid": [
+        99.6351108430732,
+        11.9470798978218
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 11,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.090164,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "25",
+      "province_name_th": "ปราจีนบุรี",
+      "province_name_en": "Prachin Buri",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        101.648049944653,
+        14.0479416468685
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 20,
+      "innovation_records": 0,
+      "cultural_records": 58,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.163934,
+        "innovation_records": 0.0,
+        "cultural_records": 0.114851,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "94",
+      "province_name_th": "ปัตตานี",
+      "province_name_en": "Pattani",
+      "region": "ภาคใต้",
+      "centroid": [
+        101.349702049733,
+        6.73064476176492
+      ],
+      "sra_overall_score": 2.05,
+      "sra_dimension_scores": {
+        "human": 2.59,
+        "physical": 2.31,
+        "financial": 1.97,
+        "natural_res": 1.82,
+        "social": 1.59
+      },
+      "area_based_participant_records": 87,
+      "innovation_records": 2,
+      "cultural_records": 106,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.97619,
+        "area_based_participant_records": 0.713115,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.209901,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "14",
+      "province_name_th": "พระนครศรีอยุธยา",
+      "province_name_en": "Phra Nakhon Si Ayutthaya",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.527003886028,
+        14.345026596351
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 29,
+      "innovation_records": 3,
+      "cultural_records": 102,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.237705,
+        "innovation_records": 0.025862,
+        "cultural_records": 0.20198,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "56",
+      "province_name_th": "พะเยา",
+      "province_name_en": "Phayao",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        100.191266808649,
+        19.2343805222056
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 32,
+      "innovation_records": 0,
+      "cultural_records": 278,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.262295,
+        "innovation_records": 0.0,
+        "cultural_records": 0.550495,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "82",
+      "province_name_th": "พังงา",
+      "province_name_en": "Phangnga",
+      "region": "ภาคใต้",
+      "centroid": [
+        98.4456029963849,
+        8.56271702911265
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 8,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.068966,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "93",
+      "province_name_th": "พัทลุง",
+      "province_name_en": "Phatthalung",
+      "region": "ภาคใต้",
+      "centroid": [
+        100.069943822817,
+        7.51615076240142
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 15,
+      "innovation_records": 0,
+      "cultural_records": 29,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.122951,
+        "innovation_records": 0.0,
+        "cultural_records": 0.057426,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "66",
+      "province_name_th": "พิจิตร",
+      "province_name_en": "Phichit",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.342984416473,
+        16.2595970840385
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [],
+      "evidence_source_count": 0,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.0
+      }
+    },
+    {
+      "province_code": "65",
+      "province_name_th": "พิษณุโลก",
+      "province_name_en": "Phitsanulok",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.542908262671,
+        16.9827392059221
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 5,
+      "innovation_records": 28,
+      "cultural_records": 54,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.040984,
+        "innovation_records": 0.241379,
+        "cultural_records": 0.106931,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "83",
+      "province_name_th": "ภูเก็ต",
+      "province_name_en": "Phuket",
+      "region": "ภาคใต้",
+      "centroid": [
+        98.3455186308451,
+        7.96779412825132
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 11,
+      "cultural_records": 0,
+      "housing_observations": 676,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.094828,
+        "cultural_records": 0.0,
+        "housing_observations": 0.684904,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "44",
+      "province_name_th": "มหาสารคาม",
+      "province_name_en": "Maha Sarakham",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.165495134889,
+        15.999670300008
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 7,
+      "innovation_records": 21,
+      "cultural_records": 300,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.057377,
+        "innovation_records": 0.181034,
+        "cultural_records": 0.594059,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "49",
+      "province_name_th": "มุกดาหาร",
+      "province_name_en": "Mukdahan",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        104.517316708639,
+        16.5617215941022
+      ],
+      "sra_overall_score": 1.91,
+      "sra_dimension_scores": {
+        "human": 2.51,
+        "physical": 2.19,
+        "financial": 1.6,
+        "natural_res": 1.94,
+        "social": 1.32
+      },
+      "area_based_participant_records": 6,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.909524,
+        "area_based_participant_records": 0.04918,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "95",
+      "province_name_th": "ยะลา",
+      "province_name_en": "Yala",
+      "region": "ภาคใต้",
+      "centroid": [
+        101.228035295513,
+        6.19069554577241
+      ],
+      "sra_overall_score": 2.1,
+      "sra_dimension_scores": {
+        "human": 2.53,
+        "physical": 2.38,
+        "financial": 1.8,
+        "natural_res": 2.03,
+        "social": 1.75
+      },
+      "area_based_participant_records": 18,
+      "innovation_records": 6,
+      "cultural_records": 48,
+      "housing_observations": 627,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 5,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 1.0,
+        "area_based_participant_records": 0.147541,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.09505,
+        "housing_observations": 0.635258,
+        "evidence_source_count": 1.0
+      }
+    },
+    {
+      "province_code": "35",
+      "province_name_th": "ยโสธร",
+      "province_name_en": "Yasothon",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        104.338499697889,
+        15.8951966380366
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 0,
+      "cultural_records": 2,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.0,
+        "cultural_records": 0.00396,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "85",
+      "province_name_th": "ระนอง",
+      "province_name_en": "Ranong",
+      "region": "ภาคใต้",
+      "centroid": [
+        98.6988406640059,
+        9.97027552114226
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 6,
+      "cultural_records": 0,
+      "housing_observations": 55,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.0,
+        "housing_observations": 0.055724,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "21",
+      "province_name_th": "ระยอง",
+      "province_name_en": "Rayong",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        101.428381709574,
+        12.8533264042372
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 2,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "70",
+      "province_name_th": "ราชบุรี",
+      "province_name_en": "Ratchaburi",
+      "region": "ภาคตะวันตก",
+      "centroid": [
+        99.5778145207821,
+        13.5347665551477
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 3,
+      "cultural_records": 208,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.025862,
+        "cultural_records": 0.411881,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "45",
+      "province_name_th": "ร้อยเอ็ด",
+      "province_name_en": "Roi Et",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.813265312343,
+        15.9195943697473
+      ],
+      "sra_overall_score": 2.05,
+      "sra_dimension_scores": {
+        "human": 2.55,
+        "physical": 2.29,
+        "financial": 2.02,
+        "natural_res": 1.93,
+        "social": 1.46
+      },
+      "area_based_participant_records": 11,
+      "innovation_records": 5,
+      "cultural_records": 57,
+      "housing_observations": 417,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 5,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.97619,
+        "area_based_participant_records": 0.090164,
+        "innovation_records": 0.043103,
+        "cultural_records": 0.112871,
+        "housing_observations": 0.422492,
+        "evidence_source_count": 1.0
+      }
+    },
+    {
+      "province_code": "16",
+      "province_name_th": "ลพบุรี",
+      "province_name_en": "Lop Buri",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.907628578383,
+        15.1093655815645
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 2,
+      "cultural_records": 64,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.017241,
+        "cultural_records": 0.126733,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "52",
+      "province_name_th": "ลำปาง",
+      "province_name_en": "Lampang",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        99.512285172386,
+        18.3272279935601
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 11,
+      "innovation_records": 4,
+      "cultural_records": 93,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.090164,
+        "innovation_records": 0.034483,
+        "cultural_records": 0.184158,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "51",
+      "province_name_th": "ลำพูน",
+      "province_name_en": "Lamphun",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        98.9546912914254,
+        18.1190237045807
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 5,
+      "innovation_records": 6,
+      "cultural_records": 14,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.040984,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.027723,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "33",
+      "province_name_th": "ศรีสะเกษ",
+      "province_name_en": "Si Sa Ket",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        104.368502211553,
+        14.856420712772
+      ],
+      "sra_overall_score": 1.97,
+      "sra_dimension_scores": {
+        "human": 2.56,
+        "physical": 2.29,
+        "financial": 1.96,
+        "natural_res": 1.88,
+        "social": 1.13
+      },
+      "area_based_participant_records": 0,
+      "innovation_records": 6,
+      "cultural_records": 111,
+      "housing_observations": 530,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.938095,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.219802,
+        "housing_observations": 0.536981,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "47",
+      "province_name_th": "สกลนคร",
+      "province_name_en": "Sakon Nakhon",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.824257817069,
+        17.3900851067421
+      ],
+      "sra_overall_score": 2.05,
+      "sra_dimension_scores": {
+        "human": 2.49,
+        "physical": 2.29,
+        "financial": 2.06,
+        "natural_res": 1.91,
+        "social": 1.51
+      },
+      "area_based_participant_records": 34,
+      "innovation_records": 0,
+      "cultural_records": 86,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.97619,
+        "area_based_participant_records": 0.278689,
+        "innovation_records": 0.0,
+        "cultural_records": 0.170297,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "90",
+      "province_name_th": "สงขลา",
+      "province_name_en": "Songkhla",
+      "region": "ภาคใต้",
+      "centroid": [
+        100.54542980745,
+        6.9343665541178
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 2,
+      "innovation_records": 4,
+      "cultural_records": 505,
+      "housing_observations": 654,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.016393,
+        "innovation_records": 0.034483,
+        "cultural_records": 1.0,
+        "housing_observations": 0.662614,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "91",
+      "province_name_th": "สตูล",
+      "province_name_en": "Satun",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.9271932352556,
+        6.83411023699872
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 46,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.091089,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "11",
+      "province_name_th": "สมุทรปราการ",
+      "province_name_en": "Samut Prakan",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.709086936236,
+        13.5968955621585
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 13,
+      "innovation_records": 4,
+      "cultural_records": 152,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.106557,
+        "innovation_records": 0.034483,
+        "cultural_records": 0.30099,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "75",
+      "province_name_th": "สมุทรสงคราม",
+      "province_name_en": "Samut Songkhram",
+      "region": "ภาคกลาง",
+      "centroid": [
+        99.9532946794036,
+        13.3968157490116
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 17,
+      "cultural_records": 55,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.146552,
+        "cultural_records": 0.108911,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "74",
+      "province_name_th": "สมุทรสาคร",
+      "province_name_en": "Samut Sakhon",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.212266818219,
+        13.5689711543035
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 16,
+      "cultural_records": 95,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.137931,
+        "cultural_records": 0.188119,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "19",
+      "province_name_th": "สระบุรี",
+      "province_name_en": "Saraburi",
+      "region": "ภาคกลาง",
+      "centroid": [
+        101.017352207059,
+        14.6282114666787
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 3,
+      "innovation_records": 1,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.02459,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "27",
+      "province_name_th": "สระแก้ว",
+      "province_name_en": "Sa Kaeo",
+      "region": "ภาคตะวันออก",
+      "centroid": [
+        102.321937775158,
+        13.7885813909989
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 1,
+      "innovation_records": 7,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.008197,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "17",
+      "province_name_th": "สิงห์บุรี",
+      "province_name_en": "Sing Buri",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.347188081344,
+        14.912349270577
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "72",
+      "province_name_th": "สุพรรณบุรี",
+      "province_name_en": "Suphan Buri",
+      "region": "ภาคกลาง",
+      "centroid": [
+        99.8915681154481,
+        14.6093371899437
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 31,
+      "innovation_records": 6,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.254098,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "84",
+      "province_name_th": "สุราษฎร์ธานี",
+      "province_name_en": "Surat Thani",
+      "region": "ภาคใต้",
+      "centroid": [
+        99.0903409109415,
+        9.05251233268579
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 6,
+      "cultural_records": 14,
+      "housing_observations": 586,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.051724,
+        "cultural_records": 0.027723,
+        "housing_observations": 0.593718,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "32",
+      "province_name_th": "สุรินทร์",
+      "province_name_en": "Surin",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        103.655302137582,
+        14.8859737030731
+      ],
+      "sra_overall_score": 2.01,
+      "sra_dimension_scores": {
+        "human": 2.87,
+        "physical": 2.42,
+        "financial": 1.9,
+        "natural_res": 1.85,
+        "social": 1.0
+      },
+      "area_based_participant_records": 13,
+      "innovation_records": 0,
+      "cultural_records": 118,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.957143,
+        "area_based_participant_records": 0.106557,
+        "innovation_records": 0.0,
+        "cultural_records": 0.233663,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "64",
+      "province_name_th": "สุโขทัย",
+      "province_name_en": "Sukhothai",
+      "region": "ภาคกลาง",
+      "centroid": [
+        99.7110398238068,
+        17.2635304887568
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 91,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.180198,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "43",
+      "province_name_th": "หนองคาย",
+      "province_name_en": "Nong Khai",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.833364414373,
+        17.9403112841274
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 1,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.2
+      }
+    },
+    {
+      "province_code": "39",
+      "province_name_th": "หนองบัวลำภู",
+      "province_name_en": "Nong Bua Lam Phu",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.301944954471,
+        17.1823281082991
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 2,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.00396,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "37",
+      "province_name_th": "อำนาจเจริญ",
+      "province_name_en": "Amnat Charoen",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        104.741325046715,
+        15.8925969324825
+      ],
+      "sra_overall_score": 2.0,
+      "sra_dimension_scores": {
+        "human": 2.45,
+        "physical": 2.2,
+        "financial": 1.85,
+        "natural_res": 1.81,
+        "social": 1.7
+      },
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.952381,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "41",
+      "province_name_th": "อุดรธานี",
+      "province_name_en": "Udon Thani",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        102.863181453099,
+        17.4251447582838
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 8,
+      "innovation_records": 23,
+      "cultural_records": 5,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.065574,
+        "innovation_records": 0.198276,
+        "cultural_records": 0.009901,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "53",
+      "province_name_th": "อุตรดิตถ์",
+      "province_name_en": "Uttaradit",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        100.517840298693,
+        17.7508719874331
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 22,
+      "innovation_records": 7,
+      "cultural_records": 35,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.180328,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.069307,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "61",
+      "province_name_th": "อุทัยธานี",
+      "province_name_en": "Uthai Thani",
+      "region": "ภาคกลาง",
+      "centroid": [
+        99.477771695088,
+        15.3496112608541
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 0,
+      "innovation_records": 0,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [],
+      "evidence_source_count": 0,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.0,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.0
+      }
+    },
+    {
+      "province_code": "34",
+      "province_name_th": "อุบลราชธานี",
+      "province_name_en": "Ubon Ratchathani",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        105.110878561297,
+        15.1840555739718
+      ],
+      "sra_overall_score": 2.07,
+      "sra_dimension_scores": {
+        "human": 2.65,
+        "physical": 2.18,
+        "financial": 1.91,
+        "natural_res": 2.01,
+        "social": 1.61
+      },
+      "area_based_participant_records": 3,
+      "innovation_records": 1,
+      "cultural_records": 265,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.985714,
+        "area_based_participant_records": 0.02459,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.524752,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "15",
+      "province_name_th": "อ่างทอง",
+      "province_name_en": "Ang Thong",
+      "region": "ภาคกลาง",
+      "centroid": [
+        100.348085554079,
+        14.6240509449387
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 2,
+      "innovation_records": 1,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.016393,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "57",
+      "province_name_th": "เชียงราย",
+      "province_name_en": "Chiang Rai",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        99.8658668144301,
+        19.8472691037048
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 17,
+      "innovation_records": 7,
+      "cultural_records": 415,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.139344,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.821782,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "50",
+      "province_name_th": "เชียงใหม่",
+      "province_name_en": "Chiang Mai",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        98.7276269344851,
+        18.7918671078126
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 122,
+      "innovation_records": 18,
+      "cultural_records": 226,
+      "housing_observations": 522,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university",
+        "f3_housing_portal"
+      ],
+      "evidence_source_count": 4,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 1.0,
+        "innovation_records": 0.155172,
+        "cultural_records": 0.447525,
+        "housing_observations": 0.528875,
+        "evidence_source_count": 0.8
+      }
+    },
+    {
+      "province_code": "76",
+      "province_name_th": "เพชรบุรี",
+      "province_name_en": "Phetchaburi",
+      "region": "ภาคตะวันตก",
+      "centroid": [
+        99.6186891238316,
+        12.9472106937771
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 30,
+      "innovation_records": 7,
+      "cultural_records": 41,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.245902,
+        "innovation_records": 0.060345,
+        "cultural_records": 0.081188,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "67",
+      "province_name_th": "เพชรบูรณ์",
+      "province_name_en": "Phetchabun",
+      "region": "ภาคกลาง",
+      "centroid": [
+        101.146448743171,
+        16.2782233535918
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 24,
+      "innovation_records": 3,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 2,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.196721,
+        "innovation_records": 0.025862,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.4
+      }
+    },
+    {
+      "province_code": "42",
+      "province_name_th": "เลย",
+      "province_name_en": "Loei",
+      "region": "ภาคตะวันออกเฉียงเหนือ",
+      "centroid": [
+        101.635123169093,
+        17.408614370931
+      ],
+      "sra_overall_score": 2.01,
+      "sra_dimension_scores": {
+        "human": 2.53,
+        "physical": 2.32,
+        "financial": 1.67,
+        "natural_res": 1.88,
+        "social": 1.65
+      },
+      "area_based_participant_records": 10,
+      "innovation_records": 9,
+      "cultural_records": 0,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_learning_area_based",
+        "f2_apptech_mru"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.957143,
+        "area_based_participant_records": 0.081967,
+        "innovation_records": 0.077586,
+        "cultural_records": 0.0,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "54",
+      "province_name_th": "แพร่",
+      "province_name_en": "Phrae",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        100.064708584874,
+        18.199725338646
+      ],
+      "sra_overall_score": null,
+      "sra_dimension_scores": {},
+      "area_based_participant_records": 4,
+      "innovation_records": 1,
+      "cultural_records": 53,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f2_learning_area_based",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.0,
+        "area_based_participant_records": 0.032787,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.10495,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    },
+    {
+      "province_code": "58",
+      "province_name_th": "แม่ฮ่องสอน",
+      "province_name_en": "Mae Hong Son",
+      "region": "ภาคเหนือ",
+      "centroid": [
+        98.0301157567094,
+        18.809845954645
+      ],
+      "sra_overall_score": 1.94,
+      "sra_dimension_scores": {
+        "human": 2.43,
+        "physical": 2.0,
+        "financial": 1.94,
+        "natural_res": 1.64,
+        "social": 1.67
+      },
+      "area_based_participant_records": 0,
+      "innovation_records": 1,
+      "cultural_records": 66,
+      "housing_observations": 0,
+      "evidence_sources": [
+        "f1_sradss_ppaos",
+        "f2_apptech_mru",
+        "f2_culturalmap_university"
+      ],
+      "evidence_source_count": 3,
+      "quality_status": "candidate_needs_review",
+      "visual_index": {
+        "sra_overall_score": 0.92381,
+        "area_based_participant_records": 0.0,
+        "innovation_records": 0.008621,
+        "cultural_records": 0.130693,
+        "housing_observations": 0.0,
+        "evidence_source_count": 0.6
+      }
+    }
+  ],
+  "methodology": {
+    "budget_simulator_th": "ผู้ใช้กำหนดงบและสัดส่วนเอง ระบบคำนวณผลรวมเท่านั้น ไม่มีการแนะนำอัตโนมัติ",
+    "map_height_th": "ความสูงเป็นค่าที่ normalize เพื่อการแสดงผลภายใน metric เดียว ห้ามเปรียบเทียบข้าม metric",
+    "province_join_th": "ใช้รหัสจังหวัดจากต้นทางและขอบเขตจังหวัดของ ปภ.; ไม่ join ด้วยชื่อเมื่อมีรหัส",
+    "privacy_th": "เผยแพร่เฉพาะ aggregate/ทะเบียนสาธารณะและตัด 2 wallet sources ออกจาก public data"
+  }
+}

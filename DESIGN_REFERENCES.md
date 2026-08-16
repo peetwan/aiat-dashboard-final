@@ -1,28 +1,32 @@
-# Design references
+# Design references — Public Evidence Atlas
 
-หน้า dashboard เวอร์ชันนี้ออกแบบใหม่จาก pattern ของผลิตภัณฑ์จริง ไม่ได้คัดลอกหน้าจอใดหน้าจอหนึ่ง
+หน้าเว็บนี้ออกแบบเป็น **public decision-support dashboard** สำหรับผู้บริหารและประชาชน ไม่ใช่หน้า monitoring ของทีม data ภายใน และไม่ได้คัดลอกหน้าจอใดหน้าจอหนึ่ง
 
 ## Mobbin MCP
 
-- [Amplitude — data home](https://mobbin.com/screens/c019d856-cf4a-4faa-a0a7-cd28dfbd531c): ใช้แนวคิด navigation ซ้าย, onboarding ของ data source และ quick status
-- [Mixpanel — main dashboard](https://mobbin.com/screens/116b19b1-6e4d-418a-8587-220b0c844f8e): ใช้ลำดับ filter → chart → detail
-- [Databricks — pipeline run](https://mobbin.com/screens/2a53f9eb-b8e1-4958-afb7-f441acbdf414): ใช้แนวคิด pipeline state และ event log ที่ตรวจย้อนหลังได้
-- [Render — database metrics](https://mobbin.com/screens/50504a21-dc6e-4450-a235-ce809c9d3355): ใช้แนวคิด health indicator และ event timeline
+- [Deel — Global Hiring Guide](https://mobbin.com/screens/a6cb49ca-18e2-49d4-9a58-da555b0c4855): แนวคิด map-first hero และการเปิดรายละเอียดตามพื้นที่
+- [Profound — Answer Engine Insights](https://mobbin.com/screens/98b82305-3239-4d52-b0c9-0e7f701dc127): การเชื่อมแผนที่กับตารางเปรียบเทียบใน workspace เดียว
+- [Felt — Operational Map](https://mobbin.com/screens/e3ac649f-a644-4545-a798-9d50366385db): layer control และข้อมูลเชิงพื้นที่ที่เปิดดูได้โดยไม่ทำให้หน้าหนักเกินไป
+- [Rocket Money — Budget](https://mobbin.com/screens/e8e471f9-dc5d-47a7-8d02-8b62c096149b): รูปแบบตัวเลขงบ แถวจัดสรร และยอดรวมที่อ่านง่าย
+- [Origin — Spending](https://mobbin.com/screens/d74b56f7-a4f0-43c9-b708-6615de691c5c): แนวคิด money-flow; รอบนี้ยังไม่ใช้ Sankey เพราะ dataset ไม่มีเส้นทางเงินที่ยืนยันแล้ว
 
-## Public dashboard references
+## Public policy dashboards
 
-- [Swetrix](https://github.com/Swetrix/swetrix): dashboard analytics ที่เน้น KPI หลักและ progressive disclosure
-- [Chartbrew](https://github.com/chartbrew/chartbrew): ตัวอย่างการเชื่อม API, SQL และ NoSQL เข้า dashboard เดียว
-- [Story Analytics](https://storyanalytics.ai/): ตัวอย่าง publication-ready chart และ data-source workflow
+- [UNDP GeoHub](https://geohub.data.undp.org/): แผนที่เป็นเครื่องมือสำรวจหลักและมี metadata ประกอบ
+- [UNDP SDG Push Diagnostic](https://sdgdiagnostics.data.undp.org/): แยก evidence, policy choice และ scenario ออกจากกัน
+- [USAspending Agency Profiles](https://www.usaspending.gov/agency): drill-down จากภาพรวมไปยังหน่วยงานและแหล่งข้อมูล
+- [Seattle Budget Dashboard](https://www.seattle.gov/council/topics/budget-dashboard): public budget communication ที่อธิบายบริบทก่อนตัวเลข
+- [Open Treasury](https://www.opentreasury.org/): budget simulation ที่ใช้ภาษาคนทั่วไป
 
 ## Existing PMUA mock
 
-ตรวจ [PMUA Data Command Center Mockup](https://pmua-dashboard-mock.poomzi.com/) เพื่อเก็บ information architecture เดิม เช่น source coverage, project lookup, area และ budget
+ตรวจ [PMUA Data Command Center Mockup](https://pmua-dashboard-mock.poomzi.com/) เพื่อเข้าใจหัวข้อเดิม เช่น source coverage, พื้นที่ และงบประมาณ แต่ไม่ได้นำค่าตัวอย่าง สี หรือ visual hierarchy เดิมมาใช้
 
-ค่าตัวอย่างใน mock เช่น งบประมาณ, ROI, outcome, จำนวนโครงการ หรือชื่อบุคคล ไม่ถูกนำมาใช้ เพราะยังไม่มี evidence ใน merged dataset ปัจจุบัน หน้าใหม่จึงแสดงเฉพาะ:
+## Design decisions ที่นำมาใช้จริง
 
-1. จำนวน source และ endpoint จาก source catalog
-2. API/raw connector ที่กำหนดไว้จริง
-3. expected record count ที่ติดป้าย candidate reference
-4. loaded record และ ingestion run จาก database
-5. policy state ที่ย้อนกลับไปหา source registry ได้
+1. WebGL 3D province map เป็น entry point หลัก และมี table เป็นทางเลือกที่เข้าถึงง่ายกว่า
+2. ผู้ใช้สลับดูแต่ละ signal แยกกัน ได้แก่ coverage, SRA, innovation, housing และ culture
+3. ไม่มีการรวม signal เป็น “คะแนนความต้องการงบ” เพราะยังไม่มีสูตรที่เจ้าของนโยบายรับรอง
+4. Budget Lab คำนวณจากงบ จังหวัด และน้ำหนักที่ผู้ใช้เลือกเท่านั้น ผลลัพธ์ติดป้ายว่าเป็น scenario ไม่ใช่ข้อเสนออย่างเป็นทางการ
+5. ทุกหน้ามี provenance, quality status และ download/API เพื่อให้ประชาชนตรวจข้อมูลต้นทางได้
+6. โทน dark atlas ใช้เฉพาะ hero/map ส่วน workspace วิเคราะห์ใช้พื้นสว่างเพื่อให้อ่านตารางและตัวเลขได้นาน

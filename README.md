@@ -1,71 +1,98 @@
-# dashboard_final
+# AIAT Public Evidence Atlas
 
-โฟลเดอร์นี้เป็นแอป standalone สำหรับเปลี่ยนข้อมูล audit ให้เป็น database และ dashboard โดยใช้หลัก API-first, snapshot fallback และ policy gate ก่อนขึ้น Railway
+Public Executive Dashboard สำหรับสำรวจหลักฐานเชิงพื้นที่จากข้อมูลสาธารณะ 10 แหล่ง เปรียบเทียบจังหวัด ทดลองฉากทัศน์งบประมาณ และดาวน์โหลดข้อมูลชุดเดียวกับที่หน้าเว็บใช้
 
-ข้อมูลทั้ง 12 source ยังเป็น candidate หรือ needs_review จึงต้องแสดงป้ายสถานะนี้เสมอ เมื่อ 2026-08-16 project owner อนุมัติ publication สำหรับ 10 source สาธารณะ ส่วน wallet 2 source ยังคง restricted local-only ตามกติกาโปรเจกต์
+ข้อมูลทั้งหมดในรุ่นนี้ยังเป็น `candidate` หรือ `needs_review` จึงไม่ถูกเรียกว่า KPI และตัวจำลองงบไม่จัดอันดับหรือแนะนำงบอัตโนมัติ ส่วน `f2_wallet_all_realtime` และ `f2_wallet_cluster_realtime` ถูกตัดออกจาก public projection และคงเป็น local-only
+
+## สิ่งที่มีในหน้าเว็บ
+
+- แผนที่ประเทศไทย 77 จังหวัดแบบ WebGL/3D ด้วย MapLibre GL JS 5.12
+- จุดวัฒนธรรมสาธารณะ 5,258 จุด พร้อม URL ต้นทาง
+- ตารางเทียบ 74 จังหวัดที่มีหลักฐานอย่างน้อยหนึ่งกลุ่ม
+- Budget Lab ที่ผู้ใช้กำหนดวงเงินและสัดส่วนเอง
+- Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256
+- Operational API/ingestion/database เดิมสำหรับผู้ดูแลระบบ
 
 ## โครงสร้างสำหรับมือใหม่
 
 ~~~text
 dashboard_final/
-├─ app/                 ตัว FastAPI, database, ingestion และหน้า dashboard
-├─ config/              source catalog 12 แหล่ง + executable API plans
+├─ app/
+│  ├─ main.py             FastAPI routes: public + operations
+│  ├─ public_data.py      โหลด public projection แบบ read-only
+│  ├─ ingestion.py        API-first + snapshot fallback
+│  ├─ database.py         SQLite หรือ PostgreSQL
+│  ├─ static/             WebGL UI, CSS และ JavaScript
+│  └─ templates/          หน้า Public Evidence Atlas
+├─ config/
+│  ├─ source_catalog.json ทะเบียน 12 source และ policy
+│  └─ ingestion_plans.json allowlist ของ API ที่เรียกได้
 ├─ data/
-│  ├─ snapshots/        raw fallback บนเครื่อง (ไม่ push Git)
-│  └─ runtime/          SQLite และ immutable fetch runs (ไม่ push Git)
-├─ tools/               สร้าง catalog และเตรียม snapshot จากโปรเจกต์หลัก
-├─ tests/               automated safety และ API tests
-├─ SOURCE_MATRIX.md     ตารางตัดสินใจต่อ source
-├─ WORKFLOW.md          ลำดับงานตั้งแต่ดึงข้อมูลถึง dashboard
-├─ DEPLOY_RAILWAY.md    ขั้นตอนเปิด project ใหม่บน Railway
-├─ DESIGN_REFERENCES.md  ที่มาของ pattern และขอบเขตตัวเลขที่นำมาใช้
-└─ SECURITY.md          กติกาข้อมูลและ approval gate
+│  ├─ public/             ไฟล์ aggregate ที่ push/deploy ได้
+│  ├─ snapshots/          raw fallback บนเครื่อง ไม่ push Git
+│  └─ runtime/            database/raw fetch runs ไม่ push Git
+├─ tools/
+│  └─ build_public_data.py สร้าง public projection จากหลักฐานจริง
+├─ tests/                 API, privacy และ publication tests
+├─ WORKFLOW.md            data flow ตั้งแต่ source ถึง dashboard
+├─ DEPLOY_RAILWAY.md      วิธี deploy public-only หรือ full pipeline
+└─ DESIGN_REFERENCES.md   Mobbin และ public-dashboard references
 ~~~
 
 ## เริ่มบนเครื่อง
 
-ใช้ Python 3.12 แล้วรัน:
+ใช้ Python 3.12:
 
 ~~~powershell
 cd dashboard_final
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-Copy-Item .env.example .env
 python -m app.cli init-db
 uvicorn app.main:app --reload
 ~~~
 
 เปิด http://localhost:8000
 
-หน้า Overview ใช้ API 4 ชุด:
+## Public Data API
 
-- `/api/summary` — KPI เชิงเทคนิคที่คำนวณจาก database
-- `/api/sources` — source registry พร้อม endpoint/run count
-- `/api/connectivity` — ตรวจว่าแต่ละ source มี API plan หรือ snapshot connector
-- `/api/runs` — event timeline ของ ingestion
+| Endpoint | เนื้อหา |
+|---|---|
+| `/api/public/v1/overview` | summary, metric definitions และ methodology |
+| `/api/public/v1/sources` | 10 public sources พร้อม URL/readiness |
+| `/api/public/v1/provinces` | public evidence projection รายจังหวัด |
+| `/api/public/v1/provinces/{code}` | จังหวัดเดียวด้วยรหัส 2 หลัก |
+| `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด + metric properties |
+| `/api/public/v1/map/cultural-points` | GeoJSON จุดวัฒนธรรม 5,258 จุด |
+| `/docs` | OpenAPI explorer |
 
-## เตรียม snapshot จากชุด merged เดิม
+ไฟล์ดาวน์โหลดอยู่ที่ `/downloads/` ได้แก่ `province_evidence.csv`, `source_inventory.csv`, `cultural_points.geojson`, `thailand_provinces.geojson` และ `manifest.json`
 
-คำสั่ง default จะเตรียมเฉพาะ snapshot-only, ไม่แตะ wallet และข้ามไฟล์ใหญ่กว่า 50 MB:
+## สร้าง public projection ใหม่
+
+รันจาก workspace หลักที่มี merged evidence:
+
+~~~powershell
+python tools/build_public_data.py
+~~~
+
+หากต้องการ refresh ขอบเขตจังหวัดจาก ArcGIS REST ของกรมป้องกันและบรรเทาสาธารณภัย:
+
+~~~powershell
+python tools/build_public_data.py --refresh-boundaries
+~~~
+
+Script จะตรวจว่ามี public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และจะสร้าง manifest ของ input/output ทุกไฟล์
+
+## Operational ingestion
 
 ~~~powershell
 python tools/prepare_snapshots.py
-python -m app.cli ingest --source f2_rmutdb --strategy snapshot
-~~~
-
-ไฟล์ snapshot และ database ถูก ignore จาก Git เพื่อป้องกันการ push ข้อมูลหรือไฟล์ใหญ่ออกไปโดยไม่ตั้งใจ
-
-## ดึง API
-
-~~~powershell
-python -m app.cli ingest --source f2_apptech_mtr
-python -m app.cli ingest --source f2_apptech_mru
 python -m app.cli ingest --source f2_learning_area_based
 python -m app.cli ingest --source f3_housing_portal
 python -m app.cli status
 ~~~
 
-API plan จะเรียกเฉพาะ allowlist ใน config/ingestion_plans.json และจะไม่เรียก endpoint login, person, household หรือ write action
+ค่า row-level ใน `/api/records?include_payload=true` ยังคงปิดเมื่อ `PUBLIC_DATA_VALUES_ENABLED=false` ส่วน public aggregate API เปิดได้เสมอเพราะผ่าน publication projection แยกแล้ว
 
-อ่าน WORKFLOW.md ก่อนเปิด ingestion บน Railway และอ่าน DEPLOY_RAILWAY.md เมื่อต้องการสร้าง project ใหม่
+ก่อน deploy ให้อ่าน [WORKFLOW.md](WORKFLOW.md), [SECURITY.md](SECURITY.md) และ [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md)
