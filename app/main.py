@@ -8,8 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, func, select, text
 
-from app.catalog import sync_catalog
-from app.database import SessionLocal, init_db
+from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
+from app.database import SessionLocal, engine, init_db
 from app.models import DashboardRecord, Endpoint, IngestionRun, Source
 from app.settings import PROJECT_ROOT, get_settings
 
@@ -26,7 +26,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="0.2.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
 
 
@@ -79,6 +79,43 @@ def summary():
             )
             or 0
         )
+        failed_runs = (
+            session.scalar(
+                select(func.count()).select_from(IngestionRun).where(IngestionRun.status == "failed")
+            )
+            or 0
+        )
+        expected_records = (
+            session.scalar(
+                select(func.sum(Source.expected_record_count)).where(
+                    Source.production_values_allowed.is_(True)
+                )
+            )
+            or 0
+        )
+        api_first_sources = (
+            session.scalar(
+                select(func.count()).select_from(Source).where(Source.acquisition_mode == "api_first")
+            )
+            or 0
+        )
+        snapshot_sources = (
+            session.scalar(
+                select(func.count()).select_from(Source).where(
+                    Source.acquisition_mode == "snapshot_only"
+                )
+            )
+            or 0
+        )
+        blocked_sources = (
+            session.scalar(
+                select(func.count()).select_from(Source).where(
+                    Source.acquisition_mode == "blocked"
+                )
+            )
+            or 0
+        )
+        latest_run_at = session.scalar(select(func.max(IngestionRun.started_at)))
         return {
             "sources": source_count,
             "endpoints_catalogued": endpoint_count,
@@ -86,6 +123,14 @@ def summary():
             "candidate_records_loaded": records,
             "production_approved_sources": production_approved_sources,
             "complete_runs": complete_runs,
+            "failed_runs": failed_runs,
+            "expected_candidate_records": expected_records,
+            "api_first_sources": api_first_sources,
+            "snapshot_sources": snapshot_sources,
+            "blocked_sources": blocked_sources,
+            "configured_connectors": api_first_sources + snapshot_sources,
+            "database_backend": engine.dialect.name,
+            "latest_run_at": latest_run_at,
             "public_data_values_enabled": settings.public_data_values_enabled,
             "warning": "ทุกค่าปัจจุบันเป็น candidate/needs_review ไม่ใช่ KPI หรือ production fact",
         }
@@ -101,9 +146,26 @@ def sources():
                 )
             ).all()
         )
+        endpoint_counts: dict[str, dict[str, int]] = {}
+        for endpoint in session.scalars(select(Endpoint)).all():
+            counts = endpoint_counts.setdefault(
+                endpoint.source_id,
+                {"total": 0, "runtime": 0, "restricted": 0},
+            )
+            counts["total"] += 1
+            counts["runtime"] += int(endpoint.runtime_enabled and not endpoint.restricted)
+            counts["restricted"] += int(endpoint.restricted)
+
+        latest_runs: dict[str, IngestionRun] = {}
+        for run in session.scalars(select(IngestionRun).order_by(desc(IngestionRun.started_at))).all():
+            latest_runs.setdefault(run.source_id, run)
+
         items = session.scalars(select(Source).order_by(Source.ordinal)).all()
-        return [
-            {
+        result = []
+        for item in items:
+            counts = endpoint_counts.get(item.source_id, {"total": 0, "runtime": 0, "restricted": 0})
+            latest = latest_runs.get(item.source_id)
+            result.append({
                 "ordinal": item.ordinal,
                 "source_id": item.source_id,
                 "name_th": item.name_th,
@@ -114,10 +176,50 @@ def sources():
                 "production_values_allowed": item.production_values_allowed,
                 "expected_record_count": item.expected_record_count,
                 "loaded_records": record_counts.get(item.source_id, 0),
+                "endpoint_count": counts["total"],
+                "runtime_endpoint_count": counts["runtime"],
+                "restricted_endpoint_count": counts["restricted"],
+                "latest_run": (
+                    {
+                        "run_id": latest.run_id,
+                        "status": latest.status,
+                        "strategy": latest.strategy,
+                        "started_at": latest.started_at,
+                        "records_loaded": latest.records_loaded,
+                    }
+                    if latest
+                    else None
+                ),
                 "notes_th": item.notes_th,
+            })
+        return result
+
+
+@app.get("/api/connectivity")
+def connectivity():
+    catalog = load_catalog()
+    api_plans = load_ingestion_plans().get("sources", {})
+    backend = engine.dialect.name
+    result = []
+    for source in catalog["sources"]:
+        source_id = source["source_id"]
+        snapshot_path = settings.resolved_snapshot_root / source_id
+        snapshot_configured = bool(source.get("snapshot_fallback")) or source["acquisition_mode"] == "snapshot_only"
+        result.append(
+            {
+                "source_id": source_id,
+                "name_th": source["name_th"],
+                "acquisition_mode": source["acquisition_mode"],
+                "api_plan_configured": source_id in api_plans,
+                "snapshot_configured": snapshot_configured,
+                "snapshot_available": snapshot_path.exists(),
+                "database_backend": backend,
+                "cloud_policy": source["cloud_policy"],
+                "deployable": source["cloud_policy"] != "restricted_local_only",
+                "candidate_only": source["readiness_status"] == "needs_review",
             }
-            for item in items
-        ]
+        )
+    return result
 
 
 @app.get("/api/sources/{source_id}/endpoints")

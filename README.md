@@ -18,6 +18,7 @@ dashboard_final/
 ├─ SOURCE_MATRIX.md     ตารางตัดสินใจต่อ source
 ├─ WORKFLOW.md          ลำดับงานตั้งแต่ดึงข้อมูลถึง dashboard
 ├─ DEPLOY_RAILWAY.md    ขั้นตอนเปิด project ใหม่บน Railway
+├─ DESIGN_REFERENCES.md  ที่มาของ pattern และขอบเขตตัวเลขที่นำมาใช้
 └─ SECURITY.md          กติกาข้อมูลและ approval gate
 ~~~
 
@@ -36,6 +37,13 @@ uvicorn app.main:app --reload
 ~~~
 
 เปิด http://localhost:8000
+
+หน้า Overview ใช้ API 4 ชุด:
+
+- `/api/summary` — KPI เชิงเทคนิคที่คำนวณจาก database
+- `/api/sources` — source registry พร้อม endpoint/run count
+- `/api/connectivity` — ตรวจว่าแต่ละ source มี API plan หรือ snapshot connector
+- `/api/runs` — event timeline ของ ingestion
 
 ## เตรียม snapshot จากชุด merged เดิม
 
