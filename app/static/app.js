@@ -23,6 +23,8 @@ const state = {
   hoveredRegion: null,
   regions: {},
   regionMarkers: [],
+  countryZoom: null,
+  pendingLock: null,
 };
 
 const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
@@ -45,7 +47,7 @@ const MAP_MODES = {
       { min: 1, color: "#a9d3b8", label: "1–4" },
     ],
     regionLegendTitle: "โครงการ บพท. รวมรายภาค",
-    regionLegendNote: "สีเข้ม = โครงการรวมมาก · คลิกภาคเพื่อดูรายจังหวัด",
+    regionLegendNote: "สีเข้ม = โครงการรวมมาก",
     regionValue: (summary) => (summary.withData ? summary.total : null),
     regionSteps: [
       { min: 300, color: "#14532e", label: "300+" },
@@ -71,7 +73,7 @@ const MAP_MODES = {
       { max: Infinity, color: "#f2c49a", label: "> 1.95" },
     ],
     regionLegendTitle: "คะแนนทุนเฉลี่ยรายภาค (SRA-DSS)",
-    regionLegendNote: "สีเข้ม = คะแนนเฉลี่ยต่ำกว่า · คลิกภาคเพื่อดูรายจังหวัด",
+    regionLegendNote: "สีเข้ม = คะแนนเฉลี่ยต่ำกว่า",
     regionValue: (summary) => (summary.withData ? summary.total / summary.withData : null),
     regionSteps: [
       { max: 1.8, color: "#b4551d", label: "≤ 1.80" },
@@ -94,7 +96,7 @@ const MAP_MODES = {
       { min: 1, color: "#b0cde4", label: "1–4" },
     ],
     regionLegendTitle: "นวัตกรรมพร้อมใช้รวมรายภาค",
-    regionLegendNote: "สีเข้ม = นวัตกรรมรวมมาก · คลิกภาคเพื่อดูรายจังหวัด",
+    regionLegendNote: "สีเข้ม = นวัตกรรมรวมมาก",
     regionValue: (summary) => (summary.withData ? summary.total : null),
     regionSteps: [
       { min: 300, color: "#1d5482", label: "300+" },
@@ -118,7 +120,7 @@ const MAP_MODES = {
       { min: 1, color: "#cfe4d4", label: "1" },
     ],
     regionLegendTitle: "ความครอบคลุมข้อมูลเฉลี่ยรายภาค",
-    regionLegendNote: "สีเข้ม = เฉลี่ยหลายแหล่งต่อจังหวัด · คลิกภาคเพื่อดูรายจังหวัด",
+    regionLegendNote: "สีเข้ม = เฉลี่ยหลายแหล่งต่อจังหวัด",
     regionValue: (summary) => (summary.withData ? summary.total / summary.withData : null),
     regionSteps: [
       { min: 5.5, color: "#176747", label: "5.5+" },
@@ -427,6 +429,30 @@ function setHoveredRegion(name) {
   applyRegionFocus();
 }
 
+function regionPadding() {
+  return window.matchMedia("(max-width: 720px)").matches
+    ? { top: 92, right: 24, bottom: 110, left: 24 }
+    : { top: 110, right: 90, bottom: 110, left: 90 };
+}
+
+function cancelPendingLock() {
+  if (state.pendingLock && state.map) {
+    state.map.off("moveend", state.pendingLock);
+    state.pendingLock = null;
+  }
+}
+
+function fitRegionBounds(region, duration = 700) {
+  if (!state.mapLoaded || !region?.bounds) return;
+  cancelPendingLock();
+  state.map.fitBounds(region.bounds, {
+    padding: regionPadding(),
+    pitch: 0,
+    bearing: 0,
+    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : duration,
+  });
+}
+
 function selectRegion(name, moveMap = true) {
   const region = state.regions[name];
   if (!region) return;
@@ -439,16 +465,7 @@ function selectRegion(name, moveMap = true) {
   renderLegend();
   applyRegionFocus();
   updateLabelVisibility();
-  if (moveMap && state.mapLoaded && region.bounds) {
-    state.map.fitBounds(region.bounds, {
-      padding: window.matchMedia("(max-width: 720px)").matches
-        ? { top: 92, right: 24, bottom: 110, left: 24 }
-        : { top: 110, right: 90, bottom: 110, left: 90 },
-      pitch: 0,
-      bearing: 0,
-      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
-    });
-  }
+  if (moveMap) fitRegionBounds(region);
 }
 
 function countryPadding() {
@@ -463,11 +480,20 @@ function lockCountryView(animate = false) {
   // wide screens and clamped the zoom so the map never fully fit.
   const map = state.map;
   if (!map) return;
+  cancelPendingLock();
   map.setMaxBounds(null);
   map.setMinZoom(2);
   const camera = map.cameraForBounds(THAILAND_BOUNDS, { padding: countryPadding() });
   if (!camera) return;
+  state.countryZoom = camera.zoom;
   const lock = () => {
+    state.pendingLock = null;
+    // The user may have drilled into a region/province while the return
+    // animation was still running — never lock that view as "country".
+    if (state.selectedRegion || state.selectedCode) return;
+    if (Math.abs(map.getZoom() - camera.zoom) > 0.2) {
+      map.jumpTo({ ...camera, pitch: 0, bearing: 0 });
+    }
     map.setMinZoom(Math.max(2, map.getZoom() - 0.05));
     const view = map.getBounds();
     map.setMaxBounds([
@@ -476,6 +502,7 @@ function lockCountryView(animate = false) {
     ]);
   };
   if (animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    state.pendingLock = lock;
     map.once("moveend", lock);
     map.easeTo({ ...camera, pitch: 0, bearing: 0, duration: 700 });
   } else {
@@ -487,7 +514,7 @@ function lockCountryView(animate = false) {
 function backToCountry() {
   state.selectedRegion = null;
   setHoveredRegion(null);
-  closePanel();
+  closePanel(false);
   document.getElementById("backToCountry").hidden = true;
   setPrompt("เลือกภาค แล้วเจาะลงรายจังหวัด", "ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง");
   applyFillForLevel();
@@ -531,12 +558,17 @@ function setFeatureSelection(code) {
 function fitProvince(province) {
   if (!state.mapLoaded || !province.centroid?.every((value) => Number.isFinite(Number(value)))) return;
   const isMobile = window.matchMedia("(max-width: 720px)").matches;
+  cancelPendingLock();
   state.map.easeTo({
     center: province.centroid,
     zoom: isMobile ? 6.4 : 7,
     pitch: 0,
     bearing: 0,
-    padding: isMobile ? { top: 72, right: 18, bottom: 360, left: 18 } : { top: 80, right: 660, bottom: 60, left: 60 },
+    // The panel overlays the right edge (desktop) / bottom (mobile), so shift
+    // the province into the strip that stays visible. `offset` is ephemeral —
+    // easeTo `padding` is remembered by the camera and kept skewing every
+    // later fit (country/region views drifted after opening a province).
+    offset: isMobile ? [0, -140] : [-330, 0],
     duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
   });
 }
@@ -1138,7 +1170,7 @@ async function selectProvince(code, moveMap = true) {
   }
 }
 
-function closePanel() {
+function closePanel(refitMap = true) {
   state.requestToken += 1;
   if (state.mapLoaded && state.selectedCode) {
     state.map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: false });
@@ -1159,6 +1191,11 @@ function closePanel() {
   url.searchParams.delete("province");
   url.searchParams.delete("view");
   window.history.replaceState({}, "", url);
+  // Ease back to the region overview so opening and closing a province always
+  // lands on the same stable view instead of wherever the last fit left off.
+  if (refitMap && state.selectedRegion) {
+    fitRegionBounds(state.regions[state.selectedRegion], 600);
+  }
 }
 
 function toggleCulturalPoints() {
@@ -1169,16 +1206,11 @@ function toggleCulturalPoints() {
   document.getElementById("togglePoints").setAttribute("aria-pressed", String(state.pointsVisible));
 }
 
-function resetMap() {
-  backToCountry();
-}
-
 function bindEvents() {
   document.getElementById("provinceSelect").addEventListener("change", (event) => {
     if (event.target.value) selectProvince(event.target.value, true);
   });
-  document.getElementById("closePanel").addEventListener("click", closePanel);
-  document.getElementById("resetMap").addEventListener("click", resetMap);
+  document.getElementById("closePanel").addEventListener("click", () => closePanel());
   document.getElementById("backToCountry").addEventListener("click", backToCountry);
   document.getElementById("togglePoints").addEventListener("click", toggleCulturalPoints);
   document.querySelectorAll("[data-map-mode]").forEach((button) => {
@@ -1212,7 +1244,9 @@ function bindEvents() {
     if (state.currentBriefing) renderCulture(state.currentBriefing.sections.culture);
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && state.selectedCode) closePanel();
+    if (event.key !== "Escape") return;
+    if (state.selectedCode) closePanel();
+    else if (state.selectedRegion) backToCountry();
   });
 }
 
@@ -1445,6 +1479,17 @@ function initMap() {
   map.on("resize", () => {
     if (!state.mapLoaded || state.selectedRegion || state.selectedCode) return;
     lockCountryView();
+  });
+
+  // Pinching/scrolling out to country scale while inside a region would leave
+  // the map in a half-region half-country state — treat it as "back to all
+  // regions" so the view and the interactions always agree.
+  map.on("zoomend", () => {
+    if (!state.mapLoaded || !state.selectedRegion || state.selectedCode) return;
+    if (state.pendingLock) return;
+    if (state.countryZoom !== null && map.getZoom() <= state.countryZoom + 0.25) {
+      backToCountry();
+    }
   });
 
   map.on("error", (event) => {

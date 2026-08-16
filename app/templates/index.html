@@ -47,12 +47,6 @@
         <div><strong id="promptTitle">เลือกภาค แล้วเจาะลงรายจังหวัด</strong><small id="promptHint">ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง</small></div>
       </div>
 
-      <div class="map-actions" aria-label="เครื่องมือแผนที่">
-        <button id="resetMap" type="button" title="กลับไปมุมมองทั้งประเทศ" aria-label="กลับไปมุมมองทั้งประเทศ">⌂</button>
-        <button id="backToCountry" type="button" hidden>← ทุกภาค</button>
-        <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
-      </div>
-
       <div class="mode-dock" role="group" aria-label="เลือกมุมมองข้อมูลบนแผนที่">
         <span class="dock-label">มุมมอง</span>
         <button type="button" class="active" data-map-mode="projects"><i></i>โครงการ บพท.</button>
@@ -61,15 +55,22 @@
         <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
       </div>
 
-      <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
-        <div><strong id="legendTitle">โครงการ บพท. รวมรายภาค</strong><small id="legendNote">สีเข้ม = โครงการรวมมาก</small></div>
-        <ol id="legendItems">
-          <li><i style="background:#a9d3b8"></i><span>1–99</span></li>
-          <li><i style="background:#63ac79"></i><span>100–199</span></li>
-          <li><i style="background:#2e7d51"></i><span>200–299</span></li>
-          <li><i style="background:#14532e"></i><span>300+</span></li>
-        </ol>
-      </section>
+      <div class="map-corner">
+        <div class="map-actions" aria-label="เครื่องมือแผนที่">
+          <button id="backToCountry" type="button" hidden>← ทุกภาค</button>
+          <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
+        </div>
+
+        <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
+          <div><strong id="legendTitle">โครงการ บพท. รวมรายภาค</strong><small id="legendNote">สีเข้ม = โครงการรวมมาก</small></div>
+          <ol id="legendItems">
+            <li><i style="background:#a9d3b8"></i><span>1–99</span></li>
+            <li><i style="background:#63ac79"></i><span>100–199</span></li>
+            <li><i style="background:#2e7d51"></i><span>200–299</span></li>
+            <li><i style="background:#14532e"></i><span>300+</span></li>
+          </ol>
+        </section>
+      </div>
 
       <aside class="province-panel" id="provincePanel" aria-hidden="true" aria-live="polite">
         <div class="panel-loading" id="panelLoading" hidden>

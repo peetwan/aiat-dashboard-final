@@ -330,7 +330,6 @@
     backdrop-filter: blur(16px);
     cursor: pointer;
   }
-  #resetMap { width: 42px; font-size: 17px; }
   #togglePoints { display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; font-size: 11px; font-weight: 750; }
   #togglePoints span { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--amber); }
   #togglePoints[aria-pressed="true"] { color: var(--night); background: var(--amber); border-color: var(--amber); }
@@ -1882,5 +1881,68 @@
   @media (max-width: 720px) {
     .tourism-place strong { font-size: 15px; }
     .tourism-place p, .schedule-row div span, .tourism-station span { font-size: 12.5px; }
+  }
+}
+
+/* Overlay layout pass: the actions row and the legend used to be two fixed
+   elements aiming at the same corner and overlapped whenever the legend grew;
+   they now stack inside one .map-corner column. The mode dock also moves out
+   of the province panel's way instead of being buried under it. */
+@layer lightmap {
+  .map-corner {
+    position: fixed;
+    left: 22px;
+    bottom: 20px;
+    z-index: 18;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    pointer-events: none;
+    transition: bottom 220ms ease, opacity 200ms ease;
+  }
+  .map-corner > * { pointer-events: auto; }
+  .map-actions { position: static; z-index: auto; }
+  .evidence-legend {
+    position: static;
+    width: 264px;
+    max-width: calc(100vw - 44px);
+  }
+  .evidence-legend > div { display: block; }
+  .evidence-legend > div small { display: block; margin-top: 3px; line-height: 1.45; }
+
+  .mode-dock { transition: left 240ms ease, opacity 200ms ease; }
+
+  /* Desktop with the panel open: the panel owns the right side, so the dock
+     recenters inside the strip of map that stays visible and the legend
+     yields (its colors are hidden behind the panel anyway). */
+  @media (min-width: 1080px) {
+    body.panel-open .mode-dock {
+      left: calc((100vw - min(640px, 100vw - 20px) - 18px) / 2);
+      max-width: calc(100vw - min(640px, 100vw - 20px) - 60px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    body.panel-open .mode-dock::-webkit-scrollbar { display: none; }
+  }
+  @media (min-width: 721px) and (max-width: 1079px) {
+    body.panel-open .mode-dock { opacity: 0; pointer-events: none; }
+  }
+  @media (min-width: 721px) {
+    body.panel-open .evidence-legend { display: none; }
+    body.panel-open .map-corner { bottom: 84px; }
+    .province-panel { top: 84px; }
+  }
+
+  /* Narrower desktops: the centered dock slides toward the left corner
+     column, so lift the column above the dock instead of letting them cross. */
+  @media (min-width: 721px) and (max-width: 1159px) {
+    .map-corner { bottom: 84px; }
+  }
+
+  @media (max-width: 720px) {
+    .map-corner { left: 12px; bottom: 74px; gap: 8px; }
+    .evidence-legend { width: min(264px, calc(100vw - 24px)); }
+    body.panel-open .map-corner { opacity: 0; pointer-events: none; }
   }
 }
