@@ -1,15 +1,19 @@
-# AIAT Public Evidence Atlas
+# AIAT Provincial Evidence Map
 
-Public Executive Dashboard สำหรับสำรวจหลักฐานเชิงพื้นที่จากข้อมูลสาธารณะ 10 แหล่ง เปรียบเทียบจังหวัด ทดลองฉากทัศน์งบประมาณ และดาวน์โหลดข้อมูลชุดเดียวกับที่หน้าเว็บใช้
+Public Executive Dashboard แบบ map-first สำหรับเปิดข้อมูลจริงของแต่ละจังหวัดจากข้อมูลสาธารณะ 10 แหล่ง ผู้ใช้คลิกพื้นที่บนแผนที่สามมิติแล้วระบบเรียก Gold Provincial API เพื่อแสดงตัวชี้วัด โครงการ นวัตกรรม ทุนวัฒนธรรม และแถวข้อมูลจาก URL ต้นทาง
 
-ข้อมูลทั้งหมดในรุ่นนี้ยังเป็น `candidate` หรือ `needs_review` จึงไม่ถูกเรียกว่า KPI และตัวจำลองงบไม่จัดอันดับหรือแนะนำงบอัตโนมัติ ส่วน `f2_wallet_all_realtime` และ `f2_wallet_cluster_realtime` ถูกตัดออกจาก public projection และคงเป็น local-only
+ข้อมูลทั้งหมดในรุ่นนี้ยังเป็น `candidate` หรือ `needs_review` จึงไม่ถูกเรียกว่า KPI และไม่ถูกนำไปรวมเป็นคะแนนแนะนำงบอัตโนมัติ ส่วน `f2_wallet_all_realtime` และ `f2_wallet_cluster_realtime` ถูกตัดออกจาก public projection และคงเป็น local-only
 
 ## สิ่งที่มีในหน้าเว็บ
 
 - แผนที่ประเทศไทย 77 จังหวัดแบบ WebGL/3D ด้วย MapLibre GL JS 5.12
-- จุดวัฒนธรรมสาธารณะ 5,258 จุด พร้อม URL ต้นทาง
-- ตารางเทียบ 74 จังหวัดที่มีหลักฐานอย่างน้อยหนึ่งกลุ่ม
-- Budget Lab ที่ผู้ใช้กำหนดวงเงินและสัดส่วนเอง
+- ชื่อจังหวัดบนแผนที่และตัวเลือกค้นหาสำหรับ keyboard/mobile
+- Provincial command panel ที่เปิดเมื่อคลิกจังหวัด
+- “ข้อมูลสำคัญต่อการตัดสินใจ” ใช้ค่าจริง เช่น house-price-to-income, overcrowding, การผ่านสินเชื่อ และพื้นที่เสี่ยงน้ำท่วม
+- รายการชื่อจริงจาก Area-Based, AppTech และ Cultural Map พร้อมรายละเอียดและ URL ต้นทาง
+- “ข้อมูลอื่นทั้งหมด” แยกตาม CKAN resource และเปิด Gold JSON ฉบับเต็มได้
+- สถานะครบทั้ง 10 URL ว่า `มีข้อมูล`, `ไม่มีรายการจังหวัดนี้` หรือ `ไม่ผูกจังหวัด`
+- จุดวัฒนธรรมสาธารณะ 5,258 จุดแบบเปิดปิดได้
 - Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256
 - Operational API/ingestion/database เดิมสำหรับผู้ดูแลระบบ
 
@@ -29,10 +33,12 @@ dashboard_final/
 │  └─ ingestion_plans.json allowlist ของ API ที่เรียกได้
 ├─ data/
 │  ├─ public/             ไฟล์ aggregate ที่ push/deploy ได้
+│  │  └─ provincial_briefings/ Gold JSON ครบ 77 จังหวัด
 │  ├─ snapshots/          raw fallback บนเครื่อง ไม่ push Git
 │  └─ runtime/            database/raw fetch runs ไม่ push Git
 ├─ tools/
-│  └─ build_public_data.py สร้าง public projection จากหลักฐานจริง
+│  ├─ build_public_data.py สร้าง map/catalog projection
+│  └─ build_provincial_briefings.py สร้าง Gold API data จากค่าจริง
 ├─ tests/                 API, privacy และ publication tests
 ├─ WORKFLOW.md            data flow ตั้งแต่ source ถึง dashboard
 ├─ DEPLOY_RAILWAY.md      วิธี deploy public-only หรือ full pipeline
@@ -62,6 +68,7 @@ uvicorn app.main:app --reload
 | `/api/public/v1/sources` | 10 public sources พร้อม URL/readiness |
 | `/api/public/v1/provinces` | public evidence projection รายจังหวัด |
 | `/api/public/v1/provinces/{code}` | จังหวัดเดียวด้วยรหัส 2 หลัก |
+| `/api/public/v1/provinces/{code}/briefing` | Gold projection: ค่าจริงและรายการครบของจังหวัด |
 | `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด + metric properties |
 | `/api/public/v1/map/cultural-points` | GeoJSON จุดวัฒนธรรม 5,258 จุด |
 | `/docs` | OpenAPI explorer |
@@ -74,6 +81,7 @@ uvicorn app.main:app --reload
 
 ~~~powershell
 python tools/build_public_data.py
+python tools/build_provincial_briefings.py
 ~~~
 
 หากต้องการ refresh ขอบเขตจังหวัดจาก ArcGIS REST ของกรมป้องกันและบรรเทาสาธารณภัย:
@@ -82,7 +90,7 @@ python tools/build_public_data.py
 python tools/build_public_data.py --refresh-boundaries
 ~~~
 
-Script จะตรวจว่ามี public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และจะสร้าง manifest ของ input/output ทุกไฟล์
+สอง script จะตรวจ public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และสร้าง Gold JSON พร้อม byte size/SHA-256 รายจังหวัด
 
 ## Operational ingestion
 

@@ -12,7 +12,13 @@ from sqlalchemy import desc, func, select, text
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, engine, init_db
 from app.models import DashboardRecord, Endpoint, IngestionRun, Source
-from app.public_data import PUBLIC_DATA_ROOT, cultural_points, province_boundaries, public_catalog
+from app.public_data import (
+    PUBLIC_DATA_ROOT,
+    cultural_points,
+    province_boundaries,
+    provincial_briefing,
+    public_catalog,
+)
 from app.settings import PROJECT_ROOT, get_settings
 
 
@@ -29,8 +35,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="AIAT Public Evidence Atlas API",
-    description="Public candidate-data projection for evidence exploration and transparent budget scenarios.",
+    title="AIAT Provincial Evidence Map API",
+    description="Public candidate-data projection for province-level evidence exploration.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -111,6 +117,15 @@ def public_data_province(province_code: str):
     if province is None:
         raise HTTPException(status_code=404, detail="ไม่พบรหัสจังหวัด")
     return province
+
+
+@app.get("/api/public/v1/provinces/{province_code}/briefing", tags=["Public data"])
+def public_data_provincial_briefing(province_code: str):
+    """Return actual source values and complete province-scoped public projections."""
+    try:
+        return provincial_briefing(province_code)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายจังหวัด") from error
 
 
 @app.get("/api/public/v1/map/provinces", tags=["Public data"])

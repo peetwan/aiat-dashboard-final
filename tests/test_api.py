@@ -26,8 +26,8 @@ def test_dashboard_and_endpoint_inventory():
     with TestClient(app) as client:
         page = client.get("/")
         assert page.status_code == 200
-        assert "Public Evidence Atlas" in page.text
-        assert "มองเห็นหลักฐาน" in page.text
+        assert "Provincial Evidence Map" in page.text
+        assert "เลือกจังหวัดเพื่อเปิดข้อมูล" in page.text
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
@@ -78,6 +78,37 @@ def test_public_projection_and_downloads_are_available():
         assert roi_et.status_code == 200
         assert roi_et.json()["province_name_th"] == "ร้อยเอ็ด"
         assert roi_et.json()["evidence_source_count"] == 5
+
+        songkhla = client.get("/api/public/v1/provinces/90")
+        assert songkhla.status_code == 200
+        songkhla_payload = songkhla.json()
+        assert songkhla_payload["province_name_th"] == "สงขลา"
+
+        briefing = client.get("/api/public/v1/provinces/90/briefing")
+        assert briefing.status_code == 200
+        songkhla_briefing = briefing.json()
+        assert songkhla_briefing["schema_version"] == "2.0.0"
+        assert songkhla_briefing["province"]["province_name_th"] == "สงขลา"
+        signals = {item["key"]: item for item in songkhla_briefing["executive_signals"]}
+        assert signals["house_price_income_ratio"]["display_value"] == "3.20"
+        assert signals["overcrowding_pct"]["display_value"] == "9.24%"
+        assert signals["housing_loan_pass_share"]["display_value"] == "56.59%"
+        assert signals["flood_risk_area_level_4_5"]["display_value"] == "26.84%"
+
+        projects = songkhla_briefing["sections"]["area_based"]["items"]
+        assert {item["project_name"] for item in projects} == {
+            "เครื่องแกงฮาลาลันตอยยีบัน",
+            "AHSAN Trustmark",
+        }
+        innovations = songkhla_briefing["sections"]["innovation"]["items"]
+        assert any(item["title"] == "ลวดลายจากชุดลูกปัดโนรา" for item in innovations)
+        assert any(item["trl_level"] == 7 for item in innovations)
+        assert songkhla_briefing["sections"]["sra"]["status"] == "source_has_no_record_for_province"
+
+        coverage = {item["source_id"]: item for item in songkhla_briefing["source_coverage"]}
+        assert coverage["f3_housing_portal"]["status"] == "available"
+        assert coverage["f2_rmutdb"]["status"] == "not_province_scoped"
+        assert "f2_wallet_all_realtime" not in coverage
 
         boundary = client.get("/api/public/v1/map/provinces").json()
         assert boundary["type"] == "FeatureCollection"

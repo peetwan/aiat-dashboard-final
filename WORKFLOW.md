@@ -10,11 +10,11 @@ source registry + endpoint inventory
        +---------+----------+
        |                    |
        v                    v
-public projection      operational ingest
+Gold projection        operational ingest
 (build-time, read-only) (scheduled/runtime)
        |                    |
        v                    v
-data/public/*          immutable raw + SHA-256
+data/public/*          immutable Bronze raw + SHA-256
 manifest + hashes            |
        |                     v
        |               privacy projection
@@ -33,6 +33,7 @@ Public dashboard เปิดได้แม้ยังไม่รัน opera
 
 ~~~powershell
 python tools/build_public_data.py
+python tools/build_provincial_briefings.py
 ~~~
 
 ตัว builder จะ:
@@ -40,9 +41,10 @@ python tools/build_public_data.py
 1. รับเฉพาะ 10 source ที่ owner อนุมัติให้เผยแพร่
 2. ตัด 2 wallet source ออกจาก public artifacts โดยอัตโนมัติ
 3. อ่าน merged evidence โดยไม่แก้ raw เดิม
-4. คง signal รายจังหวัดแยกตามความหมายเดิม ไม่รวมเป็นคะแนนใหม่
-5. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
-6. เขียน `data/public/manifest.json` พร้อม SHA-256 ของทุก output
+4. สร้าง Silver projection ที่คง field, หน่วย, เวลา และ URL ต้นทาง
+5. สร้าง Gold provincial briefing แยก “ข้อมูลสำคัญ” ออกจาก “ข้อมูลอื่นทั้งหมด” โดยไม่รวมเป็นคะแนนใหม่
+6. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
+7. เขียน manifest พร้อม SHA-256 ของ output และ Gold JSON ทั้ง 77 จังหวัด
 
 ไฟล์สำคัญ:
 
@@ -51,6 +53,7 @@ python tools/build_public_data.py
 - `source_inventory.csv` — source, endpoint และ provenance สำหรับประชาชน
 - `thailand_provinces.geojson` — polygon สำหรับ WebGL map
 - `cultural_points.geojson` — จุดข้อมูลวัฒนธรรมสำหรับ cluster layer
+- `provincial_briefings/{code}.json` — ค่าจริง รายการจริง source coverage และ provenance รายจังหวัด
 
 ## 2. Public API
 
@@ -60,6 +63,7 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 - `/sources`
 - `/provinces`
 - `/provinces/{province_code}`
+- `/provinces/{province_code}/briefing`
 - `/map/provinces`
 - `/map/cultural-points`
 - `/catalog`
@@ -76,11 +80,11 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 6. privacy projection ลบ email, phone, address, token, cookie และ credential-shaped fields
 7. database เก็บ source ID, record ID, hash, fetched time และ quality status เพื่อย้อนกลับได้
 
-## 4. Budget Lab semantics
+## 4. Provincial panel semantics
 
-Budget Lab ไม่ใช้ expected record count เป็นตัวแทนความต้องการงบ ผู้ใช้ต้องเลือกจังหวัด กรอกงบ และกำหนดน้ำหนักเอง ระบบจึงคำนวณสัดส่วนให้รวมเท่ากับงบที่กรอก พร้อมข้อความกำกับว่าเป็น **user-defined scenario** เท่านั้น
+เมื่อผู้ใช้คลิกจังหวัด frontend จะเรียก `/api/public/v1/provinces/{code}/briefing` ซึ่งเป็น Gold projection ที่ materialize จาก Silver data ล่วงหน้า จึงไม่ต้องยิงหลาย API ระหว่างเปิดหน้าและยังย้อนกลับไปยัง URL ต้นทางได้ทุกส่วน
 
-ก่อนนำไปใช้เป็นข้อเสนอนโยบาย ต้องเพิ่มสูตรที่มี owner, version, วันที่อนุมัติ, ตัวแปร, unit และข้อจำกัดอย่างชัดเจน
+ชั้นบนแสดง actual executive signals; ชั้นถัดมาแสดงโครงการและทะเบียนจริง; ชั้น “ข้อมูลอื่นทั้งหมด” คืนทุก resource row ที่ผูกจังหวัดได้ ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
 
 ## 5. Source routing
 
@@ -93,6 +97,6 @@ Budget Lab ไม่ใช้ expected record count เป็นตัวแท�
 
 1. อัปเดต source ตาม registry และเก็บ raw run ใหม่
 2. รวม/validate ที่ data layer หลัก
-3. รัน `tools/build_public_data.py`
-4. ตรวจ diff ของ `data/public/manifest.json` และจำนวน records
+3. รัน `tools/build_public_data.py` และ `tools/build_provincial_briefings.py`
+4. ตรวจ diff ของ manifest, Gold values และ provenance URL
 5. รัน test, เปิดดู desktop/mobile แล้วจึง deploy

@@ -3,195 +3,125 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="AIAT Public Evidence Atlas แผนที่ข้อมูลสาธารณะสำหรับสำรวจหลักฐานรายพื้นที่ ทดลองฉากทัศน์งบประมาณ และดาวน์โหลดข้อมูลพร้อม provenance" />
-    <meta name="theme-color" content="#07110f" />
-    <title>AIAT Public Evidence Atlas</title>
+    <meta name="description" content="แผนที่ข้อมูลสาธารณะรายจังหวัดสำหรับผู้บริหาร สำรวจตัวเลข หลักฐาน และแหล่งข้อมูลของแต่ละพื้นที่" />
+    <meta name="theme-color" content="#06110e" />
+    <title>AIAT Provincial Evidence Map</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css" />
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#evidenceWorkspace">ข้ามไปยังข้อมูล</a>
+    <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
 
-    <header class="site-header" id="top">
-      <a class="brand" href="#top" aria-label="AIAT Public Evidence Atlas หน้าแรก">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>AIAT</strong><small>Public Evidence Atlas</small></span>
-      </a>
-      <nav class="site-nav" aria-label="เมนูหลัก">
-        <a class="active" href="#atlas">แผนที่</a>
-        <a href="#evidenceWorkspace">เทียบพื้นที่</a>
-        <a href="#budgetLab">จำลองงบ</a>
-        <a href="#openData">ข้อมูลเปิด</a>
-      </nav>
-      <div class="header-actions">
-        <span class="data-state"><i></i> Public · Candidate</span>
-        <a class="header-cta" href="/docs" target="_blank">API docs <span>↗</span></a>
+    <main class="atlas-shell">
+      <div id="provinceMap" class="province-map" role="application" aria-label="แผนที่สามมิติข้อมูลสาธารณะรายจังหวัดของประเทศไทย"></div>
+      <div class="map-texture" aria-hidden="true"></div>
+
+      <header class="map-header">
+        <a class="brand" href="/" aria-label="AIAT Provincial Evidence Map หน้าแรก">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span><strong>AIAT</strong><small>Provincial Evidence Map</small></span>
+        </a>
+
+        <label class="province-picker" for="provinceSelect">
+          <span class="picker-dot" aria-hidden="true"></span>
+          <span class="picker-copy"><small>เลือกพื้นที่</small><strong>คลิกจังหวัด หรือค้นหาที่นี่</strong></span>
+          <select id="provinceSelect" aria-label="เลือกจังหวัด">
+            <option value="">เลือกจังหวัด</option>
+          </select>
+          <span class="picker-chevron" aria-hidden="true">⌄</span>
+        </label>
+
+        <div class="header-meta">
+          <span class="live-state"><i></i> Public API</span>
+          <a href="/docs" target="_blank" rel="noreferrer">API <span>↗</span></a>
+        </div>
+      </header>
+
+      <div class="map-prompt" id="mapPrompt" aria-live="polite">
+        <span class="prompt-pointer" aria-hidden="true"></span>
+        <div><strong>เลือกจังหวัดเพื่อเปิดข้อมูลจริง</strong><small>ตัวชี้วัด โครงการ นวัตกรรม และหลักฐานจาก URL ต้นทาง</small></div>
       </div>
-    </header>
 
-    <main>
-      <section class="atlas-hero" id="atlas" aria-labelledby="heroTitle">
-        <div id="map" class="webgl-map" role="application" aria-label="แผนที่หลักฐานสาธารณะรายจังหวัดของประเทศไทย"></div>
-        <div class="map-noise" aria-hidden="true"></div>
+      <div class="map-actions" aria-label="เครื่องมือแผนที่">
+        <button id="resetMap" type="button" title="กลับไปมุมมองทั้งประเทศ" aria-label="กลับไปมุมมองทั้งประเทศ">⌂</button>
+        <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
+      </div>
 
-        <div class="hero-copy">
-          <p class="eyebrow"><span></span> PUBLIC EVIDENCE ATLAS · THAILAND</p>
-          <h1 id="heroTitle">มองเห็นหลักฐาน<br />ก่อนตัดสินใจเรื่องงบ</h1>
-          <p class="hero-lead">สำรวจความเป็นอยู่ นวัตกรรม ที่อยู่อาศัย และทุนวัฒนธรรมจากข้อมูลสาธารณะ พร้อมเปิดดูที่มาได้ทุกจุด</p>
-          <div class="hero-actions">
-            <a class="button primary" href="#evidenceWorkspace">เริ่มเทียบพื้นที่ <span>↓</span></a>
-            <a class="button ghost" href="/downloads/province_evidence.csv">ดาวน์โหลด CSV <span>↗</span></a>
-          </div>
-          <div class="hero-stats" id="heroStats" aria-label="สรุปข้อมูลสาธารณะ">
-            <article><strong>—</strong><span>แหล่งสาธารณะ</span></article>
-            <article><strong>—</strong><span>จังหวัดมีหลักฐาน</span></article>
-            <article><strong>—</strong><span>จุดบน WebGL</span></article>
-          </div>
+      <aside class="province-panel" id="provincePanel" aria-hidden="true" aria-live="polite">
+        <div class="panel-loading" id="panelLoading" hidden>
+          <span></span><span></span><span></span><span></span>
         </div>
 
-        <aside class="metric-dock glass" aria-label="เลือกชั้นข้อมูลบนแผนที่">
-          <div class="dock-heading">
-            <div><span>MAP LAYER</span><strong id="activeMetricLabel">ความครอบคลุมหลักฐาน</strong></div>
-            <button id="resetMap" type="button" aria-label="กลับไปมุมมองทั้งประเทศ">↺</button>
-          </div>
-          <div class="metric-options" id="metricOptions">
-            <button class="active" type="button" data-metric="evidence_source_count"><i class="mint"></i>ภาพรวม</button>
-            <button type="button" data-metric="sra_overall_score"><i class="coral"></i>ความเป็นอยู่</button>
-            <button type="button" data-metric="innovation_records"><i class="violet"></i>นวัตกรรม</button>
-            <button type="button" data-metric="housing_observations"><i class="sky"></i>ที่อยู่อาศัย</button>
-            <button type="button" data-metric="cultural_records"><i class="amber"></i>วัฒนธรรม</button>
-          </div>
-          <label class="point-toggle"><input id="pointToggle" type="checkbox" checked /><span></span>แสดงจุดวัฒนธรรม <b id="pointCount">—</b></label>
-          <p id="metricCaveat">ความสูงแสดงจำนวน source ที่มีหลักฐานในจังหวัด ไม่ใช่ระดับความต้องการงบ</p>
-        </aside>
+        <div class="panel-content" id="panelContent" hidden>
+          <header class="panel-head">
+            <div>
+              <span class="api-chip"><i></i> Gold Provincial API</span>
+              <p id="provinceMeta">จังหวัด</p>
+            </div>
+            <button class="panel-close" id="closePanel" type="button" aria-label="ปิดข้อมูลจังหวัด">×</button>
+          </header>
 
-        <aside class="province-peek glass" id="provincePeek" aria-live="polite">
-          <button class="peek-close" id="closePeek" type="button" aria-label="ปิดรายละเอียด">×</button>
-          <p class="eyebrow"><span></span> PROVINCE EVIDENCE</p>
-          <h2 id="peekProvince">เลือกจังหวัดบนแผนที่</h2>
-          <p id="peekRegion">คลิกพื้นที่เพื่อดูสัญญาณที่มีอยู่</p>
-          <div class="peek-score"><strong id="peekCoverage">—</strong><span>จาก 5 กลุ่มหลักฐานเชิงพื้นที่</span></div>
-          <div class="peek-signals" id="peekSignals"></div>
-          <button class="button primary wide" id="addProvince" type="button" disabled>เพิ่มในฉากทัศน์งบ <span>＋</span></button>
-        </aside>
+          <section class="province-title-block">
+            <div>
+              <h1 id="provinceName" tabindex="-1">จังหวัด</h1>
+              <p id="provinceEnglish"></p>
+            </div>
+            <div class="coverage-ring" id="coverageRing"><strong>LIVE</strong><span>public data</span></div>
+          </section>
 
-        <div class="map-legend glass"><span>น้อย</span><i></i><i></i><i></i><i></i><i></i><span>มาก</span><b>ความสูงและสีเปรียบเทียบภายใน layer เดียว</b></div>
+          <section class="panel-section decision-section">
+            <div class="section-heading"><span>ข้อมูลสำคัญต่อการตัดสินใจ</span><small>ค่าจริงจาก Gold projection</small></div>
+            <div class="decision-grid" id="executiveSignals"></div>
+          </section>
 
-        <div class="candidate-strip">
-          <span>!</span>
-          <p><strong>Candidate data</strong> — ใช้สำรวจหลักฐานและตั้งคำถาม ไม่ใช่ KPI ที่รับรองหรือคำแนะนำจัดสรรงบอัตโนมัติ</p>
-          <a href="#methodology">อ่านวิธีใช้</a>
+          <section class="panel-section" id="areaSection" hidden>
+            <div class="section-heading"><span>โครงการพัฒนาระดับพื้นที่</span><small>ชื่อโครงการและหน่วยดำเนินงานจริง</small></div>
+            <div class="record-list" id="areaProjects"></div>
+          </section>
+
+          <section class="panel-section" id="innovationSection" hidden>
+            <div class="section-heading"><span>นวัตกรรมในพื้นที่</span><small>TRL เงินทุน กลุ่มเป้าหมาย และจุดเด่น</small></div>
+            <div class="record-list" id="innovationItems"></div>
+          </section>
+
+          <section class="panel-section" id="cultureSection" hidden>
+            <div class="section-heading"><span>ทุนวัฒนธรรมที่ควรติดตาม</span><small>คง risk status code ตามต้นทาง</small></div>
+            <div class="record-list" id="cultureItems"></div>
+          </section>
+
+          <section class="panel-section all-data-section">
+            <div class="section-heading"><span>ข้อมูลอื่นทั้งหมด</span><small>เปิดดูทุก resource และทุกแถวผ่าน API</small></div>
+            <div class="all-data-list" id="allDataSections"></div>
+          </section>
+
+          <section class="panel-section source-section">
+            <div class="section-heading"><span>ความครอบคลุม 10 URL</span><small>แยก API, snapshot และแหล่งที่ไม่ผูกจังหวัด</small></div>
+            <div class="province-sources" id="provinceSources"></div>
+          </section>
+
+          <footer class="panel-footer">
+            <div><span class="candidate-dot"></span><p><strong>Candidate data</strong><small id="panelUpdated">กำลังตรวจสอบวันที่</small></p></div>
+            <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">เปิดข้อมูลครบ JSON <span>↗</span></a>
+          </footer>
         </div>
-      </section>
 
-      <section class="evidence-section" id="evidenceWorkspace">
-        <div class="section-shell">
-          <div class="section-intro split-intro">
-            <div><p class="eyebrow dark"><span></span> DECISION WORKSPACE</p><h2>เทียบพื้นที่ด้วยสัญญาณที่ตรวจกลับได้</h2></div>
-            <p>เรียงจังหวัดตามชนิดข้อมูลที่ต้องการ แล้วเปิดดูจำนวนแถว ความครอบคลุม และสถานะความหมาย โดยไม่รวมคนละหน่วยให้กลายเป็น “คะแนนวิเศษ” ตัวเดียว</p>
-          </div>
-
-          <div class="workspace-grid">
-            <section class="comparison-panel">
-              <div class="panel-toolbar">
-                <div class="segmented" id="rankMetric" aria-label="เลือกเกณฑ์เรียงลำดับ">
-                  <button class="active" type="button" data-rank="evidence_source_count">หลักฐานครบ</button>
-                  <button type="button" data-rank="sra_overall_score">SRA score</button>
-                  <button type="button" data-rank="innovation_records">นวัตกรรม</button>
-                  <button type="button" data-rank="housing_observations">ที่อยู่อาศัย</button>
-                </div>
-                <label class="search-box"><span>⌕</span><input id="provinceSearch" type="search" placeholder="ค้นหาจังหวัด" /></label>
-              </div>
-              <div class="comparison-head"><span>พื้นที่</span><span>หลักฐาน</span><span>ค่าตาม layer</span><span></span></div>
-              <div class="province-ranking" id="provinceRanking"></div>
-              <div class="panel-footer"><span id="rankingCount">— จังหวัด</span><span>ค่าทุกตัวติดป้ายหน่วยและสถานะใน API</span></div>
-            </section>
-
-            <aside class="evidence-explainer">
-              <p class="eyebrow dark"><span></span> HOW TO READ</p>
-              <h3>ข้อมูลบอกอะไร — และยังบอกอะไรไม่ได้</h3>
-              <div class="explain-list">
-                <article><span>01</span><div><strong>Coverage ≠ Need</strong><p>จังหวัดที่มีหลาย source หมายถึงตรวจสอบต่อได้มาก ไม่ได้แปลว่าควรได้งบมากกว่า</p></div></article>
-                <article><span>02</span><div><strong>Record ≠ Person</strong><p>แถว Area-Based คือหน่วยเข้าร่วมโครงการ ส่วน Housing คือ observation ตาม resource</p></div></article>
-                <article><span>03</span><div><strong>Source score</strong><p>SRA overall ใช้หน่วย <code>source_score</code> และยังมีนิยาม provisional จากต้นทาง</p></div></article>
-              </div>
-              <div class="evidence-note"><span>OPEN BY DESIGN</span><p>ดาวน์โหลดตารางเดียวกับที่หน้าเว็บใช้ หรือเรียก JSON API เพื่อตรวจสูตรและ provenance ได้ทันที</p><a href="/docs" target="_blank">เปิด API explorer ↗</a></div>
-            </aside>
-          </div>
+        <div class="panel-error" id="panelError" hidden>
+          <strong>โหลดข้อมูลจังหวัดไม่สำเร็จ</strong>
+          <p>ลองเลือกจังหวัดอีกครั้ง</p>
+          <button id="retryProvince" type="button">ลองใหม่</button>
         </div>
-      </section>
+      </aside>
 
-      <section class="budget-section" id="budgetLab">
-        <div class="section-shell">
-          <div class="section-intro budget-intro">
-            <div><p class="eyebrow"><span></span> TRANSPARENT BUDGET LAB</p><h2>สร้างฉากทัศน์งบด้วยมือคุณเอง</h2></div>
-            <p>เลือกจังหวัดจากแผนที่หรือตาราง กำหนดงบและสัดส่วน แล้วส่งออกภาพรวม ระบบไม่จัดอันดับหรือแนะนำแทนผู้ตัดสินใจ</p>
-          </div>
+      <div class="map-fallback" id="mapFallback" hidden>
+        <strong>ไม่สามารถเปิดแผนที่ WebGL ได้</strong>
+        <p>ยังเลือกจังหวัดจากช่องค้นหาด้านบนได้</p>
+      </div>
 
-          <div class="budget-grid">
-            <section class="budget-control glass-dark">
-              <div class="budget-input-row"><label for="budgetTotal">วงเงินจำลอง</label><div><input id="budgetTotal" type="number" min="1" max="1000000" step="10" value="100" /><span>ล้านบาท</span></div></div>
-              <div class="scenario-heading"><div><strong>พื้นที่ในฉากทัศน์</strong><span id="scenarioCount">0 พื้นที่</span></div><button id="clearScenario" type="button">ล้างทั้งหมด</button></div>
-              <div class="scenario-list" id="scenarioList"><div class="empty-scenario"><span>＋</span><strong>ยังไม่ได้เลือกพื้นที่</strong><p>คลิกจังหวัดบนแผนที่หรือปุ่ม “เพิ่ม” ในตารางด้านบน</p></div></div>
-              <p class="simulator-disclaimer">* ตัวเลขเริ่มต้น 100 ล้านบาทเป็นค่า UI ตัวอย่าง ไม่ใช่งบจริงและไม่ใช่คำแนะนำ</p>
-            </section>
-
-            <section class="budget-output">
-              <div class="output-topline"><div><span>ALLOCATION PREVIEW</span><strong id="allocatedTotal">0 ล้านบาท</strong></div><button id="copyScenario" type="button">คัดลอกสรุป</button></div>
-              <div class="allocation-chart" id="allocationChart"><div class="chart-empty"><span></span><p>เพิ่มพื้นที่อย่างน้อย 1 จังหวัดเพื่อเริ่มจำลอง</p></div></div>
-              <div class="output-summary">
-                <article><span>วงเงินรวม</span><strong id="summaryBudget">100.0 ลบ.</strong></article>
-                <article><span>จัดสรรแล้ว</span><strong id="summaryAllocated">0%</strong></article>
-                <article><span>สถานะ</span><strong>Simulation only</strong></article>
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
-
-      <section class="open-data-section" id="openData">
-        <div class="section-shell">
-          <div class="section-intro split-intro">
-            <div><p class="eyebrow dark"><span></span> PUBLIC DATA COMMONS</p><h2>ข้อมูลที่ประชาชนเปิดดูและนำไปใช้ต่อได้</h2></div>
-            <p>หน้าเว็บ, API และไฟล์ดาวน์โหลดใช้ public projection ชุดเดียวกัน พร้อม hash และเส้นทางกลับไปยัง URL ต้นทาง</p>
-          </div>
-
-          <div class="download-grid">
-            <a class="download-card featured" href="/downloads/province_evidence.csv"><span class="file-type">CSV</span><div><strong>Province evidence</strong><p>77 จังหวัด · metric ที่เผยแพร่ได้ · UTF-8</p></div><b>↓</b></a>
-            <a class="download-card" href="/downloads/cultural_points.geojson"><span class="file-type">GEO</span><div><strong>Cultural points</strong><p id="downloadPointCopy">จุดวัฒนธรรมพร้อมพิกัด</p></div><b>↓</b></a>
-            <a class="download-card" href="/downloads/source_inventory.csv"><span class="file-type">CSV</span><div><strong>Source inventory</strong><p>10 public sources · URL · readiness</p></div><b>↓</b></a>
-            <a class="download-card" href="/downloads/manifest.json"><span class="file-type">SHA</span><div><strong>Build manifest</strong><p>Input/output path · bytes · SHA-256</p></div><b>↓</b></a>
-          </div>
-
-          <div class="source-browser">
-            <div class="source-browser-head"><div><span>PUBLIC SOURCE REGISTRY</span><strong>แหล่งข้อมูลที่ใช้ใน public projection</strong></div><span id="sourceTotal">— sources</span></div>
-            <div class="source-grid" id="sourceGrid"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="method-section" id="methodology">
-        <div class="section-shell method-grid">
-          <div><p class="eyebrow dark"><span></span> METHODOLOGY</p><h2>เส้นแบ่งที่ทำให้ข้อมูลสาธารณะยังน่าเชื่อถือ</h2></div>
-          <div class="method-steps">
-            <article><span>1</span><div><strong>Source first</strong><p>เริ่มจาก registry และ URL รัฐบาล/มหาวิทยาลัย พร้อมบันทึกเวลาและ hash</p></div></article>
-            <article><span>2</span><div><strong>Public projection</strong><p>เผยแพร่เฉพาะ aggregate และทะเบียนสาธารณะ ตัด 2 wallet sources ออกจาก cloud</p></div></article>
-            <article><span>3</span><div><strong>Semantic labels</strong><p>ไม่เรียก candidate ว่า KPI และไม่รวมหน่วยต่างกันเป็นคะแนนนโยบาย</p></div></article>
-            <article><span>4</span><div><strong>Open verification</strong><p>ทุก visual มี JSON/CSV คู่กัน และมี manifest สำหรับตรวจไฟล์ย้อนหลัง</p></div></article>
-          </div>
-        </div>
-      </section>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </main>
 
-    <footer class="site-footer">
-      <div class="brand footer-brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>AIAT</strong><small>Public Evidence Atlas</small></span></div>
-      <p>Built for transparent public-data exploration · Candidate data · Updated <span id="footerUpdated">—</span></p>
-      <div><a href="https://github.com/peetwan/aiat-dashboard-final" target="_blank" rel="noreferrer">GitHub ↗</a><a href="/docs" target="_blank">API ↗</a><a href="#top">กลับด้านบน ↑</a></div>
-    </footer>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="/static/app.js" defer></script>
   </body>

@@ -29,3 +29,13 @@ def province_boundaries() -> dict[str, Any]:
 
 def cultural_points() -> dict[str, Any]:
     return load_public_file("cultural_points.geojson")
+
+
+@lru_cache(maxsize=77)
+def provincial_briefing(province_code: str) -> dict[str, Any]:
+    code = province_code.strip().zfill(2)
+    path = (PUBLIC_DATA_ROOT / "provincial_briefings" / f"{code}.json").resolve()
+    briefing_root = (PUBLIC_DATA_ROOT / "provincial_briefings").resolve()
+    if path.parent != briefing_root or not path.exists():
+        raise FileNotFoundError(code)
+    return json.loads(path.read_text(encoding="utf-8"))
