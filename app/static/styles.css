@@ -1833,3 +1833,11 @@
     .province-panel { border-radius: 18px; }
   }
 }
+
+/* The shell tracks the dynamic viewport so mobile URL bars never push the
+   map taller than the visible screen. */
+@layer lightmap {
+  @supports (height: 100dvh) {
+    .atlas-shell { height: 100dvh; }
+  }
+}

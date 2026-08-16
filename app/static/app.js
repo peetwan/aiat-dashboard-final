@@ -377,6 +377,39 @@ function selectRegion(name, moveMap = true) {
   }
 }
 
+function countryPadding() {
+  return window.matchMedia("(max-width: 720px)").matches
+    ? { top: 76, right: 12, bottom: 92, left: 12 }
+    : { top: 84, right: 48, bottom: 76, left: 48 };
+}
+
+function lockCountryView(animate = false) {
+  // Fit the whole country to the actual viewport first, THEN derive the
+  // zoom floor and pan bounds from that view. A hardcoded maxBounds fought
+  // wide screens and clamped the zoom so the map never fully fit.
+  const map = state.map;
+  if (!map) return;
+  map.setMaxBounds(null);
+  map.setMinZoom(2);
+  const camera = map.cameraForBounds(THAILAND_BOUNDS, { padding: countryPadding() });
+  if (!camera) return;
+  const lock = () => {
+    map.setMinZoom(Math.max(2, map.getZoom() - 0.05));
+    const view = map.getBounds();
+    map.setMaxBounds([
+      [view.getWest() - 0.4, view.getSouth() - 0.4],
+      [view.getEast() + 0.4, view.getNorth() + 0.4],
+    ]);
+  };
+  if (animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    map.once("moveend", lock);
+    map.easeTo({ ...camera, pitch: 0, bearing: 0, duration: 700 });
+  } else {
+    map.jumpTo({ ...camera, pitch: 0, bearing: 0 });
+    lock();
+  }
+}
+
 function backToCountry() {
   state.selectedRegion = null;
   setHoveredRegion(null);
@@ -385,16 +418,7 @@ function backToCountry() {
   setPrompt("เลือกภาค แล้วเจาะลงรายจังหวัด", "ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง");
   applyRegionFocus();
   updateLabelVisibility();
-  if (state.mapLoaded) {
-    state.map.fitBounds(THAILAND_BOUNDS, {
-      padding: window.matchMedia("(max-width: 720px)").matches
-        ? { top: 84, right: 16, bottom: 96, left: 16 }
-        : { top: 96, right: 60, bottom: 80, left: 60 },
-      pitch: 0,
-      bearing: 0,
-      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
-    });
-  }
+  if (state.mapLoaded) lockCountryView(true);
 }
 
 function addProvinceLabels() {
@@ -1129,12 +1153,11 @@ function initMap() {
     bounds: THAILAND_BOUNDS,
     fitBoundsOptions: {
       padding: window.matchMedia("(max-width: 720px)").matches
-        ? { top: 84, right: 16, bottom: 96, left: 16 }
-        : { top: 96, right: 60, bottom: 80, left: 60 },
+        ? { top: 76, right: 12, bottom: 92, left: 12 }
+        : { top: 84, right: 48, bottom: 76, left: 48 },
     },
-    minZoom: 3.6,
+    minZoom: 2,
     maxZoom: 13,
-    maxBounds: [[93.5, 3.2], [109.5, 22.5]],
     pitch: 0,
     bearing: 0,
     pitchWithRotate: false,
@@ -1330,23 +1353,18 @@ function initMap() {
     addProvinceLabels();
     addRegionMarkers();
     applyRegionFocus();
-    // Lock the first view: the whole country always fits the screen and the
-    // user cannot zoom out past it.
-    map.setMinZoom(Math.max(3.2, map.getZoom() - 0.15));
+    lockCountryView();
     if (state.selectedCode) {
       map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: true });
       fitProvince(provinceByCode(state.selectedCode));
     }
   });
 
-  window.addEventListener("resize", () => {
+  // Container resizes (window resize, mobile URL bar show/hide) re-fit the
+  // locked country view so the whole map always matches the screen.
+  map.on("resize", () => {
     if (!state.mapLoaded || state.selectedRegion || state.selectedCode) return;
-    map.fitBounds(THAILAND_BOUNDS, {
-      padding: window.matchMedia("(max-width: 720px)").matches
-        ? { top: 84, right: 16, bottom: 96, left: 16 }
-        : { top: 96, right: 60, bottom: 80, left: 60 },
-      duration: 0,
-    });
+    lockCountryView();
   });
 
   map.on("error", (event) => {
