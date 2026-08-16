@@ -34,6 +34,7 @@ Public dashboard เปิดได้แม้ยังไม่รัน opera
 ~~~powershell
 python tools/build_public_data.py
 python tools/build_provincial_briefings.py
+python tools/build_executive_summaries.py
 ~~~
 
 ตัว builder จะ:
@@ -42,9 +43,10 @@ python tools/build_provincial_briefings.py
 2. ตัด 2 wallet source ออกจาก public artifacts โดยอัตโนมัติ
 3. อ่าน merged evidence โดยไม่แก้ raw เดิม
 4. สร้าง Silver projection ที่คง field, หน่วย, เวลา และ URL ต้นทาง
-5. สร้าง Gold provincial briefing แยก “ข้อมูลสำคัญ” ออกจาก “ข้อมูลอื่นทั้งหมด” โดยไม่รวมเป็นคะแนนใหม่
-6. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
-7. เขียน manifest พร้อม SHA-256 ของ output และ Gold JSON ทั้ง 77 จังหวัด
+5. สร้าง source-shaped provincial briefing ที่คง record และ provenance ฉบับเต็ม
+6. สร้าง executive summary โดย clean, group และเปรียบเทียบเฉพาะ metric เดียวกัน ไม่สร้างคะแนนนโยบายใหม่
+7. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
+8. เขียน manifest พร้อม SHA-256 ของ output ทั้ง 77 จังหวัด
 
 ไฟล์สำคัญ:
 
@@ -54,6 +56,7 @@ python tools/build_provincial_briefings.py
 - `thailand_provinces.geojson` — polygon สำหรับ WebGL map
 - `cultural_points.geojson` — จุดข้อมูลวัฒนธรรมสำหรับ cluster layer
 - `provincial_briefings/{code}.json` — ค่าจริง รายการจริง source coverage และ provenance รายจังหวัด
+- `executive_summaries/{code}.json` — สรุปรายมิติที่ clean แล้ว ไม่มี raw rows และพร้อมแสดงผลทันที
 
 ## 2. Public API
 
@@ -64,6 +67,7 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 - `/provinces`
 - `/provinces/{province_code}`
 - `/provinces/{province_code}/briefing`
+- `/provinces/{province_code}/summary`
 - `/map/provinces`
 - `/map/cultural-points`
 - `/catalog`
@@ -82,9 +86,9 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 
 ## 4. Provincial panel semantics
 
-เมื่อผู้ใช้คลิกจังหวัด frontend จะเรียก `/api/public/v1/provinces/{code}/briefing` ซึ่งเป็น Gold projection ที่ materialize จาก Silver data ล่วงหน้า จึงไม่ต้องยิงหลาย API ระหว่างเปิดหน้าและยังย้อนกลับไปยัง URL ต้นทางได้ทุกส่วน
+เมื่อผู้ใช้คลิกจังหวัด frontend จะเรียก `/api/public/v1/provinces/{code}/summary` ซึ่งเป็น serving projection ขนาดเล็กที่สรุปและเปรียบเทียบไว้แล้ว ส่วน `/briefing` ฉบับเต็มจะโหลดเมื่อเปิดแท็บโครงการเท่านั้น
 
-ชั้นบนแสดง actual executive signals; ชั้นถัดมาแสดงโครงการและทะเบียนจริง; ชั้น “ข้อมูลอื่นทั้งหมด” คืนทุก resource row ที่ผูกจังหวัดได้ ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
+ชั้นรายมิติแสดงทุกกลุ่มพร้อมอ่านโดยไม่ใช้ dropdown หรือ raw cells ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
 
 ## 5. Source routing
 
@@ -97,6 +101,6 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 
 1. อัปเดต source ตาม registry และเก็บ raw run ใหม่
 2. รวม/validate ที่ data layer หลัก
-3. รัน `tools/build_public_data.py` และ `tools/build_provincial_briefings.py`
+3. รัน `tools/build_public_data.py`, `tools/build_provincial_briefings.py` และ `tools/build_executive_summaries.py`
 4. ตรวจ diff ของ manifest, Gold values และ provenance URL
 5. รัน test, เปิดดู desktop/mobile แล้วจึง deploy

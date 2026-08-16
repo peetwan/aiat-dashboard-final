@@ -12,7 +12,8 @@ Public Executive Dashboard แบบ map-first สำหรับเปิดข
 - ฟอนต์ Anuphan และ responsive bottom sheet สำหรับมือถือ
 - “ข้อมูลสำคัญต่อการตัดสินใจ” ใช้ค่าจริง เช่น house-price-to-income, overcrowding, การผ่านสินเชื่อ และพื้นที่เสี่ยงน้ำท่วม
 - รายการชื่อจริงจาก Area-Based, AppTech และ Cultural Map พร้อมรายละเอียดและ URL ต้นทาง
-- “ข้อมูลรายมิติ” แปล CKAN fields เป็นภาษาที่อ่านง่าย พร้อม mini chart และตัวเลือก drill-down; Gold JSON ฉบับเต็มยังเปิดตรวจได้
+- “รายมิติ” ใช้ serving pipeline ที่ clean และ join ระดับจังหวัดแล้ว แสดง comparison, distribution และรายการสำคัญทันทีโดยไม่ใช้ dropdown หรือ raw cells
+- โหลด executive summary ขนาดเล็กก่อน และโหลด Gold JSON ฉบับเต็มเฉพาะเมื่อเปิดดูรายการโครงการ
 - สถานะครบทั้ง 10 URL ว่า `มีข้อมูล`, `ไม่มีรายการจังหวัดนี้` หรือ `ไม่ผูกจังหวัด`
 - จุดวัฒนธรรมสาธารณะ 5,258 จุดแบบเปิดปิดได้
 - Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256

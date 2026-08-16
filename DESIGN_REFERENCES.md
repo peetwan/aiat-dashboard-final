@@ -35,5 +35,6 @@
 5. Panel แบ่งเป็น 4 tabs: ภาพรวม → โครงการและพื้นที่ → ข้อมูลรายมิติ → แหล่งข้อมูล เพื่อไม่ให้เป็นหน้า scroll ยาวต่อกัน
 6. แหล่งข้อมูลครบ 10 URL แยก API-first กับ snapshot พร้อม availability, URL และ quality status
 7. สีและความสูงบนแผนที่ใช้ `evidence_source_count` เท่านั้น เพื่อสื่อ “ความครอบคลุมหลักฐาน” ไม่ใช้จำนวน record เป็น KPI และมี legend อธิบายตรงหน้า
-8. ข้อมูล CKAN ถูกแปล field เป็นคำไทย แบ่งหมวด แสดง mini chart และมีตัวเลือก drill-down; raw key คงอยู่ใน Gold JSON เพื่อการตรวจสอบเท่านั้น
+8. ข้อมูล CKAN ถูก clean และสรุปใน serving pipeline ก่อนถึง browser; หน้ารายมิติแสดง comparison และ distribution ทันทีโดยไม่มี dropdown หรือ raw cell
 9. ใช้ Anuphan เป็นฟอนต์หลัก พร้อมขนาดตัวอักษรและ touch target ที่อ่านง่ายทั้ง desktop/mobile
+10. ลดข้อความกำกับ ไอคอนลูกศร และตัวเลขลำดับที่ไม่ช่วยการตัดสินใจ; ใช้ contrast และ spacing แยกลำดับข้อมูลแทน

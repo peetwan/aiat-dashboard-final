@@ -31,7 +31,9 @@ def test_dashboard_and_endpoint_inventory():
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
         assert 'data-panel-tab="dimensions"' in page.text
-        assert "ข้อมูลรายมิติ" in page.text
+        assert "ภาพสถานการณ์รายมิติ" in page.text
+        assert "สำรวจรายละเอียดตามมิติ" not in page.text
+        assert "↗" not in page.text
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
@@ -113,6 +115,23 @@ def test_public_projection_and_downloads_are_available():
         assert coverage["f3_housing_portal"]["status"] == "available"
         assert coverage["f2_rmutdb"]["status"] == "not_province_scoped"
         assert "f2_wallet_all_realtime" not in coverage
+
+        summary_response = client.get("/api/public/v1/provinces/90/summary")
+        assert summary_response.status_code == 200
+        assert len(summary_response.content) < 30_000
+        executive = summary_response.json()
+        assert executive["schema_version"] == "1.0.0"
+        assert executive["province"]["province_name_th"] == "สงขลา"
+        assert executive["coverage"]["available_source_count"] == 4
+        dimensions = {item["key"]: item for item in executive["dimensions"]}
+        assert set(dimensions) == {"housing", "risk", "development", "culture"}
+        assert any(metric["key"] == "house_price_income_ratio" for metric in dimensions["housing"]["metrics"])
+        assert any(metric["comparison"] == "above" for metric in dimensions["housing"]["metrics"])
+        assert executive["methodology"]["raw_rows_included"] is False
+        assert "sections" not in executive
+        assert "f2_wallet_all_realtime" not in {
+            item["source_id"] for item in executive["source_coverage"]
+        }
 
         boundary = client.get("/api/public/v1/map/provinces").json()
         assert boundary["type"] == "FeatureCollection"

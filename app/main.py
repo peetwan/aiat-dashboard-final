@@ -15,6 +15,7 @@ from app.models import DashboardRecord, Endpoint, IngestionRun, Source
 from app.public_data import (
     PUBLIC_DATA_ROOT,
     cultural_points,
+    executive_summary,
     province_boundaries,
     provincial_briefing,
     public_catalog,
@@ -126,6 +127,15 @@ def public_data_provincial_briefing(province_code: str):
         return provincial_briefing(province_code)
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายจังหวัด") from error
+
+
+@app.get("/api/public/v1/provinces/{province_code}/summary", tags=["Public data"])
+def public_data_executive_summary(province_code: str):
+    """Return a compact, cleaned and benchmarked province-level executive view."""
+    try:
+        return executive_summary(province_code)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายมิติของจังหวัด") from error
 
 
 @app.get("/api/public/v1/map/provinces", tags=["Public data"])

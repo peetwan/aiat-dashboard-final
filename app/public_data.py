@@ -39,3 +39,13 @@ def provincial_briefing(province_code: str) -> dict[str, Any]:
     if path.parent != briefing_root or not path.exists():
         raise FileNotFoundError(code)
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=77)
+def executive_summary(province_code: str) -> dict[str, Any]:
+    code = province_code.strip().zfill(2)
+    path = (PUBLIC_DATA_ROOT / "executive_summaries" / f"{code}.json").resolve()
+    summary_root = (PUBLIC_DATA_ROOT / "executive_summaries").resolve()
+    if path.parent != summary_root or not path.exists():
+        raise FileNotFoundError(code)
+    return json.loads(path.read_text(encoding="utf-8"))

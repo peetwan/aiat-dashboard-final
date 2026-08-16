@@ -38,7 +38,7 @@
 
         <div class="header-meta">
           <span class="live-state"><i></i> Public API</span>
-          <a href="/docs" target="_blank" rel="noreferrer">API <span>↗</span></a>
+          <a href="/docs" target="_blank" rel="noreferrer">API</a>
         </div>
       </header>
 
@@ -70,7 +70,7 @@
         <div class="panel-content" id="panelContent" hidden>
           <header class="panel-head">
             <div>
-              <span class="api-chip"><i></i> Provincial brief</span>
+              <span class="api-chip"><i></i> ข้อมูลจังหวัด</span>
               <p id="provinceMeta">จังหวัด</p>
             </div>
             <button class="panel-close" id="closePanel" type="button" aria-label="ปิดข้อมูลจังหวัด">×</button>
@@ -82,44 +82,46 @@
               <p id="provinceEnglish"></p>
             </div>
             <div class="coverage-summary" id="coverageRing">
-              <span>หลักฐานที่เชื่อมได้</span>
-              <strong id="coverageCount">—</strong>
-              <small>จาก 10 แหล่งสาธารณะ</small>
+              <span>ความครอบคลุม</span>
+              <strong id="coverageLabel">—</strong>
+              <small id="coverageCount">กำลังตรวจข้อมูล</small>
             </div>
           </section>
 
           <nav class="panel-tabs" aria-label="หมวดข้อมูลจังหวัด">
             <button class="active" type="button" data-panel-tab="overview" aria-selected="true">ภาพรวม</button>
-            <button type="button" data-panel-tab="portfolio" aria-selected="false">โครงการและพื้นที่</button>
-            <button type="button" data-panel-tab="dimensions" aria-selected="false">ข้อมูลรายมิติ</button>
-            <button type="button" data-panel-tab="sources" aria-selected="false">แหล่งข้อมูล</button>
+            <button type="button" data-panel-tab="portfolio" aria-selected="false">โครงการ</button>
+            <button type="button" data-panel-tab="dimensions" aria-selected="false">รายมิติ</button>
+            <button type="button" data-panel-tab="sources" aria-selected="false">ต้นทาง</button>
           </nav>
 
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
-              <div class="panel-section decision-section">
-                <div class="section-heading"><span>ข้อมูลสำคัญต่อการตัดสินใจ</span><small>ค่าจริงจาก Gold projection</small></div>
-                <div class="decision-grid" id="executiveSignals"></div>
-              </div>
-              <div class="panel-section briefing-section">
-                <div class="section-heading"><span>อ่านสถานการณ์อย่างรวดเร็ว</span><small>สรุปจากค่าที่มี โดยไม่สร้างคะแนนใหม่</small></div>
+              <div class="panel-section briefing-section executive-overview">
+                <div class="section-heading"><span>ภาพที่เห็นจากข้อมูล</span></div>
                 <div class="briefing-narrative" id="decisionNarrative"></div>
+              </div>
+              <div class="panel-section decision-section">
+                <div class="section-heading"><span>ค่าประกอบภาพรวม</span></div>
+                <div class="decision-grid" id="executiveSignals"></div>
               </div>
             </section>
 
             <section class="panel-view" data-panel-view="portfolio" hidden>
+              <div class="portfolio-loading" id="portfolioLoading"><span></span><span></span><span></span></div>
+              <div class="portfolio-empty" id="portfolioEmpty" hidden>ยังไม่มีรายการโครงการหรือนวัตกรรมที่ผูกกับจังหวัดนี้</div>
               <div class="panel-section" id="areaSection" hidden>
-                <div class="section-heading"><span>โครงการพัฒนาระดับพื้นที่</span><small>ชื่อโครงการและหน่วยดำเนินงานจริง</small></div>
+                <div class="section-heading"><span>โครงการพัฒนาระดับพื้นที่</span></div>
                 <div class="record-list" id="areaProjects"></div>
               </div>
 
               <div class="panel-section" id="innovationSection" hidden>
-                <div class="section-heading"><span>นวัตกรรมในพื้นที่</span><small>TRL เงินทุน กลุ่มเป้าหมาย และจุดเด่น</small></div>
+                <div class="section-heading"><span>นวัตกรรมในพื้นที่</span></div>
                 <div class="record-list" id="innovationItems"></div>
               </div>
 
               <div class="panel-section" id="cultureSection" hidden>
-                <div class="section-heading"><span>ทุนวัฒนธรรมในพื้นที่</span><small id="cultureResultCount">ค้นหาและเปิดดูรายการได้</small></div>
+                <div class="section-heading"><span>ทุนวัฒนธรรมในพื้นที่</span><small id="cultureResultCount"></small></div>
                 <div class="collection-tools">
                   <label><span>ค้นหาทุนวัฒนธรรม</span><input id="cultureSearch" type="search" placeholder="ชื่อ แหล่ง หรืออำเภอ" autocomplete="off" /></label>
                 </div>
@@ -130,19 +132,19 @@
 
             <section class="panel-view" data-panel-view="dimensions" hidden>
               <div class="panel-section all-data-section">
-                <div class="section-heading"><span>ข้อมูลรายมิติ</span><small>แปล field ต้นทางให้เป็นภาษาที่อ่านง่าย</small></div>
-                <div class="all-data-list" id="allDataSections"></div>
+                <div class="section-heading"><span>ภาพสถานการณ์รายมิติ</span></div>
+                <div class="dimension-summary-list" id="allDataSections"></div>
               </div>
             </section>
 
             <section class="panel-view" data-panel-view="sources" hidden>
               <div class="panel-section source-section">
-                <div class="section-heading"><span>ความครอบคลุม 10 URL</span><small>API, snapshot และสถานะการผูกจังหวัด</small></div>
+                <div class="section-heading"><span>แหล่งข้อมูลที่ใช้</span></div>
                 <div class="province-sources" id="provinceSources"></div>
               </div>
               <footer class="panel-footer">
                 <div><span class="candidate-dot"></span><p><strong>Candidate data</strong><small id="panelUpdated">กำลังตรวจสอบวันที่</small></p></div>
-                <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">ข้อมูลครบ JSON <span>↗</span></a>
+                <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">ดูข้อมูล JSON</a>
               </footer>
             </section>
           </div>

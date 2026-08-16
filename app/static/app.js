@@ -9,101 +9,12 @@ const state = {
   requestToken: 0,
   labelMarkers: [],
   pointsVisible: false,
+  currentSummary: null,
   currentBriefing: null,
+  briefingLoading: false,
   cultureVisible: 12,
   cultureQuery: "",
   hoverPopup: null,
-};
-
-const DIMENSION_FIELDS = new Set([
-  "year", "income_rank_id", "house_type", "house_tenure", "house_tenure_type",
-  "supply_type", "price_rank", "Attribute", "gap_type",
-]);
-
-const HIDDEN_FIELDS = new Set(["cwt_id", "cwt_dc", "cwt_name", "province_name"]);
-
-const FIELD_META = {
-  year: ["ปีข้อมูล", "number"],
-  income_rank_id: ["กลุ่มรายได้", "number"],
-  house_type: ["ประเภทที่อยู่อาศัย", "text"],
-  house_tenure: ["ลักษณะการครอบครอง", "text"],
-  house_tenure_type: ["ลักษณะการครอบครอง", "text"],
-  supply_type: ["ประเภทที่อยู่อาศัย", "text"],
-  price_rank: ["ระดับราคา", "number"],
-  Attribute: ["หมวดค่าใช้จ่าย", "text"],
-  gap_type: ["ประเภทช่องว่าง", "text"],
-  human: ["มิติทุนมนุษย์", "decimal"],
-  physical: ["มิติทุนกายภาพ", "decimal"],
-  financial: ["มิติทุนการเงิน", "decimal"],
-  natural_res: ["มิติทรัพยากรธรรมชาติ", "decimal"],
-  social: ["มิติทุนสังคม", "decimal"],
-  overall: ["คะแนนรวมตามต้นทาง", "decimal"],
-  population: ["จำนวนประชากร", "number"],
-  household_number: ["จำนวนครัวเรือน", "number"],
-  household_average_member: ["สมาชิกเฉลี่ยต่อครัวเรือน", "decimal"],
-  average_price: ["ราคาที่อยู่อาศัยเฉลี่ย", "number"],
-  house_price_income_ratio: ["อัตราส่วนราคาบ้านต่อรายได้", "decimal"],
-  pct_overcrowded: ["ที่อยู่อาศัยแออัด", "percent"],
-  count_overcrowded: ["ครัวเรือนแออัดตามต้นทาง", "number"],
-  count_not_overcrowded: ["ครัวเรือนไม่แออัดตามต้นทาง", "number"],
-  total_count: ["จำนวนรวมตามต้นทาง", "number"],
-  share_loan_pass: ["ผ่านเกณฑ์สินเชื่อ", "ratio"],
-  share_loan_fail: ["ไม่ผ่านเกณฑ์สินเชื่อ", "ratio"],
-  share_tenure_owner: ["เป็นเจ้าของ", "ratio"],
-  share_tenure_rent: ["เช่า", "ratio"],
-  share_tenure_squatter: ["อยู่อาศัยโดยไม่มีกรรมสิทธิ์", "ratio"],
-  risk_level_1_pct_area: ["พื้นที่เสี่ยงระดับ 1", "percent"],
-  risk_level_2_pct_area: ["พื้นที่เสี่ยงระดับ 2", "percent"],
-  risk_level_3_pct_area: ["พื้นที่เสี่ยงระดับ 3", "percent"],
-  risk_level_4_pct_area: ["พื้นที่เสี่ยงระดับ 4", "percent"],
-  risk_level_5_pct_area: ["พื้นที่เสี่ยงระดับ 5", "percent"],
-  risk_level_1_population: ["ประชากรในพื้นที่เสี่ยงระดับ 1", "number"],
-  risk_level_2_population: ["ประชากรในพื้นที่เสี่ยงระดับ 2", "number"],
-  risk_level_3_population: ["ประชากรในพื้นที่เสี่ยงระดับ 3", "number"],
-  risk_level_4_population: ["ประชากรในพื้นที่เสี่ยงระดับ 4", "number"],
-  risk_level_5_population: ["ประชากรในพื้นที่เสี่ยงระดับ 5", "number"],
-  Mean: ["ค่าดัชนี", "decimal"],
-  house_burden_pct: ["ภาระค่าใช้จ่ายที่อยู่อาศัย", "percent"],
-  exp_pct_house_burden: ["สัดส่วนค่าใช้จ่ายด้านที่อยู่อาศัย", "percent"],
-  share_over_30: ["ภาระค่าใช้จ่ายเกิน 30%", "ratio"],
-  share_over_40: ["ภาระค่าใช้จ่ายเกิน 40%", "ratio"],
-  pct_house: ["สัดส่วนที่อยู่อาศัย", "percent"],
-  supply_unit: ["จำนวนหน่วยที่อยู่อาศัย", "number"],
-  supply_rent: ["อุปทานสำหรับเช่า", "number"],
-  supply_sale: ["อุปทานสำหรับขาย", "number"],
-  rent_cost: ["ค่าเช่าตามต้นทาง", "number"],
-  mortgage_cost: ["ค่าผ่อนตามต้นทาง", "number"],
-  house_tenure_owner: ["เจ้าของ", "number"],
-  house_tenure_owner_landrented: ["เจ้าของบ้านบนที่ดินเช่า", "number"],
-  house_tenure_rented: ["เช่า", "number"],
-  house_tenure_squatter: ["ไม่มีกรรมสิทธิ์", "number"],
-  house_tenure_mortgage: ["อยู่ระหว่างผ่อน", "number"],
-  pct_house_tenure_owner: ["สัดส่วนเจ้าของ", "percent"],
-  pct_house_tenure_owner_landrented: ["สัดส่วนเจ้าของบ้านบนที่ดินเช่า", "percent"],
-  pct_house_tenure_rented: ["สัดส่วนเช่า", "percent"],
-  pct_house_tenure_squatter: ["สัดส่วนไม่มีกรรมสิทธิ์", "percent"],
-  pct_house_tenure_mortgage: ["สัดส่วนอยู่ระหว่างผ่อน", "percent"],
-  exp_water_electricity: ["ค่าน้ำและไฟตามต้นทาง", "number"],
-  exp_cooking_fuel: ["เชื้อเพลิงประกอบอาหารตามต้นทาง", "number"],
-  exp_garbage: ["ค่าจัดการขยะตามต้นทาง", "number"],
-  exp_services: ["ค่าบริการตามต้นทาง", "number"],
-  exp_health: ["ค่าใช้จ่ายสุขภาพตามต้นทาง", "number"],
-  exp_fuel: ["ค่าเชื้อเพลิงตามต้นทาง", "number"],
-  exp_transportation: ["ค่าเดินทางตามต้นทาง", "number"],
-  exp_food: ["ค่าอาหารตามต้นทาง", "number"],
-  exp_foodbev: ["ค่าอาหารและเครื่องดื่มตามต้นทาง", "number"],
-  exp_house_repair: ["ค่าซ่อมแซมที่อยู่อาศัยตามต้นทาง", "number"],
-  exp_rental: ["ค่าเช่าตามต้นทาง", "number"],
-  exp_mortgage: ["ค่าผ่อนตามต้นทาง", "number"],
-  exp_pct_utilities: ["สัดส่วนค่าสาธารณูปโภค", "percent"],
-  exp_pct_transportation: ["สัดส่วนค่าเดินทาง", "percent"],
-  exp_pct_medical: ["สัดส่วนค่ารักษาพยาบาล", "percent"],
-  exp_pct_foodbev: ["สัดส่วนค่าอาหารและเครื่องดื่ม", "percent"],
-  pct_medical: ["สัดส่วนค่ารักษาพยาบาล", "percent"],
-  pct_others: ["สัดส่วนค่าใช้จ่ายอื่น", "percent"],
-  pct_transportation: ["สัดส่วนค่าเดินทาง", "percent"],
-  value: ["ค่าช่องว่างอุปสงค์–อุปทาน", "decimal"],
-  Value: ["ค่าตามต้นทาง", "decimal"],
 };
 
 function escapeHtml(value) {
@@ -131,44 +42,6 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
-function fieldLabel(key) {
-  if (FIELD_META[key]) return FIELD_META[key][0];
-  return String(key)
-    .replace(/^exp_/, "ค่าใช้จ่าย ")
-    .replace(/^pct_/, "สัดส่วน ")
-    .replace(/^share_/, "สัดส่วน ")
-    .replaceAll("_", " ")
-    .trim();
-}
-
-function formatSourceValue(key, value) {
-  if (value === null || value === undefined || value === "") return "ไม่ระบุ";
-  const type = FIELD_META[key]?.[1] || "auto";
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || type === "text") return String(value);
-  if (type === "ratio") return `${formatNumber(numeric * 100, 2)}%`;
-  if (type === "percent") return `${formatNumber(numeric, 2)}%`;
-  if (type === "decimal") return formatNumber(numeric, 2);
-  return formatNumber(numeric, 0);
-}
-
-function displayUnit(unit) {
-  if (unit === "source_score") return "คะแนนตามต้นทาง";
-  return unit || "";
-}
-
-function rowDimensions(row) {
-  return Object.entries(row?.values || {})
-    .filter(([key, value]) => DIMENSION_FIELDS.has(key) && value !== null && value !== "")
-    .map(([key, value]) => `${fieldLabel(key)} ${formatSourceValue(key, value)}`);
-}
-
-function rowMetrics(row, limit = 5) {
-  return Object.entries(row?.values || {})
-    .filter(([key, value]) => FIELD_META[key] && !DIMENSION_FIELDS.has(key) && !HIDDEN_FIELDS.has(key) && value !== null && value !== "")
-    .slice(0, limit);
-}
-
 function activatePanelTab(tabName, updateUrl = true) {
   document.querySelectorAll("[data-panel-tab]").forEach((button) => {
     const active = button.dataset.panelTab === tabName;
@@ -186,6 +59,7 @@ function activatePanelTab(tabName, updateUrl = true) {
     url.searchParams.set("view", tabName);
     window.history.replaceState({}, "", url);
   }
+  if (tabName === "portfolio") ensurePortfolioLoaded();
 }
 
 function provinceByCode(code) {
@@ -325,9 +199,16 @@ function openPanelLoading(province) {
   document.getElementById("mapPrompt").classList.add("is-hidden");
   document.querySelector(".picker-copy strong").textContent = province.province_name_th;
   document.getElementById("provinceSelect").value = province.province_code;
+  state.currentSummary = null;
   state.currentBriefing = null;
+  state.briefingLoading = false;
   state.cultureVisible = 12;
   state.cultureQuery = "";
+  document.getElementById("portfolioLoading").hidden = false;
+  document.getElementById("portfolioEmpty").hidden = true;
+  ["areaSection", "innovationSection", "cultureSection"].forEach((id) => {
+    document.getElementById(id).hidden = true;
+  });
   const cultureSearch = document.getElementById("cultureSearch");
   if (cultureSearch) cultureSearch.value = "";
   activatePanelTab("overview", false);
@@ -338,52 +219,31 @@ function trimText(value, length = 180) {
   return text.length > length ? `${text.slice(0, length).trim()}…` : text;
 }
 
-function renderExecutiveSignals(briefing) {
-  const signals = briefing.executive_signals || [];
+function renderExecutiveSignals(summary) {
+  const signals = summary.readout?.context_metrics || [];
   document.getElementById("executiveSignals").innerHTML = signals.length
     ? signals
         .map(
           (signal) => `
-            <a class="decision-card" href="${escapeHtml(signal.source_url)}" target="_blank" rel="noreferrer">
+            <article class="decision-card">
               <span>${escapeHtml(signal.label_th)}</span>
               <strong>${escapeHtml(signal.display_value)}</strong>
-              <small>${escapeHtml(signal.unit || "")} · ดูต้นทาง ↗</small>
-            </a>`,
+              <small>${escapeHtml(signal.unit || "")}</small>
+            </article>`,
         )
         .join("")
-    : '<article class="empty-data"><strong>ต้นทางยังไม่มีตัวชี้วัดที่ยืนยันสำหรับจังหวัดนี้</strong><span>ดูรายการจริงในหมวดข้อมูลด้านล่างแทน</span></article>';
+    : '<article class="empty-data"><strong>ยังไม่มีค่าระดับจังหวัดที่สรุปได้</strong></article>';
 }
 
-function renderDecisionNarrative(briefing) {
-  const signals = new Map((briefing.executive_signals || []).map((signal) => [signal.key, signal]));
-  const facts = [];
-  const affordability = signals.get("house_price_income_ratio");
-  const loan = signals.get("housing_loan_pass_share");
-  const overcrowding = signals.get("overcrowding_pct");
-  const flood = signals.get("flood_risk_area_level_4_5");
-  if (affordability) facts.push({
-    eyebrow: "กำลังซื้อที่อยู่อาศัย",
-    text: `ราคาบ้านคิดเป็น ${affordability.display_value} เท่าของรายได้ตามชุดข้อมูลต้นทาง`,
-  });
-  if (loan) facts.push({
-    eyebrow: "การเข้าถึงสินเชื่อ",
-    text: `สัดส่วนที่ผ่านเกณฑ์สินเชื่ออยู่ที่ ${loan.display_value}`,
-  });
-  if (overcrowding) facts.push({
-    eyebrow: "คุณภาพที่อยู่อาศัย",
-    text: `ที่อยู่อาศัยแออัดคิดเป็น ${overcrowding.display_value} ตามนิยามของต้นทาง`,
-  });
-  if (flood) facts.push({
-    eyebrow: "ความเสี่ยงเชิงพื้นที่",
-    text: `พื้นที่เสี่ยงน้ำท่วมระดับ 4–5 รวม ${flood.display_value} ของพื้นที่ตามต้นทาง`,
-  });
+function renderDecisionNarrative(summary) {
+  const facts = summary.readout?.observations || [];
   document.getElementById("decisionNarrative").innerHTML = facts.length
-    ? facts.map((fact, index) => `
+    ? facts.map((fact) => `
         <article class="briefing-fact">
-          <span>${String(index + 1).padStart(2, "0")}</span>
-          <div><small>${escapeHtml(fact.eyebrow)}</small><p>${escapeHtml(fact.text)}</p></div>
+          <i aria-hidden="true"></i>
+          <div><small>${escapeHtml(fact.label_th)}</small><p>${escapeHtml(fact.text_th)}</p></div>
         </article>`).join("")
-    : '<article class="empty-data"><strong>ยังไม่มีค่าที่เพียงพอสำหรับสรุปสถานการณ์</strong><span>เลือกดูโครงการหรือข้อมูลรายมิติแทนได้</span></article>';
+    : '<article class="empty-data"><strong>ยังไม่มีข้อมูลเพียงพอสำหรับสรุปภาพจังหวัด</strong></article>';
 }
 
 function renderAreaProjects(section) {
@@ -396,7 +256,7 @@ function renderAreaProjects(section) {
           <div class="record-kicker"><span>ปีงบประมาณ ${escapeHtml(item.fiscal_year || "ไม่ระบุ")}</span><span>${escapeHtml(item.district || "ไม่ระบุอำเภอ")}</span></div>
           <h3>${escapeHtml(item.project_name || "ไม่ระบุชื่อโครงการ")}</h3>
           <p>${escapeHtml(item.business_name || "ไม่ระบุหน่วยธุรกิจ")}</p>
-          <footer><span>${escapeHtml(item.research_unit || "ไม่ระบุหน่วยวิจัย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">API ↗</a></footer>
+          <footer><span>${escapeHtml(item.research_unit || "ไม่ระบุหน่วยวิจัย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง</a></footer>
         </article>`,
     )
     .join("");
@@ -419,7 +279,7 @@ function renderInnovations(section) {
             <div><dt>เงินทุนต้นทาง</dt><dd>${escapeHtml(funding || "ไม่ระบุ")}</dd></div>
             <div><dt>กลุ่มเป้าหมาย</dt><dd>${escapeHtml(trimText(target || "ไม่ระบุ", 150))}</dd></div>
           </dl>
-          <footer><span>${escapeHtml(item.owner_affiliation_name || "ไม่ระบุสังกัด")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">รายละเอียด ↗</a></footer>
+          <footer><span>${escapeHtml(item.owner_affiliation_name || "ไม่ระบุสังกัด")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">รายละเอียด</a></footer>
         </article>`;
     })
     .join("");
@@ -446,175 +306,161 @@ function renderCulture(section) {
         <article class="data-card culture-card">
           ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : ""}
           <div>
-            <div class="record-kicker"><span>สถานะจากต้นทาง ${escapeHtml(item.risk_status_code ?? "ไม่ระบุ")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
+            <div class="record-kicker"><span>${escapeHtml(item.cultural_type || "ทุนวัฒนธรรม")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
             <h3>${escapeHtml(item.title_th || "ไม่ระบุชื่อ")}</h3>
             <p>${escapeHtml(trimText(item.risk_reason || item.history || "ต้นทางไม่ได้ระบุเหตุผลความเสี่ยง", 180))}</p>
-            <footer><span>${escapeHtml([item.tambon, item.amphoe].filter(Boolean).join(" · ") || "ไม่ระบุพื้นที่ย่อย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง ↗</a></footer>
+            <footer><span>${escapeHtml([item.tambon, item.amphoe].filter(Boolean).join(" · ") || "ไม่ระบุพื้นที่ย่อย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง</a></footer>
           </div>
         </article>`,
     )
     .join("") || '<article class="empty-data"><strong>ไม่พบรายการที่ตรงกับคำค้น</strong><span>ลองใช้ชื่ออำเภอหรือหมวดวัฒนธรรม</span></article>';
 }
 
-function resourceSummary(group) {
-  const dimensions = (group.field_names || [])
-    .filter((key) => DIMENSION_FIELDS.has(key))
-    .map(fieldLabel);
-  if ((group.field_names || []).includes("year")) {
-    return `ดูแนวโน้มตามปีจาก ${formatNumber(group.row_count)} ช่วงข้อมูล`;
-  }
-  if (group.row_count === 1) return "ค่าภาพรวมระดับจังหวัดจากต้นทาง";
-  if (dimensions.length) return `เปรียบเทียบได้ตาม ${[...new Set(dimensions)].join(" · ")}`;
-  return `มีข้อมูลย่อย ${formatNumber(group.row_count)} รายการที่ผูกกับจังหวัดนี้`;
-}
-
-function renderMetricTiles(row, limit = 6) {
-  const metrics = rowMetrics(row, limit);
-  return metrics.length
-    ? `<div class="interpreted-metrics">${metrics.map(([key, value]) => `
-        <div><small>${escapeHtml(fieldLabel(key))}</small><strong>${escapeHtml(formatSourceValue(key, value))}</strong></div>`).join("")}</div>`
-    : '<p class="dimension-note">รายการนี้ไม่มีค่าตัวเลขเพิ่มเติมจากมิติที่เลือก</p>';
-}
-
-function recordOptionLabel(row, index) {
-  const dimensions = rowDimensions(row);
-  return dimensions.length ? dimensions.join(" · ") : `รายการ ${index + 1}`;
-}
-
-function renderMiniBars(group) {
-  const rows = group.rows || [];
-  if (!rows.length || (rows.length > 12 && !(group.field_names || []).includes("year"))) return "";
-  const metricKey = Object.keys(rows[0].values || {}).find((key) => {
-    if (!FIELD_META[key] || DIMENSION_FIELDS.has(key) || HIDDEN_FIELDS.has(key)) return false;
-    return Number.isFinite(Number(rows[0].values[key]));
-  });
-  if (!metricKey) return "";
-  const plotted = [...rows]
-    .sort((a, b) => Number(a.values?.year || 0) - Number(b.values?.year || 0))
-    .slice(-8);
-  const max = Math.max(...plotted.map((row) => Math.abs(Number(row.values?.[metricKey]) || 0)), 1);
+function renderDimensionMetric(metric) {
   return `
-    <div class="mini-chart" aria-label="กราฟ ${escapeHtml(fieldLabel(metricKey))}">
-      <div class="mini-chart-head"><span>${escapeHtml(fieldLabel(metricKey))}</span><small>เปรียบเทียบภายในชุดข้อมูลเดียวกัน</small></div>
-      <div class="mini-bars">${plotted.map((row, index) => {
-        const numeric = Number(row.values?.[metricKey]) || 0;
-        const label = rowDimensions(row)[0] || `รายการ ${index + 1}`;
-        const width = Math.max(4, Math.min(100, Math.abs(numeric) / max * 100));
-        return `<div><span title="${escapeHtml(label)}">${escapeHtml(label.replace(/^[^ ]+ /, ""))}</span><i><b style="width:${width.toFixed(2)}%"></b></i><strong>${escapeHtml(formatSourceValue(metricKey, numeric))}</strong></div>`;
-      }).join("")}</div>
-    </div>`;
-}
-
-function renderResourceCard(group, groupIndex) {
-  const rows = group.rows || [];
-  const latestIndex = (group.field_names || []).includes("year")
-    ? rows.reduce((best, row, index) => Number(row.values?.year || 0) > Number(rows[best]?.values?.year || 0) ? index : best, 0)
-    : 0;
-  const selected = rows[latestIndex];
-  const dimensionLabels = [...new Set((group.field_names || []).filter((key) => DIMENSION_FIELDS.has(key)).map(fieldLabel))];
-  return `
-    <article class="dimension-card">
-      <header>
-        <div><span>${escapeHtml(group.dataset_title || "ข้อมูลที่อยู่อาศัย")}</span><h3>${escapeHtml(group.resource_name || "ไม่ระบุชื่อชุดข้อมูล")}</h3></div>
-        <em>${formatNumber(group.row_count)} รายการย่อย</em>
-      </header>
-      <p>${escapeHtml(resourceSummary(group))}</p>
-      ${dimensionLabels.length ? `<div class="dimension-chips">${dimensionLabels.map((label) => `<span>${escapeHtml(label)}</span>`).join("")}</div>` : ""}
-      ${renderMiniBars(group)}
-      ${rows.length === 1 ? renderMetricTiles(selected) : `
-        <details class="resource-explorer">
-          <summary>สำรวจรายละเอียดตามมิติ <span>⌄</span></summary>
-          <div class="resource-explorer-body">
-            <label><span>เลือกรายการเปรียบเทียบ</span>
-              <select data-resource-select="${groupIndex}" aria-label="เลือกมิติของ ${escapeHtml(group.resource_name)}">
-                ${rows.map((row, index) => `<option value="${index}"${index === latestIndex ? " selected" : ""}>${escapeHtml(recordOptionLabel(row, index))}</option>`).join("")}
-              </select>
-            </label>
-            <div id="resourceMetrics${groupIndex}">${renderMetricTiles(selected)}</div>
-          </div>
-        </details>`}
-      <footer><span>นิยามและหน่วยยึดตามต้นทาง</span><a href="${escapeHtml(group.source_url)}" target="_blank" rel="noreferrer">เปิดชุดข้อมูล ↗</a></footer>
+    <article class="clean-metric${metric.attention ? " is-attention" : ""}">
+      <div class="clean-metric-head">
+        <span>${escapeHtml(metric.label_th)}</span>
+        <strong>${escapeHtml(metric.display_value)}</strong>
+      </div>
+      <p>${escapeHtml(metric.comparison_th)}</p>
+      <div class="comparison-track" aria-label="${escapeHtml(metric.label_th)} ${escapeHtml(metric.comparison_th)}">
+        <i class="benchmark-marker" style="left:${Number(metric.benchmark_position_pct).toFixed(1)}%"></i>
+        <b class="value-marker" style="left:${Number(metric.position_pct).toFixed(1)}%"></b>
+      </div>
+      <small>${escapeHtml(metric.benchmark_label_th)} ${escapeHtml(metric.benchmark_display_value)}</small>
     </article>`;
 }
 
-function renderAllData(briefing) {
-  const { sra, housing } = briefing.sections;
-  const groups = housing.resource_groups || [];
-  const categoryMap = new Map();
-  groups.forEach((group, index) => {
-    const category = group.dataset_title || "ข้อมูลอื่น";
-    if (!categoryMap.has(category)) categoryMap.set(category, []);
-    categoryMap.get(category).push({ group, index });
-  });
-  const housingContent = [...categoryMap.entries()].map(([category, items], categoryIndex) => `
-    <details class="dimension-category"${categoryIndex === 0 ? " open" : ""}>
-      <summary><div><strong>${escapeHtml(category)}</strong><small>${formatNumber(items.length)} ชุดข้อมูลที่ผูกจังหวัดได้</small></div><span>⌄</span></summary>
-      <div class="dimension-category-body">${items.map(({ group, index }) => renderResourceCard(group, index)).join("")}</div>
-    </details>`).join("");
-  const sraContent = sra.status === "available"
-    ? `<div class="interpreted-metrics">${sra.items.map((item) => `<div><small>${escapeHtml(fieldLabel(item.metric_key))}</small><strong>${formatNumber(item.value, 2)} ${escapeHtml(displayUnit(item.unit))}</strong></div>`).join("")}</div>`
-    : '<div class="data-absence"><strong>ไม่มีข้อมูลจังหวัดนี้ใน API ปี 2569</strong><p>ระบบแสดงสถานะว่าไม่มี record และไม่แทนค่าด้วยศูนย์</p></div>';
-  document.getElementById("allDataSections").innerHTML = `
-    <section class="dimension-intro">
-      <span>Housing intelligence</span>
-      <h3>ข้อมูลที่อยู่อาศัยในภาษาที่อ่านง่าย</h3>
-      <p>เลือกมิติเพื่อดูรายละเอียด ระบบคงค่าต้นทางและไม่สร้างคะแนนเปรียบเทียบจังหวัดใหม่</p>
-    </section>
-    ${housingContent || '<div class="data-absence"><strong>ยังไม่มีข้อมูลที่อยู่อาศัยของจังหวัดนี้</strong></div>'}
-    <details class="dimension-category sra-category">
-      <summary><div><strong>SRA-DSS</strong><small>สถานการณ์ความเปราะบางจาก aggregate API</small></div><span>⌄</span></summary>
-      <div class="dimension-category-body">${sraContent}</div>
-    </details>`;
+function renderBreakdown(breakdown) {
+  const items = breakdown.items || [];
+  if (!items.length) return "";
+  if (breakdown.kind === "trend") {
+    const values = items.map((item) => Number(item.value)).filter(Number.isFinite);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = Math.max(max - min, 1);
+    return `
+      <section class="clean-breakdown trend-breakdown">
+        <h4>${escapeHtml(breakdown.label_th)}</h4>
+        <div class="trend-bars">${items.map((item) => {
+          const height = 28 + ((Number(item.value) - min) / span) * 72;
+          return `<div title="${escapeHtml(item.display_value)}"><i style="height:${height.toFixed(1)}%"></i><span>${escapeHtml(item.label_th)}</span></div>`;
+        }).join("")}</div>
+        <strong>${escapeHtml(items.at(-1)?.display_value || "")}</strong>
+      </section>`;
+  }
+  const max = Math.max(...items.map((item) => Number(item.value) || 0), 1);
+  return `
+    <section class="clean-breakdown">
+      <h4>${escapeHtml(breakdown.label_th)}</h4>
+      <div class="clean-bars">${items.map((item) => {
+        const width = breakdown.kind === "distribution"
+          ? Number(item.share_pct || 0)
+          : (Number(item.value || 0) / max) * 100;
+        return `<div class="clean-bar-row"><span>${escapeHtml(item.label_th)}</span><i><b style="width:${Math.max(3, width).toFixed(1)}%"></b></i>${breakdown.kind === "scores" ? `<strong>${escapeHtml(item.display_value)}</strong>` : ""}</div>`;
+      }).join("")}</div>
+      ${breakdown.note_th ? `<small>${escapeHtml(breakdown.note_th)}</small>` : ""}
+    </section>`;
 }
 
-function updateResourceRecord(groupIndex, rowIndex) {
-  const group = state.currentBriefing?.sections?.housing?.resource_groups?.[groupIndex];
-  const target = document.getElementById(`resourceMetrics${groupIndex}`);
-  if (!group || !target) return;
-  target.innerHTML = renderMetricTiles(group.rows?.[rowIndex]);
+function renderHighlights(highlights) {
+  if (!highlights?.length) return "";
+  return `<div class="dimension-highlights">${highlights.slice(0, 4).map((item) => `
+    <article>
+      <span>${item.kind === "project" ? "โครงการ" : item.kind === "innovation" ? "นวัตกรรม" : "รายการจากต้นทาง"}</span>
+      <strong>${escapeHtml(item.title_th)}</strong>
+      ${item.detail_th ? `<p>${escapeHtml(trimText(item.detail_th, 160))}</p>` : ""}
+      ${item.meta_th ? `<small>${escapeHtml(item.meta_th)}</small>` : ""}
+    </article>`).join("")}</div>`;
 }
 
-function renderSources(briefing) {
+function renderAllData(summary) {
+  const dimensions = summary.dimensions || [];
+  const missing = summary.missing_dimensions || [];
+  document.getElementById("allDataSections").innerHTML = dimensions.length
+    ? `${dimensions.map((dimension) => `
+        <article class="executive-dimension" data-dimension="${escapeHtml(dimension.key)}">
+          <header>
+            <span>${escapeHtml(dimension.label_th)}</span>
+            <p>${escapeHtml(dimension.summary_th)}</p>
+          </header>
+          ${dimension.metrics?.length ? `<div class="clean-metric-list">${dimension.metrics.map(renderDimensionMetric).join("")}</div>` : ""}
+          ${dimension.breakdowns?.map(renderBreakdown).join("") || ""}
+          ${renderHighlights(dimension.highlights)}
+        </article>`).join("")}
+        ${missing.length ? `<p class="missing-dimensions">ยังไม่มีข้อมูลระดับจังหวัดในมิติ ${missing.map((item) => escapeHtml(item.label_th)).join(" · ")}</p>` : ""}`
+    : '<article class="empty-data"><strong>ยังไม่มีข้อมูลระดับจังหวัดที่สรุปเป็นรายมิติได้</strong></article>';
+}
+
+function renderSources(summary) {
   const statusLabel = {
     available: "มีข้อมูล",
     source_has_no_record_for_province: "ไม่มีรายการจังหวัดนี้",
     not_province_scoped: "ไม่ผูกจังหวัด",
   };
-  document.getElementById("provinceSources").innerHTML = briefing.source_coverage
+  document.getElementById("provinceSources").innerHTML = summary.source_coverage
     .map((source) => {
       const apiFirst = source.acquisition_mode === "api_first";
       return `
         <article class="source-row ${escapeHtml(source.status)}">
           <span class="source-mode${apiFirst ? "" : " snapshot"}">${apiFirst ? "API" : "RAW"}</span>
           <div><strong>${escapeHtml(source.name_th)}</strong><small>${escapeHtml(statusLabel[source.status] || source.status)}${source.note_th ? ` · ${escapeHtml(source.note_th)}` : ""}</small></div>
-          <a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer" aria-label="เปิดต้นทาง ${escapeHtml(source.name_th)}">↗</a>
+          <a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer" aria-label="เปิดต้นทาง ${escapeHtml(source.name_th)}">ดู</a>
         </article>`;
     })
     .join("");
 }
 
-function renderProvincePanel(briefing) {
-  const province = briefing.province;
-  state.currentBriefing = briefing;
+function renderProvincePanel(summary) {
+  const province = summary.province;
+  state.currentSummary = summary;
   document.getElementById("panelLoading").hidden = true;
   document.getElementById("panelError").hidden = true;
   document.getElementById("panelContent").hidden = false;
   document.getElementById("provinceMeta").textContent = `${province.region} · รหัส ${province.province_code}`;
   document.getElementById("provinceName").textContent = province.province_name_th;
   document.getElementById("provinceEnglish").textContent = province.province_name_en;
-  document.getElementById("coverageCount").textContent = `${formatNumber(briefing.available_source_ids?.length || 0)} / 10`;
-  renderExecutiveSignals(briefing);
-  renderDecisionNarrative(briefing);
-  renderAreaProjects(briefing.sections.area_based);
-  renderInnovations(briefing.sections.innovation);
-  renderCulture(briefing.sections.culture);
-  renderAllData(briefing);
-  renderSources(briefing);
-  document.getElementById("panelUpdated").textContent = `สร้าง Gold projection ${formatDate(briefing.generated_at)}`;
+  document.getElementById("coverageLabel").textContent = summary.coverage?.label_th || "ข้อมูลยังบาง";
+  document.getElementById("coverageCount").textContent = `เชื่อม ${formatNumber(summary.coverage?.available_source_count || 0)} จาก ${formatNumber(summary.coverage?.public_source_count || 10)} แหล่ง`;
+  renderExecutiveSignals(summary);
+  renderDecisionNarrative(summary);
+  renderAllData(summary);
+  renderSources(summary);
+  document.getElementById("panelUpdated").textContent = `อัปเดตชุดสรุป ${formatDate(summary.generated_at)}`;
   document.getElementById("provinceApiLink").href = `/api/public/v1/provinces/${province.province_code}/briefing`;
   const requestedView = new URLSearchParams(window.location.search).get("view");
   if (["overview", "portfolio", "dimensions", "sources"].includes(requestedView)) activatePanelTab(requestedView, false);
   document.getElementById("provinceName").focus({ preventScroll: true });
+}
+
+async function ensurePortfolioLoaded() {
+  if (!state.selectedCode || state.currentBriefing || state.briefingLoading) return;
+  const code = state.selectedCode;
+  state.briefingLoading = true;
+  document.getElementById("portfolioLoading").hidden = false;
+  document.getElementById("portfolioEmpty").hidden = true;
+  try {
+    const response = await fetch(`/api/public/v1/provinces/${code}/briefing`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Province briefing API ${response.status}`);
+    const briefing = await response.json();
+    if (state.selectedCode !== code) return;
+    state.currentBriefing = briefing;
+    renderAreaProjects(briefing.sections.area_based);
+    renderInnovations(briefing.sections.innovation);
+    renderCulture(briefing.sections.culture);
+    const hasPortfolio = ["area_based", "innovation", "culture"].some(
+      (key) => briefing.sections[key]?.status === "available",
+    );
+    document.getElementById("portfolioEmpty").hidden = hasPortfolio;
+  } catch (error) {
+    console.error(error);
+    document.getElementById("portfolioEmpty").textContent = "โหลดรายการโครงการไม่สำเร็จ";
+    document.getElementById("portfolioEmpty").hidden = false;
+  } finally {
+    if (state.selectedCode === code) document.getElementById("portfolioLoading").hidden = true;
+    state.briefingLoading = false;
+  }
 }
 
 function renderPanelError() {
@@ -646,11 +492,11 @@ async function selectProvince(code, moveMap = true) {
 
   const token = ++state.requestToken;
   try {
-    const response = await fetch(`/api/public/v1/provinces/${normalized}/briefing`, { cache: "no-store" });
+    const response = await fetch(`/api/public/v1/provinces/${normalized}/summary`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Province API ${response.status}`);
-    const province = await response.json();
+    const summary = await response.json();
     if (token !== state.requestToken || state.selectedCode !== normalized) return;
-    renderProvincePanel(province);
+    renderProvincePanel(summary);
   } catch (error) {
     if (token !== state.requestToken) return;
     console.error(error);
@@ -664,6 +510,9 @@ function closePanel() {
     state.map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: false });
   }
   state.selectedCode = null;
+  state.currentSummary = null;
+  state.currentBriefing = null;
+  state.briefingLoading = false;
   updateLabelVisibility();
   const panel = document.getElementById("provincePanel");
   panel.classList.remove("is-open");
@@ -720,11 +569,6 @@ function bindEvents() {
   document.getElementById("loadMoreCulture").addEventListener("click", () => {
     state.cultureVisible += 12;
     if (state.currentBriefing) renderCulture(state.currentBriefing.sections.culture);
-  });
-  document.getElementById("allDataSections").addEventListener("change", (event) => {
-    const select = event.target.closest("[data-resource-select]");
-    if (!select) return;
-    updateResourceRecord(Number(select.dataset.resourceSelect), Number(select.value));
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.selectedCode) closePanel();
