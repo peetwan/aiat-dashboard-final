@@ -16,6 +16,7 @@ BASE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260814T_tea
 MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
 STAGED_ROOT = WORKSPACE_ROOT / "data/staged"
 OUTPUT_ROOT = PROJECT_ROOT / "data/public/provincial_briefings"
+SOURCE_INSIGHTS_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 
 
 def read_json(path: Path) -> Any:
@@ -292,6 +293,9 @@ def build() -> None:
                 },
                 "culture": initial_section("f2_culturalmap_university", "ทุนวัฒนธรรมในพื้นที่"),
                 "tourism": initial_section("f3_ruamthiao_lamphun", "การเดินทางและท่องเที่ยวลำพูน"),
+                "pppconnext": initial_section("f1_pppconnext", "ครัวเรือนและทุนดำรงชีพ"),
+                "apptech_mtr": initial_section("f2_apptech_mtr", "การใช้งานแพลตฟอร์มนวัตกรรม"),
+                "city_capital": initial_section("f3_city_capital_open_data", "ทุนเมืองระดับเทศบาล"),
             },
             "source_coverage": [],
             "quality": {
@@ -476,11 +480,63 @@ def build() -> None:
             for payload in (read_json(path) for path in tourism_files)
         ]
 
+    # Audited cross-source geography links. Each source retains its original grain.
+    source_insights = read_json(SOURCE_INSIGHTS_PATH)
+    city_source = source_insights["sources"]["f3_city_capital_open_data"]
+    city_metrics = {
+        metric["metric_id"]: metric
+        for group in city_source["groups"]
+        for metric in group["metrics"]
+    }
+    for code, briefing in briefings.items():
+        links = source_insights["province_links"].get(code, {})
+        briefing["sections"]["pppconnext"]["items"] = links.get("f1_pppconnext") or []
+
+        apptech = links.get("f2_apptech_mtr")
+        if apptech:
+            briefing["sections"]["apptech_mtr"]["items"] = [apptech]
+
+        city_items = []
+        for city in links.get("f3_city_capital_open_data") or []:
+            signals = []
+            for metric_id, value in city.get("values", {}).items():
+                metric = city_metrics.get(metric_id)
+                middle = safe_float((metric or {}).get("median"))
+                number = safe_float(value)
+                direction = (metric or {}).get("concern_direction")
+                if number is None or middle in (None, 0) or direction not in {"high", "low"}:
+                    continue
+                gap = (number - middle) / abs(middle)
+                attention = gap > 0.10 if direction == "high" else gap < -0.10
+                if not attention:
+                    continue
+                low = safe_float(metric.get("minimum"))
+                high = safe_float(metric.get("maximum"))
+                span = (high - low) if low is not None and high is not None else 0
+                signals.append({
+                    "key": metric_id,
+                    "label_th": metric.get("label_th"),
+                    "value": number,
+                    "display_value": f"{number:,.1f}",
+                    "unit": metric.get("display_unit"),
+                    "comparison": "above" if gap > 0 else "below",
+                    "comparison_th": "สูงกว่าค่ากลางของ 18 เมือง" if gap > 0 else "ต่ำกว่าค่ากลางของ 18 เมือง",
+                    "benchmark_label_th": "ค่ากลาง 18 เมือง",
+                    "benchmark_value": middle,
+                    "benchmark_display_value": f"{middle:,.1f}",
+                    "position_pct": round((number - low) / span * 100, 1) if span else 50,
+                    "benchmark_position_pct": round((middle - low) / span * 100, 1) if span else 50,
+                    "attention": True,
+                    "attention_strength": round(abs(gap), 4),
+                    "source_id": "f3_city_capital_open_data",
+                    "source_url": city_source["source_url"],
+                })
+            signals.sort(key=lambda item: item["attention_strength"], reverse=True)
+            city_items.append({**city, "signals": signals})
+        briefing["sections"]["city_capital"]["items"] = city_items
+
     not_province_scoped = {
         "f2_rmutdb": "ทะเบียนไม่มี field จังหวัดที่ยืนยันแล้ว",
-        "f2_apptech_mtr": "ทะเบียนไม่มี field จังหวัดที่ยืนยันแล้ว",
-        "f3_city_capital_open_data": "ต้นทางเป็นระดับเทศบาลและยังไม่มี province key ที่ยืนยันแล้ว",
-        "f1_pppconnext": "มีชื่อพื้นที่แต่ระดับ geography ยังไม่ชัด จึงไม่ join เป็นจังหวัด",
     }
     section_source = {
         "f1_sradss_ppaos": "sra",
@@ -489,6 +545,9 @@ def build() -> None:
         "f2_learning_area_based": "area_based",
         "f3_housing_portal": "housing",
         "f3_ruamthiao_lamphun": "tourism",
+        "f1_pppconnext": "pppconnext",
+        "f2_apptech_mtr": "apptech_mtr",
+        "f3_city_capital_open_data": "city_capital",
     }
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -539,6 +598,8 @@ def build() -> None:
         housing_metadata_path,
         *housing_paths,
         *tourism_files,
+        SOURCE_INSIGHTS_PATH,
+        PROJECT_ROOT / "data/public/source_insights_manifest.json",
     ]
     index = {
         "schema_version": "2.0.0",

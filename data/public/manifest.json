@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-16T05:03:54.269766+00:00",
+  "generated_at": "2026-08-16T08:10:28.334592+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
@@ -222,18 +222,23 @@
       "path": "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_population_8596f1eb-57fc-4911-8da9-84cec1450725.csv",
       "bytes": 7737,
       "sha256": "f3d5f1db1447e6322b4cd6b7ef5ff1e2d0a6424c111b72b4736ce325333edc45"
+    },
+    {
+      "path": "dashboard_final/data/public/source_insights.json",
+      "bytes": 383022,
+      "sha256": "4677c7b5d86fe45f4f3bada6d86e192dcc931c43c9f386d2a72bfcf17b34d68d"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
-      "bytes": 87941,
-      "sha256": "bf362a52cba36ad8eb0465c289e36176791da7da1a22c30700ca4e97a09a36b7"
+      "bytes": 109763,
+      "sha256": "11868ca1e4d0e6e5620fed088e92414a25a23b2d46787481cef03689f41169f6"
     },
     {
       "path": "data/public/province_evidence.csv",
-      "bytes": 8619,
-      "sha256": "aea9e6461d1bce7e8ca1fd91751d4478079e5bb838a11b5ddd3d5f825ba74f30"
+      "bytes": 9611,
+      "sha256": "f3383028c1e794d0d07e89d512bfac2a6690f865baa5c8a39bec8c3a81fa7f3a"
     },
     {
       "path": "data/public/source_inventory.csv",
@@ -247,8 +252,8 @@
     },
     {
       "path": "data/public/thailand_provinces.geojson",
-      "bytes": 1547163,
-      "sha256": "1faf8c13bb7e11b2dec5149cb98a282f433383304b29988d2e90a0426b4128d2"
+      "bytes": 1566023,
+      "sha256": "a5e4f4e0734ed89e9bc00dce1a8d42557d349ff7f72b8b14836935845f902577"
     }
   ],
   "excluded_source_ids": [

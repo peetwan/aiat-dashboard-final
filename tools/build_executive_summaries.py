@@ -59,7 +59,9 @@ SRA_LABELS = {
 DIMENSION_LABELS = {
     "housing": "ที่อยู่อาศัยและกำลังซื้อ",
     "risk": "ความเสี่ยงและความเปราะบาง",
+    "livelihood": "ครัวเรือนและทุนดำรงชีพ",
     "development": "โครงการและนวัตกรรม",
+    "urban": "บริการเมืองและคุณภาพชีวิต",
     "culture": "ทุนวัฒนธรรม",
 }
 
@@ -72,9 +74,9 @@ SOURCE_JOIN_AUDIT = [
     },
     {
         "source_id": "f1_pppconnext",
-        "join_status": "not_province_scoped",
-        "dimension": None,
-        "serving_use": "source_inventory_only",
+        "join_status": "province_name_confirmed_in_curated_bi",
+        "dimension": "livelihood",
+        "serving_use": "province_aggregate_only",
     },
     {
         "source_id": "f2_culturalmap_university",
@@ -90,9 +92,9 @@ SOURCE_JOIN_AUDIT = [
     },
     {
         "source_id": "f2_apptech_mtr",
-        "join_status": "no_confirmed_province_key",
-        "dimension": None,
-        "serving_use": "source_inventory_only",
+        "join_status": "source_api_province_code",
+        "dimension": "development",
+        "serving_use": "province_aggregate_only",
     },
     {
         "source_id": "f2_apptech_mru",
@@ -108,9 +110,9 @@ SOURCE_JOIN_AUDIT = [
     },
     {
         "source_id": "f3_city_capital_open_data",
-        "join_status": "municipality_without_confirmed_province_key",
-        "dimension": None,
-        "serving_use": "source_inventory_only",
+        "join_status": "official_dla_municipality_crosswalk",
+        "dimension": "urban",
+        "serving_use": "municipality_records_linked_to_province",
     },
     {
         "source_id": "f3_ruamthiao_lamphun",
@@ -416,12 +418,58 @@ def build_risk_dimension(
     }
 
 
+def build_livelihood_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
+    records = briefing.get("sections", {}).get("pppconnext", {}).get("items", [])
+    if not records:
+        return None
+    preferred = (
+        "จำนวนครัวเรือน",
+        "กลุ่มที่ 1 อยู่ลำบาก",
+        "กลุ่มที่ 2 อยู่ยาก",
+        "กลุ่มที่ 3 อยู่พอได้",
+        "กลุ่มที่ 4 อยู่พอดี",
+        "TPMAP (2565)",
+        "PPPConnext (2564-2565)",
+    )
+    selected: list[dict[str, Any]] = []
+    used: set[str] = set()
+    for label in preferred:
+        record = next(
+            (
+                item
+                for item in records
+                if item.get("metric_name") == label and item.get("metric_name") not in used
+            ),
+            None,
+        )
+        value = safe_float((record or {}).get("value"))
+        if record and value is not None:
+            used.add(label)
+            selected.append({
+                "kind": "source_fact",
+                "title_th": label,
+                "detail_th": f"{value:,.0f} · หน่วยตามต้นทางยังต้องทบทวน",
+                "source_url": record.get("source_url"),
+            })
+    return {
+        "key": "livelihood",
+        "label_th": DIMENSION_LABELS["livelihood"],
+        "summary_th": "มีค่ารวมระดับจังหวัดจากกราฟ PPPConnext โดยคงแต่ละตัวชี้วัดแยกกัน",
+        "metrics": [],
+        "breakdowns": [],
+        "highlights": selected[:4],
+        "source_ids": ["f1_pppconnext"],
+        "context_th": "ไม่รวมค่าต่างหน่วยเป็นคะแนนเดียว",
+    }
+
+
 def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
     sections = briefing.get("sections", {})
     projects = sections.get("area_based", {}).get("items", [])
     innovations = sections.get("innovation", {}).get("items", [])
     tourism = sections.get("tourism", {}).get("items", [])
-    if not projects and not innovations and not tourism:
+    apptech = sections.get("apptech_mtr", {}).get("items", [])
+    if not projects and not innovations and not tourism and not apptech:
         return None
 
     project_districts = distribution(
@@ -434,6 +482,26 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         innovations, lambda item: item.get("category"), "innovation_categories", "หมวดนวัตกรรม"
     )
     breakdowns = [item for item in (project_districts, project_years, innovation_categories) if item]
+    if apptech:
+        activity = apptech[0]
+        breakdowns.append({
+            "key": "apptech_activity",
+            "kind": "scores",
+            "label_th": "กิจกรรม AppTech ที่ API ผูกกับจังหวัด",
+            "items": [
+                {
+                    "label_th": "ผู้ใช้ที่ลงทะเบียน",
+                    "value": activity.get("registered_users", 0),
+                    "display_value": f"{activity.get('registered_users', 0):,.0f}",
+                },
+                {
+                    "label_th": "การปฏิสัมพันธ์",
+                    "value": activity.get("interactions", 0),
+                    "display_value": f"{activity.get('interactions', 0):,.0f}",
+                },
+            ],
+            "note_th": "เป็นคนละ grain กับจำนวนผลงานนวัตกรรม",
+        })
 
     districts = [item["label_th"] for item in (project_districts or {}).get("items", [])[:2]]
     categories = [item["label_th"] for item in (innovation_categories or {}).get("items", [])[:2]]
@@ -481,6 +549,8 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         source_ids.append("f2_apptech_mru")
     if tourism:
         source_ids.append("f3_ruamthiao_lamphun")
+    if apptech:
+        source_ids.append("f2_apptech_mtr")
     return {
         "key": "development",
         "label_th": DIMENSION_LABELS["development"],
@@ -489,6 +559,46 @@ def build_development_dimension(briefing: dict[str, Any]) -> dict[str, Any] | No
         "breakdowns": breakdowns,
         "highlights": highlights,
         "source_ids": source_ids,
+    }
+
+
+def build_urban_dimension(briefing: dict[str, Any]) -> dict[str, Any] | None:
+    cities = briefing.get("sections", {}).get("city_capital", {}).get("items", [])
+    if not cities:
+        return None
+    signals = sorted(
+        (
+            {**signal, "city_name_th": city.get("city_name_th")}
+            for city in cities
+            for signal in city.get("signals", [])
+        ),
+        key=lambda item: item.get("attention_strength", 0),
+        reverse=True,
+    )
+    city_names = " และ ".join(city.get("city_name_th") or "ไม่ระบุเมือง" for city in cities)
+    if signals:
+        lead = signals[0]
+        summary = f"{lead['city_name_th']}: {lead['label_th']} {lead['comparison_th']}"
+    else:
+        summary = f"มีข้อมูลทุนเมืองระดับเทศบาลของ {city_names}"
+    highlights = [
+        {
+            "kind": "city",
+            "title_th": city.get("city_name_th") or "ไม่ระบุเมือง",
+            "detail_th": f"อำเภอ{city.get('district_name_th') or 'ไม่ระบุ'} · ตัวชี้วัด 39 รายการ",
+            "source_url": "https://evaluatethecity.netlify.app/",
+        }
+        for city in cities
+    ]
+    return {
+        "key": "urban",
+        "label_th": DIMENSION_LABELS["urban"],
+        "summary_th": summary,
+        "metrics": signals[:3],
+        "breakdowns": [],
+        "highlights": highlights,
+        "source_ids": ["f3_city_capital_open_data"],
+        "context_th": "เปรียบเทียบกับค่ากลางของ 18 เมืองใน snapshot เดียวกัน",
     }
 
 
@@ -594,7 +704,9 @@ def build_summary(
         for dimension in (
             build_housing_dimension(briefing, benchmarks),
             build_risk_dimension(briefing, benchmarks),
+            build_livelihood_dimension(briefing),
             build_development_dimension(briefing),
+            build_urban_dimension(briefing),
             build_culture_dimension(briefing),
         )
         if dimension

@@ -10,7 +10,7 @@ source registry + endpoint inventory
        +---------+----------+
        |                    |
        v                    v
-Gold projection        operational ingest
+Serving projection     operational ingest
 (build-time, read-only) (scheduled/runtime)
        |                    |
        v                    v
@@ -32,6 +32,7 @@ Public dashboard เปิดได้แม้ยังไม่รัน opera
 รันจากโฟลเดอร์ `dashboard_final`:
 
 ~~~powershell
+python tools/build_source_insights.py
 python tools/build_public_data.py
 python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
@@ -42,11 +43,12 @@ python tools/build_executive_summaries.py
 1. รับเฉพาะ 10 source ที่ owner อนุมัติให้เผยแพร่
 2. ตัด 2 wallet source ออกจาก public artifacts โดยอัตโนมัติ
 3. อ่าน merged evidence โดยไม่แก้ raw เดิม
-4. สร้าง Silver projection ที่คง field, หน่วย, เวลา และ URL ต้นทาง
-5. สร้าง source-shaped provincial briefing ที่คง record และ provenance ฉบับเต็ม
-6. สร้าง executive summary โดย clean, group และเปรียบเทียบเฉพาะ metric เดียวกัน ไม่สร้างคะแนนนโยบายใหม่
-7. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
-8. เขียน manifest พร้อม SHA-256 ของ output ทั้ง 77 จังหวัด
+4. audit geography ของ PPPConnext, AppTech MTR และ City Capital; แยก RMUTDB เป็น non-geo
+5. สร้าง source insight ที่คง field, หน่วย, เวลา และ URL ต้นทาง
+6. สร้าง source-shaped provincial briefing ที่คง record และ provenance ฉบับเต็ม
+7. สร้าง executive summary โดย clean, group และเปรียบเทียบเฉพาะ metric เดียวกัน ไม่สร้างคะแนนนโยบายใหม่
+8. สร้าง province boundary จากแหล่งทางการ 77 จังหวัด และ cultural point 5,258 จุด
+9. เขียน manifest พร้อม SHA-256 ของ output ทั้ง 77 จังหวัด
 
 ไฟล์สำคัญ:
 
@@ -57,6 +59,7 @@ python tools/build_executive_summaries.py
 - `cultural_points.geojson` — จุดข้อมูลวัฒนธรรมสำหรับ cluster layer
 - `provincial_briefings/{code}.json` — ค่าจริง รายการจริง source coverage และ provenance รายจังหวัด
 - `executive_summaries/{code}.json` — สรุปรายมิติที่ clean แล้ว ไม่มี raw rows และพร้อมแสดงผลทันที
+- `source_insights.json` — ภาพรวม 4 source, distributions และ geography link ที่ audit แล้ว
 
 ## 2. Public API
 
@@ -71,6 +74,7 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 - `/map/provinces`
 - `/map/cultural-points`
 - `/catalog`
+- `/source-insights`
 
 ไฟล์ projection ยังดาวน์โหลดตรงได้จาก `/downloads/` และไม่ต้องเปิด raw payload gate
 
@@ -88,7 +92,7 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 
 เมื่อผู้ใช้คลิกจังหวัด frontend จะเรียก `/api/public/v1/provinces/{code}/summary` ซึ่งเป็น serving projection ขนาดเล็กที่สรุปและเปรียบเทียบไว้แล้ว ส่วน `/briefing` ฉบับเต็มจะโหลดเมื่อเปิดแท็บโครงการเท่านั้น
 
-ชั้นรายมิติแสดงทุกกลุ่มพร้อมอ่านโดยไม่ใช้ dropdown หรือ raw cells ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
+ชั้นรายมิติแสดงทุกกลุ่มพร้อมอ่านโดยไม่ใช้ dropdown หรือ raw cells หน้า `/insights` แสดงข้อมูลข้ามพื้นที่และ RMUTDB ส่วน source ที่ไม่มีจังหวัดจะระบุสถานะโดยไม่แทนด้วย `0` และไม่เดา geography
 
 ## 5. Source routing
 
@@ -101,6 +105,6 @@ API ใต้ `/api/public/v1` เป็น read-only และเปิด CORS
 
 1. อัปเดต source ตาม registry และเก็บ raw run ใหม่
 2. รวม/validate ที่ data layer หลัก
-3. รัน `tools/build_public_data.py`, `tools/build_provincial_briefings.py` และ `tools/build_executive_summaries.py`
+3. รัน `tools/build_source_insights.py`, `tools/build_public_data.py`, `tools/build_provincial_briefings.py` และ `tools/build_executive_summaries.py`
 4. ตรวจ diff ของ manifest, Gold values และ provenance URL
 5. รัน test, เปิดดู desktop/mobile แล้วจึง deploy

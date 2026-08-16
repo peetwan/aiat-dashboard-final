@@ -19,6 +19,7 @@ from app.public_data import (
     province_boundaries,
     provincial_briefing,
     public_catalog,
+    source_insights,
 )
 from app.settings import PROJECT_ROOT, get_settings
 
@@ -65,6 +66,15 @@ def dashboard(request: Request):
     )
 
 
+@app.get("/insights", response_class=HTMLResponse)
+def insights_dashboard(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="insights.html",
+        context={"app_name": settings.app_name, "app_env": settings.app_env},
+    )
+
+
 @app.get("/health")
 def health():
     with SessionLocal() as session:
@@ -91,6 +101,12 @@ def public_data_overview():
         "metrics": catalog["metrics"],
         "methodology": catalog["methodology"],
     }
+
+
+@app.get("/api/public/v1/source-insights", tags=["Public data"])
+def public_source_insights():
+    """Return cleaned source dashboards and audited geography links."""
+    return source_insights()
 
 
 @app.get("/api/public/v1/sources", tags=["Public data"])

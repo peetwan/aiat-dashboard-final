@@ -16,6 +16,7 @@ Public Executive Dashboard แบบ map-first สำหรับเปิดข
 - โหลด executive summary ขนาดเล็กก่อน และโหลด Gold JSON ฉบับเต็มเฉพาะเมื่อเปิดดูรายการโครงการ
 - สถานะครบทั้ง 10 URL ว่า `มีข้อมูล`, `ไม่มีรายการจังหวัดนี้` หรือ `ไม่ผูกจังหวัด`
 - จุดวัฒนธรรมสาธารณะ 5,258 จุดแบบเปิดปิดได้
+- หน้า `/insights` สำหรับอ่าน PPPConnext, AppTech MTR, City Capital และ RMUTDB โดยไม่ต้องเลือกจังหวัด
 - Public JSON API, CSV, GeoJSON และ build manifest พร้อม SHA-256
 - Operational API/ingestion/database เดิมสำหรับผู้ดูแลระบบ
 
@@ -35,12 +36,15 @@ dashboard_final/
 │  └─ ingestion_plans.json allowlist ของ API ที่เรียกได้
 ├─ data/
 │  ├─ public/             ไฟล์ aggregate ที่ push/deploy ได้
-│  │  └─ provincial_briefings/ Gold JSON ครบ 77 จังหวัด
+│  │  ├─ source_insights.json  ข้อมูล clean สำหรับหน้าภาพรวม
+│  │  └─ provincial_briefings/ serving JSON ครบ 77 จังหวัด
 │  ├─ snapshots/          raw fallback บนเครื่อง ไม่ push Git
 │  └─ runtime/            database/raw fetch runs ไม่ push Git
 ├─ tools/
+│  ├─ build_source_insights.py audit/clean/join 4 source เพิ่มเติม
 │  ├─ build_public_data.py สร้าง map/catalog projection
-│  └─ build_provincial_briefings.py สร้าง Gold API data จากค่าจริง
+│  ├─ build_provincial_briefings.py สร้าง serving data รายจังหวัด
+│  └─ build_executive_summaries.py ย่อยเป็นมิติสำหรับผู้บริหาร
 ├─ tests/                 API, privacy และ publication tests
 ├─ WORKFLOW.md            data flow ตั้งแต่ source ถึง dashboard
 ├─ DEPLOY_RAILWAY.md      วิธี deploy public-only หรือ full pipeline
@@ -71,6 +75,8 @@ uvicorn app.main:app --reload
 | `/api/public/v1/provinces` | public evidence projection รายจังหวัด |
 | `/api/public/v1/provinces/{code}` | จังหวัดเดียวด้วยรหัส 2 หลัก |
 | `/api/public/v1/provinces/{code}/briefing` | Gold projection: ค่าจริงและรายการครบของจังหวัด |
+| `/api/public/v1/provinces/{code}/summary` | ข้อมูลรายมิติที่ clean และ benchmark แล้ว |
+| `/api/public/v1/source-insights` | ภาพรวม 4 source พร้อมผล audit และ geography links |
 | `/api/public/v1/map/provinces` | GeoJSON ขอบเขต 77 จังหวัด + metric properties |
 | `/api/public/v1/map/cultural-points` | GeoJSON จุดวัฒนธรรม 5,258 จุด |
 | `/docs` | OpenAPI explorer |
@@ -82,8 +88,10 @@ uvicorn app.main:app --reload
 รันจาก workspace หลักที่มี merged evidence:
 
 ~~~powershell
+python tools/build_source_insights.py
 python tools/build_public_data.py
 python tools/build_provincial_briefings.py
+python tools/build_executive_summaries.py
 ~~~
 
 หากต้องการ refresh ขอบเขตจังหวัดจาก ArcGIS REST ของกรมป้องกันและบรรเทาสาธารณภัย:
@@ -92,7 +100,7 @@ python tools/build_provincial_briefings.py
 python tools/build_public_data.py --refresh-boundaries
 ~~~
 
-สอง script จะตรวจ public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และสร้าง Gold JSON พร้อม byte size/SHA-256 รายจังหวัด
+pipeline จะตรวจ public source ที่อนุมัติ 10 แหล่ง, ขอบเขตครบ 77 จังหวัด และสร้าง serving JSON พร้อม byte size/SHA-256 รายจังหวัด
 
 ## Operational ingestion
 

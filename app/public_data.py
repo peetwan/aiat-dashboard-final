@@ -31,6 +31,10 @@ def cultural_points() -> dict[str, Any]:
     return load_public_file("cultural_points.geojson")
 
 
+def source_insights() -> dict[str, Any]:
+    return load_public_file("source_insights.json")
+
+
 @lru_cache(maxsize=77)
 def provincial_briefing(province_code: str) -> dict[str, Any]:
     code = province_code.strip().zfill(2)

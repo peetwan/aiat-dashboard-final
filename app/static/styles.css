@@ -235,6 +235,7 @@
   }
   .live-state i { width: 7px; height: 7px; background: var(--mint); border-radius: 50%; box-shadow: 0 0 0 5px rgba(114, 239, 173, 0.08); }
   .header-meta a { color: var(--night); background: var(--mint); border-color: var(--mint); }
+  .header-meta .insights-link { color: #e8f6ee; background: rgba(7, 20, 16, 0.82); border-color: var(--line); }
 
   .map-prompt {
     position: fixed;

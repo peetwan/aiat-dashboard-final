@@ -2,54 +2,48 @@
 
 อัปเดต: 2026-08-16
 
-## ข้อค้นพบ
+## ผลล่าสุด
 
-- Public catalog มี 10 source; 5 source ใช้ API-first และ 5 source ใช้ snapshot ที่มี provenance
-- 6 source เชื่อมเข้าระดับจังหวัดได้: SRA-DSS, Cultural Map, AppTech MRU, Area-Based, Ruam Thiao และ Thai Housing Portal
-- 4 source ยังไม่มี province key ที่ยืนยันแล้ว จึงอยู่ใน source inventory เท่านั้น: PPPConnext, RMUTDB, AppTech MTR และ City Capital Open Data
+- Public catalog มี 10 source; 9 source เชื่อมพื้นที่ได้ด้วย key ที่ตรวจแล้ว
+- PPPConnext เชื่อมได้ 21 จังหวัดจาก curated BI aggregate 660 แถว
+- AppTech MTR มี API aggregate ครบ 77 จังหวัด แต่แยกผู้ใช้ การปฏิสัมพันธ์ และผลงานออกจากกัน
+- City Capital เชื่อมเทศบาล 18/18 แห่งกับ 16 จังหวัดด้วยทะเบียน DLA
+- RMUTDB ไม่ผูกจังหวัด เพราะเจ้าของผลงานไม่ใช่สถานที่ใช้งานนวัตกรรม
 - Wallet 2 source เป็น restricted local-only และไม่อยู่ใน public artifact หรือ API
-- ปัญหา UI เดิมเกิดจากการส่ง Housing resource หลายร้อยแถวต่อจังหวัดให้ browser แสดงเป็น dropdown แทนการสรุปใน data pipeline
 
-## มิติที่ใช้ใน Serving layer
+## มิติใน Serving layer
 
-| มิติ | ข้อมูลที่รวม | การย่อยข้อมูล |
+| มิติ | ข้อมูล | วิธีอ่าน |
 |---|---|---|
-| ที่อยู่อาศัยและกำลังซื้อ | ราคาบ้านต่อรายได้, การผ่านสินเชื่อ, ที่อยู่อาศัยแออัด, แนวโน้มประชากร | เลือกค่าระดับจังหวัด, เปรียบเทียบกับ median ของจังหวัดที่มี metric เดียวกัน, เก็บ time series ล่าสุด |
-| ความเสี่ยงและความเปราะบาง | พื้นที่เสี่ยงน้ำท่วมระดับ 4–5, คะแนน 5 มิติจาก SRA-DSS | รวมระดับความเสี่ยง 4 และ 5 ตาม derivation เดิม; คะแนน SRA คงสถานะ provisional และไม่ตีความทิศทางแทนต้นทาง |
-| โครงการและนวัตกรรม | Area-Based projects, AppTech MRU, Ruam Thiao เฉพาะลำพูน | จัดกลุ่มปีงบประมาณ พื้นที่ดำเนินงาน หมวดนวัตกรรม และเลือกชื่อรายการล่าสุดสำหรับอ่านต่อ |
-| ทุนวัฒนธรรม | Cultural Map records | จัดกลุ่มหมวด อำเภอ และชนิดทุนวัฒนธรรม; แสดงข้อความประกอบสถานะจากต้นทางโดยไม่ตีความรหัสความเสี่ยงเอง |
+| ที่อยู่อาศัยและกำลังซื้อ | ราคาบ้านต่อรายได้, การผ่านสินเชื่อ, ความแออัด, ประชากร | เทียบ median ของจังหวัดที่มี metric เดียวกัน |
+| ความเสี่ยงและความเปราะบาง | น้ำท่วม, SRA-DSS 5 มิติ | คงคะแนน provisional และไม่ตีความทิศทางแทนต้นทาง |
+| ครัวเรือนและทุนดำรงชีพ | PPPConnext aggregate | แสดงค่าแยก metric และ widget; ไม่รวมต่างหน่วย |
+| โครงการและนวัตกรรม | Area-Based, AppTech MRU, AppTech MTR, Ruam Thiao | แยกรายการผลงานออกจาก aggregate ผู้ใช้/กิจกรรม |
+| บริการเมืองและคุณภาพชีวิต | City Capital 39 metric | คงระดับเทศบาล; เทียบ median ของ 18 เมืองใน snapshot |
+| ทุนวัฒนธรรม | Cultural Map | จัดกลุ่มหมวด อำเภอ และชนิดทุนวัฒนธรรม |
 
 ## Join contract
 
-- ใช้รหัสจังหวัดเป็นหลักเมื่อ source มีรหัสยืนยันแล้ว
-- ชื่อจังหวัดใช้ผ่าน crosswalk 77 จังหวัดที่ materialize ใน pipeline เท่านั้น ไม่ join ด้วยชื่อแบบ ad hoc ในหน้าเว็บ
-- Source ระดับเทศบาลหรือไม่มี geography key จะไม่ถูกบังคับเข้าจังหวัด
+- ใช้รหัสจังหวัดจากต้นทางเมื่อมี
+- ชื่อจังหวัดผ่าน crosswalk 77 จังหวัดใน pipeline เท่านั้น
+- เทศบาลใช้ exact `ประเภท + ชื่อ` กับทะเบียน DLA
 - สถานะไม่มี record ไม่ถูกแทนด้วยศูนย์
+- ค่า aggregate ระดับเมืองไม่ถูกยกเป็น KPI จังหวัด
 
-## Serving pipeline ใหม่
+## Pipeline
 
 ~~~text
-source-shaped provincial briefing
-            |
-            v
-metric selection + province join audit
-            |
-            v
-same-metric provincial median
-            |
-            v
-clean dimension summaries + distributions + highlights
-            |
-            v
-/api/public/v1/provinces/{code}/summary
+public API / immutable raw snapshot
+  clean schema + keep source grain
+  audited geography crosswalk
+  same-metric median where valid
+  source insights + provincial briefing
+  compact executive summary + public API
 ~~~
 
-`tools/build_executive_summaries.py` สร้างไฟล์ compact แยก 77 จังหวัดไว้ใน
-`data/public/executive_summaries/` หน้าเว็บโหลด summary นี้ก่อน ส่วน briefing ฉบับเต็มจะโหลดเมื่อผู้ใช้เปิดแท็บโครงการเท่านั้น
+## ขอบเขต
 
-## ขอบเขตการตีความ
-
-- comparison ใช้ค่ากลางของจังหวัดที่มีข้อมูลใน metric เดียวกัน ไม่ใช่เกณฑ์นโยบาย
-- ค่าใกล้ median หมายถึงต่างไม่เกิน 10% ตามกติกาของ serving view
 - ไม่มี composite score, budget score หรือ ranking จังหวัดที่สร้างขึ้นใหม่
-- ทุก metric ยังคง source URL และสถานะ candidate/needs_review
+- `near median` ใช้ส่วนต่างไม่เกิน 10% เฉพาะ metric เดียวกัน
+- ทุก metric คง source URL, provenance และสถานะ candidate/needs_review
+- `as_of` ที่ต้นทางไม่ระบุจะแสดงว่าไม่ระบุ

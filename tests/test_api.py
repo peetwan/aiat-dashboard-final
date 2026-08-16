@@ -32,8 +32,17 @@ def test_dashboard_and_endpoint_inventory():
         assert "ความครอบคลุมข้อมูล" in page.text
         assert 'data-panel-tab="dimensions"' in page.text
         assert "ภาพสถานการณ์รายมิติ" in page.text
+        assert 'href="/insights"' in page.text
         assert "สำรวจรายละเอียดตามมิติ" not in page.text
         assert "↗" not in page.text
+
+        insights_page = client.get("/insights")
+        assert insights_page.status_code == 200
+        assert "AIAT Data Insights" in insights_page.text
+        assert "โดยไม่ต้องไล่เปิด" in insights_page.text
+        assert "ทีละชุด" in insights_page.text
+        assert "select" not in insights_page.text.lower()
+        assert "→" not in insights_page.text
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
@@ -77,13 +86,13 @@ def test_public_projection_and_downloads_are_available():
         assert payload["summary"]["geocoded_cultural_points"] == 5258
 
         provinces = client.get("/api/public/v1/provinces?has_evidence=true").json()
-        assert len(provinces) == 74
+        assert len(provinces) == 77
         assert all(row["quality_status"] == "candidate_needs_review" for row in provinces)
 
         roi_et = client.get("/api/public/v1/provinces/45")
         assert roi_et.status_code == 200
         assert roi_et.json()["province_name_th"] == "ร้อยเอ็ด"
-        assert roi_et.json()["evidence_source_count"] == 5
+        assert roi_et.json()["evidence_source_count"] == 8
 
         songkhla = client.get("/api/public/v1/provinces/90")
         assert songkhla.status_code == 200
@@ -114,6 +123,7 @@ def test_public_projection_and_downloads_are_available():
         coverage = {item["source_id"]: item for item in songkhla_briefing["source_coverage"]}
         assert coverage["f3_housing_portal"]["status"] == "available"
         assert coverage["f2_rmutdb"]["status"] == "not_province_scoped"
+        assert coverage["f2_apptech_mtr"]["status"] == "available"
         assert "f2_wallet_all_realtime" not in coverage
 
         summary_response = client.get("/api/public/v1/provinces/90/summary")
@@ -122,7 +132,7 @@ def test_public_projection_and_downloads_are_available():
         executive = summary_response.json()
         assert executive["schema_version"] == "1.0.0"
         assert executive["province"]["province_name_th"] == "สงขลา"
-        assert executive["coverage"]["available_source_count"] == 4
+        assert executive["coverage"]["available_source_count"] == 5
         dimensions = {item["key"]: item for item in executive["dimensions"]}
         assert set(dimensions) == {"housing", "risk", "development", "culture"}
         assert any(metric["key"] == "house_price_income_ratio" for metric in dimensions["housing"]["metrics"])
@@ -132,6 +142,26 @@ def test_public_projection_and_downloads_are_available():
         assert "f2_wallet_all_realtime" not in {
             item["source_id"] for item in executive["source_coverage"]
         }
+
+        source_insights = client.get("/api/public/v1/source-insights")
+        assert source_insights.status_code == 200
+        insight_payload = source_insights.json()
+        assert insight_payload["audit_summary"]["geo_linkable_source_ids"] == [
+            "f1_pppconnext",
+            "f2_apptech_mtr",
+            "f3_city_capital_open_data",
+        ]
+        assert insight_payload["audit_summary"]["non_geo_source_ids"] == ["f2_rmutdb"]
+        assert insight_payload["sources"]["f1_pppconnext"]["coverage"]["linked_provinces"] == 21
+        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["registered_users"] == 2356
+        assert insight_payload["sources"]["f3_city_capital_open_data"]["coverage"]["linked_cities"] == 18
+        assert insight_payload["sources"]["f2_rmutdb"]["statistics"]["detailed_records"] == 1006
+
+        lampang = client.get("/api/public/v1/provinces/52/summary").json()
+        lampang_dimensions = {item["key"]: item for item in lampang["dimensions"]}
+        assert "livelihood" in lampang_dimensions
+        assert "urban" in lampang_dimensions
+        assert lampang_dimensions["urban"]["metrics"][0]["benchmark_label_th"] == "ค่ากลาง 18 เมือง"
 
         boundary = client.get("/api/public/v1/map/provinces").json()
         assert boundary["type"] == "FeatureCollection"

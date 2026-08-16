@@ -100,7 +100,8 @@ function metricPaint() {
     2, "#21523f",
     3, "#2f7859",
     4, "#48ac7a",
-    5, "#75e7ab",
+    6, "#75e7ab",
+    8, "#baf3d2",
   ];
   return {
     baseColor: richnessColor,

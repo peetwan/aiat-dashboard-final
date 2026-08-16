@@ -144,6 +144,10 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "innovation_records": 0,
             "cultural_records": 0,
             "housing_observations": 0,
+            "pppconnext_aggregate_rows": 0,
+            "apptech_registered_users": 0,
+            "apptech_interactions": 0,
+            "city_capital_cities": 0,
             "evidence_sources": [],
             "evidence_source_count": 0,
             "quality_status": "candidate_needs_review",
@@ -242,12 +246,27 @@ def build_public_data(refresh_boundaries: bool) -> None:
             if code in profiles:
                 profiles[code]["housing_observations"] += 1
 
+    # Audited source-level pipeline: retain the original grain for each geography link.
+    source_insights_path = OUTPUT_DIR / "source_insights.json"
+    input_paths.append(source_insights_path)
+    source_insights = read_json(source_insights_path)
+    for code, links in source_insights["province_links"].items():
+        if code not in profiles:
+            continue
+        profiles[code]["pppconnext_aggregate_rows"] = len(links.get("f1_pppconnext") or [])
+        apptech = links.get("f2_apptech_mtr") or {}
+        profiles[code]["apptech_registered_users"] = apptech.get("registered_users", 0)
+        profiles[code]["apptech_interactions"] = apptech.get("interactions", 0)
+        profiles[code]["city_capital_cities"] = len(links.get("f3_city_capital_open_data") or [])
+
     metric_sources = {
         "sra_overall_score": "f1_sradss_ppaos",
         "area_based_participant_records": "f2_learning_area_based",
         "innovation_records": "f2_apptech_mru",
         "cultural_records": "f2_culturalmap_university",
         "housing_observations": "f3_housing_portal",
+        "pppconnext_aggregate_rows": "f1_pppconnext",
+        "city_capital_cities": "f3_city_capital_open_data",
     }
     numeric_metrics = list(metric_sources)
     metric_max = {
@@ -260,13 +279,17 @@ def build_public_data(refresh_boundaries: bool) -> None:
             for metric, source_id in metric_sources.items()
             if profile[metric] not in (None, 0)
         ]
+        # AppTech's public province API explicitly returns all 77 provinces, including zero activity.
+        sources.append("f2_apptech_mtr")
         profile["evidence_sources"] = sources
         profile["evidence_source_count"] = len(sources)
         profile["visual_index"] = {
             metric: round((profile[metric] or 0) / metric_max[metric], 6)
             for metric in numeric_metrics
         }
-        profile["visual_index"]["evidence_source_count"] = round(len(sources) / 5, 6)
+        profile["visual_index"]["evidence_source_count"] = round(
+            len(sources) / (len(metric_sources) + 1), 6
+        )
 
         props = boundary_by_code[code]["properties"]
         props.update(
@@ -280,6 +303,10 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "innovation_records": profile["innovation_records"],
                 "cultural_records": profile["cultural_records"],
                 "housing_observations": profile["housing_observations"],
+                "pppconnext_aggregate_rows": profile["pppconnext_aggregate_rows"],
+                "apptech_registered_users": profile["apptech_registered_users"],
+                "apptech_interactions": profile["apptech_interactions"],
+                "city_capital_cities": profile["city_capital_cities"],
                 "idx_evidence_source_count": profile["visual_index"]["evidence_source_count"],
                 **{f"idx_{metric}": profile["visual_index"][metric] for metric in numeric_metrics},
             }
@@ -375,6 +402,26 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "unit": "observations",
                 "semantic_status": "technical_observation_count",
             },
+            "pppconnext_aggregate_rows": {
+                "label_th": "ตัวชี้วัดครัวเรือนระดับจังหวัดจาก PPPConnext",
+                "unit": "aggregate rows",
+                "semantic_status": "candidate_aggregate_rows",
+            },
+            "apptech_registered_users": {
+                "label_th": "ผู้ใช้ที่ API AppTech ผูกกับจังหวัด",
+                "unit": "users",
+                "semantic_status": "candidate_source_aggregate",
+            },
+            "apptech_interactions": {
+                "label_th": "การปฏิสัมพันธ์ที่ API AppTech ผูกกับจังหวัด",
+                "unit": "interactions",
+                "semantic_status": "candidate_source_aggregate",
+            },
+            "city_capital_cities": {
+                "label_th": "เทศบาลในชุด City Capital",
+                "unit": "cities",
+                "semantic_status": "municipality_records_not_province_metrics",
+            },
         },
         "sources": source_inventory,
         "provinces": sorted(profiles.values(), key=lambda row: row["province_name_th"]),
@@ -417,6 +464,10 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "innovation_records",
         "cultural_records",
         "housing_observations",
+        "pppconnext_aggregate_rows",
+        "apptech_registered_users",
+        "apptech_interactions",
+        "city_capital_cities",
         "quality_status",
     ]
     with province_csv.open("w", encoding="utf-8-sig", newline="") as handle:
