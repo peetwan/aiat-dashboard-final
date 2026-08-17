@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="AIAT Database Explorer — แผนที่ความสัมพันธ์ของ 28 แหล่งข้อมูลและ Serving Database แบบ read-only" />
+    <title>AIAT Database Explorer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="AIAT Database Explorer">
+        <span class="brand-mark">DB</span>
+        <span>
+          <strong>AIAT Database Explorer</strong>
+          <small>28 Sources · Live Serving Map</small>
+        </span>
+      </a>
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a href="#sources">28 แหล่ง</a>
+        <a href="#pipeline">เส้นทางข้อมูล</a>
+        <a href="#database">ตาราง Database</a>
+        <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero shell">
+        <div class="hero-copy">
+          <div class="eyebrow"><span id="live-dot" class="live-dot"></span><span id="live-label">กำลังเชื่อมต่อ Database…</span></div>
+          <h1>ดูว่าแต่ละ URL<br /><em>เชื่อมกับอะไรอยู่</em></h1>
+          <p class="hero-lead">
+            หน้าอ่านอย่างเดียวสำหรับอธิบาย 28 แหล่งข้อมูล สิ่งที่เรานำมาใช้ Grain ของแต่ละชุด
+            Endpoint ที่เชื่อมอยู่ และตาราง PostgreSQL ที่ข้อมูลไปถึง
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#sources">ดูทั้ง 28 แหล่ง</a>
+            <a class="secondary-action" href="#database">ดูโครงสร้าง Database</a>
+          </div>
+          <p class="realtime-note">
+            “Realtime” ในหน้านี้หมายถึงอ่านสถานะจาก PostgreSQL ตัวเดียวกับ Dashboard ทุก
+            {{ refresh_interval_seconds }} วินาที ไม่ได้ยิงทั้ง 28 เว็บไซต์ทุกครั้งที่เปิดหน้า
+          </p>
+        </div>
+
+        <aside class="hero-panel" aria-label="สถานะ Database">
+          <div class="panel-header">
+            <span>Serving database</span>
+            <span id="backend-badge" class="status-pill neutral">ตรวจสอบ…</span>
+          </div>
+          <div class="database-orbit">
+            <div class="orbit orbit-a"></div>
+            <div class="orbit orbit-b"></div>
+            <div class="db-cylinder">
+              <span class="db-top"></span>
+              <strong>PostgreSQL</strong>
+              <small>shared · read only</small>
+            </div>
+            <span class="satellite satellite-a">API</span>
+            <span class="satellite satellite-b">JSON</span>
+            <span class="satellite satellite-c">GIS</span>
+          </div>
+          <dl class="live-facts">
+            <div><dt>ตรวจล่าสุด</dt><dd id="checked-at">—</dd></div>
+            <div><dt>Public artifacts</dt><dd id="artifact-inline">—</dd></div>
+            <div><dt>Candidate records</dt><dd id="candidate-inline">—</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="stats shell" aria-label="ภาพรวมข้อมูล">
+        <article class="stat-card accent-blue"><span>แหล่งข้อมูลทั้งหมด</span><strong id="source-total">—</strong><small>ทะเบียน URL</small></article>
+        <article class="stat-card accent-green"><span>Public candidate</span><strong id="public-total">—</strong><small>แสดง values พร้อมคำเตือน</small></article>
+        <article class="stat-card accent-yellow"><span>Metadata only</span><strong id="metadata-total">—</strong><small>แสดงสถานะ ยังไม่มี values</small></article>
+        <article class="stat-card accent-red"><span>Restricted local</span><strong id="restricted-total">—</strong><small>ไม่ส่ง values ขึ้น Cloud</small></article>
+        <article class="stat-card accent-purple"><span>Public artifacts</span><strong id="artifact-total">—</strong><small>Dashboard อ่านจริง</small></article>
+        <article class="stat-card accent-cyan"><span>Spatial features</span><strong id="spatial-total">—</strong><small>Housing GIS</small></article>
+      </section>
+
+      <section id="pipeline" class="section shell">
+        <div class="section-heading">
+          <div><span class="kicker">DATA JOURNEY</span><h2>เส้นทางจาก URL ถึง Dashboard</h2></div>
+          <p>แต่ละขั้นมีหน้าที่คนละอย่าง และ Candidate staging จะไม่ถูกเผยแพร่เองอัตโนมัติ</p>
+        </div>
+
+        <div class="pipeline-grid">
+          <article class="pipeline-step step-source"><span class="step-number">01</span><div class="step-icon">URL</div><h3>Source</h3><p>28 เว็บไซต์, API, CKAN และ Snapshot</p></article>
+          <span class="pipeline-arrow">→</span>
+          <article class="pipeline-step step-control"><span class="step-number">02</span><div class="step-icon">ID</div><h3>Control</h3><p><code>sources</code> + <code>endpoints</code></p></article>
+          <span class="pipeline-arrow">→</span>
+          <article class="pipeline-step step-stage"><span class="step-number">03</span><div class="step-icon">QA</div><h3>Candidate</h3><p><code>ingestion_runs</code> + <code>dashboard_records</code></p></article>
+          <span class="pipeline-arrow">→</span>
+          <article class="pipeline-step step-build"><span class="step-number">04</span><div class="step-icon">✓</div><h3>Build & Review</h3><p>Grain · Privacy · Geography · Hash</p></article>
+          <span class="pipeline-arrow">→</span>
+          <article class="pipeline-step step-serve"><span class="step-number">05</span><div class="step-icon">DB</div><h3>Serving</h3><p><code>public_artifacts</code> + tables เฉพาะทาง</p></article>
+          <span class="pipeline-arrow">→</span>
+          <article class="pipeline-step step-ui"><span class="step-number">06</span><div class="step-icon">UI</div><h3>FastAPI</h3><p>Public API → Dashboard 77 จังหวัด</p></article>
+        </div>
+
+        <div class="guardrail">
+          <strong>ประตูควบคุม:</strong>
+          <span><code>dashboard_records</code> เป็นที่พัก Candidate เท่านั้น</span>
+          <span>ต้อง Build + Test + Review ก่อนเข้า <code>public_artifacts</code></span>
+          <span>ทุก Public source ตอนนี้ยังเป็น candidate/needs_review ไม่ใช่ KPI รับรอง</span>
+        </div>
+      </section>
+
+      <section id="sources" class="section shell">
+        <div class="section-heading source-heading">
+          <div><span class="kicker">SOURCE CATALOG</span><h2>ทั้ง 28 แหล่ง เราเอาอะไรมา</h2></div>
+          <div class="source-summary" id="source-summary">กำลังโหลด…</div>
+        </div>
+
+        <div class="filters" aria-label="ตัวกรองแหล่งข้อมูล">
+          <label class="search-box">
+            <span>⌕</span>
+            <input id="search-input" type="search" placeholder="ค้นหาชื่อ, source ID, ข้อมูล หรือ URL…" autocomplete="off" />
+          </label>
+          <label>
+            <span class="sr-only">กรองฝ่าย</span>
+            <select id="group-filter"><option value="">ทุกฝ่าย</option></select>
+          </label>
+          <label>
+            <span class="sr-only">กรองนโยบาย</span>
+            <select id="policy-filter">
+              <option value="">ทุกสถานะเผยแพร่</option>
+              <option value="project_owner_approved_public">Public candidate</option>
+              <option value="metadata_only">Metadata only</option>
+              <option value="restricted_local_only">Restricted local-only</option>
+            </select>
+          </label>
+          <label>
+            <span class="sr-only">กรองการเชื่อมต่อ</span>
+            <select id="connection-filter">
+              <option value="">ทุกการเชื่อมต่อ</option>
+              <option value="api_connected">API connected</option>
+              <option value="snapshot_connected">Snapshot connected</option>
+              <option value="public_projection">Public projection</option>
+              <option value="catalog_only">Catalog only</option>
+              <option value="local_only">Local only</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table class="source-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>แหล่ง / URL</th>
+                <th>เราเอาอะไรมา</th>
+                <th>Grain — 1 แถวแทนอะไร</th>
+                <th>สถานะเชื่อมต่อ</th>
+                <th>ไปตารางไหน</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="source-body">
+              <tr><td colspan="7" class="loading-cell">กำลังอ่าน Source Catalog จาก Database…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="empty-state" class="empty-state" hidden>ไม่พบแหล่งข้อมูลที่ตรงกับตัวกรอง</p>
+      </section>
+
+      <section id="database" class="section shell">
+        <div class="section-heading">
+          <div><span class="kicker">LIVE SCHEMA</span><h2>ตาราง Database เชื่อมกันอย่างไร</h2></div>
+          <p>จำนวนแถวด้านล่างอ่านจาก PostgreSQL ปัจจุบัน ส่วน spatial/demand ใช้จำนวนจาก validated snapshot contract</p>
+        </div>
+
+        <div class="schema-layout">
+          <div id="schema-cards" class="schema-cards" aria-live="polite"></div>
+          <aside class="relationship-panel">
+            <h3>Relationship map</h3>
+            <p class="relationship-intro">เส้นเชื่อมใช้ <code>source_id</code>, snapshot/layer key หรือขั้นตอน build ที่มี contract ชัดเจน</p>
+            <div id="relationship-list" class="relationship-list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section shell glossary-section">
+        <div class="section-heading">
+          <div><span class="kicker">ELI5 GLOSSARY</span><h2>คำศัพท์ที่ต้องรู้</h2></div>
+        </div>
+        <div class="glossary-grid">
+          <article><strong>Grain</strong><p>หนึ่งแถวแทนอะไร เช่น ผู้เข้าร่วมหนึ่งราย โครงการหนึ่งโครงการ หรือ GIS feature หนึ่งชิ้น</p></article>
+          <article><strong>Candidate</strong><p>ข้อมูลที่ใช้ทดสอบ/แสดงพร้อมคำเตือนได้ แต่ความหมายยังไม่ได้รับรองเป็น KPI</p></article>
+          <article><strong>Artifact</strong><p>ชุด JSON ที่ปรุงและตรวจเสร็จแล้ว พร้อมให้ API และ Dashboard อ่าน</p></article>
+          <article><strong>Endpoint</strong><p>ประตู API หรือ URL ที่ระบบใช้ขอข้อมูลจากเว็บไซต์ต้นทาง</p></article>
+          <article><strong>Provenance</strong><p>สูติบัตรของข้อมูล บอกว่ามาจาก source, endpoint, รอบดึง และหลักฐานใด</p></article>
+          <article><strong>Snapshot</strong><p>ภาพถ่ายข้อมูล ณ ช่วงเวลาหนึ่ง ใช้เมื่อไม่ควรหรือไม่สามารถดึง API สดได้ตลอด</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer shell">
+      <div><strong>AIAT Database Explorer</strong><span>Read-only metadata & connection status</span></div>
+      <div><span id="footer-refresh">Auto-refresh ทุก {{ refresh_interval_seconds }} วินาที</span><a href="/docs" target="_blank">API docs ↗</a></div>
+    </footer>
+
+    <dialog id="source-dialog" class="source-dialog">
+      <div class="dialog-shell">
+        <button id="dialog-close" class="dialog-close" aria-label="ปิด">×</button>
+        <div id="dialog-content"></div>
+      </div>
+    </dialog>
+
+    <script>
+      window.EXPLORER_CONFIG = { refreshSeconds: {{ refresh_interval_seconds }} };
+    </script>
+    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+  </body>
+</html>

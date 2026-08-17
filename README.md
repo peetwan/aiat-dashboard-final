@@ -20,6 +20,8 @@
 
 Dashboard มีหน้าแผนที่จังหวัด หน้า `/province/{code}` สำหรับข้อมูลจังหวัดฉบับเต็ม หน้า `/insights` สำหรับข้อมูลข้ามจังหวัด/non-geo และ Public API สำหรับ source coverage, province summaries, briefings, สถานะระบบอัปเดต และไฟล์ดาวน์โหลดที่มี provenance
 
+`explorer/` เป็น Database Explorer แบบ read-only สำหรับดูความสัมพันธ์ของทั้ง 28 sources, สิ่งที่นำมาจากแต่ละ URL, grain, endpoints, operational runs และ live Serving Database counts โดย deploy เป็น service/domain แยกใน Railway project เดียวกันและอ่าน PostgreSQL ตัวเดียวกับ Dashboard ดูรายละเอียดที่ [Database Explorer](docs/database-explorer.md)
+
 ## โครงสร้างข้อมูลเมื่อเลือกจังหวัด
 
 Province panel แบ่งเป็น 5 แท็บตามคำถามตัดสินใจ ไม่ได้แบ่งตามชื่อระบบต้นทาง:
