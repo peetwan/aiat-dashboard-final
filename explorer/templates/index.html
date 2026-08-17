@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="AIAT Database Explorer — แผนที่ความสัมพันธ์ของ 28 แหล่งข้อมูลและ Serving Database แบบ read-only" />
+    <meta name="description" content="แผนที่ฐานข้อมูลของ AIAT Dashboard: ข้อมูลมาจากไหน เก็บที่ตารางใด และ Dashboard อ่านอะไร" />
     <title>AIAT Database Explorer</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="/static/styles.css?v=artifact-gallery-1" />
+    <link rel="stylesheet" href="/static/styles.css?v=plain-language-1" />
   </head>
   <body>
     <div class="ambient ambient-one"></div>
@@ -17,14 +17,14 @@
         <span class="brand-mark">DB</span>
         <span>
           <strong>AIAT Database Explorer</strong>
-          <small>28 Sources · Live Serving Map</small>
+          <small>ดูเส้นทางข้อมูลทั้ง 28 แหล่ง</small>
         </span>
       </a>
       <nav class="topnav" aria-label="เมนูหลัก">
-        <a href="#database-map">Database Map</a>
+        <a href="#database-map">ภาพรวมฐานข้อมูล</a>
         <a href="#sources">28 แหล่ง</a>
-        <a href="#data-preview">Live Data</a>
-        <a href="#artifact-gallery">JSON Gallery</a>
+        <a href="#data-preview">ตัวอย่างตาราง</a>
+        <a href="#artifact-gallery">ไฟล์ JSON</a>
         <a href="#pipeline">เส้นทางข้อมูล</a>
         <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
       </nav>
@@ -34,139 +34,129 @@
       <section id="database-map" class="database-map shell">
         <header class="map-hero">
           <div>
-            <div class="eyebrow"><span id="live-dot" class="live-dot"></span><span id="live-label">กำลังเชื่อมต่อ Database…</span></div>
-            <span class="kicker">DATABASE MAP</span>
-            <h1>AIAT Serving Database</h1>
-            <p>ภาพรวมว่าตารางไหนมีหน้าที่อะไร และข้อมูลไหลไปทางไหน</p>
+            <div class="eyebrow"><span id="live-dot" class="live-dot"></span><span id="live-label">กำลังเชื่อมต่อฐานข้อมูล…</span></div>
+            <span class="kicker">ภาพรวมฐานข้อมูล</span>
+            <h1>ข้อมูลมาจากไหน และไปอยู่ที่ไหน</h1>
+            <p>กดที่ชื่อตารางเพื่อดูว่าเก็บข้อมูลอะไร และเชื่อมกับตารางใด</p>
           </div>
           <div class="map-hero-actions">
-            <a class="secondary-action" href="#sources">ดู 28 Sources</a>
+            <a class="secondary-action" href="#sources">ดูข้อมูลทั้ง 28 แหล่ง</a>
             <a class="primary-action" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
           </div>
         </header>
 
-        <div class="map-status-strip" aria-label="สถานะ Database แบบสด">
+        <div class="map-status-strip" aria-label="สถานะฐานข้อมูลล่าสุด">
           <span id="backend-badge" class="status-pill neutral">กำลังตรวจ PostgreSQL</span>
-          <span><b id="map-table-total">9</b> tables</span>
-          <span><b id="artifact-inline">—</b> public artifacts</span>
-          <span><b id="candidate-inline">—</b> candidate rows</span>
+          <span><b id="map-table-total">9</b> ตาราง</span>
+          <span><b id="artifact-inline">—</b> ไฟล์ JSON พร้อมใช้</span>
+          <span><b id="candidate-inline">—</b> แถวที่ยังรอตรวจ</span>
           <span>อัปเดต <b id="checked-at">—</b></span>
-          <span class="read-only-mark">READ ONLY</span>
+          <span class="read-only-mark">ดูข้อมูลอย่างเดียว</span>
         </div>
 
         <div class="database-canvas" aria-label="แผนผังความสัมพันธ์ของตาราง">
           <div class="map-primary-flow">
             <section class="map-column role-control">
-              <header><span>01</span><div><strong>Registry</strong><small>ทะเบียนและสิทธิ์</small></div></header>
+              <header><span>01</span><div><strong>แหล่งข้อมูล</strong><small>รายชื่อเว็บและช่องทางดึง</small></div></header>
               <div id="map-control" class="map-table-stack"></div>
             </section>
-            <div class="map-flow-link" aria-hidden="true"><span>1 : N</span></div>
+            <div class="map-flow-link" aria-hidden="true"><span>มีหลาย</span></div>
             <section class="map-column role-operation">
-              <header><span>02</span><div><strong>Operations</strong><small>ประวัติการดึง</small></div></header>
+              <header><span>02</span><div><strong>ประวัติการดึง</strong><small>ดึงเมื่อไร สำเร็จหรือไม่</small></div></header>
               <div id="map-operational" class="map-table-stack"></div>
             </section>
-            <div class="map-flow-link" aria-hidden="true"><span>load</span></div>
+            <div class="map-flow-link" aria-hidden="true"><span>นำเข้า</span></div>
             <section class="map-column role-candidate">
-              <header><span>03</span><div><strong>Candidate</strong><small>พื้นที่พักตรวจ</small></div></header>
+              <header><span>03</span><div><strong>ข้อมูลที่ยังรอตรวจ</strong><small>ยังไม่ให้ Dashboard ใช้</small></div></header>
               <div id="map-candidate" class="map-table-stack"></div>
             </section>
             <div class="map-flow-link gate-link" aria-hidden="true"><span>QA</span></div>
-            <section class="map-gate" aria-label="Quality gate">
-              <span>QUALITY GATE</span>
-              <strong>Build · Test · Review</strong>
-              <small>ไม่ auto-promote</small>
+            <section class="map-gate" aria-label="ขั้นตอนตรวจข้อมูล">
+              <span>ตรวจข้อมูล</span>
+              <strong>ความหมาย · ความถูกต้อง · ข้อมูลส่วนบุคคล</strong>
+              <small>ผ่านแล้วจึงนำไปแสดง</small>
             </section>
-            <div class="map-flow-link" aria-hidden="true"><span>sync</span></div>
+            <div class="map-flow-link" aria-hidden="true"><span>บันทึก</span></div>
             <section class="map-column role-public">
-              <header><span>04</span><div><strong>Serving</strong><small>พร้อมให้ API อ่าน</small></div></header>
+              <header><span>04</span><div><strong>ข้อมูลพร้อมใช้</strong><small>JSON ที่ตรวจแล้ว</small></div></header>
               <div id="map-public" class="map-table-stack"></div>
             </section>
-            <div class="map-flow-link" aria-hidden="true"><span>GET</span></div>
+            <div class="map-flow-link" aria-hidden="true"><span>ส่งให้</span></div>
             <section class="map-consumer">
-              <span>05 · CONSUMER</span>
-              <strong>FastAPI</strong>
+              <span>05 · เว็บไซต์</span>
+              <strong>ระบบส่งข้อมูล</strong>
               <div class="consumer-arrow">↓</div>
               <b>Dashboard 77 จังหวัด</b>
             </section>
           </div>
 
-          <div class="map-branch-label"><span></span><strong>Specialized serving branches</strong><span></span></div>
+          <div class="map-branch-label"><span></span><strong>ตารางเฉพาะสำหรับแผนที่และข้อมูลที่อยู่อาศัย</strong><span></span></div>
           <div class="map-special-grid">
             <section class="map-special role-spatial">
-              <header><span>GIS</span><div><strong>Spatial Serving</strong><small>ชั้นแผนที่และ geometry</small></div></header>
+              <header><span>MAP</span><div><strong>ข้อมูลแผนที่</strong><small>จุด เส้น พื้นที่ และพิกัด</small></div></header>
               <div id="map-spatial" class="map-special-flow"></div>
             </section>
             <section class="map-special role-housing">
-              <header><span>HOME</span><div><strong>Housing Serving</strong><small>snapshot และ demand records</small></div></header>
+              <header><span>HOME</span><div><strong>ข้อมูลที่อยู่อาศัย</strong><small>ชุดแบบสอบถามและคำตอบ</small></div></header>
               <div id="map-housing" class="map-special-flow"></div>
             </section>
           </div>
         </div>
 
         <div class="map-footer-row">
-          <div class="map-legend" aria-label="คำอธิบายสีของบทบาท">
-            <span class="legend-control">Control</span>
-            <span class="legend-operation">Operations</span>
-            <span class="legend-candidate">Candidate</span>
-            <span class="legend-public">Public</span>
-            <span class="legend-spatial">GIS</span>
-            <span class="legend-housing">Housing</span>
-          </div>
           <aside id="map-inspector" class="map-inspector" aria-live="polite">
-            <span class="inspector-kicker">SELECTED TABLE</span>
-            <strong>เลือก block เพื่อดูหน้าที่</strong>
-            <small>แสดง Grain, Primary key และตารางที่เชื่อมกัน</small>
+            <span class="inspector-kicker">ตารางที่เลือก</span>
+            <strong>กดชื่อตารางด้านบนเพื่อดูรายละเอียด</strong>
+            <small>จะแสดงว่า 1 แถวหมายถึงอะไร ใช้รหัสใด และเชื่อมกับตารางไหน</small>
           </aside>
         </div>
       </section>
 
       <section class="stats shell" aria-label="ภาพรวมข้อมูล">
-        <article class="stat-card accent-blue"><span>แหล่งข้อมูลทั้งหมด</span><strong id="source-total">—</strong><small>ทะเบียน URL</small></article>
-        <article class="stat-card accent-green"><span>Public candidate</span><strong id="public-total">—</strong><small>แสดง values พร้อมคำเตือน</small></article>
-        <article class="stat-card accent-yellow"><span>Metadata only</span><strong id="metadata-total">—</strong><small>แสดงสถานะ ยังไม่มี values</small></article>
-        <article class="stat-card accent-red"><span>Restricted local</span><strong id="restricted-total">—</strong><small>ไม่ส่ง values ขึ้น Cloud</small></article>
-        <article class="stat-card accent-purple"><span>Public artifacts</span><strong id="artifact-total">—</strong><small>Dashboard อ่านจริง</small></article>
-        <article class="stat-card accent-cyan"><span>Spatial features</span><strong id="spatial-total">—</strong><small>Housing GIS</small></article>
+        <article class="stat-card accent-blue"><span>แหล่งข้อมูลทั้งหมด</span><strong id="source-total">—</strong><small>เว็บไซต์และระบบต้นทาง</small></article>
+        <article class="stat-card accent-green"><span>มีข้อมูลสาธารณะ</span><strong id="public-total">—</strong><small>ยังต้องอ่านคำเตือนกำกับ</small></article>
+        <article class="stat-card accent-yellow"><span>มีเฉพาะรายละเอียดแหล่ง</span><strong id="metadata-total">—</strong><small>ยังไม่มีตัวเลขให้แสดง</small></article>
+        <article class="stat-card accent-red"><span>เก็บในเครื่องเท่านั้น</span><strong id="restricted-total">—</strong><small>ไม่ส่งค่าข้อมูลขึ้นเว็บไซต์</small></article>
+        <article class="stat-card accent-purple"><span>ไฟล์ JSON พร้อมใช้</span><strong id="artifact-total">—</strong><small>Dashboard อ่านข้อมูลกลุ่มนี้</small></article>
+        <article class="stat-card accent-cyan"><span>จุดและพื้นที่บนแผนที่</span><strong id="spatial-total">—</strong><small>ข้อมูลที่อยู่อาศัย</small></article>
       </section>
 
       <section id="pipeline" class="section shell">
         <div class="section-heading">
-          <div><span class="kicker">DATA JOURNEY</span><h2>เส้นทางจาก URL ถึง Dashboard</h2></div>
-          <p>แต่ละขั้นมีหน้าที่คนละอย่าง และ Candidate staging จะไม่ถูกเผยแพร่เองอัตโนมัติ</p>
+          <div><span class="kicker">ขั้นตอนทำข้อมูล</span><h2>จากเว็บไซต์ต้นทางถึง Dashboard</h2></div>
+          <p>ข้อมูลดิบจะถูกเก็บและตรวจสอบก่อนเสมอ ไม่ได้นำขึ้น Dashboard ทันที</p>
         </div>
 
         <div class="pipeline-grid">
-          <article class="pipeline-step step-source"><span class="step-number">01</span><div class="step-icon">URL</div><h3>Source</h3><p>28 เว็บไซต์, API, CKAN และ Snapshot</p></article>
+          <article class="pipeline-step step-source"><span class="step-number">01</span><div class="step-icon">GET</div><h3>ดึงข้อมูล</h3><p>ใช้ API, ไฟล์ดาวน์โหลด, CKAN, ArcGIS หรืออ่านหน้าเว็บ ตามที่แต่ละแหล่งมี</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-control"><span class="step-number">02</span><div class="step-icon">ID</div><h3>Control</h3><p><code>sources</code> + <code>endpoints</code></p></article>
+          <article class="pipeline-step step-control"><span class="step-number">02</span><div class="step-icon">RAW</div><h3>เก็บต้นฉบับ</h3><p>เก็บไฟล์เดิม เวลา URL และหลักฐานไว้ โดยไม่แก้ทับรอบเก่า</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-stage"><span class="step-number">03</span><div class="step-icon">QA</div><h3>Candidate</h3><p><code>ingestion_runs</code> + <code>dashboard_records</code></p></article>
+          <article class="pipeline-step step-stage"><span class="step-number">03</span><div class="step-icon">✓</div><h3>จัดและตรวจข้อมูล</h3><p>จัดชื่อช่อง จังหวัด ปี และหน่วยให้ตรงกัน พร้อมตัดชื่อ เบอร์โทร และอีเมล</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-build"><span class="step-number">04</span><div class="step-icon">✓</div><h3>Build & Review</h3><p>Grain · Privacy · Geography · Hash</p></article>
+          <article class="pipeline-step step-build"><span class="step-number">04</span><div class="step-icon">{ }</div><h3>สร้างไฟล์ JSON</h3><p>สร้างข้อมูลส่วนกลางและข้อมูลสรุปแยกตาม 77 จังหวัด</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-serve"><span class="step-number">05</span><div class="step-icon">DB</div><h3>Serving</h3><p><code>public_artifacts</code> + tables เฉพาะทาง</p></article>
-          <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-ui"><span class="step-number">06</span><div class="step-icon">UI</div><h3>FastAPI</h3><p>Public API → Dashboard 77 จังหวัด</p></article>
+          <article class="pipeline-step step-serve"><span class="step-number">05</span><div class="step-icon">DB</div><h3>ใส่ฐานข้อมูล</h3><p>บันทึก JSON ใน <code>public_artifacts.payload</code> แล้วส่งให้ Dashboard อ่าน</p></article>
         </div>
 
         <div class="guardrail">
-          <strong>ประตูควบคุม:</strong>
-          <span><code>dashboard_records</code> เป็นที่พัก Candidate เท่านั้น</span>
-          <span>ต้อง Build + Test + Review ก่อนเข้า <code>public_artifacts</code></span>
-          <span>ทุก Public source ตอนนี้ยังเป็น candidate/needs_review ไม่ใช่ KPI รับรอง</span>
+          <strong>จำง่าย:</strong>
+          <span><code>dashboard_records</code> คือข้อมูลที่ยังรอตรวจ</span>
+          <span><code>public_artifacts</code> คือ JSON ที่ตรวจและสร้างเสร็จแล้ว</span>
+          <span>ตัวเลขที่ยังไม่รู้หน่วย ปี หรือขอบเขต จะไม่เรียกว่าเป็นตัวเลขที่รับรองแล้ว</span>
         </div>
       </section>
 
       <section id="sources" class="section shell">
         <div class="section-heading source-heading">
-          <div><span class="kicker">SOURCE CATALOG</span><h2>ทั้ง 28 แหล่ง เราเอาอะไรมา</h2></div>
+          <div><span class="kicker">28 แหล่งข้อมูล</span><h2>แต่ละเว็บไซต์ เราดึงอะไรมา</h2></div>
           <div class="source-summary" id="source-summary">กำลังโหลด…</div>
         </div>
 
         <div class="filters" aria-label="ตัวกรองแหล่งข้อมูล">
           <label class="search-box">
             <span>⌕</span>
-            <input id="search-input" type="search" placeholder="ค้นหาชื่อ, source ID, ข้อมูล หรือ URL…" autocomplete="off" />
+            <input id="search-input" type="search" placeholder="ค้นหาชื่อเว็บไซต์ ข้อมูล หรือ URL…" autocomplete="off" />
           </label>
           <label>
             <span class="sr-only">กรองฝ่าย</span>
@@ -176,20 +166,20 @@
             <span class="sr-only">กรองนโยบาย</span>
             <select id="policy-filter">
               <option value="">ทุกสถานะเผยแพร่</option>
-              <option value="project_owner_approved_public">Public candidate</option>
-              <option value="metadata_only">Metadata only</option>
-              <option value="restricted_local_only">Restricted local-only</option>
+              <option value="project_owner_approved_public">มีข้อมูลสาธารณะ</option>
+              <option value="metadata_only">มีเฉพาะรายละเอียดแหล่ง</option>
+              <option value="restricted_local_only">เก็บในเครื่องเท่านั้น</option>
             </select>
           </label>
           <label>
             <span class="sr-only">กรองการเชื่อมต่อ</span>
             <select id="connection-filter">
               <option value="">ทุกการเชื่อมต่อ</option>
-              <option value="api_connected">API connected</option>
-              <option value="snapshot_connected">Snapshot connected</option>
-              <option value="public_projection">Public projection</option>
-              <option value="catalog_only">Catalog only</option>
-              <option value="local_only">Local only</option>
+              <option value="api_connected">เชื่อม API แล้ว</option>
+              <option value="snapshot_connected">ใช้ไฟล์ที่บันทึกไว้</option>
+              <option value="public_projection">มีข้อมูลที่คัดแล้ว</option>
+              <option value="catalog_only">มีเฉพาะรายชื่อแหล่ง</option>
+              <option value="local_only">เก็บในเครื่อง</option>
             </select>
           </label>
         </div>
@@ -200,15 +190,15 @@
               <tr>
                 <th>#</th>
                 <th>แหล่ง / URL</th>
-                <th>เราเอาอะไรมา</th>
-                <th>Grain — 1 แถวแทนอะไร</th>
-                <th>สถานะเชื่อมต่อ</th>
-                <th>ไปตารางไหน</th>
+                <th>เราดึงข้อมูลอะไร</th>
+                <th>1 แถวหมายถึงอะไร</th>
+                <th>ตอนนี้เชื่อมอย่างไร</th>
+                <th>เก็บในตารางไหน</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="source-body">
-              <tr><td colspan="7" class="loading-cell">กำลังอ่าน Source Catalog จาก Database…</td></tr>
+              <tr><td colspan="7" class="loading-cell">กำลังอ่านรายชื่อแหล่งข้อมูล…</td></tr>
             </tbody>
           </table>
         </div>
@@ -217,30 +207,30 @@
 
       <section id="data-preview" class="section shell data-preview-section">
         <div class="section-heading preview-heading">
-          <div><span class="kicker">LIVE DATA PREVIEW</span><h2>ตัวอย่างข้อมูลจริงใน Database</h2></div>
-          <p>เลือก Source/URL แล้วกด Block ตารางเพื่อดูแถวจริงแบบ read-only โดยซ่อน payload และข้อมูลติดต่อ</p>
+          <div><span class="kicker">ตัวอย่างแต่ละตาราง</span><h2>กดดูแถวตัวอย่างในฐานข้อมูล</h2></div>
+          <p>เลือกแหล่งข้อมูลแล้วกดชื่อตาราง ระบบจะแสดงไม่เกิน 6 แถวและไม่แก้ข้อมูลจริง</p>
         </div>
 
         <div class="preview-toolbar">
           <label>
-            <span>เลือก Source / URL</span>
+            <span>เลือกแหล่งข้อมูล</span>
             <select id="preview-source-filter">
-              <option value="">ทุก Source — ดูภาพรวม Database</option>
+              <option value="">ทุกแหล่งข้อมูล</option>
             </select>
           </label>
-          <div id="preview-filter-label" class="preview-filter-label">กำลังอ่าน 28 Sources…</div>
-          <span class="safe-preview-badge">SAFE COLUMNS ONLY</span>
+          <div id="preview-filter-label" class="preview-filter-label">กำลังอ่านข้อมูลทั้ง 28 แหล่ง…</div>
+          <span class="safe-preview-badge">ซ่อนข้อมูลส่วนบุคคลแล้ว</span>
         </div>
 
         <div id="preview-blocks" class="preview-block-grid" aria-live="polite">
-          <div class="preview-loading">กำลังอ่าน Schema จาก PostgreSQL…</div>
+          <div class="preview-loading">กำลังอ่านรายชื่อตาราง…</div>
         </div>
       </section>
 
       <section id="artifact-gallery" class="section shell artifact-gallery-section">
         <div class="section-heading artifact-heading">
-          <div><span class="kicker">JSON ARTIFACT GALLERY</span><h2>ตัวอย่าง JSON ที่ Dashboard ใช้</h2></div>
-          <p>กดแต่ละ Block เพื่อดูตัวอย่าง JSON พร้อมชื่อไฟล์ และตำแหน่งจริงใน PostgreSQL</p>
+          <div><span class="kicker">JSON ที่ใช้งานจริง</span><h2>ไฟล์ JSON ที่ Dashboard ใช้</h2></div>
+          <p>แต่ละช่องคือ JSON หนึ่งไฟล์ กดเพื่อดูตัวอย่างและตำแหน่งที่เก็บในฐานข้อมูล</p>
         </div>
 
         <div class="artifact-toolbar">
@@ -252,8 +242,8 @@
             <span class="sr-only">กรองกลุ่ม JSON</span>
             <select id="artifact-group-filter"><option value="">ทุกกลุ่ม JSON</option></select>
           </label>
-          <div id="artifact-summary" class="artifact-summary">กำลังอ่าน Public artifacts…</div>
-          <span class="safe-preview-badge">SAFE · TRIMMED JSON</span>
+          <div id="artifact-summary" class="artifact-summary">กำลังอ่านรายชื่อไฟล์ JSON…</div>
+          <span class="safe-preview-badge">ตัวอย่างขนาดย่อ</span>
         </div>
 
         <div id="artifact-blocks" class="artifact-block-grid" aria-live="polite">
@@ -264,8 +254,8 @@
     </main>
 
     <footer class="footer shell">
-      <div><strong>AIAT Database Explorer</strong><span>Read-only metadata & connection status</span></div>
-      <div><span id="footer-refresh">Auto-refresh ทุก {{ refresh_interval_seconds }} วินาที</span><a href="/docs" target="_blank">API docs ↗</a></div>
+      <div><strong>AIAT Database Explorer</strong><span>ดูเส้นทางข้อมูลและตัวอย่างจากฐานข้อมูล</span></div>
+      <div><span id="footer-refresh">อัปเดตอัตโนมัติทุก {{ refresh_interval_seconds }} วินาที</span><a href="/docs" target="_blank">คู่มือ API ↗</a></div>
     </footer>
 
     <dialog id="source-dialog" class="source-dialog">
@@ -292,6 +282,6 @@
     <script>
       window.EXPLORER_CONFIG = { refreshSeconds: {{ refresh_interval_seconds }} };
     </script>
-    <script src="/static/app.js?v=artifact-gallery-1" defer></script>
+    <script src="/static/app.js?v=plain-language-1" defer></script>
   </body>
 </html>

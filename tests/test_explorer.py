@@ -172,22 +172,23 @@ def test_artifact_gallery_lists_metadata_and_returns_safe_json_preview() -> None
                 session.commit()
 
 
-def test_explorer_home_is_a_thai_read_only_database_map() -> None:
+def test_explorer_home_uses_plain_thai_for_the_database_map() -> None:
     with TestClient(app) as client:
         response = client.get("/")
 
     assert response.status_code == 200
     assert "AIAT Database Explorer" in response.text
-    assert "DATABASE MAP" in response.text
-    assert "AIAT Serving Database" in response.text
+    assert "ข้อมูลมาจากไหน และไปอยู่ที่ไหน" in response.text
     assert response.text.index('id="database-map"') < response.text.index('id="sources"')
-    assert "READ ONLY" in response.text
-    assert "LIVE DATA PREVIEW" in response.text
-    assert "ตัวอย่างข้อมูลจริงใน Database" in response.text
-    assert "JSON ARTIFACT GALLERY" in response.text
-    assert "ตัวอย่าง JSON ที่ Dashboard ใช้" in response.text
+    assert "ดูข้อมูลอย่างเดียว" in response.text
+    assert "กดดูแถวตัวอย่างในฐานข้อมูล" in response.text
+    assert "ไฟล์ JSON ที่ Dashboard ใช้" in response.text
     assert 'id="artifact-gallery"' in response.text
     assert "ELI5 GLOSSARY" not in response.text
-    assert 'href="/static/styles.css?v=artifact-gallery-1"' in response.text
-    assert 'src="/static/app.js?v=artifact-gallery-1"' in response.text
+    assert "Candidate" not in response.text
+    assert "Grain" not in response.text
+    assert "QUALITY GATE" not in response.text
+    assert "Public candidate" not in response.text
+    assert 'href="/static/styles.css?v=plain-language-1"' in response.text
+    assert 'src="/static/app.js?v=plain-language-1"' in response.text
     assert "http://testserver/static" not in response.text
