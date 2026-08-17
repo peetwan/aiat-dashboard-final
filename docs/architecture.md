@@ -93,12 +93,18 @@ URL → connector → evidence/manifest → sanitize → dashboard_records
 ### Publication lane
 
 ```text
-immutable evidence → builders → semantic/privacy tests → data/public/*.json
-                  → serving_manifest.json → reviewed commit
-                  → Railway deploy/startup sync → public_artifacts
+immutable evidence → deterministic builders → contract-declared data/public/*
+publication contracts ───────────────┘                 ↓
+                                        publication_receipt.json
+                                                  ↓
+                           publication-gate + exact-revision review
+                                                  ↓
+                         merge → Railway startup sync → public_artifacts
 ```
 
-ไม่มี code path ที่ copy `dashboard_records` ไป `public_artifacts` เอง การ publish ต้องเป็น JSON object ที่ผ่าน builder/test มี entry ใน `data/public/serving_manifest.json` และให้ทีม review diff ก่อน merge Artifact ใหม่ที่ไม่ใช่ serving core ต้องประกาศ `source_ids`; runtime ยอมรับเฉพาะ source ที่ catalog อนุมัติให้เผยแพร่ และตรวจ privacy ของ artifact ทั้งชุดก่อนเริ่มแก้ database rows
+ไม่มี code path ที่ copy `dashboard_records` ไป `public_artifacts` เอง Publication contract ประกาศ grain, identity, geography, `as_of`, unit/denominator, completeness, privacy และ output ของแต่ละ dataset ส่วน `serving_manifest.json` ระบุ artifact ที่ Dashboard นำเข้า database แต่ละ seed loader ตรวจ manifest/hash/privacy ของ seed นั้นก่อนเริ่มแก้ rows ของตารางชุดนั้น; การรวมทุก seed เป็น transaction เดียวเป็นงาน hardening แยกต่างหาก
+
+การเพิ่ม URL/dataset/ความหมาย/contract/builder/`serving_manifest.json` ใหม่ รวมถึง `data/spatial/` และ `data/demand/` ต้องให้ทีมตรวจเอง Routine refresh เปลี่ยนได้เฉพาะ output ที่ contract เดิมประกาศใต้ `data/public/` พร้อม deterministic receipt; CI และผู้ตรวจผูกการอนุมัติกับ commit SHA นั้น Runtime ยอมรับเฉพาะ source ที่ catalog อนุมัติ โดย preflight `data/public` ทั้ง release ก่อน sync และให้ spatial/demand loader ตรวจ seed ของตนก่อนแก้ตารางของ seed นั้น
 
 ## 6. Database design
 
@@ -177,8 +183,10 @@ Production ยังไม่มี daily source scheduler (`automatic_refresh_e
 ## 10. Team workflow
 
 ```text
-Issue → branch → code/contract/fixture/tests → Pull Request
-      → GitHub CI + Codex review → squash merge → Railway auto-deploy
+ตั้ง URL/dataset/ความหมายใหม่ → team review → merge
+routine data refresh → receipt → publication-gate → exact-revision review
+                     → codex-publication-reviewed → squash merge
+                     → Railway auto-deploy/startup sync
 ```
 
 ก่อนเปิด PR รัน:
@@ -189,6 +197,8 @@ python tools/validate_public_repo.py
 python -m pytest -q
 ```
 
+Routine public-data refresh ต้องรัน `python -m app.cli publication receipt` แล้ว `python -m app.cli publication validate` เพิ่มด้วย Scheduled review/automation ตรวจ PR และ production health เท่านั้น ไม่ fetch ด้วย production secret และไม่เขียน database โดยตรง
+
 Public clone รัน application และ connector tests ได้ครบ ส่วน integration tests ที่เทียบ raw evidence ทั้งชุดจะทำงานเมื่อ `AIAT_EVIDENCE_ROOT` ชี้ไปยัง evidence workspace ที่มีไฟล์ตรงตาม dated run ที่ builder ระบุ
 
-อ่านวิธีเพิ่ม source ที่ [Connector development](connector-development.md), กติกา publication ที่ [Data governance](data-governance.md) และ production runbook ที่ [Deployment](deployment.md)
+อ่านวิธีเพิ่ม source ที่ [Connector development](connector-development.md), ขั้นตอน release ที่ [Publication workflow](publication-workflow.md), กติกา publication ที่ [Data governance](data-governance.md) และ production runbook ที่ [Deployment](deployment.md)

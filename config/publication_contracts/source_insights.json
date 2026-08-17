@@ -1,0 +1,52 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "source_insights",
+  "dataset_key": "source_insights",
+  "source_scope": "approved_values",
+  "source_ids": [
+    "f1_sradss_ppaos",
+    "f1_pppconnext",
+    "f2_apptech_mtr",
+    "f2_apptech_mru",
+    "f2_rmutdb",
+    "f2_culturalmap_university",
+    "f2_learning_dashboard",
+    "f2_learning_area_based",
+    "f3_housing_portal",
+    "f3_city_capital_open_data",
+    "f3_ruamthiao_lamphun"
+  ],
+  "builder": "tools.build_source_insights:main",
+  "grain_th": "หนึ่ง block ต่อหนึ่งแหล่งข้อมูล และรายการเชื่อมจังหวัดตามชุดข้อมูลนั้น",
+  "identity": {"source": ["source_id"]},
+  "geography": {"level": "province_or_national", "fields": ["province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "sources.*.as_of"]},
+  "measures": [
+    {"name": "source-specific public summaries", "unit": "ระบุในแต่ละ metric", "denominator": "ระบุในแต่ละ metric หรือไม่ระบุ"}
+  ],
+  "completeness": {"source_count": 7},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/source_insights.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 2097152,
+      "records_pointer": "/sources",
+      "identity_fields": ["$key"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 7,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/source_insights_manifest.json",
+      "format": "json",
+      "role": "provenance",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

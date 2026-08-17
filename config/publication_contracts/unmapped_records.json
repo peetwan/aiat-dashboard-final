@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "unmapped_records",
+  "dataset_key": "unmapped_records",
+  "source_scope": "approved_values",
+  "source_ids": ["f2_learning_area_based", "f2_learning_dashboard", "f2_apptech_mru", "f3_housing_portal"],
+  "builder": "tools.build_public_data:main",
+  "grain_th": "หนึ่ง block ต่อหนึ่งแหล่งที่ยังจับคู่จังหวัดไม่ได้",
+  "identity": {"source": ["source_id"]},
+  "geography": {"level": "unmapped", "fields": []},
+  "as_of": {"status": "generated", "fields": ["generated_at"]},
+  "measures": [
+    {"name": "unmapped record counts", "unit": "ระเบียน", "denominator": "ระเบียนของแหล่งนั้น"}
+  ],
+  "completeness": {"source_count": 4, "guess_geography": false},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/unmapped_records.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 2097152,
+      "records_pointer": "/sources",
+      "identity_fields": ["$key"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 4,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
+from app.catalog import load_catalog
 from app.database import SessionLocal
 from app.main import app
 from app.models import PublicArtifact
@@ -21,31 +22,45 @@ from app.public_artifacts import (
 
 
 def test_public_artifact_sync_is_complete_and_idempotent():
+    expected_artifacts = len(artifact_inputs())
+    catalog = load_catalog()
+    catalog_sources = catalog["sources"]
     with TestClient(app) as client:
         with SessionLocal() as session:
             count = session.scalar(select(func.count()).select_from(PublicArtifact))
-            assert count == len(artifact_inputs()) == REQUIRED_ARTIFACT_COUNT == 163
+            assert count == expected_artifacts == REQUIRED_ARTIFACT_COUNT
             second_sync = sync_public_artifacts(session)
             assert second_sync == {
-                "expected": 163,
+                "expected": expected_artifacts,
                 "inserted": 0,
                 "updated": 0,
-                "unchanged": 163,
+                "unchanged": expected_artifacts,
             }
 
         coverage = client.get("/api/public/v1/database-coverage")
         assert coverage.status_code == 200
         payload = coverage.json()
         assert payload["status"] == "complete"
-        assert payload["source_catalog_rows"] == 28
-        assert payload["endpoint_catalog_rows"] == 144
-        assert payload["runtime_enabled_endpoints"] == 92
-        assert payload["province_briefings"] == 77
-        assert payload["executive_summaries"] == 77
+        assert payload["source_catalog_rows"] == len(catalog_sources)
+        assert payload["endpoint_catalog_rows"] == sum(
+            len(source["endpoints"]) for source in catalog_sources
+        )
+        assert payload["runtime_enabled_endpoints"] == sum(
+            endpoint["runtime_enabled"] and not endpoint["restricted"]
+            for source in catalog_sources
+            for endpoint in source["endpoints"]
+        )
+        assert payload["province_briefings"] == REQUIRED_GROUP_COUNTS[
+            "provincial_briefing"
+        ]
+        assert payload["executive_summaries"] == REQUIRED_GROUP_COUNTS[
+            "executive_summary"
+        ]
         assert payload["restricted_values_published"] == 0
 
 
 def test_public_api_reads_the_serving_database_before_file_fallback():
+    expected_artifacts = len(artifact_inputs())
     with TestClient(app) as client:
         marker = "database-serving-proof"
         with SessionLocal() as session:
@@ -63,7 +78,7 @@ def test_public_api_reads_the_serving_database_before_file_fallback():
 
         index = client.get("/api/public/v1/artifacts")
         assert index.status_code == 200
-        assert len(index.json()) == 163
+        assert len(index.json()) == expected_artifacts
         assert any(row["artifact_key"] == "learning-dashboard" for row in index.json())
 
         generic_artifact = client.get("/api/public/v1/artifacts/learning-dashboard")

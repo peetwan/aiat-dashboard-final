@@ -1,0 +1,42 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "learning_dashboard",
+  "dataset_key": "learning_dashboard",
+  "source_scope": "approved_values",
+  "source_ids": ["f2_learning_dashboard"],
+  "builder": "tools.build_learning_dashboard:main",
+  "grain_th": "หนึ่งแถวต่อหนึ่งรายการที่หน้าเว็บต้นทางผูกกับจังหวัดได้",
+  "identity": {"record": ["source_row_number"]},
+  "geography": {"level": "province", "fields": ["province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "province_rows[].as_of"]},
+  "measures": [
+    {"name": "learning dashboard metric", "unit": "field unit", "denominator": "ไม่ระบุจากต้นทาง"}
+  ],
+  "completeness": {"minimum_province_rows": 1, "unmatched_rows_retained": true},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/learning_dashboard.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "/province_rows",
+      "identity_fields": ["source_row_number"],
+      "max_identity_churn_ratio": 0.25,
+      "minimum_count": 1,
+      "max_count_drop_ratio": 0.1,
+      "max_count_increase_ratio": 1,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/learning_dashboard_manifest.json",
+      "format": "json",
+      "role": "provenance",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

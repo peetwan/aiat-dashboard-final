@@ -4,6 +4,7 @@ import gzip
 import hashlib
 import json
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
@@ -11,6 +12,7 @@ from app.database import SessionLocal
 from app.main import app
 from app.models import SpatialFeature
 from app import spatial_artifacts
+from app.settings import PROJECT_ROOT
 
 
 def write_gzip_row(path, row: dict) -> str:
@@ -50,6 +52,7 @@ def test_spatial_sync_is_transactional_and_idempotent(tmp_path, monkeypatch):
         layers[layer_id] = {
             "feature_count": 1,
             "artifact_path": f"data/spatial/{artifact_path.name}",
+            "artifact_bytes": artifact_path.stat().st_size,
             "artifact_sha256": digest,
         }
     manifest = {
@@ -74,19 +77,25 @@ def test_spatial_sync_is_transactional_and_idempotent(tmp_path, monkeypatch):
             assert second["loaded"] == 0
             assert sorted(second["unchanged_layers"]) == sorted(counts)
 
+    artifact_path.write_bytes(artifact_path.read_bytes() + b"corrupt")
+    with pytest.raises(RuntimeError, match="byte count mismatch"):
+        spatial_artifacts.load_spatial_manifest(manifest_path)
+
 
 def test_housing_spatial_summary_and_query_contract():
     with TestClient(app) as client:
         summary = client.get("/api/public/v1/housing-spatial/summary")
         assert summary.status_code == 200
         payload = summary.json()
-        assert payload["counts"] == {
-            "subdistrict_boundaries": 169,
-            "housing_points": 28694,
-            "accessibility_grid": 6543,
-            "flood_grid": 159126,
+        assert set(payload["counts"]) == {
+            "subdistrict_boundaries",
+            "housing_points",
+            "accessibility_grid",
+            "flood_grid",
         }
-        assert payload["total_spatial_features"] == 194532
+        assert all(count >= 0 for count in payload["counts"].values())
+        assert payload["total_spatial_features"] == sum(payload["counts"].values())
+        assert payload["database_contract"]["layer_counts"] == payload["counts"]
         assert payload["database_contract"]["demand_respondent_rows_included"] == 0
 
         unsupported = client.get(
@@ -96,18 +105,47 @@ def test_housing_spatial_summary_and_query_contract():
         assert unsupported.status_code == 422
 
 
+def test_spatial_mapping_rejects_private_properties():
+    row = {
+        "source_id": "f3_housing_portal",
+        "layer_id": "housing_points",
+        "feature_id": "private-point",
+        "geometry_type": "Point",
+        "bbox": [100.0, 13.0, 100.0, 13.0],
+        "geometry": {"type": "Point", "coordinates": [100.0, 13.0]},
+        "properties": {"contact_email": "person@example.com"},
+        "evidence_path": "data/raw/example.json",
+        "evidence_sha256": "a" * 64,
+        "fetched_at": "2026-08-17T00:00:00+00:00",
+        "as_of": "ไม่ระบุ",
+        "quality_status": "needs_review",
+    }
+
+    with pytest.raises(ValueError, match="private/contact value"):
+        spatial_artifacts._mapping(row, "housing_points")
+
+
 def test_housing_demand_public_summary_privacy_contract():
+    contract = json.loads(
+        (
+            PROJECT_ROOT
+            / "config"
+            / "publication_contracts"
+            / "housing_summaries.json"
+        ).read_text(encoding="utf-8")
+    )
+    expected_provinces = contract["completeness"]["province_count"]
     with TestClient(app) as client:
         response = client.get("/api/public/v1/housing-demand/summary")
         assert response.status_code == 200
         payload = response.json()
         assert payload["source_id"] == "f3_housing_portal"
-        assert payload["record_count"] == 25_919
-        assert payload["province_count"] == 77
+        assert payload["province_count"] == len(payload["provinces"])
+        assert payload["province_count"] == expected_provinces
         assert sum(
             int(item["respondents_living"])
             for item in payload["provinces"].values()
-        ) == 25_919
+        ) == payload["record_count"]
         privacy = payload["privacy_projection"]
         assert privacy["excluded_source_fields"] == ["id"]
         assert privacy["source_identifier_published"] is False

@@ -1,0 +1,42 @@
+name: Publication Gate
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
+      - edited
+
+concurrency:
+  group: publication-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  publication-gate:
+    name: publication-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the exact pull request revision without credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify the proposed public-data revision
+        env:
+          PUBLICATION_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUBLICATION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUBLICATION_REPORT: ${{ runner.temp }}/publication-review.json
+        run: >-
+          python .github/scripts/verify_publication.py
+          --base-sha "$PUBLICATION_BASE_SHA"
+          --head-sha "$PUBLICATION_HEAD_SHA"
+          --report "$PUBLICATION_REPORT"

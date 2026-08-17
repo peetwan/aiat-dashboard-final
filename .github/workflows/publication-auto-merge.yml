@@ -1,0 +1,399 @@
+name: Public Data Auto Merge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - labeled
+      - unlabeled
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
+      - edited
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: publication-auto-merge-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  reconcile-publication-auto-merge:
+    name: reconcile-publication-auto-merge
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      ((github.event.action != 'labeled' && github.event.action != 'unlabeled') ||
+      github.event.label.name == 'codex-publication-reviewed')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      checks: read
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Reconcile publication authorization against immutable revisions
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = context.payload.pull_request.number;
+            const action = context.payload.action;
+            const eventHeadSha = context.payload.pull_request.head.sha;
+            const eventBaseSha = context.payload.pull_request.base.sha;
+            const authorizationLabel = 'codex-publication-reviewed';
+            const ordinaryAuthorizationLabel = 'codex-automerge';
+            const expectedChecks = new Set(['pipeline', 'publication-gate']);
+
+            async function readPullRequest() {
+              const response = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pullNumber,
+              });
+              return response.data;
+            }
+
+            function hasLabel(pullRequest, labelName) {
+              return pullRequest.labels.some(label => label.name === labelName);
+            }
+
+            async function disableAutoMerge(pullRequest) {
+              if (!pullRequest.auto_merge) {
+                return;
+              }
+              await github.graphql(`
+                mutation DisableAutoMerge($pullRequestId: ID!) {
+                  disablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId
+                  }) {
+                    pullRequest { number autoMergeRequest { enabledAt } }
+                  }
+                }
+              `, { pullRequestId: pullRequest.node_id });
+            }
+
+            async function removeAuthorizationLabel(pullRequest) {
+              if (!hasLabel(pullRequest, authorizationLabel)) {
+                return;
+              }
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pullNumber,
+                  name: authorizationLabel,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            async function invalidate(reason, { force = false, fail = false } = {}) {
+              const latest = await readPullRequest();
+              const publicationAuthorized = hasLabel(latest, authorizationLabel);
+              if (publicationAuthorized || force) {
+                await disableAutoMerge(latest);
+              }
+              if (publicationAuthorized) {
+                await removeAuthorizationLabel(latest);
+              }
+              if (fail) {
+                core.setFailed(reason);
+              } else {
+                core.notice(reason);
+              }
+            }
+
+            if (action === 'unlabeled') {
+              await invalidate('Publication authorization removed; auto-merge is disabled.', {
+                force: true,
+              });
+              return;
+            }
+
+            if (['opened', 'synchronize', 'reopened', 'ready_for_review', 'converted_to_draft'].includes(action)) {
+              await invalidate(
+                `Pull request changed state (${action}); the current publication revision must be reviewed again.`
+              );
+              return;
+            }
+
+            if (action === 'edited') {
+              if (context.payload.changes?.base) {
+                await invalidate('Pull request base changed; the publication revision must be reviewed again.');
+              } else {
+                core.notice('Pull request metadata changed without changing its base branch.');
+              }
+              return;
+            }
+
+            if (action !== 'labeled') {
+              core.notice(`No publication auto-merge action is defined for ${action}.`);
+              return;
+            }
+
+            let pullRequest = await readPullRequest();
+            if (
+              pullRequest.head.sha !== eventHeadSha ||
+              pullRequest.base.sha !== eventBaseSha
+            ) {
+              await invalidate(
+                'The labeled head or base revision is no longer current; review the new revision again.',
+                { fail: true }
+              );
+              return;
+            }
+            const authorizedHeadSha = eventHeadSha;
+            const authorizedBaseSha = eventBaseSha;
+            if (pullRequest.base.ref !== 'main') {
+              await invalidate('Publication auto-merge is available only for pull requests targeting main.', {
+                fail: true,
+              });
+              return;
+            }
+            if (pullRequest.state !== 'open' || pullRequest.draft) {
+              await invalidate('Only open, non-draft pull requests can be authorized.', { fail: true });
+              return;
+            }
+            if (!hasLabel(pullRequest, authorizationLabel)) {
+              await invalidate('The publication authorization label is not present.', { fail: true });
+              return;
+            }
+            if (hasLabel(pullRequest, ordinaryAuthorizationLabel)) {
+              await invalidate('Use exactly one auto-merge authorization lane per pull request.', {
+                fail: true,
+              });
+              return;
+            }
+            if (context.actor.toLowerCase() === pullRequest.user.login.toLowerCase()) {
+              await invalidate('The pull request author cannot authorize their own publication.', {
+                fail: true,
+              });
+              return;
+            }
+
+            let permission;
+            try {
+              const response = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: context.actor,
+              });
+              permission = response.data.permission;
+            } catch (error) {
+              await invalidate(`Cannot verify authorization for ${context.actor}: ${error.message}`, {
+                fail: true,
+              });
+              return;
+            }
+            const allowedPermissions = new Set(['admin', 'maintain', 'write']);
+            if (!allowedPermissions.has(permission)) {
+              await invalidate(`Actor ${context.actor} cannot authorize a publication.`, { fail: true });
+              return;
+            }
+
+            if (pullRequest.changed_files >= 3000) {
+              await invalidate('Pull requests with 3,000 or more changed files require manual merge.', {
+                fail: true,
+              });
+              return;
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: pullNumber,
+              per_page: 100,
+            });
+            if (files.length !== pullRequest.changed_files) {
+              await invalidate(
+                `GitHub returned ${files.length} of ${pullRequest.changed_files} changed files; manual merge is required.`,
+                { fail: true }
+              );
+              return;
+            }
+            if (files.length === 0) {
+              await invalidate('An empty pull request cannot authorize a publication.', { fail: true });
+              return;
+            }
+
+            function isStrictPublicDataPath(filename) {
+              if (typeof filename !== 'string' || filename.includes('\\')) {
+                return false;
+              }
+              const parts = filename.split('/');
+              return (
+                parts.length > 2 &&
+                parts[0] === 'data' &&
+                parts[1] === 'public' &&
+                parts.slice(2).every(part => part !== '' && part !== '.' && part !== '..')
+              );
+            }
+
+            const allPaths = files.flatMap(file =>
+              [file.filename, file.previous_filename].filter(Boolean)
+            );
+            const invalidPaths = [...new Set(allPaths.filter(path => !isStrictPublicDataPath(path)))];
+            if (invalidPaths.length) {
+              await invalidate(
+                `Publication pull requests may change only data/public/**: ${invalidPaths.join(', ')}`,
+                { fail: true }
+              );
+              return;
+            }
+            const servingManifestPath = 'data/public/serving_manifest.json';
+            if (allPaths.includes(servingManifestPath)) {
+              await invalidate('Changes to serving_manifest.json require manual review and merge.', {
+                fail: true,
+              });
+              return;
+            }
+
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              {
+                owner,
+                repo,
+                ref: authorizedHeadSha,
+                per_page: 100,
+                filter: 'latest',
+              },
+              response => response.data.check_runs
+            );
+            for (const expectedCheck of expectedChecks) {
+              const successful = checkRuns.some(checkRun =>
+                checkRun.name === expectedCheck &&
+                checkRun.head_sha === authorizedHeadSha &&
+                checkRun.status === 'completed' &&
+                checkRun.conclusion === 'success' &&
+                checkRun.app?.slug === 'github-actions' &&
+                checkRun.pull_requests?.some(checkPullRequest =>
+                  checkPullRequest.number === pullNumber &&
+                  checkPullRequest.head?.sha === authorizedHeadSha &&
+                  checkPullRequest.base?.sha === authorizedBaseSha
+                )
+              );
+              if (!successful) {
+                await invalidate(
+                  `Required GitHub Actions check ${expectedCheck} is not successful for ${authorizedHeadSha}.`,
+                  { fail: true }
+                );
+                return;
+              }
+            }
+
+            // This is the final API read before the enable mutation. It binds authorization
+            // to both immutable revisions and catches pushes to either side of the diff.
+            pullRequest = await readPullRequest();
+            if (
+              pullRequest.head.sha !== authorizedHeadSha ||
+              pullRequest.base.sha !== authorizedBaseSha ||
+              pullRequest.base.ref !== 'main' ||
+              pullRequest.state !== 'open' ||
+              pullRequest.draft ||
+              !hasLabel(pullRequest, authorizationLabel) ||
+              hasLabel(pullRequest, ordinaryAuthorizationLabel)
+            ) {
+              await invalidate('Pull request changed during verification; review the current revision again.', {
+                fail: true,
+              });
+              return;
+            }
+
+            if (pullRequest.auto_merge) {
+              core.notice('Auto-merge is already enabled for the reviewed publication revision.');
+              return;
+            }
+            await github.graphql(`
+              mutation EnableAutoMerge($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {
+                  pullRequestId: $pullRequestId,
+                  mergeMethod: SQUASH
+                }) {
+                  pullRequest { number autoMergeRequest { enabledAt } }
+                }
+              }
+            `, { pullRequestId: pullRequest.node_id });
+
+            // A main push or an unlabeled event uses a different workflow run and can
+            // race with the enable mutation above. Re-read after enabling, then fail
+            // closed and force-disable auto-merge if authorization moved meanwhile.
+            pullRequest = await readPullRequest();
+            if (
+              pullRequest.head.sha !== authorizedHeadSha ||
+              pullRequest.base.sha !== authorizedBaseSha ||
+              pullRequest.base.ref !== 'main' ||
+              pullRequest.state !== 'open' ||
+              pullRequest.draft ||
+              !hasLabel(pullRequest, authorizationLabel) ||
+              hasLabel(pullRequest, ordinaryAuthorizationLabel)
+            ) {
+              await invalidate(
+                'Pull request changed while auto-merge was being enabled; review the current revision again.',
+                { force: true, fail: true }
+              );
+              return;
+            }
+            core.notice(
+              `Auto-merge enabled for head ${authorizedHeadSha} against base ${authorizedBaseSha}.`
+            );
+
+  invalidate-publication-authorizations-on-main-push:
+    name: invalidate-publication-authorizations-on-main-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Invalidate reviews whose base revision moved
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const authorizationLabel = 'codex-publication-reviewed';
+            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              base: 'main',
+              per_page: 100,
+            });
+            const authorizedPullRequests = openPullRequests.filter(pullRequest =>
+              pullRequest.labels.some(label => label.name === authorizationLabel)
+            );
+
+            for (const pullRequest of authorizedPullRequests) {
+              if (pullRequest.auto_merge) {
+                await github.graphql(`
+                  mutation DisableAutoMerge($pullRequestId: ID!) {
+                    disablePullRequestAutoMerge(input: {
+                      pullRequestId: $pullRequestId
+                    }) {
+                      pullRequest { number autoMergeRequest { enabledAt } }
+                    }
+                  }
+                `, { pullRequestId: pullRequest.node_id });
+              }
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pullRequest.number,
+                  name: authorizationLabel,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+              core.notice(
+                `Invalidated publication review on #${pullRequest.number} because main advanced to ${context.sha}.`
+              );
+            }

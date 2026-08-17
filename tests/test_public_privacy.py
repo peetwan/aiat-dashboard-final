@@ -11,6 +11,7 @@ PUBLIC_ROOT = DASHBOARD_ROOT / "data/public"
 BRIEFING_ROOT = PUBLIC_ROOT / "provincial_briefings"
 EXECUTIVE_SUMMARY_ROOT = PUBLIC_ROOT / "executive_summaries"
 CATALOG_PATH = DASHBOARD_ROOT / "config/source_catalog.json"
+CONTRACT_ROOT = DASHBOARD_ROOT / "config/publication_contracts"
 
 RESTRICTED_SOURCE_IDS = {
     "f2_target_household",
@@ -335,7 +336,8 @@ def test_cultural_geojson_has_no_contact_or_private_attribute_projection():
 
 def test_all_provincial_culture_and_tourism_sections_are_privacy_projected():
     paths = briefing_paths()
-    assert len(paths) == 77
+    contract = read_json(CONTRACT_ROOT / "provincial_briefings.json")
+    assert len(paths) == contract["completeness"]["file_count"]
 
     violations: list[tuple[str, str]] = []
     for path in paths:
@@ -396,14 +398,23 @@ def test_executive_portfolio_contains_aggregate_values_only():
     insights = read_json(PUBLIC_ROOT / "source_insights.json")
     portfolio = insights["executive_portfolio"]
 
-    assert portfolio["audit"]["source_count"] == 10
-    assert len(portfolio["headline_metrics"]) == 9
+    status_rows = portfolio["audit"]["status_rows"]
+    assert portfolio["audit"]["source_count"] == len(status_rows)
+    assert len({row["source_id"] for row in status_rows}) == len(status_rows)
+    assert portfolio["audit"]["source_count"] == sum(
+        portfolio["audit"][f"{status}_source_count"]
+        for status in ("complete", "partial", "mixed")
+    )
+    headline_metrics = portfolio["headline_metrics"]
+    assert headline_metrics
+    assert len({item["key"] for item in headline_metrics}) == len(headline_metrics)
     demand = next(
-        item for item in portfolio["headline_metrics"]
+        item for item in headline_metrics
         if item["key"] == "housing_demand_responses"
     )
-    assert demand["value"] == 25_919
-    assert len(portfolio["audit"]["status_rows"]) == 10
+    demand_summary = read_json(PUBLIC_ROOT / "housing_demand_summary.json")
+    assert demand["value"] == demand_summary["record_count"]
+    assert demand["value"] >= 0
     violations = find_privacy_violations(
         portfolio,
         "source_insights.executive_portfolio",
@@ -414,7 +425,8 @@ def test_executive_portfolio_contains_aggregate_values_only():
 
 def test_all_executive_summary_dimensions_and_highlights_are_privacy_projected():
     paths = executive_summary_paths()
-    assert len(paths) == 77
+    contract = read_json(CONTRACT_ROOT / "executive_summaries.json")
+    assert len(paths) == contract["completeness"]["file_count"]
 
     violations: list[tuple[str, str]] = []
     for path in paths:

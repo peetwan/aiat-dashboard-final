@@ -1,0 +1,80 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "dashboard_core",
+  "dataset_key": "province_dashboard",
+  "source_scope": "approved_values",
+  "source_ids": [
+    "f1_sradss_ppaos",
+    "f1_pppconnext",
+    "f2_culturalmap_university",
+    "f2_rmutdb",
+    "f2_apptech_mtr",
+    "f2_apptech_mru",
+    "f2_learning_dashboard",
+    "f2_learning_area_based",
+    "f3_city_capital_open_data",
+    "f3_ruamthiao_lamphun",
+    "f3_housing_portal"
+  ],
+  "builder": "tools.build_public_data:main",
+  "grain_th": "หนึ่งแถวต่อหนึ่งจังหวัด; ตารางแหล่งข้อมูลหนึ่งแถวต่อหนึ่ง URL",
+  "identity": {"province": ["province_code"], "source": ["source_id"]},
+  "geography": {"level": "province", "fields": ["province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "provinces[].sra_as_of"]},
+  "measures": [
+    {"name": "province evidence metrics", "unit": "ระบุแยกในชื่อ field/metadata", "denominator": "ระบุแยกตาม metric หรือไม่ระบุ"}
+  ],
+  "completeness": {"province_count": 77, "source_count": 11},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/public_dashboard.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "/provinces",
+      "identity_fields": ["province_code"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 77,
+      "max_count_drop_ratio": 0,
+      "max_count_increase_ratio": 0,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/province_evidence.csv",
+      "format": "csv",
+      "role": "download",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "$",
+      "identity_fields": ["province_code"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 77,
+      "headers": ["province_code", "province_name_th", "province_name_en", "region", "evidence_source_count", "sra_overall_score", "sra_scope_status", "sra_as_of", "area_based_project_groups", "area_based_participant_records", "innovation_records", "cultural_records", "housing_observations", "housing_demand_responses", "pppconnext_aggregate_rows", "learning_dashboard_business_records", "apptech_registered_users", "apptech_interactions", "city_capital_cities", "quality_status"],
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/source_inventory.csv",
+      "format": "csv",
+      "role": "download",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "$",
+      "identity_fields": ["source_id"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 11,
+      "headers": ["ordinal", "source_id", "name_th", "url", "acquisition_mode", "expected_record_count", "readiness_status", "quality_label_th"],
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/manifest.json",
+      "format": "json",
+      "role": "provenance",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

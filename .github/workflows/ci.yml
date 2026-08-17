@@ -20,12 +20,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
           cache: pip
@@ -38,6 +38,9 @@ jobs:
 
       - name: Validate connector contracts
         run: python -m app.cli validate-pipeline
+
+      - name: Validate reviewed publication release
+        run: python -m app.cli publication validate
 
       - name: Validate public repository boundary
         run: python tools/validate_public_repo.py

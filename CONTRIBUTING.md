@@ -28,7 +28,7 @@ python -m pytest -q
 5. เปิด Pull Request และกรอก checklist
 6. รอ CI และ Codex review
 7. แก้ P0/P1, failed checks และ review conversations ให้หมด
-8. เมื่อพร้อม สมาชิกทีมที่มีสิทธิ์หรือ Codex automation จะใส่ label `codex-automerge`; GitHub จะ squash merge หลัง required checks ผ่าน
+8. PR ปกติใช้ `codex-automerge`; routine public-data refresh ใช้ `codex-publication-reviewed` หลังตรวจ revision ล่าสุด แล้ว GitHub จึงเปิด squash auto-merge
 
 ห้าม push ตรงเข้า `main`
 
@@ -85,30 +85,25 @@ python -m app.cli status
 
 ## ทำ reviewed Public release
 
-1. สร้าง cleaned JSON object ด้วย deterministic builder และวางไว้ใต้ `data/public/`
-2. เพิ่ม entry ใน `data/public/serving_manifest.json` โดย artifact ใหม่ที่ไม่ใช่ serving core ต้องระบุ `source_ids`
-3. เพิ่ม tests ที่ตรวจ schema, count/completeness, privacy และ semantic diff ของชุดนั้น
-4. รัน tests ทั้งหมด เปิด PR ให้ทีม review diff และ merge เมื่อ required checks ผ่าน
-5. Railway จะ deploy `main`; Dashboard startup จะตรวจ manifest และ payload ทั้งชุดก่อน sync เข้า `public_artifacts` แบบ idempotent
+มีสองเลน:
 
-ตัวอย่าง entry สำหรับไฟล์เดียว:
+- เพิ่ม URL/dataset, เปลี่ยนความหมาย, publication contract, builder, `data/public/serving_manifest.json`, code/config/workflow หรือไฟล์ใต้ `data/spatial/` และ `data/demand/`: ให้ทีมตรวจและ merge แบบ PR ปกติ
+- อัปเดตข้อมูลรอบเดิม: เปลี่ยนได้เฉพาะ output ที่ contract เดิมประกาศใต้ `data/public/` พร้อม `data/public/publication_receipt.json`
 
-```json
-{
-  "key": "learning-dashboard",
-  "group": "source_dataset",
-  "path": "learning_dashboard.json",
-  "source_ids": ["f2_learning_dashboard"]
-}
+สำหรับ dataset ใหม่ ให้เริ่มจาก `python tools/scaffold_publication.py --help` เครื่องมือจะสร้าง contract, builder แบบ fail-closed, fixture สังเคราะห์ redacted และ test โดยไม่สร้าง public output ดูคำสั่งตัวอย่างและงาน manual ที่ต้องทำต่อใน [Publication workflow](docs/publication-workflow.md)
+
+หลัง builder ทำงาน ให้รัน:
+
+```powershell
+python -m app.cli publication receipt
+python -m app.cli publication validate
 ```
 
-- `key` ใช้ตัวพิมพ์เล็ก ตัวเลข `_`, `/` หรือ `-`; `group` ใช้ `lower_snake_case`
-- `path` ต้องเป็น relative path ใต้ `data/public/` และไฟล์ต้องเป็น JSON object
-- `source_ids` ต้องไม่ซ้ำ และทุกค่าในรายการต้องมี `production_values_allowed=true` กับ `cloud_policy=team_approved_public` ใน generated source catalog
-- หากเป็นชุดหลายไฟล์ให้ใช้ `path_glob`, `key_template` และ `expected_count` ตามรูปแบบ province entries ที่มีอยู่ พร้อม test ความครบของรหัสจังหวัด
-- ตัวตรวจจะปฏิเสธทั้ง release ก่อนแก้ database หากเจอ field/value ที่เป็นอีเมล เบอร์โทร ข้อมูลติดต่อ ที่อยู่ หรือ restricted source identifier ตัวตรวจนี้เป็น guardrail; ผู้ review ยังต้องตรวจความหมายและข้อมูลส่วนบุคคลชนิดอื่นใน diff
+เปิด PR แล้วรอ `pipeline` และ `publication-gate` ผ่าน ผู้ตรวจที่ไม่ใช่ PR author จึงใส่ `codex-publication-reviewed` ให้ revision ล่าสุดเพื่อเปิด squash auto-merge การ push เพิ่มหรือ `main` เดินหน้าจะยกเลิกสิทธิ์เดิม
 
-ห้าม copy `dashboard_records` ไป `public_artifacts` ตรงๆ หรือเพิ่ม JSON โดยไม่ลง manifest/review เพราะ Candidate ยังไม่ใช่ข้อมูลที่อนุมัติให้เผยแพร่
+ห้าม copy `dashboard_records` ไป `public_artifacts` ตรงๆ เพราะ Candidate ยังไม่ใช่ข้อมูลที่อนุมัติให้เผยแพร่ Railway startup เป็นผู้ sync reviewed revision หลัง merge; review automation ไม่เขียน database เอง
+
+รายละเอียด contract, manifest/receipt และสิ่งที่ gate ตรวจอยู่ที่ [Publication workflow](docs/publication-workflow.md)
 
 ## Public repo กับ evidence workspace
 

@@ -68,12 +68,18 @@ def test_safe_auto_merge_blocks_critical_policy_and_release_paths():
         "'app/privacy.py'",
         "'app/ingestion.py'",
         "'app/public_artifacts.py'",
+        "'app/publication.py'",
+        "'app/cli.py'",
         "'app/server.py'",
         "'app/operations.py'",
         "'explorer/main.py'",
         "'config/'",
         "'data/public/'",
+        "'data/spatial/'",
+        "'data/demand/'",
         "'tools/build_'",
+        "'tools/scaffold_publication.py'",
+        "'tools/publication_builders/'",
     ):
         assert protected_path in workflow
 

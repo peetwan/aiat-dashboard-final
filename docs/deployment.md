@@ -47,7 +47,7 @@ Explorer ใช้ `DASHBOARD_URL=https://aiat-dashboard-web-production.up.railw
 
 การ sync ใช้ key/hash จึงรันซ้ำได้ และมี PostgreSQL advisory lock กันการ deploy หลาย replica เขียนพร้อมกัน Explorer อ่านอย่างเดียวและไม่ seed database
 
-การ merge connector ใหม่ไม่ทำให้ข้อมูลต้นทางถูก publish เอง ข้อมูลใหม่ต้องผ่าน Candidate → review/build/test → commit JSON ใต้ `data/public/` พร้อม manifest entry ที่ผูก `source_ids` ซึ่งอนุมัติให้เผยแพร่แล้ว
+การ merge connector ใหม่ไม่ทำให้ข้อมูลต้นทางถูก publish เอง Dataset/contract/builder/`serving_manifest.json` ใหม่ต้องผ่าน team review ก่อน ส่วน routine refresh ใช้ output เดิมตาม contract, receipt และ exact-revision review ตาม [Publication workflow](publication-workflow.md)
 
 ## Pre-merge checks
 
@@ -58,6 +58,15 @@ python -m app.cli validate-pipeline
 python tools/validate_public_repo.py
 python -m pytest -q
 ```
+
+ถ้าเป็น routine public-data refresh ให้สร้าง receipt หลัง builder แล้วตรวจ release เพิ่ม:
+
+```powershell
+python -m app.cli publication receipt
+python -m app.cli publication validate
+```
+
+GitHub รัน check `publication-gate` กับ head SHA ของ PR ผู้ตรวจที่ไม่ใช่ PR author จึงใส่ `codex-publication-reviewed`; privileged workflow ตรวจ `pipeline`, `publication-gate`, label actor และ revision ซ้ำก่อนเปิด squash auto-merge
 
 สองคำสั่งต่อไปเป็น local Docker build smoke test ที่แนะนำเมื่อแก้ Dockerfile/deployment config แต่ยังไม่ใช่ job ใน GitHub Actions ปัจจุบัน:
 
@@ -79,6 +88,8 @@ docker build -f Dockerfile.explorer -t aiat-database-explorer .
 - restricted values published = 0
 - หน้า `/`, `/insights` และจังหวัดตัวอย่างเปิดได้
 
+Scheduled Codex/team automation ตรวจผล deploy และ health ได้ แต่ไม่เรียก production ingestion และไม่เขียน PostgreSQL โดยตรง Database เปลี่ยนเฉพาะเมื่อ Dashboard startup sync commit ที่ merge แล้ว
+
 ณ 17 สิงหาคม 2569 serving contract คือ public artifacts 163 ชุด, spatial features 194,532 และ housing demand records 25,919
 
 ## Source refresh
@@ -91,7 +102,9 @@ Production ยังไม่เปิด source scheduler และ Web Service
 - one-run lock, bounded retry และ timeout
 - schema/count/uniqueness/privacy checks
 - alert เมื่อ connector fail หรือ schema/count drift
-- manual publication gate; ห้าม auto-promote Candidate
+- เปิด PR ผ่าน publication contract/gate; ห้าม auto-promote Candidate หรือเขียน production database จาก scheduled job
+
+Schedule จะรันทุกกี่ชั่วโมงก็ได้ตาม freshness ของ source แต่ผล fetch ต้องหยุดที่ Candidate/immutable evidence จากนั้น deterministic builder จึงเปิด routine refresh PR ส่วน URL/dataset/ความหมาย/contract ใหม่และไฟล์ใต้ `data/spatial/` หรือ `data/demand/` ยังต้องให้ทีมตรวจเอง
 
 ## Rollback
 

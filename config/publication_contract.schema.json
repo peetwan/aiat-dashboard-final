@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/peetwan/aiat-dashboard-final/config/publication_contract.schema.json",
+  "title": "AIAT reviewed publication contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "contract_id",
+    "dataset_key",
+    "source_scope",
+    "source_ids",
+    "builder",
+    "grain_th",
+    "identity",
+    "geography",
+    "as_of",
+    "measures",
+    "completeness",
+    "privacy_profile",
+    "outputs"
+  ],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "contract_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+    "dataset_key": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+    "source_scope": {
+      "enum": ["approved_values", "catalog_metadata", "reference_geography"]
+    },
+    "source_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+    },
+    "builder": {"type": "string", "minLength": 1},
+    "grain_th": {"type": "string", "minLength": 1},
+    "identity": {"type": "object", "minProperties": 1},
+    "geography": {"type": "object", "minProperties": 1},
+    "as_of": {"type": "object", "minProperties": 1},
+    "measures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "unit", "denominator"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "unit": {"type": "string", "minLength": 1},
+          "denominator": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "completeness": {"type": "object", "minProperties": 1},
+    "privacy_profile": {
+      "enum": [
+        "aggregate_public",
+        "catalog_metadata",
+        "provenance_metadata",
+        "reference_geography"
+      ]
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/output"}
+    }
+  },
+  "$defs": {
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "role", "downloadable", "max_bytes", "schema_policy"],
+      "oneOf": [
+        {"required": ["path"], "not": {"required": ["path_glob"]}},
+        {"required": ["path_glob"], "not": {"required": ["path"]}}
+      ],
+      "dependentRequired": {
+        "records_pointer": ["identity_fields", "max_identity_churn_ratio"],
+        "max_identity_churn_ratio": ["records_pointer"]
+      },
+      "properties": {
+        "path": {"type": "string", "pattern": "^data/public/"},
+        "path_glob": {"type": "string", "pattern": "^data/public/"},
+        "expected_files": {"type": "integer", "minimum": 0},
+        "format": {"enum": ["json", "geojson", "csv"]},
+        "role": {"enum": ["database", "download", "provenance", "support"]},
+        "downloadable": {"type": "boolean"},
+        "max_bytes": {"type": "integer", "minimum": 1, "maximum": 26214400},
+        "records_pointer": {"type": "string"},
+        "identity_fields": {"type": "array", "items": {"type": "string"}},
+        "expected_count": {"type": "integer", "minimum": 0},
+        "minimum_count": {"type": "integer", "minimum": 0},
+        "max_count_drop_ratio": {"type": "number", "minimum": 0, "maximum": 10},
+        "max_count_increase_ratio": {"type": "number", "minimum": 0, "maximum": 10},
+        "max_identity_churn_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "as_of_pointer": {"type": "string"},
+        "headers": {"type": "array", "items": {"type": "string"}},
+        "schema_policy": {"const": "stable"}
+      }
+    }
+  }
+}

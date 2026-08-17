@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "reference_map",
+  "dataset_key": "thailand_provinces",
+  "source_scope": "reference_geography",
+  "source_ids": [],
+  "builder": "tools.build_public_data:main",
+  "grain_th": "หนึ่ง feature ต่อหนึ่งจังหวัด",
+  "identity": {"province": ["properties.province_code"]},
+  "geography": {"level": "province", "fields": ["properties.province_code"]},
+  "as_of": {"status": "generated", "fields": ["generated_at"]},
+  "measures": [
+    {"name": "province boundary/reference attributes", "unit": "geometry/metadata", "denominator": "ไม่เกี่ยวข้อง"}
+  ],
+  "completeness": {"province_count": 77},
+  "privacy_profile": "reference_geography",
+  "outputs": [
+    {
+      "path": "data/public/thailand_provinces.geojson",
+      "format": "geojson",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 5242880,
+      "records_pointer": "/features",
+      "identity_fields": ["properties.province_code"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 77,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    }
+  ]
+}

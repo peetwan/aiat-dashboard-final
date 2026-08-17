@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, func, select, text
@@ -39,8 +39,12 @@ from app.public_artifacts import (
     database_artifact_counts,
     sync_public_artifacts,
 )
+from app.publication import (
+    PublicationError,
+    downloadable_public_files,
+    validate_workspace,
+)
 from app.public_data import (
-    PUBLIC_DATA_ROOT,
     cultural_points,
     executive_summary,
     housing_spatial_summary,
@@ -70,6 +74,7 @@ from app.demand_artifacts import (
 
 settings = get_settings()
 templates = Jinja2Templates(directory=PROJECT_ROOT / "app" / "templates")
+PUBLICATION_CONTRACTS_ROOT = PROJECT_ROOT / "config" / "publication_contracts"
 
 _REVIEWED_CATALOG = load_catalog()
 validate_catalog_contract(_REVIEWED_CATALOG)
@@ -100,6 +105,7 @@ DEMAND_DATABASE_REQUIRED = (
     settings.app_env.lower() == "production" and engine.dialect.name == "postgresql"
 )
 EXPECTED_DEMAND_RECORDS = REQUIRED_DEMAND_COUNT if DEMAND_DATABASE_REQUIRED else 0
+_PUBLICATION_PREFLIGHT_COMPLETE = False
 
 
 def _debug_api_enabled() -> bool:
@@ -107,6 +113,23 @@ def _debug_api_enabled() -> bool:
         settings.app_env.lower() in {"local", "development", "dev", "test"}
         and engine.dialect.name == "sqlite"
     )
+
+
+def _preflight_publication_release() -> None:
+    """Validate the immutable release once, before any serving rows are changed."""
+
+    global _PUBLICATION_PREFLIGHT_COMPLETE
+    if _PUBLICATION_PREFLIGHT_COMPLETE:
+        return
+    report = validate_workspace(
+        PROJECT_ROOT,
+        PUBLICATION_CONTRACTS_ROOT,
+        PROJECT_ROOT / "config" / "source_catalog.json",
+    )
+    if report["status"] != "valid":
+        evidence = "; ".join(report["problems"][:10])
+        raise RuntimeError(f"publication preflight failed: {evidence}")
+    _PUBLICATION_PREFLIGHT_COMPLETE = True
 
 
 def _sync_serving_database() -> None:
@@ -280,6 +303,7 @@ def _require_local_debug_api() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    _preflight_publication_release()
     init_db()
     _sync_serving_database()
     yield
@@ -299,7 +323,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
-app.mount("/downloads", StaticFiles(directory=PUBLIC_DATA_ROOT), name="public-downloads")
+
+
+@app.get("/downloads/{asset_path:path}", include_in_schema=False)
+def reviewed_public_download(asset_path: str):
+    """Serve only files explicitly marked downloadable by a reviewed contract."""
+
+    try:
+        allowed = downloadable_public_files(PROJECT_ROOT, PUBLICATION_CONTRACTS_ROOT)
+    except PublicationError as exc:
+        raise HTTPException(status_code=503, detail="publication contract unavailable") from exc
+    path = allowed.get(asset_path.replace("\\", "/"))
+    if path is None:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return FileResponse(path)
 
 
 @app.get("/", response_class=HTMLResponse)

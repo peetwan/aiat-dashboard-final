@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import re
 from datetime import datetime, timezone
@@ -50,6 +51,16 @@ def load_demand_manifest(path: Path = DEMAND_MANIFEST_PATH) -> dict[str, Any]:
     ):
         if int(privacy.get(field, -1)) != 0:
             raise RuntimeError(f"housing demand privacy gate failed: {field}")
+    artifact = (payload.get("artifacts") or {}).get("records") or {}
+    artifact_path = (path.parent.resolve() / Path(str(artifact.get("path"))).name).resolve()
+    root = path.parent.resolve()
+    if root not in artifact_path.parents or not artifact_path.is_file():
+        raise RuntimeError("housing demand serving artifact is missing")
+    raw = artifact_path.read_bytes()
+    if len(raw) != int(artifact.get("bytes", -1)):
+        raise RuntimeError("housing demand serving artifact byte count mismatch")
+    if hashlib.sha256(raw).hexdigest() != str(artifact.get("sha256", "")):
+        raise RuntimeError("housing demand serving artifact hash mismatch")
     return payload
 
 

@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "source_coverage",
+  "dataset_key": "source_coverage",
+  "source_scope": "catalog_metadata",
+  "source_ids": ["f1_sradss_ppaos", "f1_pppconnext", "f2_culturalmap_university", "f2_cultural_market_civil", "f2_icommunity", "f2_rmutdb", "f2_apptech_mtr", "f2_apptech_mru", "f2_target_household", "f2_learning_dashboard", "f2_learning_area_based", "f2_wallet_all_realtime", "f2_wallet_cluster_realtime", "f3_city_capital_open_data", "f3_nonthaburi_city_learning", "f3_ruamthiao_lamphun", "f3_ruamrian", "f3_ruamkhai", "f3_ruamjai_thungsong", "f3_healthcare_nonthaburi", "f3_ciap_smartcity", "f3_learning_city_platform", "f3_housing_portal", "f4_research_dashboard_psu", "spu_sukhothai_care", "spu_sukhothai_water", "spu_nsn_flood", "spu_rawangphai_uru"],
+  "builder": "tools.build_source_coverage:main",
+  "grain_th": "หนึ่งแถวต่อหนึ่ง URL ใน catalog ทั้ง 28 แหล่ง",
+  "identity": {"source": ["source_id"]},
+  "geography": {"level": "source_metadata", "fields": []},
+  "as_of": {"status": "generated", "fields": ["generated_at"]},
+  "measures": [
+    {"name": "coverage/status counts", "unit": "จำนวนแหล่งข้อมูล", "denominator": "28 URLs ใน catalog"}
+  ],
+  "completeness": {"source_count": 28},
+  "privacy_profile": "catalog_metadata",
+  "outputs": [
+    {
+      "path": "data/public/source_coverage.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "/sources",
+      "identity_fields": ["source_id"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 28,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "executive_summaries",
+  "dataset_key": "executive_summaries",
+  "source_scope": "approved_values",
+  "source_ids": ["f1_sradss_ppaos", "f1_pppconnext", "f2_culturalmap_university", "f2_rmutdb", "f2_apptech_mtr", "f2_apptech_mru", "f2_learning_dashboard", "f2_learning_area_based", "f3_city_capital_open_data", "f3_ruamthiao_lamphun", "f3_housing_portal"],
+  "builder": "tools.build_executive_summaries:main",
+  "grain_th": "หนึ่งไฟล์สรุปผู้บริหารต่อหนึ่งจังหวัด",
+  "identity": {"province": ["province.province_code"]},
+  "geography": {"level": "province", "fields": ["province.province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "dimensions.*.as_of"]},
+  "measures": [
+    {"name": "executive province measures", "unit": "ระบุในแต่ละ dimension", "denominator": "ระบุในแต่ละ dimension หรือไม่ระบุ"}
+  ],
+  "completeness": {"file_count": 77},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path_glob": "data/public/executive_summaries/[0-9][0-9].json",
+      "expected_files": 77,
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "$",
+      "identity_fields": ["province.province_code"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 1,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/executive_summaries/index.json",
+      "format": "json",
+      "role": "support",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

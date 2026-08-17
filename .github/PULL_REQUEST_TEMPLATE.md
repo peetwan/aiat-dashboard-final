@@ -1,36 +1,29 @@
 ## เปลี่ยนอะไร
 
-<!-- อธิบายสั้น ๆ ว่าแก้อะไรและทำไม -->
+<!-- สรุปสิ่งที่แก้ เหตุผล และผลที่คาดหวัง -->
 
 ## ประเภทงาน
 
 - [ ] Application/UI/API
-- [ ] Connector หรือ source contract
-- [ ] Public artifact/data release
-- [ ] Documentation/tooling
-- [ ] Deployment/workflow
+- [ ] Connector/URL/contract
+- [ ] Routine public-data refresh
+- [ ] ตั้งหรือเปลี่ยน Public dataset/ความหมาย (manual review)
+- [ ] Docs/tooling/deployment
 
-## Data boundary
+## ขอบเขตข้อมูล
 
-- [ ] ไม่มี `.env`, credential, cookie, raw dump หรือ database dump
-- [ ] ไม่มีชื่อบุคคล เบอร์โทร อีเมล ที่อยู่ หรือ identifier ส่วนบุคคลใน fixture/public artifact
-- [ ] Connector output ยังเข้า Candidate เท่านั้น ไม่มี direct public promotion
-- [ ] Grain, identity, geography, completeness และ privacy contract อัปเดตแล้ว (ถ้าเกี่ยวข้อง)
+- [ ] ไม่มี secret, raw/database dump, ชื่อบุคคล, เบอร์โทร หรืออีเมล
+- [ ] Connector output ยังเป็น Candidate; ไม่มีทางลัดเข้า `public_artifacts`
+- [ ] ถ้าเป็น routine refresh: diff มีเฉพาะ output ที่ publication contract เดิมประกาศและ `data/public/publication_receipt.json`
+- [ ] ถ้าเปลี่ยน URL/dataset/ความหมาย/contract/builder/`serving_manifest.json`, `data/spatial/` หรือ `data/demand/`: ระบุให้ทีม manual review
 
-## Verification
+## ตรวจแล้ว
 
 - [ ] `python -m app.cli validate-pipeline`
 - [ ] `python tools/validate_public_repo.py`
 - [ ] `python -m pytest -q`
-- [ ] ตรวจ diff ของ counts/hashes/public artifacts แล้ว (ถ้ามี data release)
+- [ ] Public data: `python -m app.cli publication receipt` แล้ว `python -m app.cli publication validate`
 
-## หลักฐานเฉพาะประเภทงาน
+## หลักฐาน/จุดที่อยากให้ตรวจ
 
-- [ ] UI/UX: แนบภาพ before/after และตรวจ mobile, keyboard navigation, focus state แล้ว (ถ้าเกี่ยวข้อง)
-- [ ] Public release: อัปเดต `data/public/serving_manifest.json` แล้ว (ถ้าเกี่ยวข้อง)
-- [ ] Public release: manifest ผูก `source_ids` ที่อนุมัติแล้ว และ payload ผ่าน privacy scan (ถ้าเกี่ยวข้อง)
-- [ ] Public release: ตรวจ generic artifacts API รวมถึง `item_count` และ `content_hash` ตรงกับไฟล์ JSON แล้ว (ถ้าเกี่ยวข้อง)
-
-## Review note
-
-<!-- ระบุสิ่งที่ reviewer/Codex ควรตรวจเป็นพิเศษ หรือเขียน "ไม่มี" -->
+<!-- ใส่ evidence path, count/schema ที่เปลี่ยน, ภาพ UI หรือเขียน "ไม่มี" -->
