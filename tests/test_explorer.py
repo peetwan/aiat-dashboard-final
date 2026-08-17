@@ -92,4 +92,6 @@ def test_explorer_home_is_a_thai_read_only_database_map() -> None:
     assert "AIAT Database Explorer" in response.text
     assert "ทั้ง 28 แหล่ง" in response.text
     assert "read-only" in response.text
-
+    assert 'href="/static/styles.css"' in response.text
+    assert 'src="/static/app.js"' in response.text
+    assert "http://testserver/static" not in response.text
