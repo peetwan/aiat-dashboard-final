@@ -1,0 +1,26 @@
+{
+  "contract_version": "1.0",
+  "source_id": "replace_source_id",
+  "connector": "app.connectors.replace_source_id:ExampleConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "replace_dataset_key",
+      "grain_th": "อธิบายว่าหนึ่งแถวแทนอะไร",
+      "identity_fields": ["id"],
+      "geography_fields": ["province"],
+      "as_of_fields": ["updated_at"]
+    }
+  ],
+  "completeness_checks": [
+    "ระบุว่ารู้ได้อย่างไรว่าดึงครบ",
+    "ระบุวิธีตรวจ ID ซ้ำ",
+    "ระบุพฤติกรรมเมื่อ schema เปลี่ยน"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/replace_source_id/sample_response.json"
+}

@@ -6,6 +6,7 @@ import json
 from sqlalchemy import func, select
 
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
+from app.connector_contracts import ConnectorContractError, validate_connector_contracts
 from app.database import SessionLocal, init_db
 from app.ingestion import IngestionPipeline, PolicyViolation
 from app.models import DashboardRecord, HousingDemandRecord, IngestionRun, PublicArtifact, Source
@@ -106,6 +107,18 @@ def command_status() -> int:
         return 1 if failed else 0
 
 
+def command_validate_pipeline() -> int:
+    """Validate the public connector surface without network or database access."""
+
+    try:
+        report = validate_connector_contracts()
+    except ConnectorContractError as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}, ensure_ascii=False))
+        return 1
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="AIAT dashboard database workflow")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -119,6 +132,10 @@ def main() -> int:
     )
     ingest.add_argument("--strategy", choices=["auto", "api", "snapshot"], default="auto")
     subparsers.add_parser("status", help="ดูสถานะ source และจำนวน record")
+    subparsers.add_parser(
+        "validate-pipeline",
+        help="ตรวจ registry, connector entrypoint, grain, completeness และ privacy contract โดยไม่เรียก network",
+    )
     args = parser.parse_args()
     if args.command == "init-db":
         initialize()
@@ -126,6 +143,8 @@ def main() -> int:
         return 0
     if args.command == "ingest":
         return command_ingest(args)
+    if args.command == "validate-pipeline":
+        return command_validate_pipeline()
     return command_status()
 
 

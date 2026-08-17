@@ -4,6 +4,7 @@
   "sources": {
     "f1_sradss_ppaos": {
       "driver": "sradss",
+      "connector": "app.connectors.sradss:SradssConnector",
       "requests": [
         {
           "name": "summary_updated_at",
@@ -50,12 +51,14 @@
     },
     "f2_apptech_mtr": {
       "driver": "apptech_mtr",
+      "connector": "app.connectors.apptech_mtr:ApptechMtrConnector",
       "url": "https://app.rinmp.com/api/appTechPublic",
       "page_size": 99,
       "database_projection": "ลบ ownerContact, email, phone, address และ credential-shaped fields ก่อนเข้า database"
     },
     "f2_apptech_mru": {
       "driver": "apptech_mru",
+      "connector": "app.connectors.apptech_mru:ApptechMruConnector",
       "page_size": 12,
       "completeness_gate": "commit only when unique record IDs equal totaldata for every dataset",
       "runtime_policy": "probe totaldata first; fetch full lists only on change; use validated snapshot after any incomplete/non-JSON/timeout response",
@@ -99,6 +102,7 @@
     },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",
+      "connector": "app.connectors.learning_dashboard:LearningDashboardConnector",
       "url": "https://lesuper.app/api/opendata/pmua",
       "method": "POST",
       "body_mode": "json_empty",
@@ -114,12 +118,14 @@
     },
     "f2_learning_area_based": {
       "driver": "pmua_area_based",
+      "connector": "app.connectors.pmua_area_based:PmuaAreaBasedConnector",
       "url": "https://lesuper.app/api/opendata/pmua/area-based",
       "completeness_gate": "unique non-null IDs and stats.totalRecords must equal data rows; every published stats dimension must reconcile before commit",
       "database_projection": "store 1,002 participant/business rows separately from source-published aggregate dimensions; never count aggregate rows as participants or projects"
     },
     "f3_housing_portal": {
       "driver": "housing_ckan",
+      "connector": "app.connectors.housing_ckan:HousingCkanConnector",
       "package_show_url": "https://data.thaihousingportal.com/api/3/action/package_show",
       "expected_dataset_count": 7,
       "expected_resource_count": 41,

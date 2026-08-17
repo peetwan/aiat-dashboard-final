@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.catalog import load_ingestion_plans, source_config
+from app.connectors import ConnectorContext, load_connector
 from app.models import DashboardRecord, IngestionRun
 from app.privacy import payload_hash, sanitize_payload, stable_record_id
 from app.settings import PROJECT_ROOT, Settings, get_settings
@@ -299,21 +300,20 @@ class IngestionPipeline:
             raise RuntimeError("source นี้ยังไม่มี executable API plan")
         recorder = ResponseRecorder(source["source_id"], run_id, self.settings)
         try:
-            driver = plan["driver"]
-            if driver == "sradss":
-                records = self._fetch_sradss(plan, recorder)
-            elif driver == "apptech_mtr":
-                records = self._fetch_apptech_mtr(plan, recorder)
-            elif driver == "apptech_mru":
-                records = self._fetch_apptech_mru(plan, recorder)
-            elif driver == "learning_dashboard":
-                records = self._fetch_learning_dashboard(plan, recorder)
-            elif driver == "pmua_area_based":
-                records = self._fetch_pmua(plan, recorder)
-            elif driver == "housing_ckan":
-                records = self._fetch_housing(source, plan, recorder)
-            else:
-                raise RuntimeError(f"ไม่รู้จัก API driver: {driver}")
+            connector = load_connector(plan["connector"])
+            if connector.driver_name != plan["driver"]:
+                raise RuntimeError(
+                    f"connector driver mismatch: plan={plan['driver']} "
+                    f"connector={connector.driver_name}"
+                )
+            records = connector.fetch(
+                ConnectorContext(
+                    source=source,
+                    plan=plan,
+                    settings=self.settings,
+                    recorder=recorder,
+                )
+            )
             manifest = recorder.write_manifest(source["source_id"], run_id, len(records))
             return records, manifest
         except Exception as exc:
@@ -329,311 +329,48 @@ class IngestionPipeline:
             recorder.close()
 
     def _fetch_sradss(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
-        records: list[tuple[str, dict]] = []
-        for request in plan["requests"]:
-            params = {
-                key: (self.settings.sra_year if value == "$SRA_YEAR" else value)
-                for key, value in request.get("params", {}).items()
-            }
-            response, _ = recorder.request(
-                "GET",
-                request["url"],
-                name=request["name"],
-                params=params,
-            )
-            payload = response.json()
-            for path, rows in nested_record_lists(payload, request["name"]):
-                records.extend((path, row) for row in rows)
-                if self._limit_reached(len(records)):
-                    return records[: self.settings.max_records_per_source]
-        return records
+        from app.connectors.sradss import SradssConnector
+
+        return SradssConnector().fetch(self._connector_context(plan, recorder))
 
     def _fetch_apptech_mtr(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
-        records: list[tuple[str, dict]] = []
-        offset = 0
-        page_size = int(plan.get("page_size", 99))
-        total = None
-        while total is None or offset < total:
-            response, _ = recorder.request(
-                "GET",
-                plan["url"],
-                name=f"apptech_mtr_offset_{offset:05d}",
-                params={"__template": "appTech.public.list", "offset": offset, "max": page_size},
-            )
-            payload = response.json()
-            rows = payload.get("data") or []
-            total = int(payload.get("totalCount") or len(rows))
-            records.extend(("innovations", row) for row in rows if isinstance(row, dict))
-            if not rows or self._limit_reached(len(records)):
-                break
-            offset += page_size
-        limit = self.settings.max_records_per_source
-        return records[:limit] if limit > 0 else records
+        from app.connectors.apptech_mtr import ApptechMtrConnector
+
+        return ApptechMtrConnector().fetch(self._connector_context(plan, recorder))
+
+    def _connector_context(
+        self,
+        plan: dict,
+        recorder: ResponseRecorder,
+        source: dict | None = None,
+    ) -> ConnectorContext:
+        """Compatibility helper for focused connector tests and local debugging."""
+
+        return ConnectorContext(
+            source=source or {},
+            plan=plan,
+            settings=self.settings,
+            recorder=recorder,
+        )
 
     def _fetch_apptech_mru(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
-        records: list[tuple[str, dict]] = []
-        page_size = int(plan.get("page_size", 12))
-        id_fields = {
-            "innovation": "innovationid",
-            "requirement": "requirementid",
-            "news": "newsid",
-        }
-        for dataset in plan["datasets"]:
-            offset = 0
-            total = None
-            dataset_records: list[dict] = []
-            seen_ids: set[str] = set()
-            dataset_name = dataset["name"]
-            id_field = dataset.get("id_field") or id_fields.get(dataset_name)
-            if not id_field:
-                raise RuntimeError(f"AppTech MRU dataset {dataset_name} has no configured id field")
-            while total is None or offset < total:
-                request_template = dict(dataset["form"])
-                action = request_template.pop("action")
-                request_template.update(
-                    {
-                        "startlimit": offset,
-                        "endlimit": page_size,
-                        "maxpage": 0,
-                        "targetpagenumber": (offset // page_size) + 1,
-                    }
-                )
-                response, _ = recorder.request(
-                    "POST",
-                    dataset["url"],
-                    name=f"{dataset['name']}_offset_{offset:05d}",
-                    json_body={"action": action, "filter": request_template},
-                    headers={
-                        "Origin": "https://38rat.nstru.ac.th",
-                        "Referer": "https://38rat.nstru.ac.th/",
-                    },
-                )
-                payload = response.json()
-                envelope = payload.get("data") if isinstance(payload, dict) else None
-                if not isinstance(envelope, dict):
-                    raise RuntimeError(f"AppTech MRU {dataset_name} response has no data envelope")
-                if "totaldata" not in envelope:
-                    raise RuntimeError(f"AppTech MRU {dataset_name} response has no totaldata")
-                try:
-                    reported_total = int(envelope["totaldata"])
-                except (TypeError, ValueError) as exc:
-                    raise RuntimeError(
-                        f"AppTech MRU {dataset_name} totaldata is not an integer"
-                    ) from exc
-                if total is None:
-                    total = reported_total
-                elif reported_total != total:
-                    raise RuntimeError(
-                        f"AppTech MRU {dataset_name} totaldata changed during pagination: "
-                        f"{total} -> {reported_total}"
-                    )
+        from app.connectors.apptech_mru import ApptechMruConnector
 
-                rows = envelope.get("data")
-                if not isinstance(rows, list):
-                    raise RuntimeError(f"AppTech MRU {dataset_name} data is not a list")
-                for row in rows:
-                    if not isinstance(row, dict):
-                        raise RuntimeError(f"AppTech MRU {dataset_name} returned a non-object row")
-                    record_id = row.get(id_field)
-                    if record_id in (None, ""):
-                        raise RuntimeError(
-                            f"AppTech MRU {dataset_name} row is missing {id_field}"
-                        )
-                    record_id_text = str(record_id)
-                    if record_id_text in seen_ids:
-                        raise RuntimeError(
-                            f"AppTech MRU {dataset_name} duplicate {id_field}={record_id_text}"
-                        )
-                    seen_ids.add(record_id_text)
-                    dataset_records.append(row)
-
-                if not rows or self._limit_reached(len(records) + len(dataset_records)):
-                    break
-                offset += page_size
-
-            if total is None or len(dataset_records) != total or len(seen_ids) != total:
-                raise RuntimeError(
-                    f"AppTech MRU {dataset_name} incomplete: "
-                    f"unique={len(seen_ids)}, rows={len(dataset_records)}, reported_total={total}"
-                )
-            records.extend((dataset_name, row) for row in dataset_records)
-            if self._limit_reached(len(records)):
-                break
-        limit = self.settings.max_records_per_source
-        return records[:limit] if limit > 0 else records
+        return ApptechMruConnector().fetch(self._connector_context(plan, recorder))
 
     def _fetch_pmua(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
-        response, _ = recorder.request("GET", plan["url"], name="area_based")
-        payload = response.json()
-        if not isinstance(payload, dict):
-            raise RuntimeError("PMUA Area Based response is not an object")
-        rows = payload.get("data")
-        stats = payload.get("stats")
-        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
-            raise RuntimeError("PMUA Area Based data is not an object list")
-        if not isinstance(stats, dict):
-            raise RuntimeError("PMUA Area Based response has no stats object")
+        from app.connectors.pmua_area_based import PmuaAreaBasedConnector
 
-        ids = [str(row.get("id")) for row in rows if row.get("id") not in (None, "")]
-        if len(ids) != len(rows) or len(set(ids)) != len(rows):
-            raise RuntimeError(
-                f"PMUA Area Based IDs incomplete or duplicated: rows={len(rows)}, "
-                f"non_null={len(ids)}, unique={len(set(ids))}"
-            )
-        try:
-            total_records = int(stats["totalRecords"])
-        except (KeyError, TypeError, ValueError) as exc:
-            raise RuntimeError("PMUA Area Based stats.totalRecords is missing or invalid") from exc
-        if total_records != len(rows):
-            raise RuntimeError(
-                f"PMUA Area Based incomplete: rows={len(rows)}, totalRecords={total_records}"
-            )
-
-        dimension_fields = {
-            "byRegion": "region",
-            "byProvince": "province",
-            "byDistrict": "district",
-            "bySubDistrict": "subDistrict",
-            "byBusinessType": None,
-            "byResearchUnit": "researchUnit",
-            "byFiscalYear": "fiscalYear",
-        }
-        aggregate_records: list[tuple[str, dict]] = [
-            (
-                "aggregate_summary",
-                {
-                    "id": "summary:totalRecords",
-                    "dimension": "summary",
-                    "label": "totalRecords",
-                    "value": total_records,
-                    "unit": "participant_or_business_records",
-                },
-            )
-        ]
-        for dimension, source_field in dimension_fields.items():
-            values = stats.get(dimension)
-            if not isinstance(values, dict):
-                raise RuntimeError(f"PMUA Area Based stats.{dimension} is not an object")
-            parsed_values: dict[str, int] = {}
-            for label, value in values.items():
-                try:
-                    parsed_values[str(label)] = int(value)
-                except (TypeError, ValueError) as exc:
-                    raise RuntimeError(
-                        f"PMUA Area Based stats.{dimension}[{label!r}] is not an integer"
-                    ) from exc
-            expected_sum = (
-                len(rows)
-                if source_field is None
-                else sum(row.get(source_field) not in (None, "") for row in rows)
-            )
-            if sum(parsed_values.values()) != expected_sum:
-                raise RuntimeError(
-                    f"PMUA Area Based stats.{dimension} does not reconcile: "
-                    f"sum={sum(parsed_values.values())}, expected={expected_sum}"
-                )
-            dataset_key = f"aggregate_{dimension}"
-            aggregate_records.extend(
-                (
-                    dataset_key,
-                    {
-                        "id": f"{dimension}:{label}",
-                        "dimension": dimension,
-                        "label": label,
-                        "value": value,
-                        "unit": "participant_or_business_records",
-                    },
-                )
-                for label, value in parsed_values.items()
-            )
-
-        records = [("area_based", row) for row in rows]
-        records.extend(aggregate_records)
-        limit = self.settings.max_records_per_source
-        return records[:limit] if limit > 0 else records
+        return PmuaAreaBasedConnector().fetch(self._connector_context(plan, recorder))
 
     def _fetch_learning_dashboard(
         self,
         plan: dict,
         recorder: ResponseRecorder,
     ) -> list[tuple[str, dict]]:
-        response, _ = recorder.request(
-            "POST",
-            plan["url"],
-            name="learning_dashboard",
-            json_body={} if plan.get("body_mode") == "json_empty" else None,
-        )
-        payload = response.json()
-        expected_keys = set(plan.get("expected_keys", []))
-        missing = sorted(expected_keys - set(payload))
-        if missing:
-            raise RuntimeError(f"learning dashboard response missing keys: {', '.join(missing)}")
+        from app.connectors.learning_dashboard import LearningDashboardConnector
 
-        scope_warning = plan.get("scope_warning_th")
-        records: list[tuple[str, dict]] = []
-        table_names = ("provinces", "entityTypes", "categories", "geography")
-        for table_name in table_names:
-            table = payload.get(table_name)
-            if not isinstance(table, list) or not table or not isinstance(table[0], list):
-                raise RuntimeError(f"learning dashboard {table_name} is not a header-array table")
-            headers = table[0]
-            if len(headers) != 2:
-                raise RuntimeError(f"learning dashboard {table_name} header width must be 2")
-            for row_number, row in enumerate(table[1:], start=1):
-                if not isinstance(row, list) or len(row) != 2:
-                    raise RuntimeError(
-                        f"learning dashboard {table_name} row {row_number} width must be 2"
-                    )
-                records.append(
-                    (
-                        table_name,
-                        {
-                            "source_row_number": row_number,
-                            "label_field": headers[0],
-                            "value_field": headers[1],
-                            "label": row[0],
-                            "value": row[1],
-                            "unit": None,
-                            "as_of": None,
-                            "scope_warning_th": scope_warning,
-                        },
-                    )
-                )
-
-        impact_rows = payload.get("geographyImpact")
-        if not isinstance(impact_rows, list) or not all(
-            isinstance(row, dict) for row in impact_rows
-        ):
-            raise RuntimeError("learning dashboard geographyImpact must be an object array")
-        records.extend(
-            (
-                "geographyImpact",
-                {
-                    "source_row_number": row_number,
-                    **row,
-                    "unit": None,
-                    "as_of": None,
-                    "scope_warning_th": scope_warning,
-                },
-            )
-            for row_number, row in enumerate(impact_rows, start=1)
-        )
-        impact_summary = payload.get("impactSummary")
-        if not isinstance(impact_summary, dict):
-            raise RuntimeError("learning dashboard impactSummary must be an object")
-        records.append(
-            (
-                "impactSummary",
-                {
-                    **impact_summary,
-                    "unit": None,
-                    "as_of": None,
-                    "scope_warning_th": scope_warning,
-                },
-            )
-        )
-        limit = self.settings.max_records_per_source
-        return records[:limit] if limit > 0 else records
+        return LearningDashboardConnector().fetch(self._connector_context(plan, recorder))
 
     def _fetch_housing(
         self,
@@ -641,109 +378,11 @@ class IngestionPipeline:
         plan: dict,
         recorder: ResponseRecorder,
     ) -> list[tuple[str, dict]]:
-        records: list[tuple[str, dict]] = []
-        dataset_ids = [str(dataset.get("id") or "") for dataset in plan["datasets"]]
-        resource_ids: list[str] = []
-        value_resource_ids: list[str] = []
-        problems: list[str] = []
-        if not all(dataset_ids) or len(set(dataset_ids)) != len(dataset_ids):
-            problems.append("dataset IDs are missing or duplicated")
-        for dataset in plan["datasets"]:
-            response, _ = recorder.request(
-                "GET",
-                plan["package_show_url"],
-                name=f"package_{dataset['id']}",
-                params={"id": dataset["id"]},
-            )
-            payload = response.json()
-            result = payload.get("result") if isinstance(payload, dict) else None
-            if not isinstance(payload, dict) or payload.get("success") is not True:
-                problems.append(f"{dataset['id']} package_show success is not true")
-                continue
-            if not isinstance(result, dict):
-                problems.append(f"{dataset['id']} package_show result is not an object")
-                continue
-            if result.get("name") and result.get("name") != dataset["id"]:
-                problems.append(
-                    f"{dataset['id']} package_show returned name={result.get('name')}"
-                )
-            resources = result.get("resources")
-            if not isinstance(resources, list):
-                problems.append(f"{dataset['id']} resources is not a list")
-                continue
-            for resource in resources:
-                if not isinstance(resource, dict) or not resource.get("id"):
-                    problems.append(f"{dataset['id']} resource ID is missing")
-                    continue
-                resource_ids.append(str(resource["id"]))
-            if dataset["value_policy"] != "values":
-                continue
-            for resource in resources:
-                if not isinstance(resource, dict) or not resource.get("id"):
-                    continue
-                value_resource_ids.append(str(resource["id"]))
-                url = resource.get("url")
-                if not url:
-                    problems.append(f"{dataset['id']}:{resource['id']} URL is missing")
-                    continue
-                file_response, path = recorder.request(
-                    "GET",
-                    url,
-                    name=f"{dataset['id']}_{resource.get('id', 'resource')}",
-                )
-                content_type = file_response.headers.get("content-type", "").lower()
-                if "csv" not in content_type and not url.lower().endswith(".csv"):
-                    problems.append(
-                        f"{dataset['id']}:{resource['id']} is not a CSV resource"
-                    )
-                    continue
-                text = file_response.content.decode("utf-8-sig", errors="replace")
-                for row_number, row in enumerate(csv.DictReader(text.splitlines()), start=1):
-                    records.append(
-                        (
-                            f"{dataset['id']}:{resource.get('id', path.stem)}",
-                            {
-                                "resource_id": resource.get("id"),
-                                "resource_name": resource.get("name"),
-                                "row_number": row_number,
-                                "source_fields": row,
-                            },
-                        )
-                    )
-        expected_dataset_count = int(plan.get("expected_dataset_count") or 0)
-        expected_resource_count = int(plan.get("expected_resource_count") or 0)
-        expected_value_resource_count = int(plan.get("expected_value_resource_count") or 0)
-        expected_value_record_count = int(
-            plan.get("expected_value_record_count")
-            or source.get("expected_record_count")
-            or 0
+        from app.connectors.housing_ckan import HousingCkanConnector
+
+        return HousingCkanConnector().fetch(
+            self._connector_context(plan, recorder, source=source)
         )
-        if expected_dataset_count and len(dataset_ids) != expected_dataset_count:
-            problems.append(
-                f"datasets={len(dataset_ids)}; expected {expected_dataset_count}"
-            )
-        if len(set(resource_ids)) != len(resource_ids):
-            problems.append("resource IDs are duplicated across packages")
-        if expected_resource_count and len(resource_ids) != expected_resource_count:
-            problems.append(
-                f"resources={len(resource_ids)}; expected {expected_resource_count}"
-            )
-        if expected_value_resource_count and len(value_resource_ids) != expected_value_resource_count:
-            problems.append(
-                f"value resources={len(value_resource_ids)}; expected {expected_value_resource_count}"
-            )
-        if expected_value_record_count and len(records) != expected_value_record_count:
-            problems.append(
-                f"value records={len(records)}; expected {expected_value_record_count}"
-            )
-        if self.settings.max_records_per_source > 0 and len(records) > self.settings.max_records_per_source:
-            problems.append(
-                "max_records_per_source is below the complete housing value row count; "
-                "partial database commits are forbidden"
-            )
-        if problems:
-            raise RuntimeError("Thai Housing CKAN incomplete: " + "; ".join(problems))
-        return records
 
     def _load_snapshot(self, source: dict, run_id: str) -> tuple[list[tuple[str, dict]], Path]:
         root = self.settings.resolved_snapshot_root / source["source_id"]

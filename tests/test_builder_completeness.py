@@ -4,6 +4,9 @@ import csv
 import json
 import re
 from collections import Counter
+from pathlib import Path
+
+import pytest
 
 from tools.build_provincial_briefings import (
     BASE_RUN,
@@ -21,6 +24,30 @@ from tools.build_provincial_briefings import (
 from tools.build_source_insights import build_cultural_supporting_coverage
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MAINTAINER_EVIDENCE_REASON = (
+    "immutable raw/staged evidence lives in the maintainer workspace, not the public clone"
+)
+CULTURAL_FILES = (
+    "map_inspiration.json",
+    "products.json",
+    "activities.json",
+    "recreation.json",
+    "team.json",
+)
+CULTURAL_DIR = MERGE_RUN / "03_f2_culturalmap_university/data"
+HOUSING_METADATA_PATH = (
+    STAGED_ROOT
+    / "f3_housing_portal/20260803T_housing_silver_02/resource_inventory.json"
+)
+HOUSING_DIR = BASE_RUN / "23_f3_housing_portal/data"
+TOURISM_DIR = MERGE_RUN / "16_f3_ruamthiao_lamphun/data"
+
+
+@pytest.mark.skipif(
+    not all((CULTURAL_DIR / filename).is_file() for filename in CULTURAL_FILES),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_cultural_supporting_projection_is_aggregate_only_and_complete():
     projection = build_cultural_supporting_coverage()
 
@@ -45,6 +72,10 @@ def test_cultural_supporting_projection_is_aggregate_only_and_complete():
     assert "records" not in projection
 
 
+@pytest.mark.skipif(
+    not REQUIREMENT_PATH.is_file(),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_two_public_requirements_are_sanitized_and_exactly_province_linked():
     rows = [
         json.loads(line)
@@ -80,6 +111,10 @@ def test_two_public_requirements_are_sanitized_and_exactly_province_linked():
         assert "phone" not in serialized
 
 
+@pytest.mark.skipif(
+    not REQUIREMENT_PATH.is_file(),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_requirement_province_crosswalk_does_not_strip_or_infer_prefixes():
     row = json.loads(REQUIREMENT_PATH.read_text(encoding="utf-8").splitlines()[0])
     row["normalized_fields"]["areas"][0]["province"] = "จังหวัดศรีสะเกษ"
@@ -90,9 +125,13 @@ def test_requirement_province_crosswalk_does_not_strip_or_infer_prefixes():
     assert unmatched == ["จังหวัดศรีสะเกษ"]
 
 
+@pytest.mark.skipif(
+    not HOUSING_METADATA_PATH.is_file() or not any(HOUSING_DIR.glob("*.csv")),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_all_approved_housing_rows_reconcile_with_306_sanitized_unmapped_rows():
     dashboard = json.loads(
-        (BASE_RUN.parents[3] / "dashboard_final/data/public/public_dashboard.json").read_text(
+        (PROJECT_ROOT / "data/public/public_dashboard.json").read_text(
             encoding="utf-8"
         )
     )
@@ -101,20 +140,15 @@ def test_all_approved_housing_rows_reconcile_with_306_sanitized_unmapped_rows():
         for row in dashboard["provinces"]
     }
     valid_codes = set(code_by_name.values())
-    metadata_path = (
-        STAGED_ROOT
-        / "f3_housing_portal/20260803T_housing_silver_02/resource_inventory.json"
-    )
     metadata = {
         row["resource_id"]: row
-        for row in json.loads(metadata_path.read_text(encoding="utf-8"))["resources"]
+        for row in json.loads(HOUSING_METADATA_PATH.read_text(encoding="utf-8"))["resources"]
     }
 
     total = 0
     mapped = 0
     unmapped = []
-    housing_dir = BASE_RUN / "23_f3_housing_portal/data"
-    for path in sorted(housing_dir.glob("*.csv")):
+    for path in sorted(HOUSING_DIR.glob("*.csv")):
         with path.open("r", encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
                 total += 1
@@ -165,8 +199,12 @@ def recursive_keys(value):
             yield from recursive_keys(child)
 
 
+@pytest.mark.skipif(
+    not (CULTURAL_DIR / "map_inspiration.json").is_file(),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
-    cultural_path = MERGE_RUN / "03_f2_culturalmap_university/data/map_inspiration.json"
+    cultural_path = CULTURAL_DIR / "map_inspiration.json"
     source = json.loads(cultural_path.read_text(encoding="utf-8"))
     code, item = project_cultural_record(source["data"]["records"][0], cultural_path)
 
@@ -208,13 +246,16 @@ def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
     assert forbidden.isdisjoint(set(recursive_keys(item)))
 
 
+@pytest.mark.skipif(
+    not any(TOURISM_DIR.glob("*.json")),
+    reason=MAINTAINER_EVIDENCE_REASON,
+)
 def test_tourism_projection_keeps_counts_but_no_contact_or_address_fields():
-    tourism_dir = MERGE_RUN / "16_f3_ruamthiao_lamphun/data"
     projections = {
         item["page_id"]: item
         for item in (
             project_tourism_payload(json.loads(path.read_text(encoding="utf-8")))
-            for path in sorted(tourism_dir.glob("*.json"))
+            for path in sorted(TOURISM_DIR.glob("*.json"))
         )
     }
 

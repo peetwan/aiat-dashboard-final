@@ -1,0 +1,48 @@
+name: เพิ่มหรือแก้ Source Connector
+description: ขอเพิ่ม URL, API, CKAN, ArcGIS, JSON หรือ snapshot source
+title: "[source] "
+labels: ["source-request"]
+body:
+  - type: input
+    id: source_url
+    attributes:
+      label: Source URL
+      description: URL หน้าสาธารณะของแหล่งข้อมูล
+      placeholder: https://example.go.th/dashboard
+    validations:
+      required: true
+  - type: dropdown
+    id: access_mode
+    attributes:
+      label: รูปแบบที่พบ
+      options:
+        - API/JSON
+        - CKAN
+        - ArcGIS
+        - CSV/Excel export
+        - HTML scrape
+        - Snapshot
+        - ยังไม่ทราบ
+    validations:
+      required: true
+  - type: textarea
+    id: grain
+    attributes:
+      label: หนึ่งแถวแทนอะไร
+      description: เช่น โครงการหนึ่งโครงการ ผู้เข้าร่วมหนึ่งราย หรือค่ารวมหนึ่งจังหวัด
+    validations:
+      required: true
+  - type: textarea
+    id: completeness
+    attributes:
+      label: รู้ได้อย่างไรว่าดึงครบ
+      description: เช่น totalCount, จำนวนหน้า, unique ID หรือ resource count
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: ข้อมูลสาธารณะ
+      options:
+        - label: ฉันไม่ได้แนบ token, cookie, credential หรือข้อมูลส่วนบุคคลลง issue นี้
+          required: true

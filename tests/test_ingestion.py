@@ -86,6 +86,49 @@ def test_snapshot_ingestion_sanitizes_contact_fields(tmp_path):
         assert "0899999999" not in record.payload["note"]
 
 
+def test_operational_candidate_removes_person_name_containers_and_fields():
+    from app.privacy import sanitize_payload
+
+    payload = sanitize_payload(
+        {
+            "id": 1,
+            "name": "ชื่อนวัตกรรมที่เผยแพร่ได้",
+            "ownerContact": {
+                "name": "ชื่อบุคคล",
+                "lastname": "นามสกุลบุคคล",
+                "email": "person@example.com",
+            },
+            "researcherName": "ชื่อผู้วิจัย",
+        }
+    )
+
+    assert payload == {"id": 1, "name": "ชื่อนวัตกรรมที่เผยแพร่ได้"}
+
+
+def test_apptech_mtr_driver_rejects_incomplete_or_duplicate_pagination():
+    plan = {"url": "https://example.test/apptech", "page_size": 2}
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=10)
+    with SessionLocal() as session:
+        pipeline = IngestionPipeline(session, settings)
+        incomplete = SequenceRecorder(
+            [
+                {"data": [{"id": 1}, {"id": 2}], "totalCount": 3},
+                {"data": [], "totalCount": 3},
+            ]
+        )
+        with pytest.raises(RuntimeError, match="incomplete pagination"):
+            pipeline._fetch_apptech_mtr(plan, incomplete)
+
+        duplicate = SequenceRecorder(
+            [
+                {"data": [{"id": 1}, {"id": 2}], "totalCount": 3},
+                {"data": [{"id": 2}], "totalCount": 3},
+            ]
+        )
+        with pytest.raises(RuntimeError, match="duplicate id=2"):
+            pipeline._fetch_apptech_mtr(plan, duplicate)
+
+
 def test_restricted_sources_are_blocked_and_approved_public_sources_pass_guard():
     settings = Settings(
         app_env="local",
@@ -332,6 +375,8 @@ def test_ruamthiao_snapshot_gate_normalizes_all_visible_content():
         / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
         / "16_f3_ruamthiao_lamphun/data"
     )
+    if not snapshot_root.is_dir():
+        pytest.skip("full tourism snapshot evidence is not included in the public clone")
     files = sorted(snapshot_root.glob("*.json"))
     records = IngestionPipeline._read_ruamthiao_snapshot(
         {"expected_record_count": 54},

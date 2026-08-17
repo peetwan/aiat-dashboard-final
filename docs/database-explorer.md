@@ -2,6 +2,8 @@
 
 Database Explorer เป็น service แยกจาก Public Dashboard แต่ deploy อยู่ใน Railway project เดียวกันและอ่าน PostgreSQL ตัวเดียวกันผ่าน private service reference
 
+Production: [aiat-database-explorer-production.up.railway.app](https://aiat-database-explorer-production.up.railway.app)
+
 ## ขอบเขต
 
 - อ่านอย่างเดียว ไม่มี endpoint สำหรับ insert/update/delete
@@ -21,15 +23,15 @@ python -m explorer.server
 
 ## Railway service
 
-Explorer ใช้ image จาก `Dockerfile.explorer` และตัวแปร:
+Explorer ใช้ `railway.explorer.json`, `Dockerfile.explorer` และตัวแปร:
 
 ```text
-DATABASE_URL=${{Postgres-HY_j.DATABASE_URL}}
+DATABASE_URL=${{<serving-postgres>.DATABASE_URL}}
 DASHBOARD_URL=https://aiat-dashboard-web-production.up.railway.app
 APP_ENV=production
 ```
 
-ชื่อ database service ใน reference ต้องตรงกับ service ที่ Dashboard ใช้อยู่จริง ห้ามคัดลอกค่าของ connection string ลง Git
+`<serving-postgres>` หมายถึง PostgreSQL service ที่ Dashboard ใช้อยู่จริง ทั้งสอง app ต้องอ้าง service เดียวกัน ห้ามคัดลอกค่าของ connection string ลง Git
 
 Health check: `/health`
 
@@ -41,4 +43,3 @@ Health check: `/health`
 | `/api/sources` | รายละเอียดครบ 28 sources พร้อม grain/endpoints/tables |
 | `/api/source/{source_id}` | รายละเอียด source เดียว |
 | `/api/schema` | 9 serving tables, live counts และ relationships |
-

@@ -1,0 +1,25 @@
+{
+  "contract_version": "1.0",
+  "source_id": "f2_apptech_mtr",
+  "connector": "app.connectors.apptech_mtr:ApptechMtrConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "innovations",
+      "grain_th": "นวัตกรรมหนึ่งรายการ",
+      "identity_fields": ["id", "innovationid"],
+      "geography_fields": ["province", "provinceName"],
+      "as_of_fields": ["updatedAt", "year"]
+    }
+  ],
+  "completeness_checks": [
+    "ไล่ pagination จนครบ totalCount",
+    "หยุดและแจ้งปัญหาเมื่อ response ไม่ใช่รายการข้อมูล",
+    "เก็บ hash ของ response ทุกหน้า"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "ownerContact", "citizen"]
+  }
+}

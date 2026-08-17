@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "source_id": "f2_learning_dashboard",
+  "connector": "app.connectors.learning_dashboard:LearningDashboardConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "provinces|entityTypes|categories|geography",
+      "grain_th": "หมวดสรุปหนึ่งรายการตามตารางที่ต้นทางส่งมา",
+      "identity_fields": ["source_row_number", "label"],
+      "geography_fields": ["label"],
+      "as_of_fields": []
+    },
+    {
+      "key_pattern": "geographyImpact|impactSummary",
+      "grain_th": "ค่าผลกระทบรวมหนึ่งรายการตามขอบเขตต้นทาง",
+      "identity_fields": ["source_row_number", "geography"],
+      "geography_fields": ["geography", "province"],
+      "as_of_fields": []
+    }
+  ],
+  "completeness_checks": [
+    "response ต้องมี expected keys ครบ",
+    "ตาราง header-array ต้องมีความกว้างสองคอลัมน์",
+    "เก็บ unit และ as_of เป็น null เมื่อแหล่งข้อมูลไม่ระบุ"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  }
+}

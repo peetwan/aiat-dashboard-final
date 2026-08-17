@@ -49,6 +49,10 @@ def test_executable_plans_never_include_restricted_sources():
     serialized = " ".join(executable_urls).lower()
     assert "data_household_detail.php" not in serialized
     assert "/backend/ajax/auth/" not in serialized
+    assert all(
+        plan.get("connector", "").startswith("app.connectors.")
+        for plan in plans.values()
+    )
 
 
 def test_postgres_startup_sync_holds_one_advisory_lock(monkeypatch):
