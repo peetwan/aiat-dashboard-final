@@ -25,8 +25,8 @@ from tools.build_source_insights import build_cultural_supporting_coverage
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-MAINTAINER_EVIDENCE_REASON = (
-    "immutable raw/staged evidence lives in the maintainer workspace, not the public clone"
+EVIDENCE_WORKSPACE_REASON = (
+    "immutable raw/staged evidence is not included in the public clone"
 )
 CULTURAL_FILES = (
     "map_inspiration.json",
@@ -46,7 +46,7 @@ TOURISM_DIR = MERGE_RUN / "16_f3_ruamthiao_lamphun/data"
 
 @pytest.mark.skipif(
     not all((CULTURAL_DIR / filename).is_file() for filename in CULTURAL_FILES),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_cultural_supporting_projection_is_aggregate_only_and_complete():
     projection = build_cultural_supporting_coverage()
@@ -74,7 +74,7 @@ def test_cultural_supporting_projection_is_aggregate_only_and_complete():
 
 @pytest.mark.skipif(
     not REQUIREMENT_PATH.is_file(),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_two_public_requirements_are_sanitized_and_exactly_province_linked():
     rows = [
@@ -113,7 +113,7 @@ def test_two_public_requirements_are_sanitized_and_exactly_province_linked():
 
 @pytest.mark.skipif(
     not REQUIREMENT_PATH.is_file(),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_requirement_province_crosswalk_does_not_strip_or_infer_prefixes():
     row = json.loads(REQUIREMENT_PATH.read_text(encoding="utf-8").splitlines()[0])
@@ -127,7 +127,7 @@ def test_requirement_province_crosswalk_does_not_strip_or_infer_prefixes():
 
 @pytest.mark.skipif(
     not HOUSING_METADATA_PATH.is_file() or not any(HOUSING_DIR.glob("*.csv")),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_all_approved_housing_rows_reconcile_with_306_sanitized_unmapped_rows():
     dashboard = json.loads(
@@ -201,7 +201,7 @@ def recursive_keys(value):
 
 @pytest.mark.skipif(
     not (CULTURAL_DIR / "map_inspiration.json").is_file(),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
     cultural_path = CULTURAL_DIR / "map_inspiration.json"
@@ -248,7 +248,7 @@ def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
 
 @pytest.mark.skipif(
     not any(TOURISM_DIR.glob("*.json")),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_tourism_projection_keeps_counts_but_no_contact_or_address_fields():
     projections = {

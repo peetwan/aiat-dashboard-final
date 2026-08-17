@@ -4,12 +4,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 from pathlib import Path
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = DASHBOARD_ROOT.parent
+EVIDENCE_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
+).expanduser().resolve()
 
 
 def sha256_file(path: Path) -> str:
@@ -18,6 +21,20 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def resolve_snapshot_origin(
+    path_text: str,
+    *,
+    evidence_root: Path = EVIDENCE_ROOT,
+    dashboard_root: Path = DASHBOARD_ROOT,
+) -> Path:
+    relative = Path(path_text.replace("\\", "/"))
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"snapshot origin must be a safe relative path: {path_text}")
+    if relative.parts and relative.parts[0] == "dashboard_final":
+        return dashboard_root.joinpath(*relative.parts[1:])
+    return evidence_root / relative
 
 
 def main() -> int:
@@ -47,7 +64,7 @@ def main() -> int:
         target_root = DASHBOARD_ROOT / "data/snapshots" / source_id
         artifacts = []
         for relative in source["snapshot_origin_files"]:
-            origin = PROJECT_ROOT / relative
+            origin = resolve_snapshot_origin(relative)
             size_mb = origin.stat().st_size / (1024 * 1024)
             if size_mb > args.max_file_mb and not args.include_large:
                 report["skipped"].append(

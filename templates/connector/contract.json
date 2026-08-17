@@ -1,26 +1,37 @@
 {
-  "contract_version": "1.0",
-  "source_id": "replace_source_id",
-  "connector": "app.connectors.replace_source_id:ExampleConnector",
-  "transport": "http_json",
+  "contract_version": "1.1",
+  "source_id": __SOURCE_ID_JSON__,
+  "connector": __CONNECTOR_ENTRYPOINT_JSON__,
+  "transport": __TRANSPORT_JSON__,
   "dataset_grains": [
     {
-      "key_pattern": "replace_dataset_key",
-      "grain_th": "อธิบายว่าหนึ่งแถวแทนอะไร",
-      "identity_fields": ["id"],
-      "geography_fields": ["province"],
-      "as_of_fields": ["updated_at"]
+      "key_pattern": __KEY_PATTERN_JSON__,
+      "grain_th": __GRAIN_TH_JSON__,
+      "identity_options": __IDENTITY_OPTIONS_JSON__,
+      "geography_fields": __GEOGRAPHY_FIELDS_JSON__,
+      "as_of_fields": __AS_OF_FIELDS_JSON__
     }
   ],
   "completeness_checks": [
-    "ระบุว่ารู้ได้อย่างไรว่าดึงครบ",
-    "ระบุวิธีตรวจ ID ซ้ำ",
-    "ระบุพฤติกรรมเมื่อ schema เปลี่ยน"
+    "response data ต้องเป็น object array",
+    "ทุก record ต้องมี identity ตาม identity_options และ identity ห้ามซ้ำ",
+    "เพิ่มการตรวจ pagination, total count และ schema drift ตามพฤติกรรมจริงของ source ก่อนเปิด PR"
   ],
   "privacy": {
     "candidate_only": true,
     "contact_value_scan": true,
-    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
   },
-  "sample_fixture": "tests/fixtures/connectors/replace_source_id/sample_response.json"
+  "sample_fixture": __FIXTURE_PATH_JSON__,
+  "notes_th": "Scaffold นี้เป็นจุดเริ่มต้น ต้องปรับ parser และ completeness checks ให้ตรง response จริงก่อนเปิด PR"
 }

@@ -329,7 +329,7 @@ def _utc_now() -> str:
 
 def _policy_label(policy: str) -> str:
     return {
-        "project_owner_approved_public": "Public candidate",
+        "team_approved_public": "Public candidate",
         "metadata_only": "Metadata only",
         "restricted_local_only": "Restricted local-only",
     }.get(policy, policy)
@@ -386,7 +386,7 @@ def _live_snapshot(session) -> dict[str, Any]:
         "checked_at": _utc_now(),
         "refresh_interval_seconds": REFRESH_INTERVAL_SECONDS,
         "source_total": source_total,
-        "public_candidate_sources": policy_counts.get("project_owner_approved_public", 0),
+        "public_candidate_sources": policy_counts.get("team_approved_public", 0),
         "metadata_only_sources": policy_counts.get("metadata_only", 0),
         "restricted_sources": policy_counts.get("restricted_local_only", 0),
         "endpoint_total": endpoint_total,

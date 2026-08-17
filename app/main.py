@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, func, select, text
 
-from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
+from app.catalog import load_catalog, load_ingestion_plans, sync_catalog, validate_catalog_contract
 from app.database import SessionLocal, engine, init_db
 from app.models import DashboardRecord, Endpoint, IngestionRun, PublicArtifact, Source, SpatialFeature
 from app.api_schemas import (
@@ -71,13 +71,26 @@ from app.demand_artifacts import (
 settings = get_settings()
 templates = Jinja2Templates(directory=PROJECT_ROOT / "app" / "templates")
 
+_REVIEWED_CATALOG = load_catalog()
+validate_catalog_contract(_REVIEWED_CATALOG)
+_REVIEWED_SOURCES = _REVIEWED_CATALOG["sources"]
 EXPECTED_PUBLIC_ARTIFACTS = REQUIRED_ARTIFACT_COUNT
-EXPECTED_SOURCE_COUNT = 28
-EXPECTED_PUBLIC_SOURCE_COUNT = 11
-EXPECTED_METADATA_SOURCE_COUNT = 12
-EXPECTED_RESTRICTED_SOURCE_COUNT = 5
-EXPECTED_ENDPOINT_COUNT = 144
-EXPECTED_RUNTIME_ENDPOINT_COUNT = 94
+EXPECTED_SOURCE_COUNT = len(_REVIEWED_SOURCES)
+EXPECTED_PUBLIC_SOURCE_COUNT = sum(
+    source.get("cloud_policy") == "team_approved_public" for source in _REVIEWED_SOURCES
+)
+EXPECTED_METADATA_SOURCE_COUNT = sum(
+    source.get("cloud_policy") == "metadata_only" for source in _REVIEWED_SOURCES
+)
+EXPECTED_RESTRICTED_SOURCE_COUNT = sum(
+    source.get("cloud_policy") == "restricted_local_only" for source in _REVIEWED_SOURCES
+)
+EXPECTED_ENDPOINT_COUNT = sum(len(source.get("endpoints", [])) for source in _REVIEWED_SOURCES)
+EXPECTED_RUNTIME_ENDPOINT_COUNT = sum(
+    endpoint.get("runtime_enabled") is True and endpoint.get("restricted") is not True
+    for source in _REVIEWED_SOURCES
+    for endpoint in source.get("endpoints", [])
+)
 STARTUP_SYNC_LOCK_ID = 0x4149415453594E43  # ASCII "AIATSYNC", signed bigint-safe.
 SPATIAL_DATABASE_REQUIRED = (
     settings.app_env.lower() == "production" and engine.dialect.name == "postgresql"
@@ -145,7 +158,7 @@ def _serving_contract_snapshot(session) -> dict:
     public_policy_ids = set(
         session.scalars(
             select(Source.source_id).where(
-                Source.cloud_policy == "project_owner_approved_public"
+                Source.cloud_policy == "team_approved_public"
             )
         ).all()
     )
@@ -396,6 +409,56 @@ def health():
 def public_data_catalog():
     """Return the complete approved public projection and its semantic labels."""
     return public_catalog()
+
+
+@app.get(
+    "/api/public/v1/artifacts",
+    tags=["Public data"],
+    response_model=list[dict],
+)
+def public_artifact_index():
+    """List every reviewed artifact declared by the current serving manifest."""
+    with SessionLocal() as session:
+        artifacts = session.execute(
+            select(
+                PublicArtifact.artifact_key,
+                PublicArtifact.artifact_group,
+                PublicArtifact.province_code,
+                PublicArtifact.item_count,
+                PublicArtifact.content_hash,
+                PublicArtifact.source_path,
+                PublicArtifact.updated_at,
+            ).order_by(
+                PublicArtifact.artifact_group,
+                PublicArtifact.artifact_key,
+            )
+        ).all()
+        return [
+            {
+                "artifact_key": artifact.artifact_key,
+                "artifact_group": artifact.artifact_group,
+                "province_code": artifact.province_code,
+                "item_count": artifact.item_count,
+                "content_hash": artifact.content_hash,
+                "source_path": artifact.source_path,
+                "updated_at": artifact.updated_at.isoformat(),
+            }
+            for artifact in artifacts
+        ]
+
+
+@app.get(
+    "/api/public/v1/artifacts/{artifact_key:path}",
+    tags=["Public data"],
+    response_model=dict,
+)
+def public_artifact_by_key(artifact_key: str):
+    """Return one reviewed JSON object without adding source-specific API code."""
+    with SessionLocal() as session:
+        artifact = session.get(PublicArtifact, artifact_key)
+        if artifact is None:
+            raise HTTPException(status_code=404, detail="ไม่พบ public artifact")
+        return artifact.payload
 
 
 @app.get(

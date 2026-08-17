@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -13,7 +14,9 @@ from typing import Any, Iterable
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_ROOT = PROJECT_ROOT.parent
+WORKSPACE_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(PROJECT_ROOT.parent))
+).expanduser().resolve()
 BASE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final"
 PPP_PATH = (
     WORKSPACE_ROOT
@@ -147,9 +150,31 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def provenance_path(
+    path: Path,
+    *,
+    evidence_root: Path = WORKSPACE_ROOT,
+    dashboard_root: Path = PROJECT_ROOT,
+) -> str:
+    """Return a stable path without assuming the repo lives under the evidence root."""
+    resolved = path.expanduser().resolve()
+    dashboard_root = dashboard_root.expanduser().resolve()
+    evidence_root = evidence_root.expanduser().resolve()
+    try:
+        relative = resolved.relative_to(dashboard_root)
+    except ValueError:
+        try:
+            return resolved.relative_to(evidence_root).as_posix()
+        except ValueError as exc:
+            raise ValueError(
+                f"provenance input is outside the dashboard and evidence roots: {resolved}"
+            ) from exc
+    return (Path("dashboard_final") / relative).as_posix()
+
+
 def input_entry(path: Path) -> dict[str, Any]:
     return {
-        "path": path.relative_to(WORKSPACE_ROOT).as_posix(),
+        "path": provenance_path(path),
         "bytes": path.stat().st_size,
         "sha256": sha256(path),
     }
@@ -744,7 +769,7 @@ def build_executive_portfolio(
             "mixed_source_count": status_counts["mixed"],
             "status_rows": status_rows,
             "evidence": [
-                path.relative_to(WORKSPACE_ROOT).as_posix()
+                provenance_path(path)
                 for path in AUDIT_EVIDENCE_PATHS.values()
             ],
         },

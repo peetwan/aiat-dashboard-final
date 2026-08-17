@@ -1,0 +1,10 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_apptech_mtr",
+  "records": [
+    {
+      "dataset_key": "innovations",
+      "payload": {"id": "fixture-apptech-01", "provinceName": "จังหวัดตัวอย่าง", "year": "2569"}
+    }
+  ]
+}

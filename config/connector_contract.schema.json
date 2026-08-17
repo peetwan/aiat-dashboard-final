@@ -11,24 +11,33 @@
     "transport",
     "dataset_grains",
     "completeness_checks",
-    "privacy"
+    "privacy",
+    "sample_fixture"
   ],
   "properties": {
-    "contract_version": {"const": "1.0"},
+    "contract_version": {"const": "1.1"},
     "source_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
     "connector": {"type": "string", "pattern": "^app\\.connectors\\.[a-z0-9_]+:[A-Za-z][A-Za-z0-9_]+$"},
-    "transport": {"enum": ["http_json", "http_form_json", "ckan_csv", "snapshot"]},
+    "transport": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
     "dataset_grains": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["key_pattern", "grain_th", "identity_fields", "geography_fields"],
+        "required": ["key_pattern", "grain_th", "identity_options", "geography_fields", "as_of_fields"],
         "properties": {
-          "key_pattern": {"type": "string", "minLength": 1},
+          "key_pattern": {"type": "string", "pattern": "^\\^.*\\$$"},
           "grain_th": {"type": "string", "minLength": 1},
-          "identity_fields": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "identity_options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string", "minLength": 1}
+            }
+          },
           "geography_fields": {"type": "array", "items": {"type": "string"}},
           "as_of_fields": {"type": "array", "items": {"type": "string"}}
         }
@@ -53,7 +62,10 @@
         }
       }
     },
-    "sample_fixture": {"type": "string", "pattern": "^tests/fixtures/connectors/"},
+    "sample_fixture": {
+      "type": "string",
+      "pattern": "^tests/fixtures/connectors/[a-z0-9_]+\\.json$"
+    },
     "notes_th": {"type": "string"}
   }
 }

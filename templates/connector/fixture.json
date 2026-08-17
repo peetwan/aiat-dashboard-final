@@ -1,0 +1,10 @@
+{
+  "fixture_version": "1.0",
+  "source_id": __SOURCE_ID_JSON__,
+  "records": [
+    {
+      "dataset_key": __DATASET_KEY_JSON__,
+      "payload": __FIXTURE_PAYLOAD_JSON__
+    }
+  ]
+}

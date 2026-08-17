@@ -8,7 +8,7 @@
 
 อย่าเปิด public issue หากรายงานมี credential, ข้อมูลส่วนบุคคล, URL ที่มี token, raw response หรือวิธีเข้าถึงข้อมูลที่ไม่ควรเผยแพร่
 
-ให้ติดต่อ maintainer ผ่าน GitHub private vulnerability reporting ของ repository หากเปิดใช้งาน หรือส่งรายละเอียดส่วนตัวให้เจ้าของ repository `peetwan`
+ให้ติดต่อทีมผู้ร่วมดูแลผ่าน GitHub private vulnerability reporting ของ repository หากเปิดใช้งาน หรือใช้ช่องทางส่วนตัวที่ทีมระบุ ห้ามส่ง secret หรือข้อมูลอ่อนไหวใน public issue
 
 รายงานควรมี:
 

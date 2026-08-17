@@ -1,15 +1,15 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f3_housing_portal",
   "connector": "app.connectors.housing_ckan:HousingCkanConnector",
   "transport": "ckan_csv",
   "dataset_grains": [
     {
-      "key_pattern": "{package_id}:{resource_id}",
+      "key_pattern": "^[^:]+:[^:]+$",
       "grain_th": "หนึ่งแถวใน CKAN CSV resource ที่ได้รับอนุญาตให้ใช้ค่า",
-      "identity_fields": ["resource_id", "row_number"],
+      "identity_options": [["resource_id", "row_number"]],
       "geography_fields": ["province", "district", "subdistrict", "adm1_pcode", "adm2_pcode", "adm3_pcode"],
-      "as_of_fields": ["year", "fiscal_year", "last_modified"]
+      "as_of_fields": ["source_fields.year", "source_fields.fiscal_year", "source_fields.last_modified"]
     }
   ],
   "completeness_checks": [
@@ -22,5 +22,6 @@
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "birth_year", "income", "respondent_id", "citizen", "national_id"]
   },
+  "sample_fixture": "tests/fixtures/connectors/f3_housing_portal.json",
   "notes_th": "Demand person-level values และ policy-assessment values ไม่อยู่ใน value-approved connector lane"
 }

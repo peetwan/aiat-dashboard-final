@@ -4,15 +4,23 @@
 
 ## สิ่งที่ต้องมีในหนึ่ง PR
 
-1. แหล่งข้อมูลต้องอยู่ใน `config/source_catalog.json`
+1. แหล่งเดิมต้องมี entry ใน generated `config/source_catalog.json`; source ลำดับใหม่ต้องเพิ่ม canonical registry/source card ผ่าน evidence workspace แล้ว regenerate ห้ามแก้ catalog ด้วยมือ
 2. เพิ่ม plan ใน `config/ingestion_plans.json` พร้อม `driver` และ `connector` entrypoint
 3. เพิ่ม Python module ที่ `app/connectors/<source_id>.py`
 4. เพิ่ม contract ที่ `config/connector_contracts/<source_id>.json`
-5. เพิ่ม fixture ที่ลบข้อมูลระบุตัวบุคคลแล้วใน `tests/fixtures/connectors/<source_id>/`
+5. เพิ่ม fixture ที่ลบข้อมูลระบุตัวบุคคลแล้วใน `tests/fixtures/connectors/<source_id>.json`
 6. เพิ่ม unit tests ที่ใช้ fixture หรือ fake recorder; ห้ามเรียก network จริงใน CI
 7. รัน `python -m app.cli validate-pipeline`, `python tools/validate_public_repo.py` และ `python -m pytest -q`
 
-เริ่มจากไฟล์ใน `templates/connector/` แล้วเปลี่ยนชื่อ class, driver, grain และ completeness checks ให้ตรงกับต้นทางจริง
+เริ่มจากไฟล์ใน `templates/connector/` หรือให้ tool สร้าง connector + contract + fixture + offline test ตั้งต้น:
+
+```powershell
+python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --dataset-key <key> --grain-th "หนึ่งแถวแทน..." --identity-fields <field[,field]>
+```
+
+รันด้วย `--dry-run` ก่อนได้ และเพิ่ม `--identity-fields` หลายครั้งเมื่อต้นทางมี identity สำรอง Tool ไม่แก้ generated source catalog/ingestion plan และไม่ overwrite ไฟล์เดิม จึงต้องเพิ่ม plan และแก้ parser, grain, identity, geography, `as_of` และ completeness ให้ตรงกับต้นทางจริงก่อนเปิด PR
+
+สำหรับ source ลำดับใหม่ที่ยังไม่อยู่ใน 28 แหล่ง ให้ผู้ที่มี `AIAT_EVIDENCE_ROOT` เพิ่ม `config/source_registry.json` และ `data/source_audit/<ordinal>_<source_id>/source_card.json` ใน canonical evidence workspace จากนั้นรัน `tools/build_source_catalog.py` และ `tools/build_source_coverage.py` เพื่อให้ PR มี generated catalog/coverage diff ที่ตรวจย้อนกลับได้
 
 อย่าพยายามบังคับให้ทุก URL คืน schema เดียวกัน Generalization อยู่ที่ interface ของ connector และ contract ส่วน parsing ยังคงเป็นของ source นั้น ตัวอย่าง pattern ที่รองรับ:
 
@@ -45,6 +53,8 @@ Connector ห้าม:
 - นำชื่อบุคคล เบอร์โทร อีเมล หรือที่อยู่เข้า fixture
 
 ส่วนกลางใน `app/ingestion.py` จะเป็นผู้เก็บ response, SHA-256, manifest, sanitize payload, ป้องกัน record version ซ้ำ และเขียน Candidate เข้า `dashboard_records`
+
+Plan ต้องประกาศ request shape ที่ connector ส่งจริงด้วย: GET ระบุ `params`, POST JSON ระบุ `json_body` และใช้ `$PLACEHOLDER` เฉพาะค่าที่เปลี่ยนระหว่าง pagination ตอน generate catalog ค่าพวกนี้จะกลายเป็น `<value>` ส่วน key และค่าคงที่จะถูกล็อกไว้ Runtime จะปฏิเสธ URL, query key, POST body field หรือ action ที่ไม่ตรงกับ reviewed plan
 
 ## Contract ต้องตอบอะไรได้
 

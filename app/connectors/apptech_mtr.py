@@ -11,13 +11,26 @@ class ApptechMtrConnector:
         seen_ids: set[str] = set()
         offset = 0
         page_size = int(context.plan.get("page_size", 99))
+        query_template = context.plan.get("query_params")
+        if not isinstance(query_template, dict) or not query_template:
+            raise RuntimeError("AppTech MTR plan has no query_params contract")
         total: int | None = None
         while total is None or offset < total:
+            params = {
+                key: (
+                    offset
+                    if value == "$OFFSET"
+                    else page_size
+                    if value == "$PAGE_SIZE"
+                    else value
+                )
+                for key, value in query_template.items()
+            }
             response, _ = context.recorder.request(
                 "GET",
                 context.plan["url"],
                 name=f"apptech_mtr_offset_{offset:05d}",
-                params={"__template": "appTech.public.list", "offset": offset, "max": page_size},
+                params=params,
             )
             payload = response.json()
             if not isinstance(payload, dict):

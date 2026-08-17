@@ -1,0 +1,14 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f1_sradss_ppaos",
+  "records": [
+    {
+      "dataset_key": "summary_updated_at.value",
+      "payload": {"updated_at": "2569-08-17", "status": "fixture"}
+    },
+    {
+      "dataset_key": "provinces.rows",
+      "payload": {"id": "fixture-province-01", "province": "จังหวัดตัวอย่าง", "year": "2569"}
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import urllib.parse
 import urllib.request
 from collections import defaultdict
@@ -14,7 +15,9 @@ from typing import Any, Iterable
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_ROOT = PROJECT_ROOT.parent
+WORKSPACE_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(PROJECT_ROOT.parent))
+).expanduser().resolve()
 BASE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final"
 MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
 OUTPUT_DIR = PROJECT_ROOT / "data/public"

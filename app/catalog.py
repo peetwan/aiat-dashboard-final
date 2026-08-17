@@ -12,12 +12,12 @@ from app.settings import PROJECT_ROOT
 
 CATALOG_PATH = PROJECT_ROOT / "config" / "source_catalog.json"
 PLANS_PATH = PROJECT_ROOT / "config" / "ingestion_plans.json"
-CATALOG_CONTRACT = {
-    "registry_source_count": 28,
-    "approved_public_source_count": 11,
-    "metadata_only_source_count": 12,
-    "restricted_source_count": 5,
-}
+CATALOG_CONTRACT_KEYS = (
+    "registry_source_count",
+    "approved_public_source_count",
+    "metadata_only_source_count",
+    "restricted_source_count",
+)
 
 
 def load_catalog(path: Path = CATALOG_PATH) -> dict:
@@ -43,7 +43,7 @@ def validate_catalog_contract(catalog: dict) -> None:
     public_ids = {
         item["source_id"]
         for item in sources
-        if item.get("cloud_policy") == "project_owner_approved_public"
+        if item.get("cloud_policy") == "team_approved_public"
     }
     approved_ids = {
         item["source_id"] for item in sources if item.get("production_values_allowed") is True
@@ -61,10 +61,16 @@ def validate_catalog_contract(catalog: dict) -> None:
     policy = catalog.get("policy", {})
     if len(source_ids) != len(set(source_ids)):
         raise ValueError("source catalog contains duplicate source_id values")
-    if actual != CATALOG_CONTRACT:
-        raise ValueError(f"source catalog contract mismatch: {actual}")
-    if {key: policy.get(key) for key in CATALOG_CONTRACT} != CATALOG_CONTRACT:
+    declared = {key: policy.get(key) for key in CATALOG_CONTRACT_KEYS}
+    if actual != declared:
         raise ValueError("source catalog policy summary does not match its required contract")
+    if (
+        actual["approved_public_source_count"]
+        + actual["metadata_only_source_count"]
+        + actual["restricted_source_count"]
+        != actual["registry_source_count"]
+    ):
+        raise ValueError("source catalog cloud-policy partitions are not exhaustive")
     if public_ids != approved_ids:
         raise ValueError("public cloud policy and production approval source sets differ")
 

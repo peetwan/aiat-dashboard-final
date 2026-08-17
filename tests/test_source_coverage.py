@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = DASHBOARD_ROOT.parent
+PROJECT_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
+).expanduser().resolve()
 CATALOG_PATH = DASHBOARD_ROOT / "config/source_catalog.json"
 COVERAGE_PATH = DASHBOARD_ROOT / "data/public/source_coverage.json"
 REGISTRY_PATH = PROJECT_ROOT / "config/source_registry.json"
@@ -53,8 +57,30 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def test_endpoint_ids_match_the_current_policy_fields():
+    catalog = read_json(CATALOG_PATH)
+    for source in catalog["sources"]:
+        for endpoint in source.get("endpoints", []):
+            identity = "|".join(
+                (
+                    source["source_id"],
+                    endpoint["method"],
+                    endpoint["url"],
+                    endpoint["team_action"],
+                )
+            )
+            assert endpoint["endpoint_id"] == hashlib.sha256(
+                identity.encode("utf-8")
+            ).hexdigest()
+
+
 def test_catalog_covers_registry_and_keeps_value_lanes_separate():
     catalog = read_json(CATALOG_PATH)
+    assert catalog["catalog_version"] == "0.3.0"
+    assert catalog["policy"]["approval_basis"] == "current_catalog_policy_and_source_cards"
+    assert catalog["policy"]["current_stewardship"] == "repository_co_maintainers"
+    assert "approval_recorded_by" not in catalog["policy"]
+    assert "approved_by" not in catalog["policy"]
     catalog_ids = [source["source_id"] for source in catalog["sources"]]
     assert len(catalog_ids) == catalog["policy"]["registry_source_count"] == 28
     if REGISTRY_PATH.is_file():
@@ -68,6 +94,11 @@ def test_catalog_covers_registry_and_keeps_value_lanes_separate():
     assert {source_id for source_id, source in by_id.items() if source["production_values_allowed"]} == PUBLIC_CANDIDATES
     assert {source_id for source_id, source in by_id.items() if source["value_visibility"] == "restricted_local_only"} == RESTRICTED
     assert sum(source["value_visibility"] == "metadata_only" for source in by_id.values()) == 12
+    assert {
+        source["cloud_policy"]
+        for source in by_id.values()
+        if source["production_values_allowed"]
+    } == {"team_approved_public"}
 
     for source_id in RESTRICTED:
         source = by_id[source_id]
@@ -99,7 +130,7 @@ def test_learning_dashboard_uses_verified_post_and_66_province_rows():
     endpoint = source["endpoints"][0]
     assert endpoint["method"] == "POST"
     assert endpoint["url"] == "https://lesuper.app/api/opendata/pmua"
-    assert endpoint["request_template"] == {"json": {}}
+    assert endpoint["request_template"] == {"json": {}, "json_body": {}}
     assert endpoint["runtime_enabled"] is True
     assert endpoint["restricted"] is False
     assert "raw response" in source["notes_th"]
@@ -108,9 +139,9 @@ def test_learning_dashboard_uses_verified_post_and_66_province_rows():
 
 @pytest.mark.skipif(
     not HAS_EVIDENCE_WORKSPACE,
-    reason="full endpoint evidence lives in the maintainer workspace, not the public clone",
+    reason="full endpoint evidence is not included in the public clone",
 )
-def test_every_catalog_endpoint_has_maintainer_evidence_and_is_not_invented():
+def test_every_catalog_endpoint_has_evidence_and_is_not_invented():
     index_rows = list(
         csv.DictReader((MERGED_ROOT / "00_INDEX.csv").open(encoding="utf-8-sig", newline=""))
     )
@@ -186,6 +217,7 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     assert learning["records"]["observed_count_basis"] == "verified_province_rows_excluding_header"
     assert learning["public_visibility"]["production_values_allowed"] is True
     assert learning["status"]["fact_acceptance"] == "candidate_needs_review"
+    assert learning["evidence"]["approval_basis"] == "source_card_candidate_scope_needs_review"
 
     assert sources["f2_cultural_market_civil"]["public_visibility"]["classification"] == "metadata_only"
     assert sources["f2_icommunity"]["public_visibility"]["classification"] == "metadata_only"

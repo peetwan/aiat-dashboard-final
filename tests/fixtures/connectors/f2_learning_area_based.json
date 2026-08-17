@@ -1,0 +1,14 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_learning_area_based",
+  "records": [
+    {
+      "dataset_key": "area_based",
+      "payload": {"id": "fixture-area-01", "province": "จังหวัดตัวอย่าง", "fiscalYear": "2569"}
+    },
+    {
+      "dataset_key": "aggregate_byProvince",
+      "payload": {"id": "byProvince:จังหวัดตัวอย่าง", "dimension": "byProvince", "label": "จังหวัดตัวอย่าง", "value": 1}
+    }
+  ]
+}

@@ -4,12 +4,15 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_ROOT = PROJECT_ROOT.parent
+WORKSPACE_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(PROJECT_ROOT.parent))
+).expanduser().resolve()
 RAW_RESPONSE_PATH = (
     WORKSPACE_ROOT
     / "data/raw/network/f2_learning_dashboard/20260803T_network/response.txt"
@@ -51,9 +54,31 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def provenance_path(
+    path: Path,
+    *,
+    evidence_root: Path = WORKSPACE_ROOT,
+    dashboard_root: Path = PROJECT_ROOT,
+) -> str:
+    """Return a stable path without assuming the repo lives under the evidence root."""
+    resolved = path.expanduser().resolve()
+    dashboard_root = dashboard_root.expanduser().resolve()
+    evidence_root = evidence_root.expanduser().resolve()
+    try:
+        relative = resolved.relative_to(dashboard_root)
+    except ValueError:
+        try:
+            return resolved.relative_to(evidence_root).as_posix()
+        except ValueError as exc:
+            raise ValueError(
+                f"provenance input is outside the dashboard and evidence roots: {resolved}"
+            ) from exc
+    return (Path("dashboard_final") / relative).as_posix()
+
+
 def manifest_entry(path: Path) -> dict[str, Any]:
     return {
-        "path": path.relative_to(WORKSPACE_ROOT).as_posix(),
+        "path": provenance_path(path),
         "bytes": path.stat().st_size,
         "sha256": sha256(path),
     }

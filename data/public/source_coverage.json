@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T05:56:41.144441+00:00",
+  "generated_at": "2026-08-17T14:24:32.632331+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "673da171bbd49a8559f8e2599ae181041841a2da4c3cc75bc94d91595d7553fb"
+      "sha256": "efad2bd41e3a89dd9afdb833f632cff8a719cc85056b91a00e8c212265fd0148"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,7 +18,7 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 28,
-      "aggregate_sha256": "621abe4a608404f099288dd3f223be043d53ba4e9771984ae861bedcb2cbdd2d"
+      "aggregate_sha256": "57079f860c29697e66296d66f74acf1225d4b8cc25bcd86ece25f4cebfdaf528"
     }
   },
   "summary": {
@@ -97,7 +97,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/01_f1_sradss_ppaos/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 44,
         "primary_paths": [
           "data/raw/firecrawl_map/f1_sradss_ppaos/20260803T_url_audit_map_01/manifest.json",
@@ -170,7 +170,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/02_f1_pppconnext/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 4,
         "primary_paths": [
           "data/raw/firecrawl_map/f1_pppconnext/20260817T_canonical_map_02/manifest.json",
@@ -249,7 +249,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/03_f2_culturalmap_university/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 6,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_culturalmap_university/20260817T_url_completeness_map_03c/manifest.json",
@@ -455,7 +455,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/06_f2_rmutdb/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 14,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_rmutdb/20260817T_url_completeness_map_06/manifest.json",
@@ -528,7 +528,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/07_f2_apptech_mtr/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 6,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_apptech_mtr/20260817T_url_completeness_map_07b/manifest.json",
@@ -601,7 +601,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/08_f2_apptech_mru/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 8,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_apptech_mru/20260817T_url_completeness_map_08/manifest.json",
@@ -734,7 +734,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/10_f2_learning_dashboard/source_card.json",
         "merged_index": null,
-        "approval_basis": "project_owner_instruction_2026_08_16_candidate_only",
+        "approval_basis": "source_card_candidate_scope_needs_review",
         "catalogued_endpoint_count": 1,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_learning_dashboard/20260803T_url_audit_map_01/manifest.json",
@@ -799,7 +799,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/11_f2_learning_area_based/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 1,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_learning_area_based/20260817T_url_completeness_map_11c/manifest.json",
@@ -985,7 +985,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/14_f3_city_capital_open_data/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 1,
         "primary_paths": [
           "data/raw/firecrawl_map/f3_city_capital_open_data/20260817T_url_completeness_map_14/manifest.json",
@@ -1114,7 +1114,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/16_f3_ruamthiao_lamphun/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 5,
         "primary_paths": [
           "data/raw/firecrawl_map/f3_ruamthiao_lamphun/20260817T_url_completeness_map_16/manifest.json",
@@ -1575,7 +1575,7 @@
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/23_f3_housing_portal/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
+        "approval_basis": "source_card_dashboard_publication_scope",
         "catalogued_endpoint_count": 50,
         "primary_paths": [
           "data/raw/firecrawl_map/f3_housing_portal/20260817T_url_completeness_map_23/manifest.json",

@@ -24,6 +24,13 @@
 - [ ] `python -m pytest -q`
 - [ ] ตรวจ diff ของ counts/hashes/public artifacts แล้ว (ถ้ามี data release)
 
+## หลักฐานเฉพาะประเภทงาน
+
+- [ ] UI/UX: แนบภาพ before/after และตรวจ mobile, keyboard navigation, focus state แล้ว (ถ้าเกี่ยวข้อง)
+- [ ] Public release: อัปเดต `data/public/serving_manifest.json` แล้ว (ถ้าเกี่ยวข้อง)
+- [ ] Public release: manifest ผูก `source_ids` ที่อนุมัติแล้ว และ payload ผ่าน privacy scan (ถ้าเกี่ยวข้อง)
+- [ ] Public release: ตรวจ generic artifacts API รวมถึง `item_count` และ `content_hash` ตรงกับไฟล์ JSON แล้ว (ถ้าเกี่ยวข้อง)
+
 ## Review note
 
 <!-- ระบุสิ่งที่ reviewer/Codex ควรตรวจเป็นพิเศษ หรือเขียน "ไม่มี" -->

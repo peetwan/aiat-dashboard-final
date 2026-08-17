@@ -41,27 +41,32 @@ Explorer ใช้ `DASHBOARD_URL=https://aiat-dashboard-web-production.up.railw
 
 1. สร้างตารางที่ยังขาดโดยไม่ drop ตารางเดิม
 2. sync `config/source_catalog.json`
-3. sync reviewed artifacts จาก `data/public/`
+3. ขยาย `data/public/serving_manifest.json` แล้วตรวจ path, `source_ids` และ privacy ของ payload ทุกชุดก่อนแก้ `public_artifacts`
 4. transaction-swap spatial และ housing demand snapshots
-5. ตรวจ serving contract ก่อนตอบ health ว่า `ok`
+5. ตรวจ serving contract ที่ derive expected artifact/group counts จาก manifest ก่อนตอบ health ว่า `ok`
 
 การ sync ใช้ key/hash จึงรันซ้ำได้ และมี PostgreSQL advisory lock กันการ deploy หลาย replica เขียนพร้อมกัน Explorer อ่านอย่างเดียวและไม่ seed database
 
-การ merge connector ใหม่ไม่ทำให้ข้อมูลต้นทางถูก publish เอง ข้อมูลใหม่ต้องผ่าน Candidate → review/build/test → commit `data/public/*` ก่อน
+การ merge connector ใหม่ไม่ทำให้ข้อมูลต้นทางถูก publish เอง ข้อมูลใหม่ต้องผ่าน Candidate → review/build/test → commit JSON ใต้ `data/public/` พร้อม manifest entry ที่ผูก `source_ids` ซึ่งอนุมัติให้เผยแพร่แล้ว
 
 ## Pre-merge checks
 
-คำสั่งเหล่านี้รันได้จาก public clone และเป็นชุดเดียวกับ GitHub Actions:
+สามคำสั่งแรกเป็น required CI ที่ GitHub Actions รันจาก public clone:
 
 ```powershell
 python -m app.cli validate-pipeline
 python tools/validate_public_repo.py
 python -m pytest -q
+```
+
+สองคำสั่งต่อไปเป็น local Docker build smoke test ที่แนะนำเมื่อแก้ Dockerfile/deployment config แต่ยังไม่ใช่ job ใน GitHub Actions ปัจจุบัน:
+
+```powershell
 docker build -t aiat-dashboard-final .
 docker build -f Dockerfile.explorer -t aiat-database-explorer .
 ```
 
-การ rebuild public release จาก raw evidence ทั้งหมดเป็น maintainer workflow ภายนอก public repo ผู้ทำ application/connector PR ไม่ต้องมี raw data ชุดนั้น
+การ rebuild public release จาก raw evidence ทั้งหมดต้องใช้ evidence workspace ภายนอก public repo สมาชิกทีมที่ได้รับไฟล์ชุดนั้นตั้ง `AIAT_EVIDENCE_ROOT` แล้วรัน deterministic builder ได้ ผู้ทำ application/UI/connector PR ไม่ต้องมี raw data ชุดนั้น
 
 ## Verify production
 
