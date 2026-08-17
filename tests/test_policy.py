@@ -114,6 +114,11 @@ def test_postgres_startup_sync_holds_one_advisory_lock(monkeypatch):
         "sync_spatial_layers",
         lambda _: events.append("spatial_layers"),
     )
+    monkeypatch.setattr(
+        main,
+        "sync_housing_demand",
+        lambda _: events.append("housing_demand"),
+    )
 
     main._sync_serving_database()
 
@@ -123,6 +128,7 @@ def test_postgres_startup_sync_holds_one_advisory_lock(monkeypatch):
         "catalog",
         "public_artifacts",
         "spatial_layers",
+        "housing_demand",
         "unlock",
         "commit",
     ]

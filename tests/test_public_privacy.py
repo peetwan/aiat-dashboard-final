@@ -397,7 +397,12 @@ def test_executive_portfolio_contains_aggregate_values_only():
     portfolio = insights["executive_portfolio"]
 
     assert portfolio["audit"]["source_count"] == 10
-    assert len(portfolio["headline_metrics"]) == 8
+    assert len(portfolio["headline_metrics"]) == 9
+    demand = next(
+        item for item in portfolio["headline_metrics"]
+        if item["key"] == "housing_demand_responses"
+    )
+    assert demand["value"] == 25_919
     assert len(portfolio["audit"]["status_rows"]) == 10
     violations = find_privacy_violations(
         portfolio,

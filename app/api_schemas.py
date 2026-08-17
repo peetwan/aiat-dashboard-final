@@ -55,6 +55,7 @@ class ProvinceResponse(PublicApiModel):
     innovation_records: int
     cultural_records: int
     housing_observations: int
+    housing_demand_responses: int
     pppconnext_aggregate_rows: int
     learning_dashboard_business_records: int
     apptech_registered_users: int | float | None
@@ -201,6 +202,9 @@ class DatabaseCoverageResponse(PublicApiModel):
     spatial_features_expected: int
     spatial_layer_counts: dict[str, int]
     spatial_complete: bool
+    housing_demand_records_in_database: int
+    housing_demand_records_expected: int
+    housing_demand_complete: bool
     restricted_values_published: int
     operational_candidate_records: int
     raw_data_storage: str
@@ -344,6 +348,20 @@ class HousingSpatialFeatureCollectionResponse(PublicApiModel):
     features: list[GeoJSONFeature]
 
 
+class HousingDemandSummaryResponse(PublicApiModel):
+    schema_version: str
+    generated_at: str
+    source_id: Literal["f3_housing_portal"]
+    publication_status: str
+    quality_status: str
+    record_count: int
+    province_count: int
+    privacy_projection: JsonObject
+    national: JsonObject
+    provinces: dict[str, JsonObject]
+    evidence: JsonObject
+
+
 class HealthResponse(PublicApiModel):
     status: Literal["ok", "unhealthy"]
     database: Literal["connected", "disconnected"]
@@ -357,6 +375,9 @@ class HealthResponse(PublicApiModel):
     spatial_features: int
     spatial_features_expected: int
     spatial_complete: bool
+    housing_demand_records: int
+    housing_demand_records_expected: int
+    housing_demand_complete: bool
     published_catalog_ids_match_approved: bool
     restricted_values_published: int
     app_env: str

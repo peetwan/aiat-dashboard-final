@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T05:20:54.038341+00:00",
+  "generated_at": "2026-08-17T05:56:41.144441+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "c30fd5a626de99f610125e93913c61ae25902cb70007cee50b52cc21acf7e8f0"
+      "sha256": "673da171bbd49a8559f8e2599ae181041841a2da4c3cc75bc94d91595d7553fb"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -1552,7 +1552,7 @@
         "linked_area_count": 12,
         "related_area_count": null,
         "decision": "public_package_geo_audit_2026_08_16",
-        "current_map_area_count": 12,
+        "current_map_area_count": 77,
         "numeric_value_area_count": null,
         "known_omissions": [
           {
@@ -1595,7 +1595,7 @@
       },
       "notes_th": [
         "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
-        "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่; CKAN lane นี้ครบแล้ว แต่หน้า Housing Stock ยังมี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids ที่ยังไม่อยู่ใน serving database. Demand 25,919 respondent rows คง schema-only และ policy values blocked."
+        "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่; CKAN lane นี้ครบแล้ว แต่หน้า Housing Stock มี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids ใน serving database. Demand 25,919 respondent rows เผยแพร่แบบ privacy projection โดยตัด source id และผ่าน contact scan; ทั้งสามชุดแยก grain และยังเป็น needs_review."
       ]
     },
     {

@@ -209,11 +209,13 @@ function setText(id, value) {
 function renderKpis(summary, briefing) {
   const portfolio = summary.research_portfolio || {};
   const culture = briefing.sections?.culture?.total_records;
+  const demand = briefing.sections?.housing?.demand_record_total;
   const metrics = [
     [portfolio.project_count, "กลุ่มโครงการ", "จัดกลุ่มเบื้องต้น"],
     [portfolio.participant_record_count, "ระเบียนผู้เข้าร่วม", "ไม่ใช่จำนวนโครงการ"],
     [portfolio.innovation_count, "นวัตกรรม", "ผลงานที่เชื่อมจังหวัด"],
     [culture, "ทุนวัฒนธรรม", "ระเบียนที่บันทึกในพื้นที่"],
+    [demand, "คำตอบ Housing demand", "ผู้ตอบที่อาศัยในจังหวัด ไม่ใช่ประชากร"],
   ];
   document.getElementById("executiveKpis").innerHTML = metrics.map(([value, label, note]) => `
     <article class="metric-item">
@@ -222,6 +224,48 @@ function renderKpis(summary, briefing) {
       <small>${escapeHtml(note)}</small>
     </article>
   `).join("");
+}
+
+function renderHousingDemand(briefing) {
+  const target = document.getElementById("housingDemandPanel");
+  const demand = briefing.sections?.housing?.demand_summary;
+  if (!target) return;
+  if (!demand || !Number(demand.respondents_living)) {
+    target.innerHTML = "";
+    return;
+  }
+  const single = demand.single_choice_distributions || {};
+  const ranked = demand.ranked_choice_distributions || {};
+  const distributions = [
+    single.future_housing_demand,
+    single.intended_housing_type,
+    single.preferred_price_range,
+    single.preferred_price_range_per_month,
+    single.urgency_of_housing_purchase_rent,
+    ranked.disaster_prevention,
+  ].filter(Boolean);
+  const futureAnswered = single.future_housing_demand?.answered || 0;
+  target.innerHTML = `
+    <article class="demand-panel">
+      <header class="demand-heading">
+        <div><span>Housing demand</span><h3>ความต้องการที่อยู่อาศัยของผู้ตอบในจังหวัด</h3></div>
+        <p>สรุปจากแบบสำรวจที่ตัด source id และตรวจชื่อ เบอร์โทร อีเมลแล้ว</p>
+      </header>
+      <div class="demand-facts">
+        <article><span>ผู้ตอบที่อาศัยในจังหวัด</span><strong>${formatNumber(demand.respondents_living)}</strong><small>คำตอบแบบสำรวจ</small></article>
+        <article><span>เลือกจังหวัดนี้เป็นพื้นที่ที่ต้องการ</span><strong>${formatNumber(demand.respondents_preferring_destination)}</strong><small>คำตอบที่ระบุจังหวัดเป้าหมาย</small></article>
+        <article><span>ตอบคำถามความต้องการอนาคต</span><strong>${formatNumber(futureAnswered)}</strong><small>ไม่ใช่จำนวนประชากรจังหวัด</small></article>
+      </div>
+      <div class="demand-charts">
+        ${distributions.map((distribution) => `
+          <figure class="chart-panel">
+            <figcaption><span>${distribution.mention_count ? "การถูกเลือกใน 5 อันดับ" : `${formatNumber(distribution.answered)} คำตอบ`}</span><strong>${escapeHtml(distribution.label_th)}</strong></figcaption>
+            <div>${chartRows((distribution.items || []).slice(0, 8))}</div>
+            ${distribution.share_basis_th ? `<p class="chart-note">${escapeHtml(distribution.share_basis_th)}</p>` : ""}
+          </figure>`).join("")}
+      </div>
+      <p class="demand-note">ค่าทั้งหมดเป็นสัดส่วนในกลุ่มผู้ตอบแบบสำรวจของจังหวัด ใช้ดูรูปแบบความต้องการ ไม่ใช้แทนประชากรหรือครัวเรือนทั้งหมด</p>
+    </article>`;
 }
 
 function renderExecutiveReadout(summary) {
@@ -694,6 +738,7 @@ function renderPage(summary, briefing, operations) {
   renderDecisionChain(summary);
   renderExecutiveGaps(summary);
   renderResearch(briefing, summary);
+  renderHousingDemand(briefing);
   setupPeople(briefing);
   renderDimensions(summary);
   renderSources(summary);

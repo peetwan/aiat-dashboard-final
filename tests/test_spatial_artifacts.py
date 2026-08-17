@@ -94,3 +94,23 @@ def test_housing_spatial_summary_and_query_contract():
             params={"layer_id": "demand_respondents"},
         )
         assert unsupported.status_code == 422
+
+
+def test_housing_demand_public_summary_privacy_contract():
+    with TestClient(app) as client:
+        response = client.get("/api/public/v1/housing-demand/summary")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["source_id"] == "f3_housing_portal"
+        assert payload["record_count"] == 25_919
+        assert payload["province_count"] == 77
+        assert sum(
+            int(item["respondents_living"])
+            for item in payload["provinces"].values()
+        ) == 25_919
+        privacy = payload["privacy_projection"]
+        assert privacy["excluded_source_fields"] == ["id"]
+        assert privacy["source_identifier_published"] is False
+        assert privacy["name_fields_in_source_schema"] == 0
+        assert privacy["phone_fields_in_source_schema"] == 0
+        assert privacy["email_fields_in_source_schema"] == 0

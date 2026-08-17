@@ -352,11 +352,62 @@ def build_housing_dimension(
         if signal and benchmark:
             metrics.append(metric_context(signal, benchmark))
     trend = population_trend(briefing)
-    if not metrics and not trend:
+    demand = (
+        briefing.get("sections", {})
+        .get("housing", {})
+        .get("demand_summary")
+    ) or {}
+    demand_respondents = int(demand.get("respondents_living") or 0)
+    preferred_destination = int(
+        demand.get("respondents_preferring_destination") or 0
+    )
+    if demand_respondents:
+        metrics.extend([
+            {
+                "key": "housing_demand_respondents",
+                "label_th": "ผู้ตอบแบบสำรวจที่อาศัยในจังหวัด",
+                "value": demand_respondents,
+                "display_value": format_value(demand_respondents, "integer"),
+                "benchmark_label_th": "คำตอบแบบสำรวจ ไม่ใช่ประชากรจังหวัด",
+                "attention": False,
+            },
+            {
+                "key": "preferred_housing_destination",
+                "label_th": "ผู้ตอบที่เลือกจังหวัดนี้เป็นพื้นที่ที่ต้องการ",
+                "value": preferred_destination,
+                "display_value": format_value(preferred_destination, "integer"),
+                "benchmark_label_th": "คำตอบแบบสำรวจ",
+                "attention": False,
+            },
+        ])
+
+    breakdowns = [trend] if trend else []
+    single = demand.get("single_choice_distributions") or {}
+    for key in (
+        "future_housing_demand",
+    ):
+        distribution = single.get(key)
+        if distribution and distribution.get("items"):
+            breakdowns.append({
+                "key": key,
+                "kind": "distribution",
+                "label_th": distribution["label_th"],
+                "items": distribution["items"][:3],
+                "note_th": (
+                    f"ผู้ตอบคำถามนี้ {int(distribution.get('answered') or 0):,} ราย; "
+                    "เป็นคำตอบแบบสำรวจ ไม่ใช่สัดส่วนประชากรจังหวัด"
+                ),
+            })
+    if not metrics and not breakdowns:
         return None
-    attention = [metric["label_th"] for metric in metrics if metric["attention"]]
+    attention = [metric["label_th"] for metric in metrics if metric.get("attention")]
     if attention:
         summary = f"เมื่อเทียบกับค่ากลาง ประเด็นที่เด่นคือ {' และ '.join(attention[:2])}"
+    elif demand_respondents:
+        summary = (
+            f"มีคำตอบแบบสำรวจจากผู้ที่อาศัยในจังหวัด {demand_respondents:,} ราย "
+            "แสดงความต้องการ ประเภท ราคา ช่วงเวลา และปัจจัยประกอบการตัดสินใจ"
+        )
     else:
         summary = "ตัวชี้วัดที่มีอยู่ไม่ต่างจากค่ากลางอย่างเด่นชัด"
     return {
@@ -364,7 +415,7 @@ def build_housing_dimension(
         "label_th": DIMENSION_LABELS["housing"],
         "summary_th": summary,
         "metrics": metrics,
-        "breakdowns": [trend] if trend else [],
+        "breakdowns": breakdowns,
         "highlights": [],
         "source_ids": ["f3_housing_portal"],
     }

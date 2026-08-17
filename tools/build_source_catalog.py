@@ -228,6 +228,8 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
     notes = [registry_row.get("notes", "")]
     if index_row and index_row.get("notes_th"):
         notes.append(index_row["notes_th"])
+    if source_id == "f3_housing_portal":
+        notes = [note for note in notes if "demand 25,919" not in note.lower()]
     if source_id == "f2_learning_dashboard":
         notes.append(
             "อนุญาต Cloud publication เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว; "
@@ -289,9 +291,9 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
     if source_id == "f3_housing_portal":
         notes.append(
             "ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved "
-            "projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids "
-            "และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows "
-            "คง schema-only และ policy values คง blocked ตาม privacy/owner gate."
+            "projection ครบ 7,259 rows. Housing Stock 28,694 points, 6,543 accessibility grids และ "
+            "159,126 flood grids เข้า serving database แล้ว. Demand 25,919 respondent rows เผยแพร่แบบ "
+            "privacy projection โดยตัด source id และผ่านการตรวจชื่อ เบอร์โทร และอีเมล; ยังเป็น needs_review."
         )
     return " | ".join(note.strip() for note in notes if note and note.strip())
 

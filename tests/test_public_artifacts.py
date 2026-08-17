@@ -13,13 +13,13 @@ def test_public_artifact_sync_is_complete_and_idempotent():
     with TestClient(app) as client:
         with SessionLocal() as session:
             count = session.scalar(select(func.count()).select_from(PublicArtifact))
-            assert count == len(artifact_inputs()) == 162
+            assert count == len(artifact_inputs()) == 163
             second_sync = sync_public_artifacts(session)
             assert second_sync == {
-                "expected": 162,
+                "expected": 163,
                 "inserted": 0,
                 "updated": 0,
-                "unchanged": 162,
+                "unchanged": 163,
             }
 
         coverage = client.get("/api/public/v1/database-coverage")

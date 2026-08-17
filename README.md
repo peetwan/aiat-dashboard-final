@@ -13,7 +13,7 @@
 | Metadata-only | 12 แหล่ง |
 | Restricted local-only | 5 แหล่ง |
 | จังหวัด | 77 จังหวัด |
-| Public serving artifacts | 162 ชุด |
+| Public serving artifacts | 163 ชุด |
 | Housing spatial features | 194,532 features ใน 4 layers |
 | Production database | PostgreSQL บน Railway |
 | Local database | SQLite สำหรับพัฒนาและทดสอบ |

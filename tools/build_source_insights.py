@@ -46,6 +46,7 @@ MANIFEST_PATH = PROJECT_ROOT / "data/public/source_insights_manifest.json"
 LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
 LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
 HOUSING_SPATIAL_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_spatial_summary.json"
+HOUSING_DEMAND_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_demand_summary.json"
 AREA_BASED_RESPONSE_PATH = (
     WORKSPACE_ROOT / "data/raw/network/f2_learning_area_based/20260803T_network/response.json"
 )
@@ -624,6 +625,7 @@ def build_executive_portfolio(
     }
     housing = evidence["f3_housing_portal"]
     housing_spatial = read_json(HOUSING_SPATIAL_SUMMARY_PATH)
+    housing_demand = read_json(HOUSING_DEMAND_SUMMARY_PATH)
     tourism = evidence["f3_ruamthiao_lamphun"]
     city_audit = evidence["f3_city_capital_open_data"]
 
@@ -704,8 +706,8 @@ def build_executive_portfolio(
             "source_id": "f3_housing_portal",
             "label_th": "Housing Portal",
             "status": "complete",
-            "status_th": "CKAN และ Spatial ครบ",
-            "summary_th": "public CKAN 7,259 rows และ spatial 194,532 features พร้อมเข้า database; demand 25,919 rows คง local-only",
+            "status_th": "CKAN, Spatial และ Demand ครบ",
+            "summary_th": "public CKAN 7,259 rows, spatial 194,532 features และ demand 25,919 rows พร้อมเข้า database; demand ตัด source id และผ่าน contact scan",
             "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "มิติการพัฒนา", "ที่มา/อัปเดต"],
         },
     ]
@@ -719,6 +721,8 @@ def build_executive_portfolio(
     area_stats = area_based["statistics"]
     cultural_coverage = cultural["coverage"]
     housing_counts = housing_spatial["counts"]
+    if housing_demand.get("record_count") != 25_919:
+        raise ValueError("unexpected housing demand record count")
     tourism_datasets = tourism["structured_coverage"]["datasets"]
     city_snapshot = city_audit["structured_snapshot"]
 
@@ -803,6 +807,14 @@ def build_executive_portfolio(
                 "source_id": "f3_housing_portal",
             },
             {
+                "key": "housing_demand_responses",
+                "label_th": "คำตอบ Housing demand",
+                "value": housing_demand["record_count"],
+                "unit": "คำตอบ",
+                "note_th": "ครบ 77 จังหวัด; ไม่ใช่จำนวนประชากร",
+                "source_id": "f3_housing_portal",
+            },
+            {
                 "key": "city_capital_cities",
                 "label_th": "เมืองที่มีตัวชี้วัดทุนเมือง",
                 "value": city["coverage"]["cities"],
@@ -851,6 +863,15 @@ def build_executive_portfolio(
                     {"label_th": "ขอบเขตแขวง", "value": housing_counts["subdistrict_boundaries"]},
                 ],
             },
+            "housing_demand": {
+                "title_th": "ความต้องการที่อยู่อาศัยในอนาคต",
+                "unit_th": "คำตอบแบบสำรวจ",
+                "items": [
+                    {"label_th": item["label_th"], "value": item["value"]}
+                    for item in housing_demand["national"]["single_choice_distributions"]
+                    ["future_housing_demand"]["items"]
+                ],
+            },
             "tourism_inventory": {
                 "title_th": "ข้อมูลท่องเที่ยวลำพูน",
                 "unit_th": "รายการสาธารณะ",
@@ -875,7 +896,7 @@ def build_executive_portfolio(
         "source_notes": {
             "housing_public_rows": housing["railway_ckan_projection"]["value_approved_row_count"],
             "housing_spatial_features": housing_spatial["total_spatial_features"],
-            "housing_demand_rows_published": housing_spatial["database_contract"]["demand_respondent_rows_included"],
+            "housing_demand_rows_published": housing_demand["record_count"],
             "housing_unassigned_rows": housing["railway_ckan_projection"]["unassigned_rows"],
             "tourism_public_items": tourism["structured_coverage"]["all_content_item_count"],
             "rmutdb_detailed_records": rmutdb["statistics"]["detailed_records"],
@@ -1039,6 +1060,7 @@ def build() -> None:
         LEARNING_PATH,
         LEARNING_MANIFEST_PATH,
         HOUSING_SPATIAL_SUMMARY_PATH,
+        HOUSING_DEMAND_SUMMARY_PATH,
         AREA_BASED_RESPONSE_PATH,
         AREA_BASED_CURRENT_OBSERVATION,
         *[CULTURAL_ROOT / values[0] for values in CULTURAL_DATASETS.values()],

@@ -29,6 +29,7 @@ SOURCE_INSIGHTS_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
 LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
 HOUSING_SPATIAL_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_spatial_summary.json"
+HOUSING_DEMAND_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_demand_summary.json"
 UNMAPPED_PATH = PROJECT_ROOT / "data/public/unmapped_records.json"
 REQUIREMENT_PATH = (
     STAGED_ROOT
@@ -840,6 +841,8 @@ def build() -> None:
                     "resource_groups": [],
                     "spatial_summary": None,
                     "spatial_feature_total": 0,
+                    "demand_summary": None,
+                    "demand_record_total": 0,
                 },
                 "culture": initial_section("f2_culturalmap_university", "ทุนวัฒนธรรมในพื้นที่"),
                 "tourism": initial_section("f3_ruamthiao_lamphun", "การเดินทางและท่องเที่ยวลำพูน"),
@@ -1162,7 +1165,7 @@ def build() -> None:
         raise RuntimeError("housing projection reconciliation failed")
 
     # The public spatial projection is Bangkok-only and remains a separate
-    # grain from CKAN rows. Demand respondent rows are intentionally excluded.
+    # grain from CKAN rows and the privacy-projected demand survey.
     housing_spatial_summary = read_json(HOUSING_SPATIAL_SUMMARY_PATH)
     if housing_spatial_summary["database_contract"]["demand_respondent_rows_included"] != 0:
         raise RuntimeError("housing spatial projection unexpectedly includes demand respondents")
@@ -1170,6 +1173,34 @@ def build() -> None:
         spatial_section = briefings["10"]["sections"]["housing"]
         spatial_section["spatial_summary"] = housing_spatial_summary
         spatial_section["spatial_feature_total"] = housing_spatial_summary["total_spatial_features"]
+
+    housing_demand_summary = read_json(HOUSING_DEMAND_SUMMARY_PATH)
+    if (
+        housing_demand_summary.get("record_count") != 25_919
+        or housing_demand_summary.get("province_count") != 77
+    ):
+        raise RuntimeError("housing demand summary count contract failed")
+    privacy = housing_demand_summary.get("privacy_projection") or {}
+    if privacy.get("source_identifier_published") is not False or any(
+        int(privacy.get(key, -1)) != 0
+        for key in (
+            "name_fields_in_source_schema",
+            "phone_fields_in_source_schema",
+            "email_fields_in_source_schema",
+        )
+    ):
+        raise RuntimeError("housing demand summary privacy contract failed")
+    demand_total = 0
+    for code, briefing in briefings.items():
+        demand = housing_demand_summary["provinces"].get(code)
+        if demand is None:
+            raise RuntimeError(f"housing demand province is missing: {code}")
+        respondents = int(demand.get("respondents_living") or 0)
+        briefing["sections"]["housing"]["demand_summary"] = demand
+        briefing["sections"]["housing"]["demand_record_total"] = respondents
+        demand_total += respondents
+    if demand_total != 25_919:
+        raise RuntimeError("housing demand province reconciliation failed")
 
     # Ruam Thiao is explicitly Lamphun-scoped in its source definition.
     tourism_files = sorted((MERGE_RUN / "16_f3_ruamthiao_lamphun/data").glob("*.json"))
@@ -1274,7 +1305,9 @@ def build() -> None:
             section["total_records"] = total
             section["status"] = (
                 "available"
-                if total or section.get("spatial_feature_total", 0)
+                if total
+                or section.get("spatial_feature_total", 0)
+                or section.get("demand_record_total", 0)
                 else "source_has_no_record_for_province"
             )
             if section_id == "sra" and section["scope_status"] == "in_scope" and not section["items"]:
@@ -1310,11 +1343,15 @@ def build() -> None:
                     spatial_features = briefing["sections"]["housing"].get(
                         "spatial_feature_total", 0
                     )
+                    demand_respondents = briefing["sections"]["housing"].get(
+                        "demand_record_total", 0
+                    )
                     record_breakdown = {
                         "public_ckan_rows": records,
                         "spatial_features": spatial_features,
+                        "housing_demand_respondents": demand_respondents,
                     }
-                    records += spatial_features
+                    records += spatial_features + demand_respondents
                 item.update({
                     "status": "available" if records else "source_has_no_record_for_province",
                     "records": records,
@@ -1325,7 +1362,7 @@ def build() -> None:
                             "นับ participant records; จำนวนโครงการเป็นการจัดกลุ่มเบื้องต้นจากชื่อ+ปี+หน่วยวิจัย"
                             if source_id == "f2_learning_area_based"
                             else (
-                                "public CKAN rows และ spatial features เป็นคนละ grain; demand respondents ไม่เผยแพร่"
+                                "public CKAN rows, spatial features และผู้ตอบแบบสำรวจเป็นคนละ grain; demand ตัด source id และผ่าน contact scan ก่อนเผยแพร่"
                                 if source_id == "f3_housing_portal"
                                 else (
                                 "อยู่ในขอบเขตจังหวัดเป้าหมาย แต่คะแนนปี 2569 เป็นค่าว่าง; aggregate ชุดอื่นยังแสดงแบบ candidate"
@@ -1369,6 +1406,7 @@ def build() -> None:
         housing_metadata_path,
         *housing_paths,
         HOUSING_SPATIAL_SUMMARY_PATH,
+        HOUSING_DEMAND_SUMMARY_PATH,
         *tourism_files,
         SOURCE_INSIGHTS_PATH,
         PROJECT_ROOT / "data/public/source_insights_manifest.json",

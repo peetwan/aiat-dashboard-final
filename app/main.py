@@ -18,6 +18,7 @@ from app.api_schemas import (
     DatabaseCoverageResponse,
     ExecutiveSummaryResponse,
     HealthResponse,
+    HousingDemandSummaryResponse,
     HousingSpatialFeatureCollectionResponse,
     HousingSpatialSummaryResponse,
     LearningDashboardResponse,
@@ -43,6 +44,7 @@ from app.public_data import (
     cultural_points,
     executive_summary,
     housing_spatial_summary,
+    housing_demand_summary,
     learning_dashboard,
     province_boundaries,
     provincial_briefing,
@@ -58,6 +60,11 @@ from app.spatial_artifacts import (
     REQUIRED_SPATIAL_TOTAL,
     spatial_contract_snapshot,
     sync_spatial_layers,
+)
+from app.demand_artifacts import (
+    REQUIRED_DEMAND_COUNT,
+    demand_contract_snapshot,
+    sync_housing_demand,
 )
 
 
@@ -76,6 +83,10 @@ SPATIAL_DATABASE_REQUIRED = (
     settings.app_env.lower() == "production" and engine.dialect.name == "postgresql"
 )
 EXPECTED_SPATIAL_FEATURES = REQUIRED_SPATIAL_TOTAL if SPATIAL_DATABASE_REQUIRED else 0
+DEMAND_DATABASE_REQUIRED = (
+    settings.app_env.lower() == "production" and engine.dialect.name == "postgresql"
+)
+EXPECTED_DEMAND_RECORDS = REQUIRED_DEMAND_COUNT if DEMAND_DATABASE_REQUIRED else 0
 
 
 def _debug_api_enabled() -> bool:
@@ -111,6 +122,7 @@ def _sync_serving_database() -> None:
                 sync_catalog(session)
                 sync_public_artifacts(session)
                 sync_spatial_layers(session)
+                sync_housing_demand(session)
         finally:
             connection.execute(
                 text("SELECT pg_advisory_unlock(:lock_id)"),
@@ -197,6 +209,10 @@ def _serving_contract_snapshot(session) -> dict:
         session,
         required=SPATIAL_DATABASE_REQUIRED,
     )
+    demand = demand_contract_snapshot(
+        session,
+        required=DEMAND_DATABASE_REQUIRED,
+    )
     policy_partitions_are_exact = (
         approved_ids == public_policy_ids
         and not (approved_ids & metadata_ids)
@@ -219,6 +235,7 @@ def _serving_contract_snapshot(session) -> dict:
         and endpoint_total == EXPECTED_ENDPOINT_COUNT
         and runtime_endpoint_total == EXPECTED_RUNTIME_ENDPOINT_COUNT
         and spatial["complete"]
+        and demand["complete"]
     )
     return {
         "complete": complete,
@@ -237,6 +254,7 @@ def _serving_contract_snapshot(session) -> dict:
         "endpoint_total": endpoint_total,
         "runtime_endpoint_total": runtime_endpoint_total,
         "spatial": spatial,
+        "housing_demand": demand,
     }
 
 
@@ -334,6 +352,9 @@ def health():
                 "spatial_features": 0,
                 "spatial_features_expected": EXPECTED_SPATIAL_FEATURES,
                 "spatial_complete": False,
+                "housing_demand_records": 0,
+                "housing_demand_records_expected": EXPECTED_DEMAND_RECORDS,
+                "housing_demand_complete": False,
                 "published_catalog_ids_match_approved": False,
                 "restricted_values_published": 0,
                 "app_env": settings.app_env,
@@ -352,6 +373,9 @@ def health():
         "spatial_features": contract["spatial"]["feature_total"],
         "spatial_features_expected": contract["spatial"]["expected_total"],
         "spatial_complete": contract["spatial"]["complete"],
+        "housing_demand_records": contract["housing_demand"]["count"],
+        "housing_demand_records_expected": contract["housing_demand"]["expected"],
+        "housing_demand_complete": contract["housing_demand"]["complete"],
         "published_catalog_ids_match_approved": contract[
             "published_catalog_ids_match_approved"
         ],
@@ -441,6 +465,16 @@ def public_learning_dashboard():
 def public_housing_spatial_summary():
     """Return executive-safe counts and distributions for public spatial layers."""
     return housing_spatial_summary()
+
+
+@app.get(
+    "/api/public/v1/housing-demand/summary",
+    tags=["Public data"],
+    response_model=HousingDemandSummaryResponse,
+)
+def public_housing_demand_summary():
+    """Return the privacy-projected national and provincial demand aggregates."""
+    return housing_demand_summary()
 
 
 @app.get(
@@ -554,6 +588,9 @@ def public_database_coverage():
         "spatial_features_expected": contract["spatial"]["expected_total"],
         "spatial_layer_counts": contract["spatial"]["counts"],
         "spatial_complete": contract["spatial"]["complete"],
+        "housing_demand_records_in_database": contract["housing_demand"]["count"],
+        "housing_demand_records_expected": contract["housing_demand"]["expected"],
+        "housing_demand_complete": contract["housing_demand"]["complete"],
         "restricted_values_published": contract["disallowed_operational_records"],
         "operational_candidate_records": contract["approved_operational_records"],
         "raw_data_storage": "immutable_evidence_outside_serving_database",

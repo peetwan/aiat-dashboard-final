@@ -20,6 +20,7 @@ MERGE_RUN = WORKSPACE_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_te
 OUTPUT_DIR = PROJECT_ROOT / "data/public"
 LEARNING_PATH = OUTPUT_DIR / "learning_dashboard.json"
 LEARNING_MANIFEST_PATH = OUTPUT_DIR / "learning_dashboard_manifest.json"
+HOUSING_DEMAND_SUMMARY_PATH = OUTPUT_DIR / "housing_demand_summary.json"
 
 BOUNDARY_LAYER = (
     "https://gis-portal.disaster.go.th/arcgis/rest/services/MapDX/"
@@ -197,6 +198,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
             "innovation_records": 0,
             "cultural_records": 0,
             "housing_observations": 0,
+            "housing_demand_responses": 0,
             "pppconnext_aggregate_rows": 0,
             "learning_dashboard_business_records": 0,
             "apptech_registered_users": 0,
@@ -343,6 +345,29 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 reason = housing_unmapped_reason(row, code, set(profiles))
                 housing_unmapped_reason_counts[reason] += 1
 
+    housing_demand = read_json(HOUSING_DEMAND_SUMMARY_PATH)
+    if housing_demand.get("record_count") != 25_919 or housing_demand.get("province_count") != 77:
+        raise RuntimeError("housing demand summary count contract failed")
+    privacy = housing_demand.get("privacy_projection") or {}
+    if privacy.get("source_identifier_published") is not False or any(
+        int(privacy.get(key, -1)) != 0
+        for key in (
+            "name_fields_in_source_schema",
+            "phone_fields_in_source_schema",
+            "email_fields_in_source_schema",
+        )
+    ):
+        raise RuntimeError("housing demand summary privacy contract failed")
+    input_paths.append(HOUSING_DEMAND_SUMMARY_PATH)
+    for code, demand_row in housing_demand["provinces"].items():
+        if code not in profiles:
+            raise RuntimeError(f"unknown housing demand province code: {code}")
+        profiles[code]["housing_demand_responses"] = int(
+            demand_row.get("respondents_living") or 0
+        )
+    if sum(row["housing_demand_responses"] for row in profiles.values()) != 25_919:
+        raise RuntimeError("housing demand province reconciliation failed")
+
     # Audited source-level pipeline: retain the original grain for each geography link.
     source_insights_path = OUTPUT_DIR / "source_insights.json"
     input_paths.append(source_insights_path)
@@ -365,6 +390,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "innovation_records": "f2_apptech_mru",
         "cultural_records": "f2_culturalmap_university",
         "housing_observations": "f3_housing_portal",
+        "housing_demand_responses": "f3_housing_portal",
         "pppconnext_aggregate_rows": "f1_pppconnext",
         "learning_dashboard_business_records": "f2_learning_dashboard",
         "city_capital_cities": "f3_city_capital_open_data",
@@ -410,6 +436,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "innovation_records": profile["innovation_records"],
                 "cultural_records": profile["cultural_records"],
                 "housing_observations": profile["housing_observations"],
+                "housing_demand_responses": profile["housing_demand_responses"],
                 "pppconnext_aggregate_rows": profile["pppconnext_aggregate_rows"],
                 "learning_dashboard_business_records": profile["learning_dashboard_business_records"],
                 "apptech_registered_users": profile["apptech_registered_users"],
@@ -558,6 +585,11 @@ def build_public_data(refresh_boundaries: bool) -> None:
                 "unit": "observations",
                 "semantic_status": "technical_observation_count",
             },
+            "housing_demand_responses": {
+                "label_th": "ผู้ตอบแบบสำรวจความต้องการที่อยู่อาศัยที่อาศัยในจังหวัด",
+                "unit": "survey responses",
+                "semantic_status": "privacy_projected_candidate_survey_responses_not_population",
+            },
             "pppconnext_aggregate_rows": {
                 "label_th": "ตัวชี้วัดครัวเรือนระดับจังหวัดจาก PPPConnext",
                 "unit": "aggregate rows",
@@ -631,6 +663,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
         "innovation_records",
         "cultural_records",
         "housing_observations",
+        "housing_demand_responses",
         "pppconnext_aggregate_rows",
         "learning_dashboard_business_records",
         "apptech_registered_users",

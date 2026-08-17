@@ -8,7 +8,8 @@ from sqlalchemy import func, select
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, init_db
 from app.ingestion import IngestionPipeline, PolicyViolation
-from app.models import DashboardRecord, IngestionRun, PublicArtifact, Source
+from app.models import DashboardRecord, HousingDemandRecord, IngestionRun, PublicArtifact, Source
+from app.demand_artifacts import sync_housing_demand
 from app.public_artifacts import database_artifact_counts, sync_public_artifacts
 from app.spatial_artifacts import database_spatial_counts, sync_spatial_layers
 
@@ -19,6 +20,7 @@ def initialize() -> None:
         sync_catalog(session)
         sync_public_artifacts(session)
         sync_spatial_layers(session)
+        sync_housing_demand(session)
 
 
 def command_ingest(args: argparse.Namespace) -> int:
@@ -93,6 +95,9 @@ def command_status() -> int:
                         or 0,
                         "groups": database_artifact_counts(session),
                         "spatial_layers": database_spatial_counts(session),
+                        "housing_demand_records": session.scalar(
+                            select(func.count()).select_from(HousingDemandRecord)
+                        ) or 0,
                     }
                 },
                 ensure_ascii=False,

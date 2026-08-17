@@ -824,10 +824,13 @@ function overviewBars(entries, widthAccessor) {
 
 function renderProvinceOverview(summary) {
   const portfolio = summary.research_portfolio || {};
+  const housingDimension = (summary.dimensions || []).find((item) => item.key === "housing") || {};
+  const demandMetric = (housingDimension.metrics || []).find((item) => item.key === "housing_demand_respondents");
   const metrics = [
     { label: "กลุ่มโครงการ", value: portfolio.project_count, status: portfolio.project_count_status, note: "การจัดกลุ่มเบื้องต้น", tab: "projects" },
     { label: "ผู้เข้าร่วมโครงการ", value: portfolio.participant_record_count, status: portfolio.participant_record_status, note: "ระเบียนผู้เข้าร่วม", tab: "portfolio" },
     { label: "นวัตกรรม", value: portfolio.innovation_count, status: portfolio.innovation_count_status, note: "รายการที่เชื่อมจังหวัด", tab: "projects" },
+    { label: "Housing demand", value: demandMetric?.value, status: demandMetric ? "available" : "missing", note: "คำตอบแบบสำรวจ ไม่ใช่ประชากร", tab: "portfolio" },
   ];
   const metricGrid = document.getElementById("overviewMetrics");
   metricGrid.innerHTML = metrics.map((metric) => `
@@ -1031,13 +1034,16 @@ function renderHousing(section = {}) {
   const wrapper = document.getElementById("housingSection");
   const groups = section.resource_groups || [];
   const spatial = section.spatial_summary || null;
-  const available = section.status === "available" && (groups.length > 0 || spatial);
+  const demand = section.demand_summary || null;
+  const available = section.status === "available" && (groups.length > 0 || spatial || demand);
   wrapper.hidden = !available;
   if (!available) return;
   const spatialTotal = Number(section.spatial_feature_total || spatial?.total_spatial_features || 0);
-  document.getElementById("housingNote").textContent = spatial
-    ? `${formatNumber(section.total_records || 0)} CKAN rows · ${formatNumber(spatialTotal)} spatial features`
-    : `${formatNumber(section.total_records || 0)} รายการจาก Thai Housing Portal`;
+  document.getElementById("housingNote").textContent = [
+    `${formatNumber(section.total_records || 0)} CKAN rows`,
+    spatial ? `${formatNumber(spatialTotal)} spatial features` : null,
+    demand ? `${formatNumber(section.demand_record_total || demand.respondents_living || 0)} demand responses` : null,
+  ].filter(Boolean).join(" · ");
   const counts = spatial?.counts || {};
   const categories = Object.entries(spatial?.housing_points?.by_category || {})
     .map(([label, value]) => ({ label, value: Number(value) || 0 }))
@@ -1047,7 +1053,14 @@ function renderHousing(section = {}) {
     apartment: "อพาร์ตเมนต์", condo: "คอนโด", lodging: "ที่พัก",
     dormitory: "หอพัก", camping: "แคมป์", other: "ประเภทอื่น",
   };
-  document.getElementById("housingSpatialSummary").innerHTML = spatial ? `
+  const demandFuture = demand?.single_choice_distributions?.future_housing_demand;
+  const demandHtml = demand ? `
+    <div class="housing-spatial-kpis housing-demand-kpis">
+      <article><span>ผู้ตอบที่อาศัยในจังหวัด</span><strong>${formatNumber(demand.respondents_living || 0)}</strong><small>คำตอบแบบสำรวจ</small></article>
+      <article><span>เลือกจังหวัดนี้เป็นพื้นที่ที่ต้องการ</span><strong>${formatNumber(demand.respondents_preferring_destination || 0)}</strong><small>คำตอบที่ระบุปลายทาง</small></article>
+    </div>
+    ${demandFuture ? `<article class="housing-spatial-chart"><header><strong>${escapeHtml(demandFuture.label_th)}</strong><small>${formatNumber(demandFuture.answered || 0)} คำตอบ</small></header><div>${overviewBars((demandFuture.items || []).slice(0, 5).map((item) => ({ label: item.label_th, value: item.value, display: `${formatNumber(item.value)} · ${formatNumber(item.share_pct, 1)}%` })), (item) => item.value)}</div></article>` : ""}` : "";
+  const spatialHtml = spatial ? `
     <div class="housing-spatial-kpis">
       <article><span>จุดที่อยู่อาศัย</span><strong>${formatNumber(counts.housing_points || 0)}</strong><small>จุดสาธารณะ</small></article>
       <article><span>กริดการเข้าถึง</span><strong>${formatNumber(counts.accessibility_grid || 0)}</strong><small>คะแนนเฉลี่ย ${formatNumber(spatial.accessibility_grid?.score_mean || 0, 1)}</small></article>
@@ -1059,6 +1072,7 @@ function renderHousing(section = {}) {
       <div>${categories.map((item) => `
         <div class="housing-bar"><span>${escapeHtml(categoryLabels[item.label] || item.label)}</span><i><b style="width:${Math.max(2, item.value / maxCategory * 100).toFixed(1)}%"></b></i><strong>${formatNumber(item.value)}</strong></div>`).join("")}</div>
     </article>` : "";
+  document.getElementById("housingSpatialSummary").innerHTML = demandHtml + spatialHtml;
   const visibleGroups = groups.slice(0, 8);
   const remaining = groups.length - visibleGroups.length;
   document.getElementById("housingItems").innerHTML =

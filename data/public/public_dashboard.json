@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T05:20:51.320846+00:00",
+  "generated_at": "2026-08-17T05:56:38.281480+00:00",
   "publication_status": "public_candidate_projection",
   "warning_th": "ข้อมูลทุกชุดเป็น candidate/needs_review ใช้สำรวจหลักฐานและจำลองฉากทัศน์ ไม่ใช่คำสั่งจัดสรรงบหรือ KPI ที่รับรองแล้ว",
   "summary": {
@@ -113,6 +113,11 @@
       "label_th": "แถวข้อมูล Thai Housing Portal",
       "unit": "observations",
       "semantic_status": "technical_observation_count"
+    },
+    "housing_demand_responses": {
+      "label_th": "ผู้ตอบแบบสำรวจความต้องการที่อยู่อาศัยที่อาศัยในจังหวัด",
+      "unit": "survey responses",
+      "semantic_status": "privacy_projected_candidate_survey_responses_not_population"
     },
     "pppconnext_aggregate_rows": {
       "label_th": "ตัวชี้วัดครัวเรือนระดับจังหวัดจาก PPPConnext",
@@ -312,7 +317,7 @@
       "expected_record_count": 7259,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์ | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows คง schema-only และ policy values คง blocked ตาม privacy/owner gate."
+      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. Housing Stock 28,694 points, 6,543 accessibility grids และ 159,126 flood grids เข้า serving database แล้ว. Demand 25,919 respondent rows เผยแพร่แบบ privacy projection โดยตัด source id และผ่านการตรวจชื่อ เบอร์โทร และอีเมล; ยังเป็น needs_review."
     }
   ],
   "provinces": [
@@ -334,6 +339,7 @@
       "innovation_records": 7,
       "cultural_records": 1,
       "housing_observations": 0,
+      "housing_demand_responses": 167,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 4.0,
@@ -342,10 +348,11 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -354,10 +361,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.00198,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.027852,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -378,6 +386,7 @@
       "innovation_records": 116,
       "cultural_records": 361,
       "housing_observations": 988,
+      "housing_demand_responses": 5996,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 12,
       "apptech_registered_users": 6.0,
@@ -400,10 +409,11 @@
         "innovation_records": 1.0,
         "cultural_records": 0.714851,
         "housing_observations": 1.0,
+        "housing_demand_responses": 1.0,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -424,6 +434,7 @@
       "innovation_records": 8,
       "cultural_records": 129,
       "housing_observations": 0,
+      "housing_demand_responses": 239,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 48.0,
@@ -433,10 +444,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -445,10 +457,11 @@
         "innovation_records": 0.068966,
         "cultural_records": 0.255446,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.03986,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -475,6 +488,7 @@
       "innovation_records": 0,
       "cultural_records": 5,
       "housing_observations": 0,
+      "housing_demand_responses": 193,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 5.0,
@@ -484,11 +498,12 @@
         "f1_sradss_ppaos",
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.933333,
@@ -497,10 +512,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.009901,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.032188,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -521,6 +537,7 @@
       "innovation_records": 21,
       "cultural_records": 20,
       "housing_observations": 0,
+      "housing_demand_responses": 122,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 0,
@@ -530,10 +547,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -542,10 +560,11 @@
         "innovation_records": 0.181034,
         "cultural_records": 0.039604,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.020347,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -566,6 +585,7 @@
       "innovation_records": 3,
       "cultural_records": 34,
       "housing_observations": 489,
+      "housing_demand_responses": 635,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 9,
       "apptech_registered_users": 0,
@@ -588,10 +608,11 @@
         "innovation_records": 0.025862,
         "cultural_records": 0.067327,
         "housing_observations": 0.494939,
+        "housing_demand_responses": 0.105904,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -612,6 +633,7 @@
       "innovation_records": 0,
       "cultural_records": 66,
       "housing_observations": 0,
+      "housing_demand_responses": 105,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 31.0,
@@ -620,10 +642,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -632,10 +655,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.130693,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.017512,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -656,6 +680,7 @@
       "innovation_records": 7,
       "cultural_records": 52,
       "housing_observations": 585,
+      "housing_demand_responses": 297,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 2.0,
@@ -678,10 +703,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.10297,
         "housing_observations": 0.592105,
+        "housing_demand_responses": 0.049533,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -702,6 +728,7 @@
       "innovation_records": 1,
       "cultural_records": 59,
       "housing_observations": 0,
+      "housing_demand_responses": 591,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 33.0,
@@ -711,11 +738,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -724,10 +752,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.116832,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.098566,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -754,6 +783,7 @@
       "innovation_records": 16,
       "cultural_records": 52,
       "housing_observations": 0,
+      "housing_demand_responses": 59,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 7.0,
@@ -764,11 +794,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.904762,
@@ -777,10 +808,11 @@
         "innovation_records": 0.137931,
         "cultural_records": 0.10297,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.00984,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -801,6 +833,7 @@
       "innovation_records": 2,
       "cultural_records": 64,
       "housing_observations": 0,
+      "housing_demand_responses": 138,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 28.0,
@@ -810,10 +843,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -822,10 +856,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.126733,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.023015,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -846,6 +881,7 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 192,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 0,
@@ -853,11 +889,12 @@
       "city_capital_cities": 1,
       "evidence_sources": [
         "f2_learning_area_based",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -866,10 +903,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.032021,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -890,6 +928,7 @@
       "innovation_records": 3,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 329,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 9,
       "apptech_registered_users": 135.0,
@@ -898,10 +937,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -910,10 +950,11 @@
         "innovation_records": 0.025862,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.05487,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -934,15 +975,17 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 124,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
       "apptech_interactions": 2.0,
       "city_capital_cities": 0,
       "evidence_sources": [
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 1,
+      "evidence_source_count": 2,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -951,10 +994,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.02068,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.1
+        "evidence_source_count": 0.181818
       }
     },
     {
@@ -975,6 +1019,7 @@
       "innovation_records": 2,
       "cultural_records": 18,
       "housing_observations": 0,
+      "housing_demand_responses": 182,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -983,10 +1028,11 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -995,10 +1041,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.035644,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.030354,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1019,6 +1066,7 @@
       "innovation_records": 0,
       "cultural_records": 2,
       "housing_observations": 0,
+      "housing_demand_responses": 85,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 6.0,
@@ -1026,10 +1074,11 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1038,10 +1087,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.00396,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.014176,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -1062,6 +1112,7 @@
       "innovation_records": 2,
       "cultural_records": 48,
       "housing_observations": 0,
+      "housing_demand_responses": 350,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -1071,10 +1122,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1083,10 +1135,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.09505,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.058372,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -1107,6 +1160,7 @@
       "innovation_records": 0,
       "cultural_records": 12,
       "housing_observations": 0,
+      "housing_demand_responses": 259,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 12.0,
@@ -1115,10 +1169,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1127,10 +1182,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.023762,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.043195,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1151,6 +1207,7 @@
       "innovation_records": 6,
       "cultural_records": 169,
       "housing_observations": 0,
+      "housing_demand_responses": 452,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 8,
       "apptech_registered_users": 164.0,
@@ -1160,12 +1217,13 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1174,10 +1232,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.334653,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.075384,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -1198,6 +1257,7 @@
       "innovation_records": 95,
       "cultural_records": 132,
       "housing_observations": 0,
+      "housing_demand_responses": 390,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 38,
       "apptech_registered_users": 32.0,
@@ -1207,11 +1267,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1220,10 +1281,11 @@
         "innovation_records": 0.818966,
         "cultural_records": 0.261386,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.065043,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 1.0,
         "city_capital_cities": 1.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -1244,6 +1306,7 @@
       "innovation_records": 0,
       "cultural_records": 99,
       "housing_observations": 0,
+      "housing_demand_responses": 319,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 1.0,
@@ -1251,11 +1314,12 @@
       "city_capital_cities": 1,
       "evidence_sources": [
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1264,10 +1328,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.19604,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.053202,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1288,6 +1353,7 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 2006,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 7,
       "apptech_registered_users": 1.0,
@@ -1295,11 +1361,12 @@
       "city_capital_cities": 2,
       "evidence_sources": [
         "f2_learning_area_based",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1308,10 +1375,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.334556,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.184211,
         "city_capital_cities": 1.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1338,6 +1406,7 @@
       "innovation_records": 1,
       "cultural_records": 1,
       "housing_observations": 0,
+      "housing_demand_responses": 151,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 1.0,
@@ -1348,11 +1417,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.904762,
@@ -1361,10 +1431,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.00198,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.025183,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -1385,6 +1456,7 @@
       "innovation_records": 2,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 122,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 25,
       "apptech_registered_users": 0,
@@ -1393,10 +1465,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1405,10 +1478,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.020347,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.657895,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1429,6 +1503,7 @@
       "innovation_records": 1,
       "cultural_records": 54,
       "housing_observations": 0,
+      "housing_demand_responses": 149,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -1437,9 +1512,10 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1448,10 +1524,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.106931,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.02485,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -1478,6 +1555,7 @@
       "innovation_records": 5,
       "cultural_records": 2,
       "housing_observations": 0,
+      "housing_demand_responses": 243,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 13.0,
@@ -1488,11 +1566,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.795238,
@@ -1501,10 +1580,11 @@
         "innovation_records": 0.043103,
         "cultural_records": 0.00396,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.040527,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -1525,6 +1605,7 @@
       "innovation_records": 0,
       "cultural_records": 84,
       "housing_observations": 815,
+      "housing_demand_responses": 899,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 52.0,
@@ -1546,10 +1627,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.166337,
         "housing_observations": 0.824899,
+        "housing_demand_responses": 0.149933,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1570,6 +1652,7 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 143,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 65.0,
@@ -1577,10 +1660,11 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_learning_area_based",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1589,10 +1673,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.023849,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -1613,6 +1698,7 @@
       "innovation_records": 0,
       "cultural_records": 58,
       "housing_observations": 0,
+      "housing_demand_responses": 212,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 16.0,
@@ -1621,9 +1707,10 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1632,10 +1719,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.114851,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.035357,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -1662,6 +1750,7 @@
       "innovation_records": 2,
       "cultural_records": 106,
       "housing_observations": 0,
+      "housing_demand_responses": 75,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 12,
       "apptech_registered_users": 56.0,
@@ -1672,11 +1761,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.97619,
@@ -1685,10 +1775,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.209901,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.012508,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -1709,6 +1800,7 @@
       "innovation_records": 3,
       "cultural_records": 102,
       "housing_observations": 0,
+      "housing_demand_responses": 383,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 20,
       "apptech_registered_users": 2.0,
@@ -1718,10 +1810,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1730,10 +1823,11 @@
         "innovation_records": 0.025862,
         "cultural_records": 0.20198,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.063876,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.526316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -1754,6 +1848,7 @@
       "innovation_records": 0,
       "cultural_records": 278,
       "housing_observations": 0,
+      "housing_demand_responses": 168,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 12,
       "apptech_registered_users": 8.0,
@@ -1762,10 +1857,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1774,10 +1870,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.550495,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.028019,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.315789,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -1798,6 +1895,7 @@
       "innovation_records": 8,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 202,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -1805,10 +1903,11 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1817,10 +1916,11 @@
         "innovation_records": 0.068966,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.033689,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -1841,6 +1941,7 @@
       "innovation_records": 0,
       "cultural_records": 29,
       "housing_observations": 0,
+      "housing_demand_responses": 146,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 10,
       "apptech_registered_users": 63.0,
@@ -1849,12 +1950,13 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1863,10 +1965,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.057426,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.02435,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -1887,16 +1990,18 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 116,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 0,
       "apptech_interactions": 0,
       "city_capital_cities": 0,
       "evidence_sources": [
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 2,
+      "evidence_source_count": 3,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1905,10 +2010,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.019346,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.2
+        "evidence_source_count": 0.272727
       }
     },
     {
@@ -1929,6 +2035,7 @@
       "innovation_records": 28,
       "cultural_records": 54,
       "housing_observations": 0,
+      "housing_demand_responses": 361,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 1.0,
@@ -1938,13 +2045,14 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 8,
+      "evidence_source_count": 9,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1953,10 +2061,11 @@
         "innovation_records": 0.241379,
         "cultural_records": 0.106931,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.060207,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.8
+        "evidence_source_count": 0.818182
       }
     },
     {
@@ -1977,6 +2086,7 @@
       "innovation_records": 11,
       "cultural_records": 0,
       "housing_observations": 677,
+      "housing_demand_responses": 146,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -1997,10 +2107,11 @@
         "innovation_records": 0.094828,
         "cultural_records": 0.0,
         "housing_observations": 0.685223,
+        "housing_demand_responses": 0.02435,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -2021,6 +2132,7 @@
       "innovation_records": 21,
       "cultural_records": 300,
       "housing_observations": 0,
+      "housing_demand_responses": 176,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 10.0,
@@ -2030,10 +2142,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2042,10 +2155,11 @@
         "innovation_records": 0.181034,
         "cultural_records": 0.594059,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.029353,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2072,6 +2186,7 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 103,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -2080,10 +2195,11 @@
       "evidence_sources": [
         "f1_sradss_ppaos",
         "f2_learning_area_based",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.909524,
@@ -2092,10 +2208,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.017178,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2122,6 +2239,7 @@
       "innovation_records": 6,
       "cultural_records": 48,
       "housing_observations": 628,
+      "housing_demand_responses": 100,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 1.0,
@@ -2146,10 +2264,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.09505,
         "housing_observations": 0.635628,
+        "housing_demand_responses": 0.016678,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.8
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -2170,6 +2289,7 @@
       "innovation_records": 0,
       "cultural_records": 2,
       "housing_observations": 0,
+      "housing_demand_responses": 91,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -2178,11 +2298,12 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2191,10 +2312,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.00396,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.015177,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2215,6 +2337,7 @@
       "innovation_records": 6,
       "cultural_records": 0,
       "housing_observations": 55,
+      "housing_demand_responses": 102,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 0,
@@ -2235,10 +2358,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.0,
         "housing_observations": 0.055668,
+        "housing_demand_responses": 0.017011,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -2259,6 +2383,7 @@
       "innovation_records": 2,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 350,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 49.0,
@@ -2267,10 +2392,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2279,10 +2405,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.058372,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2303,6 +2430,7 @@
       "innovation_records": 3,
       "cultural_records": 208,
       "housing_observations": 0,
+      "housing_demand_responses": 186,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 29.0,
@@ -2311,10 +2439,11 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2323,10 +2452,11 @@
         "innovation_records": 0.025862,
         "cultural_records": 0.411881,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.031021,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2353,6 +2483,7 @@
       "innovation_records": 5,
       "cultural_records": 57,
       "housing_observations": 419,
+      "housing_demand_responses": 222,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 10,
       "apptech_registered_users": 131.0,
@@ -2378,10 +2509,11 @@
         "innovation_records": 0.043103,
         "cultural_records": 0.112871,
         "housing_observations": 0.424089,
+        "housing_demand_responses": 0.037025,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.9
+        "evidence_source_count": 0.818182
       }
     },
     {
@@ -2402,6 +2534,7 @@
       "innovation_records": 2,
       "cultural_records": 64,
       "housing_observations": 0,
+      "housing_demand_responses": 329,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -2411,9 +2544,10 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2422,10 +2556,11 @@
         "innovation_records": 0.017241,
         "cultural_records": 0.126733,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.05487,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2446,6 +2581,7 @@
       "innovation_records": 4,
       "cultural_records": 93,
       "housing_observations": 0,
+      "housing_demand_responses": 171,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 267.0,
@@ -2455,13 +2591,14 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f1_sradss_ppaos",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 8,
+      "evidence_source_count": 9,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2470,10 +2607,11 @@
         "innovation_records": 0.034483,
         "cultural_records": 0.184158,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.028519,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.8
+        "evidence_source_count": 0.818182
       }
     },
     {
@@ -2494,6 +2632,7 @@
       "innovation_records": 6,
       "cultural_records": 14,
       "housing_observations": 0,
+      "housing_demand_responses": 129,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 8,
       "apptech_registered_users": 10.0,
@@ -2503,11 +2642,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2516,10 +2656,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.027723,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.021514,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -2546,6 +2687,7 @@
       "innovation_records": 6,
       "cultural_records": 111,
       "housing_observations": 532,
+      "housing_demand_responses": 304,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 6,
       "apptech_registered_users": 0,
@@ -2570,10 +2712,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.219802,
         "housing_observations": 0.538462,
+        "housing_demand_responses": 0.0507,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.157895,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.8
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -2600,6 +2743,7 @@
       "innovation_records": 0,
       "cultural_records": 86,
       "housing_observations": 0,
+      "housing_demand_responses": 271,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 9,
       "apptech_registered_users": 143.0,
@@ -2609,12 +2753,13 @@
         "f1_sradss_ppaos",
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.97619,
@@ -2623,10 +2768,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.170297,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.045197,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.236842,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -2647,6 +2793,7 @@
       "innovation_records": 4,
       "cultural_records": 505,
       "housing_observations": 655,
+      "housing_demand_responses": 678,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 10,
       "apptech_registered_users": 257.0,
@@ -2669,10 +2816,11 @@
         "innovation_records": 0.034483,
         "cultural_records": 1.0,
         "housing_observations": 0.662955,
+        "housing_demand_responses": 0.113075,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.263158,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2693,6 +2841,7 @@
       "innovation_records": 1,
       "cultural_records": 46,
       "housing_observations": 0,
+      "housing_demand_responses": 74,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 60.0,
@@ -2701,10 +2850,11 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2713,10 +2863,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.091089,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.012342,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2737,6 +2888,7 @@
       "innovation_records": 4,
       "cultural_records": 152,
       "housing_observations": 0,
+      "housing_demand_responses": 656,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 137.0,
@@ -2746,10 +2898,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2758,10 +2911,11 @@
         "innovation_records": 0.034483,
         "cultural_records": 0.30099,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.109406,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2782,6 +2936,7 @@
       "innovation_records": 17,
       "cultural_records": 55,
       "housing_observations": 0,
+      "housing_demand_responses": 52,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 12.0,
@@ -2791,10 +2946,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2803,10 +2959,11 @@
         "innovation_records": 0.146552,
         "cultural_records": 0.108911,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.008672,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2827,6 +2984,7 @@
       "innovation_records": 16,
       "cultural_records": 95,
       "housing_observations": 0,
+      "housing_demand_responses": 91,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -2835,10 +2993,11 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2847,10 +3006,11 @@
         "innovation_records": 0.137931,
         "cultural_records": 0.188119,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.015177,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2871,6 +3031,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 261,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 0,
@@ -2879,11 +3040,12 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2892,10 +3054,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.043529,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -2916,6 +3079,7 @@
       "innovation_records": 7,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 138,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 22.0,
@@ -2924,10 +3088,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2936,10 +3101,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.023015,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -2960,6 +3126,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 77,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -2967,9 +3134,10 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 2,
+      "evidence_source_count": 3,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -2978,10 +3146,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.012842,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.2
+        "evidence_source_count": 0.272727
       }
     },
     {
@@ -3002,6 +3171,7 @@
       "innovation_records": 6,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 339,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 46.0,
@@ -3010,10 +3180,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3022,10 +3193,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.056538,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -3046,6 +3218,7 @@
       "innovation_records": 6,
       "cultural_records": 14,
       "housing_observations": 587,
+      "housing_demand_responses": 438,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -3067,10 +3240,11 @@
         "innovation_records": 0.051724,
         "cultural_records": 0.027723,
         "housing_observations": 0.59413,
+        "housing_demand_responses": 0.073049,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -3097,6 +3271,7 @@
       "innovation_records": 0,
       "cultural_records": 118,
       "housing_observations": 0,
+      "housing_demand_responses": 168,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 0,
@@ -3106,11 +3281,12 @@
         "f1_sradss_ppaos",
         "f2_learning_area_based",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.957143,
@@ -3119,10 +3295,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.233663,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.028019,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.105263,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -3143,6 +3320,7 @@
       "innovation_records": 0,
       "cultural_records": 91,
       "housing_observations": 0,
+      "housing_demand_responses": 238,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 99.0,
@@ -3150,9 +3328,10 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 2,
+      "evidence_source_count": 3,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3161,10 +3340,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.180198,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.039693,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.2
+        "evidence_source_count": 0.272727
       }
     },
     {
@@ -3185,6 +3365,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 128,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -3192,9 +3373,10 @@
       "city_capital_cities": 0,
       "evidence_sources": [
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 2,
+      "evidence_source_count": 3,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3203,10 +3385,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.021348,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.2
+        "evidence_source_count": 0.272727
       }
     },
     {
@@ -3227,6 +3410,7 @@
       "innovation_records": 1,
       "cultural_records": 2,
       "housing_observations": 0,
+      "housing_demand_responses": 80,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -3235,9 +3419,10 @@
       "evidence_sources": [
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3246,10 +3431,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.00396,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.013342,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -3276,6 +3462,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 104,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 7,
       "apptech_registered_users": 0,
@@ -3284,11 +3471,12 @@
       "evidence_sources": [
         "f1_sradss_ppaos",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.952381,
@@ -3297,10 +3485,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.017345,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.184211,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -3321,6 +3510,7 @@
       "innovation_records": 23,
       "cultural_records": 5,
       "housing_observations": 0,
+      "housing_demand_responses": 378,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 0,
@@ -3330,10 +3520,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3342,10 +3533,11 @@
         "innovation_records": 0.198276,
         "cultural_records": 0.009901,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.063042,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -3366,6 +3558,7 @@
       "innovation_records": 7,
       "cultural_records": 35,
       "housing_observations": 0,
+      "housing_demand_responses": 105,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 0,
@@ -3375,10 +3568,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3387,10 +3581,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.069307,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.017512,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -3411,16 +3606,18 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 179,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
       "apptech_interactions": 0,
       "city_capital_cities": 0,
       "evidence_sources": [
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 2,
+      "evidence_source_count": 3,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3429,10 +3626,11 @@
         "innovation_records": 0.0,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.029853,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.2
+        "evidence_source_count": 0.272727
       }
     },
     {
@@ -3459,6 +3657,7 @@
       "innovation_records": 1,
       "cultural_records": 265,
       "housing_observations": 0,
+      "housing_demand_responses": 494,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
@@ -3469,11 +3668,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 7,
+      "evidence_source_count": 8,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.985714,
@@ -3482,10 +3682,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.524752,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.082388,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.026316,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.727273
       }
     },
     {
@@ -3506,6 +3707,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 116,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
@@ -3514,9 +3716,10 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 3,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3525,10 +3728,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.019346,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.0,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.3
+        "evidence_source_count": 0.363636
       }
     },
     {
@@ -3549,6 +3753,7 @@
       "innovation_records": 7,
       "cultural_records": 415,
       "housing_observations": 0,
+      "housing_demand_responses": 288,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 17,
       "apptech_registered_users": 91.0,
@@ -3558,11 +3763,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3571,10 +3777,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.821782,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.048032,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.447368,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -3595,6 +3802,7 @@
       "innovation_records": 18,
       "cultural_records": 226,
       "housing_observations": 523,
+      "housing_demand_responses": 502,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 21,
       "apptech_registered_users": 62.0,
@@ -3618,10 +3826,11 @@
         "innovation_records": 0.155172,
         "cultural_records": 0.447525,
         "housing_observations": 0.529352,
+        "housing_demand_responses": 0.083722,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.552632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.7
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -3642,6 +3851,7 @@
       "innovation_records": 7,
       "cultural_records": 41,
       "housing_observations": 0,
+      "housing_demand_responses": 141,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 0,
@@ -3651,10 +3861,11 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 6,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3663,10 +3874,11 @@
         "innovation_records": 0.060345,
         "cultural_records": 0.081188,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.023516,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.078947,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.545455
       }
     },
     {
@@ -3687,6 +3899,7 @@
       "innovation_records": 3,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 365,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 6,
       "apptech_registered_users": 0,
@@ -3695,10 +3908,11 @@
       "evidence_sources": [
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 4,
+      "evidence_source_count": 5,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3707,10 +3921,11 @@
         "innovation_records": 0.025862,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.060874,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.157895,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.4
+        "evidence_source_count": 0.454545
       }
     },
     {
@@ -3737,6 +3952,7 @@
       "innovation_records": 9,
       "cultural_records": 0,
       "housing_observations": 0,
+      "housing_demand_responses": 199,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 0,
@@ -3746,11 +3962,12 @@
         "f1_sradss_ppaos",
         "f2_learning_area_based",
         "f2_apptech_mru",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.957143,
@@ -3759,10 +3976,11 @@
         "innovation_records": 0.077586,
         "cultural_records": 0.0,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.033189,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.131579,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -3783,6 +4001,7 @@
       "innovation_records": 1,
       "cultural_records": 53,
       "housing_observations": 0,
+      "housing_demand_responses": 206,
       "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 8,
       "apptech_registered_users": 5.0,
@@ -3792,11 +4011,12 @@
         "f2_learning_area_based",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -3805,10 +4025,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.10495,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.034356,
         "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.210526,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     },
     {
@@ -3835,6 +4056,7 @@
       "innovation_records": 1,
       "cultural_records": 66,
       "housing_observations": 0,
+      "housing_demand_responses": 144,
       "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 133.0,
@@ -3844,11 +4066,12 @@
         "f1_sradss_ppaos",
         "f2_apptech_mru",
         "f2_culturalmap_university",
+        "f3_housing_portal",
         "f1_pppconnext",
         "f2_learning_dashboard",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 6,
+      "evidence_source_count": 7,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.92381,
@@ -3857,10 +4080,11 @@
         "innovation_records": 0.008621,
         "cultural_records": 0.130693,
         "housing_observations": 0.0,
+        "housing_demand_responses": 0.024016,
         "pppconnext_aggregate_rows": 1.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.0,
-        "evidence_source_count": 0.6
+        "evidence_source_count": 0.636364
       }
     }
   ],

@@ -15,11 +15,14 @@ def test_health_and_catalog_summary():
         health_payload = health.json()
         assert health_payload["status"] == "ok"
         assert health_payload["database"] == "connected"
-        assert health_payload["public_artifacts"] == 162
-        assert health_payload["public_artifacts_expected"] == 162
+        assert health_payload["public_artifacts"] == 163
+        assert health_payload["public_artifacts_expected"] == 163
         assert health_payload["spatial_features"] == 0
         assert health_payload["spatial_features_expected"] == 0
         assert health_payload["spatial_complete"] is True
+        assert health_payload["housing_demand_records"] == 0
+        assert health_payload["housing_demand_records_expected"] == 0
+        assert health_payload["housing_demand_complete"] is True
         assert health_payload["source_catalog_rows"] == 28
         assert health_payload["public_value_sources"] == 11
         assert health_payload["metadata_only_sources"] == 12
@@ -174,6 +177,9 @@ def test_public_projection_and_downloads_are_available():
         assert coverage["f2_apptech_mtr"]["status"] == "available"
         assert coverage["f2_learning_dashboard"]["status"] == "available"
         assert "f2_wallet_all_realtime" not in coverage
+        demand = songkhla_briefing["sections"]["housing"]["demand_summary"]
+        assert demand["respondents_living"] > 0
+        assert demand["single_choice_distributions"]["future_housing_demand"]["answered"] > 0
 
         summary_response = client.get("/api/public/v1/provinces/90/summary")
         assert summary_response.status_code == 200
@@ -494,7 +500,7 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
         assert baseline.status_code == 200
         baseline_payload = baseline.json()
         assert baseline_payload["status"] == "complete"
-        assert baseline_payload["public_artifacts_in_database"] == 162
+        assert baseline_payload["public_artifacts_in_database"] == 163
         assert baseline_payload["source_catalog_rows"] == 28
         assert baseline_payload["public_value_sources"] == 11
         assert baseline_payload["metadata_only_sources"] == 12
@@ -533,7 +539,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 17
+    assert len(public_operations) == 18
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

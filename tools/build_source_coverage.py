@@ -266,8 +266,9 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
         "f3_housing_portal": (
             "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว "
             "คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่; CKAN lane นี้ครบแล้ว แต่หน้า Housing Stock "
-            "ยังมี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids "
-            "ที่ยังไม่อยู่ใน serving database. Demand 25,919 respondent rows คง schema-only และ policy values blocked."
+            "มี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids "
+            "ใน serving database. Demand 25,919 respondent rows เผยแพร่แบบ privacy projection โดยตัด "
+            "source id และผ่าน contact scan; ทั้งสามชุดแยก grain และยังเป็น needs_review."
         ),
     }
     if source_id in source_notes:

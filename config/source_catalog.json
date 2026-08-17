@@ -1888,7 +1888,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 7259,
-      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์ | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows คง schema-only และ policy values คง blocked ตาม privacy/owner gate.",
+      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. Housing Stock 28,694 points, 6,543 accessibility grids และ 159,126 flood grids เข้า serving database แล้ว. Demand 25,919 respondent rows เผยแพร่แบบ privacy projection โดยตัด source id และผ่านการตรวจชื่อ เบอร์โทร และอีเมล; ยังเป็น needs_review.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_demandgap_e7b75d00-b4aa-43ff-879c-873ae0818f55.csv",
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_4d53d17c-4478-44a6-9f3f-62fed6eb401b.csv",

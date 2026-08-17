@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-17T05:47:21.393164+00:00",
+  "source_id": "f3_housing_portal",
+  "dataset_key": "housing_demand",
+  "validation_status": "pass",
+  "record_count": 25919,
+  "unique_source_row_numbers": 25919,
+  "input": {
+    "path": "data/staged/f3_housing_portal/20260803T_housing_silver_02/silver/resources/demand/ae090999-5a29-42c5-8518-40f5ece5b081.jsonl",
+    "bytes": 247109201,
+    "sha256": "713efa65576886e9ffa77c25b72f35aa5abf17c9a4e9aedbb81fa8dcd20f600a"
+  },
+  "artifacts": {
+    "records": {
+      "path": "data/demand/housing_demand.ndjson.gz",
+      "bytes": 6770073,
+      "sha256": "00451b73580e3154731f28eca750d3cdf4e42409f51520976abf255c10541203",
+      "record_count": 25919
+    },
+    "summary": {
+      "path": "data/public/housing_demand_summary.json",
+      "bytes": 1705817,
+      "sha256": "5a5c91de7665d4313f900e1bffc87526c791fd30c6a4de56138d9334b01c5365",
+      "province_count": 77
+    }
+  },
+  "privacy_projection": {
+    "excluded_source_fields": [
+      "id"
+    ],
+    "name_fields_in_source_schema": 0,
+    "phone_fields_in_source_schema": 0,
+    "email_fields_in_source_schema": 0,
+    "email_values_redacted": 0,
+    "phone_values_redacted": 0,
+    "published_fields": 65,
+    "source_identifier_published": false
+  }
+}

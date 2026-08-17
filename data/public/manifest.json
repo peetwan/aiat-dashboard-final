@@ -1,12 +1,12 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-17T05:20:51.320846+00:00",
+  "generated_at": "2026-08-17T05:56:38.281480+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
       "path": "dashboard_final/config/source_catalog.json",
-      "bytes": 143176,
-      "sha256": "c30fd5a626de99f610125e93913c61ae25902cb70007cee50b52cc21acf7e8f0"
+      "bytes": 143037,
+      "sha256": "673da171bbd49a8559f8e2599ae181041841a2da4c3cc75bc94d91595d7553fb"
     },
     {
       "path": "dashboard_final/data/public/learning_dashboard.json",
@@ -239,21 +239,26 @@
       "sha256": "f3d5f1db1447e6322b4cd6b7ef5ff1e2d0a6424c111b72b4736ce325333edc45"
     },
     {
+      "path": "dashboard_final/data/public/housing_demand_summary.json",
+      "bytes": 1705817,
+      "sha256": "5a5c91de7665d4313f900e1bffc87526c791fd30c6a4de56138d9334b01c5365"
+    },
+    {
       "path": "dashboard_final/data/public/source_insights.json",
-      "bytes": 404275,
-      "sha256": "1a2ef64fefafccb10b1d02aae23b2cc13b3509074ce3a4308878bcce5c7827cd"
+      "bytes": 405338,
+      "sha256": "0d06e0c46b2f44eb57a4fc6e2b5df93773e769a58176dec88e27b4986c3c41c0"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
-      "bytes": 142178,
-      "sha256": "9a466183b33bf8110fe11dd103c997e71ec1b540bd211a3268545e399906be47"
+      "bytes": 151402,
+      "sha256": "a02b93f4002ada878c5fbae7cc3507110d900898d2948ed9f4104b41052b58c1"
     },
     {
       "path": "data/public/province_evidence.csv",
-      "bytes": 11403,
-      "sha256": "c92456d86231636309a7df3471de4ff12a83e481193c853eb806bd2130477fe4"
+      "bytes": 11729,
+      "sha256": "3eb17f4ce095ffbbcb05bef34d0648628ef0a9078ac69d98b313e8f8de03eaaa"
     },
     {
       "path": "data/public/source_inventory.csv",
@@ -267,8 +272,8 @@
     },
     {
       "path": "data/public/thailand_provinces.geojson",
-      "bytes": 1587692,
-      "sha256": "a5a95082fe130d0f56086339e587a8fe9a677d6b626c8914670e190ac8c6b5ac"
+      "bytes": 1595216,
+      "sha256": "2717cc7ddc6f07bd3669c8e91b952274629dbf521283726d0ab455e5f1abb44b"
     }
   ],
   "excluded_source_ids": [

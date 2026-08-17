@@ -165,3 +165,39 @@ class SpatialFeature(Base):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     as_of: Mapped[str] = mapped_column(String(100), default="ไม่ระบุ")
     quality_status: Mapped[str] = mapped_column(String(60), default="needs_review")
+
+
+class HousingDemandSnapshot(Base):
+    """Validated privacy-projected Housing Portal demand snapshot."""
+
+    __tablename__ = "housing_demand_snapshots"
+
+    snapshot_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    source_id: Mapped[str] = mapped_column(ForeignKey("sources.source_id"), index=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    record_count: Mapped[int] = mapped_column(Integer)
+    source_path: Mapped[str] = mapped_column(Text)
+    quality_status: Mapped[str] = mapped_column(String(60), default="needs_review")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class HousingDemandRecord(Base):
+    """Respondent answer with the source identifier and contact data removed."""
+
+    __tablename__ = "housing_demand_records"
+    __table_args__ = (
+        Index("ix_housing_demand_living_province", "living_province_code"),
+        Index("ix_housing_demand_preferred_province", "preferred_province_code"),
+    )
+
+    source_row_number: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_id: Mapped[str] = mapped_column(ForeignKey("sources.source_id"), index=True)
+    living_province_code: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    preferred_province_code: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    record_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    evidence_path: Mapped[str] = mapped_column(Text)
+    evidence_sha256: Mapped[str] = mapped_column(String(64))
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    as_of: Mapped[str] = mapped_column(String(100), default="ไม่ระบุ")
+    quality_status: Mapped[str] = mapped_column(String(60), default="needs_review")
