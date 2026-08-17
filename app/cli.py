@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.connector_contracts import ConnectorContractError, validate_connector_contracts
 from app.database import SessionLocal, init_db
-from app.flood_snapshot_importer import DEFAULT_PIPELINE_ROOT, import_flood_snapshots
+from app.flood_snapshot_importer import DEFAULT_PIPELINE_ROOT, DRIVE_FOLDER_ID, import_flood_snapshots
 from app.ingestion import IngestionPipeline, PolicyViolation
 from app.models import DashboardRecord, HousingDemandRecord, IngestionRun, PublicArtifact, Source
 from app.demand_artifacts import sync_housing_demand
@@ -132,6 +132,7 @@ def command_import_flood_snapshots(args: argparse.Namespace) -> int:
             session,
             pipeline_root=Path(args.pipeline_root),
             folders=args.folder or None,
+            drive_folder_id=args.drive_folder_id,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
@@ -217,6 +218,11 @@ def main() -> int:
         action="append",
         default=[],
         help="optional source folder to import; repeat for multiple folders",
+    )
+    flood.add_argument(
+        "--drive-folder-id",
+        default=None,
+        help="Google Drive folder ID to download pipeline snapshots from (e.g. %s)" % DRIVE_FOLDER_ID,
     )
     subparsers.add_parser("status", help="ดูสถานะ source และจำนวน record")
     subparsers.add_parser(

@@ -12,9 +12,12 @@ from sqlalchemy.orm import Session
 from app.catalog import source_config
 from app.models import DashboardRecord
 from app.privacy import payload_hash, sanitize_payload
+from app.settings import PROJECT_ROOT
 
 
 DEFAULT_PIPELINE_ROOT = Path("/Users/mister1st/Documents/AIAT/pipeline")
+PIPELINE_CACHE_ROOT = PROJECT_ROOT / "data" / "cache" / "pipeline"
+DRIVE_FOLDER_ID = "1ChHg4P_ss6hCnigfIsC1B4y6FlWPuzyr"
 
 FLOOD_SNAPSHOT_SOURCES = {
     "sukhothaicare": {
@@ -112,6 +115,37 @@ EXTRA_FORBIDDEN_KEYS = {
     "cookie",
     "authorization",
 }
+
+def download_pipeline_from_drive(
+    drive_folder_id: str,
+    output_dir: Path,
+    folders: Iterable[str] | None = None,
+) -> Path:
+    """Download pipeline snapshot data from Google Drive if not already cached.
+
+    Uses the local cache at *output_dir*. If all requested folders already
+    exist with a non-empty ``output/`` subdirectory the download is skipped.
+
+    Returns the *output_dir* path where the data can be found.
+    """
+    import gdown  # lazy import – only needed when Drive download is requested
+
+    selected = list(folders or FLOOD_SNAPSHOT_SOURCES)
+
+    # Check if all selected folders already exist with at least one run
+    all_cached = all(
+        (output_dir / f / "output").is_dir()
+        and any((output_dir / f / "output").iterdir())
+        for f in selected
+    )
+    if all_cached:
+        return output_dir
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    gdown.download_folder(id=drive_folder_id, output=str(output_dir))
+    return output_dir
+
+
 
 
 @dataclass(frozen=True)
@@ -234,7 +268,10 @@ def import_flood_snapshots(
     session: Session,
     pipeline_root: Path = DEFAULT_PIPELINE_ROOT,
     folders: Iterable[str] | None = None,
+    drive_folder_id: str | None = None,
 ) -> dict[str, Any]:
+    if drive_folder_id is not None:
+        pipeline_root = download_pipeline_from_drive(drive_folder_id, PIPELINE_CACHE_ROOT, folders)
     datasets = flood_snapshot_datasets(pipeline_root, folders)
     validate_dataset_counts(datasets)
 

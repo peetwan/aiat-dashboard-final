@@ -10,3 +10,5 @@ data/runtime/*
 !data/runtime/.gitkeep
 data/snapshots/*
 !data/snapshots/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
