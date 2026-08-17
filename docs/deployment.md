@@ -38,6 +38,8 @@ python tools/build_public_data.py
 python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
 python tools/build_source_coverage.py
+python -m app.cli validate-pipeline
+python tools/validate_public_repo.py
 python -m pytest -q
 python ..\scripts\validate_all.py
 docker build -t aiat-dashboard-final .

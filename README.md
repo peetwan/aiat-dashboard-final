@@ -62,6 +62,34 @@ python -m app.server
 
 `init-db` จะสร้างตาราง, sync catalog 28 แหล่ง, นำ cleaned public artifacts และ Housing spatial 194,532 features เข้า serving database โดยไม่ fetch หรือแก้ raw evidence
 
+## Central pipeline สำหรับทีม
+
+Executable source ใช้ connector module และ contract รายแหล่ง:
+
+```text
+source_catalog.json
+        ↓
+ingestion_plans.json ── connector entrypoint
+        ↓
+app/connectors/<source>.py
+        ↓
+config/connector_contracts/<source>.json
+        ↓
+evidence + manifest → sanitized Candidate → reviewed public artifact
+```
+
+ตรวจโครงสร้างทั้งหมดโดยไม่เรียก network หรือใช้ evidence workspace ภายใน:
+
+```powershell
+python -m app.cli validate-pipeline
+python tools/validate_public_repo.py
+python -m pytest -q
+```
+
+Source ใหม่เข้าผ่าน Pull Request และต้องมี registry, plan, connector, grain/completeness/privacy contract, redacted fixture และ tests ครบ อ่าน [CONTRIBUTING.md](CONTRIBUTING.md) และ [คู่มือเพิ่ม Connector](docs/connector-development.md)
+
+Repository มี GitHub Actions ตรวจทุก PR และ `AGENTS.md` สำหรับ Codex review rules เฉพาะ publication boundary, completeness และ public-data safety การ merge อัตโนมัติใช้ label `codex-automerge` จาก maintainer/Codex automation และยังต้องรอ required CI ผ่านก่อนเสมอ
+
 ## เส้นทางข้อมูล
 
 ```text
@@ -135,16 +163,18 @@ Regression suite ตรวจ 77 จังหวัด รวม project/partici
 | [Data audit](docs/data-audit.md) | ตรวจ coverage, geography, dimensions และข้อจำกัด |
 | [Deployment](docs/deployment.md) | deploy หรือ verify ระบบบน Railway/PostgreSQL |
 | [Design](docs/design.md) | ทำความเข้าใจ UX contract และเหตุผลด้านการออกแบบ |
+| [Connector development](docs/connector-development.md) | เพิ่ม URL/connector ผ่าน Pull Request |
 
 ## โครงสร้าง repository
 
 ```text
-app/            FastAPI, database models, API และหน้าเว็บ
-config/         source catalog และ ingestion allowlist
+app/            FastAPI, database models, API, connectors และหน้าเว็บ
+config/         source catalog, ingestion plans และ connector contracts
 data/public/    cleaned deployment seeds ที่ตรวจย้อนกลับได้
-docs/           เอกสารหลัก 5 เรื่อง
+docs/           เอกสาร architecture, governance, data, deploy, design และ connector
 tests/          data, API, privacy, policy และ UI contracts
 tools/          deterministic builders สำหรับ public artifacts
+.github/        CI, PR template, CODEOWNERS และ safe auto-merge
 ```
 
 ## กติกาสำคัญ

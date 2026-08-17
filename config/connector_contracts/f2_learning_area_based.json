@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "source_id": "f2_learning_area_based",
+  "connector": "app.connectors.pmua_area_based:PmuaAreaBasedConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "area_based",
+      "grain_th": "ผู้เข้าร่วมหรือธุรกิจหนึ่งระเบียน ไม่ใช่หนึ่งโครงการ",
+      "identity_fields": ["id"],
+      "geography_fields": ["region", "province", "district", "subDistrict"],
+      "as_of_fields": ["fiscalYear", "updatedAt"]
+    },
+    {
+      "key_pattern": "aggregate_*",
+      "grain_th": "ค่ารวมหนึ่งรายการต่อมิติที่ต้นทางเผยแพร่",
+      "identity_fields": ["id", "dimension", "label"],
+      "geography_fields": ["label"],
+      "as_of_fields": []
+    }
+  ],
+  "completeness_checks": [
+    "unique non-null IDs ต้องเท่ากับ stats.totalRecords",
+    "ผลรวมทุกมิติต้อง reconcile กับจำนวนแถวที่มีค่า",
+    "participant rows และ aggregate rows ต้องอยู่คนละ dataset grain"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  }
+}

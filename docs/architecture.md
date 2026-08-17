@@ -93,12 +93,13 @@ Release ปัจจุบันมี 77 briefings + 77 executive summaries แ
 
 ## Operational refresh
 
-`config/ingestion_plans.json` เป็น executable allowlist สำหรับ source ที่ยืนยัน endpoint แล้วเท่านั้น:
+`config/ingestion_plans.json` เป็น executable allowlist สำหรับ source ที่ยืนยัน endpoint แล้วเท่านั้น แต่ละ plan ชี้ `connector` ไปยัง module ภายใต้ `app/connectors/` และมี grain/completeness/privacy contract ชื่อเดียวกันใน `config/connector_contracts/`:
 
 ```powershell
 python -m app.cli ingest --source f2_learning_dashboard
 python -m app.cli ingest --all
 python -m app.cli status
+python -m app.cli validate-pipeline
 ```
 
 `--all` เลือกเฉพาะ public source ที่มี executable plan; metadata-only และ restricted ไม่ถูกเรียก API ทุก response ถูกเก็บพร้อม run manifest ใน runtime storage และแถว sanitized ถูกเขียนเข้า `dashboard_records`
@@ -112,6 +113,8 @@ python -m app.cli status
 - retry เฉพาะ timeout, 429 และ 5xx แบบ bounded; ไม่ retry/bypass 401 หรือ 403
 - `f2_apptech_mru` ใช้ JSON `{action, filter}` พร้อม Origin/Referer ตาม public frontend contract
 - Operational candidate แยกจาก `public_artifacts`; ไม่มี code path auto-promote
+- Connector รับผิดชอบ request/parse/completeness ของ source ตัวเอง ส่วน orchestrator กลางรับผิดชอบ evidence, hash, manifest, privacy projection, idempotency และ database write
+- `validate-pipeline` ต้อง import connector และตรวจ contract ทุก executable source ได้โดยไม่เรียก upstream network
 
 ## Maintainable refresh design
 

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/peetwan/aiat-dashboard-final/config/connector_contract.schema.json",
+  "title": "AIAT connector contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "source_id",
+    "connector",
+    "transport",
+    "dataset_grains",
+    "completeness_checks",
+    "privacy"
+  ],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "source_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "connector": {"type": "string", "pattern": "^app\\.connectors\\.[a-z0-9_]+:[A-Za-z][A-Za-z0-9_]+$"},
+    "transport": {"enum": ["http_json", "http_form_json", "ckan_csv", "snapshot"]},
+    "dataset_grains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key_pattern", "grain_th", "identity_fields", "geography_fields"],
+        "properties": {
+          "key_pattern": {"type": "string", "minLength": 1},
+          "grain_th": {"type": "string", "minLength": 1},
+          "identity_fields": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "geography_fields": {"type": "array", "items": {"type": "string"}},
+          "as_of_fields": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "completeness_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_only", "contact_value_scan", "forbidden_public_fields"],
+      "properties": {
+        "candidate_only": {"const": true},
+        "contact_value_scan": {"const": true},
+        "forbidden_public_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "sample_fixture": {"type": "string", "pattern": "^tests/fixtures/connectors/"},
+    "notes_th": {"type": "string"}
+  }
+}

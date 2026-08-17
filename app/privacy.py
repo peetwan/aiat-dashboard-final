@@ -22,6 +22,19 @@ FORBIDDEN_KEY_PARTS = {
     "authorization",
     "api_key",
     "apikey",
+    "ownercontact",
+    "owner_name",
+    "ownername",
+    "contactperson",
+    "contact_name",
+    "firstname",
+    "first_name",
+    "lastname",
+    "last_name",
+    "person_name",
+    "personname",
+    "researcher_name",
+    "researchername",
 }
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?66|0)\d[\d -]{7,12}\d(?!\d)")

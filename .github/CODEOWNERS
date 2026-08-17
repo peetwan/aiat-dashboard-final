@@ -1,0 +1,9 @@
+* @peetwan
+
+# Data contracts, publication gates, and deployment changes always request the maintainer.
+/config/ @peetwan
+/app/connectors/ @peetwan
+/app/ingestion.py @peetwan
+/app/public_artifacts.py @peetwan
+/.github/workflows/ @peetwan
+/data/public/ @peetwan
