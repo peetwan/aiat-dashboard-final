@@ -27,8 +27,8 @@ def test_public_artifact_sync_is_complete_and_idempotent():
         payload = coverage.json()
         assert payload["status"] == "complete"
         assert payload["source_catalog_rows"] == 28
-        assert payload["endpoint_catalog_rows"] == 141
-        assert payload["runtime_enabled_endpoints"] == 90
+        assert payload["endpoint_catalog_rows"] == 144
+        assert payload["runtime_enabled_endpoints"] == 94
         assert payload["province_briefings"] == 77
         assert payload["executive_summaries"] == 77
         assert payload["restricted_values_published"] == 0

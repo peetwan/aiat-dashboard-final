@@ -35,6 +35,7 @@
       </section>
 
       <nav class="source-index" aria-label="ข้ามไปยังแหล่งข้อมูล">
+        <a href="#executivePortfolio">ภาพรวมผู้บริหาร</a>
         <a href="#coverage">28 แหล่งข้อมูล</a>
         <a href="#unmapped">ข้อมูลไม่ผูกพื้นที่</a>
         <a href="#ppp">ครัวเรือน</a>
@@ -42,6 +43,37 @@
         <a href="#city">ทุนเมือง</a>
         <a href="#rmutdb">ทะเบียนผลงาน</a>
       </nav>
+
+      <section class="source-section executive-portfolio" id="executivePortfolio" aria-labelledby="executivePortfolioTitle" hidden>
+        <header class="section-head portfolio-head">
+          <div><span>Executive portfolio</span><h2 id="executivePortfolioTitle">ข้อมูลที่ควรใช้ประกอบการตัดสินใจ</h2></div>
+          <p>คัดจาก 10 เว็บไซต์ที่ audit แล้ว แสดงตามหน่วยของต้นทางและไม่รวมตัวเลขต่างความหมายเข้าด้วยกัน</p>
+        </header>
+
+        <div class="portfolio-kpis" id="executiveKpis"></div>
+
+        <div class="portfolio-lead-grid">
+          <article class="readiness-card">
+            <header><div><span>Data readiness</span><h3>ความพร้อมของ 10 เว็บไซต์</h3></div><small>ตรวจเมื่อ 17 ส.ค. 2569</small></header>
+            <div class="readiness-visual" id="auditReadiness"></div>
+          </article>
+          <article class="visual-card portfolio-chart-card">
+            <header><h3>ทุนดำรงชีพเฉลี่ย</h3><small>คะแนนตามนิยามต้นทาง</small></header>
+            <div id="capitalChart"></div>
+          </article>
+        </div>
+
+        <div class="portfolio-chart-grid">
+          <article class="visual-card portfolio-chart-card"><header><h3>ประเภทธุรกิจ Area Based</h3><small>หน่วยธุรกิจ</small></header><div id="businessTypeChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>องค์ประกอบข้อมูลวัฒนธรรม</h3><small>public records</small></header><div id="culturalChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ข้อมูลแผนที่ที่อยู่อาศัย</h3><small>spatial features</small></header><div id="housingSpatialChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ข้อมูลท่องเที่ยวลำพูน</h3><small>รายการสาธารณะ</small></header><div id="tourismChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ความครบของข้อมูลทุนเมือง</h3><small>702 observations</small></header><div id="cityCompletenessChart"></div></article>
+        </div>
+
+        <div class="portfolio-health-head"><div><span>Audit health</span><h3>สถานะที่ต้องรู้ก่อนใช้ตัวเลข</h3></div><p>สถานะนี้บอกความครบของหน้าเว็บและ API ไม่ใช่การรับรองนิยาม KPI ทางนโยบาย</p></div>
+        <div class="source-health-grid" id="sourceHealthGrid"></div>
+      </section>
 
       <section class="source-section coverage-section" id="coverage" aria-labelledby="coverageTitle">
         <header class="section-head coverage-head">

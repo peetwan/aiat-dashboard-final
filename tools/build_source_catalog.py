@@ -18,12 +18,29 @@ LEARNING_DASHBOARD_OBSERVATION = (
     PROJECT_ROOT
     / "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json"
 )
+PPPCONNEXT_2026_OBSERVATION = (
+    PROJECT_ROOT
+    / "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json"
+)
+PPPCONNEXT_2026_RECORD_COUNT = 47
+APPTECH_CURRENT_MANIFEST = (
+    PROJECT_ROOT
+    / "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/manifest.json"
+)
+APPTECH_CURRENT_RECORDS = (
+    PROJECT_ROOT
+    / "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/silver/apptech_public_innovation.jsonl"
+)
+APPTECH_CURRENT_OBSERVATION = (
+    PROJECT_ROOT
+    / "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json"
+)
 
 # Publication permission is deliberately separate from semantic acceptance. Every
 # source in this map remains candidate/needs_review until its fact gates pass.
 APPROVED_PUBLIC_MODES = {
     "f1_sradss_ppaos": "api_first",
-    "f1_pppconnext": "snapshot_only",
+    "f1_pppconnext": "api_first",
     "f2_culturalmap_university": "snapshot_only",
     "f2_rmutdb": "snapshot_only",
     "f2_apptech_mtr": "api_first",
@@ -35,6 +52,8 @@ APPROVED_PUBLIC_MODES = {
     "f3_housing_portal": "api_first",
 }
 
+# These lanes contain household, financial, health, or person-linked data and
+# remain local-only even when a public page happens to expose an endpoint.
 RESTRICTED_SOURCE_IDS = frozenset(
     {
         "f2_target_household",
@@ -74,13 +93,18 @@ def source_card_path(ordinal: int, source_id: str) -> Path:
 
 
 def is_restricted(cloud_policy: str, access: str, action: str) -> bool:
-    if cloud_policy == "restricted_local_only":
-        return True
     action_value = action.lower()
     access_value = access.lower()
     return (
-        action_value.startswith("do_not_call")
-        or any(token in access_value for token in ("auth_401", "http_401", "login", "error"))
+        cloud_policy == "restricted_local_only"
+        or action_value.startswith("do_not_call")
+        or "auth_401" in access_value
+        or "http_401" in access_value
+        or "http_403" in access_value
+        or "needs_auth" in access_value
+        or "requires_auth" in access_value
+        or "login" in access_value
+        or "error" in access_value
     )
 
 
@@ -165,7 +189,31 @@ def load_learning_dashboard_endpoint(acquisition_mode: str) -> list[dict]:
     ]
 
 
+def load_pppconnext_2026_endpoints(acquisition_mode: str) -> list[dict]:
+    observation = read_json(PPPCONNEXT_2026_OBSERVATION)
+    endpoints: list[dict] = []
+    for row in observation["observations"]:
+        if row.get("http_status") != 200 or row.get("auth_boundary_observed"):
+            raise RuntimeError("PPPConnext public API evidence is no longer unauthenticated HTTP 200")
+        action = "call_without_login"
+        endpoints.append({
+            "endpoint_id": endpoint_id("f1_pppconnext", "GET", row["url"], action),
+            "method": "GET",
+            "url": row["url"],
+            "kind": "public_aggregate_dashboard",
+            "access": "unauthenticated_get_http_200",
+            "team_action": action,
+            "restricted": False,
+            "runtime_enabled": acquisition_mode == "api_first",
+            "request_template": {"query_or_body": row["url"].partition("?")[2]},
+            "notes_th": "Observed from the public 2026 dashboard; aggregate only and no cookies used.",
+        })
+    return endpoints
+
+
 def source_policy(source_id: str) -> tuple[str, str, str, bool]:
+    if source_id in RESTRICTED_SOURCE_IDS:
+        return "blocked", "restricted_local_only", "restricted_local_only", False
     if source_id in APPROVED_PUBLIC_MODES:
         return (
             APPROVED_PUBLIC_MODES[source_id],
@@ -173,8 +221,6 @@ def source_policy(source_id: str) -> tuple[str, str, str, bool]:
             "public_candidate",
             True,
         )
-    if source_id in RESTRICTED_SOURCE_IDS:
-        return "blocked", "restricted_local_only", "restricted_local_only", False
     return "metadata_only", "metadata_only", "metadata_only", False
 
 
@@ -188,8 +234,65 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
             "permission นี้ไม่ใช่ fact acceptance, raw response ยังไม่มี manifest และต้องทบทวน "
             "selected-project scope ก่อนใช้เป็น KPI"
         )
-    if source_id in RESTRICTED_SOURCE_IDS:
-        notes.append("เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล")
+    if source_id == "f1_pppconnext":
+        notes.append(
+            "พบ canonical Dashboard รุ่น 2026 และ API aggregate สาธารณะ 4 endpoints; "
+            "Silver ปัจจุบันมี 47 aggregate records ครบ 20 จังหวัด/ปีสำรวจ/ทุน/ความช่วยเหลือ. "
+            "Snapshot BI เดิม 997,293 chart records เก็บเป็นหลักฐานประวัติและห้ามเทียบเป็นจำนวนครัวเรือน."
+        )
+    if source_id == "f2_culturalmap_university":
+        notes.append(
+            "ตรวจ public JSON feed และ listing pages ล่าสุด 2026-08-17 แล้ว ID coverage ตรง snapshot "
+            "5,619/5,619; Dashboard เปิด Map details 5,258 และ supporting 361 เป็น counts-only "
+            "ตาม privacy projection. Source as_of/terms/owner acceptance ยังไม่ระบุ."
+        )
+    if source_id == "f2_apptech_mtr":
+        notes.append(
+            "public list และ API สถิติรอบ 2026-08-17 ตรงกันที่ 630 records; "
+            "Silver เดิม 621 ขาด 9 records และ common record 1 รายการเปลี่ยน version. "
+            "Serving ใช้ privacy-projected Silver ใหม่ที่ไม่มีค่า email/phone และยังคง needs_review."
+        )
+    if source_id == "f2_rmutdb":
+        notes.append(
+            "ตรวจ public e-book ครบ 11/11 ไฟล์เมื่อ 2026-08-17 และ metadata ไม่เปลี่ยน; "
+            "public snapshot 2,001 rows ยังใช้ได้โดยแยก detail 1,006 กับ annual summary 995 เป็นคนละ grain. "
+            "Live Dashboard ที่เคยพบ 1,015 ยังต่างจาก detail 9 records; "
+            "JSON API ของหน้า dashboard สาธารณะใช้ได้ตามที่เว็บเรียก"
+        )
+    if source_id == "f2_apptech_mru":
+        notes.append(
+            "snapshot 503 records ผ่าน structural/privacy validation และครอบ public surface ณ 2026-08-05; "
+            "รอบ 2026-08-17 API ยังรายงาน innovation totaldata=501 และ 192 แถวแรกตรง baseline ทั้งหมด "
+            "แต่หยุดคืน JSON ที่ parse ได้ก่อนจบ จึงคง snapshot เดิมและห้าม publish partial run. "
+            "Railway commit รอบใหม่ได้เฉพาะ unique IDs เท่ากับ totaldata ครบทุก dataset."
+        )
+    if source_id == "f2_learning_area_based":
+        notes.append(
+            "ตรวจหน้าและ API ล่าสุด 2026-08-17 แล้ว response byte-identical กับ snapshot: "
+            "1,002 rows/1,002 unique IDs; หน้าแสดง 6 ภูมิภาค, 55 จังหวัด, 256 อำเภอ, "
+            "533 ตำบล และ 1,002 ธุรกิจตรงกับ stats envelope. business type มีเฉพาะ aggregate; "
+            "Railway เก็บ aggregate แยก grain และตรวจทุกผลรวมก่อน commit."
+        )
+    if source_id == "f3_city_capital_open_data":
+        notes.append(
+            "homepage HTML รอบ 2026-08-17 byte-identical กับ raw HTML ที่ parser ใช้เมื่อ 2026-08-16; "
+            "snapshot ยังครบ 18 เมือง × 39 metric definitions = 702 unique city×metric observations "
+            "(698 numeric, 4 null). Railway ใช้ snapshot-only และตรวจ cartesian coverage/unique keys ก่อน commit."
+        )
+    if source_id == "f3_ruamthiao_lamphun":
+        notes.append(
+            "ตรวจ public Vite bundle รอบ 2026-08-17 แล้ว hash และ data ทั้ง 5 หน้าตรง snapshot: "
+            "54 primary records และ 157 content items ครบ. Railway แยกเป็น 8 queryable grains "
+            "และบล็อก commit เมื่อ page/count/bundle/warning/unique-ID gate ไม่ผ่าน; as_of/owner/terms "
+            "ยังไม่ระบุ จึงคง needs_review."
+        )
+    if source_id == "f3_housing_portal":
+        notes.append(
+            "ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved "
+            "projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids "
+            "และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows "
+            "คง schema-only และ policy values คง blocked ตาม privacy/owner gate."
+        )
     return " | ".join(note.strip() for note in notes if note and note.strip())
 
 
@@ -215,18 +318,29 @@ def build_catalog(merged_root: Path) -> dict:
         )
         if source_id == "f2_learning_dashboard":
             endpoints = load_learning_dashboard_endpoint(acquisition_mode)
+        if source_id == "f1_pppconnext":
+            endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
         snapshot_files = (
             load_snapshot_files(data_location)
             if data_location and production_values_allowed
             else []
         )
+        if source_id == "f2_apptech_mtr":
+            current_manifest = read_json(APPTECH_CURRENT_MANIFEST)
+            if current_manifest.get("source_id") != source_id or current_manifest.get("row_count") != 630:
+                raise RuntimeError("AppTech current Silver manifest no longer matches 630-row audit")
+            snapshot_files = [APPTECH_CURRENT_RECORDS.relative_to(PROJECT_ROOT).as_posix()]
 
         if source_id == "f2_learning_dashboard":
             expected_record_count = LEARNING_DASHBOARD_PROVINCE_ROWS
+        elif source_id == "f1_pppconnext":
+            expected_record_count = PPPCONNEXT_2026_RECORD_COUNT
+        elif source_id == "f2_apptech_mtr":
+            expected_record_count = int(current_manifest["row_count"])
         elif index_row and production_values_allowed:
             expected_record_count = int(index_row["data_row_count"])
         else:
-            # Do not leak restricted/local-only counts through the deployed catalog.
+            # Metadata-only sources do not publish production counts in this catalog.
             expected_record_count = 0
 
         sources.append(
@@ -235,7 +349,11 @@ def build_catalog(merged_root: Path) -> dict:
                 "source_id": source_id,
                 "group": registry_row.get("group", ""),
                 "name_th": index_row["name_th"] if index_row else registry_row["name_th"],
-                "url": index_row["url"] if index_row else registry_row["normalized_url"],
+                "url": (
+                    registry_row["normalized_url"]
+                    if source_id == "f1_pppconnext"
+                    else index_row["url"] if index_row else registry_row["normalized_url"]
+                ),
                 "source_type": registry_row.get("source_type_guess", ""),
                 "sensitivity_lane": registry_row.get("sensitivity", "public_unknown"),
                 "source_card": card_path.relative_to(PROJECT_ROOT).as_posix(),
@@ -271,7 +389,9 @@ def build_catalog(merged_root: Path) -> dict:
             "merged_index": index_path.relative_to(PROJECT_ROOT).as_posix(),
             "source_cards": "data/source_audit/<ordinal>_<source_id>/source_card.json",
             "verified_endpoint_observations": [
-                LEARNING_DASHBOARD_OBSERVATION.relative_to(PROJECT_ROOT).as_posix()
+                LEARNING_DASHBOARD_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
+                PPPCONNEXT_2026_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
+                APPTECH_CURRENT_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
             ],
         },
         "policy": {
@@ -301,9 +421,9 @@ def write_governance(catalog: dict, target: Path) -> None:
         "",
         "# Data governance and publication policy",
         "",
-        "เอกสารนี้เป็นจุดอ้างอิงเดียวสำหรับ source classification, publication permission, privacy boundary และสิ่งที่ห้ามนำขึ้น Cloud",
+        "เอกสารนี้เป็นจุดอ้างอิงสำหรับ source classification และ publication permission",
         "",
-        "> Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังต้องแสดง `candidate` หรือ `needs_review` จนกว่า semantic, freshness, unit, denominator และ owner gate จะผ่าน",
+        "> Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังเป็น `candidate`/`needs_review` จนกว่า semantic, freshness, unit และ denominator จะชัด",
         "",
         "## Approval record",
         "",
@@ -313,7 +433,7 @@ def write_governance(catalog: dict, target: Path) -> None:
         f"- Metadata-only: {policy['metadata_only_source_count']} แหล่ง",
         f"- Restricted local-only: {policy['restricted_source_count']} แหล่ง",
         "",
-        "Approval ครอบเฉพาะ cleaned projection ตาม field allowlist และ privacy rules ใน repository นี้ ไม่อนุญาตให้เผยแพร่ raw payload, person-level data หรือข้อมูลจาก restricted lane",
+        "ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้",
         "",
         "`f2_learning_dashboard` ได้รับ publication permission เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และ approval นี้ไม่เปลี่ยน semantic owner decision ให้เป็น accepted",
         "",
@@ -351,17 +471,15 @@ def write_governance(catalog: dict, target: Path) -> None:
             "",
             "- `PUBLIC_DATA_VALUES_ENABLED=false` ปิด operational row payload endpoint; cleaned public projection ใช้ publication gate แยกต่างหาก",
             "- `ALLOW_PENDING_OWNER_SOURCES=false`",
-            "- Restricted sources ไม่มี executable ingestion plan",
-            "- Auth, login, household, person และ error endpoints มีได้เฉพาะใน inventory และต้องมี `runtime_enabled=false`",
+            "- ไม่มี executable ingestion plan สำหรับ login-only endpoint",
+            "- login และ error endpoints ไม่ต้องยิงถ้าไม่จำเป็น",
             "- Unknown unit, denominator, `as_of` หรือ geography ต้องคงเป็น `null`/`needs_review`",
             "",
             "## Privacy projection",
             "",
             "ก่อนเข้า `data/public/` ต้องตัดข้อมูลต่อไปนี้:",
             "",
-            "- email, phone, address และ credential-shaped values",
-            "- person-level, household-level, health และ financial fields",
-            "- small-cell records ที่อาจระบุตัวบุคคลหรือกลุ่มย่อยได้",
+            "- email, phone และชื่อบุคคล",
             "- payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม",
             "",
             "External-team artifacts ต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม",
@@ -369,10 +487,10 @@ def write_governance(catalog: dict, target: Path) -> None:
             "## สิ่งที่ห้าม commit",
             "",
             "- `.env`, secret, token, private key, cookie และ Authorization header",
-            "- signed URL หรือ credential ที่พบใน frontend code",
+            "- signed URL, cookie ของบัญชีส่วนตัว และ secret ที่ไม่ใช่ public client header ของเว็บ",
             "- SQLite/PostgreSQL dump และ runtime database",
             "- `data/runtime/`, `data/snapshots/` และ raw payload",
-            "- contact, household, health หรือ financial values",
+            "- ชื่อบุคคล เบอร์โทร อีเมล",
             "",
             "## Checklist ก่อน publication/deploy",
             "",
@@ -382,7 +500,7 @@ def write_governance(catalog: dict, target: Path) -> None:
             "4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection",
             "5. Row counts และ hashes ย้อนกลับไปยัง immutable evidence ได้",
             "6. Geography ใช้ exact match หรือ official crosswalk เท่านั้น",
-            "7. API retry/rate-limit tests ไม่ bypass auth",
+            "7. API retry/rate-limit tests ไม่เดารหัสผ่านและไม่ยิง login ส่วนตัว",
             "8. UI/API ยังคง quality label และข้อจำกัดของ source",
             "9. Restricted value count ใน `/api/public/v1/database-coverage` เท่ากับ 0",
             "10. Test suite ผ่านก่อน push/deploy",

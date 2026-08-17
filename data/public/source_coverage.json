@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-16T13:40:43.297688+00:00",
+  "generated_at": "2026-08-17T04:19:12.972072+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
       "path": "config/source_registry.json",
-      "sha256": "c9f3c9615a27aa1b7bc5e5338ddbdf4a99ec6bba7587163390207bd3f1fce79d"
+      "sha256": "1ac5cb5bf067dc982b3fe69c99d2491fe315903d0b35f2c99e50241dac408685"
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "51a60748ecf4fbc9cfa1c2851e43a1031c413b4b3ee68c69d1191a1152a1f370"
+      "sha256": "c30fd5a626de99f610125e93913c61ae25902cb70007cee50b52cc21acf7e8f0"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,7 +18,7 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 28,
-      "aggregate_sha256": "2ff96be8563d62db8720d574c355adf6d355d91720139fda7b681db35036f686"
+      "aggregate_sha256": "6b5020275fb908b82724281fabe453ab4259e759e3be2761524165a05b7ca182"
     }
   },
   "summary": {
@@ -45,8 +45,8 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "VERIFIED_AGGREGATE_API",
-        "data_inventory": "RUNTIME_AGGREGATE_SCHEMA_RECONCILED",
+        "network_api_export": "VERIFIED_AGGREGATE_API_CURRENT_BASE",
+        "data_inventory": "WEBSITE_API_DASHBOARD_GAPS_RECONCILED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
@@ -125,19 +125,19 @@
       "source_id": "f1_pppconnext",
       "group": "ฝ่าย 1",
       "name_th": "PPPConnext BI",
-      "url": "http://www.ppaos.com/ppaos/frontend/web/",
+      "url": "https://ppaos.com/2026/dashboard/ppaos/",
       "source_type": "portal",
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
-        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
+        "network_api_export": "PUBLIC_AGGREGATE_API_VERIFIED",
+        "data_inventory": "UPDATED_2026_08_17",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": 997293,
+        "observed_count": 47,
         "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": 660,
         "serving_numeric_value_count": null,
@@ -153,7 +153,7 @@
         "linked_area_count": 21,
         "related_area_count": null,
         "decision": "province_aggregate_join_allowed_for_candidate_serving",
-        "current_map_area_count": 21,
+        "current_map_area_count": 20,
         "numeric_value_area_count": null,
         "known_omissions": []
       },
@@ -171,10 +171,12 @@
         "source_card": "data/source_audit/02_f1_pppconnext/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
-        "catalogued_endpoint_count": 1,
+        "catalogued_endpoint_count": 4,
         "primary_paths": [
-          "data/raw/firecrawl_map/f1_pppconnext/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f1_pppconnext/20260817T_canonical_map_02/manifest.json",
+          "data/raw/firecrawl_scrape/f1_pppconnext/20260817T_canonical_scrape_02/manifest.json",
           "data/source_audit/02_f1_pppconnext/evidence/map_observation.json",
+          "data/source_audit/02_f1_pppconnext/evidence/website_completeness_20260817.json",
           "data/source_audit/02_f1_pppconnext/evidence/gate_observation.json",
           "data/source_audit/02_f1_pppconnext/extracted/route_probe/20260804T_pppconnext_route_probe_01/route_probe_observation.json",
           "data/source_audit/02_f1_pppconnext/extracted/route_probe/20260804T_pppconnext_route_probe_01/route_probe_observation_reconciled.json",
@@ -182,9 +184,7 @@
           "data/staged/f1_pppconnext/20260804T_pppconnext_silver_01/manifest.json",
           "data/staged/f1_pppconnext/20260804T_pppconnext_silver_01/independent_validation_report.json",
           "data/raw/network/f1_pppconnext/20260804T_pppconnext_bi_full_02/",
-          "data/staged/f1_pppconnext/20260804T_pppconnext_bi_full_silver_02/",
-          "data/raw/network/f1_pppconnext/20260804T_pppconnext_bi_probe_01/observation.json",
-          "data/staged/f1_pppconnext/20260804T_pppconnext_bi_silver_01/manifest.json"
+          "data/staged/f1_pppconnext/20260804T_pppconnext_bi_full_silver_02/"
         ],
         "local_evidence_paths_withheld": false
       },
@@ -204,8 +204,8 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "VERIFIED_STRUCTURED_EXTERNAL_TEAM_EXPORT",
-        "data_inventory": "STRUCTURED_CANDIDATE_RECORDED",
+        "network_api_export": "PUBLIC_JSON_FEED_AND_LISTINGS_VERIFIED",
+        "data_inventory": "CURRENT_CORPUS_RECONCILED_5619",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
@@ -252,10 +252,11 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 6,
         "primary_paths": [
-          "data/raw/firecrawl_map/f2_culturalmap_university/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f2_culturalmap_university/20260817T_url_completeness_map_03c/manifest.json",
           "data/source_audit/03_f2_culturalmap_university/evidence/map_observation.json",
           "data/source_audit/03_f2_culturalmap_university/evidence/root_scrape_observation.json",
           "data/source_audit/03_f2_culturalmap_university/extracted/root_scrape.json",
+          "data/source_audit/03_f2_culturalmap_university/evidence/website_completeness_20260817.json",
           "data/source_audit/03_f2_culturalmap_university/extracted/detail/detail_manifest.json",
           "data/source_audit/03_f2_culturalmap_university/evidence/detail_observation.json",
           "data/source_audit/03_f2_culturalmap_university/evidence/gate_observation.json",
@@ -415,8 +416,8 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "AUTH_BOUNDARY_CONFIRMED_PUBLIC_EXPORT_FOUND",
-        "data_inventory": "SILVER_CANDIDATE_BUILT",
+        "network_api_export": "PUBLIC_EBOOK_CATALOG_11_UNCHANGED_AUTH_BOUNDARY_RETAINED",
+        "data_inventory": "SILVER_CANDIDATE_RECONCILED_WITH_PUBLIC_EXPORT",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
@@ -457,7 +458,7 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 14,
         "primary_paths": [
-          "data/raw/firecrawl_map/f2_rmutdb/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f2_rmutdb/20260817T_url_completeness_map_06/manifest.json",
           "data/raw/network/f2_rmutdb/20260805T_url_audit_recon_01/observation.json",
           "data/raw/network/f2_rmutdb/20260805T_url_audit_recon_01/manifest.json",
           "data/raw/export/f2_rmutdb/20260805T_ebook_export_01/manifest.json",
@@ -465,6 +466,8 @@
           "data/staged/silver/f2_rmutdb/20260805T_ebook_silver_01/manifest.json",
           "data/source_audit/06_f2_rmutdb/evidence/map_observation.json",
           "data/source_audit/06_f2_rmutdb/evidence/surface_observation.json",
+          "data/source_audit/06_f2_rmutdb/evidence/website_completeness_20260817.json",
+          "data/raw/network/f2_rmutdb/20260817T_ebook_catalog_06/manifest.json",
           "data/source_audit/06_f2_rmutdb/evidence/gate_observation.json",
           "data/raw/network/f2_rmutdb/20260811T_freshness_check_06/manifest.json"
         ],
@@ -486,14 +489,14 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "VERIFIED_PUBLIC_API_STRUCTURED",
-        "data_inventory": "SILVER_CANDIDATE_BUILT",
+        "network_api_export": "PUBLIC_API_630_RECORDS_AND_5_CUSTOM_ROUTES_VERIFIED",
+        "data_inventory": "CURRENT_SILVER_CANDIDATE_630_RECONCILED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": 621,
-        "observed_count_basis": "merged_index_data_row_count",
+        "observed_count": 630,
+        "observed_count_basis": "validated_current_public_api_silver_2026_08_17",
         "serving_projection_count": 77,
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_aggregate_api_rows",
@@ -528,7 +531,8 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 6,
         "primary_paths": [
-          "data/raw/firecrawl_map/f2_apptech_mtr/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f2_apptech_mtr/20260817T_url_completeness_map_07b/manifest.json",
+          "data/raw/firecrawl_map/f2_apptech_mtr/20260817T_url_completeness_map_07/manifest.json",
           "data/source_audit/07_f2_apptech_mtr/extracted/detail/detail_manifest.json",
           "data/source_audit/07_f2_apptech_mtr/evidence/detail_observation.json",
           "data/source_audit/07_f2_apptech_mtr/extracted/json_probe/20260804T_apptech_mtr_json_probe_02/json_probe_observation.json",
@@ -537,15 +541,14 @@
           "data/staged/f2_apptech_mtr/20260804T_apptech_mtr_silver_01/manifest.json",
           "data/staged/f2_apptech_mtr/20260804T_apptech_mtr_silver_01/quality_report.json",
           "data/staged/f2_apptech_mtr/20260804T_apptech_mtr_silver_01/independent_validation_report.json",
-          "data/raw/network/f2_apptech_mtr/20260811T_freshness_check_07/manifest.json",
-          "data/raw/network/f2_apptech_mtr/20260816T_geo_link_audit_07/manifest.json",
-          "data/raw/network/f2_apptech_mtr/20260816T_geo_link_audit_07/observation.json"
+          "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/manifest.json",
+          "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/manifest.json"
         ],
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
         "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
-        "province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน"
+        "public list และ statistics รอบ 2026-08-17 ตรงกันที่ 630 records; province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน"
       ]
     },
     {
@@ -601,7 +604,7 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 8,
         "primary_paths": [
-          "data/raw/firecrawl_map/f2_apptech_mru/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f2_apptech_mru/20260817T_url_completeness_map_08/manifest.json",
           "data/source_audit/08_f2_apptech_mru/extracted/detail/detail_manifest.json",
           "data/source_audit/08_f2_apptech_mru/evidence/detail_observation.json",
           "data/source_audit/08_f2_apptech_mru/evidence/gate_observation.json",
@@ -628,7 +631,7 @@
       "name_th": "ระบบฐานข้อมูลครัวเรือนมุ่งเป้า",
       "url": "https://pmua-apptech.com/",
       "source_type": "dashboard_or_case_management",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "restricted",
@@ -678,7 +681,7 @@
       },
       "notes_th": [
         "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
-        "ห้ามส่ง PII เข้า Cloud โดยไม่ยืนยันสิทธิ์และขอบเขตข้อมูล; scrape เฉพาะ public aggregate ก่อน"
+        "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted"
       ]
     },
     {
@@ -799,7 +802,7 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 1,
         "primary_paths": [
-          "data/raw/firecrawl_map/f2_learning_area_based/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f2_learning_area_based/20260817T_url_completeness_map_11c/manifest.json",
           "data/source_audit/11_f2_learning_area_based/evidence/map_observation.json",
           "data/source_audit/11_f2_learning_area_based/evidence/gate_observation.json",
           "data/raw/network/f2_learning_area_based/20260811T_freshness_check_11/manifest.json",
@@ -819,7 +822,7 @@
       "name_th": "กระเป๋าตังค์ครัวเรือนและธุรกิจ (realtime)",
       "url": "https://lesuper.app/opendata/superapp/gen4/integrated/all",
       "source_type": "realtime_dashboard",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "restricted",
@@ -869,7 +872,7 @@
       },
       "notes_th": [
         "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
-        "อย่า scrape realtime เป็น public fact โดยไม่เก็บ as_of และนิยามการคำนวณ"
+        "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
     {
@@ -879,7 +882,7 @@
       "name_th": "กระเป๋าตังค์เปรียบเทียบตามกลุ่มธุรกิจ (realtime)",
       "url": "https://lesuper.app/opendata/superapp/gen4/integrated/cluster",
       "source_type": "realtime_dashboard",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "restricted",
@@ -929,7 +932,7 @@
       },
       "notes_th": [
         "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
-        "ตรวจว่าข้อมูลเป็น aggregate หรือมี row-level identifier"
+        "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
     {
@@ -985,7 +988,7 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 1,
         "primary_paths": [
-          "data/raw/firecrawl_map/f3_city_capital_open_data/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f3_city_capital_open_data/20260817T_url_completeness_map_14/manifest.json",
           "data/source_audit/14_f3_city_capital_open_data/evidence/map_observation.json",
           "data/source_audit/14_f3_city_capital_open_data/evidence/root_scrape_observation.json",
           "data/source_audit/14_f3_city_capital_open_data/extracted/root_scrape.json",
@@ -1008,7 +1011,7 @@
       "name_th": "City data learning platform (นนทบุรี)",
       "url": "https://experience.arcgis.com/experience/9fbcf8c1adce4b42a72ec702c1af17f0",
       "source_type": "arcgis_gis",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "restricted",
@@ -1058,7 +1061,7 @@
       },
       "notes_th": [
         "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
-        "Map อาจเห็นเพียง shell; ควรหา ArcGIS item/FeatureServer endpoints"
+        "query ชั้น ArcGIS ที่เว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
     {
@@ -1114,13 +1117,16 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 5,
         "primary_paths": [
-          "data/raw/firecrawl_map/f3_ruamthiao_lamphun/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/firecrawl_map/f3_ruamthiao_lamphun/20260817T_url_completeness_map_16/manifest.json",
           "data/source_audit/16_f3_ruamthiao_lamphun/evidence/map_observation.json",
           "data/source_audit/16_f3_ruamthiao_lamphun/evidence/root_scrape_observation.json",
           "data/source_audit/16_f3_ruamthiao_lamphun/extracted/root_scrape.json",
+          "data/source_audit/16_f3_ruamthiao_lamphun/evidence/website_completeness_20260817.json",
+          "data/raw/network/f3_ruamthiao_lamphun/20260817T_bundle_parse_16/manifest.json",
           "data/source_audit/16_f3_ruamthiao_lamphun/evidence/gate_observation.json",
           "data/raw/external_team_scraper/f3_ruamthiao_lamphun/20260816T_external_team_import_16/manifest.json",
-          "data/raw/external_team_scraper/f3_ruamthiao_lamphun/20260816T_external_team_import_16/validation_summary.json"
+          "data/raw/external_team_scraper/f3_ruamthiao_lamphun/20260816T_external_team_import_16/validation_summary.json",
+          "data/raw/network/f3_ruamthiao_lamphun/20260817T_static_bundle_16/manifest.json"
         ],
         "local_evidence_paths_withheld": false
       },
@@ -1332,7 +1338,7 @@
       "name_th": "GIS ข้อมูลผู้ป่วยเพื่อการบริหารสาธารณสุข เทศบาลนครนนทบุรี",
       "url": "https://healthcare-nontaburimun.netlify.app/",
       "source_type": "health_gis",
-      "sensitivity_lane": "highly_sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "restricted",
@@ -1382,7 +1388,7 @@
       },
       "notes_th": [
         "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
-        "ต้องตรวจ PII/health data ก่อนส่งเข้า Firecrawl Cloud; เริ่มจาก public aggregate และ metadata"
+        "ดึง API ตามที่หน้าเว็บเรียกได้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
     {
@@ -1524,8 +1530,8 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "PRIOR_ENDPOINT_EVIDENCE_REVIEWED",
-        "data_inventory": "SILVER_REPLAY_COMPLETE",
+        "network_api_export": "VERIFIED_CURRENT_PUBLIC_CKAN_AND_SPATIAL_SURFACES",
+        "data_inventory": "WEBSITE_TO_CKAN_AND_SPATIAL_RECONCILED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
@@ -1572,21 +1578,24 @@
         "approval_basis": "source_card_dashboard_publication_approval_2026_08_16",
         "catalogued_endpoint_count": 50,
         "primary_paths": [
-          "data/raw/firecrawl_map/f3_housing_portal/20260803T_url_audit_map_01/manifest.json",
-          "data/source_audit/23_f3_housing_portal/evidence/map_observation.json",
-          "data/source_audit/23_f3_housing_portal/extracted/catalog/catalog_manifest.json",
-          "data/source_audit/23_f3_housing_portal/evidence/sample_resource_observation.json",
-          "data/source_audit/23_f3_housing_portal/extracted/catalog/sample_resources/",
-          "data/source_audit/23_f3_housing_portal/evidence/gate_observation.json",
-          "data/raw/network/f3_housing_portal/20260811T_freshness_check_23_02/manifest.json",
-          "data/staged/f3_housing_portal/20260803T_housing_silver_02/manifest.json",
-          "dashboard_final/data/public/province_evidence.csv"
+          "data/raw/firecrawl_map/f3_housing_portal/20260817T_url_completeness_map_23/manifest.json",
+          "data/source_audit/23_f3_housing_portal/evidence/website_completeness_20260817.json",
+          "data/raw/firecrawl_scrape/f3_housing_portal/20260817T_visible_pages_23/manifest.json",
+          "data/raw/firecrawl_scrape/f3_housing_portal/20260817T_visible_pages_extra_23/manifest.json",
+          "data/raw/firecrawl_scrape/f3_housing_portal/20260817T_report_pages_23/manifest.json",
+          "data/raw/firecrawl_scrape/f3_housing_portal/20260817T_stock_map_surface_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_current_bundle_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_freshness_check_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_spatial_surface_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_spatial_counts_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_flood_count_23/manifest.json",
+          "data/raw/network/f3_housing_portal/20260817T_housing_count_23/manifest.json"
         ],
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
         "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
-        "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่"
+        "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่; CKAN lane นี้ครบแล้ว แต่หน้า Housing Stock ยังมี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids ที่ยังไม่อยู่ใน serving database. Demand 25,919 respondent rows คง schema-only และ policy values blocked."
       ]
     },
     {
@@ -1660,7 +1669,7 @@
       "name_th": "สุโขทัยแคร์ (Sukhothai Care)",
       "url": "https://sukhothaicare.in.th/",
       "source_type": "community_or_service_portal",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "metadata_only",
@@ -1714,7 +1723,7 @@
       },
       "notes_th": [
         "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
-        "ตรวจข้อมูลบุคคล/สิทธิ์เข้าถึงก่อน extraction"
+        "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
     {

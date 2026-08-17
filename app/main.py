@@ -59,8 +59,8 @@ EXPECTED_SOURCE_COUNT = 28
 EXPECTED_PUBLIC_SOURCE_COUNT = 11
 EXPECTED_METADATA_SOURCE_COUNT = 12
 EXPECTED_RESTRICTED_SOURCE_COUNT = 5
-EXPECTED_ENDPOINT_COUNT = 141
-EXPECTED_RUNTIME_ENDPOINT_COUNT = 90
+EXPECTED_ENDPOINT_COUNT = 144
+EXPECTED_RUNTIME_ENDPOINT_COUNT = 94
 STARTUP_SYNC_LOCK_ID = 0x4149415453594E43  # ASCII "AIATSYNC", signed bigint-safe.
 
 
@@ -719,7 +719,7 @@ def connectivity():
                 "snapshot_available": snapshot_path.exists(),
                 "database_backend": backend,
                 "cloud_policy": source["cloud_policy"],
-                "deployable": source["cloud_policy"] != "restricted_local_only",
+                "deployable": bool(source.get("production_values_allowed")),
                 "candidate_only": source["readiness_status"] == "needs_review",
             }
         )

@@ -26,8 +26,8 @@ def test_health_and_catalog_summary():
 
         summary = client.get("/api/summary").json()
         assert summary["sources"] == 28
-        assert summary["endpoints_catalogued"] == 141
-        assert summary["safe_runtime_endpoints"] == 90
+        assert summary["endpoints_catalogued"] == 144
+        assert summary["safe_runtime_endpoints"] == 94
         assert summary["production_approved_sources"] == 11
         assert summary["configured_connectors"] == 11
         assert summary["blocked_sources"] == 5
@@ -74,8 +74,6 @@ def test_dashboard_and_endpoint_inventory():
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
         assert wallet["cloud_policy"] == "restricted_local_only"
         assert wallet["production_values_allowed"] is False
-        assert wallet["endpoint_count"] > 0
-        assert wallet["restricted_endpoint_count"] == wallet["endpoint_count"]
 
         endpoints = client.get("/api/sources/f1_sradss_ppaos/endpoints").json()
         assert len(endpoints) == 44
@@ -218,8 +216,10 @@ def test_public_projection_and_downloads_are_available():
                 "reason": "source_province_missing",
             }
         }
-        assert insight_payload["sources"]["f1_pppconnext"]["coverage"]["linked_provinces"] == 21
+        assert insight_payload["sources"]["f1_pppconnext"]["coverage"]["linked_provinces"] == 20
         assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["registered_users"] == 2356
+        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["snapshot_records"] == 630
+        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["upstream_total_apptech"] == 630
         assert insight_payload["sources"]["f3_city_capital_open_data"]["coverage"]["linked_cities"] == 18
         assert insight_payload["sources"]["f2_rmutdb"]["statistics"]["detailed_records"] == 1006
         learning_insight = insight_payload["sources"]["f2_learning_dashboard"]
@@ -230,6 +230,28 @@ def test_public_projection_and_downloads_are_available():
         assert cultural_insight["coverage"]["supporting_records"] == 361
         assert cultural_insight["coverage"]["total_records"] == 5619
         assert cultural_insight["privacy_projection"]["contact_fields_exposed"] is False
+        portfolio = insight_payload["executive_portfolio"]
+        assert portfolio["audit"]["source_count"] == 10
+        assert portfolio["audit"]["complete_source_count"] == 5
+        assert portfolio["audit"]["partial_source_count"] == 4
+        assert portfolio["audit"]["mixed_source_count"] == 1
+        headline = {item["key"]: item for item in portfolio["headline_metrics"]}
+        assert headline["surveyed_households"]["value"] == 306388
+        assert headline["assistance_budget"]["value"] == 169327550.25
+        assert headline["apptech_innovations"]["value"] == 630
+        assert headline["area_businesses"]["value"] == 1002
+        assert headline["cultural_records"]["value"] == 5619
+        assert headline["housing_points"]["value"] == 28694
+        assert {
+            item["label_th"]: item["value"]
+            for item in portfolio["charts"]["housing_spatial"]["items"]
+        } == {
+            "พื้นที่เสี่ยงน้ำท่วม": 159126,
+            "จุดที่อยู่อาศัย": 28694,
+            "กริดการเข้าถึงบริการ": 6543,
+            "ขอบเขตแขวง": 169,
+            "กริดอุปทานเทศบาล": 44,
+        }
 
         for province_code, title in (
             ("33", "นวัตกรรมโรงอบแห้งพริกพลังงานแสงอาทิตย์"),

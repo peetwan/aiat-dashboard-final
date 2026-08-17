@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
+from pathlib import Path
 
 import httpx
 import pytest
@@ -35,6 +37,16 @@ class StubRecorder:
     def request(self, method, url, **kwargs):
         self.calls.append((method, url, kwargs))
         return StubJsonResponse(self.payload), None
+
+
+class SequenceRecorder:
+    def __init__(self, payloads):
+        self.payloads = iter(payloads)
+        self.calls = []
+
+    def request(self, method, url, **kwargs):
+        self.calls.append((method, url, kwargs))
+        return StubJsonResponse(next(self.payloads)), None
 
 
 def test_snapshot_ingestion_sanitizes_contact_fields(tmp_path):
@@ -136,6 +148,216 @@ def test_learning_dashboard_driver_keeps_all_source_grains_separate():
     assert all(record["scope_warning_th"] == "selected project scope" for _, record in records)
 
 
+def test_pmua_area_based_driver_keeps_rows_and_all_visible_aggregate_grains():
+    payload = {
+        "data": [
+            {
+                "id": "a",
+                "region": "เหนือ",
+                "province": "เชียงใหม่",
+                "district": "เมือง",
+                "subDistrict": "ช้างคลาน",
+                "researchUnit": "มรภ.",
+                "fiscalYear": "2567",
+            },
+            {
+                "id": "b",
+                "region": "ใต้",
+                "province": None,
+                "district": None,
+                "subDistrict": None,
+                "researchUnit": "มทร.",
+                "fiscalYear": "2566",
+            },
+        ],
+        "stats": {
+            "totalRecords": 2,
+            "byRegion": {"เหนือ": 1, "ใต้": 1},
+            "byProvince": {"เชียงใหม่": 1},
+            "byDistrict": {"เมือง": 1},
+            "bySubDistrict": {"ช้างคลาน": 1},
+            "byBusinessType": {"เกษตรกรรม": 1, "อื่นๆ": 1},
+            "byResearchUnit": {"มรภ.": 1, "มทร.": 1},
+            "byFiscalYear": {"2567": 1, "2566": 1},
+        },
+    }
+    recorder = StubRecorder(payload)
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        records = IngestionPipeline(session, settings)._fetch_pmua(
+            {"url": "https://lesuper.app/api/opendata/pmua/area-based"}, recorder
+        )
+
+    assert [row for dataset, row in records if dataset == "area_based"] == payload["data"]
+    business_types = {
+        row["label"]: row["value"]
+        for dataset, row in records
+        if dataset == "aggregate_byBusinessType"
+    }
+    assert business_types == {"เกษตรกรรม": 1, "อื่นๆ": 1}
+    assert any(
+        dataset == "aggregate_summary" and row["value"] == 2
+        for dataset, row in records
+    )
+
+
+def test_pmua_area_based_driver_rejects_count_mismatch():
+    payload = {
+        "data": [{"id": "a"}],
+        "stats": {
+            "totalRecords": 2,
+            "byRegion": {},
+            "byProvince": {},
+            "byDistrict": {},
+            "bySubDistrict": {},
+            "byBusinessType": {},
+            "byResearchUnit": {},
+            "byFiscalYear": {},
+        },
+    }
+    recorder = StubRecorder(payload)
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        with pytest.raises(RuntimeError, match=r"incomplete: rows=1, totalRecords=2"):
+            IngestionPipeline(session, settings)._fetch_pmua(
+                {"url": "https://lesuper.app/api/opendata/pmua/area-based"}, recorder
+            )
+
+
+def test_housing_ckan_driver_requires_complete_packages_resources_and_rows():
+    class HousingResponse:
+        def __init__(self, *, payload=None, content=b"", content_type="application/json"):
+            self._payload = payload
+            self.content = content
+            self.headers = {"content-type": content_type}
+
+        def json(self):
+            return self._payload
+
+    class HousingRecorder:
+        def request(self, _method, url, *, name, params=None):
+            if name.startswith("package_"):
+                return (
+                    HousingResponse(
+                        payload={
+                            "success": True,
+                            "result": {
+                                "name": params["id"],
+                                "resources": [
+                                    {
+                                        "id": "resource-1",
+                                        "url": "https://example.test/data.csv",
+                                        "name": "sample",
+                                    }
+                                ],
+                            },
+                        }
+                    ),
+                    Path("package.json"),
+                )
+            assert url == "https://example.test/data.csv"
+            return (
+                HousingResponse(
+                    content=b"id,value\n1,alpha\n2,beta\n",
+                    content_type="text/csv",
+                ),
+                Path("data.csv"),
+            )
+
+    plan = {
+        "package_show_url": "https://example.test/package_show",
+        "expected_dataset_count": 1,
+        "expected_resource_count": 1,
+        "expected_value_resource_count": 1,
+        "expected_value_record_count": 2,
+        "datasets": [{"id": "sample", "value_policy": "values"}],
+    }
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        pipeline = IngestionPipeline(session, settings)
+        records = pipeline._fetch_housing(
+            {"expected_record_count": 2},
+            plan,
+            HousingRecorder(),
+        )
+        assert records == [
+            (
+                "sample:resource-1",
+                {
+                    "resource_id": "resource-1",
+                    "resource_name": "sample",
+                    "row_number": 1,
+                    "source_fields": {"id": "1", "value": "alpha"},
+                },
+            ),
+            (
+                "sample:resource-1",
+                {
+                    "resource_id": "resource-1",
+                    "resource_name": "sample",
+                    "row_number": 2,
+                    "source_fields": {"id": "2", "value": "beta"},
+                },
+            ),
+        ]
+
+        incomplete_plan = {**plan, "expected_value_record_count": 3}
+        with pytest.raises(RuntimeError, match=r"value records=2; expected 3"):
+            pipeline._fetch_housing(
+                {"expected_record_count": 3},
+                incomplete_plan,
+                HousingRecorder(),
+            )
+
+
+def test_city_capital_snapshot_gate_requires_complete_city_metric_cartesian_product():
+    source = {"expected_record_count": 2}
+    complete = [
+        ("latest.cities", {"city_id": "c1"}),
+        ("latest.metrics", {"metric_id": "m1"}),
+        ("latest.metrics", {"metric_id": "m2"}),
+        ("latest.observations", {"city_id": "c1", "metric_id": "m1", "value": 1}),
+        ("latest.observations", {"city_id": "c1", "metric_id": "m2", "value": None}),
+    ]
+    IngestionPipeline._validate_city_capital_snapshot(source, complete)
+
+    with pytest.raises(RuntimeError, match=r"observations=1 but cities\*metrics=2"):
+        IngestionPipeline._validate_city_capital_snapshot(source, complete[:-1])
+
+
+def test_ruamthiao_snapshot_gate_normalizes_all_visible_content():
+    project_root = Path(__file__).resolve().parents[2]
+    snapshot_root = (
+        project_root
+        / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
+        / "16_f3_ruamthiao_lamphun/data"
+    )
+    files = sorted(snapshot_root.glob("*.json"))
+    records = IngestionPipeline._read_ruamthiao_snapshot(
+        {"expected_record_count": 54},
+        files,
+    )
+
+    counts = Counter(dataset for dataset, _ in records)
+    assert counts == {
+        "tourism_stations": 12,
+        "tourism_venues": 97,
+        "recommendations": 13,
+        "transport_services": 13,
+        "lantern_groups": 10,
+        "emergency_numbers": 6,
+        "service_contacts": 3,
+        "resources": 3,
+    }
+    assert len(records) == 157
+
+    with pytest.raises(RuntimeError, match="missing pages: travel"):
+        IngestionPipeline._read_ruamthiao_snapshot(
+            {"expected_record_count": 54},
+            [path for path in files if path.name != "travel.json"],
+        )
+
+
 def test_apptech_mru_driver_uses_nested_json_contract_and_browser_origin_headers():
     payload = {"data": {"data": [{"innovationid": "1"}], "totaldata": 1}}
     plan = {
@@ -163,6 +385,34 @@ def test_apptech_mru_driver_uses_nested_json_contract_and_browser_origin_headers
     assert request["json_body"]["filter"]["startlimit"] == 0
     assert request["headers"]["Origin"] == "https://38rat.nstru.ac.th"
     assert records == [("innovation", {"innovationid": "1"})]
+
+
+def test_apptech_mru_driver_rejects_incomplete_pagination_before_database_commit():
+    plan = {
+        "page_size": 12,
+        "datasets": [
+            {
+                "name": "innovation",
+                "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
+                "form": {"action": "fetch_innovationAll_JSON"},
+            }
+        ],
+    }
+    recorder = SequenceRecorder(
+        [
+            {
+                "data": {
+                    "data": [{"innovationid": str(index)} for index in range(1, 13)],
+                    "totaldata": 13,
+                }
+            },
+            {"data": {"data": [], "totaldata": 13}},
+        ]
+    )
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        with pytest.raises(RuntimeError, match=r"incomplete: unique=12.*reported_total=13"):
+            IngestionPipeline(session, settings)._fetch_apptech_mru(plan, recorder)
 
 
 def test_response_recorder_keeps_http_error_body_before_raising(tmp_path, monkeypatch):

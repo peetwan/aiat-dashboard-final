@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import time
+from collections import Counter
 from collections.abc import Iterable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
@@ -310,7 +311,7 @@ class IngestionPipeline:
             elif driver == "pmua_area_based":
                 records = self._fetch_pmua(plan, recorder)
             elif driver == "housing_ckan":
-                records = self._fetch_housing(plan, recorder)
+                records = self._fetch_housing(source, plan, recorder)
             else:
                 raise RuntimeError(f"ไม่รู้จัก API driver: {driver}")
             manifest = recorder.write_manifest(source["source_id"], run_id, len(records))
@@ -372,9 +373,20 @@ class IngestionPipeline:
     def _fetch_apptech_mru(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
         records: list[tuple[str, dict]] = []
         page_size = int(plan.get("page_size", 12))
+        id_fields = {
+            "innovation": "innovationid",
+            "requirement": "requirementid",
+            "news": "newsid",
+        }
         for dataset in plan["datasets"]:
             offset = 0
             total = None
+            dataset_records: list[dict] = []
+            seen_ids: set[str] = set()
+            dataset_name = dataset["name"]
+            id_field = dataset.get("id_field") or id_fields.get(dataset_name)
+            if not id_field:
+                raise RuntimeError(f"AppTech MRU dataset {dataset_name} has no configured id field")
             while total is None or offset < total:
                 request_template = dict(dataset["form"])
                 action = request_template.pop("action")
@@ -396,13 +408,55 @@ class IngestionPipeline:
                         "Referer": "https://38rat.nstru.ac.th/",
                     },
                 )
-                envelope = response.json().get("data") or {}
-                rows = envelope.get("data") or []
-                total = int(envelope.get("totaldata") or len(rows))
-                records.extend((dataset["name"], row) for row in rows if isinstance(row, dict))
-                if not rows or self._limit_reached(len(records)):
+                payload = response.json()
+                envelope = payload.get("data") if isinstance(payload, dict) else None
+                if not isinstance(envelope, dict):
+                    raise RuntimeError(f"AppTech MRU {dataset_name} response has no data envelope")
+                if "totaldata" not in envelope:
+                    raise RuntimeError(f"AppTech MRU {dataset_name} response has no totaldata")
+                try:
+                    reported_total = int(envelope["totaldata"])
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError(
+                        f"AppTech MRU {dataset_name} totaldata is not an integer"
+                    ) from exc
+                if total is None:
+                    total = reported_total
+                elif reported_total != total:
+                    raise RuntimeError(
+                        f"AppTech MRU {dataset_name} totaldata changed during pagination: "
+                        f"{total} -> {reported_total}"
+                    )
+
+                rows = envelope.get("data")
+                if not isinstance(rows, list):
+                    raise RuntimeError(f"AppTech MRU {dataset_name} data is not a list")
+                for row in rows:
+                    if not isinstance(row, dict):
+                        raise RuntimeError(f"AppTech MRU {dataset_name} returned a non-object row")
+                    record_id = row.get(id_field)
+                    if record_id in (None, ""):
+                        raise RuntimeError(
+                            f"AppTech MRU {dataset_name} row is missing {id_field}"
+                        )
+                    record_id_text = str(record_id)
+                    if record_id_text in seen_ids:
+                        raise RuntimeError(
+                            f"AppTech MRU {dataset_name} duplicate {id_field}={record_id_text}"
+                        )
+                    seen_ids.add(record_id_text)
+                    dataset_records.append(row)
+
+                if not rows or self._limit_reached(len(records) + len(dataset_records)):
                     break
                 offset += page_size
+
+            if total is None or len(dataset_records) != total or len(seen_ids) != total:
+                raise RuntimeError(
+                    f"AppTech MRU {dataset_name} incomplete: "
+                    f"unique={len(seen_ids)}, rows={len(dataset_records)}, reported_total={total}"
+                )
+            records.extend((dataset_name, row) for row in dataset_records)
             if self._limit_reached(len(records)):
                 break
         limit = self.settings.max_records_per_source
@@ -410,8 +464,91 @@ class IngestionPipeline:
 
     def _fetch_pmua(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
         response, _ = recorder.request("GET", plan["url"], name="area_based")
-        rows = response.json().get("data") or []
-        records = [("area_based", row) for row in rows if isinstance(row, dict)]
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise RuntimeError("PMUA Area Based response is not an object")
+        rows = payload.get("data")
+        stats = payload.get("stats")
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise RuntimeError("PMUA Area Based data is not an object list")
+        if not isinstance(stats, dict):
+            raise RuntimeError("PMUA Area Based response has no stats object")
+
+        ids = [str(row.get("id")) for row in rows if row.get("id") not in (None, "")]
+        if len(ids) != len(rows) or len(set(ids)) != len(rows):
+            raise RuntimeError(
+                f"PMUA Area Based IDs incomplete or duplicated: rows={len(rows)}, "
+                f"non_null={len(ids)}, unique={len(set(ids))}"
+            )
+        try:
+            total_records = int(stats["totalRecords"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise RuntimeError("PMUA Area Based stats.totalRecords is missing or invalid") from exc
+        if total_records != len(rows):
+            raise RuntimeError(
+                f"PMUA Area Based incomplete: rows={len(rows)}, totalRecords={total_records}"
+            )
+
+        dimension_fields = {
+            "byRegion": "region",
+            "byProvince": "province",
+            "byDistrict": "district",
+            "bySubDistrict": "subDistrict",
+            "byBusinessType": None,
+            "byResearchUnit": "researchUnit",
+            "byFiscalYear": "fiscalYear",
+        }
+        aggregate_records: list[tuple[str, dict]] = [
+            (
+                "aggregate_summary",
+                {
+                    "id": "summary:totalRecords",
+                    "dimension": "summary",
+                    "label": "totalRecords",
+                    "value": total_records,
+                    "unit": "participant_or_business_records",
+                },
+            )
+        ]
+        for dimension, source_field in dimension_fields.items():
+            values = stats.get(dimension)
+            if not isinstance(values, dict):
+                raise RuntimeError(f"PMUA Area Based stats.{dimension} is not an object")
+            parsed_values: dict[str, int] = {}
+            for label, value in values.items():
+                try:
+                    parsed_values[str(label)] = int(value)
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError(
+                        f"PMUA Area Based stats.{dimension}[{label!r}] is not an integer"
+                    ) from exc
+            expected_sum = (
+                len(rows)
+                if source_field is None
+                else sum(row.get(source_field) not in (None, "") for row in rows)
+            )
+            if sum(parsed_values.values()) != expected_sum:
+                raise RuntimeError(
+                    f"PMUA Area Based stats.{dimension} does not reconcile: "
+                    f"sum={sum(parsed_values.values())}, expected={expected_sum}"
+                )
+            dataset_key = f"aggregate_{dimension}"
+            aggregate_records.extend(
+                (
+                    dataset_key,
+                    {
+                        "id": f"{dimension}:{label}",
+                        "dimension": dimension,
+                        "label": label,
+                        "value": value,
+                        "unit": "participant_or_business_records",
+                    },
+                )
+                for label, value in parsed_values.items()
+            )
+
+        records = [("area_based", row) for row in rows]
+        records.extend(aggregate_records)
         limit = self.settings.max_records_per_source
         return records[:limit] if limit > 0 else records
 
@@ -498,8 +635,19 @@ class IngestionPipeline:
         limit = self.settings.max_records_per_source
         return records[:limit] if limit > 0 else records
 
-    def _fetch_housing(self, plan: dict, recorder: ResponseRecorder) -> list[tuple[str, dict]]:
+    def _fetch_housing(
+        self,
+        source: dict,
+        plan: dict,
+        recorder: ResponseRecorder,
+    ) -> list[tuple[str, dict]]:
         records: list[tuple[str, dict]] = []
+        dataset_ids = [str(dataset.get("id") or "") for dataset in plan["datasets"]]
+        resource_ids: list[str] = []
+        value_resource_ids: list[str] = []
+        problems: list[str] = []
+        if not all(dataset_ids) or len(set(dataset_ids)) != len(dataset_ids):
+            problems.append("dataset IDs are missing or duplicated")
         for dataset in plan["datasets"]:
             response, _ = recorder.request(
                 "GET",
@@ -507,12 +655,36 @@ class IngestionPipeline:
                 name=f"package_{dataset['id']}",
                 params={"id": dataset["id"]},
             )
-            resources = (response.json().get("result") or {}).get("resources") or []
+            payload = response.json()
+            result = payload.get("result") if isinstance(payload, dict) else None
+            if not isinstance(payload, dict) or payload.get("success") is not True:
+                problems.append(f"{dataset['id']} package_show success is not true")
+                continue
+            if not isinstance(result, dict):
+                problems.append(f"{dataset['id']} package_show result is not an object")
+                continue
+            if result.get("name") and result.get("name") != dataset["id"]:
+                problems.append(
+                    f"{dataset['id']} package_show returned name={result.get('name')}"
+                )
+            resources = result.get("resources")
+            if not isinstance(resources, list):
+                problems.append(f"{dataset['id']} resources is not a list")
+                continue
+            for resource in resources:
+                if not isinstance(resource, dict) or not resource.get("id"):
+                    problems.append(f"{dataset['id']} resource ID is missing")
+                    continue
+                resource_ids.append(str(resource["id"]))
             if dataset["value_policy"] != "values":
                 continue
             for resource in resources:
+                if not isinstance(resource, dict) or not resource.get("id"):
+                    continue
+                value_resource_ids.append(str(resource["id"]))
                 url = resource.get("url")
                 if not url:
+                    problems.append(f"{dataset['id']}:{resource['id']} URL is missing")
                     continue
                 file_response, path = recorder.request(
                     "GET",
@@ -521,6 +693,9 @@ class IngestionPipeline:
                 )
                 content_type = file_response.headers.get("content-type", "").lower()
                 if "csv" not in content_type and not url.lower().endswith(".csv"):
+                    problems.append(
+                        f"{dataset['id']}:{resource['id']} is not a CSV resource"
+                    )
                     continue
                 text = file_response.content.decode("utf-8-sig", errors="replace")
                 for row_number, row in enumerate(csv.DictReader(text.splitlines()), start=1):
@@ -535,8 +710,39 @@ class IngestionPipeline:
                             },
                         )
                     )
-                    if self._limit_reached(len(records)):
-                        return records
+        expected_dataset_count = int(plan.get("expected_dataset_count") or 0)
+        expected_resource_count = int(plan.get("expected_resource_count") or 0)
+        expected_value_resource_count = int(plan.get("expected_value_resource_count") or 0)
+        expected_value_record_count = int(
+            plan.get("expected_value_record_count")
+            or source.get("expected_record_count")
+            or 0
+        )
+        if expected_dataset_count and len(dataset_ids) != expected_dataset_count:
+            problems.append(
+                f"datasets={len(dataset_ids)}; expected {expected_dataset_count}"
+            )
+        if len(set(resource_ids)) != len(resource_ids):
+            problems.append("resource IDs are duplicated across packages")
+        if expected_resource_count and len(resource_ids) != expected_resource_count:
+            problems.append(
+                f"resources={len(resource_ids)}; expected {expected_resource_count}"
+            )
+        if expected_value_resource_count and len(value_resource_ids) != expected_value_resource_count:
+            problems.append(
+                f"value resources={len(value_resource_ids)}; expected {expected_value_resource_count}"
+            )
+        if expected_value_record_count and len(records) != expected_value_record_count:
+            problems.append(
+                f"value records={len(records)}; expected {expected_value_record_count}"
+            )
+        if self.settings.max_records_per_source > 0 and len(records) > self.settings.max_records_per_source:
+            problems.append(
+                "max_records_per_source is below the complete housing value row count; "
+                "partial database commits are forbidden"
+            )
+        if problems:
+            raise RuntimeError("Thai Housing CKAN incomplete: " + "; ".join(problems))
         return records
 
     def _load_snapshot(self, source: dict, run_id: str) -> tuple[list[tuple[str, dict]], Path]:
@@ -568,12 +774,18 @@ class IngestionPipeline:
                     "bytes": path.stat().st_size,
                 }
             )
-            for dataset_key, row in self._read_snapshot_file(path):
-                records.append((dataset_key, row))
+        if source["source_id"] == "f3_ruamthiao_lamphun":
+            records = self._read_ruamthiao_snapshot(source, files)
+        else:
+            for path in files:
+                for dataset_key, row in self._read_snapshot_file(path):
+                    records.append((dataset_key, row))
+                    if self._limit_reached(len(records)):
+                        break
                 if self._limit_reached(len(records)):
                     break
-            if self._limit_reached(len(records)):
-                break
+        if source["source_id"] == "f3_city_capital_open_data":
+            self._validate_city_capital_snapshot(source, records)
         run_root = self.settings.raw_root / source["source_id"] / run_id
         if run_root.exists():
             run_root = run_root / "snapshot_fallback"
@@ -585,11 +797,258 @@ class IngestionPipeline:
             "mode": "snapshot_replay",
             "replayed_at": utc_now().isoformat(),
             "records_seen": len(records),
+            "dataset_record_counts": dict(Counter(dataset for dataset, _ in records)),
             "input_artifacts": artifacts,
         }
         manifest_path = run_root / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return records, manifest_path
+
+    @staticmethod
+    def _validate_city_capital_snapshot(
+        source: dict,
+        records: list[tuple[str, dict]],
+    ) -> None:
+        cities = [row for dataset, row in records if dataset.endswith(".cities")]
+        metrics = [row for dataset, row in records if dataset.endswith(".metrics")]
+        observations = [row for dataset, row in records if dataset.endswith(".observations")]
+        city_ids = [str(row.get("city_id")) for row in cities if row.get("city_id")]
+        metric_ids = [str(row.get("metric_id")) for row in metrics if row.get("metric_id")]
+        pairs = [
+            (str(row.get("city_id")), str(row.get("metric_id")))
+            for row in observations
+            if row.get("city_id") and row.get("metric_id")
+        ]
+        expected_observations = len(cities) * len(metrics)
+        problems: list[str] = []
+        if not cities or len(city_ids) != len(cities) or len(set(city_ids)) != len(cities):
+            problems.append("city IDs are missing or duplicated")
+        if not metrics or len(metric_ids) != len(metrics) or len(set(metric_ids)) != len(metrics):
+            problems.append("metric IDs are missing or duplicated")
+        if len(pairs) != len(observations) or len(set(pairs)) != len(observations):
+            problems.append("observation keys are missing or duplicated")
+        if len(observations) != expected_observations:
+            problems.append(
+                f"observations={len(observations)} but cities*metrics={expected_observations}"
+            )
+        if any(city_id not in set(city_ids) or metric_id not in set(metric_ids) for city_id, metric_id in pairs):
+            problems.append("observation references an unknown city or metric")
+        expected_count = int(source.get("expected_record_count") or 0)
+        if expected_count and len(observations) != expected_count:
+            problems.append(
+                f"observations={len(observations)} but catalog expected_record_count={expected_count}"
+            )
+        if problems:
+            raise RuntimeError("City Capital snapshot incomplete: " + "; ".join(problems))
+
+    @staticmethod
+    def _read_ruamthiao_snapshot(
+        source: dict,
+        files: list[Path],
+    ) -> list[tuple[str, dict]]:
+        """Normalize every public Visit Lamphun content item into a queryable grain.
+
+        The five page snapshots contain 54 primary records and 103 supporting
+        records nested at different depths.  The generic JSON walker only sees
+        the nearest lists, so it cannot prove that all visible venues and contact
+        resources reached the database.
+        """
+
+        documents: dict[str, dict] = {}
+        problems: list[str] = []
+        required_pages = {"homepage", "recommend", "travel", "komepage", "contact"}
+        for path in files:
+            if path.suffix.lower() != ".json":
+                problems.append(f"unsupported snapshot file: {path.name}")
+                continue
+            payload = json.loads(path.read_text(encoding="utf-8-sig"))
+            if not isinstance(payload, dict):
+                problems.append(f"{path.name} is not a JSON object")
+                continue
+            page_id = str(payload.get("page_id") or path.stem)
+            if page_id in documents:
+                problems.append(f"duplicate page_id: {page_id}")
+            documents[page_id] = payload
+
+        missing_pages = sorted(required_pages - set(documents))
+        extra_pages = sorted(set(documents) - required_pages)
+        if missing_pages:
+            problems.append("missing pages: " + ", ".join(missing_pages))
+        if extra_pages:
+            problems.append("unexpected pages: " + ", ".join(extra_pages))
+
+        bundle_hashes = {
+            str(document.get("bundle_sha256"))
+            for document in documents.values()
+            if document.get("bundle_sha256")
+        }
+        if len(bundle_hashes) != 1:
+            problems.append(f"bundle_sha256 values={len(bundle_hashes)}; expected exactly one")
+        for page_id, document in documents.items():
+            warnings = document.get("warnings")
+            if not isinstance(warnings, list):
+                problems.append(f"{page_id}.warnings is not a list")
+            elif warnings:
+                problems.append(f"{page_id}.warnings has {len(warnings)} item(s)")
+            if not isinstance(document.get("data"), dict):
+                problems.append(f"{page_id}.data is not an object")
+        if problems:
+            raise RuntimeError("Visit Lamphun snapshot incomplete: " + "; ".join(problems))
+
+        records: list[tuple[str, dict]] = []
+
+        def add(dataset: str, row: Any, page_id: str, **context: Any) -> None:
+            if not isinstance(row, dict):
+                problems.append(f"{page_id}.{dataset} contains a non-object item")
+                return
+            document = documents[page_id]
+            normalized = dict(row)
+            normalized.update(context)
+            normalized["source_page_id"] = page_id
+            normalized["source_url"] = document.get("source_url")
+            normalized["source_scraped_at"] = document.get("scraped_at")
+            normalized["source_bundle_sha256"] = document.get("bundle_sha256")
+            records.append((dataset, normalized))
+
+        homepage = documents["homepage"]["data"]
+        stations = homepage.get("map", {}).get("stations", [])
+        if not isinstance(stations, list):
+            problems.append("homepage.data.map.stations is not a list")
+            stations = []
+        for station in stations:
+            if not isinstance(station, dict):
+                problems.append("homepage station is not an object")
+                continue
+            station_row = dict(station)
+            venues = station_row.pop("venues", [])
+            add("tourism_stations", station_row, "homepage")
+            if not isinstance(venues, list):
+                problems.append("homepage station.venues is not a list")
+                continue
+            for venue in venues:
+                add(
+                    "tourism_venues",
+                    venue,
+                    "homepage",
+                    station_id=station.get("station_id"),
+                    station_name=station.get("name"),
+                )
+
+        categories = documents["recommend"]["data"].get("categories", [])
+        if not isinstance(categories, list):
+            problems.append("recommend.data.categories is not a list")
+            categories = []
+        for category in categories:
+            if not isinstance(category, dict):
+                problems.append("recommend category is not an object")
+                continue
+            items = category.get("items", [])
+            if not isinstance(items, list):
+                problems.append("recommend category.items is not a list")
+                continue
+            for item in items:
+                add(
+                    "recommendations",
+                    item,
+                    "recommend",
+                    category_id=category.get("category_id"),
+                    category_label=category.get("label"),
+                )
+
+        travel = documents["travel"]["data"]
+        train = travel.get("train", {})
+        tram = travel.get("tourism_tram", {})
+        for item in train.get("services", []) if isinstance(train, dict) else []:
+            add("transport_services", item, "travel", transport_mode="train")
+        for item in tram.get("services", []) if isinstance(tram, dict) else []:
+            add(
+                "transport_services",
+                item,
+                "travel",
+                transport_mode="tourism_tram",
+                operating_days=tram.get("operating_days"),
+                closed_days=tram.get("closed_days"),
+            )
+        other_transport = travel.get("other_transport", [])
+        if not isinstance(other_transport, list):
+            problems.append("travel.data.other_transport is not a list")
+            other_transport = []
+        for item in other_transport:
+            add("transport_services", item, "travel", transport_mode="other")
+
+        lantern_groups = documents["komepage"]["data"].get("lantern_production_groups", [])
+        if not isinstance(lantern_groups, list):
+            problems.append("komepage.data.lantern_production_groups is not a list")
+            lantern_groups = []
+        for item in lantern_groups:
+            add("lantern_groups", item, "komepage")
+
+        contact = documents["contact"]["data"]
+        for field, dataset in (
+            ("emergency_numbers", "emergency_numbers"),
+            ("service_contacts", "service_contacts"),
+            ("resources", "resources"),
+        ):
+            rows = contact.get(field, [])
+            if not isinstance(rows, list):
+                problems.append(f"contact.data.{field} is not a list")
+                continue
+            for item in rows:
+                add(dataset, item, "contact")
+
+        counts = Counter(dataset for dataset, _ in records)
+        expected_counts = {
+            "tourism_stations": 12,
+            "tourism_venues": 97,
+            "recommendations": 13,
+            "transport_services": 13,
+            "lantern_groups": 10,
+            "emergency_numbers": 6,
+            "service_contacts": 3,
+            "resources": 3,
+        }
+        for dataset, expected in expected_counts.items():
+            observed = counts.get(dataset, 0)
+            if observed != expected:
+                problems.append(f"{dataset}={observed}; expected {expected}")
+        primary_count = sum(
+            counts.get(dataset, 0)
+            for dataset in (
+                "tourism_stations",
+                "recommendations",
+                "transport_services",
+                "lantern_groups",
+                "emergency_numbers",
+            )
+        )
+        catalog_expected = int(source.get("expected_record_count") or 0)
+        if catalog_expected and primary_count != catalog_expected:
+            problems.append(
+                f"primary records={primary_count}; catalog expected_record_count={catalog_expected}"
+            )
+        if len(records) != sum(expected_counts.values()):
+            problems.append(
+                f"all content records={len(records)}; expected {sum(expected_counts.values())}"
+            )
+
+        id_fields = {
+            "tourism_stations": "station_id",
+            "tourism_venues": "venue_id",
+            "recommendations": "item_id",
+            "transport_services": "service_id",
+            "lantern_groups": "group_id",
+            "service_contacts": "contact_id",
+            "resources": "resource_id",
+        }
+        for dataset, id_field in id_fields.items():
+            identifiers = [row.get(id_field) for name, row in records if name == dataset]
+            if any(identifier in (None, "") for identifier in identifiers):
+                problems.append(f"{dataset}.{id_field} is missing")
+            if len(set(map(str, identifiers))) != len(identifiers):
+                problems.append(f"{dataset}.{id_field} is duplicated")
+        if problems:
+            raise RuntimeError("Visit Lamphun snapshot incomplete: " + "; ".join(problems))
+        return records
 
     def _read_snapshot_file(self, path: Path) -> Iterator[tuple[str, dict]]:
         name = path.name.lower()

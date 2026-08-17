@@ -2,9 +2,9 @@
 
 # Data governance and publication policy
 
-เอกสารนี้เป็นจุดอ้างอิงเดียวสำหรับ source classification, publication permission, privacy boundary และสิ่งที่ห้ามนำขึ้น Cloud
+เอกสารนี้เป็นจุดอ้างอิงสำหรับ source classification และ publication permission
 
-> Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังต้องแสดง `candidate` หรือ `needs_review` จนกว่า semantic, freshness, unit, denominator และ owner gate จะผ่าน
+> Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังเป็น `candidate`/`needs_review` จนกว่า semantic, freshness, unit และ denominator จะชัด
 
 ## Approval record
 
@@ -14,7 +14,7 @@
 - Metadata-only: 12 แหล่ง
 - Restricted local-only: 5 แหล่ง
 
-Approval ครอบเฉพาะ cleaned projection ตาม field allowlist และ privacy rules ใน repository นี้ ไม่อนุญาตให้เผยแพร่ raw payload, person-level data หรือข้อมูลจาก restricted lane
+ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้
 
 `f2_learning_dashboard` ได้รับ publication permission เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และ approval นี้ไม่เปลี่ยน semantic owner decision ให้เป็น accepted
 
@@ -23,12 +23,12 @@ Approval ครอบเฉพาะ cleaned projection ตาม field allowlis
 | # | `source_id` | วิธีหลัก | Visibility | Records อ้างอิง | Endpoints | Runtime-safe |
 |---:|---|---|---|---:|---:|---:|
 | 1 | `f1_sradss_ppaos` | API-first | public candidate | 1,083,458 | 44 | 28 |
-| 2 | `f1_pppconnext` | Snapshot | public candidate | 997,293 | 1 | 0 |
+| 2 | `f1_pppconnext` | API-first | public candidate | 47 | 4 | 4 |
 | 3 | `f2_culturalmap_university` | Snapshot | public candidate | 5,619 | 6 | 0 |
 | 4 | `f2_cultural_market_civil` | Metadata | metadata-only | 0 | 0 | 0 |
 | 5 | `f2_icommunity` | Metadata | metadata-only | 0 | 0 | 0 |
 | 6 | `f2_rmutdb` | Snapshot | public candidate | 2,001 | 14 | 0 |
-| 7 | `f2_apptech_mtr` | API-first | public candidate | 621 | 6 | 6 |
+| 7 | `f2_apptech_mtr` | API-first | public candidate | 630 | 6 | 6 |
 | 8 | `f2_apptech_mru` | API-first | public candidate | 503 | 8 | 5 |
 | 9 | `f2_target_household` | Blocked | restricted local-only | 0 | 0 | 0 |
 | 10 | `f2_learning_dashboard` | API-first | public candidate | 66 | 1 | 1 |
@@ -57,17 +57,15 @@ Approval ครอบเฉพาะ cleaned projection ตาม field allowlis
 
 - `PUBLIC_DATA_VALUES_ENABLED=false` ปิด operational row payload endpoint; cleaned public projection ใช้ publication gate แยกต่างหาก
 - `ALLOW_PENDING_OWNER_SOURCES=false`
-- Restricted sources ไม่มี executable ingestion plan
-- Auth, login, household, person และ error endpoints มีได้เฉพาะใน inventory และต้องมี `runtime_enabled=false`
+- ไม่มี executable ingestion plan สำหรับ login-only endpoint
+- login และ error endpoints ไม่ต้องยิงถ้าไม่จำเป็น
 - Unknown unit, denominator, `as_of` หรือ geography ต้องคงเป็น `null`/`needs_review`
 
 ## Privacy projection
 
 ก่อนเข้า `data/public/` ต้องตัดข้อมูลต่อไปนี้:
 
-- email, phone, address และ credential-shaped values
-- person-level, household-level, health และ financial fields
-- small-cell records ที่อาจระบุตัวบุคคลหรือกลุ่มย่อยได้
+- email, phone และชื่อบุคคล
 - payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม
 
 External-team artifacts ต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม
@@ -75,10 +73,10 @@ External-team artifacts ต้องคง source URL, source ID, evidence path 
 ## สิ่งที่ห้าม commit
 
 - `.env`, secret, token, private key, cookie และ Authorization header
-- signed URL หรือ credential ที่พบใน frontend code
+- signed URL, cookie ของบัญชีส่วนตัว และ secret ที่ไม่ใช่ public client header ของเว็บ
 - SQLite/PostgreSQL dump และ runtime database
 - `data/runtime/`, `data/snapshots/` และ raw payload
-- contact, household, health หรือ financial values
+- ชื่อบุคคล เบอร์โทร อีเมล
 
 ## Checklist ก่อน publication/deploy
 
@@ -88,7 +86,7 @@ External-team artifacts ต้องคง source URL, source ID, evidence path 
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection
 5. Row counts และ hashes ย้อนกลับไปยัง immutable evidence ได้
 6. Geography ใช้ exact match หรือ official crosswalk เท่านั้น
-7. API retry/rate-limit tests ไม่ bypass auth
+7. API retry/rate-limit tests ไม่เดารหัสผ่านและไม่ยิง login ส่วนตัว
 8. UI/API ยังคง quality label และข้อจำกัดของ source
 9. Restricted value count ใน `/api/public/v1/database-coverage` เท่ากับ 0
 10. Test suite ผ่านก่อน push/deploy

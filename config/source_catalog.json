@@ -5,7 +5,9 @@
     "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
     "source_cards": "data/source_audit/<ordinal>_<source_id>/source_card.json",
     "verified_endpoint_observations": [
-      "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json"
+      "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json",
+      "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json",
+      "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json"
     ]
   },
   "policy": {
@@ -697,36 +699,78 @@
       "source_id": "f1_pppconnext",
       "group": "ฝ่าย 1",
       "name_th": "PPPConnext BI",
-      "url": "http://www.ppaos.com/ppaos/frontend/web/",
+      "url": "https://ppaos.com/2026/dashboard/ppaos/",
       "source_type": "portal",
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/02_f1_pppconnext/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "snapshot_only",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
       "cloud_policy": "project_owner_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
-      "expected_record_count": 997293,
-      "notes_th": "ห้ามเปลี่ยนเป็น HTTPS โดยเดา ต้องตรวจ redirect/certificate ก่อน | หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว",
+      "expected_record_count": 47,
+      "notes_th": "ต้นฉบับ legacy HTTP path ตอบ 404 ทั้ง HTTP/HTTPS เมื่อ 2026-08-17; official search + scrape ยืนยัน https://www.ppaos.com/ เป็น meta-refresh gateway และ canonical content อยู่ที่ https://ppaos.com/2026/dashboard/ppaos/; public overview ใช้ได้เฉพาะ aggregate ส่วน survey analytics/detail แสดง auth boundary | หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว | พบ canonical Dashboard รุ่น 2026 และ API aggregate สาธารณะ 4 endpoints; Silver ปัจจุบันมี 47 aggregate records ครบ 20 จังหวัด/ปีสำรวจ/ทุน/ความช่วยเหลือ. Snapshot BI เดิม 997,293 chart records เก็บเป็นหลักฐานประวัติและห้ามเทียบเป็นจำนวนครัวเรือน.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/02_f1_pppconnext/data.csv"
       ],
       "endpoints": [
         {
-          "endpoint_id": "42e734517ab74ecd8bfdb378841107a1e5d06985bcbd932ea12eea55f3d698ae",
+          "endpoint_id": "36f30319f59b442f296618e03f07175c4d5f2f59a00f8931bfb749d4ff16f465",
           "method": "GET",
-          "url": "http://www.ppaos.com/ppaos/frontend/web/",
-          "kind": "no_live_api",
-          "access": "http_404",
-          "team_action": "use_snapshot_csv",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-national-bootstrap?metric=poor_households_rate&survey_year=all",
+          "kind": "public_aggregate_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
           "restricted": false,
-          "runtime_enabled": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "metric=poor_households_rate&survey_year=all"
           },
-          "notes_th": "หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว"
+          "notes_th": "Observed from the public 2026 dashboard; aggregate only and no cookies used."
+        },
+        {
+          "endpoint_id": "1671ae2fdb996f5b9128b217405f9eb16b1c61f433fd7687ede65db1f322063c",
+          "method": "GET",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-province-analytics?prov_code=0&survey_year=all&chart_years=2563%2C2564%2C2565%2C2566%2C2567%2C2568%2C2569&chart_sections=cumulative",
+          "kind": "public_aggregate_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov_code=0&survey_year=all&chart_years=2563%2C2564%2C2565%2C2566%2C2567%2C2568%2C2569&chart_sections=cumulative"
+          },
+          "notes_th": "Observed from the public 2026 dashboard; aggregate only and no cookies used."
+        },
+        {
+          "endpoint_id": "03e30dc184f486f706cf37e77baafdb82bda133a7607746d30627cffe9f3f29d",
+          "method": "GET",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-poor-capital-potential?prov_code=0&survey_year=all",
+          "kind": "public_aggregate_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov_code=0&survey_year=all"
+          },
+          "notes_th": "Observed from the public 2026 dashboard; aggregate only and no cookies used."
+        },
+        {
+          "endpoint_id": "1b89ce5e0eaa833491f85f25b1ee27382ead8d41d4bfe617c4faabcf3ccdf30f",
+          "method": "GET",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-assistance-summary?prov_code=0&survey_year=all",
+          "kind": "public_aggregate_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "prov_code=0&survey_year=all"
+          },
+          "notes_th": "Observed from the public 2026 dashboard; aggregate only and no cookies used."
         }
       ]
     },
@@ -747,7 +791,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 5619,
-      "notes_th": "ตรวจข้อมูลแผนที่และ endpoint ที่ใช้โหลด marker/รายการ | Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "notes_th": "ตรวจข้อมูลแผนที่และ endpoint ที่ใช้โหลด marker/รายการ | Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | ตรวจ public JSON feed และ listing pages ล่าสุด 2026-08-17 แล้ว ID coverage ตรง snapshot 5,619/5,619; Dashboard เปิด Map details 5,258 และ supporting 361 เป็น counts-only ตาม privacy projection. Source as_of/terms/owner acceptance ยังไม่ระบุ.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/activities.json",
         "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/03_f2_culturalmap_university/data/map_inspiration.json",
@@ -901,7 +945,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 2001,
-      "notes_th": "URL ในต้นฉบับไม่มี scheme และติดกับชื่อรายการ ต้องยืนยัน URL จริง | ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401",
+      "notes_th": "URL ในต้นฉบับไม่มี scheme และติดกับชื่อรายการ ต้องยืนยัน URL จริง | ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401 | ตรวจ public e-book ครบ 11/11 ไฟล์เมื่อ 2026-08-17 และ metadata ไม่เปลี่ยน; public snapshot 2,001 rows ยังใช้ได้โดยแยก detail 1,006 กับ annual summary 995 เป็นคนละ grain. Live Dashboard ที่เคยพบ 1,015 ยังต่างจาก detail 9 records; JSON API ของหน้า dashboard สาธารณะใช้ได้ตามที่เว็บเรียก",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/06_f2_rmutdb/data.csv"
       ],
@@ -1120,10 +1164,10 @@
       "cloud_policy": "project_owner_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
-      "expected_record_count": 621,
-      "notes_th": "เครือข่าย มทร. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API",
+      "expected_record_count": 630,
+      "notes_th": "เครือข่าย มทร. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API | public list และ API สถิติรอบ 2026-08-17 ตรงกันที่ 630 records; Silver เดิม 621 ขาด 9 records และ common record 1 รายการเปลี่ยน version. Serving ใช้ privacy-projected Silver ใหม่ที่ไม่มีค่า email/phone และยังคง needs_review.",
       "snapshot_origin_files": [
-        "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/07_f2_apptech_mtr/data.csv"
+        "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/silver/apptech_public_innovation.jsonl"
       ],
       "endpoints": [
         {
@@ -1229,7 +1273,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 503,
-      "notes_th": "เครือข่าย มรภ. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass",
+      "notes_th": "เครือข่าย มรภ. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass | snapshot 503 records ผ่าน structural/privacy validation และครอบ public surface ณ 2026-08-05; รอบ 2026-08-17 API ยังรายงาน innovation totaldata=501 และ 192 แถวแรกตรง baseline ทั้งหมด แต่หยุดคืน JSON ที่ parse ได้ก่อนจบ จึงคง snapshot เดิมและห้าม publish partial run. Railway commit รอบใหม่ได้เฉพาะ unique IDs เท่ากับ totaldata ครบทุก dataset.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_innovation.csv",
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/08_f2_apptech_mru/data/f2_apptech_mru_source_apptech_mru_public_requirement.csv"
@@ -1356,7 +1400,7 @@
       "name_th": "ระบบฐานข้อมูลครัวเรือนมุ่งเป้า",
       "url": "https://pmua-apptech.com/",
       "source_type": "dashboard_or_case_management",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/09_f2_target_household/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "blocked",
@@ -1366,7 +1410,7 @@
       "value_visibility": "restricted_local_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "ห้ามส่ง PII เข้า Cloud โดยไม่ยืนยันสิทธิ์และขอบเขตข้อมูล; scrape เฉพาะ public aggregate ก่อน | เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล",
+      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted",
       "snapshot_origin_files": [],
       "endpoints": []
     },
@@ -1423,7 +1467,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 1002,
-      "notes_th": "ตรวจความสัมพันธ์กับ Dashboard LE หลักและ data endpoint ร่วม | ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่",
+      "notes_th": "ตรวจความสัมพันธ์กับ Dashboard LE หลักและ data endpoint ร่วม | ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่ | ตรวจหน้าและ API ล่าสุด 2026-08-17 แล้ว response byte-identical กับ snapshot: 1,002 rows/1,002 unique IDs; หน้าแสดง 6 ภูมิภาค, 55 จังหวัด, 256 อำเภอ, 533 ตำบล และ 1,002 ธุรกิจตรงกับ stats envelope. business type มีเฉพาะ aggregate; Railway เก็บ aggregate แยก grain และตรวจทุกผลรวมก่อน commit.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/11_f2_learning_area_based/data.csv"
       ],
@@ -1451,7 +1495,7 @@
       "name_th": "กระเป๋าตังค์ครัวเรือนและธุรกิจ (realtime)",
       "url": "https://lesuper.app/opendata/superapp/gen4/integrated/all",
       "source_type": "realtime_dashboard",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/12_f2_wallet_all_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "blocked",
@@ -1461,7 +1505,7 @@
       "value_visibility": "restricted_local_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "อย่า scrape realtime เป็น public fact โดยไม่เก็บ as_of และนิยามการคำนวณ | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี | เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล",
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1501,7 +1545,7 @@
       "name_th": "กระเป๋าตังค์เปรียบเทียบตามกลุ่มธุรกิจ (realtime)",
       "url": "https://lesuper.app/opendata/superapp/gen4/integrated/cluster",
       "source_type": "realtime_dashboard",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/13_f2_wallet_cluster_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "blocked",
@@ -1511,7 +1555,7 @@
       "value_visibility": "restricted_local_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "ตรวจว่าข้อมูลเป็น aggregate หรือมี row-level identifier | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง | เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล",
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1561,7 +1605,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 702,
-      "notes_th": "Netlify SPA อาจมี static JSON/JS asset ที่ต้องค้นหา | เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "notes_th": "Netlify SPA อาจมี static JSON/JS asset ที่ต้องค้นหา | เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | homepage HTML รอบ 2026-08-17 byte-identical กับ raw HTML ที่ parser ใช้เมื่อ 2026-08-16; snapshot ยังครบ 18 เมือง × 39 metric definitions = 702 unique city×metric observations (698 numeric, 4 null). Railway ใช้ snapshot-only และตรวจ cartesian coverage/unique keys ก่อน commit.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/14_f3_city_capital_open_data/data/latest.json"
       ],
@@ -1589,7 +1633,7 @@
       "name_th": "City data learning platform (นนทบุรี)",
       "url": "https://experience.arcgis.com/experience/9fbcf8c1adce4b42a72ec702c1af17f0",
       "source_type": "arcgis_gis",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/15_f3_nonthaburi_city_learning/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "blocked",
@@ -1599,7 +1643,7 @@
       "value_visibility": "restricted_local_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "Map อาจเห็นเพียง shell; ควรหา ArcGIS item/FeatureServer endpoints | เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล",
+      "notes_th": "query ชั้น ArcGIS ที่เว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
       "snapshot_origin_files": [],
       "endpoints": []
     },
@@ -1620,7 +1664,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 54,
-      "notes_th": "ตรวจ route ภายในและ static/API assets ของ Firebase web app | สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "notes_th": "ตรวจ route ภายในและ static/API assets ของ Firebase web app | สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | ตรวจ public Vite bundle รอบ 2026-08-17 แล้ว hash และ data ทั้ง 5 หน้าตรง snapshot: 54 primary records และ 157 content items ครบ. Railway แยกเป็น 8 queryable grains และบล็อก commit เมื่อ page/count/bundle/warning/unique-ID gate ไม่ผ่าน; as_of/owner/terms ยังไม่ระบุ จึงคง needs_review.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/contact.json",
         "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/16_f3_ruamthiao_lamphun/data/homepage.json",
@@ -1771,7 +1815,7 @@
       "name_th": "GIS ข้อมูลผู้ป่วยเพื่อการบริหารสาธารณสุข เทศบาลนครนนทบุรี",
       "url": "https://healthcare-nontaburimun.netlify.app/",
       "source_type": "health_gis",
-      "sensitivity_lane": "highly_sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/20_f3_healthcare_nonthaburi/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "blocked",
@@ -1781,7 +1825,7 @@
       "value_visibility": "restricted_local_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "ต้องตรวจ PII/health data ก่อนส่งเข้า Firecrawl Cloud; เริ่มจาก public aggregate และ metadata | เก็บเฉพาะ metadata ใน catalog; ห้าม deploy endpoint payload หรือค่าข้อมูล",
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียกได้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
       "snapshot_origin_files": [],
       "endpoints": []
     },
@@ -1844,7 +1888,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 7259,
-      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์",
+      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์ | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows คง schema-only และ policy values คง blocked ตาม privacy/owner gate.",
       "snapshot_origin_files": [
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_demandgap_e7b75d00-b4aa-43ff-879c-873ae0818f55.csv",
         "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/23_f3_housing_portal/data/f3_housing_portal_economic_4d53d17c-4478-44a6-9f3f-62fed6eb401b.csv",
@@ -2617,7 +2661,7 @@
       "name_th": "สุโขทัยแคร์ (Sukhothai Care)",
       "url": "https://sukhothaicare.in.th/",
       "source_type": "community_or_service_portal",
-      "sensitivity_lane": "sensitive_possible",
+      "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/25_spu_sukhothai_care/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "metadata_only",
@@ -2627,7 +2671,7 @@
       "value_visibility": "metadata_only",
       "production_values_allowed": false,
       "expected_record_count": 0,
-      "notes_th": "ตรวจข้อมูลบุคคล/สิทธิ์เข้าถึงก่อน extraction",
+      "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
       "snapshot_origin_files": [],
       "endpoints": []
     },

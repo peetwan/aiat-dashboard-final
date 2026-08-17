@@ -57,6 +57,16 @@ def test_insights_exposes_all_source_coverage_without_controls() -> None:
     assert "ทะเบียน 28 แหล่งข้อมูล" in template
     assert 'id="unmapped"' in template
     assert 'id="learningSummary"' in template
+    assert 'id="executivePortfolio"' in template
+    assert 'id="executiveKpis"' in template
+    assert 'id="auditReadiness"' in template
+    assert 'id="businessTypeChart"' in template
+    assert 'id="culturalChart"' in template
+    assert 'id="housingSpatialChart"' in template
+    assert 'id="tourismChart"' in template
+    assert 'id="cityCompletenessChart"' in template
+    assert 'id="sourceHealthGrid"' in template
+    assert "renderExecutivePortfolio(payload.executive_portfolio)" in script
     assert "/downloads/source_coverage.json" in script
     assert "/api/public/v1/source-coverage" in script
     assert "/api/public/v1/learning-dashboard" in script
@@ -70,6 +80,8 @@ def test_insights_exposes_all_source_coverage_without_controls() -> None:
     assert "ทะเบียน public projection ยังไม่ถูกสร้าง" in script
     assert "<select" not in template.lower()
     assert "<table" not in template.lower()
+    assert "→" not in template
+    assert "→" not in script
 
 
 def test_coverage_styles_are_responsive_and_high_contrast() -> None:
@@ -78,6 +90,10 @@ def test_coverage_styles_are_responsive_and_high_contrast() -> None:
     assert ".source-coverage-grid" in styles
     assert ".source-coverage-card.is-local-only" in styles
     assert ".loose-data-grid" in styles
+    assert ".portfolio-kpis" in styles
+    assert ".readiness-donut" in styles
+    assert ".portfolio-chart-grid" in styles
+    assert ".source-health-grid" in styles
     assert "@media (max-width: 640px)" in styles
     assert "word-break: normal" in styles
 

@@ -5,22 +5,27 @@ import pytest
 from app.catalog import load_catalog, load_ingestion_plans
 
 
-def test_catalog_covers_all_registry_sources_and_eleven_public_candidates():
+def test_catalog_covers_all_registry_sources_and_public_candidates():
     catalog = load_catalog()
     source_ids = {source["source_id"] for source in catalog["sources"]}
     assert len(source_ids) == 28
     assert sum(source["production_values_allowed"] for source in catalog["sources"]) == 11
     assert {
+        source["source_id"]
+        for source in catalog["sources"]
+        if source["cloud_policy"] == "restricted_local_only"
+    } == {
         "f2_target_household",
         "f2_wallet_all_realtime",
         "f2_wallet_cluster_realtime",
         "f3_nonthaburi_city_learning",
         "f3_healthcare_nonthaburi",
-    } == {
-        source["source_id"]
-        for source in catalog["sources"]
-        if source["cloud_policy"] == "restricted_local_only"
     }
+    apptech = next(source for source in catalog["sources"] if source["source_id"] == "f2_apptech_mtr")
+    assert apptech["expected_record_count"] == 630
+    assert apptech["snapshot_origin_files"] == [
+        "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/silver/apptech_public_innovation.jsonl"
+    ]
 
 
 def test_executable_plans_never_include_restricted_sources():

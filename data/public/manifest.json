@@ -1,12 +1,12 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-16T13:40:40.628338+00:00",
+  "generated_at": "2026-08-17T04:19:08.174159+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
       "path": "dashboard_final/config/source_catalog.json",
-      "bytes": 136786,
-      "sha256": "51a60748ecf4fbc9cfa1c2851e43a1031c413b4b3ee68c69d1191a1152a1f370"
+      "bytes": 143176,
+      "sha256": "c30fd5a626de99f610125e93913c61ae25902cb70007cee50b52cc21acf7e8f0"
     },
     {
       "path": "dashboard_final/data/public/learning_dashboard.json",
@@ -16,7 +16,7 @@
     {
       "path": "dashboard_final/data/public/learning_dashboard_manifest.json",
       "bytes": 780,
-      "sha256": "325579ee132d7026c6722030efe4beb7a73c9ee5c756c472913763cf4ee6bb25"
+      "sha256": "d818d83d70867f672b5fc05ed6349cc78ab2e0ab8ad263f281d0b079e9bfadee"
     },
     {
       "path": "data/qa/web_profile_team_drive_simple/20260814T_team_drive_simple_final/01_f1_sradss_ppaos/data/f1_sradss_ppaos_drilldown_province_registry_rows.csv",
@@ -240,25 +240,25 @@
     },
     {
       "path": "dashboard_final/data/public/source_insights.json",
-      "bytes": 490045,
-      "sha256": "3ca13457347ca8dff334504cebf3ee319fa945a5319c7da02921e3f286b2e719"
+      "bytes": 402842,
+      "sha256": "3678da1f953e6fdcedb8089e5d11368b619597c5d1b4661a1aabf97627aac35f"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
-      "bytes": 137944,
-      "sha256": "a36717e328210cf0c88b732997b00e0fe2dbe9acc37baa76af95fc61d7be759f"
+      "bytes": 142178,
+      "sha256": "e3a9a226a3a3aa439ff4cade468881b798161274b55409987374981c02e260cc"
     },
     {
       "path": "data/public/province_evidence.csv",
-      "bytes": 11423,
-      "sha256": "69b7fd0e41635750b8a2a8a0722b3d76fe84dce76a9798f671c10f44ec3e8a3c"
+      "bytes": 11403,
+      "sha256": "c92456d86231636309a7df3471de4ff12a83e481193c853eb806bd2130477fe4"
     },
     {
       "path": "data/public/source_inventory.csv",
-      "bytes": 2968,
-      "sha256": "fbe59730fb113f88426ab0cb27f46a1be77de73ce34ad912b5296c3ea9647f44"
+      "bytes": 2959,
+      "sha256": "1ce1ea53f3aee1b487d93b825ceab6edd7f823aa2791ea17b268da65263cf5d5"
     },
     {
       "path": "data/public/cultural_points.geojson",
@@ -267,8 +267,8 @@
     },
     {
       "path": "data/public/thailand_provinces.geojson",
-      "bytes": 1587712,
-      "sha256": "659dcd9cf565473fa4806258fccfa9a2a364da64cfb45df5a75e085b71ce56cb"
+      "bytes": 1587692,
+      "sha256": "a5a95082fe130d0f56086339e587a8fe9a677d6b626c8914670e190ac8c6b5ac"
     }
   ],
   "excluded_source_ids": [

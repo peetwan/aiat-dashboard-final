@@ -67,7 +67,7 @@ function coverageClass(source) {
     source.public_projection?.rows,
   );
   const usableCount = firstFinite(source.usable_record_count, source.usable_rows, source.latest_usable_asset?.record_count, source.latest_usable_asset?.rows);
-  if (visibility.classification === "restricted_local_only" || /restricted|local.only|high|sensitive/.test(sensitivity) || source.railway_allowed === false) return "local-only";
+  if (visibility.classification === "restricted_local_only" || source.railway_allowed === false) return "local-only";
   if (visibility.current_public_data_artifact === true || source.public_projection_available === true || source.usable_data === true || source.usable === true || (publicCount ?? usableCount ?? 0) > 0 || /public.ready|serving|published/.test(status)) return "ready";
   if (visibility.classification === "metadata_only") return "discovery";
   if (/blocked|timeout|unreachable|auth/.test(status)) return "blocked";
@@ -424,6 +424,51 @@ function renderBars(target, items, color = "#1f5b43", limit = 10) {
     </div>`).join("")}</div>`;
 }
 
+function renderExecutivePortfolio(portfolio) {
+  if (!portfolio?.audit || !Array.isArray(portfolio.headline_metrics)) return;
+  const section = document.getElementById("executivePortfolio");
+  section.hidden = false;
+
+  document.getElementById("executiveKpis").innerHTML = portfolio.headline_metrics.map((metric) => {
+    const display = metric.display_value ?? number.format(metric.value);
+    return `<article class="portfolio-kpi" data-source="${escapeHtml(metric.source_id)}">
+      <span>${escapeHtml(metric.label_th)}</span>
+      <div><strong>${escapeHtml(display)}</strong><b>${escapeHtml(metric.unit)}</b></div>
+      <small>${escapeHtml(metric.note_th)}</small>
+    </article>`;
+  }).join("");
+
+  const audit = portfolio.audit;
+  const total = Math.max(Number(audit.source_count) || 0, 1);
+  const completePct = Number(audit.complete_source_count || 0) / total * 100;
+  const partialPct = Number(audit.partial_source_count || 0) / total * 100;
+  const completeEnd = completePct.toFixed(1);
+  const partialEnd = (completePct + partialPct).toFixed(1);
+  document.getElementById("auditReadiness").innerHTML = `
+    <div class="readiness-donut" role="img" aria-label="ตรวจครบตามหน้าเว็บ ${number.format(audit.complete_source_count)} แหล่ง ใช้ได้บางส่วน ${number.format(audit.partial_source_count)} แหล่ง และข้อมูลผสม ${number.format(audit.mixed_source_count)} แหล่ง" style="background:conic-gradient(#1f5b43 0 ${completeEnd}%,#f0c66a ${completeEnd}% ${partialEnd}%,#73b8d5 ${partialEnd}% 100%)">
+      <div><strong>${number.format(audit.source_count)}</strong><span>เว็บไซต์</span></div>
+    </div>
+    <div class="readiness-legend">
+      <span class="is-complete"><i></i><b>${number.format(audit.complete_source_count)}</b> ครบตาม public surface</span>
+      <span class="is-partial"><i></i><b>${number.format(audit.partial_source_count)}</b> ใช้ได้บางส่วน</span>
+      <span class="is-mixed"><i></i><b>${number.format(audit.mixed_source_count)}</b> มีหลาย data lane</span>
+    </div>`;
+
+  const charts = portfolio.charts || {};
+  renderBars("capitalChart", charts.livelihood_capital?.items, "#2f7659", 8);
+  renderBars("businessTypeChart", charts.area_business_types?.items, "#73b8d5", 8);
+  renderBars("culturalChart", charts.cultural_records?.items, "#a58bd4", 8);
+  renderBars("housingSpatialChart", charts.housing_spatial?.items, "#e99b62", 8);
+  renderBars("tourismChart", charts.tourism_inventory?.items, "#59a88a", 8);
+  renderBars("cityCompletenessChart", charts.city_data_completeness?.items, "#7a91cf", 4);
+
+  document.getElementById("sourceHealthGrid").innerHTML = audit.status_rows.map((source) => `
+    <article class="source-health-card is-${escapeHtml(source.status)}">
+      <header><strong>${escapeHtml(source.label_th)}</strong><span>${escapeHtml(source.status_th)}</span></header>
+      <p>${escapeHtml(source.summary_th)}</p>
+    </article>`).join("");
+}
+
 function topMetric(ppp, metricName, limit = 5) {
   return ppp.provinces
     .map((province) => {
@@ -534,6 +579,7 @@ async function loadInsights() {
     const response = await fetch("/api/public/v1/source-insights");
     if (!response.ok) throw new Error("source insights unavailable");
     const payload = await response.json();
+    renderExecutivePortfolio(payload.executive_portfolio);
     renderAudit(payload);
     renderPpp(payload.sources.f1_pppconnext);
     renderApptech(payload.sources.f2_apptech_mtr);

@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-16T13:40:40.628338+00:00",
+  "generated_at": "2026-08-17T04:19:08.174159+00:00",
   "publication_status": "public_candidate_projection",
   "warning_th": "ข้อมูลทุกชุดเป็น candidate/needs_review ใช้สำรวจหลักฐานและจำลองฉากทัศน์ ไม่ใช่คำสั่งจัดสรรงบหรือ KPI ที่รับรองแล้ว",
   "summary": {
     "public_sources": 11,
-    "candidate_records_referenced": 2098578,
+    "candidate_records_referenced": 1101341,
     "provinces_with_evidence": 77,
     "geocoded_cultural_points": 5258,
     "cultural_supporting_records": 361,
@@ -156,12 +156,12 @@
       "ordinal": 2,
       "source_id": "f1_pppconnext",
       "name_th": "PPPConnext BI",
-      "url": "http://www.ppaos.com/ppaos/frontend/web/",
-      "acquisition_mode": "snapshot_only",
-      "expected_record_count": 997293,
+      "url": "https://ppaos.com/2026/dashboard/ppaos/",
+      "acquisition_mode": "api_first",
+      "expected_record_count": 47,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ห้ามเปลี่ยนเป็น HTTPS โดยเดา ต้องตรวจ redirect/certificate ก่อน | หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว"
+      "notes_th": "ต้นฉบับ legacy HTTP path ตอบ 404 ทั้ง HTTP/HTTPS เมื่อ 2026-08-17; official search + scrape ยืนยัน https://www.ppaos.com/ เป็น meta-refresh gateway และ canonical content อยู่ที่ https://ppaos.com/2026/dashboard/ppaos/; public overview ใช้ได้เฉพาะ aggregate ส่วน survey analytics/detail แสดง auth boundary | หน้า BI สดตอบ HTTP 404 จึงใส่ snapshot วันที่ 2026-08-04 ทั้ง 997,293 แถว | พบ canonical Dashboard รุ่น 2026 และ API aggregate สาธารณะ 4 endpoints; Silver ปัจจุบันมี 47 aggregate records ครบ 20 จังหวัด/ปีสำรวจ/ทุน/ความช่วยเหลือ. Snapshot BI เดิม 997,293 chart records เก็บเป็นหลักฐานประวัติและห้ามเทียบเป็นจำนวนครัวเรือน."
     },
     {
       "ordinal": 3,
@@ -172,7 +172,7 @@
       "expected_record_count": 5619,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ตรวจข้อมูลแผนที่และ endpoint ที่ใช้โหลด marker/รายการ | Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น",
+      "notes_th": "ตรวจข้อมูลแผนที่และ endpoint ที่ใช้โหลด marker/รายการ | Map/Inspiration, Products, Activities, Re-Creation และ Team; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | ตรวจ public JSON feed และ listing pages ล่าสุด 2026-08-17 แล้ว ID coverage ตรง snapshot 5,619/5,619; Dashboard เปิด Map details 5,258 และ supporting 361 เป็น counts-only ตาม privacy projection. Source as_of/terms/owner acceptance ยังไม่ระบุ.",
       "projection_coverage": {
         "map_records": 5258,
         "supporting_records": 361,
@@ -225,7 +225,7 @@
       "expected_record_count": 2001,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "URL ในต้นฉบับไม่มี scheme และติดกับชื่อรายการ ต้องยืนยัน URL จริง | ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401"
+      "notes_th": "URL ในต้นฉบับไม่มี scheme และติดกับชื่อรายการ ต้องยืนยัน URL จริง | ใส่ระเบียนที่ parse จาก e-book แล้ว และลิงก์ PDF สาธารณะ 11 เล่ม JSON API ตอบ 401 | ตรวจ public e-book ครบ 11/11 ไฟล์เมื่อ 2026-08-17 และ metadata ไม่เปลี่ยน; public snapshot 2,001 rows ยังใช้ได้โดยแยก detail 1,006 กับ annual summary 995 เป็นคนละ grain. Live Dashboard ที่เคยพบ 1,015 ยังต่างจาก detail 9 records; JSON API ของหน้า dashboard สาธารณะใช้ได้ตามที่เว็บเรียก"
     },
     {
       "ordinal": 7,
@@ -233,10 +233,10 @@
       "name_th": "AppTech เครือข่าย มทร. / RinMP",
       "url": "https://rinmp.com/",
       "acquisition_mode": "api_first",
-      "expected_record_count": 621,
+      "expected_record_count": 630,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "เครือข่าย มทร. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API"
+      "notes_th": "เครือข่าย มทร. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 621 ระเบียน พร้อม public API | public list และ API สถิติรอบ 2026-08-17 ตรงกันที่ 630 records; Silver เดิม 621 ขาด 9 records และ common record 1 รายการเปลี่ยน version. Serving ใช้ privacy-projected Silver ใหม่ที่ไม่มีค่า email/phone และยังคง needs_review."
     },
     {
       "ordinal": 8,
@@ -247,7 +247,7 @@
       "expected_record_count": 503,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "เครือข่าย มรภ. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass"
+      "notes_th": "เครือข่าย มรภ. ตรวจ owner และขอบเขตข้อมูล | ใส่ข้อมูลสาธารณะ 503 ระเบียน เส้นทาง login ห้าม bypass | snapshot 503 records ผ่าน structural/privacy validation และครอบ public surface ณ 2026-08-05; รอบ 2026-08-17 API ยังรายงาน innovation totaldata=501 และ 192 แถวแรกตรง baseline ทั้งหมด แต่หยุดคืน JSON ที่ parse ได้ก่อนจบ จึงคง snapshot เดิมและห้าม publish partial run. Railway commit รอบใหม่ได้เฉพาะ unique IDs เท่ากับ totaldata ครบทุก dataset."
     },
     {
       "ordinal": 10,
@@ -279,7 +279,7 @@
       "expected_record_count": 1002,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ตรวจความสัมพันธ์กับ Dashboard LE หลักและ data endpoint ร่วม | ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่"
+      "notes_th": "ตรวจความสัมพันธ์กับ Dashboard LE หลักและ data endpoint ร่วม | ใส่ 1,002 แถว ผู้เข้าร่วมโครงการ ไม่ใช่ประชากรทั้งพื้นที่ | ตรวจหน้าและ API ล่าสุด 2026-08-17 แล้ว response byte-identical กับ snapshot: 1,002 rows/1,002 unique IDs; หน้าแสดง 6 ภูมิภาค, 55 จังหวัด, 256 อำเภอ, 533 ตำบล และ 1,002 ธุรกิจตรงกับ stats envelope. business type มีเฉพาะ aggregate; Railway เก็บ aggregate แยก grain และตรวจทุกผลรวมก่อน commit."
     },
     {
       "ordinal": 14,
@@ -290,7 +290,7 @@
       "expected_record_count": 702,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "Netlify SPA อาจมี static JSON/JS asset ที่ต้องค้นหา | เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น"
+      "notes_th": "Netlify SPA อาจมี static JSON/JS asset ที่ต้องค้นหา | เมือง, นิยาม metric และ observation เมือง × metric; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | homepage HTML รอบ 2026-08-17 byte-identical กับ raw HTML ที่ parser ใช้เมื่อ 2026-08-16; snapshot ยังครบ 18 เมือง × 39 metric definitions = 702 unique city×metric observations (698 numeric, 4 null). Railway ใช้ snapshot-only และตรวจ cartesian coverage/unique keys ก่อน commit."
     },
     {
       "ordinal": 16,
@@ -301,7 +301,7 @@
       "expected_record_count": 54,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ตรวจ route ภายในและ static/API assets ของ Firebase web app | สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น"
+      "notes_th": "ตรวจ route ภายในและ static/API assets ของ Firebase web app | สถานี/สถานที่, คำแนะนำ, การเดินทาง, กลุ่มโคม และข้อมูลติดต่อ; as_of/owner/terms ยังไม่ยืนยัน; เก็บเป็น candidate เท่านั้น | ตรวจ public Vite bundle รอบ 2026-08-17 แล้ว hash และ data ทั้ง 5 หน้าตรง snapshot: 54 primary records และ 157 content items ครบ. Railway แยกเป็น 8 queryable grains และบล็อก commit เมื่อ page/count/bundle/warning/unique-ID gate ไม่ผ่าน; as_of/owner/terms ยังไม่ระบุ จึงคง needs_review."
     },
     {
       "ordinal": 23,
@@ -312,7 +312,7 @@
       "expected_record_count": 7259,
       "readiness_status": "needs_review",
       "quality_label_th": "ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI",
-      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์"
+      "notes_th": "ตรวจว่ามีข้อมูลครัวเรือน/ที่อยู่ระดับบุคคลหรือเป็น aggregate | ใส่ 7,259 แถวที่เผยแพร่ค่าได้; demand 25,919 แถวเป็น schema-only และ 1 แถวถูกบล็อกจึงไม่มีค่าในไฟล์ | ตรวจ 2026-08-17 แล้ว CKAN 7 datasets/41 resources ไม่เปลี่ยน และ Railway value-approved projection ครบ 7,259 rows. หน้า Housing Stock ยังมี 28,694 points, 6,543 accessibility grids และ 159,126 flood grids ที่ต้องใช้ connector/PostGIS lane แยก. Demand 25,919 respondent rows คง schema-only และ policy values คง blocked ตาม privacy/owner gate."
     }
   ],
   "provinces": [
@@ -475,7 +475,7 @@
       "innovation_records": 0,
       "cultural_records": 5,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 5.0,
       "apptech_interactions": 4.0,
@@ -754,7 +754,7 @@
       "innovation_records": 16,
       "cultural_records": 52,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 7.0,
       "apptech_interactions": 3.0,
@@ -1151,7 +1151,7 @@
       "innovation_records": 6,
       "cultural_records": 169,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 8,
       "apptech_registered_users": 164.0,
       "apptech_interactions": 16.0,
@@ -1244,19 +1244,18 @@
       "innovation_records": 0,
       "cultural_records": 99,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 6,
+      "pppconnext_aggregate_rows": 0,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 1.0,
       "apptech_interactions": 0,
       "city_capital_cities": 1,
       "evidence_sources": [
         "f2_culturalmap_university",
-        "f1_pppconnext",
         "f2_learning_dashboard",
         "f3_city_capital_open_data",
         "f2_apptech_mtr"
       ],
-      "evidence_source_count": 5,
+      "evidence_source_count": 4,
       "quality_status": "candidate_needs_review",
       "visual_index": {
         "sra_overall_score": 0.0,
@@ -1265,10 +1264,10 @@
         "innovation_records": 0.0,
         "cultural_records": 0.19604,
         "housing_observations": 0.0,
-        "pppconnext_aggregate_rows": 0.4,
+        "pppconnext_aggregate_rows": 0.0,
         "learning_dashboard_business_records": 0.052632,
         "city_capital_cities": 0.5,
-        "evidence_source_count": 0.5
+        "evidence_source_count": 0.4
       }
     },
     {
@@ -1339,7 +1338,7 @@
       "innovation_records": 1,
       "cultural_records": 1,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 3,
       "apptech_registered_users": 1.0,
       "apptech_interactions": 1.0,
@@ -1479,7 +1478,7 @@
       "innovation_records": 5,
       "cultural_records": 2,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 13.0,
       "apptech_interactions": 2.0,
@@ -1663,7 +1662,7 @@
       "innovation_records": 2,
       "cultural_records": 106,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 12,
       "apptech_registered_users": 56.0,
       "apptech_interactions": 8.0,
@@ -1842,7 +1841,7 @@
       "innovation_records": 0,
       "cultural_records": 29,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 10,
       "apptech_registered_users": 63.0,
       "apptech_interactions": 17.0,
@@ -1930,7 +1929,7 @@
       "innovation_records": 28,
       "cultural_records": 54,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 1.0,
       "apptech_interactions": 1.0,
@@ -2073,7 +2072,7 @@
       "innovation_records": 0,
       "cultural_records": 0,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
       "apptech_interactions": 1.0,
@@ -2123,7 +2122,7 @@
       "innovation_records": 6,
       "cultural_records": 48,
       "housing_observations": 628,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 1.0,
       "apptech_interactions": 3.0,
@@ -2171,7 +2170,7 @@
       "innovation_records": 0,
       "cultural_records": 2,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 0,
       "apptech_registered_users": 0,
       "apptech_interactions": 0,
@@ -2354,7 +2353,7 @@
       "innovation_records": 5,
       "cultural_records": 57,
       "housing_observations": 419,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 10,
       "apptech_registered_users": 131.0,
       "apptech_interactions": 18.0,
@@ -2447,7 +2446,7 @@
       "innovation_records": 4,
       "cultural_records": 93,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 267.0,
       "apptech_interactions": 39.0,
@@ -2547,7 +2546,7 @@
       "innovation_records": 6,
       "cultural_records": 111,
       "housing_observations": 532,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 6,
       "apptech_registered_users": 0,
       "apptech_interactions": 1.0,
@@ -2601,7 +2600,7 @@
       "innovation_records": 0,
       "cultural_records": 86,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 9,
       "apptech_registered_users": 143.0,
       "apptech_interactions": 8.0,
@@ -3098,7 +3097,7 @@
       "innovation_records": 0,
       "cultural_records": 118,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 4,
       "apptech_registered_users": 0,
       "apptech_interactions": 2.0,
@@ -3277,7 +3276,7 @@
       "innovation_records": 1,
       "cultural_records": 0,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 7,
       "apptech_registered_users": 0,
       "apptech_interactions": 1.0,
@@ -3460,7 +3459,7 @@
       "innovation_records": 1,
       "cultural_records": 265,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 1,
       "apptech_registered_users": 0,
       "apptech_interactions": 1.0,
@@ -3738,7 +3737,7 @@
       "innovation_records": 9,
       "cultural_records": 0,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 5,
       "apptech_registered_users": 0,
       "apptech_interactions": 0,
@@ -3836,7 +3835,7 @@
       "innovation_records": 1,
       "cultural_records": 66,
       "housing_observations": 0,
-      "pppconnext_aggregate_rows": 15,
+      "pppconnext_aggregate_rows": 6,
       "learning_dashboard_business_records": 2,
       "apptech_registered_users": 133.0,
       "apptech_interactions": 2.0,

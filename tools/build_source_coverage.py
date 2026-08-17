@@ -257,7 +257,7 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
             "แผนที่ใช้ point records 5,258 แถว; public non-point records อีก 361 แถวต้องแสดงในมุมอื่น ไม่ใช่ marker"
         ),
         "f2_rmutdb": "2,001 records เป็น national technology catalog; affiliation ไม่ใช่พื้นที่ใช้งานหรือผู้รับประโยชน์",
-        "f2_apptech_mtr": "province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน",
+        "f2_apptech_mtr": "public list และ statistics รอบ 2026-08-17 ตรงกันที่ 630 records; province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน",
         "f2_learning_dashboard": (
             "นับเฉพาะ province data rows 66 แถว (ไม่รวม header); raw response ยังไม่มี manifest และ "
             "selected-project scope ต้อง review"
@@ -265,7 +265,9 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
         "f3_city_capital_open_data": "18 municipality records เชื่อมได้ 16 จังหวัด แต่ metric ยังเป็น grain ระดับเทศบาล",
         "f3_housing_portal": (
             "approved public package มี 7,259 แถว: 6,953 แถวเชื่อมได้ 12 จังหวัด และ 306 แถว "
-            "คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่"
+            "คงสถานะ unassigned นอกแผนที่โดยไม่เดาพื้นที่; CKAN lane นี้ครบแล้ว แต่หน้า Housing Stock "
+            "ยังมี public spatial surfaces 28,694 points + 6,543 accessibility grids + 159,126 flood grids "
+            "ที่ยังไม่อยู่ใน serving database. Demand 25,919 respondent rows คง schema-only และ policy values blocked."
         ),
     }
     if source_id in source_notes:
@@ -307,6 +309,8 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         )
         if source_id == "f2_learning_dashboard":
             count_basis = "verified_province_rows_excluding_header"
+        elif source_id == "f2_apptech_mtr":
+            count_basis = "validated_current_public_api_silver_2026_08_17"
         elif observed_count is not None:
             count_basis = "merged_index_data_row_count"
         elif restricted:

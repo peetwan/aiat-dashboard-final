@@ -392,6 +392,21 @@ def test_secondary_value_artifacts_do_not_shadow_contact_rows():
     assert_no_privacy_violations(violations)
 
 
+def test_executive_portfolio_contains_aggregate_values_only():
+    insights = read_json(PUBLIC_ROOT / "source_insights.json")
+    portfolio = insights["executive_portfolio"]
+
+    assert portfolio["audit"]["source_count"] == 10
+    assert len(portfolio["headline_metrics"]) == 8
+    assert len(portfolio["audit"]["status_rows"]) == 10
+    violations = find_privacy_violations(
+        portfolio,
+        "source_insights.executive_portfolio",
+        allowed_sensitive_keys=SECONDARY_AGGREGATE_KEY_ALLOWLIST,
+    )
+    assert_no_privacy_violations(violations)
+
+
 def test_all_executive_summary_dimensions_and_highlights_are_privacy_projected():
     paths = executive_summary_paths()
     assert len(paths) == 77

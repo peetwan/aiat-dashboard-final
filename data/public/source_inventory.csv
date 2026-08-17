@@ -1,9 +1,9 @@
 ﻿ordinal,source_id,name_th,url,acquisition_mode,expected_record_count,readiness_status,quality_label_th
 1,f1_sradss_ppaos,ระบบฐานข้อมูล SRA-DSS,https://sradss.ppaos.com/,api_first,1083458,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
-2,f1_pppconnext,PPPConnext BI,http://www.ppaos.com/ppaos/frontend/web/,snapshot_only,997293,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
+2,f1_pppconnext,PPPConnext BI,https://ppaos.com/2026/dashboard/ppaos/,api_first,47,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
 3,f2_culturalmap_university,แผนที่วัฒนธรรมไทย Cultural Mapping (ภาคมหาวิทยาลัย),https://www.culturalmapthailand.info/,snapshot_only,5619,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
 6,f2_rmutdb,ห้องสมุดนวัตกรรม RMUTDB,https://rmutdb.net/,snapshot_only,2001,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
-7,f2_apptech_mtr,AppTech เครือข่าย มทร. / RinMP,https://rinmp.com/,api_first,621,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
+7,f2_apptech_mtr,AppTech เครือข่าย มทร. / RinMP,https://rinmp.com/,api_first,630,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
 8,f2_apptech_mru,AppTech เครือข่าย มรภ. / 38RAT,https://38rat.nstru.ac.th/,api_first,503,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
 10,f2_learning_dashboard,Dashboard LE,https://lesuper.app/opendata/pmua/dashboard,api_first,66,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI
 11,f2_learning_area_based,Dashboard LE - Area Based,https://lesuper.app/opendata/pmua/area-based,api_first,1002,needs_review,ข้อมูล candidate · ต้องทบทวนความหมายก่อนใช้เป็น KPI

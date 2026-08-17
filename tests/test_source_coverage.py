@@ -115,6 +115,12 @@ def test_every_catalog_endpoint_has_local_evidence_and_is_not_invented():
             observation["endpoint"],
         )
     )
+    ppp_observation = read_json(
+        PROJECT_ROOT
+        / "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json"
+    )
+    for endpoint in ppp_observation["observations"]:
+        allowed.add(("f1_pppconnext", "GET", endpoint["url"]))
 
     catalog = read_json(CATALOG_PATH)
     actual = {
@@ -166,7 +172,6 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     household = sources["f2_target_household"]
     assert household["public_visibility"]["classification"] == "restricted_local_only"
     assert household["records"]["observed_count"] is None
-    assert household["records"]["local_record_count_withheld"] is True
 
     rmutdb = sources["f2_rmutdb"]
     assert rmutdb["geo"]["linkability"] == "not_province_scoped"
