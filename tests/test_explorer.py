@@ -70,6 +70,8 @@ def test_explorer_schema_lists_current_nine_serving_tables_without_payloads() ->
     payload = response.json()
     assert payload["read_only"] is True
     assert len(payload["tables"]) == 9
+    assert all(item["role_th"] for item in payload["tables"])
+    assert all(item["key_fields"] for item in payload["tables"])
     assert {item["name"] for item in payload["tables"]} == {
         "sources",
         "endpoints",
@@ -90,8 +92,10 @@ def test_explorer_home_is_a_thai_read_only_database_map() -> None:
 
     assert response.status_code == 200
     assert "AIAT Database Explorer" in response.text
-    assert "ทั้ง 28 แหล่ง" in response.text
-    assert "read-only" in response.text
-    assert 'href="/static/styles.css"' in response.text
-    assert 'src="/static/app.js"' in response.text
+    assert "DATABASE MAP" in response.text
+    assert "AIAT Serving Database" in response.text
+    assert response.text.index('id="database-map"') < response.text.index('id="sources"')
+    assert "READ ONLY" in response.text
+    assert 'href="/static/styles.css?v=database-map-1"' in response.text
+    assert 'src="/static/app.js?v=database-map-1"' in response.text
     assert "http://testserver/static" not in response.text

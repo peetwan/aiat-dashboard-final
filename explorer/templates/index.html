@@ -6,7 +6,7 @@
     <meta name="description" content="AIAT Database Explorer — แผนที่ความสัมพันธ์ของ 28 แหล่งข้อมูลและ Serving Database แบบ read-only" />
     <title>AIAT Database Explorer</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v=database-map-1" />
   </head>
   <body>
     <div class="ambient ambient-one"></div>
@@ -21,55 +21,101 @@
         </span>
       </a>
       <nav class="topnav" aria-label="เมนูหลัก">
+        <a href="#database-map">Database Map</a>
         <a href="#sources">28 แหล่ง</a>
         <a href="#pipeline">เส้นทางข้อมูล</a>
-        <a href="#database">ตาราง Database</a>
         <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero shell">
-        <div class="hero-copy">
-          <div class="eyebrow"><span id="live-dot" class="live-dot"></span><span id="live-label">กำลังเชื่อมต่อ Database…</span></div>
-          <h1>ดูว่าแต่ละ URL<br /><em>เชื่อมกับอะไรอยู่</em></h1>
-          <p class="hero-lead">
-            หน้าอ่านอย่างเดียวสำหรับอธิบาย 28 แหล่งข้อมูล สิ่งที่เรานำมาใช้ Grain ของแต่ละชุด
-            Endpoint ที่เชื่อมอยู่ และตาราง PostgreSQL ที่ข้อมูลไปถึง
-          </p>
-          <div class="hero-actions">
-            <a class="primary-action" href="#sources">ดูทั้ง 28 แหล่ง</a>
-            <a class="secondary-action" href="#database">ดูโครงสร้าง Database</a>
+      <section id="database-map" class="database-map shell">
+        <header class="map-hero">
+          <div>
+            <div class="eyebrow"><span id="live-dot" class="live-dot"></span><span id="live-label">กำลังเชื่อมต่อ Database…</span></div>
+            <span class="kicker">DATABASE MAP</span>
+            <h1>AIAT Serving Database</h1>
+            <p>ภาพรวมว่าตารางไหนมีหน้าที่อะไร และข้อมูลไหลไปทางไหน</p>
           </div>
-          <p class="realtime-note">
-            “Realtime” ในหน้านี้หมายถึงอ่านสถานะจาก PostgreSQL ตัวเดียวกับ Dashboard ทุก
-            {{ refresh_interval_seconds }} วินาที ไม่ได้ยิงทั้ง 28 เว็บไซต์ทุกครั้งที่เปิดหน้า
-          </p>
+          <div class="map-hero-actions">
+            <a class="secondary-action" href="#sources">ดู 28 Sources</a>
+            <a class="primary-action" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
+          </div>
+        </header>
+
+        <div class="map-status-strip" aria-label="สถานะ Database แบบสด">
+          <span id="backend-badge" class="status-pill neutral">กำลังตรวจ PostgreSQL</span>
+          <span><b id="map-table-total">9</b> tables</span>
+          <span><b id="artifact-inline">—</b> public artifacts</span>
+          <span><b id="candidate-inline">—</b> candidate rows</span>
+          <span>อัปเดต <b id="checked-at">—</b></span>
+          <span class="read-only-mark">READ ONLY</span>
         </div>
 
-        <aside class="hero-panel" aria-label="สถานะ Database">
-          <div class="panel-header">
-            <span>Serving database</span>
-            <span id="backend-badge" class="status-pill neutral">ตรวจสอบ…</span>
+        <div class="database-canvas" aria-label="แผนผังความสัมพันธ์ของตาราง">
+          <div class="map-primary-flow">
+            <section class="map-column role-control">
+              <header><span>01</span><div><strong>Registry</strong><small>ทะเบียนและสิทธิ์</small></div></header>
+              <div id="map-control" class="map-table-stack"></div>
+            </section>
+            <div class="map-flow-link" aria-hidden="true"><span>1 : N</span></div>
+            <section class="map-column role-operation">
+              <header><span>02</span><div><strong>Operations</strong><small>ประวัติการดึง</small></div></header>
+              <div id="map-operational" class="map-table-stack"></div>
+            </section>
+            <div class="map-flow-link" aria-hidden="true"><span>load</span></div>
+            <section class="map-column role-candidate">
+              <header><span>03</span><div><strong>Candidate</strong><small>พื้นที่พักตรวจ</small></div></header>
+              <div id="map-candidate" class="map-table-stack"></div>
+            </section>
+            <div class="map-flow-link gate-link" aria-hidden="true"><span>QA</span></div>
+            <section class="map-gate" aria-label="Quality gate">
+              <span>QUALITY GATE</span>
+              <strong>Build · Test · Review</strong>
+              <small>ไม่ auto-promote</small>
+            </section>
+            <div class="map-flow-link" aria-hidden="true"><span>sync</span></div>
+            <section class="map-column role-public">
+              <header><span>04</span><div><strong>Serving</strong><small>พร้อมให้ API อ่าน</small></div></header>
+              <div id="map-public" class="map-table-stack"></div>
+            </section>
+            <div class="map-flow-link" aria-hidden="true"><span>GET</span></div>
+            <section class="map-consumer">
+              <span>05 · CONSUMER</span>
+              <strong>FastAPI</strong>
+              <div class="consumer-arrow">↓</div>
+              <b>Dashboard 77 จังหวัด</b>
+            </section>
           </div>
-          <div class="database-orbit">
-            <div class="orbit orbit-a"></div>
-            <div class="orbit orbit-b"></div>
-            <div class="db-cylinder">
-              <span class="db-top"></span>
-              <strong>PostgreSQL</strong>
-              <small>shared · read only</small>
-            </div>
-            <span class="satellite satellite-a">API</span>
-            <span class="satellite satellite-b">JSON</span>
-            <span class="satellite satellite-c">GIS</span>
+
+          <div class="map-branch-label"><span></span><strong>Specialized serving branches</strong><span></span></div>
+          <div class="map-special-grid">
+            <section class="map-special role-spatial">
+              <header><span>GIS</span><div><strong>Spatial Serving</strong><small>ชั้นแผนที่และ geometry</small></div></header>
+              <div id="map-spatial" class="map-special-flow"></div>
+            </section>
+            <section class="map-special role-housing">
+              <header><span>HOME</span><div><strong>Housing Serving</strong><small>snapshot และ demand records</small></div></header>
+              <div id="map-housing" class="map-special-flow"></div>
+            </section>
           </div>
-          <dl class="live-facts">
-            <div><dt>ตรวจล่าสุด</dt><dd id="checked-at">—</dd></div>
-            <div><dt>Public artifacts</dt><dd id="artifact-inline">—</dd></div>
-            <div><dt>Candidate records</dt><dd id="candidate-inline">—</dd></div>
-          </dl>
-        </aside>
+        </div>
+
+        <div class="map-footer-row">
+          <div class="map-legend" aria-label="คำอธิบายสีของบทบาท">
+            <span class="legend-control">Control</span>
+            <span class="legend-operation">Operations</span>
+            <span class="legend-candidate">Candidate</span>
+            <span class="legend-public">Public</span>
+            <span class="legend-spatial">GIS</span>
+            <span class="legend-housing">Housing</span>
+          </div>
+          <aside id="map-inspector" class="map-inspector" aria-live="polite">
+            <span class="inspector-kicker">SELECTED TABLE</span>
+            <strong>เลือก block เพื่อดูหน้าที่</strong>
+            <small>แสดง Grain, Primary key และตารางที่เชื่อมกัน</small>
+          </aside>
+        </div>
       </section>
 
       <section class="stats shell" aria-label="ภาพรวมข้อมูล">
@@ -167,22 +213,6 @@
         <p id="empty-state" class="empty-state" hidden>ไม่พบแหล่งข้อมูลที่ตรงกับตัวกรอง</p>
       </section>
 
-      <section id="database" class="section shell">
-        <div class="section-heading">
-          <div><span class="kicker">LIVE SCHEMA</span><h2>ตาราง Database เชื่อมกันอย่างไร</h2></div>
-          <p>จำนวนแถวด้านล่างอ่านจาก PostgreSQL ปัจจุบัน ส่วน spatial/demand ใช้จำนวนจาก validated snapshot contract</p>
-        </div>
-
-        <div class="schema-layout">
-          <div id="schema-cards" class="schema-cards" aria-live="polite"></div>
-          <aside class="relationship-panel">
-            <h3>Relationship map</h3>
-            <p class="relationship-intro">เส้นเชื่อมใช้ <code>source_id</code>, snapshot/layer key หรือขั้นตอน build ที่มี contract ชัดเจน</p>
-            <div id="relationship-list" class="relationship-list"></div>
-          </aside>
-        </div>
-      </section>
-
       <section class="section shell glossary-section">
         <div class="section-heading">
           <div><span class="kicker">ELI5 GLOSSARY</span><h2>คำศัพท์ที่ต้องรู้</h2></div>
@@ -213,6 +243,6 @@
     <script>
       window.EXPLORER_CONFIG = { refreshSeconds: {{ refresh_interval_seconds }} };
     </script>
-    <script src="/static/app.js" defer></script>
+    <script src="/static/app.js?v=database-map-1" defer></script>
   </body>
 </html>

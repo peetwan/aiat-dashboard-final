@@ -2,6 +2,7 @@ const state = {
   overview: null,
   sources: [],
   schema: null,
+  selectedTable: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -139,29 +140,72 @@ function populateGroups() {
   select.value = current;
 }
 
+function mapField(field) {
+  const isPrimary = field.includes("(PK)");
+  const isForeign = field.includes("(FK)");
+  const marker = isPrimary ? "PK" : isForeign ? "FK" : "·";
+  const className = isPrimary ? "primary" : isForeign ? "foreign" : "";
+  return `<span class="map-field ${className}"><i>${marker}</i><span>${escapeHtml(field.replace(" (PK)", "").replace(" (FK)", ""))}</span></span>`;
+}
+
+function mapTableCard(table) {
+  return `
+    <button class="map-table-card" type="button" data-map-table="${escapeHtml(table.name)}" aria-label="ดูรายละเอียดตาราง ${escapeHtml(table.name)}">
+      <span class="map-card-head">
+        <span><strong>${escapeHtml(table.name)}</strong><small>${escapeHtml(table.role_th)}</small></span>
+        <span class="map-row-count">${formatNumber(table.live_row_count)}</span>
+      </span>
+      <span class="map-field-list">${table.key_fields.map(mapField).join("")}</span>
+    </button>
+  `;
+}
+
+function selectMapTable(tableName) {
+  if (!state.schema) return;
+  const table = state.schema.tables.find((item) => item.name === tableName);
+  if (!table) return;
+  state.selectedTable = tableName;
+  const relations = state.schema.relationships.filter((relation) => relation.from === tableName || relation.to === tableName);
+  const relatedNames = new Set(relations.flatMap((relation) => [relation.from, relation.to]));
+  document.querySelectorAll("[data-map-table]").forEach((card) => {
+    const name = card.dataset.mapTable;
+    card.classList.toggle("is-selected", name === tableName);
+    card.classList.toggle("is-related", name !== tableName && relatedNames.has(name));
+  });
+  const relationText = relations.length
+    ? relations.map((relation) => `${relation.from} ${relation.cardinality} ${relation.to}`).join(" · ")
+    : "ไม่มี foreign-key path โดยตรงใน serving map";
+  $("#map-inspector").innerHTML = `
+    <span class="inspector-kicker">${escapeHtml(table.role_th)}</span>
+    <strong>${escapeHtml(table.name)} · ${escapeHtml(table.meaning_th)}</strong>
+    <small>${escapeHtml(table.grain_th)}</small>
+    <span class="inspector-count">${formatNumber(table.live_row_count)}<span>LIVE ROWS</span></span>
+    <span class="inspector-relations">PK ${escapeHtml(table.primary_key)} · ${escapeHtml(relationText)}</span>
+  `;
+}
+
 function renderSchema(data) {
   state.schema = data;
-  $("#schema-cards").innerHTML = data.tables.map((table) => `
-    <article class="schema-card">
-      <div class="schema-card-header">
-        <span class="schema-table-name">${escapeHtml(table.name)}</span>
-        <span class="schema-count">${formatNumber(table.live_row_count)}</span>
-      </div>
-      <h3>${escapeHtml(table.meaning_th)}</h3>
-      <p><strong>Grain:</strong> ${escapeHtml(table.grain_th)}</p>
-      <div class="schema-meta">
-        <span class="target-chip">PK ${escapeHtml(table.primary_key)}</span>
-        <span class="target-chip">${escapeHtml(table.group)}</span>
-        ${table.count_mode === "snapshot_contract" ? `<span class="target-chip">validated count</span>` : ""}
-      </div>
-    </article>
-  `).join("");
-  $("#relationship-list").innerHTML = data.relationships.map((relation) => `
-    <article class="relation">
-      <div class="relation-path"><span>${escapeHtml(relation.from)}</span><span>${escapeHtml(relation.cardinality)}</span><span>${escapeHtml(relation.to)}</span></div>
-      <p>${escapeHtml(relation.label_th)}</p>
-    </article>
-  `).join("");
+  const byGroup = (group) => data.tables.filter((table) => table.group === group);
+  const renderStack = (selector, tables) => {
+    $(selector).innerHTML = tables.map(mapTableCard).join("");
+  };
+  const renderFlow = (selector, tables) => {
+    $(selector).innerHTML = tables.map((table, index) => `${index ? `<span class="map-flow-link" aria-hidden="true"><span>1 : N</span></span>` : ""}${mapTableCard(table)}`).join("");
+  };
+
+  renderStack("#map-control", byGroup("Control plane"));
+  renderStack("#map-operational", byGroup("Operational"));
+  renderStack("#map-candidate", byGroup("Candidate staging"));
+  renderStack("#map-public", byGroup("Public serving"));
+  renderFlow("#map-spatial", byGroup("Spatial serving"));
+  renderFlow("#map-housing", byGroup("Housing serving"));
+  $("#map-table-total").textContent = formatNumber(data.tables.length);
+
+  document.querySelectorAll("[data-map-table]").forEach((card) => {
+    card.addEventListener("click", () => selectMapTable(card.dataset.mapTable));
+  });
+  selectMapTable(state.selectedTable || "sources");
 }
 
 function openSourceDialog(sourceId) {
@@ -248,4 +292,3 @@ $("#source-dialog").addEventListener("click", (event) => {
 
 refresh();
 window.setInterval(refresh, Number(window.EXPLORER_CONFIG.refreshSeconds || 30) * 1000);
-
