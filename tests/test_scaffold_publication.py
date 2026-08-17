@@ -99,6 +99,7 @@ def test_happy_path_creates_four_reviewable_files_without_public_output(tmp_path
     assert contract["identity"]["fields"] == ["project_id"]
     assert contract["outputs"][0]["path"] == "data/public/sample_dataset.json"
     assert contract["outputs"][0]["max_identity_churn_ratio"] == 0.0
+    assert contract["completeness"]["policy"] == "output_contracts"
     assert contract["completeness"]["needs_review"] is False
     loaded = load_contracts(tmp_path / "config/publication_contracts")
     assert loaded[0][1] == contract
@@ -167,6 +168,78 @@ def test_personal_contact_and_secret_identity_fields_are_rejected(tmp_path, fiel
             _spec(identity_fields=(field,)),
             project_root=tmp_path,
         )
+
+
+def test_csv_map_key_identity_is_rejected_before_scaffolding(tmp_path):
+    _write_catalog(tmp_path)
+
+    with pytest.raises(
+        ScaffoldError,
+        match=r"\$key identity is unavailable for CSV records",
+    ):
+        scaffold(
+            _spec(
+                identity_fields=("$key",),
+                output_path="data/public/sample_dataset.csv",
+                output_format="csv",
+                records_pointer="$",
+                as_of_pointer=None,
+                csv_headers=("province_code", "as_of", "project_count"),
+            ),
+            project_root=tmp_path,
+        )
+
+    assert not (tmp_path / "tools").exists()
+    assert not (tmp_path / "config/publication_contracts").exists()
+
+
+@pytest.mark.parametrize(
+    "overrides,error",
+    [
+        (
+            {"identity_fields": ("$key",), "records_pointer": "$"},
+            "non-root records_pointer",
+        ),
+        (
+            {"identity_fields": ("$key",), "records_pointer": "/"},
+            "non-root records_pointer",
+        ),
+        (
+            {
+                "identity_fields": ("$key",),
+                "output_path": "data/public/sample_dataset.geojson",
+                "output_format": "geojson",
+                "records_pointer": "/features",
+            },
+            "GeoJSON /features array",
+        ),
+    ],
+)
+def test_map_key_identity_rejects_known_non_object_record_shapes(
+    tmp_path, overrides, error
+):
+    _write_catalog(tmp_path)
+
+    with pytest.raises(ScaffoldError, match=error):
+        scaffold(_spec(**overrides), project_root=tmp_path)
+
+
+def test_nested_json_object_map_preserves_map_key_identity_support(tmp_path):
+    _write_catalog(tmp_path)
+
+    scaffold(
+        _spec(identity_fields=("$key",), records_pointer="/items"),
+        project_root=tmp_path,
+    )
+
+    contract = json.loads(
+        (tmp_path / "config/publication_contracts/sample_dataset.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert contract["identity"]["fields"] == ["$key"]
+    assert contract["outputs"][0]["records_pointer"] == "/items"
+    assert contract["outputs"][0]["identity_fields"] == ["$key"]
 
 
 def test_unknown_semantics_are_explicitly_marked_needs_review(tmp_path):

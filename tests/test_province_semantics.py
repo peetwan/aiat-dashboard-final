@@ -24,7 +24,11 @@ def test_all_provinces_keep_project_participant_and_unknown_semantics() -> None:
     }
 
     dashboard_contract = read_json(CONTRACT_ROOT / "dashboard_core.json")
-    expected_provinces = dashboard_contract["completeness"]["province_count"]
+    expected_provinces = next(
+        output["expected_count"]
+        for output in dashboard_contract["outputs"]
+        if output.get("path") == "data/public/public_dashboard.json"
+    )
     assert len(profiles) == len(briefings) == len(summaries) == expected_provinces
 
     for profile in profiles:

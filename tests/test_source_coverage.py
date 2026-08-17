@@ -79,7 +79,11 @@ def test_endpoint_ids_match_the_current_policy_fields():
 def test_catalog_covers_registry_and_keeps_value_lanes_separate():
     catalog = read_json(CATALOG_PATH)
     coverage_contract = read_json(CONTRACT_ROOT / "source_coverage.json")
-    expected_source_count = coverage_contract["completeness"]["source_count"]
+    expected_source_count = next(
+        output["expected_count"]
+        for output in coverage_contract["outputs"]
+        if output.get("records_pointer") == "/sources"
+    )
     assert catalog["catalog_version"] == "0.3.0"
     assert catalog["policy"]["approval_basis"] == "current_catalog_policy_and_source_cards"
     assert catalog["policy"]["current_stewardship"] == "repository_co_maintainers"
@@ -194,10 +198,17 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     payload = read_json(COVERAGE_PATH)
     summary = payload["summary"]
     contract = read_json(CONTRACT_ROOT / "source_coverage.json")
-    expected_source_count = contract["completeness"]["source_count"]
-    expected_province_count = read_json(CONTRACT_ROOT / "dashboard_core.json")[
-        "completeness"
-    ]["province_count"]
+    expected_source_count = next(
+        output["expected_count"]
+        for output in contract["outputs"]
+        if output.get("records_pointer") == "/sources"
+    )
+    dashboard_contract = read_json(CONTRACT_ROOT / "dashboard_core.json")
+    expected_province_count = next(
+        output["expected_count"]
+        for output in dashboard_contract["outputs"]
+        if output.get("path") == "data/public/public_dashboard.json"
+    )
     catalog = read_json(CATALOG_PATH)
     catalog_by_id = {source["source_id"]: source for source in catalog["sources"]}
 

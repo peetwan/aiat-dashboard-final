@@ -12,7 +12,7 @@
   "measures": [
     {"name": "executive province measures", "unit": "ระบุในแต่ละ dimension", "denominator": "ระบุในแต่ละ dimension หรือไม่ระบุ"}
   ],
-  "completeness": {"file_count": 77},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

@@ -12,7 +12,7 @@
   "measures": [
     {"name": "housing/spatial aggregate measures", "unit": "ระบุในแต่ละ field", "denominator": "aggregate เท่านั้น; ไม่มี respondent identifier"}
   ],
-  "completeness": {"province_count": 77, "respondent_rows_public": 0},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

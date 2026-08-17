@@ -146,6 +146,29 @@ def test_payload_api_is_locked_by_default():
         assert response.status_code == 403
 
 
+def test_reviewed_downloads_support_head_without_exposing_internal_paths():
+    download_path = PUBLIC_ROOT / "province_evidence.csv"
+
+    with TestClient(app) as client:
+        get_response = client.get("/downloads/province_evidence.csv")
+        head_response = client.head("/downloads/province_evidence.csv")
+
+        assert get_response.status_code == 200
+        assert head_response.status_code == 200
+        assert head_response.content == b""
+        assert head_response.headers["content-length"] == str(download_path.stat().st_size)
+        assert head_response.headers["content-type"] == get_response.headers["content-type"]
+        assert head_response.headers["etag"] == get_response.headers["etag"]
+
+        for blocked_path in (
+            "publication_receipt.json",
+            "serving_manifest.json",
+            "%2e%2e%2fpublication_receipt.json",
+            "%2e%2e%5cserving_manifest.json",
+        ):
+            assert client.head(f"/downloads/{blocked_path}").status_code == 404
+
+
 def test_public_projection_and_downloads_are_available():
     dashboard = read_json(PUBLIC_ROOT / "public_dashboard.json")
     insights = read_json(PUBLIC_ROOT / "source_insights.json")
@@ -158,7 +181,11 @@ def test_public_projection_and_downloads_are_available():
     dashboard_contract = read_json(
         PROJECT_ROOT / "config" / "publication_contracts" / "dashboard_core.json"
     )
-    expected_province_count = dashboard_contract["completeness"]["province_count"]
+    expected_province_count = next(
+        output["expected_count"]
+        for output in dashboard_contract["outputs"]
+        if output.get("path") == "data/public/public_dashboard.json"
+    )
     executive_contract = read_json(
         PROJECT_ROOT
         / "config"

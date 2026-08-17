@@ -12,7 +12,7 @@
   "measures": [
     {"name": "coverage/status counts", "unit": "จำนวนแหล่งข้อมูล", "denominator": "28 URLs ใน catalog"}
   ],
-  "completeness": {"source_count": 28},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "catalog_metadata",
   "outputs": [
     {

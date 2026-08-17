@@ -24,7 +24,7 @@
   "measures": [
     {"name": "province evidence metrics", "unit": "ระบุแยกในชื่อ field/metadata", "denominator": "ระบุแยกตาม metric หรือไม่ระบุ"}
   ],
-  "completeness": {"province_count": 77, "source_count": 11},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

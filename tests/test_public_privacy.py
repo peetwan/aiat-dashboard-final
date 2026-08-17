@@ -337,7 +337,12 @@ def test_cultural_geojson_has_no_contact_or_private_attribute_projection():
 def test_all_provincial_culture_and_tourism_sections_are_privacy_projected():
     paths = briefing_paths()
     contract = read_json(CONTRACT_ROOT / "provincial_briefings.json")
-    assert len(paths) == contract["completeness"]["file_count"]
+    expected_files = next(
+        output["expected_files"]
+        for output in contract["outputs"]
+        if "path_glob" in output
+    )
+    assert len(paths) == expected_files
 
     violations: list[tuple[str, str]] = []
     for path in paths:
@@ -426,7 +431,12 @@ def test_executive_portfolio_contains_aggregate_values_only():
 def test_all_executive_summary_dimensions_and_highlights_are_privacy_projected():
     paths = executive_summary_paths()
     contract = read_json(CONTRACT_ROOT / "executive_summaries.json")
-    assert len(paths) == contract["completeness"]["file_count"]
+    expected_files = next(
+        output["expected_files"]
+        for output in contract["outputs"]
+        if "path_glob" in output
+    )
+    assert len(paths) == expected_files
 
     violations: list[tuple[str, str]] = []
     for path in paths:

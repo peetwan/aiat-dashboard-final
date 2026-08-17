@@ -54,7 +54,7 @@ Gate ผ่านหมายถึง revision ตรงตามกติก�
 | `geography` | เชื่อมพื้นที่ระดับใดและใช้ field ไหน |
 | `as_of` | ข้อมูลอ้างถึงเวลาใด หรือระบุว่าต้นทางไม่มี |
 | `measures.unit` / `denominator` | ตัวเลขวัดด้วยหน่วยใดและหารด้วยฐานอะไร |
-| `completeness` | จำนวน/ส่วนประกอบขั้นต่ำที่ต้องมี |
+| `completeness` | ใช้กติกาใน `outputs`: จำนวนหลักอยู่ที่ `records_pointer`; ชุดรองเพิ่ม `completeness_rules` ด้วย pointer + expected/minimum count |
 | `privacy_profile` | ข้อมูลชนิดใดอนุญาตให้เผยแพร่ |
 | `outputs` | path, format, schema, identity, ขอบเขตการเปลี่ยนชุด identity และ count ของไฟล์ |
 

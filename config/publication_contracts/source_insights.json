@@ -24,7 +24,7 @@
   "measures": [
     {"name": "source-specific public summaries", "unit": "ระบุในแต่ละ metric", "denominator": "ระบุในแต่ละ metric หรือไม่ระบุ"}
   ],
-  "completeness": {"source_count": 7},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

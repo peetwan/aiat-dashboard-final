@@ -12,7 +12,7 @@
   "measures": [
     {"name": "province boundary/reference attributes", "unit": "geometry/metadata", "denominator": "ไม่เกี่ยวข้อง"}
   ],
-  "completeness": {"province_count": 77},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "reference_geography",
   "outputs": [
     {

@@ -12,7 +12,7 @@
   "measures": [
     {"name": "cultural point classification", "unit": "รายการ", "denominator": "จุดที่เผยแพร่ใน projection"}
   ],
-  "completeness": {"minimum_points": 1},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

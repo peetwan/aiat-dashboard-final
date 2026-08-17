@@ -134,7 +134,11 @@ def test_housing_demand_public_summary_privacy_contract():
             / "housing_summaries.json"
         ).read_text(encoding="utf-8")
     )
-    expected_provinces = contract["completeness"]["province_count"]
+    expected_provinces = next(
+        output["expected_count"]
+        for output in contract["outputs"]
+        if output.get("path") == "data/public/housing_demand_summary.json"
+    )
     with TestClient(app) as client:
         response = client.get("/api/public/v1/housing-demand/summary")
         assert response.status_code == 200

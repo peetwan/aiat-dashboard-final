@@ -325,7 +325,11 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
 
 
-@app.get("/downloads/{asset_path:path}", include_in_schema=False)
+@app.api_route(
+    "/downloads/{asset_path:path}",
+    methods=["GET", "HEAD"],
+    include_in_schema=False,
+)
 def reviewed_public_download(asset_path: str):
     """Serve only files explicitly marked downloadable by a reviewed contract."""
 

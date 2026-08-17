@@ -12,7 +12,7 @@
   "measures": [
     {"name": "unmapped record counts", "unit": "ระเบียน", "denominator": "ระเบียนของแหล่งนั้น"}
   ],
-  "completeness": {"source_count": 4, "guess_geography": false},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

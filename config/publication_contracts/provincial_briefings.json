@@ -12,7 +12,7 @@
   "measures": [
     {"name": "province briefing measures", "unit": "ระบุในแต่ละ section", "denominator": "ระบุในแต่ละ section หรือไม่ระบุ"}
   ],
-  "completeness": {"file_count": 77},
+  "completeness": {"policy": "output_contracts"},
   "privacy_profile": "aggregate_public",
   "outputs": [
     {

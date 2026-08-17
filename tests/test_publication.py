@@ -33,6 +33,13 @@ def _write_json(path: Path, payload: object) -> None:
     )
 
 
+def _deep_object(leaf: object, depth: int = 45) -> object:
+    value = leaf
+    for _ in range(depth):
+        value = {"next": value}
+    return value
+
+
 def _fixture(tmp_path: Path, *, include_csv: bool = False) -> tuple[Path, Path, Path]:
     root = tmp_path / "repo"
     contracts_root = root / "config" / "publication_contracts"
@@ -46,6 +53,10 @@ def _fixture(tmp_path: Path, *, include_csv: bool = False) -> tuple[Path, Path, 
             "sources": [
                 {
                     "source_id": "source_a",
+                    "url": "https://source-a.example/",
+                    "endpoints": [
+                        {"url": "https://api.source-a.example/v1/records"}
+                    ],
                     "production_values_allowed": True,
                     "cloud_policy": "team_approved_public",
                 }
@@ -126,13 +137,31 @@ def _fixture(tmp_path: Path, *, include_csv: bool = False) -> tuple[Path, Path, 
             "measures": [
                 {"name": "count", "unit": "รายการ", "denominator": "ไม่เกี่ยวข้อง"}
             ],
-            "completeness": {"minimum_count": 1},
+            "completeness": {"policy": "output_contracts"},
             "privacy_profile": "aggregate_public",
             "outputs": outputs,
         },
     )
     write_receipt(root, contracts_root, catalog_path)
     return root, contracts_root, catalog_path
+
+
+def _declare_source_b(contracts_root: Path, catalog_path: Path) -> None:
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"].append(
+        {
+            "source_id": "source_b",
+            "url": "https://source-b.example/",
+            "endpoints": [],
+            "production_values_allowed": True,
+            "cloud_policy": "team_approved_public",
+        }
+    )
+    _write_json(catalog_path, catalog)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["source_ids"].append("source_b")
+    _write_json(contract_path, contract)
 
 
 def _geojson_payload(
@@ -248,6 +277,177 @@ def test_json_private_field_is_rejected_without_logging_the_value(tmp_path):
     assert "person@example.com" not in encoded
 
 
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "opaque_id",
+        "opaque_code",
+        "record_hash",
+        "total_count",
+        "fiscal_year",
+        "source_url",
+    ],
+)
+def test_phone_shaped_value_is_rejected_in_every_opaque_field_without_logging(
+    tmp_path, field_name
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    phone_value = "081-234-5678"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, field_name: phone_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "Thai phone-like value" in encoded
+    assert phone_value not in encoded
+
+
+@pytest.mark.parametrize("phone_value", ["66812345678", "+66812345678", 66812345678])
+def test_country_code_phone_string_or_integer_is_rejected_without_logging(
+    tmp_path, phone_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, "opaque_code": phone_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "Thai phone-like" in encoded
+    assert str(phone_value) not in encoded
+
+
+def test_machine_ids_codes_hashes_and_counts_that_are_not_phone_tokens_remain_valid(
+    tmp_path,
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_url": "https://source-a.example/items/RID0812345678",
+            "items": [
+                {
+                    "id": "one",
+                    "record_id": "RID0812345678",
+                    "province_code": "10",
+                    "record_hash": "a0812345678b7c2d",
+                    "total_count": "1083458",
+                    "fiscal_year": "2569",
+                    "count": 1,
+                }
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+    assert report["problems"] == []
+
+
+@pytest.mark.parametrize(
+    ("unsafe_key", "reason"),
+    [
+        ("person@example.com", "email-like value in object key"),
+        ("081-234-5678", "Thai phone-like value in object key"),
+        ("บ้านเลขที่ 99", "home-address-like value in object key"),
+        (
+            "https://source-a.example/?signature=top-secret",
+            "signed/credential URL in object key",
+        ),
+        (
+            "-".join(("sk", "proj", "abcdefghijklmnopqrstuvwxyz")),
+            "credential-like value in object key",
+        ),
+    ],
+)
+def test_sensitive_json_map_key_is_rejected_and_redacted(
+    tmp_path, unsafe_key, reason
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [
+                {
+                    "id": "one",
+                    "count": 1,
+                    "metadata": {unsafe_key: _deep_object(True)},
+                }
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert reason in encoded
+    assert "payload exceeds depth" in encoded
+    assert unsafe_key not in encoded
+    assert "<map-key>" in encoded
+
+
+def test_restricted_source_identifier_in_json_map_key_is_rejected_and_redacted(
+    tmp_path,
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    restricted_source = "source_restricted"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"].append(
+        {
+            "source_id": restricted_source,
+            "url": "https://restricted.example/",
+            "endpoints": [],
+            "production_values_allowed": False,
+            "cloud_policy": "restricted_local_only",
+        }
+    )
+    _write_json(catalog_path, catalog)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [
+                {
+                    "id": "one",
+                    "count": 1,
+                    "metadata": {restricted_source: _deep_object(True)},
+                }
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "restricted source identifier in object key" in encoded
+    assert "payload exceeds depth" in encoded
+    assert restricted_source not in encoded
+
+
 def test_embedded_source_provenance_must_match_contract_without_logging_value(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path)
     undeclared_source = "source_not_declared"
@@ -267,6 +467,486 @@ def test_embedded_source_provenance_must_match_contract_without_logging_value(tm
     assert report["status"] == "invalid"
     assert "source provenance is not declared" in encoded
     assert undeclared_source not in encoded
+
+
+def test_registered_source_landing_descendant_and_exact_endpoint_are_valid(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_url": "https://source-a.example/datasets/current",
+            "endpoint_url": "https://api.source-a.example/v1/records",
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+    assert report["problems"] == []
+
+
+@pytest.mark.parametrize(
+    "unregistered_url",
+    [
+        "https://unregistered.example/data",
+        "https://api.source-a.example/v1/unrelated-dataset",
+        "https://api.source-a.example/v1/records?dataset=unregistered",
+    ],
+)
+def test_unregistered_source_url_is_rejected_without_logging_value(
+    tmp_path, unregistered_url
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_urls": ["https://source-a.example/datasets/current", unregistered_url],
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert unregistered_url not in encoded
+
+
+@pytest.mark.parametrize(
+    "url_key", ["url", "urls", "documentation_url", "website", "uri"]
+)
+def test_generic_url_fields_are_validated_and_redacted(tmp_path, url_key):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    unregistered_url = "https://unregistered.example/generic"
+    value: object = [unregistered_url] if url_key == "urls" else unregistered_url
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            url_key: value,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert unregistered_url not in encoded
+
+
+@pytest.mark.parametrize("url_key", ["website", "uri", "source_link"])
+def test_list_valued_link_aliases_are_validated_and_redacted(tmp_path, url_key):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    unregistered_url = "https://unregistered.example/list-alias"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            url_key: [unregistered_url],
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert unregistered_url not in encoded
+
+
+def test_generic_url_in_csv_row_is_validated_and_redacted(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path, include_csv=True)
+    unregistered_url = "https://unregistered.example/csv"
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][1]["headers"] = ["id", "count", "url"]
+    _write_json(contract_path, contract)
+    (root / "data" / "public" / "rows.csv").write_text(
+        f"id,count,url\none,2,{unregistered_url}\n",
+        encoding="utf-8",
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert unregistered_url not in encoded
+
+
+def test_declared_source_id_map_key_is_the_local_url_context(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _declare_source_b(contracts_root, catalog_path)
+    mismatched_url = "https://source-b.example/data"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "by_source": {"source_a": {"url": mismatched_url}},
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert mismatched_url not in encoded
+
+
+def test_git_diff_blocks_switch_to_another_declared_provenance_rule(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _declare_source_b(contracts_root, catalog_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["url"] = "https://source-a.example/datasets/first"
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base provenance rule")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["url"] = "https://source-b.example/datasets/first"
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "switch provenance rule")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert report["status"] == "blocked"
+    assert any("provenance rule changed" in item for item in report["problems"])
+    assert "source-a.example" not in encoded
+    assert "source-b.example" not in encoded
+    assert len(report["semantic_diff"][0]["before"]["provenance_sha256"]) == 64
+    assert len(report["semantic_diff"][0]["after"]["provenance_sha256"]) == 64
+
+
+def test_git_diff_allows_descendant_url_refresh_under_same_landing_rule(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["url"] = "https://source-a.example/datasets/first"
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base descendant URL")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["url"] = "https://source-a.example/datasets/second"
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "refresh descendant URL")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is True
+    assert report["status"] == "pass"
+    assert report["semantic_diff"][0]["before"]["provenance_sha256"] == report[
+        "semantic_diff"
+    ][0]["after"]["provenance_sha256"]
+
+
+def test_restricted_catalog_endpoint_is_denied_for_approved_values(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    restricted_url = "https://source-a.example/private/records"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"][0]["endpoints"].append(
+        {"url": restricted_url, "restricted": True, "runtime_enabled": True}
+    )
+    _write_json(catalog_path, catalog)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "url": restricted_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "restricted catalog endpoint cannot be value provenance" in encoded
+    assert restricted_url not in encoded
+
+
+def test_catalog_metadata_may_cite_restricted_endpoint(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    restricted_url = "https://source-a.example/private/records"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"][0]["endpoints"].append(
+        {"url": restricted_url, "restricted": True, "runtime_enabled": False}
+    )
+    _write_json(catalog_path, catalog)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["source_scope"] = "catalog_metadata"
+    contract["privacy_profile"] = "catalog_metadata"
+    _write_json(contract_path, contract)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "url": restricted_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+
+
+def test_runtime_disabled_nonrestricted_endpoint_remains_valid_provenance(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    archived_url = "https://source-a.example/archive/records"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"][0]["endpoints"].append(
+        {"url": archived_url, "restricted": False, "runtime_enabled": False}
+    )
+    _write_json(catalog_path, catalog)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "url": archived_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+
+
+@pytest.mark.parametrize(
+    ("field_name", "unsafe_value", "reason"),
+    [
+        (
+            "address",
+            "123 ถนนสุขุมวิท แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพมหานคร 10110",
+            "home-address-like value",
+        ),
+        ("address", "99 Sukhumvit Rd., Bangkok 10110", "home-address-like value"),
+        ("contact", "+66 (0) 81 234 5678", "Thai phone-like value"),
+        ("credential", "AIza" + "A" * 35, "credential-like value"),
+        ("credential", "sk_live_" + "A" * 30, "credential-like value"),
+    ],
+)
+def test_exact_sensitive_alias_and_value_pattern_are_rejected_without_logging(
+    tmp_path, field_name, unsafe_value, reason
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, field_name: unsafe_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "private/contact field" in encoded
+    assert reason in encoded
+    assert unsafe_value not in encoded
+
+
+def test_routine_refresh_rejects_unregistered_source_link_without_logging(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["source_link"] = "https://source-a.example/datasets/base"
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base source link")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    unsafe_value = "https://unregistered.example/alias"
+    head_payload["source_link"] = unsafe_value
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "unregistered source link")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert report["status"] == "blocked"
+    assert report["lane"] == "routine_refresh"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert unsafe_value not in encoded
+
+
+def test_percent_encoded_restricted_endpoint_is_denied_and_redacted(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    restricted_url = "https://source-a.example/private/records"
+    encoded_url = "https://source-a.example/private/%72ecords"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"][0]["endpoints"].append(
+        {"url": restricted_url, "restricted": True, "runtime_enabled": True}
+    )
+    _write_json(catalog_path, catalog)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_link": encoded_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "restricted catalog endpoint cannot be value provenance" in encoded
+    assert encoded_url not in encoded
+
+
+def test_restricted_endpoint_descendant_is_denied_before_broad_landing_rule(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    restricted_url = "https://source-a.example/private/records"
+    descendant_url = restricted_url + "/child"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["sources"][0]["endpoints"].append(
+        {"url": restricted_url, "restricted": True, "runtime_enabled": True}
+    )
+    _write_json(catalog_path, catalog)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_link": descendant_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "restricted catalog endpoint cannot be value provenance" in encoded
+    assert descendant_url not in encoded
+
+
+@pytest.mark.parametrize(
+    "ambiguous_url",
+    [
+        "https://source-a.example/private/%2e%2e/records",
+        "https://source-a.example/private/%252e%252e/records",
+        "https://source-a.example/private/records%3Bchild",
+    ],
+)
+def test_ambiguous_encoded_provenance_path_is_rejected_and_redacted(
+    tmp_path, ambiguous_url
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_link": ambiguous_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "ambiguous encoded path" in encoded
+    assert ambiguous_url not in encoded
+
+
+@pytest.mark.parametrize("encoded_separator", ["%5f", "%255f"])
+def test_percent_encoded_credential_query_key_is_rejected_and_redacted(
+    tmp_path, encoded_separator
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    credential_url = (
+        f"https://source-a.example/data?api{encoded_separator}key=" + "A" * 24
+    )
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_link": credential_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "credential query parameter" in encoded
+    assert credential_url not in encoded
+
+
+def test_percent_encoded_credential_query_in_map_key_is_rejected_and_redacted(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    credential_url = "https://source-a.example/data?api%5fkey=" + "A" * 24
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "lookup": {credential_url: "redacted"},
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "signed/credential URL in object key" in encoded
+    assert "<map-key>" in encoded
+    assert credential_url not in encoded
 
 
 def test_duplicate_identity_is_rejected(tmp_path):
@@ -392,6 +1072,62 @@ def test_contract_requires_explicit_semantics(tmp_path):
 
     with pytest.raises(PublicationError, match="grain_th"):
         load_contracts(contracts_root)
+
+
+def test_contract_rejects_opaque_completeness_claims(tmp_path):
+    _, contracts_root, _ = _fixture(tmp_path)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["completeness"]["secondary_count"] = 2
+    _write_json(contract_path, contract)
+
+    with pytest.raises(PublicationError, match="unexpected completeness fields"):
+        load_contracts(contracts_root)
+
+
+def test_git_completeness_rule_blocks_secondary_collection_loss(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["completeness_rules"] = [
+        {
+            "pointer": "/secondary",
+            "minimum_count": 1,
+            "max_count_drop_ratio": 0,
+            "max_count_increase_ratio": 1,
+        }
+    ]
+    _write_json(contract_path, contract)
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["secondary"] = [
+        {"opaque": "first-private-value"},
+        {"opaque": "second-private-value"},
+    ]
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base secondary completeness")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["secondary"] = head_payload["secondary"][:1]
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "drop secondary collection")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert any(
+        "secondary completeness count drop exceeds contract" in problem
+        for problem in report["problems"]
+    )
+    assert "first-private-value" not in encoded
+    assert "second-private-value" not in encoded
 
 
 def test_download_allowlist_excludes_receipt_and_provenance(tmp_path):
@@ -583,6 +1319,47 @@ def test_geojson_invalid_geometry_type_does_not_echo_untrusted_value(tmp_path):
     assert untrusted_value not in encoded
 
 
+def test_git_semantic_diff_blocks_geometry_type_reinterpretation(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    coordinates = [
+        [
+            [100.0, 13.0],
+            [101.0, 13.0],
+            [101.0, 14.0],
+            [100.0, 13.0],
+        ]
+    ]
+    _install_geojson(
+        root,
+        contracts_root,
+        catalog_path,
+        _geojson_payload([{"type": "Polygon", "coordinates": coordinates}]),
+    )
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base polygon geometry")
+
+    _install_geojson(
+        root,
+        contracts_root,
+        catalog_path,
+        _geojson_payload(
+            [{"type": "MultiLineString", "coordinates": coordinates}],
+            generated_at="2026-08-18T00:00:00+00:00",
+        ),
+    )
+    head_sha = _commit_all(root, "reinterpret geometry type")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is False
+    assert report["status"] == "blocked"
+    assert report["lane"] == "routine_refresh"
+    assert any("semantic meaning changed" in item for item in report["problems"])
+    assert not any("schema changed" in item for item in report["problems"])
+
+
 def test_git_semantic_diff_passes_a_routine_refresh_without_values(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path)
     _git(root, "init", "-b", "main")
@@ -638,6 +1415,350 @@ def test_git_semantic_diff_blocks_schema_drift(tmp_path):
     assert valid is False
     assert report["status"] == "blocked"
     assert any("schema changed under stable contract" in item for item in report["problems"])
+
+
+@pytest.mark.parametrize(
+    ("semantic_key", "changed_value"),
+    [
+        ("unit", "people"),
+        ("denominator", "eligible population"),
+        ("grain_th", "one row per district"),
+        ("publication_status", "accepted_fact"),
+        ("geography_level", "district"),
+    ],
+)
+def test_git_semantic_diff_blocks_meaning_reinterpretation_without_logging_values(
+    tmp_path, semantic_key, changed_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["semantics"] = {
+        "unit": "records",
+        "denominator": "all records",
+        "grain_th": "one row per record",
+        "publication_status": "candidate",
+        "geography_level": "province",
+    }
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base semantics")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["semantics"][semantic_key] = changed_value
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "reinterpret semantics")
+
+    report, valid = validate_git_revision(
+        root,
+        contracts_root,
+        catalog_path,
+        base_sha,
+        head_sha,
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert report["status"] == "blocked"
+    assert any(
+        "semantic meaning changed under stable contract" in problem
+        for problem in report["problems"]
+    )
+    assert not any("schema changed" in problem for problem in report["problems"])
+    assert changed_value not in encoded
+    assert len(report["semantic_diff"][0]["before"]["semantic_sha256"]) == 64
+    assert len(report["semantic_diff"][0]["after"]["semantic_sha256"]) == 64
+
+
+def test_git_semantic_diff_does_not_freeze_ordinary_geography_record_values(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["items"][0].update(
+        {"province_code": "10", "province_name_th": "กรุงเทพมหานคร"}
+    )
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base geography values")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["items"][0].update(
+        {"province_code": "11", "province_name_th": "สมุทรปราการ"}
+    )
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "refresh geography values")
+
+    report, valid = validate_git_revision(
+        root,
+        contracts_root,
+        catalog_path,
+        base_sha,
+        head_sha,
+    )
+
+    assert valid is True
+    assert report["status"] == "pass"
+    assert report["semantic_diff"][0]["before"]["semantic_sha256"] == report[
+        "semantic_diff"
+    ][0]["after"]["semantic_sha256"]
+
+
+def test_git_semantic_diff_blocks_unit_and_status_swaps_between_stable_records(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = {
+        "generated_at": "2026-08-17T00:00:00+00:00",
+        "items": [
+            {"id": "one", "count": 2, "unit": "records", "quality_status": "candidate"},
+            {"id": "two", "count": 3, "unit": "people", "quality_status": "reviewed"},
+        ],
+    }
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base stable record semantics")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    for field in ("unit", "quality_status"):
+        head_payload["items"][0][field], head_payload["items"][1][field] = (
+            head_payload["items"][1][field],
+            head_payload["items"][0][field],
+        )
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "swap stable record semantics")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is False
+    assert any("semantic meaning changed" in item for item in report["problems"])
+
+
+def test_git_semantic_diff_blocks_partial_semantic_field_removal(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = {
+        "generated_at": "2026-08-17T00:00:00+00:00",
+        "items": [
+            {"id": "one", "count": 2, "quality_status": "candidate"},
+            {"id": "two", "count": 3, "quality_status": "candidate"},
+        ],
+    }
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base repeated status")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    del head_payload["items"][0]["quality_status"]
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "remove one status")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is False
+    assert any("semantic meaning changed" in item for item in report["problems"])
+    assert not any("schema changed" in item for item in report["problems"])
+
+
+@pytest.mark.parametrize(
+    ("target", "changed_value"),
+    [
+        ("quality_label_th", "รับรองแล้ว"),
+        ("metric_label_th", "ตัวชี้วัดที่เปลี่ยนความหมาย"),
+        ("province_join_method", "unreviewed_guess"),
+    ],
+)
+def test_git_semantic_diff_blocks_displayed_meaning_changes(
+    tmp_path, target, changed_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["items"][0].update(
+        {
+            "quality_label_th": "ข้อมูลทดลอง ต้องตรวจทาน",
+            "metric_label_th": "จำนวนรายการ",
+        }
+    )
+    base_payload["quality"] = {"province_join_method": "official_code"}
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base displayed semantics")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    if target == "province_join_method":
+        head_payload["quality"][target] = changed_value
+    else:
+        head_payload["items"][0][target] = changed_value
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "change displayed semantics")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert any("semantic meaning changed" in item for item in report["problems"])
+    assert changed_value not in encoded
+
+
+@pytest.mark.parametrize(
+    ("field", "base_value", "head_value"),
+    [
+        ("verification_state", "candidate", "reviewed"),
+        ("classification", "public_candidate", "public_reviewed"),
+        ("candidate_not_fact", True, False),
+        ("workflow_marker", "candidate", "accepted"),
+    ],
+)
+def test_git_semantic_diff_blocks_candidate_promotion_aliases(
+    tmp_path, field, base_value, head_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["items"][0]["public_visibility"] = {field: base_value}
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base candidate marker")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["items"][0]["public_visibility"][field] = head_value
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "promote candidate marker")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert any("semantic meaning changed" in item for item in report["problems"])
+    assert str(head_value) not in encoded
+
+
+def test_git_semantic_diff_allows_dynamic_geography_row_counts(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["coverage"] = {"geography_rows": 6}
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base geography count")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["coverage"]["geography_rows"] = 7
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "refresh geography count")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is True
+    assert report["semantic_diff"][0]["before"]["semantic_sha256"] == report[
+        "semantic_diff"
+    ][0]["after"]["semantic_sha256"]
+
+
+def test_git_semantic_diff_blocks_nested_record_as_of_regression(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["items"][0]["nested"] = {
+        "observed_as_of": "2026-08-16T00:00:00+00:00"
+    }
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base nested as of")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["items"][0]["nested"]["observed_as_of"] = (
+        "2026-08-15T00:00:00+00:00"
+    )
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "regress nested as of")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert valid is False
+    assert any("per-record as_of moved backwards" in item for item in report["problems"])
+    assert "2026-08-15" not in encoded
+
+
+def test_git_semantic_diff_allows_new_records_with_unchanged_semantics(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["max_identity_churn_ratio"] = 1
+    _write_json(contract_path, contract)
+    base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    base_payload["items"][0].update(
+        {"unit": "records", "publication_status": "candidate"}
+    )
+    _write_json(artifact_path, base_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base record semantics")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    head_payload["items"].append(
+        {
+            "id": "two",
+            "count": 3,
+            "unit": "records",
+            "publication_status": "candidate",
+        }
+    )
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "add record without changing semantics")
+
+    report, valid = validate_git_revision(
+        root,
+        contracts_root,
+        catalog_path,
+        base_sha,
+        head_sha,
+    )
+
+    assert valid is True
+    assert report["status"] == "pass"
+    assert report["semantic_diff"][0]["before"]["semantic_sha256"] == report[
+        "semantic_diff"
+    ][0]["after"]["semantic_sha256"]
 
 
 def test_git_semantic_diff_blocks_complete_identity_replacement(tmp_path):

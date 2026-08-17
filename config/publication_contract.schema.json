@@ -51,7 +51,20 @@
         }
       }
     },
-    "completeness": {"type": "object", "minProperties": 1},
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy"],
+      "properties": {
+        "policy": {"const": "output_contracts"},
+        "needs_review": {"type": "boolean"},
+        "review_items": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
     "privacy_profile": {
       "enum": [
         "aggregate_public",
@@ -96,7 +109,27 @@
         "max_identity_churn_ratio": {"type": "number", "minimum": 0, "maximum": 1},
         "as_of_pointer": {"type": "string"},
         "headers": {"type": "array", "items": {"type": "string"}},
+        "completeness_rules": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/completeness_rule"}
+        },
         "schema_policy": {"const": "stable"}
+      }
+    },
+    "completeness_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pointer"],
+      "anyOf": [
+        {"required": ["expected_count"]},
+        {"required": ["minimum_count"]}
+      ],
+      "properties": {
+        "pointer": {"type": "string", "pattern": "^(\\$|/.*)$"},
+        "expected_count": {"type": "integer", "minimum": 0},
+        "minimum_count": {"type": "integer", "minimum": 0},
+        "max_count_drop_ratio": {"type": "number", "minimum": 0, "maximum": 10},
+        "max_count_increase_ratio": {"type": "number", "minimum": 0, "maximum": 10}
       }
     }
   }

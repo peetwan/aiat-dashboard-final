@@ -223,6 +223,21 @@ def _field_paths_do_not_conflict(fields: Sequence[str]) -> None:
                 )
 
 
+def _validate_map_key_identity_shape(spec: PublicationSpec) -> None:
+    if "$key" not in spec.identity_fields:
+        return
+    if spec.output_format == "csv":
+        raise ScaffoldError("$key identity is unavailable for CSV records")
+    if spec.records_pointer in {"$", "/"}:
+        raise ScaffoldError(
+            "$key identity requires a non-root records_pointer that resolves to an object map"
+        )
+    if spec.output_format == "geojson" and spec.records_pointer == "/features":
+        raise ScaffoldError(
+            "$key identity is unavailable for the GeoJSON /features array"
+        )
+
+
 def validate_spec(spec: PublicationSpec) -> PublicationSpec:
     if not DATASET_KEY_RE.fullmatch(spec.dataset_key):
         raise ScaffoldError("dataset_key must match ^[a-z][a-z0-9_]{0,63}$")
@@ -269,6 +284,7 @@ def validate_spec(spec: PublicationSpec) -> PublicationSpec:
 
     _safe_output_path(spec.output_path, spec.output_format)
     _safe_json_pointer(spec.records_pointer, label="records_pointer")
+    _validate_map_key_identity_shape(spec)
     if spec.as_of_pointer is not None:
         _safe_json_pointer(spec.as_of_pointer, label="as_of_pointer")
     if spec.output_format == "csv":
@@ -425,7 +441,7 @@ def _contract(spec: PublicationSpec) -> dict[str, object]:
             }
         ],
         "completeness": {
-            "minimum_count": spec.minimum_count,
+            "policy": "output_contracts",
             "needs_review": bool(review_items),
             "review_items": review_items,
         },
