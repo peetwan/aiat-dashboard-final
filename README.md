@@ -13,7 +13,8 @@
 | Metadata-only | 12 แหล่ง |
 | Restricted local-only | 5 แหล่ง |
 | จังหวัด | 77 จังหวัด |
-| Public serving artifacts | 161 ชุด |
+| Public serving artifacts | 162 ชุด |
+| Housing spatial features | 194,532 features ใน 4 layers |
 | Production database | PostgreSQL บน Railway |
 | Local database | SQLite สำหรับพัฒนาและทดสอบ |
 
@@ -57,7 +58,7 @@ python -m app.server
 
 เปิด `http://localhost:8000` และ OpenAPI explorer ที่ `http://localhost:8000/docs`
 
-`init-db` จะสร้างตาราง, sync catalog 28 แหล่ง และนำ cleaned public artifacts เข้า serving database โดยไม่ fetch หรือแก้ raw evidence
+`init-db` จะสร้างตาราง, sync catalog 28 แหล่ง, นำ cleaned public artifacts และ Housing spatial 194,532 features เข้า serving database โดยไม่ fetch หรือแก้ raw evidence
 
 ## เส้นทางข้อมูล
 

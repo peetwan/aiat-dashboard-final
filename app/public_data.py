@@ -61,6 +61,10 @@ def unmapped_records() -> dict[str, Any]:
     return load_public_artifact("unmapped-records", "unmapped_records.json")
 
 
+def housing_spatial_summary() -> dict[str, Any]:
+    return load_public_artifact("housing-spatial-summary", "housing_spatial_summary.json")
+
+
 def learning_dashboard() -> dict[str, Any]:
     return load_public_artifact("learning-dashboard", "learning_dashboard.json")
 

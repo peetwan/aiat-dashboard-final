@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
@@ -11,12 +12,14 @@ from sqlalchemy import desc, func, select, text
 
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.database import SessionLocal, engine, init_db
-from app.models import DashboardRecord, Endpoint, IngestionRun, PublicArtifact, Source
+from app.models import DashboardRecord, Endpoint, IngestionRun, PublicArtifact, Source, SpatialFeature
 from app.api_schemas import (
     CulturalPointFeatureCollectionResponse,
     DatabaseCoverageResponse,
     ExecutiveSummaryResponse,
     HealthResponse,
+    HousingSpatialFeatureCollectionResponse,
+    HousingSpatialSummaryResponse,
     LearningDashboardResponse,
     OperationsResponse,
     ProvinceFeatureCollectionResponse,
@@ -39,6 +42,7 @@ from app.public_data import (
     PUBLIC_DATA_ROOT,
     cultural_points,
     executive_summary,
+    housing_spatial_summary,
     learning_dashboard,
     province_boundaries,
     provincial_briefing,
@@ -49,6 +53,12 @@ from app.public_data import (
 )
 from app.operations import operations_status
 from app.settings import PROJECT_ROOT, get_settings
+from app.spatial_artifacts import (
+    REQUIRED_SPATIAL_COUNTS,
+    REQUIRED_SPATIAL_TOTAL,
+    spatial_contract_snapshot,
+    sync_spatial_layers,
+)
 
 
 settings = get_settings()
@@ -62,6 +72,10 @@ EXPECTED_RESTRICTED_SOURCE_COUNT = 5
 EXPECTED_ENDPOINT_COUNT = 144
 EXPECTED_RUNTIME_ENDPOINT_COUNT = 94
 STARTUP_SYNC_LOCK_ID = 0x4149415453594E43  # ASCII "AIATSYNC", signed bigint-safe.
+SPATIAL_DATABASE_REQUIRED = (
+    settings.app_env.lower() == "production" and engine.dialect.name == "postgresql"
+)
+EXPECTED_SPATIAL_FEATURES = REQUIRED_SPATIAL_TOTAL if SPATIAL_DATABASE_REQUIRED else 0
 
 
 def _debug_api_enabled() -> bool:
@@ -96,6 +110,7 @@ def _sync_serving_database() -> None:
             with SessionLocal(bind=connection) as session:
                 sync_catalog(session)
                 sync_public_artifacts(session)
+                sync_spatial_layers(session)
         finally:
             connection.execute(
                 text("SELECT pg_advisory_unlock(:lock_id)"),
@@ -178,6 +193,10 @@ def _serving_contract_snapshot(session) -> dict:
         )
         or 0
     )
+    spatial = spatial_contract_snapshot(
+        session,
+        required=SPATIAL_DATABASE_REQUIRED,
+    )
     policy_partitions_are_exact = (
         approved_ids == public_policy_ids
         and not (approved_ids & metadata_ids)
@@ -199,6 +218,7 @@ def _serving_contract_snapshot(session) -> dict:
         and disallowed_operational_records == 0
         and endpoint_total == EXPECTED_ENDPOINT_COUNT
         and runtime_endpoint_total == EXPECTED_RUNTIME_ENDPOINT_COUNT
+        and spatial["complete"]
     )
     return {
         "complete": complete,
@@ -216,6 +236,7 @@ def _serving_contract_snapshot(session) -> dict:
         "approved_operational_records": approved_operational_records,
         "endpoint_total": endpoint_total,
         "runtime_endpoint_total": runtime_endpoint_total,
+        "spatial": spatial,
     }
 
 
@@ -310,6 +331,9 @@ def health():
                 "public_value_sources": 0,
                 "metadata_only_sources": 0,
                 "restricted_local_only_sources": 0,
+                "spatial_features": 0,
+                "spatial_features_expected": EXPECTED_SPATIAL_FEATURES,
+                "spatial_complete": False,
                 "published_catalog_ids_match_approved": False,
                 "restricted_values_published": 0,
                 "app_env": settings.app_env,
@@ -325,6 +349,9 @@ def health():
         "public_value_sources": contract["approved_total"],
         "metadata_only_sources": contract["metadata_only_total"],
         "restricted_local_only_sources": contract["restricted_source_total"],
+        "spatial_features": contract["spatial"]["feature_total"],
+        "spatial_features_expected": contract["spatial"]["expected_total"],
+        "spatial_complete": contract["spatial"]["complete"],
         "published_catalog_ids_match_approved": contract[
             "published_catalog_ids_match_approved"
         ],
@@ -407,6 +434,88 @@ def public_learning_dashboard():
 
 
 @app.get(
+    "/api/public/v1/housing-spatial/summary",
+    tags=["Public data"],
+    response_model=HousingSpatialSummaryResponse,
+)
+def public_housing_spatial_summary():
+    """Return executive-safe counts and distributions for public spatial layers."""
+    return housing_spatial_summary()
+
+
+@app.get(
+    "/api/public/v1/housing-spatial/features",
+    tags=["Public data"],
+    response_model=HousingSpatialFeatureCollectionResponse,
+)
+def public_housing_spatial_features(
+    layer_id: str = Query(...),
+    adm3_pcode: str | None = Query(default=None, max_length=20),
+    min_lon: float | None = Query(default=None, ge=-180, le=180),
+    min_lat: float | None = Query(default=None, ge=-90, le=90),
+    max_lon: float | None = Query(default=None, ge=-180, le=180),
+    max_lat: float | None = Query(default=None, ge=-90, le=90),
+    limit: int = Query(default=200, ge=1, le=500),
+):
+    """Query privacy-projected features by layer, subdistrict or bounding box."""
+    if layer_id not in REQUIRED_SPATIAL_COUNTS:
+        raise HTTPException(status_code=422, detail="unsupported spatial layer")
+    bbox_values = (min_lon, min_lat, max_lon, max_lat)
+    if any(value is not None for value in bbox_values) and not all(
+        value is not None for value in bbox_values
+    ):
+        raise HTTPException(status_code=422, detail="bbox requires all four coordinates")
+    if all(value is not None for value in bbox_values):
+        assert min_lon is not None and min_lat is not None
+        assert max_lon is not None and max_lat is not None
+        if min_lon > max_lon or min_lat > max_lat:
+            raise HTTPException(status_code=422, detail="invalid bbox ordering")
+
+    with SessionLocal() as session:
+        conditions = [SpatialFeature.layer_id == layer_id]
+        if adm3_pcode:
+            conditions.append(SpatialFeature.adm3_pcode == adm3_pcode)
+        if all(value is not None for value in bbox_values):
+            conditions.extend([
+                SpatialFeature.max_lon >= min_lon,
+                SpatialFeature.min_lon <= max_lon,
+                SpatialFeature.max_lat >= min_lat,
+                SpatialFeature.min_lat <= max_lat,
+            ])
+        rows = list(session.scalars(
+            select(SpatialFeature)
+            .where(*conditions)
+            .order_by(SpatialFeature.feature_id)
+            .limit(limit)
+        ))
+        total = session.scalar(
+            select(func.count())
+            .select_from(SpatialFeature)
+            .where(*conditions)
+        ) or 0
+    features = [
+        {
+            "type": "Feature",
+            "geometry": json.loads(row.geometry_json),
+            "properties": {
+                "feature_id": row.feature_id,
+                **row.properties,
+                "quality_status": row.quality_status,
+            },
+        }
+        for row in rows
+    ]
+    return {
+        "type": "FeatureCollection",
+        "layer_id": layer_id,
+        "total_in_layer": total,
+        "returned": len(features),
+        "quality_status": "needs_review",
+        "features": features,
+    }
+
+
+@app.get(
     "/api/public/v1/database-coverage",
     tags=["Public data"],
     response_model=DatabaseCoverageResponse,
@@ -441,6 +550,10 @@ def public_database_coverage():
         "artifact_groups": artifact_counts,
         "province_briefings": province_briefings,
         "executive_summaries": executive_summaries,
+        "spatial_features_in_database": contract["spatial"]["feature_total"],
+        "spatial_features_expected": contract["spatial"]["expected_total"],
+        "spatial_layer_counts": contract["spatial"]["counts"],
+        "spatial_complete": contract["spatial"]["complete"],
         "restricted_values_published": contract["disallowed_operational_records"],
         "operational_candidate_records": contract["approved_operational_records"],
         "raw_data_storage": "immutable_evidence_outside_serving_database",

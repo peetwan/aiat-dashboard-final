@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T04:19:12.972072+00:00",
+  "generated_at": "2026-08-17T05:20:54.038341+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -18,7 +18,7 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 28,
-      "aggregate_sha256": "6b5020275fb908b82724281fabe453ab4259e759e3be2761524165a05b7ca182"
+      "aggregate_sha256": "621abe4a608404f099288dd3f223be043d53ba4e9771984ae861bedcb2cbdd2d"
     }
   },
   "summary": {

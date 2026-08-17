@@ -197,6 +197,10 @@ class DatabaseCoverageResponse(PublicApiModel):
     artifact_groups: dict[str, int]
     province_briefings: int
     executive_summaries: int
+    spatial_features_in_database: int
+    spatial_features_expected: int
+    spatial_layer_counts: dict[str, int]
+    spatial_complete: bool
     restricted_values_published: int
     operational_candidate_records: int
     raw_data_storage: str
@@ -315,6 +319,31 @@ class CulturalPointFeatureCollectionResponse(PublicApiModel):
     features: list[GeoJSONFeature]
 
 
+class HousingSpatialSummaryResponse(PublicApiModel):
+    schema_version: str
+    generated_at: str
+    source_id: Literal["f3_housing_portal"]
+    publication_status: str
+    quality_status: str
+    as_of: str
+    counts: dict[str, int]
+    total_spatial_features: int
+    housing_points: JsonObject
+    accessibility_grid: JsonObject
+    flood_grid: JsonObject
+    database_contract: JsonObject
+    evidence: list[str]
+
+
+class HousingSpatialFeatureCollectionResponse(PublicApiModel):
+    type: Literal["FeatureCollection"]
+    layer_id: str
+    total_in_layer: int
+    returned: int
+    quality_status: str
+    features: list[GeoJSONFeature]
+
+
 class HealthResponse(PublicApiModel):
     status: Literal["ok", "unhealthy"]
     database: Literal["connected", "disconnected"]
@@ -325,6 +354,9 @@ class HealthResponse(PublicApiModel):
     public_value_sources: int
     metadata_only_sources: int
     restricted_local_only_sources: int
+    spatial_features: int
+    spatial_features_expected: int
+    spatial_complete: bool
     published_catalog_ids_match_approved: bool
     restricted_values_published: int
     app_env: str

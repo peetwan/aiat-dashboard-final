@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-17T04:19:08.174159+00:00",
+  "generated_at": "2026-08-17T05:20:51.320846+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
@@ -240,15 +240,15 @@
     },
     {
       "path": "dashboard_final/data/public/source_insights.json",
-      "bytes": 402842,
-      "sha256": "3678da1f953e6fdcedb8089e5d11368b619597c5d1b4661a1aabf97627aac35f"
+      "bytes": 404275,
+      "sha256": "1a2ef64fefafccb10b1d02aae23b2cc13b3509074ce3a4308878bcce5c7827cd"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
       "bytes": 142178,
-      "sha256": "e3a9a226a3a3aa439ff4cade468881b798161274b55409987374981c02e260cc"
+      "sha256": "9a466183b33bf8110fe11dd103c997e71ec1b540bd211a3268545e399906be47"
     },
     {
       "path": "data/public/province_evidence.csv",

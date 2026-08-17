@@ -23,8 +23,8 @@ SRA_YEAR=2569
 
 1. เชื่อม PostgreSQL และสร้างตารางที่ยังไม่มี
 2. Sync metadata 28 sources และ verified endpoint inventory 141 รายการ
-3. Sync cleaned public artifacts 161 ชุดพร้อม content hash
-4. เปิด `/health` เมื่อ serving contract ครบ: sources 28, policy 11/12/5 และ artifacts 161
+3. Sync cleaned public artifacts 162 ชุดพร้อม content hash และ Housing spatial 194,532 features
+4. เปิด `/health` เมื่อ serving contract ครบ: sources 28, policy 11/12/5, artifacts 162 และ spatial ครบ 4 layers
 
 Dashboard จึงเปิดได้โดยไม่รัน raw ingestion และไม่ต้อง upload raw records หลายล้านแถวขึ้น Cloud
 

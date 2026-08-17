@@ -128,6 +128,8 @@ main { width: min(1400px, calc(100% - 40px)); margin: 0 auto; }
 .source-health-card.is-complete header span { color: #18573c; background: #dcefe3; }
 .source-health-card.is-mixed header span { color: #24566a; background: #dcebf1; }
 .source-health-card p { margin: 9px 0 0; color: #51635a; font-size: 12px; line-height: 1.55; }
+.source-tab-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 11px; }
+.source-tab-chips span { padding: 4px 7px; color: #496057; background: #edf2ed; border: 1px solid #dbe4dc; border-radius: 99px; font-size: 9px; font-weight: 650; }
 
 .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .rmut-grid { display: grid; grid-template-columns: 1.2fr .8fr 1fr; gap: 18px; }

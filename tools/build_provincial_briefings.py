@@ -22,12 +22,13 @@ SRA_REGISTRY_PATH = (
 )
 SRA_EXTENDED_ROOT = (
     STAGED_ROOT
-    / "f1_sradss_ppaos/20260804T_sradss_extended_silver_01/silver"
+    / "f1_sradss_ppaos/20260817T_sradss_extended_silver_y2569_02/silver"
 )
 OUTPUT_ROOT = PROJECT_ROOT / "data/public/provincial_briefings"
 SOURCE_INSIGHTS_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
 LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
+HOUSING_SPATIAL_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_spatial_summary.json"
 UNMAPPED_PATH = PROJECT_ROOT / "data/public/unmapped_records.json"
 REQUIREMENT_PATH = (
     STAGED_ROOT
@@ -837,6 +838,8 @@ def build() -> None:
                 "housing": {
                     **initial_section("f3_housing_portal", "ที่อยู่อาศัยและความเสี่ยงเมือง"),
                     "resource_groups": [],
+                    "spatial_summary": None,
+                    "spatial_feature_total": 0,
                 },
                 "culture": initial_section("f2_culturalmap_university", "ทุนวัฒนธรรมในพื้นที่"),
                 "tourism": initial_section("f3_ruamthiao_lamphun", "การเดินทางและท่องเที่ยวลำพูน"),
@@ -1158,6 +1161,16 @@ def build() -> None:
     if housing_mapped_records + len(housing_unmapped) != housing_total_records:
         raise RuntimeError("housing projection reconciliation failed")
 
+    # The public spatial projection is Bangkok-only and remains a separate
+    # grain from CKAN rows. Demand respondent rows are intentionally excluded.
+    housing_spatial_summary = read_json(HOUSING_SPATIAL_SUMMARY_PATH)
+    if housing_spatial_summary["database_contract"]["demand_respondent_rows_included"] != 0:
+        raise RuntimeError("housing spatial projection unexpectedly includes demand respondents")
+    if "10" in briefings:
+        spatial_section = briefings["10"]["sections"]["housing"]
+        spatial_section["spatial_summary"] = housing_spatial_summary
+        spatial_section["spatial_feature_total"] = housing_spatial_summary["total_spatial_features"]
+
     # Ruam Thiao is explicitly Lamphun-scoped in its source definition.
     tourism_files = sorted((MERGE_RUN / "16_f3_ruamthiao_lamphun/data").glob("*.json"))
     if "51" in briefings:
@@ -1259,7 +1272,11 @@ def build() -> None:
             else:
                 total = len(section["items"])
             section["total_records"] = total
-            section["status"] = "available" if total else "source_has_no_record_for_province"
+            section["status"] = (
+                "available"
+                if total or section.get("spatial_feature_total", 0)
+                else "source_has_no_record_for_province"
+            )
             if section_id == "sra" and section["scope_status"] == "in_scope" and not section["items"]:
                 section["score_status"] = "in_scope_no_current_value"
 
@@ -1289,6 +1306,15 @@ def build() -> None:
                     for section_id in source_sections.get(source_id, ())
                 }
                 records = sum(record_breakdown.values())
+                if source_id == "f3_housing_portal":
+                    spatial_features = briefing["sections"]["housing"].get(
+                        "spatial_feature_total", 0
+                    )
+                    record_breakdown = {
+                        "public_ckan_rows": records,
+                        "spatial_features": spatial_features,
+                    }
+                    records += spatial_features
                 item.update({
                     "status": "available" if records else "source_has_no_record_for_province",
                     "records": records,
@@ -1299,11 +1325,15 @@ def build() -> None:
                             "นับ participant records; จำนวนโครงการเป็นการจัดกลุ่มเบื้องต้นจากชื่อ+ปี+หน่วยวิจัย"
                             if source_id == "f2_learning_area_based"
                             else (
+                                "public CKAN rows และ spatial features เป็นคนละ grain; demand respondents ไม่เผยแพร่"
+                                if source_id == "f3_housing_portal"
+                                else (
                                 "อยู่ในขอบเขตจังหวัดเป้าหมาย แต่คะแนนปี 2569 เป็นค่าว่าง; aggregate ชุดอื่นยังแสดงแบบ candidate"
                                 if source_id == "f1_sradss_ppaos"
                                 and briefing["sections"]["sra"]["score_status"]
                                 == "in_scope_no_current_value"
                                 else None
+                                )
                             )
                         )
                     ),
@@ -1315,6 +1345,8 @@ def build() -> None:
                         "participant_records": briefing["sections"]["area_based"]["total_records"],
                         "provisional_project_groups": briefing["sections"]["project_master"]["total_records"],
                     }
+                elif source_id == "f3_housing_portal":
+                    item["record_breakdown"] = record_breakdown
             coverage.append(item)
         briefing["source_coverage"] = sorted(coverage, key=lambda item: public_sources[item["source_id"]]["ordinal"])
         briefing["available_source_ids"] = [
@@ -1336,6 +1368,7 @@ def build() -> None:
         cultural_path,
         housing_metadata_path,
         *housing_paths,
+        HOUSING_SPATIAL_SUMMARY_PATH,
         *tourism_files,
         SOURCE_INSIGHTS_PATH,
         PROJECT_ROOT / "data/public/source_insights_manifest.json",

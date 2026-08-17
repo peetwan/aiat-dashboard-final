@@ -28,7 +28,7 @@ Source registry 28 แหล่ง
 1. **Evidence** — raw/API/export เดิมอยู่นอก repo Dashboard และเป็น immutable
 2. **Clean projection** — builder รักษา source grain, unit, `as_of`, quality status และ provenance
 3. **Executive serving** — แยกข้อมูลที่ผูกจังหวัด, non-geo และ unmapped โดยไม่เดา join key พร้อม semantic projection ระดับ `Need → Input → Activity → Output → Outcome`
-4. **Database serving** — sync 161 JSON artifacts พร้อม SHA-256 เข้า PostgreSQL หรือ SQLite
+4. **Database serving** — sync 162 JSON artifacts พร้อม SHA-256 และ Housing spatial 194,532 features เข้า PostgreSQL หรือ SQLite
 5. **Public API/UI** — โหลด summary ก่อนใน province preview และใช้ `/summary` + `/briefing` + `/operations` ในหน้า `/province/{code}`
 
 ค่าไม่ทราบใช้ `null`/`ไม่ระบุ`; ระบบไม่แทน null ด้วยศูนย์และไม่สร้าง composite score จาก metric ต่างหน่วย โดยเฉพาะ:

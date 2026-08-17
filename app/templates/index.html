@@ -32,7 +32,7 @@
           <select id="provinceSelect" aria-label="เลือกจังหวัด">
             <option value="">เลือกจังหวัด</option>
           </select>
-          <span class="picker-chevron" aria-hidden="true">⌄</span>
+          <span class="picker-chevron" aria-hidden="true">•••</span>
         </label>
 
         <div class="header-meta">
@@ -57,7 +57,7 @@
 
       <div class="map-corner">
         <div class="map-actions" aria-label="เครื่องมือแผนที่">
-          <button id="backToCountry" type="button" hidden>← ทุกภาค</button>
+          <button id="backToCountry" type="button" hidden>ทุกภาค</button>
           <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
         </div>
 
@@ -214,6 +214,7 @@
 
               <div class="panel-section" id="housingSection" hidden>
                 <div class="section-heading"><span>ที่อยู่อาศัยและความเสี่ยงเมือง</span><small id="housingNote"></small></div>
+                <div id="housingSpatialSummary"></div>
                 <div class="housing-links" id="housingItems"></div>
               </div>
             </section>

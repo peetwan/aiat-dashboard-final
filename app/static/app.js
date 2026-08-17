@@ -504,7 +504,7 @@ function selectRegion(name, moveMap = true) {
   setHoveredRegion(null);
   state.hoverPopup?.remove();
   document.getElementById("backToCountry").hidden = false;
-  setPrompt(`${name}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+  setPrompt(`${name}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ทุกภาค เพื่อกลับมุมมองประเทศ");
   applyFillForLevel();
   renderLegend();
   applyRegionFocus();
@@ -1030,10 +1030,35 @@ function renderCityCapital(section = {}) {
 function renderHousing(section = {}) {
   const wrapper = document.getElementById("housingSection");
   const groups = section.resource_groups || [];
-  const available = section.status === "available" && groups.length > 0;
+  const spatial = section.spatial_summary || null;
+  const available = section.status === "available" && (groups.length > 0 || spatial);
   wrapper.hidden = !available;
   if (!available) return;
-  document.getElementById("housingNote").textContent = `${formatNumber(section.total_records || 0)} รายการจาก Thai Housing Portal`;
+  const spatialTotal = Number(section.spatial_feature_total || spatial?.total_spatial_features || 0);
+  document.getElementById("housingNote").textContent = spatial
+    ? `${formatNumber(section.total_records || 0)} CKAN rows · ${formatNumber(spatialTotal)} spatial features`
+    : `${formatNumber(section.total_records || 0)} รายการจาก Thai Housing Portal`;
+  const counts = spatial?.counts || {};
+  const categories = Object.entries(spatial?.housing_points?.by_category || {})
+    .map(([label, value]) => ({ label, value: Number(value) || 0 }))
+    .sort((a, b) => b.value - a.value);
+  const maxCategory = Math.max(...categories.map((item) => item.value), 1);
+  const categoryLabels = {
+    apartment: "อพาร์ตเมนต์", condo: "คอนโด", lodging: "ที่พัก",
+    dormitory: "หอพัก", camping: "แคมป์", other: "ประเภทอื่น",
+  };
+  document.getElementById("housingSpatialSummary").innerHTML = spatial ? `
+    <div class="housing-spatial-kpis">
+      <article><span>จุดที่อยู่อาศัย</span><strong>${formatNumber(counts.housing_points || 0)}</strong><small>จุดสาธารณะ</small></article>
+      <article><span>กริดการเข้าถึง</span><strong>${formatNumber(counts.accessibility_grid || 0)}</strong><small>คะแนนเฉลี่ย ${formatNumber(spatial.accessibility_grid?.score_mean || 0, 1)}</small></article>
+      <article><span>พื้นที่เสี่ยงน้ำท่วม</span><strong>${formatNumber(counts.flood_grid || 0)}</strong><small>polygon features</small></article>
+      <article><span>ขอบเขตแขวง</span><strong>${formatNumber(counts.subdistrict_boundaries || 0)}</strong><small>169 แขวงครบ</small></article>
+    </div>
+    <article class="housing-spatial-chart">
+      <header><strong>ประเภทจุดที่อยู่อาศัย</strong><small>นับแยกจาก CKAN และ demand respondents</small></header>
+      <div>${categories.map((item) => `
+        <div class="housing-bar"><span>${escapeHtml(categoryLabels[item.label] || item.label)}</span><i><b style="width:${Math.max(2, item.value / maxCategory * 100).toFixed(1)}%"></b></i><strong>${formatNumber(item.value)}</strong></div>`).join("")}</div>
+    </article>` : "";
   const visibleGroups = groups.slice(0, 8);
   const remaining = groups.length - visibleGroups.length;
   document.getElementById("housingItems").innerHTML =
@@ -1486,7 +1511,7 @@ function renderSources(summary) {
               <small>${escapeHtml(statusLabel[source.status] || source.status)} · ${escapeHtml(source.quality_label_th || source.readiness_status || "ไม่ระบุคุณภาพ")}</small>
             </span>
             <span class="source-count"><strong>${source.records === null || source.records === undefined ? "—" : formatNumber(source.records)}</strong><small>ระเบียน</small></span>
-            <i class="source-chevron" aria-hidden="true">⌄</i>
+            <i class="source-chevron" aria-hidden="true">รายละเอียด</i>
           </summary>
           <div class="source-detail">
             <p><span>ระดับข้อมูล</span>${escapeHtml(source.data_grain_th || "ไม่ระบุ")}</p>
@@ -1617,7 +1642,7 @@ async function selectProvince(code, moveMap = true) {
   if (provinceMeta.region && state.selectedRegion !== provinceMeta.region) {
     state.selectedRegion = provinceMeta.region;
     document.getElementById("backToCountry").hidden = false;
-    setPrompt(`${provinceMeta.region}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ← ทุกภาค เพื่อกลับมุมมองประเทศ");
+    setPrompt(`${provinceMeta.region}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ทุกภาค เพื่อกลับมุมมองประเทศ");
     applyFillForLevel();
     renderLegend();
     applyRegionFocus();

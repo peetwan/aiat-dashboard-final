@@ -445,13 +445,13 @@ function renderExecutivePortfolio(portfolio) {
   const completeEnd = completePct.toFixed(1);
   const partialEnd = (completePct + partialPct).toFixed(1);
   document.getElementById("auditReadiness").innerHTML = `
-    <div class="readiness-donut" role="img" aria-label="ตรวจครบตามหน้าเว็บ ${number.format(audit.complete_source_count)} แหล่ง ใช้ได้บางส่วน ${number.format(audit.partial_source_count)} แหล่ง และข้อมูลผสม ${number.format(audit.mixed_source_count)} แหล่ง" style="background:conic-gradient(#1f5b43 0 ${completeEnd}%,#f0c66a ${completeEnd}% ${partialEnd}%,#73b8d5 ${partialEnd}% 100%)">
+    <div class="readiness-donut" role="img" aria-label="ตรวจครบตามหน้าเว็บ ${number.format(audit.complete_source_count)} แหล่ง และใช้ได้บางส่วน ${number.format(audit.partial_source_count)} แหล่ง" style="background:conic-gradient(#1f5b43 0 ${completeEnd}%,#f0c66a ${completeEnd}% ${partialEnd}%,#73b8d5 ${partialEnd}% 100%)">
       <div><strong>${number.format(audit.source_count)}</strong><span>เว็บไซต์</span></div>
     </div>
     <div class="readiness-legend">
       <span class="is-complete"><i></i><b>${number.format(audit.complete_source_count)}</b> ครบตาม public surface</span>
       <span class="is-partial"><i></i><b>${number.format(audit.partial_source_count)}</b> ใช้ได้บางส่วน</span>
-      <span class="is-mixed"><i></i><b>${number.format(audit.mixed_source_count)}</b> มีหลาย data lane</span>
+      ${audit.mixed_source_count ? `<span class="is-mixed"><i></i><b>${number.format(audit.mixed_source_count)}</b> มีหลาย data lane</span>` : ""}
     </div>`;
 
   const charts = portfolio.charts || {};
@@ -466,6 +466,7 @@ function renderExecutivePortfolio(portfolio) {
     <article class="source-health-card is-${escapeHtml(source.status)}">
       <header><strong>${escapeHtml(source.label_th)}</strong><span>${escapeHtml(source.status_th)}</span></header>
       <p>${escapeHtml(source.summary_th)}</p>
+      <div class="source-tab-chips">${(source.dashboard_tabs || []).map((tab) => `<span>${escapeHtml(tab)}</span>`).join("")}</div>
     </article>`).join("");
 }
 

@@ -10,6 +10,7 @@ from app.database import SessionLocal, init_db
 from app.ingestion import IngestionPipeline, PolicyViolation
 from app.models import DashboardRecord, IngestionRun, PublicArtifact, Source
 from app.public_artifacts import database_artifact_counts, sync_public_artifacts
+from app.spatial_artifacts import database_spatial_counts, sync_spatial_layers
 
 
 def initialize() -> None:
@@ -17,6 +18,7 @@ def initialize() -> None:
     with SessionLocal() as session:
         sync_catalog(session)
         sync_public_artifacts(session)
+        sync_spatial_layers(session)
 
 
 def command_ingest(args: argparse.Namespace) -> int:
@@ -90,6 +92,7 @@ def command_status() -> int:
                         )
                         or 0,
                         "groups": database_artifact_counts(session),
+                        "spatial_layers": database_spatial_counts(session),
                     }
                 },
                 ensure_ascii=False,

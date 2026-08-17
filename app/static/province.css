@@ -173,10 +173,6 @@ a {
   background: var(--ink);
 }
 
-.detail-topbar nav .back-link::before {
-  margin-right: 7px;
-  content: "←";
-}
 
 #provinceDetailMain {
   width: min(1160px, calc(100% - 40px));

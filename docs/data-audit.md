@@ -16,7 +16,7 @@
 | Runtime-enabled endpoints | 90 |
 | Province briefings | 77 |
 | Executive summaries | 77 |
-| Public serving artifacts | 161 |
+| Public serving artifacts | 162 |
 | Accepted public sources | 0 |
 | Candidate/needs-review public sources | 11 |
 | Restricted values บน Cloud | 0 |
@@ -88,7 +88,7 @@ Production ใช้ PostgreSQL เป็น serving database และตรว
 | Area-Based | 1,002 participant/business records; 996 เชื่อม 55 จังหวัดและ 6 แถวไม่มีจังหวัด | แยก 996 participant rows ออกจาก 73 provisional project groups / 156 project–province links; 6 แถวอยู่ unmapped |
 | City Capital | 18 เทศบาล × 39 metrics | คง grain เทศบาล; เชื่อม 16 จังหวัดด้วยทะเบียน DLA |
 | Ruam Thiao | 5 payloads รวม 54 records | แสดง tourism/transport/place/service โดยตัด contact cells |
-| Housing | 7,259 public rows; 6,953 ผูก 12 จังหวัดและ 306 ไม่มีจังหวัด | แยก province briefings กับ unassigned/non-map projection |
+| Housing | 7,259 public CKAN rows; 194,532 spatial features; demand 25,919 rows ไม่เผยแพร่ | แยก tabular/spatial grain และคง demand local-only |
 | Metadata-only 12 แหล่ง | มี discovery/catalog แต่ยังไม่มี structured contract | แสดง source coverage เท่านั้น ไม่สร้าง record/KPI |
 | Restricted 5 แหล่ง | Household, financial, health หรือ sensitivity ยังไม่ผ่าน | Cloud มี metadata; payload/value อยู่ local-only |
 

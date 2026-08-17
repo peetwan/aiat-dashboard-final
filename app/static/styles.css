@@ -386,8 +386,7 @@
   .source-count { min-width: 58px; text-align: right; }
   .source-count strong { color: var(--ink-strong); font-size: 17px; font-variant-numeric: tabular-nums; }
   .source-count small { color: var(--ink-soft); font-size: 9px; }
-  .source-chevron { color: var(--ink-soft); font-size: 16px; font-style: normal; transition: transform 150ms ease; }
-  .source-row[open] .source-chevron { transform: rotate(180deg); }
+  .source-chevron { color: var(--ink-soft); font-size: 9px; font-style: normal; font-weight: 650; }
   .source-row .source-detail { display: block; padding: 4px 14px 14px 62px; border-top: 1px solid #edf0ed; }
   .source-detail p { margin-top: 8px; font-size: 11.5px; line-height: 1.55; }
   .source-detail .source-note { padding: 9px 10px; }
@@ -2496,6 +2495,36 @@
   .city-card dd { margin: 2px 0 0; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
   .housing-links { display: flex; flex-direction: column; gap: 8px; }
+  .housing-spatial-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 12px;
+  }
+  .housing-spatial-kpis article {
+    padding: 14px;
+    border: 1px solid var(--hairline);
+    background: linear-gradient(145deg, #fff 0%, #f4f7f2 100%);
+    border-radius: 14px;
+  }
+  .housing-spatial-kpis span,
+  .housing-spatial-kpis small { display: block; color: var(--ink-soft); font-size: 10.5px; line-height: 1.45; }
+  .housing-spatial-kpis strong { display: block; margin: 6px 0 3px; font-size: 23px; font-variant-numeric: tabular-nums; }
+  .housing-spatial-chart {
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    border-radius: 14px;
+  }
+  .housing-spatial-chart header { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
+  .housing-spatial-chart header strong { font-size: 12.5px; }
+  .housing-spatial-chart header small { color: var(--ink-soft); font-size: 10.5px; }
+  .housing-bar { display: grid; grid-template-columns: minmax(88px, .8fr) minmax(100px, 2fr) 54px; align-items: center; gap: 9px; margin-top: 7px; }
+  .housing-bar span, .housing-bar strong { font-size: 11px; }
+  .housing-bar strong { text-align: right; font-variant-numeric: tabular-nums; }
+  .housing-bar i { height: 8px; overflow: hidden; background: #ece6dc; border-radius: 99px; }
+  .housing-bar i b { display: block; height: 100%; background: linear-gradient(90deg, #e99b62, #d57555); border-radius: inherit; }
   .housing-link {
     display: flex;
     align-items: center;
@@ -2513,6 +2542,9 @@
 
   @media (max-width: 720px) {
     .pillar-grid { grid-template-columns: 1fr; }
+    .housing-spatial-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .housing-spatial-chart header { display: block; }
+    .housing-spatial-chart header small { display: block; margin-top: 3px; }
   }
 }
 

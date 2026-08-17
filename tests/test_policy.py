@@ -109,6 +109,11 @@ def test_postgres_startup_sync_holds_one_advisory_lock(monkeypatch):
         "sync_public_artifacts",
         lambda _: events.append("public_artifacts"),
     )
+    monkeypatch.setattr(
+        main,
+        "sync_spatial_layers",
+        lambda _: events.append("spatial_layers"),
+    )
 
     main._sync_serving_database()
 
@@ -117,6 +122,7 @@ def test_postgres_startup_sync_holds_one_advisory_lock(monkeypatch):
         "commit",
         "catalog",
         "public_artifacts",
+        "spatial_layers",
         "unlock",
         "commit",
     ]

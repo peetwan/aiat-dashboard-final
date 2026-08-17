@@ -1,0 +1,62 @@
+{
+  "errors": [],
+  "expected_counts": {
+    "accessibility_grid": 6543,
+    "flood_grid": 159126,
+    "housing_points": 28694,
+    "subdistrict_boundaries": 169
+  },
+  "generated_at": "2026-08-17T04:58:29+00:00",
+  "layers": {
+    "accessibility_grid": {
+      "artifact_bytes": 564744,
+      "artifact_path": "data/spatial/accessibility_grid.ndjson.gz",
+      "artifact_sha256": "111946474fcc015215d9c2de113e9fae8783f8239aa115ed14ab176e5c60013a",
+      "feature_count": 6543,
+      "unique_feature_id_count": 6543
+    },
+    "flood_grid": {
+      "artifact_bytes": 18326660,
+      "artifact_path": "data/spatial/flood_grid.ndjson.gz",
+      "artifact_sha256": "3cfcc09d3283e5b34ab0eec48089b1bb86ebbef7b6300740e45612c190175440",
+      "feature_count": 159126,
+      "unique_feature_id_count": 159126
+    },
+    "housing_points": {
+      "artifact_bytes": 1241522,
+      "artifact_path": "data/spatial/housing_points.ndjson.gz",
+      "artifact_sha256": "1a801c9bcf85952cb9b8e07a0099e685258b65d667ffc41b570ff2f2565066a4",
+      "feature_count": 28694,
+      "unique_feature_id_count": 28694
+    },
+    "housing_spatial_summary": {
+      "artifact_bytes": 5195,
+      "artifact_path": "data/public/housing_spatial_summary.json",
+      "artifact_sha256": "caebe7f6a96fcd104e4f567f78872fb295943679c69a257cf55f245892d92937",
+      "feature_count": 1
+    },
+    "subdistrict_boundaries": {
+      "artifact_bytes": 559875,
+      "artifact_path": "data/spatial/subdistrict_boundaries.ndjson.gz",
+      "artifact_sha256": "35a8c7f8ac77e6980c7401491a7cf8418527a9f8a90ceea34c6f183098a2bb0e",
+      "feature_count": 169,
+      "unique_feature_id_count": 169
+    }
+  },
+  "manifest_version": "0.1.0",
+  "privacy_projection": {
+    "contact_fields_included": 0,
+    "demand_respondent_rows_included": 0,
+    "point_fields_excluded": [
+      "address",
+      "name",
+      "rating",
+      "user_ratings_total"
+    ]
+  },
+  "raw_manifest_path": "data/raw/network/f3_housing_portal/20260817T_housing_spatial_full_23/manifest.json",
+  "raw_manifest_sha256": "f5584d64273b3692cde68fb719338e827f8def0d9d205d341dd4354532a3a705",
+  "raw_run_id": "20260817T_housing_spatial_full_23",
+  "source_id": "f3_housing_portal",
+  "validation_status": "pass"
+}

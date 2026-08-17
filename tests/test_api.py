@@ -15,8 +15,11 @@ def test_health_and_catalog_summary():
         health_payload = health.json()
         assert health_payload["status"] == "ok"
         assert health_payload["database"] == "connected"
-        assert health_payload["public_artifacts"] == 161
-        assert health_payload["public_artifacts_expected"] == 161
+        assert health_payload["public_artifacts"] == 162
+        assert health_payload["public_artifacts_expected"] == 162
+        assert health_payload["spatial_features"] == 0
+        assert health_payload["spatial_features_expected"] == 0
+        assert health_payload["spatial_complete"] is True
         assert health_payload["source_catalog_rows"] == 28
         assert health_payload["public_value_sources"] == 11
         assert health_payload["metadata_only_sources"] == 12
@@ -232,9 +235,9 @@ def test_public_projection_and_downloads_are_available():
         assert cultural_insight["privacy_projection"]["contact_fields_exposed"] is False
         portfolio = insight_payload["executive_portfolio"]
         assert portfolio["audit"]["source_count"] == 10
-        assert portfolio["audit"]["complete_source_count"] == 5
-        assert portfolio["audit"]["partial_source_count"] == 4
-        assert portfolio["audit"]["mixed_source_count"] == 1
+        assert portfolio["audit"]["complete_source_count"] == 7
+        assert portfolio["audit"]["partial_source_count"] == 3
+        assert portfolio["audit"]["mixed_source_count"] == 0
         headline = {item["key"]: item for item in portfolio["headline_metrics"]}
         assert headline["surveyed_households"]["value"] == 306388
         assert headline["assistance_budget"]["value"] == 169327550.25
@@ -250,7 +253,6 @@ def test_public_projection_and_downloads_are_available():
             "จุดที่อยู่อาศัย": 28694,
             "กริดการเข้าถึงบริการ": 6543,
             "ขอบเขตแขวง": 169,
-            "กริดอุปทานเทศบาล": 44,
         }
 
         for province_code, title in (
@@ -492,7 +494,7 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
         assert baseline.status_code == 200
         baseline_payload = baseline.json()
         assert baseline_payload["status"] == "complete"
-        assert baseline_payload["public_artifacts_in_database"] == 161
+        assert baseline_payload["public_artifacts_in_database"] == 162
         assert baseline_payload["source_catalog_rows"] == 28
         assert baseline_payload["public_value_sources"] == 11
         assert baseline_payload["metadata_only_sources"] == 12
@@ -531,7 +533,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 15
+    assert len(public_operations) == 17
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

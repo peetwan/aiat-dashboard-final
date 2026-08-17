@@ -45,6 +45,7 @@ OUTPUT_PATH = PROJECT_ROOT / "data/public/source_insights.json"
 MANIFEST_PATH = PROJECT_ROOT / "data/public/source_insights_manifest.json"
 LEARNING_PATH = PROJECT_ROOT / "data/public/learning_dashboard.json"
 LEARNING_MANIFEST_PATH = PROJECT_ROOT / "data/public/learning_dashboard_manifest.json"
+HOUSING_SPATIAL_SUMMARY_PATH = PROJECT_ROOT / "data/public/housing_spatial_summary.json"
 AREA_BASED_RESPONSE_PATH = (
     WORKSPACE_ROOT / "data/raw/network/f2_learning_area_based/20260803T_network/response.json"
 )
@@ -622,6 +623,7 @@ def build_executive_portfolio(
         for source_id, path in AUDIT_EVIDENCE_PATHS.items()
     }
     housing = evidence["f3_housing_portal"]
+    housing_spatial = read_json(HOUSING_SPATIAL_SUMMARY_PATH)
     tourism = evidence["f3_ruamthiao_lamphun"]
     city_audit = evidence["f3_city_capital_open_data"]
 
@@ -629,9 +631,10 @@ def build_executive_portfolio(
         {
             "source_id": "f1_sradss_ppaos",
             "label_th": "SRA DSS",
-            "status": "partial",
-            "status_th": "Aggregate ใช้ได้",
-            "summary_th": "public aggregate API ครบ 10 endpoints แต่ snapshot รายละเอียดเดิมยังต้อง refresh",
+            "status": "complete",
+            "status_th": "Public API ครบ",
+            "summary_th": "refresh ปี 2569 ครบ 888 geography requests และ 1,066 extended requests; 18 responses ที่ไม่มีข้อมูลถูกต้นทางระบุเป็น 404",
+            "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "มิติการพัฒนา", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f1_pppconnext",
@@ -639,6 +642,7 @@ def build_executive_portfolio(
             "status": "partial",
             "status_th": "Aggregate ใช้ได้",
             "summary_th": "ข้อมูลภาพรวมสาธารณะครบ 4 endpoints ส่วน survey detail อยู่หลัง login",
+            "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "มิติการพัฒนา", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f2_culturalmap_university",
@@ -646,13 +650,15 @@ def build_executive_portfolio(
             "status": "complete",
             "status_th": "ครบตามหน้าเว็บ",
             "summary_th": "public records ครบ 5,619 รายการ โดยรายละเอียด supporting data แสดงเป็นยอดรวม",
+            "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f2_rmutdb",
             "label_th": "RMUTDB",
             "status": "partial",
             "status_th": "Public export ใช้ได้",
-            "summary_th": "e-book 11 ไฟล์ครบ แต่ฉบับละเอียด 1,006 รายการยังต่างจากยอดหน้า live 9 รายการ",
+            "summary_th": "e-book 11 ไฟล์ครบ; ฉบับละเอียด 1,006 รายการยังต่างจากยอดหน้า live 9 รายการ และ public API ตอบ 503",
+            "dashboard_tabs": ["โครงการและงบ", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f2_apptech_mtr",
@@ -660,13 +666,15 @@ def build_executive_portfolio(
             "status": "complete",
             "status_th": "ครบตาม API",
             "summary_th": "รายการนวัตกรรม 630 รายการตรงกับยอดรวม upstream",
+            "dashboard_tabs": ["ภาพรวม", "โครงการและงบ", "คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f2_apptech_mru",
             "label_th": "38RAT",
             "status": "partial",
             "status_th": "ใช้ snapshot ล่าสุด",
-            "summary_th": "คง snapshot ที่ผ่าน validation 503 รายการ เพราะ current refresh ได้เพียง 192 จาก total 501",
+            "summary_th": "คง snapshot ที่ผ่าน validation 503 รายการ เพราะ current refresh ได้ 192 จาก total 501 ก่อนต้นทาง timeout",
+            "dashboard_tabs": ["โครงการและงบ", "คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f2_learning_area_based",
@@ -674,6 +682,7 @@ def build_executive_portfolio(
             "status": "complete",
             "status_th": "ครบตาม API",
             "summary_th": "1,002 หน่วยธุรกิจและ unique IDs ตรงกับหน้าเว็บทุกแถว",
+            "dashboard_tabs": ["ภาพรวม", "โครงการและงบ", "คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f3_city_capital_open_data",
@@ -681,6 +690,7 @@ def build_executive_portfolio(
             "status": "complete",
             "status_th": "ครบตามหน้าเว็บ",
             "summary_th": "18 เมือง คูณ 39 ตัวชี้วัด ครบ 702 observations และคง null 4 ค่า",
+            "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "มิติการพัฒนา", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f3_ruamthiao_lamphun",
@@ -688,17 +698,19 @@ def build_executive_portfolio(
             "status": "complete",
             "status_th": "ครบตามหน้าเว็บ",
             "summary_th": "เนื้อหาสาธารณะ 157 รายการจาก 5 routes ตรงกับ bundle ปัจจุบัน",
+            "dashboard_tabs": ["คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
             "source_id": "f3_housing_portal",
             "label_th": "Housing Portal",
-            "status": "mixed",
-            "status_th": "CKAN ครบ Spatial รอโหลด",
-            "summary_th": "public CKAN projection 7,259 rows ครบ ส่วนข้อมูลแผนที่ขนาดใหญ่ยังต้องโหลดแบบ batch",
+            "status": "complete",
+            "status_th": "CKAN และ Spatial ครบ",
+            "summary_th": "public CKAN 7,259 rows และ spatial 194,532 features พร้อมเข้า database; demand 25,919 rows คง local-only",
+            "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "มิติการพัฒนา", "ที่มา/อัปเดต"],
         },
     ]
     status_counts = Counter(row["status"] for row in status_rows)
-    if status_counts != Counter({"complete": 5, "partial": 4, "mixed": 1}):
+    if status_counts != Counter({"complete": 7, "partial": 3}):
         raise ValueError(f"unexpected audited source status counts: {status_counts}")
 
     national = ppp["national_summary"]
@@ -706,7 +718,7 @@ def build_executive_portfolio(
     apptech_stats = apptech["statistics"]
     area_stats = area_based["statistics"]
     cultural_coverage = cultural["coverage"]
-    housing_spatial = housing["current_spatial_surface"]
+    housing_counts = housing_spatial["counts"]
     tourism_datasets = tourism["structured_coverage"]["datasets"]
     city_snapshot = city_audit["structured_snapshot"]
 
@@ -785,7 +797,7 @@ def build_executive_portfolio(
             {
                 "key": "housing_points",
                 "label_th": "จุดข้อมูลที่อยู่อาศัย",
-                "value": housing_spatial["housing_points"]["current_aggregate_count"],
+                "value": housing_counts["housing_points"],
                 "unit": "จุด",
                 "note_th": "169 แขวงในกรุงเทพมหานคร",
                 "source_id": "f3_housing_portal",
@@ -833,11 +845,10 @@ def build_executive_portfolio(
                 "title_th": "ขนาดข้อมูลแผนที่ที่อยู่อาศัย",
                 "unit_th": "spatial features",
                 "items": [
-                    {"label_th": "พื้นที่เสี่ยงน้ำท่วม", "value": housing_spatial["flood_grid"]["feature_count"]},
-                    {"label_th": "จุดที่อยู่อาศัย", "value": housing_spatial["housing_points"]["current_aggregate_count"]},
-                    {"label_th": "กริดการเข้าถึงบริการ", "value": housing_spatial["accessibility_grid"]["feature_count"]},
-                    {"label_th": "ขอบเขตแขวง", "value": housing_spatial["subdistrict_boundaries"]["feature_count"]},
-                    {"label_th": "กริดอุปทานเทศบาล", "value": housing_spatial["static_municipal_supply_grids"]["feature_count_total"]},
+                    {"label_th": "พื้นที่เสี่ยงน้ำท่วม", "value": housing_counts["flood_grid"]},
+                    {"label_th": "จุดที่อยู่อาศัย", "value": housing_counts["housing_points"]},
+                    {"label_th": "กริดการเข้าถึงบริการ", "value": housing_counts["accessibility_grid"]},
+                    {"label_th": "ขอบเขตแขวง", "value": housing_counts["subdistrict_boundaries"]},
                 ],
             },
             "tourism_inventory": {
@@ -863,6 +874,8 @@ def build_executive_portfolio(
         },
         "source_notes": {
             "housing_public_rows": housing["railway_ckan_projection"]["value_approved_row_count"],
+            "housing_spatial_features": housing_spatial["total_spatial_features"],
+            "housing_demand_rows_published": housing_spatial["database_contract"]["demand_respondent_rows_included"],
             "housing_unassigned_rows": housing["railway_ckan_projection"]["unassigned_rows"],
             "tourism_public_items": tourism["structured_coverage"]["all_content_item_count"],
             "rmutdb_detailed_records": rmutdb["statistics"]["detailed_records"],
@@ -1025,6 +1038,7 @@ def build() -> None:
         CITY_CURRENT_SURFACE_MANIFEST,
         LEARNING_PATH,
         LEARNING_MANIFEST_PATH,
+        HOUSING_SPATIAL_SUMMARY_PATH,
         AREA_BASED_RESPONSE_PATH,
         AREA_BASED_CURRENT_OBSERVATION,
         *[CULTURAL_ROOT / values[0] for values in CULTURAL_DATASETS.values()],
