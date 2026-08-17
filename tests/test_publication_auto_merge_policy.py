@@ -93,6 +93,9 @@ def test_publication_auto_merge_requires_peer_review_bound_to_head_and_base():
     assert "const eventBaseSha = context.payload.pull_request.base.sha" in workflow
     assert "pullRequest.head.sha !== eventHeadSha" in workflow
     assert "pullRequest.base.sha !== eventBaseSha" in workflow
+    assert "function isSameRepository(pullRequest)" in workflow
+    assert "!isSameRepository(pullRequest)" in workflow
+    assert "fork pull requests require manual review and merge" in workflow
     assert "const authorizedHeadSha = eventHeadSha" in workflow
     assert "const authorizedBaseSha = eventBaseSha" in workflow
     assert "pullRequest.head.sha !== authorizedHeadSha" in workflow

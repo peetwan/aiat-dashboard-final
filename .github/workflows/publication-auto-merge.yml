@@ -60,6 +60,13 @@ jobs:
               return pullRequest.labels.some(label => label.name === labelName);
             }
 
+            function isSameRepository(pullRequest) {
+              return (
+                pullRequest.head.repo?.full_name?.toLowerCase() ===
+                `${owner}/${repo}`.toLowerCase()
+              );
+            }
+
             async function disableAutoMerge(pullRequest) {
               if (!pullRequest.auto_merge) {
                 return;
@@ -154,6 +161,13 @@ jobs:
               await invalidate('Publication auto-merge is available only for pull requests targeting main.', {
                 fail: true,
               });
+              return;
+            }
+            if (!isSameRepository(pullRequest)) {
+              await invalidate(
+                'Publication auto-merge is available only for collaborator branches in this repository; fork pull requests require manual review and merge.',
+                { fail: true }
+              );
               return;
             }
             if (pullRequest.state !== 'open' || pullRequest.draft) {
@@ -293,6 +307,7 @@ jobs:
               pullRequest.head.sha !== authorizedHeadSha ||
               pullRequest.base.sha !== authorizedBaseSha ||
               pullRequest.base.ref !== 'main' ||
+              !isSameRepository(pullRequest) ||
               pullRequest.state !== 'open' ||
               pullRequest.draft ||
               !hasLabel(pullRequest, authorizationLabel) ||
@@ -327,6 +342,7 @@ jobs:
               pullRequest.head.sha !== authorizedHeadSha ||
               pullRequest.base.sha !== authorizedBaseSha ||
               pullRequest.base.ref !== 'main' ||
+              !isSameRepository(pullRequest) ||
               pullRequest.state !== 'open' ||
               pullRequest.draft ||
               !hasLabel(pullRequest, authorizationLabel) ||
