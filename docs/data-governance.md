@@ -91,4 +91,4 @@ External-team artifacts ต้องคง source URL, source ID, evidence path 
 9. Restricted value count ใน `/api/public/v1/database-coverage` เท่ากับ 0
 10. Test suite ผ่านก่อน push/deploy
 
-ผล coverage และข้อจำกัดล่าสุดอยู่ใน [Data audit](data-audit.md)
+สถานะ serving ล่าสุดดูได้จาก `/api/public/v1/source-coverage` และ `/api/public/v1/database-coverage`

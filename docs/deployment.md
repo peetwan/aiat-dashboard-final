@@ -1,97 +1,98 @@
-# Deployment on Railway
+# Railway deployment
 
-Production ใช้ Railway Web Service หนึ่งชุดและ PostgreSQL Service หนึ่งชุดใน project เดียวกัน Browser ติดต่อ FastAPI เท่านั้น; การเชื่อมฐานข้อมูลเกิดผ่าน private network ฝั่ง server
+## Production topology
 
-## Environment variables
+Railway project: `aiat-dashboard-final`, environment: `production`
+
+| Service | URL | Source/role |
+|---|---|---|
+| `aiat-dashboard-web` | [Dashboard](https://aiat-dashboard-web-production.up.railway.app) | GitHub `main`; FastAPI + serving DB seed writer |
+| `aiat-database-explorer` | [Database Explorer](https://aiat-database-explorer-production.up.railway.app) | GitHub `main`; read-only DB viewer |
+| Serving PostgreSQL | private network only | ทั้งสอง app ใช้ `DATABASE_URL` reference เดียวกัน |
+
+ห้ามใส่ connection string จริงหรือชื่อ service ที่อาจเปลี่ยนลง Git ให้ตั้งค่าใน Railway Variables:
 
 ```text
+DATABASE_URL=${{<serving-postgres>.DATABASE_URL}}
 APP_ENV=production
-DATABASE_URL=${{Postgres.DATABASE_URL}}
+```
+
+Dashboard ใช้ตัวแปรเพิ่ม:
+
+```text
 PUBLIC_DATA_VALUES_ENABLED=false
 ALLOW_PENDING_OWNER_SOURCES=false
 MAX_RECORDS_PER_SOURCE=10000
 SRA_YEAR=2569
 ```
 
-ชื่อ `Postgres` ต้องตรงกับชื่อ database service บน Railway ตัวแปร `DATABASE_URL` เป็น private service reference และไม่ควรถูกคัดลอกเป็นค่าจริงลง Git
+Explorer ใช้ `DASHBOARD_URL=https://aiat-dashboard-web-production.up.railway.app`
 
-`PUBLIC_DATA_VALUES_ENABLED=false` ปิด operational row payload endpoint แต่ไม่ปิด cleaned Public API เพราะ public projection ใช้ publication gate แยกต่างหาก
+## Build configuration
 
-## Startup contract
+- Dashboard: `railway.json` + `Dockerfile`
+- Explorer: `railway.explorer.json` + `Dockerfile.explorer`
+- ทั้งคู่ health check ที่ `/health`
+- ทั้งคู่ deploy จาก branch `main`; การเปลี่ยนแปลง production ต้องเข้าผ่าน PR ที่ required CI ผ่าน
 
-เมื่อ service เริ่มทำงาน ระบบจะ:
+## Database sync ตอน deploy
 
-1. เชื่อม PostgreSQL และสร้างตารางที่ยังไม่มี
-2. Sync metadata 28 sources และ verified endpoint inventory 141 รายการ
-3. Sync cleaned public artifacts 162 ชุดพร้อม content hash และ Housing spatial 194,532 features
-4. เปิด `/health` เมื่อ serving contract ครบ: sources 28, policy 11/12/5, artifacts 162 และ spatial ครบ 4 layers
+เฉพาะ Dashboard เป็น writer ตอน startup:
 
-Dashboard จึงเปิดได้โดยไม่รัน raw ingestion และไม่ต้อง upload raw records หลายล้านแถวขึ้น Cloud
+1. สร้างตารางที่ยังขาดโดยไม่ drop ตารางเดิม
+2. sync `config/source_catalog.json`
+3. sync reviewed artifacts จาก `data/public/`
+4. transaction-swap spatial และ housing demand snapshots
+5. ตรวจ serving contract ก่อนตอบ health ว่า `ok`
 
-## Pre-deploy
+การ sync ใช้ key/hash จึงรันซ้ำได้ และมี PostgreSQL advisory lock กันการ deploy หลาย replica เขียนพร้อมกัน Explorer อ่านอย่างเดียวและไม่ seed database
+
+การ merge connector ใหม่ไม่ทำให้ข้อมูลต้นทางถูก publish เอง ข้อมูลใหม่ต้องผ่าน Candidate → review/build/test → commit `data/public/*` ก่อน
+
+## Pre-merge checks
+
+คำสั่งเหล่านี้รันได้จาก public clone และเป็นชุดเดียวกับ GitHub Actions:
 
 ```powershell
-python tools/build_source_catalog.py
-python tools/build_learning_dashboard.py
-python tools/build_source_insights.py
-python tools/build_public_data.py
-python tools/build_provincial_briefings.py
-python tools/build_executive_summaries.py
-python tools/build_source_coverage.py
 python -m app.cli validate-pipeline
 python tools/validate_public_repo.py
 python -m pytest -q
-python ..\scripts\validate_all.py
 docker build -t aiat-dashboard-final .
+docker build -f Dockerfile.explorer -t aiat-database-explorer .
 ```
 
-ตรวจ Git diff ของ catalog, counts, hashes และ public artifacts ก่อน commit/push จากนั้น Railway ใช้ `Dockerfile` และ health check `/health`
+การ rebuild public release จาก raw evidence ทั้งหมดเป็น maintainer workflow ภายนอก public repo ผู้ทำ application/connector PR ไม่ต้องมี raw data ชุดนั้น
 
-## Production verification
+## Verify production
 
-- `/health` รายงาน `database_backend: postgresql`
-- `/api/public/v1/database-coverage` รายงาน `status: complete`
-- Sources = 28
-- Endpoints = 141
-- Province briefings = 77
-- Executive summaries = 77
-- Restricted values published = 0
-- SRA target scope = 20, current numeric scores = 15, target-with-null = 5
-- Area-Based participant records = 996 และ project–province links = 156 โดยไม่ปน grain
-- หน้า `/`, `/insights`, จังหวัดตัวอย่าง และ mobile layout เปิดได้
-- หน้า `/province/{code}` โหลด summary, briefing และ operations ครบ; metric/chart แสดงค่า ค้นหา/กรอง/โหลดเพิ่มได้ และ record digest ไม่ dump raw field
-- `/api/public/v1/operations` รายงาน connector audit 6/6, 9,652 candidate records และ `automatic_refresh_enabled: false`
-- Operational/debug routes เช่น `/api/sources` ตอบ `404` บน production/PostgreSQL
+หลัง merge ให้ตรวจ:
 
-## Operational refresh
+- [Dashboard `/health`](https://aiat-dashboard-web-production.up.railway.app/health) คืน `status=ok`, `database_backend=postgresql`
+- [Database coverage](https://aiat-dashboard-web-production.up.railway.app/api/public/v1/database-coverage) คืน `status=complete`
+- [Explorer `/health`](https://aiat-database-explorer-production.up.railway.app/health) เห็น source count 28
+- Dashboard และ Explorer เห็น counts หลักตรงกัน
+- restricted values published = 0
+- หน้า `/`, `/insights` และจังหวัดตัวอย่างเปิดได้
 
-Collector ใช้งานผ่าน `python -m app.cli ingest --all` แต่ public projection จะไม่เปลี่ยนอัตโนมัติ Live audit วันที่ 16 สิงหาคม 2569 ผ่าน 6/6 connector รวม 9,652 candidate records; ตัวเลขนี้เป็น records seen ระหว่าง audit ไม่ใช่ public release count
+ณ 17 สิงหาคม 2569 serving contract คือ public artifacts 163 ชุด, spatial features 194,532 และ housing demand records 25,919
 
-Production ปัจจุบัน **ยังไม่มี daily scheduler** และค่าที่หน้า `/api/public/v1/operations` ต้องคง `automatic_refresh_enabled: false` จนกว่าจะผ่าน operation gate
+## Source refresh
 
-ลำดับที่แนะนำ:
+Production ยังไม่เปิด source scheduler และ Web Service ไม่ fetch upstream ตอน startup, health check หรือ page request
 
-1. จัด persistent volume หรือ object storage สำหรับ runtime raw/failed manifests
-2. กำหนด retention, run lock, alert destination และ bounded retry
-3. สร้าง Railway Scheduled Job แยกจาก Web Service; daily probe ตาม `config/operations_policy.json`
-4. Full fetch เฉพาะเมื่อ count/hash/watermark เปลี่ยน แล้ว validate schema/count/uniqueness/privacy/freshness
-5. เก็บเป็น candidate; owner ตรวจ diff และอนุมัติ
-6. Rebuild public projection, รัน tests, commit และ deploy revision ใหม่
+เมื่อจะเปิด schedule ต้องสร้าง service/job แยก โดยมีอย่างน้อย:
 
-Restricted sources ไม่มี executable plan และถูก block ซ้ำใน ingestion guard
+- persistent evidence storage และ immutable manifest
+- one-run lock, bounded retry และ timeout
+- schema/count/uniqueness/privacy checks
+- alert เมื่อ connector fail หรือ schema/count drift
+- manual publication gate; ห้าม auto-promote Candidate
 
 ## Rollback
 
-1. Roll back Railway deployment ไป revision ที่ผ่าน health check ล่าสุด
-2. ห้ามแก้ public artifacts หรือ database rows ด้วยมือเพื่อให้ตัวเลขกลับมา
-3. Rebuild artifacts จาก evidence revision เดิมและตรวจ hashes
-4. รัน tests แล้ว deploy ใหม่
+1. Roll back app deployment ไป commit ที่ผ่าน health check ล่าสุด
+2. อย่าแก้ database rows หรือ public artifacts ด้วยมือ
+3. ถ้าเป็น data release ให้ rebuild จาก evidence revision เดิม รัน tests และ deploy commit ใหม่
+4. ตรวจ `/health` และ `/api/public/v1/database-coverage` อีกครั้ง
 
-## Security checklist
-
-- ไม่ commit `.env`, token, signed URL, cookie, API key หรือ database dump
-- `data/runtime/`, `data/snapshots/` และ `*.sqlite` ต้องไม่เข้า Git/Docker image
-- ตรวจ publication/privacy checklist ใน [Data governance](data-governance.md)
-- ตรวจ database coverage หลัง deploy ทุกครั้ง
-
-รายละเอียด data flow อยู่ใน [Architecture](architecture.md)
+กติกา data flow อยู่ใน [Architecture](architecture.md) และ publication gate อยู่ใน [Data governance](data-governance.md)

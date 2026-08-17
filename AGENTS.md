@@ -27,6 +27,14 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 - Restricted source ห้ามมี executable connector ใน public application
 - Public revision เปลี่ยนได้หลัง deterministic build, privacy/semantic tests และ review เท่านั้น
 
+## กติกาออกแบบ Connector
+
+- Generalize ที่ `Connector` interface, recorder และ contract; เก็บ parser/pagination/schema ไว้ใน module ราย source
+- ห้ามเพิ่ม `if/elif` ตาม source ใน central orchestrator เมื่อทำเป็น connector module ได้
+- Source เดียวมีหลาย grain ได้ ให้แยก `dataset_key` และ contract ต่อ grain
+- Completeness ต้อง fail ก่อน commit เมื่อจำนวนรวมเปลี่ยน, pagination ขาด, ID ซ้ำ หรือ schema drift
+- อย่าแก้ payload เพื่อให้เหมือน source อื่นจนความหมายเดิมหาย
+
 ## Code Review Rules
 
 ### Publication boundary
@@ -44,3 +52,4 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 ### Repository workflow
 
 - Flag an executable source without matching registry, plan, connector contract, fixture-based tests, or CI coverage. Do not treat AI review as a replacement for deterministic checks or branch protection.
+- Flag startup/network code that fetches upstream URLs during web deploy, health checks, or page requests. Production startup may sync only reviewed files already committed under `data/public/`.

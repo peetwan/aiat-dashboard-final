@@ -14,6 +14,18 @@
 
 เริ่มจากไฟล์ใน `templates/connector/` แล้วเปลี่ยนชื่อ class, driver, grain และ completeness checks ให้ตรงกับต้นทางจริง
 
+อย่าพยายามบังคับให้ทุก URL คืน schema เดียวกัน Generalization อยู่ที่ interface ของ connector และ contract ส่วน parsing ยังคงเป็นของ source นั้น ตัวอย่าง pattern ที่รองรับ:
+
+| ต้นทาง | สิ่งที่ connector รับผิดชอบ |
+|---|---|
+| REST/JSON | query, pagination, total count และ stable ID |
+| form JSON | request body/headers ตาม public frontend และ response envelope |
+| CKAN | package/resource discovery, CSV download และ resource identity |
+| header-array Dashboard | แปลง header + rows พร้อม fail เมื่อความกว้างไม่ตรง |
+| snapshot/export | ตรวจ manifest/hash และ parse ไฟล์ที่อนุมัติแล้ว |
+
+หาก URL หนึ่งมีหลาย grain ให้คืนหลาย `dataset_key` และประกาศ grain แยกใน contract ห้ามรวมคน โครงการ จังหวัด และ aggregate เป็น record ชนิดเดียวเพื่อให้ code ดูง่าย
+
 ## ขอบเขตของ Connector
 
 Connector ทำได้เฉพาะ:

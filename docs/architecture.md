@@ -1,148 +1,189 @@
-# Architecture and data workflow
+# Architecture
 
-เอกสารนี้อธิบายขอบเขตระบบ เส้นทางข้อมูล โครงสร้างฐานข้อมูล และวิธีอัปเดต AIAT Provincial Evidence Map
+เอกสารนี้อธิบายว่า repository ทำอะไร ข้อมูลจาก URL ที่ต่างกันมากเข้า pipeline กลางอย่างไร ฐานข้อมูลแบ่งหน้าที่แบบไหน และ Railway deploy อะไรอัตโนมัติ
 
-## System boundary
+## 1. ขอบเขตระบบ
 
-Repository นี้เป็น **public serving application** ไม่ใช่ evidence lake หลัก การเก็บ raw, การทำ source audit และการตัดสิน semantic gate เกิดใน AIAT evidence workspace ภายนอก repo นี้ จากนั้นจึงสร้าง cleaned deployment seeds ใน `data/public/`
+Repository นี้มี 3 หน้าที่:
+
+1. เป็น Public Dashboard/API ที่อ่านเฉพาะข้อมูลซึ่งผ่าน publication gate แล้ว
+2. เป็น framework สำหรับเพิ่ม connector ราย URL ผ่าน Pull Request
+3. เป็น deployment seed สำหรับ serving database บน Railway
+
+Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน maintainer workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace
+
+## 2. ภาพรวม component
 
 ```text
-Source registry 28 แหล่ง
-        │
-        ├─ 11 public candidate ── evidence → clean → validate → summarize
-        │                                              │
-        │                                       data/public/*
-        │                                              │
-        │                                   public_artifacts table
-        │                                              │
-        │                                      FastAPI + MapLibre
-        │
-        ├─ 12 metadata-only ───── source status/catalog; ไม่มีค่าข้อมูล
-        └─ 5 restricted ───────── local-only; Cloud มี metadata เท่านั้น
+                 ┌──────────────────────────────────────┐
+28 source URLs → │ Registry + plan + contract ราย source │
+                 └──────────────────┬───────────────────┘
+                                    │
+                  ┌─────────────────▼─────────────────┐
+                  │ Connector เฉพาะเว็บ              │
+                  │ JSON / form / CKAN / snapshot     │
+                  └─────────────────┬─────────────────┘
+                                    │ Candidate datasets
+                  ┌─────────────────▼─────────────────┐
+                  │ Central ingestion orchestrator    │
+                  │ evidence, hash, manifest, privacy │
+                  │ completeness, idempotent DB write │
+                  └───────────┬───────────────────────┘
+                              │
+                     dashboard_records
+                              │ ไม่มี auto-promote
+                  ┌───────────▼───────────────────────┐
+                  │ Review + deterministic builders  │
+                  │ semantic / geography / privacy   │
+                  └───────────┬───────────────────────┘
+                              │
+                         data/public/*
+                              │ deploy/startup sync
+                  ┌───────────▼───────────────────────┐
+                  │ Shared PostgreSQL serving DB      │
+                  └──────────────┬───────────────┬────┘
+                                 │               │
+                         Public Dashboard    DB Explorer
+                           read + seed         read-only
 ```
 
-ไฟล์ `data/public/*` เป็น deployment seeds ที่มี provenance และ content hash เมื่อแอปเริ่มทำงาน ระบบจะ sync ไฟล์เหล่านี้เข้า database และ API จะอ่านจาก database ก่อน ไฟล์เป็น fallback สำหรับ CLI/local bootstrap เท่านั้น
+## 3. Generalize ตรงไหน และแยกราย URL ตรงไหน
 
-## Data layers
+ข้อมูลของแต่ละเว็บอาจต่างกันโดยสิ้นเชิง จึงไม่ควรสร้าง parser ใหญ่ตัวเดียวที่มี `if/elif` ตามชื่อ source
 
-1. **Evidence** — raw/API/export เดิมอยู่นอก repo Dashboard และเป็น immutable
-2. **Clean projection** — builder รักษา source grain, unit, `as_of`, quality status และ provenance
-3. **Executive serving** — แยกข้อมูลที่ผูกจังหวัด, non-geo และ unmapped โดยไม่เดา join key พร้อม semantic projection ระดับ `Need → Input → Activity → Output → Outcome`
-4. **Database serving** — sync 162 JSON artifacts พร้อม SHA-256 และ Housing spatial 194,532 features เข้า PostgreSQL หรือ SQLite
-5. **Public API/UI** — โหลด summary ก่อนใน province preview และใช้ `/summary` + `/briefing` + `/operations` ในหน้า `/province/{code}`
-
-ค่าไม่ทราบใช้ `null`/`ไม่ระบุ`; ระบบไม่แทน null ด้วยศูนย์และไม่สร้าง composite score จาก metric ต่างหน่วย โดยเฉพาะ:
-
-- SRA target scope แยกจาก score availability: 20 จังหวัดอยู่ในทะเบียนเป้าหมาย แต่มีคะแนนปัจจุบัน 15 จังหวัด
-- Area-Based participant rows แยกจาก provisional project groups; map และ summary ใช้ `area_based_project_groups` ไม่ใช้ participant count เป็นจำนวนโครงการ
-- Funding ที่ผูกกับนวัตกรรมหลายจังหวัดไม่ถูกตีความเป็น provincial allocation และห้ามรวมยอดรายจังหวัดเป็นยอดประเทศ
-
-## Database design
-
-ระบบใช้ SQLAlchemy schema เดียวกันทั้ง PostgreSQL และ SQLite:
-
-| Table | หน้าที่ | Key/constraint สำคัญ |
-|---|---|---|
-| `sources` | Registry, readiness และ publication policy ของ 28 แหล่ง | `source_id` เป็น primary key |
-| `endpoints` | Verified endpoint inventory และ runtime allowlist | `endpoint_id`; FK ไป `sources` |
-| `public_artifacts` | Cleaned payload ที่ Public API/Dashboard อ่านจริง | `artifact_key`; index ตาม group และ province |
-| `dashboard_records` | Operational candidate rows จากการ refresh API | unique ตาม source, dataset, record ID และ record hash |
-| `ingestion_runs` | สถานะ run, counts, timestamps และ manifest path | `run_id`; FK ไป `sources` |
-
-`public_artifacts` และ `dashboard_records` มีหน้าที่ต่างกัน: ตารางแรกคือ serving projection ที่ผ่าน clean/build/test แล้ว ส่วนตารางหลังเป็น candidate staging จาก operational refresh และไม่ถูก promote สู่ public API อัตโนมัติ
-
-Production ใช้ PostgreSQL ผ่าน `DATABASE_URL`; local default ใช้ `data/runtime/dashboard.sqlite` ซึ่งถูก ignore จาก Git
-
-## Public artifact groups
-
-- `source_catalog.json` — metadata/policy ครบ 28 แหล่ง
-- `source_coverage.json` — สถานะ database/API/dashboard ของทุก URL
-- `public_dashboard.json` — province profile 77 จังหวัด
-- `source_insights.json` — source-level และ non-geo analysis
-- `unmapped_records.json` — แถวที่ไม่มี province key โดยไม่เดาพื้นที่
-- `provincial_briefings/{code}.json` — รายการข้อมูลรายจังหวัด รวม `project_master`, participant records, SRA activity, innovation/IP/ROI/SROI และ source-level provenance
-- `executive_summaries/{code}.json` — สรุป 5 แท็บ, research portfolio, `decision_chain`, `data_quality_overview` และข้อมูลรายมิติ
-- GeoJSON — ขอบเขตจังหวัดและ cultural points
-
-## Geography rules
-
-| ลักษณะข้อมูล | ปลายทาง |
+| ส่วนที่ใช้ร่วมกัน | ส่วนที่ต้องแยกราย URL |
 |---|---|
-| มีรหัส/ชื่อจังหวัดที่ exact match | แผนที่และ province summary/briefing |
-| เป็นเทศบาลและมี official crosswalk | คง grain เมืองและเชื่อมจังหวัดเพื่อค้นหา |
-| ไม่มี geography ที่ยืนยัน | `/insights` หรือ non-geo section |
-| จังหวัดว่างหรือจับคู่ไม่ได้ | `unmapped_records.json` |
-| มีเพียงหน้าเว็บ/metadata | source coverage; ไม่สร้าง record/KPI |
-| restricted local-only | metadata บน Cloud; values อยู่ local เท่านั้น |
+| source registry และ policy | request method, headers และ body ที่เว็บต้องการ |
+| run ID, timestamps, response hash และ manifest | pagination และตำแหน่ง records ใน response |
+| retry/failure rules | schema และ dataset keys |
+| privacy projection และ secret scan | grain และ stable identity |
+| record version/idempotency | geography fields และ source-specific crosswalk |
+| Candidate/Public separation | completeness checks ของเว็บนั้น |
+| CI และ PR checklist | fixture และ schema-drift tests |
 
-## Build order
+ทุก executable source จึงมีคู่ไฟล์:
 
-```powershell
-python tools/build_source_catalog.py
-python tools/build_learning_dashboard.py
-python tools/build_source_insights.py
-python tools/build_public_data.py
-python tools/build_provincial_briefings.py
-python tools/build_executive_summaries.py
-python tools/build_source_coverage.py
-```
+- `app/connectors/<source>.py` — วิธีคุยและ parse เว็บไซต์นั้น
+- `config/connector_contracts/<source>.json` — สัญญาว่าข้อมูลคืออะไรและตรวจครบอย่างไร
 
-หลัง build ต้องตรวจ diff ของ values, counts, hashes และ unmapped records แล้วรัน `python -m pytest -q`
+`config/ingestion_plans.json` ชี้ `connector` ด้วย importable entrypoint ส่วน `app/ingestion.py` เป็น orchestrator กลางและไม่ต้องรู้รายละเอียด payload ของทุกเว็บ
 
-Release ปัจจุบันมี 77 briefings + 77 executive summaries และ regression contract ตรวจว่า 996 participant rows ไม่ถูกนับเป็น 996 โครงการ, 156 project–province links ตรงกันทุก projection และ SRA `null` ไม่ถูกแทนด้วยศูนย์
+## 4. Source states
 
-## Operational refresh
+`config/source_catalog.json` เป็น registry กลางของ 28 แหล่ง และแยก publication policy เป็น:
 
-`config/ingestion_plans.json` เป็น executable allowlist สำหรับ source ที่ยืนยัน endpoint แล้วเท่านั้น แต่ละ plan ชี้ `connector` ไปยัง module ภายใต้ `app/connectors/` และมี grain/completeness/privacy contract ชื่อเดียวกันใน `config/connector_contracts/`:
+- `public_candidate` 11 แหล่ง — มี reviewed projection ที่อนุญาตให้แสดงพร้อมคำเตือน
+- `metadata_only` 12 แหล่ง — แสดงชื่อ URL และสถานะ แต่ยังไม่เอาค่าข้อมูลขึ้น Dashboard
+- `restricted_local_only` 5 แหล่ง — Cloud เก็บ metadata เท่านั้นและไม่มี executable public connector
 
-```powershell
-python -m app.cli ingest --source f2_learning_dashboard
-python -m app.cli ingest --all
-python -m app.cli status
-python -m app.cli validate-pipeline
-```
+การมี HTTP 200 หรือดึงข้อมูลได้ไม่เปลี่ยน source ให้เป็น accepted KPI โดยอัตโนมัติ
 
-`--all` เลือกเฉพาะ public source ที่มี executable plan; metadata-only และ restricted ไม่ถูกเรียก API ทุก response ถูกเก็บพร้อม run manifest ใน runtime storage และแถว sanitized ถูกเขียนเข้า `dashboard_records`
+## 5. Data flow สองเลน
 
-`config/operations_policy.json` เป็น operation contract ของรอบดึงที่เสนอ ผล connectivity audit ล่าสุด retry/alert policy และ publication gate ส่วน `/api/public/v1/operations` เปิดเฉพาะสถานะที่ปลอดภัยต่อสาธารณะ
-
-ข้อกำหนดของ collector:
-
-- เก็บ response body และ SHA-256 ก่อน raise เมื่อ HTTP 4xx/5xx เพื่อให้ failed run ตรวจย้อนหลังได้
-- `--strategy api` ต้อง fail ตรงไปตรงมา; snapshot fallback ใช้เฉพาะ `auto` และ source ที่อนุญาต
-- retry เฉพาะ timeout, 429 และ 5xx แบบ bounded; ไม่ retry/bypass 401 หรือ 403
-- `f2_apptech_mru` ใช้ JSON `{action, filter}` พร้อม Origin/Referer ตาม public frontend contract
-- Operational candidate แยกจาก `public_artifacts`; ไม่มี code path auto-promote
-- Connector รับผิดชอบ request/parse/completeness ของ source ตัวเอง ส่วน orchestrator กลางรับผิดชอบ evidence, hash, manifest, privacy projection, idempotency และ database write
-- `validate-pipeline` ต้อง import connector และตรวจ contract ทุก executable source ได้โดยไม่เรียก upstream network
-
-## Maintainable refresh design
+### Operational lane
 
 ```text
-Railway Scheduled Job (เสนอ; ยังไม่เปิด)
-        │
-        ├─ daily lightweight probes
-        │      └─ full fetch only when count/hash/watermark changes
-        │
-        └─ collect → evidence → validate → candidate → approve → publish
-                         │                         │
-                   alert + failed manifest   human/owner gate
+URL → connector → evidence/manifest → sanitize → dashboard_records
 ```
 
-- SRA ใช้ daily current-year aggregate fetch; connector อื่นใช้ daily probe แล้ว full fetch เมื่อ drift
-- Snapshot source ตรวจ weekly/monthly หรือตาม owner export
-- Web Service ไม่ fetch upstream ตอน `/health` หรือ page request
-- ก่อนเปิด schedule ต้องมี persistent raw storage, retention, alert destination และ run lock เพื่อป้องกันงานซ้อน
-- Public revision เปลี่ยนได้เฉพาะหลัง rebuild, tests, diff review, commit และ deploy
+ใช้ตรวจ connectivity และเก็บ Candidate เวอร์ชันใหม่ ตารางนี้ไม่ใช่ข้อมูลที่ Public API อ่าน
 
-## Update cycle
+### Publication lane
 
-1. เก็บ raw run ใหม่ใน evidence workspace
-2. Validate schema, privacy, geography และ provenance
-3. รัน builders ตามลำดับ
-4. ตรวจ diff และ data audit
-5. รัน tests และ QA desktop/mobile
-6. Commit/push และ deploy
-7. ตรวจ PostgreSQL backend กับ `/api/public/v1/database-coverage`
+```text
+immutable evidence → builders → semantic/privacy tests → data/public/*
+                  → reviewed commit → Railway deploy → public_artifacts
+```
 
-รายละเอียด publication/privacy gate อยู่ใน [Data governance](data-governance.md) และคำสั่ง production อยู่ใน [Deployment](deployment.md)
+ไม่มี code path ที่ copy `dashboard_records` ไป `public_artifacts` เอง การ publish ต้องมีคน review diff และ merge revision ที่ deterministic
+
+## 6. Database design
+
+SQLAlchemy ใช้ schema เดียวกันบน PostgreSQL (production) และ SQLite (local):
+
+| Table | หน้าที่ |
+|---|---|
+| `sources` | registry และ policy ของ 28 sources |
+| `endpoints` | verified endpoints และ runtime allowlist |
+| `ingestion_runs` | สถานะ/count/timestamps ของการดึงแต่ละรอบ |
+| `dashboard_records` | Candidate records จาก operational ingestion |
+| `public_artifacts` | reviewed JSON payload ที่ Dashboard/API อ่านจริง |
+| `spatial_layer_snapshots` | manifest ของ public spatial layer |
+| `spatial_features` | features ที่ผ่าน privacy projection |
+| `housing_demand_snapshots` | manifest ของ Housing demand release |
+| `housing_demand_records` | demand rows ที่ตัด source identifier/contact แล้ว |
+
+ความสัมพันธ์หลัก:
+
+```text
+sources 1 ── many endpoints
+sources 1 ── many ingestion_runs
+sources 1 ── many dashboard_records
+sources 1 ── many spatial/demand rows
+public_artifacts แยกจาก Candidate lane โดยตั้งใจ
+```
+
+JSON ใน `public_artifacts.payload` คือ cleaned projection หนึ่งชุด ไม่ใช่ raw JSON dump ทั้งเว็บไซต์ แต่ละ artifact มี `artifact_key`, group, province code (ถ้ามี), source path และ SHA-256 เพื่อ sync แบบ idempotent
+
+## 7. Geography และ grain
+
+- หนึ่ง dataset ต้องประกาศว่า “หนึ่ง record แทนอะไร” ใน connector contract
+- มีรหัส/ชื่อจังหวัด exact match จึงเชื่อม province view
+- official crosswalk ใช้ได้เมื่อมีหลักฐานชัด
+- ไม่มี geography ที่ยืนยันให้ไป non-geo/Insights
+- จับคู่ไม่ได้ให้เก็บใน `unmapped_records` ห้ามเดาจากชื่อหน่วยงาน
+- `null` ไม่ใช่ศูนย์ และ `fetched_at` ไม่ใช่ `as_of`
+
+ตัวอย่าง: participant 1 แถวไม่เท่ากับ project 1 โครงการ และ funding ที่ผูกกับ innovation หลายจังหวัดไม่ใช่งบจัดสรรของแต่ละจังหวัด
+
+## 8. Railway production
+
+ตรวจสถานะจริงวันที่ 17 สิงหาคม 2569:
+
+| Component | Production |
+|---|---|
+| Project | `aiat-dashboard-final` |
+| Dashboard | [aiat-dashboard-web-production.up.railway.app](https://aiat-dashboard-web-production.up.railway.app) |
+| Explorer | [aiat-database-explorer-production.up.railway.app](https://aiat-database-explorer-production.up.railway.app) |
+| Source | GitHub `peetwan/aiat-dashboard-final`, branch `main` |
+| Database | PostgreSQL ผ่าน private `DATABASE_URL` reference เดียวกัน |
+| Health | ทั้งสอง service `SUCCESS`; database backend = `postgresql` |
+
+Dashboard startup ทำงานตามลำดับ:
+
+1. `create_all` เฉพาะตารางที่ยังไม่มี (ไม่ drop table)
+2. ใช้ PostgreSQL advisory lock กันสอง instance sync ซ้อนกัน
+3. sync catalog, reviewed public artifacts, spatial layers และ housing demand จากไฟล์ที่ commit อยู่ใน repo
+4. เปิด `/health` เมื่อ serving contract ครบ
+
+Explorer ไม่มี startup writer และไม่มี insert/update/delete endpoint จึงอ่านฐานข้อมูลอย่างเดียวทุก 30 วินาที
+
+## 9. Auto-deploy กับ database
+
+Railway ผูกทั้งสอง application services กับ branch `main` จึง auto-deploy หลัง PR ถูก merge
+
+- merge code อย่างเดียว → deploy code ใหม่; seeds เดิมถูก sync แบบ idempotent
+- merge `data/public/*` revision ใหม่ → Dashboard startup sync artifact/hash ใหม่เข้า database
+- connector fetch → เขียน Candidate เท่านั้นและไม่เปลี่ยน Public Dashboard
+- เปิดหน้าเว็บหรือ `/health` → ไม่ fetch upstream URL
+
+Production ยังไม่มี daily source scheduler (`automatic_refresh_enabled=false`) การเปิด scheduler ในอนาคตต้องเป็น Railway Scheduled Job แยกจาก Web Service พร้อม persistent evidence storage, retention, lock และ alerting
+
+## 10. Team workflow
+
+```text
+Issue → branch → code/contract/fixture/tests → Pull Request
+      → GitHub CI + Codex review → squash merge → Railway auto-deploy
+```
+
+ก่อนเปิด PR รัน:
+
+```powershell
+python -m app.cli validate-pipeline
+python tools/validate_public_repo.py
+python -m pytest -q
+```
+
+Public clone รัน application และ connector tests ได้ครบ ส่วน integration tests ที่เทียบ raw evidence ทั้งชุดจะทำงานเฉพาะ maintainer workspace ที่มีไฟล์นั้นจริง
+
+อ่านวิธีเพิ่ม source ที่ [Connector development](connector-development.md), กติกา publication ที่ [Data governance](data-governance.md) และ production runbook ที่ [Deployment](deployment.md)
