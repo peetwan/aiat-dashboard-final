@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from app.catalog import load_catalog, load_ingestion_plans, sync_catalog
 from app.connector_contracts import ConnectorContractError, validate_connector_contracts
 from app.database import SessionLocal, init_db
+from app.flood_snapshot_importer import DEFAULT_PIPELINE_ROOT, import_flood_snapshots
 from app.ingestion import IngestionPipeline, PolicyViolation
 from app.models import DashboardRecord, HousingDemandRecord, IngestionRun, PublicArtifact, Source
 from app.demand_artifacts import sync_housing_demand
@@ -124,6 +125,18 @@ def command_status() -> int:
         return 1 if failed else 0
 
 
+def command_import_flood_snapshots(args: argparse.Namespace) -> int:
+    initialize()
+    with SessionLocal() as session:
+        result = import_flood_snapshots(
+            session,
+            pipeline_root=Path(args.pipeline_root),
+            folders=args.folder or None,
+        )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
 def command_validate_pipeline() -> int:
     """Validate the public connector surface without network or database access."""
 
@@ -190,6 +203,21 @@ def main() -> int:
         help="เรียกเฉพาะ source สาธารณะที่มี executable API plan",
     )
     ingest.add_argument("--strategy", choices=["auto", "api", "snapshot"], default="auto")
+    flood = subparsers.add_parser(
+        "import-flood-snapshots",
+        help="import existing flood/water JSONL snapshots into dashboard_records candidate rows",
+    )
+    flood.add_argument(
+        "--pipeline-root",
+        default=DEFAULT_PIPELINE_ROOT.as_posix(),
+        help="root folder containing sukhothaicare, sukhothai-water, NSN, and rawangphai",
+    )
+    flood.add_argument(
+        "--folder",
+        action="append",
+        default=[],
+        help="optional source folder to import; repeat for multiple folders",
+    )
     subparsers.add_parser("status", help="ดูสถานะ source และจำนวน record")
     subparsers.add_parser(
         "validate-pipeline",
@@ -225,6 +253,8 @@ def main() -> int:
         return 0
     if args.command == "ingest":
         return command_ingest(args)
+    if args.command == "import-flood-snapshots":
+        return command_import_flood_snapshots(args)
     if args.command == "validate-pipeline":
         return command_validate_pipeline()
     if args.command == "publication":
