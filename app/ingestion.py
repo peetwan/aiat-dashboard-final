@@ -11,12 +11,14 @@ from collections.abc import Iterable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlsplit
 
 import httpx
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.catalog import load_ingestion_plans, source_config
+from app.connector_contracts import load_runtime_connector_contract, prepare_contract_records
 from app.connectors import ConnectorContext, load_connector
 from app.models import DashboardRecord, IngestionRun
 from app.privacy import payload_hash, sanitize_payload, stable_record_id
@@ -84,20 +86,177 @@ def nested_record_lists(value: Any, path: str = "root") -> Iterator[tuple[str, l
 
 
 class ResponseRecorder:
-    def __init__(self, source_id: str, run_id: str, settings: Settings):
+    def __init__(
+        self,
+        source_id: str,
+        run_id: str,
+        settings: Settings,
+        *,
+        runtime_endpoints: list[dict] | None = None,
+    ):
         self.root = settings.raw_root / source_id / run_id
         self.root.mkdir(parents=True, exist_ok=False)
         self.settings = settings
         self.artifacts: list[dict] = []
         self.counter = 0
+        self.allowed_endpoints = (
+            None
+            if runtime_endpoints is None
+            else [
+                self._endpoint_rule(endpoint)
+                for endpoint in runtime_endpoints
+                if endpoint.get("runtime_enabled") is True
+                and endpoint.get("restricted") is not True
+            ]
+        )
         self.client = httpx.Client(
             timeout=settings.http_timeout_seconds,
-            follow_redirects=True,
+            # A redirect is a second network destination and therefore must not
+            # inherit approval from the original allowlisted URL.  If an
+            # upstream permanently moves, add the new endpoint to the reviewed
+            # catalog instead of following it implicitly.
+            follow_redirects=False,
             headers={"User-Agent": "AIAT-dashboard-ingestion/0.1 (+read-only)"},
         )
 
     def close(self) -> None:
         self.client.close()
+
+    @staticmethod
+    def _endpoint_key(method: str, url: str) -> tuple[str, str, str, int | None, str]:
+        parsed = urlsplit(str(url))
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
+            raise PolicyViolation(f"runtime endpoint URL is invalid: {url!r}")
+        try:
+            port = parsed.port
+        except ValueError as exc:
+            raise PolicyViolation(f"runtime endpoint URL has an invalid port: {url!r}") from exc
+        if (parsed.scheme.lower(), port) in {("http", 80), ("https", 443)}:
+            port = None
+        return (
+            str(method).upper(),
+            parsed.scheme.lower(),
+            parsed.hostname.lower(),
+            port,
+            parsed.path or "/",
+        )
+
+    @classmethod
+    def _endpoint_rule(cls, endpoint: dict) -> dict[str, Any]:
+        method = str(endpoint.get("method", "GET")).upper()
+        url = str(endpoint.get("url", ""))
+        base = cls._endpoint_key(method, url)
+        url_query = tuple(sorted(parse_qsl(urlsplit(url).query, keep_blank_values=True)))
+        required_query: dict[str, str | None] = {}
+        request_template = endpoint.get("request_template")
+        query_template = ""
+        if isinstance(request_template, dict):
+            query_template = request_template.get("query", "")
+            if method == "GET" and not query_template:
+                query_template = request_template.get("query_or_body", "")
+        for key, value in parse_qsl(str(query_template), keep_blank_values=True):
+            if key in required_query:
+                raise PolicyViolation(f"runtime endpoint declares duplicate query key: {key}")
+            required_query[key] = None if value == "<value>" else value
+
+        body_mode = "none"
+        body_template: Any = None
+        if method != "GET":
+            if isinstance(request_template, dict) and "json_body" in request_template:
+                body_mode = "json"
+                body_template = request_template["json_body"]
+            elif isinstance(request_template, dict) and "form_body" in request_template:
+                body_mode = "form"
+                body_template = request_template["form_body"]
+            else:
+                # POST/PUT/PATCH requests are not approved by URL alone.  The
+                # generated catalog must declare the reviewed body shape.
+                body_mode = "unapproved"
+        return {
+            "base": base,
+            "exact_query": url_query or None,
+            "required_query": required_query,
+            "body_mode": body_mode,
+            "body_template": body_template,
+        }
+
+    @classmethod
+    def _request_endpoint(
+        cls,
+        method: str,
+        url: str,
+        params: dict | None,
+    ) -> tuple[tuple[str, str, str, int | None, str], tuple[tuple[str, str], ...]]:
+        effective_url = httpx.URL(url)
+        if params:
+            effective_url = effective_url.copy_merge_params(params)
+        effective_text = str(effective_url)
+        return (
+            cls._endpoint_key(method, effective_text),
+            tuple(sorted(parse_qsl(urlsplit(effective_text).query, keep_blank_values=True))),
+        )
+
+    def _request_is_allowed(
+        self,
+        method: str,
+        url: str,
+        params: dict | None,
+        data: dict | None = None,
+        json_body: dict | None = None,
+    ) -> bool:
+        if self.allowed_endpoints is None:
+            return True
+        if data is not None and json_body is not None:
+            return False
+        if json_body is not None:
+            body_mode = "json"
+            body: Any = json_body
+        elif data is not None:
+            body_mode = "form"
+            body = data
+        else:
+            body_mode = "none"
+            body = None
+        base, query_pairs = self._request_endpoint(method, url, params)
+        query_keys = [key for key, _ in query_pairs]
+        if len(query_keys) != len(set(query_keys)):
+            return False
+        query = dict(query_pairs)
+        for rule in self.allowed_endpoints:
+            if rule["base"] != base:
+                continue
+            exact_query = rule["exact_query"]
+            if exact_query is not None:
+                query_allowed = query_pairs == exact_query
+            else:
+                required_query = rule["required_query"]
+                query_allowed = set(query) == set(required_query) and all(
+                    expected is None or query[key] == expected
+                    for key, expected in required_query.items()
+                )
+            if not query_allowed or body_mode != rule["body_mode"]:
+                continue
+            if self._body_matches(rule["body_template"], body):
+                return True
+        return False
+
+    @classmethod
+    def _body_matches(cls, template: Any, actual: Any) -> bool:
+        if template == "<value>":
+            return actual is not None
+        if isinstance(template, dict):
+            return (
+                isinstance(actual, dict)
+                and set(actual) == set(template)
+                and all(cls._body_matches(template[key], actual[key]) for key in template)
+            )
+        if isinstance(template, list):
+            return (
+                isinstance(actual, list)
+                and len(actual) == len(template)
+                and all(cls._body_matches(expected, value) for expected, value in zip(template, actual))
+            )
+        return type(template) is type(actual) and template == actual
 
     def request(
         self,
@@ -110,6 +269,11 @@ class ResponseRecorder:
         json_body: dict | None = None,
         headers: dict | None = None,
     ) -> tuple[httpx.Response, Path]:
+        if not self._request_is_allowed(method, url, params, data, json_body):
+            raise PolicyViolation(
+                f"{self.root.parent.name}: runtime request is outside the enabled endpoint allowlist: "
+                f"{method.upper()} {urlsplit(url).path or '/'} (query/body shape rejected)"
+            )
         if self.counter:
             time.sleep(self.settings.http_delay_seconds)
         self.counter += 1
@@ -219,7 +383,11 @@ class IngestionPipeline:
             else:
                 raise ValueError("strategy ต้องเป็น auto, api หรือ snapshot")
 
-            loaded, skipped = self._store_records(source, records)
+            loaded, skipped, run_as_of = self._store_records(
+                source,
+                records,
+                use_connector_contract=actual_strategy == "api",
+            )
             run.strategy = actual_strategy
             run.status = "complete"
             run.finished_at = utc_now()
@@ -227,6 +395,7 @@ class IngestionPipeline:
             run.records_seen = len(records)
             run.records_loaded = loaded
             run.records_skipped = skipped
+            run.as_of = run_as_of
             run.manifest_path = relative_path(manifest_path) if manifest_path else None
             run.error_message = fallback_note
             self.session.commit()
@@ -242,17 +411,62 @@ class IngestionPipeline:
                 "note": fallback_note,
             }
         except Exception as exc:
-            run.status = "failed"
-            run.finished_at = utc_now()
-            failed_manifest = getattr(exc, "manifest_path", None)
+            # Candidate rows and any earlier flushes belong to this run.  Remove
+            # them atomically before recording the durable failed-run status.
+            self.session.rollback()
+            failed_run = self.session.get(IngestionRun, run_id)
+            if failed_run is None:
+                failed_run = IngestionRun(
+                    run_id=run_id,
+                    source_id=source_id,
+                    strategy=strategy,
+                    status="failed",
+                )
+                self.session.add(failed_run)
+            failed_run.status = "failed"
+            failed_run.finished_at = utc_now()
+            failed_run.strategy = actual_strategy
+            failed_manifest = getattr(exc, "manifest_path", None) or manifest_path
             if failed_manifest:
-                run.manifest_path = relative_path(failed_manifest)
-            run.error_message = f"{type(exc).__name__}: {exc}"[:4000]
+                failed_run.manifest_path = relative_path(failed_manifest)
+            failed_run.error_message = f"{type(exc).__name__}: {exc}"[:4000]
             self.session.commit()
             raise
 
-    def _store_records(self, source: dict, records: Iterable[tuple[str, dict]]) -> tuple[int, int]:
+    def _store_records(
+        self,
+        source: dict,
+        records: Iterable[tuple[str, dict]],
+        *,
+        use_connector_contract: bool = True,
+    ) -> tuple[int, int, str | None]:
         source_id = source["source_id"]
+        batch = list(records)
+        # Connector contracts describe normalized records emitted by the live
+        # API connector.  Snapshot replay keeps its existing filename-derived
+        # dataset keys, so applying the API contract to snapshot/fallback rows
+        # would reject otherwise valid historical evidence.
+        contract = load_runtime_connector_contract(source_id) if use_connector_contract else None
+        if contract is not None:
+            # This prepares every row before Session.add/flush.  A malformed or
+            # duplicate identity therefore cannot leave a partial candidate batch.
+            prepared = prepare_contract_records(contract, batch)
+        else:
+            # Snapshot-only sources retain the legacy heuristic and dataset-key
+            # truncation because they have no executable connector contract.
+            prepared = []
+            for dataset_key, raw_payload in batch:
+                payload = sanitize_payload(raw_payload)
+                digest = payload_hash(payload)
+                prepared.append(
+                    {
+                        "dataset_key": dataset_key[:200],
+                        "payload": payload,
+                        "record_hash": digest,
+                        "record_id": stable_record_id(payload, digest),
+                        "as_of": None,
+                    }
+                )
         existing = {
             (dataset, record_id, record_hash)
             for dataset, record_id, record_hash in self.session.execute(
@@ -265,21 +479,34 @@ class IngestionPipeline:
         }
         loaded = 0
         skipped = 0
-        for dataset_key, raw_payload in records:
-            payload = sanitize_payload(raw_payload)
-            digest = payload_hash(payload)
-            record_id = stable_record_id(payload, digest)
-            key = (dataset_key[:200], record_id, digest)
+        batch_as_of: set[str] = set()
+        for record in prepared:
+            if isinstance(record, dict):
+                dataset_key = record["dataset_key"]
+                payload = record["payload"]
+                digest = record["record_hash"]
+                record_id = record["record_id"]
+                as_of = record["as_of"]
+            else:
+                dataset_key = record.dataset_key
+                payload = record.payload
+                digest = record.record_hash
+                record_id = record.record_id
+                as_of = record.as_of
+            key = (dataset_key, record_id, digest)
+            if as_of is not None:
+                batch_as_of.add(as_of)
             if key in existing:
                 skipped += 1
                 continue
             self.session.add(
                 DashboardRecord(
                     source_id=source_id,
-                    dataset_key=dataset_key[:200],
+                    dataset_key=dataset_key,
                     source_record_id=record_id,
                     record_hash=digest,
                     quality_status=source["readiness_status"],
+                    as_of=as_of,
                     payload=payload,
                 )
             )
@@ -287,8 +514,7 @@ class IngestionPipeline:
             loaded += 1
             if loaded % 1000 == 0:
                 self.session.flush()
-        self.session.commit()
-        return loaded, skipped
+        return loaded, skipped, next(iter(batch_as_of)) if len(batch_as_of) == 1 else None
 
     def _limit_reached(self, count: int) -> bool:
         limit = self.settings.max_records_per_source
@@ -298,8 +524,17 @@ class IngestionPipeline:
         plan = self.plans.get(source["source_id"])
         if not plan:
             raise RuntimeError("source นี้ยังไม่มี executable API plan")
-        recorder = ResponseRecorder(source["source_id"], run_id, self.settings)
+        recorder = ResponseRecorder(
+            source["source_id"],
+            run_id,
+            self.settings,
+            runtime_endpoints=source.get("endpoints", []),
+        )
+        records: list[tuple[str, dict]] = []
         try:
+            contract = load_runtime_connector_contract(source["source_id"])
+            if contract is None:
+                raise RuntimeError("executable API plan has no connector contract")
             connector = load_connector(plan["connector"])
             if connector.driver_name != plan["driver"]:
                 raise RuntimeError(
@@ -314,13 +549,22 @@ class IngestionPipeline:
                     recorder=recorder,
                 )
             )
+            if not isinstance(records, list):
+                raise RuntimeError("connector output must be a complete list")
+            limit = self.settings.max_records_per_source
+            if limit > 0 and len(records) >= limit:
+                raise RuntimeError(
+                    "connector output reached max_records_per_source; "
+                    "partial candidate commits are forbidden"
+                )
+            prepare_contract_records(contract, records)
             manifest = recorder.write_manifest(source["source_id"], run_id, len(records))
             return records, manifest
         except Exception as exc:
             manifest = recorder.write_manifest(
                 source["source_id"],
                 run_id,
-                0,
+                len(records),
                 status="failed",
                 error=f"{type(exc).__name__}: {exc}",
             )

@@ -1,20 +1,20 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f2_learning_area_based",
   "connector": "app.connectors.pmua_area_based:PmuaAreaBasedConnector",
   "transport": "http_json",
   "dataset_grains": [
     {
-      "key_pattern": "area_based",
+      "key_pattern": "^area_based$",
       "grain_th": "ผู้เข้าร่วมหรือธุรกิจหนึ่งระเบียน ไม่ใช่หนึ่งโครงการ",
-      "identity_fields": ["id"],
+      "identity_options": [["id"]],
       "geography_fields": ["region", "province", "district", "subDistrict"],
       "as_of_fields": ["fiscalYear", "updatedAt"]
     },
     {
-      "key_pattern": "aggregate_*",
+      "key_pattern": "^aggregate_[A-Za-z0-9_]+$",
       "grain_th": "ค่ารวมหนึ่งรายการต่อมิติที่ต้นทางเผยแพร่",
-      "identity_fields": ["id", "dimension", "label"],
+      "identity_options": [["id"], ["dimension", "label"]],
       "geography_fields": ["label"],
       "as_of_fields": []
     }
@@ -28,5 +28,6 @@
     "candidate_only": true,
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
-  }
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_learning_area_based.json"
 }

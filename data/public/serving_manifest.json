@@ -1,0 +1,28 @@
+{
+  "manifest_version": "1.0",
+  "artifacts": [
+    {"key": "catalog", "group": "catalog", "path": "public_dashboard.json"},
+    {"key": "source-insights", "group": "source_insights", "path": "source_insights.json"},
+    {"key": "source-coverage", "group": "source_coverage", "path": "source_coverage.json"},
+    {"key": "unmapped-records", "group": "unmapped_records", "path": "unmapped_records.json"},
+    {"key": "housing-spatial-summary", "group": "housing_spatial_summary", "path": "housing_spatial_summary.json"},
+    {"key": "housing-demand-summary", "group": "housing_demand_summary", "path": "housing_demand_summary.json"},
+    {"key": "learning-dashboard", "group": "source_dataset", "path": "learning_dashboard.json", "source_ids": ["f2_learning_dashboard"]},
+    {"key": "map/provinces", "group": "map", "path": "thailand_provinces.geojson"},
+    {"key": "map/cultural-points", "group": "map", "path": "cultural_points.geojson"},
+    {
+      "key_template": "province/{stem}/briefing",
+      "group": "provincial_briefing",
+      "path_glob": "provincial_briefings/[0-9][0-9].json",
+      "province_code_from": "stem",
+      "expected_count": 77
+    },
+    {
+      "key_template": "province/{stem}/summary",
+      "group": "executive_summary",
+      "path_glob": "executive_summaries/[0-9][0-9].json",
+      "province_code_from": "stem",
+      "expected_count": 77
+    }
+  ]
+}

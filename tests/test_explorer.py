@@ -57,7 +57,7 @@ def test_explorer_sources_explain_data_and_grain_for_all_28_sources() -> None:
     assert all(item["database_targets"] for item in payload["sources"])
     assert payload["policy_counts"] == {
         "metadata_only": 12,
-        "project_owner_approved_public": 11,
+        "team_approved_public": 11,
         "restricted_local_only": 5,
     }
 

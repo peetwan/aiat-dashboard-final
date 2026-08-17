@@ -5,12 +5,16 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = DASHBOARD_ROOT.parent
+PROJECT_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
+).expanduser().resolve()
 REGISTRY_PATH = PROJECT_ROOT / "config/source_registry.json"
 AUDIT_ROOT = PROJECT_ROOT / "data/source_audit"
 DEFAULT_MERGED = PROJECT_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
@@ -35,6 +39,7 @@ APPTECH_CURRENT_OBSERVATION = (
     PROJECT_ROOT
     / "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json"
 )
+INGESTION_PLANS_PATH = DASHBOARD_ROOT / "config/ingestion_plans.json"
 
 # Publication permission is deliberately separate from semantic acceptance. Every
 # source in this map remains candidate/needs_review until its fact gates pass.
@@ -76,6 +81,28 @@ def read_json(path: Path) -> Any:
 def endpoint_id(source_id: str, method: str, url: str, action: str) -> str:
     value = f"{source_id}|{method}|{url}|{action}".encode("utf-8")
     return hashlib.sha256(value).hexdigest()
+
+
+def provenance_path(
+    path: Path,
+    *,
+    evidence_root: Path = PROJECT_ROOT,
+    dashboard_root: Path = DASHBOARD_ROOT,
+) -> str:
+    """Return a stable path without assuming the repo lives under the evidence root."""
+    resolved = path.expanduser().resolve()
+    dashboard_root = dashboard_root.expanduser().resolve()
+    evidence_root = evidence_root.expanduser().resolve()
+    try:
+        relative = resolved.relative_to(dashboard_root)
+    except ValueError:
+        try:
+            return resolved.relative_to(evidence_root).as_posix()
+        except ValueError as exc:
+            raise ValueError(
+                f"provenance input is outside the dashboard and evidence roots: {resolved}"
+            ) from exc
+    return (Path("dashboard_final") / relative).as_posix()
 
 
 def as_project_path(path_text: str, merged_root: Path) -> Path:
@@ -146,11 +173,162 @@ def load_endpoints(
     return endpoints
 
 
+def apply_runtime_request_templates(
+    source_id: str,
+    endpoints: list[dict],
+    plan: dict | None,
+) -> list[dict]:
+    """Bind executable query/body shapes to the reviewed runtime endpoint catalog."""
+
+    def render_dynamic_values(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {str(key): render_dynamic_values(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [render_dynamic_values(item) for item in value]
+        if isinstance(value, str) and value.startswith("$"):
+            return "<value>"
+        return value
+
+    request_templates: dict[tuple[str, str], dict[str, Any]] = {}
+    requests = list((plan or {}).get("requests", []))
+    if (plan or {}).get("url"):
+        top_level_request: dict[str, Any] = {
+            "method": (plan or {}).get("method", "GET"),
+            "url": (plan or {})["url"],
+        }
+        if (plan or {}).get("query_params"):
+            top_level_request["params"] = (plan or {})["query_params"]
+        if (
+            str(top_level_request["method"]).upper() != "GET"
+            and (plan or {}).get("body_mode") == "json_empty"
+        ):
+            top_level_request["json_body"] = {}
+        requests.append(top_level_request)
+    if (plan or {}).get("package_show_url"):
+        for dataset in (plan or {}).get("datasets", []):
+            if isinstance(dataset, dict) and dataset.get("id"):
+                requests.append(
+                    {
+                        "method": "GET",
+                        "url": f"{(plan or {})['package_show_url']}?{urlencode({'id': dataset['id']})}",
+                    }
+                )
+    for dataset in (plan or {}).get("datasets", []):
+        if not isinstance(dataset, dict) or not dataset.get("url"):
+            continue
+        if "json_body" in dataset:
+            requests.append(
+                {
+                    "method": dataset.get("method", "POST"),
+                    "url": dataset["url"],
+                    "json_body": dataset["json_body"],
+                }
+            )
+        elif "form_body" in dataset:
+            requests.append(
+                {
+                    "method": dataset.get("method", "POST"),
+                    "url": dataset["url"],
+                    "form_body": dataset["form_body"],
+                }
+            )
+    for request in requests:
+        params = request.get("params") or {}
+        has_json_body = "json_body" in request
+        has_form_body = "form_body" in request
+        method = str(request.get("method", "GET")).upper()
+        template: dict[str, Any] = {}
+        if params:
+            pairs = [
+                (
+                    str(key),
+                    "<value>" if str(value).startswith("$") else str(value),
+                )
+                for key, value in params.items()
+            ]
+            query_template = urlencode(pairs).replace("%3Cvalue%3E", "<value>")
+            template["query_or_body" if method == "GET" else "query"] = query_template
+        if has_json_body:
+            template["json_body"] = render_dynamic_values(request["json_body"])
+        if has_form_body:
+            template["form_body"] = render_dynamic_values(request["form_body"])
+        request_templates[(method, str(request["url"]))] = template
+
+    unmatched = set(request_templates)
+    for endpoint in endpoints:
+        key = (str(endpoint.get("method", "GET")).upper(), str(endpoint.get("url", "")))
+        template = request_templates.get(key)
+        if template is None:
+            continue
+        if endpoint.get("runtime_enabled") is not True:
+            raise RuntimeError(
+                f"{source_id}: executable request is not runtime-enabled: {key[0]} {key[1]}"
+            )
+        endpoint["request_template"] = {
+            **(endpoint.get("request_template") or {}),
+            **template,
+        }
+        unmatched.discard(key)
+    if unmatched:
+        missing = ", ".join(f"{method} {url}" for method, url in sorted(unmatched))
+        raise RuntimeError(
+            f"{source_id}: ingestion plan requests are missing from the endpoint catalog: {missing}"
+        )
+
+    excluded_urls = set((plan or {}).get("runtime_excluded_urls", []))
+    seen_excluded: set[str] = set()
+    for endpoint in endpoints:
+        url = str(endpoint.get("url", ""))
+        if url not in excluded_urls:
+            continue
+        endpoint["runtime_enabled"] = False
+        endpoint["team_action"] = "do_not_call_publication_policy"
+        endpoint["endpoint_id"] = endpoint_id(
+            source_id,
+            str(endpoint.get("method", "GET")),
+            url,
+            endpoint["team_action"],
+        )
+        endpoint["notes_th"] = (
+            f"{endpoint.get('notes_th', '').strip()} — runtime blocked by ingestion publication policy"
+        ).strip(" —")
+        seen_excluded.add(url)
+    missing_exclusions = excluded_urls - seen_excluded
+    if missing_exclusions:
+        raise RuntimeError(
+            f"{source_id}: runtime_excluded_urls missing from endpoint catalog: "
+            + ", ".join(sorted(missing_exclusions))
+        )
+
+    if (plan or {}).get("expected_resource_count"):
+        resource_endpoints = [
+            endpoint
+            for endpoint in endpoints
+            if endpoint.get("kind") == "ckan_resource_download"
+        ]
+        expected_resources = int((plan or {})["expected_resource_count"])
+        if len(resource_endpoints) != expected_resources:
+            raise RuntimeError(
+                f"{source_id}: catalog has {len(resource_endpoints)} CKAN resource endpoints; "
+                f"plan expects {expected_resources}"
+            )
+        expected_value_resources = int((plan or {}).get("expected_value_resource_count") or 0)
+        enabled_resources = [
+            endpoint for endpoint in resource_endpoints if endpoint.get("runtime_enabled") is True
+        ]
+        if expected_value_resources and len(enabled_resources) != expected_value_resources:
+            raise RuntimeError(
+                f"{source_id}: catalog has {len(enabled_resources)} runtime-enabled CKAN resources; "
+                f"plan expects {expected_value_resources}"
+            )
+    return endpoints
+
+
 def load_snapshot_files(data_location: Path) -> list[str]:
     if not data_location.exists():
         return []
     return sorted(
-        path.relative_to(PROJECT_ROOT).as_posix()
+        provenance_path(path)
         for path in data_location.rglob("*")
         if path.is_file()
         and (path.name == "data.csv" or "data" in path.relative_to(data_location).parts[:-1])
@@ -217,7 +395,7 @@ def source_policy(source_id: str) -> tuple[str, str, str, bool]:
     if source_id in APPROVED_PUBLIC_MODES:
         return (
             APPROVED_PUBLIC_MODES[source_id],
-            "project_owner_approved_public",
+            "team_approved_public",
             "public_candidate",
             True,
         )
@@ -232,8 +410,8 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
         notes = [note for note in notes if "demand 25,919" not in note.lower()]
     if source_id == "f2_learning_dashboard":
         notes.append(
-            "อนุญาต Cloud publication เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว; "
-            "permission นี้ไม่ใช่ fact acceptance, raw response ยังไม่มี manifest และต้องทบทวน "
+            "กำหนด Cloud publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว; "
+            "scope นี้ไม่ใช่ fact acceptance, raw response ยังไม่มี manifest และต้องทบทวน "
             "selected-project scope ก่อนใช้เป็น KPI"
         )
     if source_id == "f1_pppconnext":
@@ -300,6 +478,7 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
 
 def build_catalog(merged_root: Path) -> dict:
     registry = read_json(REGISTRY_PATH)
+    ingestion_plans = read_json(INGESTION_PLANS_PATH).get("sources", {})
     index_path = merged_root / "00_INDEX.csv"
     index_rows = list(csv.DictReader(index_path.open(encoding="utf-8-sig", newline="")))
     index_by_source_id = {row["source_id"]: row for row in index_rows}
@@ -322,6 +501,11 @@ def build_catalog(merged_root: Path) -> dict:
             endpoints = load_learning_dashboard_endpoint(acquisition_mode)
         if source_id == "f1_pppconnext":
             endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
+        endpoints = apply_runtime_request_templates(
+            source_id,
+            endpoints,
+            ingestion_plans.get(source_id),
+        )
         snapshot_files = (
             load_snapshot_files(data_location)
             if data_location and production_values_allowed
@@ -331,7 +515,7 @@ def build_catalog(merged_root: Path) -> dict:
             current_manifest = read_json(APPTECH_CURRENT_MANIFEST)
             if current_manifest.get("source_id") != source_id or current_manifest.get("row_count") != 630:
                 raise RuntimeError("AppTech current Silver manifest no longer matches 630-row audit")
-            snapshot_files = [APPTECH_CURRENT_RECORDS.relative_to(PROJECT_ROOT).as_posix()]
+            snapshot_files = [provenance_path(APPTECH_CURRENT_RECORDS)]
 
         if source_id == "f2_learning_dashboard":
             expected_record_count = LEARNING_DASHBOARD_PROVINCE_ROWS
@@ -358,7 +542,7 @@ def build_catalog(merged_root: Path) -> dict:
                 ),
                 "source_type": registry_row.get("source_type_guess", ""),
                 "sensitivity_lane": registry_row.get("sensitivity", "public_unknown"),
-                "source_card": card_path.relative_to(PROJECT_ROOT).as_posix(),
+                "source_card": provenance_path(card_path),
                 "audit_status": card.get("status", "NOT_AUDITED"),
                 "acquisition_mode": acquisition_mode,
                 "snapshot_fallback": bool(snapshot_files),
@@ -385,20 +569,20 @@ def build_catalog(merged_root: Path) -> dict:
         )
 
     return {
-        "catalog_version": "0.2.0",
+        "catalog_version": "0.3.0",
         "generated_from": {
-            "registry": REGISTRY_PATH.relative_to(PROJECT_ROOT).as_posix(),
-            "merged_index": index_path.relative_to(PROJECT_ROOT).as_posix(),
+            "registry": provenance_path(REGISTRY_PATH),
+            "merged_index": provenance_path(index_path),
             "source_cards": "data/source_audit/<ordinal>_<source_id>/source_card.json",
             "verified_endpoint_observations": [
-                LEARNING_DASHBOARD_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
-                PPPCONNEXT_2026_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
-                APPTECH_CURRENT_OBSERVATION.relative_to(PROJECT_ROOT).as_posix(),
+                provenance_path(LEARNING_DASHBOARD_OBSERVATION),
+                provenance_path(PPPCONNEXT_2026_OBSERVATION),
+                provenance_path(APPTECH_CURRENT_OBSERVATION),
             ],
         },
         "policy": {
-            "approval_recorded_at": "2026-08-16",
-            "approved_by": "peet",
+            "approval_basis": "current_catalog_policy_and_source_cards",
+            "current_stewardship": "repository_co_maintainers",
             "registry_source_count": len(sources),
             "approved_public_source_count": sum(
                 source["production_values_allowed"] for source in sources
@@ -427,17 +611,17 @@ def write_governance(catalog: dict, target: Path) -> None:
         "",
         "> Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังเป็น `candidate`/`needs_review` จนกว่า semantic, freshness, unit และ denominator จะชัด",
         "",
-        "## Approval record",
+        "## Current publication basis",
         "",
-        f"- วันที่บันทึก: {policy['approval_recorded_at']}",
-        f"- Project owner: `{policy['approved_by']}`",
+        f"- ฐานการจัดหมวดปัจจุบัน: `{policy['approval_basis']}`",
+        f"- ผู้ดูแล policy ปัจจุบัน: `{policy['current_stewardship']}`",
         f"- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: {policy['approved_public_source_count']} แหล่ง",
         f"- Metadata-only: {policy['metadata_only_source_count']} แหล่ง",
         f"- Restricted local-only: {policy['restricted_source_count']} แหล่ง",
         "",
         "ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้",
         "",
-        "`f2_learning_dashboard` ได้รับ publication permission เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และ approval นี้ไม่เปลี่ยน semantic owner decision ให้เป็น accepted",
+        "`f2_learning_dashboard` ถูกจัด publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถวตามสถานะใน source card แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และการจัด scope นี้ไม่เปลี่ยน semantic review ให้เป็น accepted",
         "",
         "## Source classification",
         "",
@@ -484,7 +668,7 @@ def write_governance(catalog: dict, target: Path) -> None:
             "- email, phone และชื่อบุคคล",
             "- payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม",
             "",
-            "External-team artifacts ต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม",
+            "Artifacts ที่เพื่อนร่วมทีมนำเข้าต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม",
             "",
             "## สิ่งที่ห้าม commit",
             "",

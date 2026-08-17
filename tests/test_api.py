@@ -33,7 +33,7 @@ def test_health_and_catalog_summary():
         summary = client.get("/api/summary").json()
         assert summary["sources"] == 28
         assert summary["endpoints_catalogued"] == 144
-        assert summary["safe_runtime_endpoints"] == 94
+        assert summary["safe_runtime_endpoints"] == 92
         assert summary["production_approved_sources"] == 11
         assert summary["configured_connectors"] == 11
         assert summary["blocked_sources"] == 5
@@ -539,7 +539,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 18
+    assert len(public_operations) == 20
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

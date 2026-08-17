@@ -2,59 +2,280 @@ name: Safe Auto Merge
 
 on:
   pull_request_target:
-    types: [labeled]
+    types:
+      - opened
+      - labeled
+      - unlabeled
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
+      - edited
 
 permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: safe-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
-  enable-auto-merge:
-    name: enable-auto-merge
-    if: github.event.label.name == 'codex-automerge' && !github.event.pull_request.draft
+  reconcile-auto-merge:
+    name: reconcile-auto-merge
+    if: >-
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled') ||
+      github.event.label.name == 'codex-automerge'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Verify trusted label and protected paths
-        id: verify
-        uses: actions/github-script@v9
+      - name: Reconcile authorization against the current pull request
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
-            const permission = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              username: context.actor,
-            });
-            const allowed = new Set(['admin', 'maintain', 'write']);
-            if (!allowed.has(permission.data.permission)) {
-              core.setFailed(`Actor ${context.actor} cannot authorize auto-merge.`);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = context.payload.pull_request.number;
+            const action = context.payload.action;
+            const eventHeadSha = context.payload.pull_request.head.sha;
+            const authorizationLabel = 'codex-automerge';
+
+            async function readPullRequest() {
+              const response = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pullNumber,
+              });
+              return response.data;
+            }
+
+            function hasAuthorizationLabel(pullRequest) {
+              return pullRequest.labels.some(label => label.name === authorizationLabel);
+            }
+
+            async function disableAutoMerge(pullRequest) {
+              if (!pullRequest.auto_merge) {
+                return;
+              }
+              await github.graphql(`
+                mutation DisableAutoMerge($pullRequestId: ID!) {
+                  disablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId
+                  }) {
+                    pullRequest { number autoMergeRequest { enabledAt } }
+                  }
+                }
+              `, { pullRequestId: pullRequest.node_id });
+            }
+
+            async function removeAuthorizationLabel(pullRequest) {
+              if (!hasAuthorizationLabel(pullRequest)) {
+                return;
+              }
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pullNumber,
+                  name: authorizationLabel,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            async function invalidate(reason, { removeLabel = true, fail = false } = {}) {
+              const latest = await readPullRequest();
+              await disableAutoMerge(latest);
+              if (removeLabel) {
+                await removeAuthorizationLabel(latest);
+              }
+              if (fail) {
+                core.setFailed(reason);
+              } else {
+                core.notice(reason);
+              }
+            }
+
+            if (action === 'unlabeled') {
+              await invalidate('Authorization label removed; auto-merge is disabled.', {
+                removeLabel: false,
+              });
+              return;
+            }
+
+            if (['opened', 'synchronize', 'reopened', 'ready_for_review', 'converted_to_draft'].includes(action)) {
+              await invalidate(
+                `Pull request changed state (${action}); a teammate must authorize the current revision again.`
+              );
+              return;
+            }
+
+            if (action === 'edited') {
+              if (context.payload.changes?.base) {
+                await invalidate('Pull request base changed; a teammate must authorize it again.');
+              } else {
+                core.notice('Pull request metadata changed without changing its base branch.');
+              }
+              return;
+            }
+
+            if (action !== 'labeled') {
+              core.notice(`No auto-merge action is defined for ${action}.`);
+              return;
+            }
+
+            let pullRequest = await readPullRequest();
+            if (pullRequest.head.sha !== eventHeadSha) {
+              await invalidate('The labeled revision is no longer current; authorize the new revision again.', {
+                fail: true,
+              });
+              return;
+            }
+            const authorizedHeadSha = eventHeadSha;
+            if (pullRequest.base.ref !== 'main') {
+              await invalidate('Safe auto-merge is available only for pull requests targeting main.', {
+                fail: true,
+              });
+              return;
+            }
+            if (pullRequest.draft) {
+              await invalidate('Draft pull requests cannot be authorized for auto-merge.', { fail: true });
+              return;
+            }
+            if (context.actor.toLowerCase() === pullRequest.user.login.toLowerCase()) {
+              await invalidate('The pull request author cannot authorize their own auto-merge.', {
+                fail: true,
+              });
+              return;
+            }
+
+            let permission;
+            try {
+              const response = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: context.actor,
+              });
+              permission = response.data.permission;
+            } catch (error) {
+              await invalidate(`Cannot verify authorization for ${context.actor}: ${error.message}`, {
+                fail: true,
+              });
+              return;
+            }
+            const allowedPermissions = new Set(['admin', 'maintain', 'write']);
+            if (!allowedPermissions.has(permission)) {
+              await invalidate(`Actor ${context.actor} cannot authorize auto-merge.`, { fail: true });
               return;
             }
 
             const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
+              owner,
+              repo,
+              pull_number: pullNumber,
               per_page: 100,
             });
-            const protectedPaths = [
-              '.github/workflows/',
-              '.github/CODEOWNERS',
+            if (files.length !== pullRequest.changed_files) {
+              await invalidate(
+                `GitHub returned ${files.length} of ${pullRequest.changed_files} changed files; manual merge is required.`,
+                { fail: true }
+              );
+              return;
+            }
+            const protectedExactPaths = new Set([
               'AGENTS.md',
               'SECURITY.md',
+              'Dockerfile',
+              'Dockerfile.explorer',
+              'Procfile',
+              'railway.json',
+              'railway.explorer.json',
+              'nixpacks.toml',
+              'runtime.txt',
+              '.python-version',
+              'requirements.txt',
+              'requirements-dev.txt',
+              'pyproject.toml',
+              'poetry.lock',
+              'uv.lock',
+              'Pipfile',
+              'Pipfile.lock',
+              'package.json',
+              'package-lock.json',
+              'npm-shrinkwrap.json',
+              'yarn.lock',
+              'pnpm-lock.yaml',
+              'app/database.py',
+              'app/catalog.py',
+              'app/models.py',
+              'app/settings.py',
+              'app/server.py',
+              'app/main.py',
+              'app/ingestion.py',
+              'app/operations.py',
+              'app/privacy.py',
+              'app/public_artifacts.py',
+              'app/public_data.py',
+              'app/demand_artifacts.py',
+              'app/spatial_artifacts.py',
+              'app/connector_contracts.py',
+              'app/connectors/base.py',
+              'app/connectors/registry.py',
+              'explorer/main.py',
+              'explorer/server.py',
+              'docs/deployment.md',
+              'tools/build_public_data.py',
+              'tools/validate_public_repo.py',
+              'tests/test_policy.py',
+              'tests/test_public_artifacts.py',
+              'tests/test_public_privacy.py',
+              'tests/test_safe_auto_merge_policy.py',
+            ]);
+            const protectedPrefixes = [
+              '.github/',
+              'config/',
+              'data/public/',
+              'alembic/',
+              'migrations/',
+              'templates/connector/',
+              'tools/build_',
+              'tests/fixtures/connectors/',
             ];
+            const isProtected = filename =>
+              protectedExactPaths.has(filename) ||
+              protectedPrefixes.some(prefix => filename.startsWith(prefix));
             const blocked = files
-              .map(file => file.filename)
-              .filter(filename => protectedPaths.some(path => filename === path || filename.startsWith(path)));
+              .flatMap(file => [file.filename, file.previous_filename].filter(Boolean))
+              .filter((filename, index, all) => isProtected(filename) && all.indexOf(filename) === index);
             if (blocked.length) {
-              core.setFailed(`Workflow/review-policy changes require manual merge: ${blocked.join(', ')}`);
+              await invalidate(
+                `Protected changes require manual merge: ${blocked.join(', ')}`,
+                { fail: true }
+              );
+              return;
             }
 
-      - name: Enable squash auto-merge after required checks pass
-        if: steps.verify.outcome == 'success'
-        uses: actions/github-script@v9
-        with:
-          script: |
+            // Re-read after pagination so a concurrent push cannot reuse authorization for a new SHA.
+            pullRequest = await readPullRequest();
+            if (
+              pullRequest.head.sha !== authorizedHeadSha ||
+              pullRequest.base.ref !== 'main' ||
+              pullRequest.draft ||
+              !hasAuthorizationLabel(pullRequest)
+            ) {
+              await invalidate('Pull request changed during verification; authorize the current revision again.', {
+                fail: true,
+              });
+              return;
+            }
+
+            if (pullRequest.auto_merge) {
+              core.notice('Auto-merge is already enabled for the current revision.');
+              return;
+            }
             await github.graphql(`
               mutation EnableAutoMerge($pullRequestId: ID!) {
                 enablePullRequestAutoMerge(input: {
@@ -64,5 +285,7 @@ jobs:
                   pullRequest { number autoMergeRequest { enabledAt } }
                 }
               }
-            `, { pullRequestId: context.payload.pull_request.node_id });
-            core.notice('Auto-merge enabled; GitHub will wait for branch protection and required CI.');
+            `, { pullRequestId: pullRequest.node_id });
+            core.notice(
+              `Auto-merge enabled for ${authorizedHeadSha}; GitHub will wait for branch protection and required CI.`
+            );

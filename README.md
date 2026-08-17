@@ -1,6 +1,6 @@
 # AIAT Provincial Evidence Map
 
-Public dashboard และ central connector pipeline สำหรับข้อมูลภาครัฐ/มหาวิทยาลัย 28 แหล่ง ข้อมูลแต่ละเว็บไซต์ไม่จำเป็นต้องมีหน้าตาเหมือนกัน: แต่ละ URL มี connector และ contract ของตัวเอง ส่วนระบบกลางดูแลการเก็บหลักฐาน การตรวจความครบ privacy, versioning และการเขียนฐานข้อมูลให้เหมือนกัน
+Public dashboard ที่มี source catalog ครบ 28 แหล่ง และ central connector pipeline สำหรับ 6 แหล่งที่เปิด operational ingestion อยู่ในปัจจุบัน แหล่งที่เหลือใช้ snapshot, metadata-only หรือ restricted lane ตาม policy; เมื่อเปิด source เพิ่ม จึงค่อยมี connector และ contract เฉพาะ URL นั้น ส่วนระบบกลางดูแลหลักฐาน ความครบ privacy, versioning และการเขียนฐานข้อมูลแบบเดียวกัน
 
 > ข้อมูลที่เผยแพร่ยังเป็น `candidate`/`needs_review` ไม่ใช่ KPI ที่หน่วยงานรับรอง และระบบไม่เดา grain, หน่วย, ปี หรือจังหวัดเมื่อหลักฐานไม่พอ
 
@@ -14,13 +14,15 @@ Public dashboard และ central connector pipeline สำหรับข้�
 
 Production ใช้ Railway project `aiat-dashboard-final` และ PostgreSQL ผ่าน private service reference ปัจจุบันฐานข้อมูลมี source catalog 28 แหล่ง, public artifacts 163 ชุด และ spatial features 194,532 รายการ
 
+Repository ถูกสร้างเริ่มต้นใต้บัญชี `peetwan` แต่ดูแลร่วมกันโดยทีม; `CODEOWNERS` ระบุ co-maintainers ไว้ ส่วน GitHub จะส่งคำขอ review ได้เมื่อบัญชีนั้นยอมรับ collaborator invitation และมีสิทธิ์ใน repository แล้ว การเปลี่ยนแปลงทั้งหมดเข้าผ่าน Pull Request
+
 ## สิ่งที่ทำอัตโนมัติ
 
 | เหตุการณ์ | ผลที่เกิดขึ้น |
 |---|---|
 | เปิด Pull Request | GitHub Actions ตรวจ connector contracts, public-repo safety และ tests |
 | PR ผ่านและ merge เข้า `main` | Railway auto-deploy Dashboard และ Explorer จาก branch `main` |
-| Dashboard เริ่มทำงาน | สร้าง schema ที่ขาดและ sync เฉพาะไฟล์ใน `data/public/` เข้า serving database แบบ idempotent |
+| Dashboard เริ่มทำงาน | สร้าง schema ที่ขาด ขยาย `data/public/serving_manifest.json` และ sync reviewed artifacts เข้า serving database แบบ idempotent |
 | Explorer เริ่มทำงาน | อ่านฐานข้อมูลเดียวกันเท่านั้น ไม่แก้ข้อมูลและไม่ fetch เว็บไซต์ต้นทาง |
 | เว็บไซต์ต้นทางเปลี่ยน | ยังไม่ publish อัตโนมัติ; connector เก็บเป็น Candidate และต้อง review/build/test ก่อน release ใหม่ |
 
@@ -53,6 +55,8 @@ python -m explorer.server
 
 เปิด `http://localhost:8080`
 
+จุดแก้ UI หลักคือ `app/templates/` + `app/static/` สำหรับ Dashboard และ `explorer/templates/` + `explorer/static/` สำหรับ Database Explorer ดู checklist จอกว้าง/มือถือใน [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## Central pipeline
 
 ```text
@@ -66,23 +70,26 @@ central orchestrator ── evidence / hash / manifest / privacy / idempotency
         ↓
 dashboard_records (Candidate)
         ↓  review + deterministic builders + tests
-data/public/*
+data/public/*.json + serving_manifest.json
         ↓  deploy/startup sync
 public_artifacts + spatial tables → API / Dashboard / Explorer
 ```
 
 ระบบ generalize ที่ “ขั้นตอนและกติกา” ไม่ใช่บังคับ schema เดียวกับทุกเว็บ ตัวอย่างเช่น CKAN อาจคืน CSV หลาย resource, Dashboard บางแห่งคืน header-array และ AppTech ใช้ pagination JSON แต่ทั้งหมดต้องประกาศ grain, identity, geography, completeness และ forbidden fields ใน contract รูปแบบเดียวกัน
 
-## เพิ่ม URL ใหม่
+Public artifact ใหม่ต้องเป็น reviewed JSON object ใต้ `data/public/` และมี entry ใน `serving_manifest.json`; entry ที่ไม่ใช่ serving core ต้องระบุ `source_ids` ที่อนุมัติให้เผยแพร่แล้ว หลัง merge ดูรายการได้ที่ `/api/public/v1/artifacts` และอ่านชุดใดๆ ด้วย `/api/public/v1/artifacts/{artifact_key}` โดยไม่ต้องเพิ่ม route เฉพาะ source
 
-หนึ่ง Pull Request ต้องมี:
+## เพิ่ม Connector หรือ URL
 
-1. source entry ใน `config/source_catalog.json`
-2. executable plan ใน `config/ingestion_plans.json` เมื่อมี public endpoint ที่ดึงได้
-3. connector ใน `app/connectors/`
-4. contract ใน `config/connector_contracts/`
-5. fixture ขนาดเล็กที่ตัดข้อมูลส่วนบุคคลแล้ว
-6. tests สำหรับ happy path, incomplete response และ schema drift
+ถ้าเป็นหนึ่งใน 28 แหล่งเดิม ให้ใช้ entry ที่มีอยู่ใน generated `config/source_catalog.json` แล้วเพิ่ม operational pieces ที่ยังขาด หนึ่ง Pull Request ต้องมี:
+
+1. executable plan ใน `config/ingestion_plans.json` เมื่อมี public endpoint ที่ดึงได้
+2. connector ใน `app/connectors/`
+3. contract ใน `config/connector_contracts/`
+4. fixture ขนาดเล็กที่ตัดข้อมูลส่วนบุคคลแล้ว
+5. tests สำหรับ happy path, incomplete response และ schema drift
+
+ถ้าเป็นแหล่งลำดับใหม่ที่ยังไม่อยู่ใน 28 แหล่ง ห้ามเพิ่มแถวลง `config/source_catalog.json` ด้วยมือ เพราะไฟล์นี้ generated ต้องให้สมาชิกที่มี evidence workspace เพิ่ม canonical `config/source_registry.json` และ `data/source_audit/<ordinal>_<source_id>/source_card.json` แล้วรัน builder เพื่อส่ง diff ของ catalog/coverage มาพร้อม PR
 
 เริ่มจาก `templates/connector/` และอ่าน [คู่มือเพิ่ม Connector](docs/connector-development.md)
 
@@ -110,7 +117,7 @@ python -m pytest -q
 
 ```text
 app/                    FastAPI, database, orchestrator และ connectors
-config/                 source registry, ingestion plans และ contracts
+config/                 generated source catalog, ingestion plans และ contracts
 data/public/            reviewed deployment seeds
 explorer/               read-only Database Explorer
 templates/connector/    จุดเริ่มต้น connector ใหม่

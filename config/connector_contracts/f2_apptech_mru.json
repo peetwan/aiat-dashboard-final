@@ -1,27 +1,27 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f2_apptech_mru",
   "connector": "app.connectors.apptech_mru:ApptechMruConnector",
   "transport": "http_form_json",
   "dataset_grains": [
     {
-      "key_pattern": "innovation",
+      "key_pattern": "^innovation$",
       "grain_th": "นวัตกรรมหนึ่งรายการ",
-      "identity_fields": ["innovationid"],
+      "identity_options": [["innovationid"]],
       "geography_fields": ["province", "provinceid"],
       "as_of_fields": ["updatedate", "year"]
     },
     {
-      "key_pattern": "requirement",
+      "key_pattern": "^requirement$",
       "grain_th": "ความต้องการหนึ่งรายการ",
-      "identity_fields": ["requirementid"],
+      "identity_options": [["requirementid"]],
       "geography_fields": ["province", "provinceid"],
       "as_of_fields": ["updatedate", "year"]
     },
     {
-      "key_pattern": "news",
+      "key_pattern": "^news$",
       "grain_th": "ข่าวสาธารณะหนึ่งรายการ",
-      "identity_fields": ["newsid"],
+      "identity_options": [["newsid"]],
       "geography_fields": [],
       "as_of_fields": ["newsdate", "updatedate"]
     }
@@ -35,5 +35,6 @@
     "candidate_only": true,
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
-  }
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_apptech_mru.json"
 }

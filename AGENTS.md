@@ -4,7 +4,7 @@
 
 ## เป้าหมายของ repository
 
-นี่คือ public serving application และ connector-based ingestion pipeline สำหรับข้อมูล 28 แหล่ง ไม่ใช่ raw evidence lake หลัก
+นี่คือ public serving application ที่ catalog ครบ 28 แหล่ง และ connector-based operational ingestion สำหรับ 6 แหล่งปัจจุบัน ที่เหลืออยู่ใน snapshot/metadata/restricted lane ไม่ใช่ raw evidence lake หลัก
 
 ## คำสั่งตรวจที่ต้องผ่าน
 
@@ -18,7 +18,7 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 
 ## กติกาแกนข้อมูล
 
-- Source ใหม่ต้องอยู่ใน `config/source_catalog.json` ก่อน
+- Source เดิมต้องมี entry ใน generated `config/source_catalog.json`; source ลำดับใหม่ต้องเพิ่ม canonical `config/source_registry.json` + source card ใน evidence workspace แล้ว regenerate ห้ามแก้ catalog ด้วยมือ
 - Executable source ต้องมี plan, importable connector, contract และ tests
 - Connector คืน Candidate records เท่านั้น ห้ามเขียน `public_artifacts` หรือ publish เอง
 - Raw response ต้องผ่าน central `ResponseRecorder` เพื่อให้มี SHA-256 และ manifest

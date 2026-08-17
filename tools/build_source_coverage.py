@@ -5,13 +5,16 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = DASHBOARD_ROOT.parent
+PROJECT_ROOT = Path(
+    os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
+).expanduser().resolve()
 REGISTRY_PATH = PROJECT_ROOT / "config/source_registry.json"
 AUDIT_ROOT = PROJECT_ROOT / "data/source_audit"
 DEFAULT_CATALOG = DASHBOARD_ROOT / "config/source_catalog.json"
@@ -93,8 +96,26 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def project_path(path: Path) -> str:
-    return path.relative_to(PROJECT_ROOT).as_posix()
+def provenance_path(
+    path: Path,
+    *,
+    evidence_root: Path = PROJECT_ROOT,
+    dashboard_root: Path = DASHBOARD_ROOT,
+) -> str:
+    """Return a stable path without assuming the repo lives under the evidence root."""
+    resolved = path.expanduser().resolve()
+    dashboard_root = dashboard_root.expanduser().resolve()
+    evidence_root = evidence_root.expanduser().resolve()
+    try:
+        dashboard_relative = resolved.relative_to(dashboard_root)
+    except ValueError:
+        try:
+            return resolved.relative_to(evidence_root).as_posix()
+        except ValueError as exc:
+            raise ValueError(
+                f"provenance input is outside the dashboard and evidence roots: {resolved}"
+            ) from exc
+    return (Path("dashboard_final") / dashboard_relative).as_posix()
 
 
 def card_path(ordinal: int, source_id: str) -> Path:
@@ -337,9 +358,9 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
 
         approval = card.get("dashboard_publication_approval_2026_08_16") or {}
         if source_id == "f2_learning_dashboard":
-            approval_basis = "project_owner_instruction_2026_08_16_candidate_only"
+            approval_basis = "source_card_candidate_scope_needs_review"
         elif approval.get("production_allowed"):
-            approval_basis = "source_card_dashboard_publication_approval_2026_08_16"
+            approval_basis = "source_card_dashboard_publication_scope"
         else:
             approval_basis = "none"
 
@@ -392,9 +413,9 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                     "restricted_values_excluded": restricted,
                 },
                 "evidence": {
-                    "registry": project_path(REGISTRY_PATH),
-                    "source_card": project_path(source_card),
-                    "merged_index": project_path(index_path) if index_row else None,
+                    "registry": provenance_path(REGISTRY_PATH),
+                    "source_card": provenance_path(source_card),
+                    "merged_index": provenance_path(index_path) if index_row else None,
                     "approval_basis": approval_basis,
                     "catalogued_endpoint_count": len(catalog_row.get("endpoints", [])),
                     "primary_paths": primary_paths,
@@ -420,9 +441,9 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
         "inputs": {
-            "registry": {"path": project_path(REGISTRY_PATH), "sha256": sha256_file(REGISTRY_PATH)},
-            "source_catalog": {"path": project_path(catalog_path), "sha256": sha256_file(catalog_path)},
-            "merged_index": {"path": project_path(index_path), "sha256": sha256_file(index_path)},
+            "registry": {"path": provenance_path(REGISTRY_PATH), "sha256": sha256_file(REGISTRY_PATH)},
+            "source_catalog": {"path": provenance_path(catalog_path), "sha256": sha256_file(catalog_path)},
+            "merged_index": {"path": provenance_path(index_path), "sha256": sha256_file(index_path)},
             "source_cards": {
                 "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
                 "count": len(card_hashes),

@@ -3,6 +3,21 @@ from __future__ import annotations
 from app.connectors.base import ConnectorContext, DatasetRecord
 
 
+def _resolve_body_template(value, replacements: dict[str, int]):
+    if isinstance(value, dict):
+        return {
+            str(key): _resolve_body_template(item, replacements)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_resolve_body_template(item, replacements) for item in value]
+    if isinstance(value, str) and value.startswith("$"):
+        if value not in replacements:
+            raise RuntimeError(f"AppTech MRU request body has unknown placeholder {value}")
+        return replacements[value]
+    return value
+
+
 class ApptechMruConnector:
     driver_name = "apptech_mru"
 
@@ -23,22 +38,23 @@ class ApptechMruConnector:
             id_field = dataset.get("id_field") or id_fields.get(dataset_name)
             if not id_field:
                 raise RuntimeError(f"AppTech MRU dataset {dataset_name} has no configured id field")
+            body_template = dataset.get("json_body")
+            if not isinstance(body_template, dict) or not body_template:
+                raise RuntimeError(f"AppTech MRU dataset {dataset_name} has no JSON body contract")
             while total is None or offset < total:
-                request_template = dict(dataset["form"])
-                action = request_template.pop("action")
-                request_template.update(
+                json_body = _resolve_body_template(
+                    body_template,
                     {
-                        "startlimit": offset,
-                        "endlimit": page_size,
-                        "maxpage": 0,
-                        "targetpagenumber": (offset // page_size) + 1,
-                    }
+                        "$OFFSET": offset,
+                        "$PAGE_SIZE": page_size,
+                        "$PAGE_NUMBER": (offset // page_size) + 1,
+                    },
                 )
                 response, _ = context.recorder.request(
                     "POST",
                     dataset["url"],
                     name=f"{dataset_name}_offset_{offset:05d}",
-                    json_body={"action": action, "filter": request_template},
+                    json_body=json_body,
                     headers={
                         "Origin": "https://38rat.nstru.ac.th",
                         "Referer": "https://38rat.nstru.ac.th/",

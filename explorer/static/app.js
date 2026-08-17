@@ -52,7 +52,7 @@ function connectionClass(status) {
 
 function policyLabel(policy) {
   return {
-    project_owner_approved_public: "มีข้อมูลสาธารณะ · ยังต้องอ่านคำเตือน",
+    team_approved_public: "มีข้อมูลสาธารณะ · ยังต้องอ่านคำเตือน",
     metadata_only: "มีเฉพาะรายละเอียดแหล่ง",
     restricted_local_only: "เก็บค่าข้อมูลในเครื่องเท่านั้น",
   }[policy] || "ยังไม่ระบุ";

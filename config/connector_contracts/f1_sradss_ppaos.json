@@ -1,20 +1,20 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f1_sradss_ppaos",
   "connector": "app.connectors.sradss:SradssConnector",
   "transport": "http_json",
   "dataset_grains": [
     {
-      "key_pattern": "summary_updated_at.*",
+      "key_pattern": "^summary_updated_at(?:\\..+)?$",
       "grain_th": "เวลาปรับปรุงข้อมูลหนึ่งรายการ",
-      "identity_fields": ["updated_at", "source_record_id"],
+      "identity_options": [["updated_at"], ["source_record_id"], ["$payload_hash"]],
       "geography_fields": [],
       "as_of_fields": ["updated_at"]
     },
     {
-      "key_pattern": "provinces.*|poverty_map_core.*|poverty_situation.*|provinces_summary.*|continuous_poor.*|data_analysis.*",
+      "key_pattern": "^(?:provinces|poverty_map_core|poverty_situation|provinces_summary|continuous_poor|data_analysis)(?:\\..+)?$",
       "grain_th": "ค่ารวมสาธารณะหนึ่งรายการตามพื้นที่และปีที่ต้นทางส่งมา",
-      "identity_fields": ["id", "province", "year", "source_record_id"],
+      "identity_options": [["id"], ["province", "year"], ["prov", "year"], ["source_record_id"], ["$payload_hash"]],
       "geography_fields": ["province", "prov", "amphoe", "tambon"],
       "as_of_fields": ["year", "updated_at"]
     }
@@ -29,5 +29,6 @@
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
   },
+  "sample_fixture": "tests/fixtures/connectors/f1_sradss_ppaos.json",
   "notes_th": "Connector นี้ดึงเฉพาะข้อมูลรวมสาธารณะและไม่แตะ household detail"
 }

@@ -1,20 +1,20 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f2_learning_dashboard",
   "connector": "app.connectors.learning_dashboard:LearningDashboardConnector",
   "transport": "http_json",
   "dataset_grains": [
     {
-      "key_pattern": "provinces|entityTypes|categories|geography",
+      "key_pattern": "^(?:provinces|entityTypes|categories|geography)$",
       "grain_th": "หมวดสรุปหนึ่งรายการตามตารางที่ต้นทางส่งมา",
-      "identity_fields": ["source_row_number", "label"],
+      "identity_options": [["source_row_number"], ["label"], ["$payload_hash"]],
       "geography_fields": ["label"],
       "as_of_fields": []
     },
     {
-      "key_pattern": "geographyImpact|impactSummary",
+      "key_pattern": "^(?:geographyImpact|impactSummary)$",
       "grain_th": "ค่าผลกระทบรวมหนึ่งรายการตามขอบเขตต้นทาง",
-      "identity_fields": ["source_row_number", "geography"],
+      "identity_options": [["source_row_number"], ["geography"], ["$payload_hash"]],
       "geography_fields": ["geography", "province"],
       "as_of_fields": []
     }
@@ -28,5 +28,6 @@
     "candidate_only": true,
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
-  }
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_learning_dashboard.json"
 }

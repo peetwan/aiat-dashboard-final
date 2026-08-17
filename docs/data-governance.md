@@ -6,17 +6,17 @@
 
 > Publication permission ไม่ใช่ fact acceptance ข้อมูล public ทุกชุดยังเป็น `candidate`/`needs_review` จนกว่า semantic, freshness, unit และ denominator จะชัด
 
-## Approval record
+## Current publication basis
 
-- วันที่บันทึก: 2026-08-16
-- Project owner: `peet`
+- ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
+- ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
 - Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 11 แหล่ง
 - Metadata-only: 12 แหล่ง
 - Restricted local-only: 5 แหล่ง
 
 ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้
 
-`f2_learning_dashboard` ได้รับ publication permission เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และ approval นี้ไม่เปลี่ยน semantic owner decision ให้เป็น accepted
+`f2_learning_dashboard` ถูกจัด publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถวตามสถานะใน source card แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และการจัด scope นี้ไม่เปลี่ยน semantic review ให้เป็น accepted
 
 ## Source classification
 
@@ -44,7 +44,7 @@
 | 20 | `f3_healthcare_nonthaburi` | Blocked | restricted local-only | 0 | 0 | 0 |
 | 21 | `f3_ciap_smartcity` | Metadata | metadata-only | 0 | 0 | 0 |
 | 22 | `f3_learning_city_platform` | Metadata | metadata-only | 0 | 0 | 0 |
-| 23 | `f3_housing_portal` | API-first | public candidate | 7,259 | 50 | 49 |
+| 23 | `f3_housing_portal` | API-first | public candidate | 7,259 | 50 | 47 |
 | 24 | `f4_research_dashboard_psu` | Metadata | metadata-only | 0 | 0 | 0 |
 | 25 | `spu_sukhothai_care` | Metadata | metadata-only | 0 | 0 | 0 |
 | 26 | `spu_sukhothai_water` | Metadata | metadata-only | 0 | 0 | 0 |
@@ -68,7 +68,7 @@
 - email, phone และชื่อบุคคล
 - payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม
 
-External-team artifacts ต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม
+Artifacts ที่เพื่อนร่วมทีมนำเข้าต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม
 
 ## สิ่งที่ห้าม commit
 

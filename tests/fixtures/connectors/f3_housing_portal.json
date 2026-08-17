@@ -1,0 +1,14 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f3_housing_portal",
+  "records": [
+    {
+      "dataset_key": "fixture-package:fixture-resource",
+      "payload": {
+        "resource_id": "fixture-resource",
+        "row_number": 1,
+        "source_fields": {"year": "2569", "value": "fixture"}
+      }
+    }
+  ]
+}

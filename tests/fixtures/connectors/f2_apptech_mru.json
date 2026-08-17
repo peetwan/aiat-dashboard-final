@@ -1,0 +1,18 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_apptech_mru",
+  "records": [
+    {
+      "dataset_key": "innovation",
+      "payload": {"innovationid": "fixture-innovation-01", "year": "2569"}
+    },
+    {
+      "dataset_key": "requirement",
+      "payload": {"requirementid": "fixture-requirement-01", "year": "2569"}
+    },
+    {
+      "dataset_key": "news",
+      "payload": {"newsid": "fixture-news-01", "newsdate": "2569-08-17"}
+    }
+  ]
+}

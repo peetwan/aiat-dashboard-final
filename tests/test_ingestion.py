@@ -9,7 +9,7 @@ import httpx
 import pytest
 from sqlalchemy import select
 
-from app.catalog import source_config, sync_catalog
+from app.catalog import load_ingestion_plans, source_config, sync_catalog
 from app.database import SessionLocal
 from app.ingestion import (
     IngestionFetchError,
@@ -17,7 +17,7 @@ from app.ingestion import (
     PolicyViolation,
     ResponseRecorder,
 )
-from app.models import DashboardRecord, IngestionRun
+from app.models import DashboardRecord, IngestionRun, Source
 from app.settings import Settings
 
 
@@ -106,7 +106,15 @@ def test_operational_candidate_removes_person_name_containers_and_fields():
 
 
 def test_apptech_mtr_driver_rejects_incomplete_or_duplicate_pagination():
-    plan = {"url": "https://example.test/apptech", "page_size": 2}
+    plan = {
+        "url": "https://example.test/apptech",
+        "page_size": 2,
+        "query_params": {
+            "__template": "appTech.public.list",
+            "offset": "$OFFSET",
+            "max": "$PAGE_SIZE",
+        },
+    }
     settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=10)
     with SessionLocal() as session:
         pipeline = IngestionPipeline(session, settings)
@@ -411,10 +419,16 @@ def test_apptech_mru_driver_uses_nested_json_contract_and_browser_origin_headers
             {
                 "name": "innovation",
                 "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
-                "form": {
+                "json_body": {
                     "action": "fetch_innovationAll_JSON",
-                    "innovationgroup": "All",
-                    "orderby": 1,
+                    "filter": {
+                        "innovationgroup": "All",
+                        "orderby": 1,
+                        "startlimit": "$OFFSET",
+                        "endlimit": "$PAGE_SIZE",
+                        "maxpage": 0,
+                        "targetpagenumber": "$PAGE_NUMBER",
+                    },
                 },
             }
         ],
@@ -439,7 +453,15 @@ def test_apptech_mru_driver_rejects_incomplete_pagination_before_database_commit
             {
                 "name": "innovation",
                 "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
-                "form": {"action": "fetch_innovationAll_JSON"},
+                "json_body": {
+                    "action": "fetch_innovationAll_JSON",
+                    "filter": {
+                        "startlimit": "$OFFSET",
+                        "endlimit": "$PAGE_SIZE",
+                        "maxpage": 0,
+                        "targetpagenumber": "$PAGE_NUMBER",
+                    },
+                },
             }
         ],
     }
@@ -495,6 +517,495 @@ def test_response_recorder_keeps_http_error_body_before_raising(tmp_path, monkey
     assert manifest["status"] == "failed"
     assert manifest["artifacts"][0]["http_status"] == 400
     assert manifest["artifacts"][0]["sha256"]
+
+
+def test_response_recorder_rejects_url_outside_runtime_endpoint_allowlist(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    settings = Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0)
+    recorder = ResponseRecorder(
+        "sample",
+        "endpoint-policy",
+        settings,
+        runtime_endpoints=[
+            {
+                "method": "GET",
+                "url": "https://example.test/allowed?catalog=query",
+                "runtime_enabled": True,
+            },
+            {
+                "method": "GET",
+                "url": "https://example.test/dynamic",
+                "runtime_enabled": True,
+                "request_template": {
+                    "query_or_body": "page=<value>&year=2569",
+                },
+            },
+            {
+                "method": "POST",
+                "url": "https://example.test/read",
+                "runtime_enabled": True,
+                "request_template": {
+                    "query_or_body": "action=read",
+                    "json_body": {
+                        "action": "read",
+                        "filter": {"offset": "<value>", "scope": "public"},
+                    },
+                },
+            },
+            {
+                "method": "POST",
+                "url": "https://example.test/empty",
+                "runtime_enabled": True,
+                "request_template": {"query_or_body": "", "json_body": {}},
+            },
+            {
+                "method": "POST",
+                "url": "https://example.test/post-query",
+                "runtime_enabled": True,
+                "request_template": {"query": "version=1", "json_body": {}},
+            },
+            {
+                "method": "GET",
+                "url": "https://example.test/restricted-but-misconfigured",
+                "runtime_enabled": True,
+                "restricted": True,
+            },
+            {
+                "method": "GET",
+                "url": "https://example.test/disabled",
+                "runtime_enabled": False,
+            },
+        ],
+    )
+    recorder.client.close()
+    recorder.client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(200, json={"ok": True}, request=request)
+        )
+    )
+    try:
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request("GET", "https://example.test/not-allowed", name="blocked")
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request("POST", "https://example.test/allowed", name="wrong-method")
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "GET",
+                "https://example.test/allowed?runtime=different-query",
+                name="wrong-static-query",
+            )
+        response, _ = recorder.request(
+            "GET",
+            "https://example.test/allowed",
+            params={"catalog": "query"},
+            name="allowed",
+        )
+        assert response.status_code == 200
+        dynamic, _ = recorder.request(
+            "GET",
+            "https://example.test/dynamic",
+            params={"page": 2, "year": "2569"},
+            name="allowed-dynamic",
+        )
+        assert dynamic.status_code == 200
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "GET",
+                "https://example.test/dynamic",
+                params={"page": 2, "year": "2569", "admin": "true"},
+                name="extra-query-key",
+            )
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "GET",
+                "https://example.test/dynamic",
+                params={"page": 2},
+                name="missing-query-key",
+            )
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "GET",
+                "https://example.test/dynamic",
+                params={"page": 2, "year": "2570"},
+                name="wrong-static-value",
+            )
+        post_response, _ = recorder.request(
+            "POST",
+            "https://example.test/read",
+            json_body={"action": "read", "filter": {"offset": 0, "scope": "public"}},
+            name="allowed-json-body",
+        )
+        assert post_response.status_code == 200
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "POST",
+                "https://example.test/read",
+                json_body={"action": "write", "filter": {"offset": 0, "scope": "public"}},
+                name="wrong-json-action",
+            )
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "POST",
+                "https://example.test/read",
+                json_body={
+                    "action": "read",
+                    "filter": {"offset": 0, "scope": "public", "admin": True},
+                },
+                name="extra-json-field",
+            )
+        empty_response, _ = recorder.request(
+            "POST",
+            "https://example.test/empty",
+            json_body={},
+            name="allowed-empty-json",
+        )
+        assert empty_response.status_code == 200
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "POST",
+                "https://example.test/empty",
+                json_body={"unexpected": True},
+                name="wrong-empty-json",
+            )
+        queried_post, _ = recorder.request(
+            "POST",
+            "https://example.test/post-query",
+            params={"version": "1"},
+            json_body={},
+            name="allowed-post-query",
+        )
+        assert queried_post.status_code == 200
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "POST",
+                "https://example.test/post-query",
+                params={"version": "2"},
+                json_body={},
+                name="wrong-post-query",
+            )
+        with pytest.raises(PolicyViolation, match="outside the enabled endpoint allowlist"):
+            recorder.request(
+                "GET",
+                "https://example.test/restricted-but-misconfigured",
+                name="restricted-endpoint",
+            )
+        assert ResponseRecorder._body_matches(1, True) is False
+        assert ResponseRecorder._body_matches(0, False) is False
+    finally:
+        recorder.close()
+
+
+def test_response_recorder_does_not_follow_redirect_outside_allowlist(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    settings = Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0)
+    recorder = ResponseRecorder(
+        "sample",
+        "redirect-policy",
+        settings,
+        runtime_endpoints=[
+            {
+                "method": "GET",
+                "url": "https://example.test/allowed",
+                "runtime_enabled": True,
+            }
+        ],
+    )
+    requested_hosts: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requested_hosts.append(request.url.host)
+        if request.url.host == "example.test":
+            return httpx.Response(
+                302,
+                headers={"location": "http://127.0.0.1/internal"},
+                request=request,
+            )
+        return httpx.Response(200, json={"secret": "must-not-be-read"}, request=request)
+
+    recorder.client.close()
+    recorder.client = httpx.Client(
+        transport=httpx.MockTransport(handler),
+        follow_redirects=False,
+    )
+    try:
+        with pytest.raises(httpx.HTTPStatusError, match="302"):
+            recorder.request("GET", "https://example.test/allowed", name="redirect")
+        assert requested_hosts == ["example.test"]
+        assert recorder.artifacts[0]["http_status"] == 302
+    finally:
+        recorder.close()
+
+
+def test_all_executable_plan_requests_match_the_generated_runtime_allowlist():
+    plans = load_ingestion_plans()["sources"]
+
+    def recorder_for(source_id: str) -> ResponseRecorder:
+        source = source_config(source_id)
+        recorder = object.__new__(ResponseRecorder)
+        recorder.allowed_endpoints = [
+            ResponseRecorder._endpoint_rule(endpoint)
+            for endpoint in source["endpoints"]
+            if endpoint.get("runtime_enabled") is True
+        ]
+        return recorder
+
+    def resolve(value, replacements):
+        if isinstance(value, dict):
+            return {key: resolve(item, replacements) for key, item in value.items()}
+        if isinstance(value, list):
+            return [resolve(item, replacements) for item in value]
+        return replacements.get(value, value) if isinstance(value, str) else value
+
+    sra_recorder = recorder_for("f1_sradss_ppaos")
+    for request in plans["f1_sradss_ppaos"]["requests"]:
+        params = {
+            key: ("2569" if value == "$SRA_YEAR" else value)
+            for key, value in request.get("params", {}).items()
+        }
+        assert sra_recorder._request_is_allowed("GET", request["url"], params)
+
+    apptech_recorder = recorder_for("f2_apptech_mtr")
+    apptech_plan = plans["f2_apptech_mtr"]
+    apptech_params = {
+        key: (0 if value == "$OFFSET" else 99 if value == "$PAGE_SIZE" else value)
+        for key, value in apptech_plan["query_params"].items()
+    }
+    assert apptech_recorder._request_is_allowed(
+        "GET",
+        apptech_plan["url"],
+        apptech_params,
+    )
+    assert not apptech_recorder._request_is_allowed(
+        "GET",
+        apptech_plan["url"],
+        {**apptech_params, "scope": "unreviewed"},
+    )
+
+    mru_recorder = recorder_for("f2_apptech_mru")
+    for dataset in plans["f2_apptech_mru"]["datasets"]:
+        body = resolve(
+            dataset["json_body"],
+            {"$OFFSET": 0, "$PAGE_SIZE": 12, "$PAGE_NUMBER": 1},
+        )
+        assert mru_recorder._request_is_allowed(
+            "POST", dataset["url"], None, None, body
+        )
+        assert not mru_recorder._request_is_allowed(
+            "POST",
+            dataset["url"],
+            None,
+            None,
+            {**body, "action": "unreviewed_write_action"},
+        )
+
+    learning_plan = plans["f2_learning_dashboard"]
+    learning_recorder = recorder_for("f2_learning_dashboard")
+    assert learning_recorder._request_is_allowed(
+        "POST", learning_plan["url"], None, None, {}
+    )
+    assert not learning_recorder._request_is_allowed(
+        "POST", learning_plan["url"], None, None, {"scope": "unreviewed"}
+    )
+
+    area_plan = plans["f2_learning_area_based"]
+    area_recorder = recorder_for("f2_learning_area_based")
+    assert area_recorder._request_is_allowed("GET", area_plan["url"], None)
+
+    housing_source = source_config("f3_housing_portal")
+    housing_recorder = recorder_for("f3_housing_portal")
+    housing_plan = plans["f3_housing_portal"]
+    allowed_dataset_ids = {dataset["id"] for dataset in housing_plan["datasets"]}
+    for dataset_id in allowed_dataset_ids:
+        assert housing_recorder._request_is_allowed(
+            "GET",
+            housing_plan["package_show_url"],
+            {"id": dataset_id},
+        )
+    assert not housing_recorder._request_is_allowed(
+        "GET",
+        housing_plan["package_show_url"],
+        {"id": "unreviewed-package"},
+    )
+    resource_endpoints = [
+        endpoint
+        for endpoint in housing_source["endpoints"]
+        if endpoint.get("kind") == "ckan_resource_download"
+    ]
+    enabled_resource_urls = {
+        endpoint["url"]
+        for endpoint in resource_endpoints
+        if endpoint.get("runtime_enabled") is True
+    }
+    assert len(resource_endpoints) == housing_plan["expected_resource_count"]
+    assert len(enabled_resource_urls) == housing_plan["expected_value_resource_count"]
+    assert not (set(housing_plan["runtime_excluded_urls"]) & enabled_resource_urls)
+    for url in enabled_resource_urls:
+        assert housing_recorder._request_is_allowed("GET", url, None)
+    for url in housing_plan["runtime_excluded_urls"]:
+        assert not housing_recorder._request_is_allowed("GET", url, None)
+
+
+def test_contract_batch_is_fully_validated_before_candidate_rows_are_added():
+    source = source_config("f2_apptech_mtr")
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+    with SessionLocal() as session:
+        pipeline = IngestionPipeline(session, settings)
+        with pytest.raises(ValueError, match="none of the contract identity_options"):
+            pipeline._store_records(
+                source,
+                [
+                    ("innovations", {"id": "valid-first", "year": "2569"}),
+                    ("innovations", {"name": "missing identity"}),
+                ],
+            )
+        assert session.scalars(select(DashboardRecord)).all() == []
+
+        loaded, skipped, as_of = pipeline._store_records(
+            source,
+            [("innovations", {"id": "valid-first", "year": "2569"})],
+        )
+        session.flush()
+        record = session.scalar(select(DashboardRecord))
+        assert (loaded, skipped, as_of) == (1, 0, "2569")
+        assert record is not None
+        assert record.source_record_id == "valid-first"
+        assert record.as_of == "2569"
+
+
+@pytest.mark.parametrize(
+    ("strategy", "expected_strategy"),
+    [("snapshot", "snapshot"), ("auto", "api_then_snapshot")],
+)
+def test_api_source_snapshot_paths_keep_legacy_dataset_normalization(
+    tmp_path,
+    monkeypatch,
+    strategy,
+    expected_strategy,
+):
+    snapshot_root = tmp_path / "snapshots"
+    source_root = snapshot_root / "f2_apptech_mtr"
+    source_root.mkdir(parents=True)
+    (source_root / "apptech_public_innovation.jsonl").write_text(
+        json.dumps({"id": "snapshot-record-1", "year": "2568"}, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    settings = Settings(
+        database_url="sqlite:///unused.sqlite",
+        snapshot_root=snapshot_root,
+        max_records_per_source=0,
+    )
+
+    with SessionLocal() as session:
+        sync_catalog(session)
+        pipeline = IngestionPipeline(session, settings)
+        if strategy == "auto":
+            monkeypatch.setattr(
+                pipeline,
+                "_fetch_api",
+                lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("upstream failed")),
+            )
+
+        result = pipeline.ingest_source("f2_apptech_mtr", strategy=strategy)
+
+        record = session.scalar(select(DashboardRecord))
+        assert result["strategy"] == expected_strategy
+        assert result["records_loaded"] == 1
+        assert record is not None
+        assert record.dataset_key == "apptech_public_innovation"
+        assert record.source_record_id == "snapshot-record-1"
+
+
+def test_failed_ingestion_rolls_back_candidate_rows_before_marking_run_failed(
+    tmp_path,
+    monkeypatch,
+):
+    failed_manifest = tmp_path / "manifest.json"
+    failed_manifest.write_text("{}\n", encoding="utf-8")
+    source = source_config("f2_apptech_mtr")
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=0)
+
+    with SessionLocal() as session:
+        session.add(
+            Source(
+                source_id=source["source_id"],
+                ordinal=source["ordinal"],
+                name_th=source["name_th"],
+                source_url=source["url"],
+                acquisition_mode=source["acquisition_mode"],
+                readiness_status=source["readiness_status"],
+                cloud_policy=source["cloud_policy"],
+                production_values_allowed=True,
+                expected_record_count=source["expected_record_count"],
+                notes_th="",
+            )
+        )
+        session.commit()
+        pipeline = IngestionPipeline(session, settings)
+        monkeypatch.setattr(
+            pipeline,
+            "_fetch_api",
+            lambda *_args, **_kwargs: (
+                [("innovations", {"id": "will-rollback"})],
+                failed_manifest,
+            ),
+        )
+
+        def add_then_fail(_source, _records, **_kwargs):
+            session.add(
+                DashboardRecord(
+                    source_id=source["source_id"],
+                    dataset_key="innovations",
+                    source_record_id="will-rollback",
+                    record_hash="a" * 64,
+                    quality_status="needs_review",
+                    payload={"id": "will-rollback"},
+                )
+            )
+            session.flush()
+            raise RuntimeError("database-stage failure")
+
+        monkeypatch.setattr(pipeline, "_store_records", add_then_fail)
+        with pytest.raises(RuntimeError, match="database-stage failure"):
+            pipeline.ingest_source(source["source_id"], strategy="api")
+
+        assert session.scalars(select(DashboardRecord)).all() == []
+        run = session.scalar(select(IngestionRun))
+        assert run is not None
+        assert run.status == "failed"
+        assert "database-stage failure" in run.error_message
+
+
+def test_api_record_limit_fails_instead_of_committing_a_possible_partial_batch(
+    tmp_path,
+    monkeypatch,
+):
+    class LimitConnector:
+        driver_name = "limit-test"
+
+        def fetch(self, _context):
+            return [("innovations", {"id": "record-at-limit"})]
+
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr("app.ingestion.load_connector", lambda _entrypoint: LimitConnector())
+    settings = Settings(database_url="sqlite:///unused.sqlite", max_records_per_source=1)
+    source = source_config("f2_apptech_mtr")
+    with SessionLocal() as session:
+        pipeline = IngestionPipeline(session, settings)
+        pipeline.plans[source["source_id"]] = {
+            "driver": "limit-test",
+            "connector": "app.connectors.apptech_mtr:ApptechMtrConnector",
+        }
+        with pytest.raises(IngestionFetchError, match="partial candidate commits are forbidden"):
+            pipeline._fetch_api(source, "limit-run")
+
+    manifest = json.loads(
+        (tmp_path / "data/runtime/raw/f2_apptech_mtr/limit-run/manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert manifest["status"] == "failed"
+    assert manifest["records_seen"] == 1
 
 
 def test_explicit_api_strategy_never_hides_failure_with_snapshot_fallback(tmp_path, monkeypatch):

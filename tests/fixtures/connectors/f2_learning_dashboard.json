@@ -1,0 +1,14 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_learning_dashboard",
+  "records": [
+    {
+      "dataset_key": "provinces",
+      "payload": {"source_row_number": 1, "label": "จังหวัดตัวอย่าง", "value": 1, "as_of": null}
+    },
+    {
+      "dataset_key": "impactSummary",
+      "payload": {"totalEmployeeAmount": 1, "as_of": null, "unit": null}
+    }
+  ]
+}

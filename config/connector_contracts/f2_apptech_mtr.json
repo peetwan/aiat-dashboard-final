@@ -1,13 +1,13 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "source_id": "f2_apptech_mtr",
   "connector": "app.connectors.apptech_mtr:ApptechMtrConnector",
   "transport": "http_json",
   "dataset_grains": [
     {
-      "key_pattern": "innovations",
+      "key_pattern": "^innovations$",
       "grain_th": "นวัตกรรมหนึ่งรายการ",
-      "identity_fields": ["id", "innovationid"],
+      "identity_options": [["id"], ["innovationid"]],
       "geography_fields": ["province", "provinceName"],
       "as_of_fields": ["updatedAt", "year"]
     }
@@ -21,5 +21,6 @@
     "candidate_only": true,
     "contact_value_scan": true,
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "ownerContact", "citizen"]
-  }
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_apptech_mtr.json"
 }

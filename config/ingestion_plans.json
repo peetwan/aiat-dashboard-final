@@ -53,6 +53,11 @@
       "driver": "apptech_mtr",
       "connector": "app.connectors.apptech_mtr:ApptechMtrConnector",
       "url": "https://app.rinmp.com/api/appTechPublic",
+      "query_params": {
+        "__template": "appTech.public.list",
+        "offset": "$OFFSET",
+        "max": "$PAGE_SIZE"
+      },
       "page_size": 99,
       "database_projection": "ลบ ownerContact, email, phone, address และ credential-shaped fields ก่อนเข้า database"
     },
@@ -66,31 +71,49 @@
         {
           "name": "innovation",
           "url": "https://38rat.nstru.ac.th/backend/ajax/public/innovation.php",
-          "form": {
+          "json_body": {
             "action": "fetch_innovationAll_JSON",
-            "innovationgroup": "All",
-            "affiliationid": "All",
-            "innovationtype": "All",
-            "orderby": 1,
-            "cus_search1": ""
+            "filter": {
+              "innovationgroup": "All",
+              "affiliationid": "All",
+              "innovationtype": "All",
+              "orderby": 1,
+              "cus_search1": "",
+              "startlimit": "$OFFSET",
+              "endlimit": "$PAGE_SIZE",
+              "maxpage": 0,
+              "targetpagenumber": "$PAGE_NUMBER"
+            }
           }
         },
         {
           "name": "requirement",
           "url": "https://38rat.nstru.ac.th/backend/ajax/public/requirement.php",
-          "form": {
+          "json_body": {
             "action": "fetch_requirementAll_JSON",
-            "orderby": 1,
-            "cus_search1": ""
+            "filter": {
+              "orderby": 1,
+              "cus_search1": "",
+              "startlimit": "$OFFSET",
+              "endlimit": "$PAGE_SIZE",
+              "maxpage": 0,
+              "targetpagenumber": "$PAGE_NUMBER"
+            }
           }
         },
         {
           "name": "news",
           "url": "https://38rat.nstru.ac.th/backend/ajax/public/news.php",
-          "form": {
+          "json_body": {
             "action": "fetch_newsAll_JSON",
-            "orderby": 1,
-            "cus_search1": ""
+            "filter": {
+              "orderby": 1,
+              "cus_search1": "",
+              "startlimit": "$OFFSET",
+              "endlimit": "$PAGE_SIZE",
+              "maxpage": 0,
+              "targetpagenumber": "$PAGE_NUMBER"
+            }
           }
         }
       ],
@@ -132,7 +155,11 @@
       "expected_value_resource_count": 39,
       "expected_value_record_count": 7259,
       "completeness_gate": "all seven packages and 41 unique resources must exist; all 39 value-approved CSV resources must parse to exactly 7,259 rows before commit",
-      "privacy_gate": "demand remains schema-only because its 25,919 respondent rows include birth year, income and other person-linked fields; policy-assessment values remain blocked",
+      "privacy_gate": "the live connector keeps demand schema-only because its 25,919 respondent rows include birth year, income and other person-linked fields; policy-assessment values remain blocked. Any demand values in the serving database come from a separate pre-redacted reviewed artifact, not this live connector",
+      "runtime_excluded_urls": [
+        "https://data.thaihousingportal.com/dataset/67f58c26-0cde-410d-9ed2-c55ea2303c91/resource/ae090999-5a29-42c5-8518-40f5ece5b081/download/housing_demand_clean_stage_2.csv",
+        "https://data.thaihousingportal.com/dataset/39edd2b9-01c8-4fca-a388-bae015de03ba/resource/3dcc96ea-6545-4ca1-88d5-58ad51ad2c18/download/policy_assessment_template.csv"
+      ],
       "spatial_surfaces": {
         "database_strategy": "separate PostGIS schema or query-on-demand proxy; do not mix geometries into the 7,259 CKAN observation grain",
         "housing_points_endpoint": "https://data.thaihousingportal.com/api/bangkok-housing/subdistricts/{adm3_pcode}?category={category}",

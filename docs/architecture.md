@@ -10,18 +10,20 @@ Repository นี้มี 3 หน้าที่:
 2. เป็น framework สำหรับเพิ่ม connector ราย URL ผ่าน Pull Request
 3. เป็น deployment seed สำหรับ serving database บน Railway
 
-Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน maintainer workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace
+Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน evidence workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace สมาชิกทีมที่ได้รับ evidence package สามารถชี้ builder ไปที่ root นั้นด้วย `AIAT_EVIDENCE_ROOT`
+
+ขอบเขตปัจจุบันคือ catalog 28 แหล่ง แต่มี executable plans/connectors/contracts 6 แหล่ง แหล่งอื่นใช้ reviewed snapshot, metadata-only หรือ restricted lane จนกว่าจะเพิ่ม operational connector พร้อม contract และ tests
 
 ## 2. ภาพรวม component
 
 ```text
                  ┌──────────────────────────────────────┐
-28 source URLs → │ Registry + plan + contract ราย source │
+28 source URLs → │ Catalog 28 + executable plans 6      │
                  └──────────────────┬───────────────────┘
                                     │
                   ┌─────────────────▼─────────────────┐
-                  │ Connector เฉพาะเว็บ              │
-                  │ JSON / form / CKAN / snapshot     │
+                  │ Connector เฉพาะ 6 executable URLs │
+                  │ JSON / form / CKAN                 │
                   └─────────────────┬─────────────────┘
                                     │ Candidate datasets
                   ┌─────────────────▼─────────────────┐
@@ -70,7 +72,7 @@ Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence �
 
 ## 4. Source states
 
-`config/source_catalog.json` เป็น registry กลางของ 28 แหล่ง และแยก publication policy เป็น:
+`config/source_catalog.json` เป็น generated serving catalog ของ 28 แหล่งและแยก publication policy ดังนี้; canonical `config/source_registry.json` กับ source cards อยู่ใน evidence workspace และเป็น input ตอน regenerate:
 
 - `public_candidate` 11 แหล่ง — มี reviewed projection ที่อนุญาตให้แสดงพร้อมคำเตือน
 - `metadata_only` 12 แหล่ง — แสดงชื่อ URL และสถานะ แต่ยังไม่เอาค่าข้อมูลขึ้น Dashboard
@@ -91,11 +93,12 @@ URL → connector → evidence/manifest → sanitize → dashboard_records
 ### Publication lane
 
 ```text
-immutable evidence → builders → semantic/privacy tests → data/public/*
-                  → reviewed commit → Railway deploy → public_artifacts
+immutable evidence → builders → semantic/privacy tests → data/public/*.json
+                  → serving_manifest.json → reviewed commit
+                  → Railway deploy/startup sync → public_artifacts
 ```
 
-ไม่มี code path ที่ copy `dashboard_records` ไป `public_artifacts` เอง การ publish ต้องมีคน review diff และ merge revision ที่ deterministic
+ไม่มี code path ที่ copy `dashboard_records` ไป `public_artifacts` เอง การ publish ต้องเป็น JSON object ที่ผ่าน builder/test มี entry ใน `data/public/serving_manifest.json` และให้ทีม review diff ก่อน merge Artifact ใหม่ที่ไม่ใช่ serving core ต้องประกาศ `source_ids`; runtime ยอมรับเฉพาะ source ที่ catalog อนุมัติให้เผยแพร่ และตรวจ privacy ของ artifact ทั้งชุดก่อนเริ่มแก้ database rows
 
 ## 6. Database design
 
@@ -113,6 +116,8 @@ SQLAlchemy ใช้ schema เดียวกันบน PostgreSQL (productio
 | `housing_demand_snapshots` | manifest ของ Housing demand release |
 | `housing_demand_records` | demand rows ที่ตัด source identifier/contact แล้ว |
 
+Housing live connector ไม่ดาวน์โหลด respondent CSV ของ `demand` และไม่โหลด `policy-assessment`; connector ใช้ demand package เพื่อยืนยัน schema/resource count เท่านั้น ส่วน `housing_demand_records` ใน serving database มาจาก pre-redacted reviewed artifact คนละ publication lane
+
 ความสัมพันธ์หลัก:
 
 ```text
@@ -123,7 +128,7 @@ sources 1 ── many spatial/demand rows
 public_artifacts แยกจาก Candidate lane โดยตั้งใจ
 ```
 
-JSON ใน `public_artifacts.payload` คือ cleaned projection หนึ่งชุด ไม่ใช่ raw JSON dump ทั้งเว็บไซต์ แต่ละ artifact มี `artifact_key`, group, province code (ถ้ามี), source path และ SHA-256 เพื่อ sync แบบ idempotent
+JSON ใน `public_artifacts.payload` คือ cleaned projection หนึ่งชุด ไม่ใช่ raw JSON dump ทั้งเว็บไซต์ แต่ละแถวมี `artifact_key`, group, province code (ถ้ามี), source path และ SHA-256 เพื่อ sync แบบ idempotent ส่วน `source_ids` เป็น provenance/publication gate ใน serving manifest ปัจจุบัน ไม่ใช่คอลัมน์ในตาราง `public_artifacts`
 
 ## 7. Geography และ grain
 
@@ -153,8 +158,8 @@ Dashboard startup ทำงานตามลำดับ:
 
 1. `create_all` เฉพาะตารางที่ยังไม่มี (ไม่ drop table)
 2. ใช้ PostgreSQL advisory lock กันสอง instance sync ซ้อนกัน
-3. sync catalog, reviewed public artifacts, spatial layers และ housing demand จากไฟล์ที่ commit อยู่ใน repo
-4. เปิด `/health` เมื่อ serving contract ครบ
+3. ขยาย `serving_manifest.json` และ sync reviewed public artifacts รวมถึง spatial/housing data จากไฟล์ที่ commit อยู่ใน repo
+4. เปิด `/health` เมื่อ counts ใน database ตรงกับ serving contract ที่ derive จาก manifest
 
 Explorer ไม่มี startup writer และไม่มี insert/update/delete endpoint จึงอ่านฐานข้อมูลอย่างเดียวทุก 30 วินาที
 
@@ -184,6 +189,6 @@ python tools/validate_public_repo.py
 python -m pytest -q
 ```
 
-Public clone รัน application และ connector tests ได้ครบ ส่วน integration tests ที่เทียบ raw evidence ทั้งชุดจะทำงานเฉพาะ maintainer workspace ที่มีไฟล์นั้นจริง
+Public clone รัน application และ connector tests ได้ครบ ส่วน integration tests ที่เทียบ raw evidence ทั้งชุดจะทำงานเมื่อ `AIAT_EVIDENCE_ROOT` ชี้ไปยัง evidence workspace ที่มีไฟล์ตรงตาม dated run ที่ builder ระบุ
 
 อ่านวิธีเพิ่ม source ที่ [Connector development](connector-development.md), กติกา publication ที่ [Data governance](data-governance.md) และ production runbook ที่ [Deployment](deployment.md)

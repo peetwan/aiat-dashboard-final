@@ -13,14 +13,14 @@ from tools.build_learning_dashboard import (
 )
 
 
-MAINTAINER_EVIDENCE_REASON = (
-    "immutable raw response lives in the maintainer workspace, not the public clone"
+EVIDENCE_WORKSPACE_REASON = (
+    "immutable raw response is not included in the public clone"
 )
 
 
 @pytest.mark.skipif(
     not RAW_RESPONSE_PATH.is_file(),
-    reason=MAINTAINER_EVIDENCE_REASON,
+    reason=EVIDENCE_WORKSPACE_REASON,
 )
 def test_real_learning_dashboard_payload_is_lossless_and_exactly_geocoded():
     raw_payload = json.loads(RAW_RESPONSE_PATH.read_text(encoding="utf-8-sig"))

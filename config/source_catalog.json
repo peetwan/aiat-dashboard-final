@@ -1,5 +1,5 @@
 {
-  "catalog_version": "0.2.0",
+  "catalog_version": "0.3.0",
   "generated_from": {
     "registry": "config/source_registry.json",
     "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -11,8 +11,8 @@
     ]
   },
   "policy": {
-    "approval_recorded_at": "2026-08-16",
-    "approved_by": "peet",
+    "approval_basis": "current_catalog_policy_and_source_cards",
+    "current_stewardship": "repository_co_maintainers",
     "registry_source_count": 28,
     "approved_public_source_count": 11,
     "metadata_only_source_count": 12,
@@ -34,7 +34,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 1083458,
@@ -170,7 +170,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "year=<value>&amp=ALL&prov=ALL&tambon=ALL"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -198,7 +198,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "year=<value>&amp=ALL&prov=ALL&tambon=ALL"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -338,7 +338,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "year=<value>&amp=ALL&prov=ALL&tambon=ALL"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -352,7 +352,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "year=<value>&amp=ALL&prov=ALL&tambon=ALL"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -394,7 +394,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "year=<value>&prov=ALL"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -408,7 +408,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "_nc=1"
           },
           "notes_th": "เรียกได้โดยไม่ต้อง login"
         },
@@ -707,7 +707,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 47,
@@ -787,7 +787,7 @@
       "acquisition_mode": "snapshot_only",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 5619,
@@ -941,7 +941,7 @@
       "acquisition_mode": "snapshot_only",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 2001,
@@ -1161,7 +1161,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 630,
@@ -1180,7 +1180,7 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "__template=appTech.public.list&offset=<value>&max=<value>"
           },
           "notes_th": "bounded public pagination; local payloads retained for Silver candidate"
         },
@@ -1269,7 +1269,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 503,
@@ -1289,7 +1289,21 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "action=fetch_innovationAll_JSON"
+            "query_or_body": "action=fetch_innovationAll_JSON",
+            "json_body": {
+              "action": "fetch_innovationAll_JSON",
+              "filter": {
+                "innovationgroup": "All",
+                "affiliationid": "All",
+                "innovationtype": "All",
+                "orderby": 1,
+                "cus_search1": "",
+                "startlimit": "<value>",
+                "endlimit": "<value>",
+                "maxpage": 0,
+                "targetpagenumber": "<value>"
+              }
+            }
           },
           "notes_th": "public JSON; server page size 12; no CORS"
         },
@@ -1303,7 +1317,18 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "action=fetch_newsAll_JSON"
+            "query_or_body": "action=fetch_newsAll_JSON",
+            "json_body": {
+              "action": "fetch_newsAll_JSON",
+              "filter": {
+                "orderby": 1,
+                "cus_search1": "",
+                "startlimit": "<value>",
+                "endlimit": "<value>",
+                "maxpage": 0,
+                "targetpagenumber": "<value>"
+              }
+            }
           },
           "notes_th": "public JSON; server page size 12; no CORS"
         },
@@ -1317,7 +1342,18 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "action=fetch_requirementAll_JSON"
+            "query_or_body": "action=fetch_requirementAll_JSON",
+            "json_body": {
+              "action": "fetch_requirementAll_JSON",
+              "filter": {
+                "orderby": 1,
+                "cus_search1": "",
+                "startlimit": "<value>",
+                "endlimit": "<value>",
+                "maxpage": 0,
+                "targetpagenumber": "<value>"
+              }
+            }
           },
           "notes_th": "public JSON; server page size 12; no CORS"
         },
@@ -1427,11 +1463,11 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 66,
-      "notes_th": "ต้อง inspect network เพื่อหา data endpoint ของ dashboard | อนุญาต Cloud publication เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว; permission นี้ไม่ใช่ fact acceptance, raw response ยังไม่มี manifest และต้องทบทวน selected-project scope ก่อนใช้เป็น KPI",
+      "notes_th": "ต้อง inspect network เพื่อหา data endpoint ของ dashboard | กำหนด Cloud publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถว; scope นี้ไม่ใช่ fact acceptance, raw response ยังไม่มี manifest และต้องทบทวน selected-project scope ก่อนใช้เป็น KPI",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1444,7 +1480,8 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "json": {}
+            "json": {},
+            "json_body": {}
           },
           "notes_th": "POST empty JSON body verified HTTP 200; GET returned 405. Payload is text/plain JSON and selected-project scope remains needs_review."
         }
@@ -1463,7 +1500,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 1002,
@@ -1601,7 +1638,7 @@
       "acquisition_mode": "snapshot_only",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 702,
@@ -1660,7 +1697,7 @@
       "acquisition_mode": "snapshot_only",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 54,
@@ -1884,7 +1921,7 @@
       "acquisition_mode": "api_first",
       "snapshot_fallback": true,
       "readiness_status": "needs_review",
-      "cloud_policy": "project_owner_approved_public",
+      "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 7259,
@@ -1974,18 +2011,18 @@
           "notes_th": "CKAN dataset `demand`"
         },
         {
-          "endpoint_id": "446a6e6249a74277ca0f3df7566c11cb4adb49b60eb8f66123ec03e5df2469b9",
+          "endpoint_id": "520d93241e7557aa2a7be3e06db83f11d85dc37204d30e92ad1a7d0f76d4a252",
           "method": "GET",
           "url": "https://data.thaihousingportal.com/dataset/67f58c26-0cde-410d-9ed2-c55ea2303c91/resource/ae090999-5a29-42c5-8518-40f5ece5b081/download/housing_demand_clean_stage_2.csv",
           "kind": "ckan_resource_download",
           "access": "public",
-          "team_action": "call_without_login",
+          "team_action": "do_not_call_publication_policy",
           "restricted": false,
-          "runtime_enabled": true,
+          "runtime_enabled": false,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "ความต้องการที่อยู่อาศัยรายจังหวัด (พื้นที่โครงการ)"
+          "notes_th": "ความต้องการที่อยู่อาศัยรายจังหวัด (พื้นที่โครงการ) — runtime blocked by ingestion publication policy"
         },
         {
           "endpoint_id": "d8c1f0dfd8e894fe9bd59c386ff1de77aef24735258367d2cffb85f71245aed9",
@@ -2534,18 +2571,18 @@
           "notes_th": "CKAN dataset `policy-assessment`"
         },
         {
-          "endpoint_id": "92547a095299251b2eaf79fdaee722e7257e9a6cf11c5e0e039153d613823520",
+          "endpoint_id": "b4429aa2bee3303ff30c139b3c8b0a5d3966a515e0fe56238e7cb2fe71573cfd",
           "method": "GET",
           "url": "https://data.thaihousingportal.com/dataset/39edd2b9-01c8-4fca-a388-bae015de03ba/resource/3dcc96ea-6545-4ca1-88d5-58ad51ad2c18/download/policy_assessment_template.csv",
           "kind": "ckan_resource_download",
           "access": "public",
-          "team_action": "call_without_login",
+          "team_action": "do_not_call_publication_policy",
           "restricted": false,
-          "runtime_enabled": true,
+          "runtime_enabled": false,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "policy_assessment_template.csv"
+          "notes_th": "policy_assessment_template.csv — runtime blocked by ingestion publication policy"
         },
         {
           "endpoint_id": "2751bdf09b217fbda418cea40169bb0acf00922a75df33fe8e685c917139f24c",

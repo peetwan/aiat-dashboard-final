@@ -1,9 +1,9 @@
-* @peetwan
+* @peetwan @GeorgieSmile @Thanden11 @manchuphon
 
-# Data contracts, publication gates, and deployment changes always request the maintainer.
-/config/ @peetwan
-/app/connectors/ @peetwan
-/app/ingestion.py @peetwan
-/app/public_artifacts.py @peetwan
-/.github/workflows/ @peetwan
-/data/public/ @peetwan
+# Data contracts, publication gates, and deployment changes request review from the project team.
+/config/ @peetwan @GeorgieSmile @Thanden11 @manchuphon
+/app/connectors/ @peetwan @GeorgieSmile @Thanden11 @manchuphon
+/app/ingestion.py @peetwan @GeorgieSmile @Thanden11 @manchuphon
+/app/public_artifacts.py @peetwan @GeorgieSmile @Thanden11 @manchuphon
+/.github/workflows/ @peetwan @GeorgieSmile @Thanden11 @manchuphon
+/data/public/ @peetwan @GeorgieSmile @Thanden11 @manchuphon

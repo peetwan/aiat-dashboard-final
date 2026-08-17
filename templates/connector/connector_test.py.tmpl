@@ -1,0 +1,63 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from app.connectors.base import ConnectorContext
+from app.connectors.__MODULE_NAME__ import __CLASS_NAME__
+from app.settings import Settings
+
+
+FIXTURE_PATH = (
+    Path(__file__).parent
+    / "fixtures"
+    / "connectors"
+    / (__SOURCE_ID_PY__ + ".json")
+)
+
+
+class StubResponse:
+    def __init__(self, payload: dict):
+        self._payload = payload
+
+    def json(self) -> dict:
+        return self._payload
+
+
+class StubRecorder:
+    def __init__(self, rows: list[dict]):
+        self.rows = rows
+        self.calls: list[tuple[str, str, dict]] = []
+
+    def request(self, method: str, url: str, **kwargs):
+        self.calls.append((method, url, kwargs))
+        return StubResponse({"data": self.rows}), Path("fixture.json")
+
+
+def test___SOURCE_ID___connector_replays_redacted_fixture_without_network():
+    fixture = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    expected = [
+        (record["dataset_key"], record["payload"])
+        for record in fixture["records"]
+    ]
+    recorder = StubRecorder([payload for _, payload in expected])
+    context = ConnectorContext(
+        source={"source_id": __SOURCE_ID_PY__},
+        plan={"url": "https://example.invalid/api"},
+        settings=Settings(
+            database_url="sqlite:///unused.sqlite",
+            max_records_per_source=0,
+        ),
+        recorder=recorder,
+    )
+
+    connector = __CLASS_NAME__()
+    assert connector.driver_name == __DRIVER_NAME_PY__
+    assert connector.fetch(context) == expected
+    assert recorder.calls == [
+        (
+            "GET",
+            "https://example.invalid/api",
+            {"name": "first_page"},
+        )
+    ]
