@@ -470,6 +470,73 @@ code {
 .preview-empty { padding: 45px; color: var(--muted); text-align: center; }
 .preview-safety-note { margin: 12px 0 0; color: #71897e; font-size: 0.65rem; }
 
+.artifact-gallery-section { padding-bottom: 100px; }
+.artifact-heading { margin-bottom: 20px; }
+.artifact-toolbar {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(210px, 0.38fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(11, 24, 20, 0.85);
+}
+.artifact-search { position: relative; }
+.artifact-search > span { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--green); transform: translateY(-50%); }
+.artifact-search input, .artifact-toolbar select { width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 10px; outline: none; background: #0e1d19; color: var(--text); }
+.artifact-search input { padding: 0 14px 0 42px; }
+.artifact-toolbar select { padding: 0 36px 0 13px; }
+.artifact-search input:focus, .artifact-toolbar select:focus { border-color: rgba(186,156,255,0.55); box-shadow: 0 0 0 3px rgba(186,156,255,0.08); }
+.artifact-summary { color: #bfd0c8; font-size: 0.7rem; white-space: nowrap; }
+.artifact-block-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.artifact-block {
+  --artifact-accent: var(--purple);
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 275px;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(186,156,255,0.1), transparent 42%),
+    rgba(11,24,20,0.96);
+  color: var(--text);
+  text-align: left;
+  flex-direction: column;
+  transition: 150ms ease;
+}
+.artifact-block::after { position: absolute; right: -26px; bottom: -54px; color: rgba(186,156,255,0.035); content: "{ }"; font: 900 8rem/1 monospace; pointer-events: none; }
+.artifact-block:hover, .artifact-block:focus-visible { border-color: rgba(186,156,255,0.6); outline: none; box-shadow: 0 18px 55px rgba(0,0,0,0.3); transform: translateY(-2px); }
+.artifact-block-top { display: flex; align-items: center; gap: 8px; margin-bottom: 17px; }
+.json-file-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(186,156,255,0.3); border-radius: 9px; background: rgba(186,156,255,0.08); color: var(--purple); font: 800 0.66rem/1 monospace; }
+.artifact-group { min-width: 0; overflow: hidden; color: #baa8e3; font: 750 0.57rem/1.2 monospace; letter-spacing: 0.04em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.artifact-items { margin-left: auto; color: var(--text); font: 850 0.9rem/1 monospace; text-align: right; }
+.artifact-items small { display: block; margin-top: 4px; color: var(--muted); font: 650 0.45rem/1 monospace; }
+.artifact-block > strong { display: block; color: #f1ebff; font: 760 0.95rem/1.35 "Cascadia Code", Consolas, monospace; overflow-wrap: anywhere; }
+.artifact-key { display: block; margin-top: 5px; color: var(--purple); font: 650 0.63rem/1.4 monospace; overflow-wrap: anywhere; }
+.artifact-source-path { display: block; margin-top: 10px; color: var(--muted); font: 520 0.58rem/1.45 monospace; overflow-wrap: anywhere; }
+.artifact-location { display: flex; align-items: center; gap: 7px; margin-top: auto; padding: 9px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,0.16); color: #b9c9c1; font: 650 0.57rem/1.3 monospace; }
+.artifact-location i { padding: 3px 5px; border-radius: 4px; background: rgba(121,242,178,0.1); color: var(--green); font-style: normal; }
+.artifact-location b { color: var(--purple); }
+.artifact-block-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 11px; color: var(--muted); font-size: 0.62rem; }
+.artifact-block-foot b { color: var(--purple); font: 750 0.58rem/1 monospace; }
+.artifact-show-more { display: block; margin: 18px auto 0; padding: 10px 22px; border: 1px solid rgba(186,156,255,0.36); border-radius: 10px; background: rgba(186,156,255,0.07); color: #d8c9ff; }
+.artifact-show-more:hover { border-color: rgba(186,156,255,0.7); background: rgba(186,156,255,0.12); }
+.artifact-preview-dialog { width: min(1040px, calc(100% - 28px)); }
+.artifact-dialog-head h2 { color: #e9deff; }
+.artifact-db-address { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 18px; padding: 12px 14px; border: 1px solid rgba(186,156,255,0.22); border-radius: 10px; background: rgba(186,156,255,0.055); }
+.artifact-db-address > span { width: 100%; color: var(--muted); font: 750 0.52rem/1 monospace; letter-spacing: 0.08em; }
+.artifact-db-address strong { color: #e3d9ff; font: 750 0.68rem/1.3 monospace; }
+.artifact-db-address b { color: var(--purple); }
+.artifact-db-address small { margin-left: auto; color: var(--muted); font: 600 0.58rem/1 monospace; }
+.json-preview-wrap { max-height: min(58vh, 650px); margin-top: 12px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: #06100d; }
+.json-preview-wrap pre { min-width: min-content; margin: 0; padding: 18px; }
+.json-preview-wrap code { padding: 0; border: 0; background: transparent; color: #c5d9cf; font: 520 0.68rem/1.58 "Cascadia Code", Consolas, monospace; white-space: pre; }
+
 .footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-block: 24px 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.72rem; }
 .footer div, .footer strong, .footer span { display: flex; gap: 14px; align-items: center; }
 .footer strong { color: var(--text); }
@@ -506,7 +573,7 @@ code {
   .pipeline-grid { grid-template-columns: repeat(3, 1fr); }
   .pipeline-arrow { display: none; }
   .schema-cards { grid-template-columns: repeat(2, 1fr); }
-  .preview-block-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .preview-block-grid, .artifact-block-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
@@ -523,6 +590,8 @@ code {
   .search-box { grid-column: 1 / -1; }
   .schema-layout { grid-template-columns: 1fr; }
   .preview-toolbar { grid-template-columns: 1fr; align-items: start; }
+  .artifact-toolbar { grid-template-columns: 1fr 1fr; }
+  .artifact-search { grid-column: 1 / -1; }
   .safe-preview-badge { justify-self: start; }
 }
 
@@ -554,7 +623,10 @@ code {
   .pipeline-step { min-height: 180px; }
   .filters { grid-template-columns: 1fr; }
   .search-box { grid-column: auto; }
-  .schema-cards, .preview-block-grid, .detail-grid { grid-template-columns: 1fr; }
+  .schema-cards, .preview-block-grid, .artifact-block-grid, .detail-grid { grid-template-columns: 1fr; }
+  .artifact-toolbar { grid-template-columns: 1fr; }
+  .artifact-search { grid-column: auto; }
+  .artifact-summary { white-space: normal; }
   .preview-field-list { grid-template-columns: 1fr; }
   .detail-box.wide { grid-column: auto; }
   .footer { align-items: flex-start; flex-direction: column; }

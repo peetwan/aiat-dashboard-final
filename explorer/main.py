@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from collections import Counter, defaultdict
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,29 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPLORER_ROOT = Path(__file__).resolve().parent
 CATALOG_PATH = PROJECT_ROOT / "config" / "source_catalog.json"
 REFRESH_INTERVAL_SECONDS = 30
+ARTIFACT_PREVIEW_MAX_DEPTH = 6
+ARTIFACT_PREVIEW_MAX_DICT_KEYS = 40
+ARTIFACT_PREVIEW_MAX_LIST_ITEMS = 12
+ARTIFACT_PREVIEW_MAX_STRING_LENGTH = 800
+ARTIFACT_PREVIEW_NODE_BUDGET = 320
+
+SENSITIVE_JSON_KEYS = {
+    "citizen_id",
+    "contact",
+    "contact_name",
+    "e_mail",
+    "email",
+    "first_name",
+    "full_name",
+    "last_name",
+    "line_id",
+    "mobile",
+    "national_id",
+    "phone",
+    "respondent_name",
+    "tel_no",
+    "telephone",
+}
 
 app = FastAPI(
     title="AIAT Database Explorer",
@@ -494,6 +518,94 @@ def _preview_value(value: Any) -> Any:
     return value
 
 
+def _artifact_file_name(source_path: str) -> str:
+    return source_path.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+
+
+def _safe_artifact_source_path(source_path: str) -> str:
+    normalized = source_path.replace("\\", "/")
+    if normalized.startswith("data/public/"):
+        return normalized
+    marker = "/data/public/"
+    if marker in normalized:
+        return f"data/public/{normalized.split(marker, 1)[1]}"
+    return _artifact_file_name(normalized)
+
+
+def _is_sensitive_json_key(key: Any) -> bool:
+    normalized = str(key).strip().lower().replace("-", "_").replace(" ", "_")
+    if normalized in SENSITIVE_JSON_KEYS:
+        return True
+    return normalized.endswith(("_email", "_phone", "_telephone", "_mobile", "_citizen_id"))
+
+
+def _safe_json_preview(payload: Any) -> tuple[Any, bool]:
+    """Return a bounded JSON preview with contact/identity values suppressed."""
+
+    budget = {"remaining": ARTIFACT_PREVIEW_NODE_BUDGET}
+
+    def visit(value: Any, depth: int) -> tuple[Any, bool]:
+        if budget["remaining"] <= 0:
+            return "[preview truncated]", True
+        budget["remaining"] -= 1
+
+        if depth >= ARTIFACT_PREVIEW_MAX_DEPTH and isinstance(value, (dict, list)):
+            return "[preview truncated]", True
+
+        if isinstance(value, dict):
+            result: dict[str, Any] = {}
+            truncated = len(value) > ARTIFACT_PREVIEW_MAX_DICT_KEYS
+            for index, (key, item) in enumerate(value.items()):
+                if index >= ARTIFACT_PREVIEW_MAX_DICT_KEYS:
+                    break
+                output_key = str(key)
+                if _is_sensitive_json_key(output_key):
+                    result[output_key] = "[hidden]"
+                    continue
+                preview_item, item_truncated = visit(item, depth + 1)
+                result[output_key] = preview_item
+                truncated = truncated or item_truncated
+            return result, truncated
+
+        if isinstance(value, list):
+            result_list: list[Any] = []
+            truncated = len(value) > ARTIFACT_PREVIEW_MAX_LIST_ITEMS
+            for item in value[:ARTIFACT_PREVIEW_MAX_LIST_ITEMS]:
+                preview_item, item_truncated = visit(item, depth + 1)
+                result_list.append(preview_item)
+                truncated = truncated or item_truncated
+            return result_list, truncated
+
+        if isinstance(value, str) and len(value) > ARTIFACT_PREVIEW_MAX_STRING_LENGTH:
+            return f"{value[:ARTIFACT_PREVIEW_MAX_STRING_LENGTH]}…", True
+        if isinstance(value, datetime):
+            return value.isoformat(), False
+        return value, False
+
+    return visit(payload, 0)
+
+
+def _artifact_metadata(artifact: PublicArtifact | Mapping[str, Any]) -> dict[str, Any]:
+    def field(name: str) -> Any:
+        return artifact[name] if isinstance(artifact, Mapping) else getattr(artifact, name)
+
+    source_path = str(field("source_path"))
+    updated_at = field("updated_at")
+    return {
+        "artifact_key": field("artifact_key"),
+        "artifact_group": field("artifact_group"),
+        "province_code": field("province_code"),
+        "item_count": int(field("item_count") or 0),
+        "updated_at": updated_at.isoformat() if updated_at else None,
+        "file_name": _artifact_file_name(source_path),
+        "source_path": _safe_artifact_source_path(source_path),
+        "database_table": "public_artifacts",
+        "database_column": "payload",
+        "database_type": "JSON / JSONB",
+        "database_location": "PostgreSQL → public_artifacts.payload",
+    }
+
+
 def _preview_rows(
     session,
     table_name: str,
@@ -632,6 +744,56 @@ def data_preview(table_name: str, source_id: str | None = None, limit: int = 6):
     try:
         with SessionLocal() as session:
             return _preview_rows(session, table_name, source_id, safe_limit)
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="database unavailable") from exc
+
+
+@app.get("/api/artifacts")
+def artifacts():
+    try:
+        with SessionLocal() as session:
+            rows = session.execute(
+                select(
+                    PublicArtifact.artifact_key,
+                    PublicArtifact.artifact_group,
+                    PublicArtifact.province_code,
+                    PublicArtifact.item_count,
+                    PublicArtifact.updated_at,
+                    PublicArtifact.source_path,
+                ).order_by(
+                    PublicArtifact.artifact_group,
+                    PublicArtifact.province_code,
+                    PublicArtifact.artifact_key,
+                )
+            ).mappings().all()
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="database unavailable") from exc
+    return {
+        "generated_at": _utc_now(),
+        "artifact_count": len(rows),
+        "database_location": "PostgreSQL → public_artifacts.payload",
+        "payload_included": False,
+        "artifacts": [_artifact_metadata(artifact) for artifact in rows],
+    }
+
+
+@app.get("/api/artifact-preview")
+def artifact_preview(artifact_key: str):
+    try:
+        with SessionLocal() as session:
+            artifact = session.scalar(
+                select(PublicArtifact).where(PublicArtifact.artifact_key == artifact_key)
+            )
+            if artifact is None:
+                raise HTTPException(status_code=404, detail="artifact not found")
+            payload_preview, truncated = _safe_json_preview(artifact.payload)
+            return {
+                "generated_at": _utc_now(),
+                **_artifact_metadata(artifact),
+                "payload_preview": payload_preview,
+                "truncated": truncated,
+                "safe_preview": True,
+            }
     except SQLAlchemyError as exc:
         raise HTTPException(status_code=503, detail="database unavailable") from exc
 

@@ -6,7 +6,7 @@
     <meta name="description" content="AIAT Database Explorer — แผนที่ความสัมพันธ์ของ 28 แหล่งข้อมูลและ Serving Database แบบ read-only" />
     <title>AIAT Database Explorer</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="/static/styles.css?v=live-data-preview-1" />
+    <link rel="stylesheet" href="/static/styles.css?v=artifact-gallery-1" />
   </head>
   <body>
     <div class="ambient ambient-one"></div>
@@ -24,6 +24,7 @@
         <a href="#database-map">Database Map</a>
         <a href="#sources">28 แหล่ง</a>
         <a href="#data-preview">Live Data</a>
+        <a href="#artifact-gallery">JSON Gallery</a>
         <a href="#pipeline">เส้นทางข้อมูล</a>
         <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
       </nav>
@@ -235,6 +236,31 @@
           <div class="preview-loading">กำลังอ่าน Schema จาก PostgreSQL…</div>
         </div>
       </section>
+
+      <section id="artifact-gallery" class="section shell artifact-gallery-section">
+        <div class="section-heading artifact-heading">
+          <div><span class="kicker">JSON ARTIFACT GALLERY</span><h2>ตัวอย่าง JSON ที่ Dashboard ใช้</h2></div>
+          <p>กดแต่ละ Block เพื่อดูตัวอย่าง JSON พร้อมชื่อไฟล์ และตำแหน่งจริงใน PostgreSQL</p>
+        </div>
+
+        <div class="artifact-toolbar">
+          <label class="artifact-search">
+            <span>⌕</span>
+            <input id="artifact-search-input" type="search" placeholder="ค้นหาชื่อไฟล์, artifact key หรือจังหวัด…" autocomplete="off" />
+          </label>
+          <label>
+            <span class="sr-only">กรองกลุ่ม JSON</span>
+            <select id="artifact-group-filter"><option value="">ทุกกลุ่ม JSON</option></select>
+          </label>
+          <div id="artifact-summary" class="artifact-summary">กำลังอ่าน Public artifacts…</div>
+          <span class="safe-preview-badge">SAFE · TRIMMED JSON</span>
+        </div>
+
+        <div id="artifact-blocks" class="artifact-block-grid" aria-live="polite">
+          <div class="preview-loading">กำลังอ่านรายชื่อ JSON จาก public_artifacts…</div>
+        </div>
+        <button id="artifact-show-more" class="artifact-show-more" type="button" hidden>แสดงเพิ่ม</button>
+      </section>
     </main>
 
     <footer class="footer shell">
@@ -256,9 +282,16 @@
       </div>
     </dialog>
 
+    <dialog id="artifact-preview-dialog" class="source-dialog artifact-preview-dialog">
+      <div class="dialog-shell">
+        <button id="artifact-preview-close" class="dialog-close" aria-label="ปิด">×</button>
+        <div id="artifact-preview-content"></div>
+      </div>
+    </dialog>
+
     <script>
       window.EXPLORER_CONFIG = { refreshSeconds: {{ refresh_interval_seconds }} };
     </script>
-    <script src="/static/app.js?v=live-data-preview-1" defer></script>
+    <script src="/static/app.js?v=artifact-gallery-1" defer></script>
   </body>
 </html>

@@ -4,6 +4,8 @@ const state = {
   schema: null,
   selectedTable: null,
   previewSourceId: "",
+  artifacts: [],
+  artifactVisibleLimit: 36,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -259,6 +261,96 @@ async function openDataPreview(tableName) {
   }
 }
 
+function artifactBlock(artifact) {
+  const province = artifact.province_code ? `จังหวัด ${artifact.province_code}` : "ข้อมูลระดับประเทศ";
+  return `
+    <button class="artifact-block" type="button" data-artifact-key="${escapeHtml(artifact.artifact_key)}">
+      <span class="artifact-block-top">
+        <span class="json-file-icon">{ }</span>
+        <span class="artifact-group">${escapeHtml(artifact.artifact_group)}</span>
+        <span class="artifact-items">${formatNumber(artifact.item_count)}<small>ITEMS</small></span>
+      </span>
+      <strong>${escapeHtml(artifact.file_name)}</strong>
+      <span class="artifact-key">${escapeHtml(artifact.artifact_key)}</span>
+      <span class="artifact-source-path">${escapeHtml(artifact.source_path)}</span>
+      <span class="artifact-location"><i>DB</i><span>public_artifacts <b>→</b> payload</span></span>
+      <span class="artifact-block-foot"><span>${escapeHtml(province)}</span><b>ดู JSON →</b></span>
+    </button>
+  `;
+}
+
+function filteredArtifacts() {
+  const query = $("#artifact-search-input").value.trim().toLowerCase();
+  const group = $("#artifact-group-filter").value;
+  return state.artifacts.filter((artifact) => {
+    const searchable = [
+      artifact.file_name,
+      artifact.source_path,
+      artifact.artifact_key,
+      artifact.artifact_group,
+      artifact.province_code,
+    ].join(" ").toLowerCase();
+    return (!query || searchable.includes(query))
+      && (!group || artifact.artifact_group === group);
+  });
+}
+
+function renderArtifacts() {
+  const filtered = filteredArtifacts();
+  const visible = filtered.slice(0, state.artifactVisibleLimit);
+  $("#artifact-blocks").innerHTML = visible.length
+    ? visible.map(artifactBlock).join("")
+    : `<div class="preview-loading">ไม่พบ JSON artifact ที่ตรงกับตัวกรอง</div>`;
+  $("#artifact-summary").textContent = `แสดง ${formatNumber(visible.length)} จาก ${formatNumber(filtered.length)} JSON · ทั้งหมด ${formatNumber(state.artifacts.length)}`;
+  $("#artifact-show-more").hidden = visible.length >= filtered.length;
+  document.querySelectorAll("[data-artifact-key]").forEach((button) => {
+    button.addEventListener("click", () => openArtifactPreview(button.dataset.artifactKey));
+  });
+}
+
+function populateArtifactGroups() {
+  const select = $("#artifact-group-filter");
+  const current = select.value;
+  const groups = [...new Set(state.artifacts.map((artifact) => artifact.artifact_group).filter(Boolean))];
+  select.innerHTML = `<option value="">ทุกกลุ่ม JSON</option>${groups.map((group) => `<option value="${escapeHtml(group)}">${escapeHtml(group)}</option>`).join("")}`;
+  select.value = current;
+}
+
+async function openArtifactPreview(artifactKey) {
+  const dialog = $("#artifact-preview-dialog");
+  const content = $("#artifact-preview-content");
+  content.innerHTML = `<div class="preview-empty">กำลังอ่าน JSON ตัวอย่างจาก PostgreSQL…</div>`;
+  dialog.showModal();
+  try {
+    const query = new URLSearchParams({ artifact_key: artifactKey });
+    const data = await requestJson(`/api/artifact-preview?${query}`);
+    const prettyJson = JSON.stringify(data.payload_preview, null, 2);
+    content.innerHTML = `
+      <header class="preview-dialog-head artifact-dialog-head">
+        <span class="kicker">PUBLIC ARTIFACT · SAFE JSON PREVIEW</span>
+        <h2>${escapeHtml(data.file_name)}</h2>
+        <p>${escapeHtml(data.source_path)}</p>
+        <div class="preview-dialog-meta">
+          <span>key: ${escapeHtml(data.artifact_key)}</span>
+          <span>${escapeHtml(data.artifact_group)}</span>
+          <span>${formatNumber(data.item_count)} items</span>
+          ${data.province_code ? `<span>province ${escapeHtml(data.province_code)}</span>` : `<span>national</span>`}
+        </div>
+      </header>
+      <div class="artifact-db-address">
+        <span>DATABASE LOCATION</span>
+        <strong>PostgreSQL</strong><b>→</b><strong>${escapeHtml(data.database_table)}</strong><b>→</b><strong>${escapeHtml(data.database_column)}</strong>
+        <small>${escapeHtml(data.database_type)}</small>
+      </div>
+      <div class="json-preview-wrap"><pre><code>${escapeHtml(prettyJson)}</code></pre></div>
+      <p class="preview-safety-note">${data.truncated ? "ตัวอย่างนี้ถูกตัดให้สั้นลงเพื่อเปิดได้เร็ว · " : ""}ซ่อน field ติดต่อ/ระบุตัวบุคคล และไม่ส่ง JSON ก้อนเต็มผ่าน Explorer API</p>
+    `;
+  } catch (error) {
+    console.error(error);
+    content.innerHTML = `<div class="preview-empty">อ่าน JSON ตัวอย่างไม่สำเร็จ</div>`;
+  }
+}
+
 function selectMapTable(tableName) {
   if (!state.schema) return;
   const table = state.schema.tables.find((item) => item.name === tableName);
@@ -362,10 +454,11 @@ function openSourceDialog(sourceId) {
 
 async function refresh() {
   try {
-    const [overview, sourceData, schema] = await Promise.all([
+    const [overview, sourceData, schema, artifactData] = await Promise.all([
       requestJson("/api/overview"),
       requestJson("/api/sources"),
       requestJson("/api/schema"),
+      requestJson("/api/artifacts"),
     ]);
     renderOverview(overview);
     state.sources = sourceData.sources;
@@ -373,6 +466,9 @@ async function refresh() {
     populatePreviewSources();
     renderSources();
     renderSchema(schema);
+    state.artifacts = artifactData.artifacts;
+    populateArtifactGroups();
+    renderArtifacts();
     $("#footer-refresh").textContent = `อัปเดตล่าสุด ${formatDate(overview.checked_at)} · refresh ทุก ${window.EXPLORER_CONFIG.refreshSeconds} วินาที`;
   } catch (error) {
     console.error(error);
@@ -391,6 +487,10 @@ $("#data-preview-close").addEventListener("click", () => $("#data-preview-dialog
 $("#data-preview-dialog").addEventListener("click", (event) => {
   if (event.target === $("#data-preview-dialog")) $("#data-preview-dialog").close();
 });
+$("#artifact-preview-close").addEventListener("click", () => $("#artifact-preview-dialog").close());
+$("#artifact-preview-dialog").addEventListener("click", (event) => {
+  if (event.target === $("#artifact-preview-dialog")) $("#artifact-preview-dialog").close();
+});
 $("#preview-source-filter").addEventListener("change", (event) => {
   state.previewSourceId = event.target.value;
   updatePreviewFilterLabel();
@@ -398,6 +498,18 @@ $("#preview-source-filter").addEventListener("change", (event) => {
 });
 ["#search-input", "#group-filter", "#policy-filter", "#connection-filter"].forEach((selector) => {
   $(selector).addEventListener(selector === "#search-input" ? "input" : "change", renderSources);
+});
+$("#artifact-search-input").addEventListener("input", () => {
+  state.artifactVisibleLimit = 36;
+  renderArtifacts();
+});
+$("#artifact-group-filter").addEventListener("change", () => {
+  state.artifactVisibleLimit = 36;
+  renderArtifacts();
+});
+$("#artifact-show-more").addEventListener("click", () => {
+  state.artifactVisibleLimit += 36;
+  renderArtifacts();
 });
 
 refresh();

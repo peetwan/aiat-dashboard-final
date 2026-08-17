@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 
 from app.catalog import sync_catalog
 from app.database import SessionLocal
-from explorer.main import app
+from app.models import PublicArtifact
+from explorer.main import _safe_json_preview, app
 from explorer.source_profiles import SOURCE_PROFILES, validate_profile_coverage
 
 
@@ -110,6 +111,67 @@ def test_data_preview_returns_only_safe_physical_rows_and_supports_source_filter
     assert missing_preview.status_code == 404
 
 
+def test_json_preview_is_bounded_and_hides_sensitive_values() -> None:
+    preview, truncated = _safe_json_preview(
+        {
+            "indicator_name": "จำนวนตัวอย่าง",
+            "email": "sensitive",
+            "nested": {"phone": "sensitive", "values": list(range(20))},
+        }
+    )
+
+    assert preview["indicator_name"] == "จำนวนตัวอย่าง"
+    assert preview["email"] == "[hidden]"
+    assert preview["nested"]["phone"] == "[hidden]"
+    assert "sensitive" not in json.dumps(preview)
+    assert truncated is True
+
+
+def test_artifact_gallery_lists_metadata_and_returns_safe_json_preview() -> None:
+    artifact_key = "__test_safe_json_gallery__"
+    with SessionLocal() as session:
+        session.merge(
+            PublicArtifact(
+                artifact_key=artifact_key,
+                artifact_group="test_gallery",
+                province_code="10",
+                content_hash="0" * 64,
+                source_path="data/public/test/gallery-preview.json",
+                item_count=2,
+                payload={"summary": {"value": 42}, "contact_name": "sensitive"},
+            )
+        )
+        session.commit()
+
+    try:
+        with TestClient(app) as client:
+            listing = client.get("/api/artifacts")
+            preview = client.get("/api/artifact-preview", params={"artifact_key": artifact_key})
+            missing = client.get("/api/artifact-preview", params={"artifact_key": "missing"})
+
+        assert listing.status_code == 200
+        listed = next(item for item in listing.json()["artifacts"] if item["artifact_key"] == artifact_key)
+        assert listed["file_name"] == "gallery-preview.json"
+        assert listed["source_path"] == "data/public/test/gallery-preview.json"
+        assert listed["database_table"] == "public_artifacts"
+        assert listed["database_column"] == "payload"
+        assert "payload_preview" not in listing.text
+
+        assert preview.status_code == 200
+        payload = preview.json()
+        assert payload["safe_preview"] is True
+        assert payload["payload_preview"]["summary"]["value"] == 42
+        assert payload["payload_preview"]["contact_name"] == "[hidden]"
+        assert "sensitive" not in preview.text
+        assert missing.status_code == 404
+    finally:
+        with SessionLocal() as session:
+            artifact = session.get(PublicArtifact, artifact_key)
+            if artifact is not None:
+                session.delete(artifact)
+                session.commit()
+
+
 def test_explorer_home_is_a_thai_read_only_database_map() -> None:
     with TestClient(app) as client:
         response = client.get("/")
@@ -122,7 +184,10 @@ def test_explorer_home_is_a_thai_read_only_database_map() -> None:
     assert "READ ONLY" in response.text
     assert "LIVE DATA PREVIEW" in response.text
     assert "ตัวอย่างข้อมูลจริงใน Database" in response.text
+    assert "JSON ARTIFACT GALLERY" in response.text
+    assert "ตัวอย่าง JSON ที่ Dashboard ใช้" in response.text
+    assert 'id="artifact-gallery"' in response.text
     assert "ELI5 GLOSSARY" not in response.text
-    assert 'href="/static/styles.css?v=live-data-preview-1"' in response.text
-    assert 'src="/static/app.js?v=live-data-preview-1"' in response.text
+    assert 'href="/static/styles.css?v=artifact-gallery-1"' in response.text
+    assert 'src="/static/app.js?v=artifact-gallery-1"' in response.text
     assert "http://testserver/static" not in response.text
