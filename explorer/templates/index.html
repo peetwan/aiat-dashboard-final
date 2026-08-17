@@ -6,7 +6,7 @@
     <meta name="description" content="AIAT Database Explorer — แผนที่ความสัมพันธ์ของ 28 แหล่งข้อมูลและ Serving Database แบบ read-only" />
     <title>AIAT Database Explorer</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="/static/styles.css?v=database-map-1" />
+    <link rel="stylesheet" href="/static/styles.css?v=live-data-preview-1" />
   </head>
   <body>
     <div class="ambient ambient-one"></div>
@@ -23,6 +23,7 @@
       <nav class="topnav" aria-label="เมนูหลัก">
         <a href="#database-map">Database Map</a>
         <a href="#sources">28 แหล่ง</a>
+        <a href="#data-preview">Live Data</a>
         <a href="#pipeline">เส้นทางข้อมูล</a>
         <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
       </nav>
@@ -213,17 +214,25 @@
         <p id="empty-state" class="empty-state" hidden>ไม่พบแหล่งข้อมูลที่ตรงกับตัวกรอง</p>
       </section>
 
-      <section class="section shell glossary-section">
-        <div class="section-heading">
-          <div><span class="kicker">ELI5 GLOSSARY</span><h2>คำศัพท์ที่ต้องรู้</h2></div>
+      <section id="data-preview" class="section shell data-preview-section">
+        <div class="section-heading preview-heading">
+          <div><span class="kicker">LIVE DATA PREVIEW</span><h2>ตัวอย่างข้อมูลจริงใน Database</h2></div>
+          <p>เลือก Source/URL แล้วกด Block ตารางเพื่อดูแถวจริงแบบ read-only โดยซ่อน payload และข้อมูลติดต่อ</p>
         </div>
-        <div class="glossary-grid">
-          <article><strong>Grain</strong><p>หนึ่งแถวแทนอะไร เช่น ผู้เข้าร่วมหนึ่งราย โครงการหนึ่งโครงการ หรือ GIS feature หนึ่งชิ้น</p></article>
-          <article><strong>Candidate</strong><p>ข้อมูลที่ใช้ทดสอบ/แสดงพร้อมคำเตือนได้ แต่ความหมายยังไม่ได้รับรองเป็น KPI</p></article>
-          <article><strong>Artifact</strong><p>ชุด JSON ที่ปรุงและตรวจเสร็จแล้ว พร้อมให้ API และ Dashboard อ่าน</p></article>
-          <article><strong>Endpoint</strong><p>ประตู API หรือ URL ที่ระบบใช้ขอข้อมูลจากเว็บไซต์ต้นทาง</p></article>
-          <article><strong>Provenance</strong><p>สูติบัตรของข้อมูล บอกว่ามาจาก source, endpoint, รอบดึง และหลักฐานใด</p></article>
-          <article><strong>Snapshot</strong><p>ภาพถ่ายข้อมูล ณ ช่วงเวลาหนึ่ง ใช้เมื่อไม่ควรหรือไม่สามารถดึง API สดได้ตลอด</p></article>
+
+        <div class="preview-toolbar">
+          <label>
+            <span>เลือก Source / URL</span>
+            <select id="preview-source-filter">
+              <option value="">ทุก Source — ดูภาพรวม Database</option>
+            </select>
+          </label>
+          <div id="preview-filter-label" class="preview-filter-label">กำลังอ่าน 28 Sources…</div>
+          <span class="safe-preview-badge">SAFE COLUMNS ONLY</span>
+        </div>
+
+        <div id="preview-blocks" class="preview-block-grid" aria-live="polite">
+          <div class="preview-loading">กำลังอ่าน Schema จาก PostgreSQL…</div>
         </div>
       </section>
     </main>
@@ -240,9 +249,16 @@
       </div>
     </dialog>
 
+    <dialog id="data-preview-dialog" class="source-dialog data-preview-dialog">
+      <div class="dialog-shell">
+        <button id="data-preview-close" class="dialog-close" aria-label="ปิด">×</button>
+        <div id="data-preview-content"></div>
+      </div>
+    </dialog>
+
     <script>
       window.EXPLORER_CONFIG = { refreshSeconds: {{ refresh_interval_seconds }} };
     </script>
-    <script src="/static/app.js?v=database-map-1" defer></script>
+    <script src="/static/app.js?v=live-data-preview-1" defer></script>
   </body>
 </html>

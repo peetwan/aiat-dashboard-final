@@ -3,6 +3,7 @@ const state = {
   sources: [],
   schema: null,
   selectedTable: null,
+  previewSourceId: "",
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -140,6 +141,24 @@ function populateGroups() {
   select.value = current;
 }
 
+function populatePreviewSources() {
+  const select = $("#preview-source-filter");
+  const current = state.previewSourceId;
+  select.innerHTML = `
+    <option value="">ทุก Source — ดูภาพรวม Database</option>
+    ${state.sources.map((source) => `<option value="${escapeHtml(source.source_id)}">${String(source.ordinal).padStart(2, "0")} · ${escapeHtml(source.name_th)} — ${escapeHtml(source.url)}</option>`).join("")}
+  `;
+  select.value = current;
+  updatePreviewFilterLabel();
+}
+
+function updatePreviewFilterLabel() {
+  const source = state.sources.find((item) => item.source_id === state.previewSourceId);
+  $("#preview-filter-label").textContent = source
+    ? `${source.source_id} · ${source.name_th}`
+    : `ทุก Source · ${formatNumber(state.sources.length)} URL`;
+}
+
 function mapField(field) {
   const isPrimary = field.includes("(PK)");
   const isForeign = field.includes("(FK)");
@@ -158,6 +177,86 @@ function mapTableCard(table) {
       <span class="map-field-list">${table.key_fields.map(mapField).join("")}</span>
     </button>
   `;
+}
+
+function previewTone(group) {
+  return {
+    Operational: "tone-operational",
+    "Candidate staging": "tone-candidate",
+    "Public serving": "tone-public",
+    "Spatial serving": "tone-spatial",
+    "Housing serving": "tone-housing",
+  }[group] || "tone-control";
+}
+
+function previewBlock(table) {
+  const relationCount = state.schema.relationships.filter((relation) => relation.from === table.name || relation.to === table.name).length;
+  return `
+    <button class="preview-block ${previewTone(table.group)}" type="button" data-preview-table="${escapeHtml(table.name)}">
+      <span class="preview-block-head">
+        <span><strong>${escapeHtml(table.name)}</strong><small>${escapeHtml(table.role_th)}</small></span>
+        <span class="preview-count">${formatNumber(table.live_row_count)}<span>${table.count_mode === "snapshot_contract" ? "VALIDATED COUNT" : "SERVING ROWS"}</span></span>
+      </span>
+      <span class="preview-field-list">${table.key_fields.map((field) => `<span>${escapeHtml(field)}</span>`).join("")}</span>
+      <span class="preview-block-foot"><span>${relationCount ? `${formatNumber(relationCount)} relationships` : "global serving table"}</span><b>กดดู DATA →</b></span>
+    </button>
+  `;
+}
+
+function renderPreviewBlocks(data) {
+  $("#preview-blocks").innerHTML = data.tables.map(previewBlock).join("");
+  document.querySelectorAll("[data-preview-table]").forEach((button) => {
+    button.addEventListener("click", () => openDataPreview(button.dataset.previewTable));
+  });
+}
+
+function previewCell(value) {
+  if (value === null || value === undefined) return `<span class="data-null">NULL</span>`;
+  if (typeof value === "boolean") return `<span class="data-boolean-${value}">${value}</span>`;
+  const text = String(value);
+  if (/^https?:\/\//i.test(text)) {
+    return `<a href="${escapeHtml(text)}" target="_blank" rel="noreferrer" title="${escapeHtml(text)}">${escapeHtml(text)} ↗</a>`;
+  }
+  return `<span title="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
+}
+
+async function openDataPreview(tableName) {
+  const dialog = $("#data-preview-dialog");
+  const content = $("#data-preview-content");
+  const selectedSource = state.sources.find((item) => item.source_id === state.previewSourceId);
+  content.innerHTML = `<div class="preview-empty">กำลังอ่านตัวอย่างจาก PostgreSQL…</div>`;
+  dialog.showModal();
+  try {
+    const query = new URLSearchParams({ limit: "6" });
+    if (state.previewSourceId) query.set("source_id", state.previewSourceId);
+    const data = await requestJson(`/api/data-preview/${encodeURIComponent(tableName)}?${query}`);
+    const rowsHtml = data.rows.length
+      ? `<div class="data-sample-wrap"><table class="data-sample-table"><thead><tr>${data.columns.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead><tbody>${data.rows.map((row) => `<tr>${data.columns.map((column) => `<td>${previewCell(row[column])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`
+      : `<div class="preview-empty">ยังไม่มี physical rows ในตารางนี้${data.source_filter_applied ? "สำหรับ Source ที่เลือก" : ""}</div>`;
+    const filterLabel = data.source_filter_applied && selectedSource
+      ? `${selectedSource.source_id} · ${selectedSource.name_th}`
+      : data.source_filter_requested && !data.source_filter_supported
+        ? "Global table · ตารางนี้ไม่มี source_id โดยตรง"
+        : "ทุก Source";
+    content.innerHTML = `
+      <header class="preview-dialog-head">
+        <span class="kicker">LIVE POSTGRESQL · READ ONLY</span>
+        <h2>${escapeHtml(data.table)}</h2>
+        <p>${escapeHtml(data.meaning_th)}</p>
+        <div class="preview-dialog-meta">
+          <span>${formatNumber(data.physical_row_count)} physical rows</span>
+          <span>แสดง ${formatNumber(data.sample_size)} แถว</span>
+          <span>${escapeHtml(filterLabel)}</span>
+          ${data.count_mode === "snapshot_contract" ? `<span>${formatNumber(data.serving_or_contract_count)} validated count</span>` : ""}
+        </div>
+      </header>
+      ${rowsHtml}
+      <p class="preview-safety-note">Safe preview: ไม่ส่ง payload, request template, geometry, evidence path, hash หรือข้อมูลติดต่อออกจาก API นี้</p>
+    `;
+  } catch (error) {
+    console.error(error);
+    content.innerHTML = `<div class="preview-empty">อ่านตัวอย่างข้อมูลไม่สำเร็จ</div>`;
+  }
 }
 
 function selectMapTable(tableName) {
@@ -200,6 +299,7 @@ function renderSchema(data) {
   renderStack("#map-public", byGroup("Public serving"));
   renderFlow("#map-spatial", byGroup("Spatial serving"));
   renderFlow("#map-housing", byGroup("Housing serving"));
+  renderPreviewBlocks(data);
   $("#map-table-total").textContent = formatNumber(data.tables.length);
 
   document.querySelectorAll("[data-map-table]").forEach((card) => {
@@ -270,6 +370,7 @@ async function refresh() {
     renderOverview(overview);
     state.sources = sourceData.sources;
     populateGroups();
+    populatePreviewSources();
     renderSources();
     renderSchema(schema);
     $("#footer-refresh").textContent = `อัปเดตล่าสุด ${formatDate(overview.checked_at)} · refresh ทุก ${window.EXPLORER_CONFIG.refreshSeconds} วินาที`;
@@ -285,6 +386,15 @@ async function refresh() {
 $("#dialog-close").addEventListener("click", () => $("#source-dialog").close());
 $("#source-dialog").addEventListener("click", (event) => {
   if (event.target === $("#source-dialog")) $("#source-dialog").close();
+});
+$("#data-preview-close").addEventListener("click", () => $("#data-preview-dialog").close());
+$("#data-preview-dialog").addEventListener("click", (event) => {
+  if (event.target === $("#data-preview-dialog")) $("#data-preview-dialog").close();
+});
+$("#preview-source-filter").addEventListener("change", (event) => {
+  state.previewSourceId = event.target.value;
+  updatePreviewFilterLabel();
+  if (state.schema) renderPreviewBlocks(state.schema);
 });
 ["#search-input", "#group-filter", "#policy-filter", "#connection-filter"].forEach((selector) => {
   $(selector).addEventListener(selector === "#search-input" ? "input" : "change", renderSources);

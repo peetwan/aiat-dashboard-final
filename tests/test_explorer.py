@@ -86,6 +86,30 @@ def test_explorer_schema_lists_current_nine_serving_tables_without_payloads() ->
     assert "payload" not in response.text
 
 
+def test_data_preview_returns_only_safe_physical_rows_and_supports_source_filter() -> None:
+    seed_catalog()
+    with TestClient(app) as client:
+        source_preview = client.get(
+            "/api/data-preview/sources",
+            params={"source_id": "f1_sradss_ppaos", "limit": 3},
+        )
+        staging_preview = client.get("/api/data-preview/dashboard_records", params={"limit": 3})
+        missing_preview = client.get("/api/data-preview/not_a_table")
+
+    assert source_preview.status_code == 200
+    payload = source_preview.json()
+    assert payload["safe_preview"] is True
+    assert payload["source_filter_applied"] is True
+    assert payload["physical_row_count"] == 1
+    assert payload["rows"][0]["source_id"] == "f1_sradss_ppaos"
+    assert "payload" not in source_preview.text
+    assert "request_template" not in source_preview.text
+    assert "evidence_path" not in source_preview.text
+    assert staging_preview.status_code == 200
+    assert "payload" not in staging_preview.text
+    assert missing_preview.status_code == 404
+
+
 def test_explorer_home_is_a_thai_read_only_database_map() -> None:
     with TestClient(app) as client:
         response = client.get("/")
@@ -96,6 +120,9 @@ def test_explorer_home_is_a_thai_read_only_database_map() -> None:
     assert "AIAT Serving Database" in response.text
     assert response.text.index('id="database-map"') < response.text.index('id="sources"')
     assert "READ ONLY" in response.text
-    assert 'href="/static/styles.css?v=database-map-1"' in response.text
-    assert 'src="/static/app.js?v=database-map-1"' in response.text
+    assert "LIVE DATA PREVIEW" in response.text
+    assert "ตัวอย่างข้อมูลจริงใน Database" in response.text
+    assert "ELI5 GLOSSARY" not in response.text
+    assert 'href="/static/styles.css?v=live-data-preview-1"' in response.text
+    assert 'src="/static/app.js?v=live-data-preview-1"' in response.text
     assert "http://testserver/static" not in response.text

@@ -18,10 +18,12 @@ from app.database import SessionLocal, engine
 from app.models import (
     DashboardRecord,
     Endpoint,
+    HousingDemandRecord,
     HousingDemandSnapshot,
     IngestionRun,
     PublicArtifact,
     Source,
+    SpatialFeature,
     SpatialLayerSnapshot,
 )
 from explorer.source_profiles import SOURCE_PROFILES, validate_profile_coverage
@@ -151,6 +153,143 @@ RELATIONSHIPS = [
     {"from": "housing_demand_snapshots", "to": "housing_demand_records", "cardinality": "1 → many", "label_th": "หนึ่ง snapshot มีหลายคำตอบ"},
     {"from": "validated public files", "to": "public_artifacts", "cardinality": "build → sync", "label_th": "Public artifacts มาจาก deterministic builders ไม่ auto-promote จาก staging"},
 ]
+
+
+PREVIEW_TABLES: dict[str, dict[str, Any]] = {
+    "sources": {
+        "model": Source,
+        "columns": [
+            "source_id",
+            "ordinal",
+            "name_th",
+            "source_url",
+            "acquisition_mode",
+            "readiness_status",
+            "cloud_policy",
+            "production_values_allowed",
+            "expected_record_count",
+            "updated_at",
+        ],
+        "order_by": "ordinal",
+        "source_scoped": True,
+    },
+    "endpoints": {
+        "model": Endpoint,
+        "columns": [
+            "endpoint_id",
+            "source_id",
+            "method",
+            "url",
+            "kind",
+            "access_status",
+            "restricted",
+            "runtime_enabled",
+        ],
+        "order_by": "endpoint_id",
+        "source_scoped": True,
+    },
+    "ingestion_runs": {
+        "model": IngestionRun,
+        "columns": [
+            "run_id",
+            "source_id",
+            "strategy",
+            "status",
+            "started_at",
+            "finished_at",
+            "as_of",
+            "records_seen",
+            "records_loaded",
+            "records_skipped",
+        ],
+        "order_by": "started_at",
+        "source_scoped": True,
+        "descending": True,
+    },
+    "dashboard_records": {
+        "model": DashboardRecord,
+        "columns": [
+            "id",
+            "source_id",
+            "dataset_key",
+            "source_record_id",
+            "quality_status",
+            "fetched_at",
+            "as_of",
+        ],
+        "order_by": "id",
+        "source_scoped": True,
+        "descending": True,
+    },
+    "public_artifacts": {
+        "model": PublicArtifact,
+        "columns": [
+            "artifact_key",
+            "artifact_group",
+            "province_code",
+            "item_count",
+            "updated_at",
+        ],
+        "order_by": "updated_at",
+        "source_scoped": False,
+        "descending": True,
+    },
+    "spatial_layer_snapshots": {
+        "model": SpatialLayerSnapshot,
+        "columns": [
+            "layer_id",
+            "source_id",
+            "feature_count",
+            "quality_status",
+            "updated_at",
+        ],
+        "order_by": "layer_id",
+        "source_scoped": True,
+    },
+    "spatial_features": {
+        "model": SpatialFeature,
+        "columns": [
+            "id",
+            "source_id",
+            "layer_id",
+            "feature_id",
+            "geometry_type",
+            "adm3_pcode",
+            "as_of",
+            "quality_status",
+            "fetched_at",
+        ],
+        "order_by": "id",
+        "source_scoped": True,
+    },
+    "housing_demand_snapshots": {
+        "model": HousingDemandSnapshot,
+        "columns": [
+            "snapshot_id",
+            "source_id",
+            "record_count",
+            "quality_status",
+            "updated_at",
+        ],
+        "order_by": "updated_at",
+        "source_scoped": True,
+        "descending": True,
+    },
+    "housing_demand_records": {
+        "model": HousingDemandRecord,
+        "columns": [
+            "source_row_number",
+            "source_id",
+            "living_province_code",
+            "preferred_province_code",
+            "as_of",
+            "quality_status",
+            "fetched_at",
+        ],
+        "order_by": "source_row_number",
+        "source_scoped": True,
+    },
+}
 
 
 def _catalog() -> dict[str, Any]:
@@ -349,6 +488,71 @@ def _table_counts(session) -> dict[str, int]:
     }
 
 
+def _preview_value(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+def _preview_rows(
+    session,
+    table_name: str,
+    source_id: str | None,
+    limit: int,
+) -> dict[str, Any]:
+    preview = PREVIEW_TABLES.get(table_name)
+    if not preview:
+        raise HTTPException(status_code=404, detail="preview table not found")
+
+    model = preview["model"]
+    column_names = list(preview["columns"])
+    columns = [getattr(model, name).label(name) for name in column_names]
+    source_scoped = bool(preview["source_scoped"])
+    filter_applied = bool(source_id and source_scoped)
+
+    count_statement = select(func.count()).select_from(model)
+    row_statement = select(*columns)
+    if filter_applied:
+        source_column = getattr(model, "source_id")
+        count_statement = count_statement.where(source_column == source_id)
+        row_statement = row_statement.where(source_column == source_id)
+
+    order_column = getattr(model, preview["order_by"])
+    row_statement = row_statement.order_by(
+        order_column.desc() if preview.get("descending") else order_column.asc()
+    ).limit(limit)
+
+    physical_row_count = session.scalar(count_statement) or 0
+    rows = [
+        {key: _preview_value(value) for key, value in row.items()}
+        for row in session.execute(row_statement).mappings().all()
+    ]
+    table_definition = next(item for item in TABLE_DEFINITIONS if item["name"] == table_name)
+    contract_count = _table_counts(session)[table_name]
+    relationships = [
+        item
+        for item in RELATIONSHIPS
+        if item["from"] == table_name or item["to"] == table_name
+    ]
+    return {
+        "generated_at": _utc_now(),
+        "table": table_name,
+        "role_th": table_definition["role_th"],
+        "meaning_th": table_definition["meaning_th"],
+        "columns": column_names,
+        "rows": rows,
+        "sample_size": len(rows),
+        "physical_row_count": int(physical_row_count),
+        "serving_or_contract_count": int(contract_count),
+        "count_mode": table_definition["count_mode"],
+        "source_filter_supported": source_scoped,
+        "source_filter_requested": source_id,
+        "source_filter_applied": filter_applied,
+        "safe_preview": True,
+        "relationships": relationships,
+    }
+
+
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def index(request: Request):
     return templates.TemplateResponse(
@@ -420,6 +624,16 @@ def schema():
         "tables": tables,
         "relationships": RELATIONSHIPS,
     }
+
+
+@app.get("/api/data-preview/{table_name}")
+def data_preview(table_name: str, source_id: str | None = None, limit: int = 6):
+    safe_limit = min(max(limit, 1), 10)
+    try:
+        with SessionLocal() as session:
+            return _preview_rows(session, table_name, source_id, safe_limit)
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="database unavailable") from exc
 
 
 @app.get("/api/source/{source_id}")
