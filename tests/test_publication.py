@@ -936,7 +936,7 @@ def test_percent_encoded_credential_query_key_is_rejected_and_redacted(
     assert credential_url not in encoded
 
 
-@pytest.mark.parametrize("separator", [";", "%3B"])
+@pytest.mark.parametrize("separator", [";", "%3B", "%253B", "%25253B"])
 def test_semicolon_credential_query_key_is_rejected_and_redacted(
     tmp_path, separator
 ):

@@ -428,7 +428,7 @@ def _query_has_credential_parameter(raw_query: str) -> bool:
     """Detect credential parameters across ordinary and encoded separators."""
 
     candidate = raw_query
-    for _ in range(3):
+    for _ in range(4):
         for segment in re.split(r"[&;]", candidate):
             key = segment.partition("=")[0]
             normalized = key.strip().lower().replace("-", "_")
@@ -436,9 +436,11 @@ def _query_has_credential_parameter(raw_query: str) -> bool:
                 return True
         decoded = unquote(candidate)
         if decoded == candidate:
-            break
+            return False
         candidate = decoded
-    return False
+    # Excessively nested encoding is ambiguous and should never be needed by
+    # reviewed provenance. Fail closed instead of trusting an unscanned layer.
+    return True
 
 
 def _has_credential_query_url(value: str) -> bool:
