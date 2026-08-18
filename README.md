@@ -108,6 +108,7 @@ python -m pytest -q
 
 | เอกสาร | ใช้เมื่อ |
 |---|---|
+| [เพิ่ม source ใหม่ (Quickstart)](docs/add-new-source.md) | มี URL ใหม่และอยากรู้ทุกขั้นจนเปิด PR ได้ |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | workflow branch, PR และ review |
 | [Architecture](docs/architecture.md) | เข้าใจ connector, database, Railway และ publication flow |
 | [Connector development](docs/connector-development.md) | เพิ่มหรือแก้ URL |

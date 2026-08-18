@@ -20,7 +20,13 @@ python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --
 
 รันด้วย `--dry-run` ก่อนได้ และเพิ่ม `--identity-fields` หลายครั้งเมื่อต้นทางมี identity สำรอง Tool ไม่แก้ generated source catalog/ingestion plan และไม่ overwrite ไฟล์เดิม จึงต้องเพิ่ม plan และแก้ parser, grain, identity, geography, `as_of` และ completeness ให้ตรงกับต้นทางจริงก่อนเปิด PR
 
-สำหรับ source ลำดับใหม่ที่ยังไม่อยู่ใน 28 แหล่ง ให้ผู้ที่มี `AIAT_EVIDENCE_ROOT` เพิ่ม `config/source_registry.json` และ `data/source_audit/<ordinal>_<source_id>/source_card.json` ใน canonical evidence workspace จากนั้นรัน `tools/build_source_catalog.py` และ `tools/build_source_coverage.py` เพื่อให้ PR มี generated catalog/coverage diff ที่ตรวจย้อนกลับได้
+สำหรับ source ลำดับใหม่ที่ยังไม่อยู่ใน catalog ให้ลงทะเบียนใน canonical evidence workspace ก่อน — ในโฟลเดอร์ workspace (`AIAT_EVIDENCE_ROOT`; ค่าเริ่มต้นคือโฟลเดอร์แม่ของ repo นี้) รันคำสั่งเดียว:
+
+```powershell
+python scripts/new_source.py <url> --name "ชื่อไทย" --group "ฝ่าย ..."
+```
+
+ได้ registry entry + source card skeleton ครบ จากนั้นกลับมา repo นี้รัน `tools/build_source_catalog.py` และ `tools/build_source_coverage.py` เพื่อให้ PR มี generated catalog/coverage diff ที่ตรวจย้อนกลับได้ ดูภาพรวมทุกขั้นที่ [เพิ่ม source ใหม่ (Quickstart)](add-new-source.md)
 
 อย่าพยายามบังคับให้ทุก URL คืน schema เดียวกัน Generalization อยู่ที่ interface ของ connector และ contract ส่วน parsing ยังคงเป็นของ source นั้น ตัวอย่าง pattern ที่รองรับ:
 

@@ -4,7 +4,7 @@
 
 ## เป้าหมายของ repository
 
-นี่คือ public serving application ที่ catalog ครบ 28 แหล่ง และ connector-based operational ingestion สำหรับ 6 แหล่งปัจจุบัน ที่เหลืออยู่ใน snapshot/metadata/restricted lane ไม่ใช่ raw evidence lake หลัก
+นี่คือ public serving application ที่ catalog ครอบทุกแหล่งใน canonical registry (ชุดตรวจรับแรก 28 แหล่ง และทีมเพิ่มได้ต่อเนื่อง) และ connector-based operational ingestion สำหรับ 6 แหล่งปัจจุบัน ที่เหลืออยู่ใน snapshot/metadata/restricted lane ไม่ใช่ raw evidence lake หลัก
 
 ## คำสั่งตรวจที่ต้องผ่าน
 
