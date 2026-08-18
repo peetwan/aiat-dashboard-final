@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import gzip
 import json
+import os
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, TextIO
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,67 +14,32 @@ from sqlalchemy.orm import Session
 from app.catalog import source_config
 from app.models import DashboardRecord
 from app.privacy import payload_hash, sanitize_payload
-from app.settings import PROJECT_ROOT
 
 
-DEFAULT_PIPELINE_ROOT = Path("/Users/mister1st/Documents/AIAT/pipeline")
-PIPELINE_CACHE_ROOT = PROJECT_ROOT / "data" / "cache" / "pipeline"
-DRIVE_FOLDER_ID = "1ChHg4P_ss6hCnigfIsC1B4y6FlWPuzyr"
+def evidence_root() -> Path:
+    """Evidence workspace root — ต้องตั้ง AIAT_EVIDENCE_ROOT (หรือส่ง --evidence-root) เสมอ
 
+    ห้าม default ไปยังโฟลเดอร์แม่ของ repo: public runtime ต้อง standalone
+    (บังคับโดย tools/validate_public_repo.py) การอ่าน workspace เกิดเฉพาะ
+    ตอนที่ operator สั่ง import เองเท่านั้น
+    """
+    root_text = os.environ.get("AIAT_EVIDENCE_ROOT")
+    if not root_text:
+        raise RuntimeError(
+            "ยังไม่ได้ตั้ง AIAT_EVIDENCE_ROOT — ชี้ไปที่ evidence workspace "
+            "(โฟลเดอร์ที่มี data/raw จาก tools/evidence_pull.py) "
+            "หรือส่ง --evidence-root ให้คำสั่ง import-flood-snapshots"
+        )
+    return Path(root_text).expanduser().resolve()
+
+
+# โฟลเดอร์ snapshot เดิม → source_id; ชื่อโฟลเดอร์ยังเป็น prefix ของ dataset_key
+# เพื่อให้ dashboard_records เดิม (เช่น "sukhothaicare.incidents") คงที่
 FLOOD_SNAPSHOT_SOURCES = {
-    "sukhothaicare": {
-        "source_id": "spu_sukhothai_care",
-        "expected_counts": {
-            "announcements": 131,
-            "api_endpoints": 40,
-            "app_routes": 14,
-            "incident_map": 189,
-            "incident_stats": 9,
-            "incidents": 211,
-            "page_assets": 31,
-            "pages": 1,
-            "roads": 0,
-            "shelters": 0,
-            "site_links": 0,
-        },
-    },
-    "sukhothai-water": {
-        "source_id": "spu_sukhothai_water",
-        "expected_counts": {
-            "api_endpoints": 3,
-            "dams": 20,
-            "page_assets": 37,
-            "pages": 1,
-            "rain_24h": 70,
-            "site_links": 9,
-            "water_levels": 28,
-        },
-    },
-    "NSN": {
-        "source_id": "spu_nsn_flood",
-        "expected_counts": {
-            "data_source_tables": 25,
-            "forecast_chart": 7,
-            "forecast_daily": 7,
-            "pages": 18,
-            "site_links": 737,
-            "station_details": 10,
-            "station_tables": 18,
-            "water_stations": 10,
-        },
-    },
-    "rawangphai": {
-        "source_id": "spu_rawangphai_uru",
-        "expected_counts": {
-            "api_endpoints": 18,
-            "geojson_assets": 4,
-            "pages": 1,
-            "rain_analysis": 750,
-            "shelters": 507,
-            "site_links": 0,
-            "water_levels": 32,
-        },
-    },
+    "sukhothaicare": "spu_sukhothai_care",
+    "sukhothai-water": "spu_sukhothai_water",
+    "NSN": "spu_nsn_flood",
+    "rawangphai": "spu_rawangphai_uru",
 }
 
 IDENTITY_FIELDS = (
@@ -116,37 +83,6 @@ EXTRA_FORBIDDEN_KEYS = {
     "authorization",
 }
 
-def download_pipeline_from_drive(
-    drive_folder_id: str,
-    output_dir: Path,
-    folders: Iterable[str] | None = None,
-) -> Path:
-    """Download pipeline snapshot data from Google Drive if not already cached.
-
-    Uses the local cache at *output_dir*. If all requested folders already
-    exist with a non-empty ``output/`` subdirectory the download is skipped.
-
-    Returns the *output_dir* path where the data can be found.
-    """
-    import gdown  # lazy import – only needed when Drive download is requested
-
-    selected = list(folders or FLOOD_SNAPSHOT_SOURCES)
-
-    # Check if all selected folders already exist with at least one run
-    all_cached = all(
-        (output_dir / f / "output").is_dir()
-        and any((output_dir / f / "output").iterdir())
-        for f in selected
-    )
-    if all_cached:
-        return output_dir
-
-    output_dir.mkdir(parents=True, exist_ok=True)
-    gdown.download_folder(id=drive_folder_id, output=str(output_dir))
-    return output_dir
-
-
-
 
 @dataclass(frozen=True)
 class SnapshotDataset:
@@ -159,50 +95,70 @@ class SnapshotDataset:
     expected_count: int
 
 
-def latest_run_dir(folder_root: Path) -> Path:
-    output_root = folder_root / "output"
+def latest_run_dir(source_root: Path) -> Path:
     candidates = sorted(
         path
-        for path in output_root.iterdir()
+        for path in (source_root.iterdir() if source_root.is_dir() else [])
         if path.is_dir() and (path / "manifest.json").is_file()
     )
     if not candidates:
-        raise FileNotFoundError(f"no snapshot runs found under {output_root}")
+        raise FileNotFoundError(
+            f"no evidence runs found under {source_root} — "
+            "รัน python tools/evidence_pull.py <source_id> ก่อน (ดู docs/evidence-storage.md)"
+        )
     return candidates[-1]
 
 
 def flood_snapshot_datasets(
-    pipeline_root: Path = DEFAULT_PIPELINE_ROOT,
+    root: Path | None = None,
     folders: Iterable[str] | None = None,
 ) -> list[SnapshotDataset]:
+    workspace = root if root is not None else evidence_root()
     selected = list(folders or FLOOD_SNAPSHOT_SOURCES)
     datasets: list[SnapshotDataset] = []
     for folder in selected:
         if folder not in FLOOD_SNAPSHOT_SOURCES:
             raise KeyError(f"unsupported flood snapshot folder: {folder}")
-        config = FLOOD_SNAPSHOT_SOURCES[folder]
-        run_dir = latest_run_dir(pipeline_root / folder)
-        run_id = run_dir.name
-        for dataset_name, expected_count in sorted(config["expected_counts"].items()):
-            path = run_dir / f"{dataset_name}.jsonl"
+        source_id = FLOOD_SNAPSHOT_SOURCES[folder]
+        run_dir = latest_run_dir(workspace / "data" / "raw" / source_id)
+        manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
+        run_id = str(manifest.get("run_id", run_dir.name))
+        manifest_datasets = manifest.get("datasets", [])
+        if not manifest_datasets:
+            raise ValueError(f"manifest ของ {run_dir} ไม่มี datasets")
+        prefix = f"{folder}."
+        for entry in sorted(manifest_datasets, key=lambda item: str(item["dataset_key"])):
+            dataset_key = str(entry["dataset_key"])
+            if not dataset_key.startswith(prefix):
+                raise ValueError(
+                    f"dataset_key {dataset_key!r} ใน {run_dir} ไม่ขึ้นต้นด้วย {prefix!r}"
+                )
+            path = run_dir / str(entry["file"])
             if not path.is_file():
-                raise FileNotFoundError(f"missing expected JSONL file: {path}")
+                raise FileNotFoundError(f"missing dataset file from manifest: {path}")
             datasets.append(
                 SnapshotDataset(
                     folder=folder,
-                    source_id=str(config["source_id"]),
+                    source_id=source_id,
                     run_id=run_id,
-                    dataset_name=dataset_name,
-                    dataset_key=f"{folder}.{dataset_name}",
+                    dataset_name=dataset_key[len(prefix):],
+                    dataset_key=dataset_key,
                     path=path,
-                    expected_count=int(expected_count),
+                    # จำนวนแถวมาจาก manifest ของ run ไม่ hardcode ในซอร์สโค้ด
+                    expected_count=int(entry["row_count"]),
                 )
             )
     return datasets
 
 
+def _open_text(path: Path) -> TextIO:
+    if path.name.endswith(".gz"):
+        return gzip.open(path, "rt", encoding="utf-8")
+    return path.open("r", encoding="utf-8-sig")
+
+
 def iter_jsonl(path: Path) -> Iterable[dict[str, Any]]:
-    with path.open("r", encoding="utf-8-sig") as handle:
+    with _open_text(path) as handle:
         for line_number, line in enumerate(handle, start=1):
             text = line.strip()
             if not text:
@@ -259,20 +215,17 @@ def validate_dataset_counts(datasets: Iterable[SnapshotDataset]) -> dict[str, in
         if count != dataset.expected_count:
             raise RuntimeError(
                 f"{dataset.dataset_key} row count mismatch: actual={count}, "
-                f"expected={dataset.expected_count}"
+                f"manifest={dataset.expected_count}"
             )
     return counts
 
 
 def import_flood_snapshots(
     session: Session,
-    pipeline_root: Path = DEFAULT_PIPELINE_ROOT,
+    root: Path | None = None,
     folders: Iterable[str] | None = None,
-    drive_folder_id: str | None = None,
 ) -> dict[str, Any]:
-    if drive_folder_id is not None:
-        pipeline_root = download_pipeline_from_drive(drive_folder_id, PIPELINE_CACHE_ROOT, folders)
-    datasets = flood_snapshot_datasets(pipeline_root, folders)
+    datasets = flood_snapshot_datasets(root, folders)
     validate_dataset_counts(datasets)
 
     existing = {
@@ -317,7 +270,6 @@ def import_flood_snapshots(
             source_counts[dataset.source_id] += 1
             if inserted % 1000 == 0:
                 session.flush()
-
     session.commit()
     return {
         "status": "complete",
