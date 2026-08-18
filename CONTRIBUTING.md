@@ -112,7 +112,7 @@ python -m app.cli publication validate
 
 Repository นี้ clone แล้วเปิด Dashboard, สร้าง serving database, validate connectors และรัน tests ได้ด้วยตัวเอง แต่ raw evidence/audit history หลักอยู่ใน workspace ภายในและไม่ถูก publish
 
-Contributor ไม่ต้องมี evidence workspace เพื่อแก้ application, UI หรือ connector tests ให้ใช้ fixture ที่ตัดข้อมูลอ่อนไหวแล้ว ส่วนการ rebuild จาก immutable evidence ทำได้โดยสมาชิกทีมคนใดก็ได้ที่ได้รับ evidence package ซึ่งมีสิทธิ์ใช้
+Contributor ไม่ต้องมี evidence workspace เพื่อแก้ application, UI หรือ connector tests ให้ใช้ fixture ที่ตัดข้อมูลอ่อนไหวแล้ว ส่วนการ rebuild จาก immutable evidence ทำได้โดยสมาชิกทีมที่ได้รับ key อ่านของ team evidence bucket: ตั้ง `.env` แล้วรัน `python tools/evidence_pull.py <source_id>` เพื่อดึง run ที่ตรวจ sha256 แล้วลงเครื่อง — ดูขั้นตอนเต็มที่ [docs/evidence-storage.md](docs/evidence-storage.md)
 
 ตั้ง root ที่มี `config/source_registry.json` และ `data/raw`, `data/staged`, `data/qa`, `data/source_audit` ก่อนรัน dated-path builders:
 

@@ -111,6 +111,7 @@ python -m app.cli check
 | [Architecture](docs/architecture.md) | เข้าใจ connector, database, Railway และ publication flow |
 | [Connector development](docs/connector-development.md) | เพิ่มหรือแก้ URL |
 | [Publication workflow](docs/publication-workflow.md) | เลือกเลน release, สร้าง receipt และใช้ auto-merge อย่างปลอดภัย |
+| [Evidence storage](docs/evidence-storage.md) | ดึง/อัปโหลด raw snapshot จาก team bucket (R2) และกติกา immutable runs |
 | [Data governance](docs/data-governance.md) | ตรวจ classification, privacy และ publication gate |
 | [Deployment](docs/deployment.md) | deploy, health check และ rollback |
 | [Database Explorer](docs/database-explorer.md) | รันและใช้ Explorer |

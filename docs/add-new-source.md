@@ -19,6 +19,10 @@ python scripts/new_source.py https://เว็บใหม่.go.th/ --name "ช
 โฟลเดอร์ `data/source_audit/<NN>_<source_id>/` (card skeleton) + regenerate board
 ดูรายละเอียดที่ `docs/add_new_url.md` ของ workspace นั้น
 
+ถ้าเครื่องยังไม่มี workspace: raw snapshot กลางของทีมอยู่บน evidence bucket
+ดึงด้วย `python tools/evidence_pull.py <source_id>` และเมื่อดึงข้อมูลใหม่ของ source ตัวเอง
+ให้ `evidence_push.py` ขึ้น bucket เป็น run ใหม่เสมอ — ดู [evidence-storage.md](evidence-storage.md)
+
 ## ขั้น 2 — Regenerate catalog/coverage (ใน repo นี้)
 
 ```powershell
