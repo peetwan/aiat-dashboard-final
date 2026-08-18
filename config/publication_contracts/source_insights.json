@@ -37,6 +37,20 @@
       "identity_fields": ["$key"],
       "max_identity_churn_ratio": 0,
       "expected_count": 7,
+      "completeness_rules": [
+        {
+          "pointer": "/sources/f2_apptech_mtr/province_activity",
+          "expected_count": 77
+        },
+        {
+          "pointer": "/sources/f3_city_capital_open_data/cities",
+          "expected_count": 18
+        },
+        {
+          "pointer": "/sources/f2_learning_dashboard/provinces",
+          "expected_count": 66
+        }
+      ],
       "as_of_pointer": "/generated_at",
       "schema_policy": "stable"
     },

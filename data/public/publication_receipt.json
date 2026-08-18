@@ -1,6 +1,6 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "5124ef212122efa14e21ff34ec5cd7381c555a0e387bff6687763598cbdd1a4a",
+  "release_digest": "85962ee8ef10168a41bca4445e149f2846f38a48f2150ebd1a565b8b34b80499",
   "artifact_count": 170,
   "artifacts": [
     {
@@ -1661,7 +1661,7 @@
       "format": "json",
       "bytes": 405337,
       "sha256": "0dbb997e7b494b4f913019a8ce9afdca4ebb981ebad0a7de333f10b049c87507",
-      "contract_sha256": "2edec420ac84ec87512669b82ef7c156de5066f4979a5b0697e42be862ef58f5"
+      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
     },
     {
       "path": "data/public/source_insights_manifest.json",
@@ -1671,7 +1671,7 @@
       "format": "json",
       "bytes": 7370,
       "sha256": "5cbbeeaa50a07c048a7f14ccccb5176bb727fd2095144bd864d46108c6d971ef",
-      "contract_sha256": "2edec420ac84ec87512669b82ef7c156de5066f4979a5b0697e42be862ef58f5"
+      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
     },
     {
       "path": "data/public/source_inventory.csv",

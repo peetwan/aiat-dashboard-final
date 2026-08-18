@@ -78,6 +78,17 @@ SECRET_VALUE_RE = re.compile(
     r"\bAKIA[A-Z0-9]{16}\b|"
     r"\bAIza[A-Za-z0-9_-]{35}\b)"
 )
+CREDENTIAL_ASSIGNMENT_RE = re.compile(
+    r"(?i)(?:"
+    r"\bauthorization\s*:\s*(?:basic|bearer)\s+"
+    r"(?!(?:redacted|removed|unknown|none|null|not_available)\b)"
+    r"[A-Za-z0-9._~+/=-]{8,}|"
+    r"\b(?:password|passwd|pwd|client_secret|api_?key|access_token|token)"
+    r"\s*[:=]\s*"
+    r"(?!(?:redacted|removed|unknown|none|null|false|not_available)\b)"
+    r"[^\s,;]{8,}"
+    r")"
+)
 NUMERIC_CELL_RE = re.compile(
     r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$"
 )
@@ -333,6 +344,7 @@ def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
         or ADDRESS_VALUE_RE.search(text) is not None
         or SIGNED_URL_RE.search(text) is not None
         or SECRET_VALUE_RE.search(text) is not None
+        or CREDENTIAL_ASSIGNMENT_RE.search(text) is not None
         or _has_credential_query_url(text)
     )
 
@@ -510,7 +522,7 @@ def _privacy_reasons_for_text(
         reasons.append("signed/credential URL")
     elif _has_credential_query_url(value):
         reasons.append("signed/credential URL")
-    if SECRET_VALUE_RE.search(value):
+    if SECRET_VALUE_RE.search(value) or CREDENTIAL_ASSIGNMENT_RE.search(value):
         reasons.append("credential-like value")
     if PHONE_RE.search(value):
         reasons.append("Thai phone-like value")
@@ -547,6 +559,7 @@ def _privacy_problems(
                     key,
                     restricted_source_ids=restricted_source_ids,
                 )
+                normalized_key = _normalise_key(key)
                 key_reasons = _privacy_reasons_for_text(
                     str(key),
                     restricted_source_ids=restricted_source_ids,
@@ -562,6 +575,14 @@ def _privacy_problems(
                 )
                 for reason in key_reasons:
                     append(child_path, f"{reason} in object key")
+                if normalized_key == "restricted_source_ids_excluded" and (
+                    not isinstance(child, list)
+                    or any(
+                        not isinstance(item, str) or item not in restricted_source_ids
+                        for item in child
+                    )
+                ):
+                    append(child_path, "invalid restricted-source exclusion audit")
                 if _sensitive_key(str(key), child):
                     append(child_path, "private/contact field")
                 walk(child, child_path)
@@ -1234,18 +1255,25 @@ def _completeness_summary(payload: Any, output: dict[str, Any]) -> dict[str, int
     return counts
 
 
-def _record_summary(payload: Any, output: dict[str, Any]) -> dict[str, Any]:
+def _record_summary(
+    payload: Any,
+    output: dict[str, Any],
+    *,
+    restricted_source_ids: set[str],
+) -> dict[str, Any]:
     pointer = output.get("records_pointer")
     if pointer is None:
         return {
             "count": None,
             "identity_hash": None,
             "_identity_digests": None,
+            "_record_schema_digests": None,
             "_record_semantic_digests": None,
             "_record_as_of_values": None,
         }
     records = _records(payload, pointer)
     identities: set[str] = set()
+    record_schemas: dict[str, str] = {}
     record_semantics: dict[str, str] = {}
     record_as_of_values: dict[str, dict[str, str | None]] = {}
     fields = output.get("identity_fields", [])
@@ -1260,6 +1288,10 @@ def _record_summary(payload: Any, output: dict[str, Any]) -> dict[str, Any]:
         if digest in identities:
             raise PublicationError(f"duplicate record identity for fields {fields}")
         identities.add(digest)
+        record_schemas[digest] = _shape_signature(
+            record,
+            restricted_source_ids=restricted_source_ids,
+        )
         record_semantics[digest] = _semantic_signature(record)
         record_as_of_values[digest] = _record_temporal_values(record)
     count = len(records)
@@ -1283,6 +1315,7 @@ def _record_summary(payload: Any, output: dict[str, Any]) -> dict[str, Any]:
         # Kept only in-memory for Jaccard churn calculation. Reports expose the
         # aggregate hash and ratio, never source identity values or per-row hashes.
         "_identity_digests": tuple(sorted(identities)),
+        "_record_schema_digests": record_schemas,
         "_record_semantic_digests": record_semantics,
         "_record_as_of_values": record_as_of_values,
         "as_of": as_of,
@@ -1919,7 +1952,7 @@ def _validate_snapshot(
         if len(entry.data) > output["max_bytes"]:
             problems.append(f"{path}: exceeds contract max_bytes")
             continue
-        if b"\x00" in entry.data[:8192]:
+        if b"\x00" in entry.data:
             problems.append(f"{path}: binary/NUL payload is not allowed")
             continue
         try:
@@ -1940,7 +1973,11 @@ def _validate_snapshot(
                     payload,
                     restricted_source_ids=restricted,
                 )
-                record_summary = _record_summary(payload, output)
+                record_summary = _record_summary(
+                    payload,
+                    output,
+                    restricted_source_ids=restricted,
+                )
             else:
                 rows, schema_hash = _csv_payload(
                     entry.data,
@@ -1955,7 +1992,11 @@ def _validate_snapshot(
                     profile=binding.contract["privacy_profile"],
                 )
                 problems.extend(privacy)
-                record_summary = _record_summary(rows, output)
+                record_summary = _record_summary(
+                    rows,
+                    output,
+                    restricted_source_ids=restricted,
+                )
                 payload = rows
             completeness_counts = _completeness_summary(payload, output)
             semantic_hash = _semantic_signature(payload)
@@ -2034,7 +2075,24 @@ def _semantic_diff(
         if binding is None:
             problems.append(f"{path}: no trusted contract for semantic diff")
             continue
-        if before["schema_sha256"] != after["schema_sha256"]:
+        schema_changed = before["schema_sha256"] != after["schema_sha256"]
+        before_record_schemas = before.get("_record_schema_digests") or {}
+        after_record_schemas = after.get("_record_schema_digests") or {}
+        common_identities = before_record_schemas.keys() & after_record_schemas.keys()
+        if any(
+            before_record_schemas[identity_digest]
+            != after_record_schemas[identity_digest]
+            for identity_digest in common_identities
+        ):
+            schema_changed = True
+        reviewed_record_shapes = set(before_record_schemas.values())
+        added_identities = after_record_schemas.keys() - before_record_schemas.keys()
+        if any(
+            after_record_schemas[identity_digest] not in reviewed_record_shapes
+            for identity_digest in added_identities
+        ):
+            schema_changed = True
+        if schema_changed:
             problems.append(f"{path}: schema changed under stable contract")
         semantic_changed = before["semantic_sha256"] != after["semantic_sha256"]
         before_record_semantics = before.get("_record_semantic_digests") or {}

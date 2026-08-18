@@ -1007,6 +1007,27 @@ def test_unapproved_excluded_list_cannot_bypass_sensitive_field_scan(tmp_path):
     assert private_name not in encoded
 
 
+def test_approved_exclusion_audit_rejects_values_outside_restricted_catalog(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    private_name = "Alice Smith"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "restricted_source_ids_excluded": [private_name],
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "invalid restricted-source exclusion audit" in encoded
+    assert private_name not in encoded
+
+
 def test_duplicate_identity_is_rejected(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path)
     _write_json(
@@ -1049,6 +1070,58 @@ def test_secret_or_signed_url_value_is_rejected(tmp_path, unsafe_value, reason):
     assert unsafe_value not in json.dumps(report, ensure_ascii=False)
 
 
+@pytest.mark.parametrize(
+    "unsafe_value",
+    [
+        "Authorization: Basic dXNlcjpwYXNz",
+        "password=SuperSecret123",
+    ],
+)
+def test_generic_credential_assignment_is_rejected_without_logging_value(
+    tmp_path, unsafe_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, "note": unsafe_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "credential-like value" in encoded
+    assert unsafe_value not in encoded
+
+
+@pytest.mark.parametrize(
+    "safe_value",
+    [
+        "Authorization: Basic redacted",
+        "password=removed",
+        "token=not_available",
+    ],
+)
+def test_explicitly_redacted_credential_audit_values_remain_valid(tmp_path, safe_value):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, "note": safe_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+
+
 def test_csv_contact_value_is_rejected_without_logging_the_value(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path, include_csv=True)
     (root / "data" / "public" / "rows.csv").write_text(
@@ -1063,6 +1136,22 @@ def test_csv_contact_value_is_rejected_without_logging_the_value(tmp_path):
     assert report["status"] == "invalid"
     assert "email-like value" in encoded
     assert "person@example.com" not in encoded
+
+
+def test_csv_nul_after_prefix_is_rejected_without_logging_payload(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path, include_csv=True)
+    private_tail = "x" * 9000 + "\x00"
+    (root / "data" / "public" / "rows.csv").write_bytes(
+        ("id,count\none," + private_tail + "\n").encode("utf-8")
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "binary/NUL payload is not allowed" in encoded
+    assert private_tail not in encoded
 
 
 @pytest.mark.parametrize(
@@ -1475,6 +1564,54 @@ def test_git_semantic_diff_blocks_schema_drift(tmp_path):
     assert any("schema changed under stable contract" in item for item in report["problems"])
 
 
+def test_git_semantic_diff_blocks_partial_record_schema_loss(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    artifact_path = root / "data" / "public" / "artifact.json"
+    _write_json(
+        artifact_path,
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [
+                {"id": "one", "count": 2, "label_th": "รายการหนึ่ง"},
+                {"id": "two", "count": 3, "label_th": "รายการสอง"},
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+    _git(root, "init", "-b", "main")
+    base_sha = _commit_all(root, "base repeated record schema")
+
+    head_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    head_payload["generated_at"] = "2026-08-18T00:00:00+00:00"
+    del head_payload["items"][0]["label_th"]
+    _write_json(artifact_path, head_payload)
+    write_receipt(root, contracts_root, catalog_path)
+    head_sha = _commit_all(root, "remove one record field")
+
+    report, valid = validate_git_revision(
+        root, contracts_root, catalog_path, base_sha, head_sha
+    )
+
+    assert valid is False
+    assert any("schema changed under stable contract" in item for item in report["problems"])
+
+
+def test_source_insights_contract_enforces_complete_nested_snapshots():
+    contract = json.loads(
+        (CONTRACTS_ROOT / "source_insights.json").read_text(encoding="utf-8")
+    )
+    rules = {
+        rule["pointer"]: rule["expected_count"]
+        for rule in contract["outputs"][0]["completeness_rules"]
+    }
+
+    assert rules == {
+        "/sources/f2_apptech_mtr/province_activity": 77,
+        "/sources/f3_city_capital_open_data/cities": 18,
+        "/sources/f2_learning_dashboard/provinces": 66,
+    }
+
+
 @pytest.mark.parametrize(
     ("semantic_key", "changed_value"),
     [
@@ -1629,7 +1766,7 @@ def test_git_semantic_diff_blocks_partial_semantic_field_removal(tmp_path):
 
     assert valid is False
     assert any("semantic meaning changed" in item for item in report["problems"])
-    assert not any("schema changed" in item for item in report["problems"])
+    assert any("schema changed" in item for item in report["problems"])
 
 
 @pytest.mark.parametrize(
