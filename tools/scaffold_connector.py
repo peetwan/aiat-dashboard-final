@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.privacy import FORBIDDEN_KEY_PARTS, sanitize_payload  # noqa: E402
+from app.privacy import forbidden_key_reason, sanitize_payload  # noqa: E402
 
 
 TEMPLATE_ROOT = PROJECT_ROOT / "templates" / "connector"
@@ -56,17 +56,15 @@ def _validate_field_path(path: str, *, label: str) -> str:
         raise ScaffoldError(
             f"{label} must be a field name or dotted field path, got {path!r}"
         )
-    segments = {
-        part.lower().replace("-", "_")
-        for part in path.split(".")
-    }
-    blocked = sorted(
-        forbidden
-        for forbidden in FORBIDDEN_KEY_PARTS
-        if any(forbidden in segment for segment in segments)
-    )
-    if blocked:
-        raise ScaffoldError(f"{label} uses a forbidden personal/contact field: {blocked[0]}")
+    # Same token-bounded rules the runtime applies, so a declarable field is
+    # exactly a field that survives sanitize_payload (address_province is
+    # geography and allowed; owner_email is contact data and rejected).
+    for segment in path.split("."):
+        reason = forbidden_key_reason(segment)
+        if reason is not None:
+            raise ScaffoldError(
+                f"{label} uses a forbidden personal/contact field ({reason}): {segment}"
+            )
     return path
 
 
