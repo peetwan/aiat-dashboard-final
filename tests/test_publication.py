@@ -1805,10 +1805,88 @@ def test_source_insights_contract_enforces_complete_nested_snapshots():
     }
 
 
+def test_nested_total_records_must_match_items_length(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1}],
+            "sections": {
+                "innovation": {
+                    "total_records": 2,
+                    "items": [{"id": "first"}],
+                }
+            },
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "invalid"
+    assert any(
+        "nested total_records does not match items length" in problem
+        for problem in report["problems"]
+    )
+
+
+def test_nested_resource_group_summary_validates_rows_and_total(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1}],
+            "sections": {
+                "housing": {
+                    "total_records": 2,
+                    "items": [],
+                    "resource_groups": [
+                        {
+                            "row_count": 2,
+                            "rows": [{"id": "first"}, {"id": "second"}],
+                        }
+                    ],
+                }
+            },
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+
+
+def test_multi_collection_section_does_not_treat_items_as_the_whole_total(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1}],
+            "sections": {
+                "sra": {
+                    "total_records": 2,
+                    "items": [{"id": "first"}],
+                    "trend": [{"id": "second"}],
+                }
+            },
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+
+
 @pytest.mark.parametrize(
     ("semantic_key", "changed_value"),
     [
         ("unit", "people"),
+        ("currency", "USD"),
         ("denominator", "eligible population"),
         ("grain_th", "one row per district"),
         ("publication_status", "accepted_fact"),
@@ -1823,6 +1901,7 @@ def test_git_semantic_diff_blocks_meaning_reinterpretation_without_logging_value
     base_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
     base_payload["semantics"] = {
         "unit": "records",
+        "currency": "THB",
         "denominator": "all records",
         "grain_th": "one row per record",
         "publication_status": "candidate",

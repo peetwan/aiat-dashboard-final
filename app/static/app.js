@@ -762,7 +762,7 @@ function renderResearchPortfolio(summary) {
     <section class="research-block outcome-coverage-block">
       <h4>ความพร้อมของข้อมูลผลผลิตและผลลัพธ์</h4>
       <div class="funding-grid">
-        <article><span>ระบุหัวหน้า/นักวิจัย</span><strong>${formatNumber(outcomes.research_lead_names || 0)}</strong><small>นวัตกรรม</small></article>
+        <article><span>ระบุสังกัดนักวิจัย</span><strong>${formatNumber(outcomes.research_lead_affiliations || 0)}</strong><small>สังกัด</small></article>
         <article><span>ระบุทรัพย์สินทางปัญญา</span><strong>${formatNumber(outcomes.ip_records || 0)}</strong><small>นวัตกรรม</small></article>
         <article><span>ระบุ ROI / SROI</span><strong>${formatNumber((outcomes.roi_records || 0) + (outcomes.sroi_records || 0))}</strong><small>ระเบียนที่มีค่า</small></article>
       </div>
@@ -874,7 +874,7 @@ function renderProvinceOverview(summary) {
     : "";
 
   const outcomeEntries = [
-    { label: "ระบุหัวหน้า/นักวิจัย", value: Number(outcomes.research_lead_names || 0) },
+    { label: "ระบุสังกัดนักวิจัย", value: Number(outcomes.research_lead_affiliations || 0) },
     { label: "ทรัพย์สินทางปัญญา", value: Number(outcomes.ip_records || 0) },
     { label: "ROI / SROI", value: outcomeRecords },
   ].map((entry) => ({ ...entry, display: formatNumber(entry.value) }));

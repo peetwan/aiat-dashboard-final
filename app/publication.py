@@ -201,6 +201,7 @@ SEMANTIC_VALUE_KEYS = {
     "calculation_method_th",
     "candidate_not_fact",
     "classification",
+    "currency",
     "data_grain",
     "data_grain_th",
     "definition",
@@ -247,6 +248,7 @@ SEMANTIC_SUFFIXES = (
     "_method_th",
     "_status",
     "_unit",
+    "_currency",
 )
 GEOGRAPHY_CONTEXT_KEYS = {"definition", "fields", "grain", "level", "meaning", "scope"}
 TEMPORAL_VALUE_KEYS = {"as_of", "observed_as_of"}
@@ -2044,6 +2046,7 @@ def _validate_snapshot(
                 payload = load_json_bytes(entry.data, path=path)
                 if not isinstance(payload, dict):
                     raise PublicationError(f"{path} must contain a JSON object")
+                _validate_declared_item_counts(payload)
                 privacy = _privacy_problems(
                     payload,
                     artifact_path=path,
@@ -2124,6 +2127,66 @@ def _validate_snapshot(
     except PublicationError as exc:
         problems.append(str(exc))
     return summaries, problems
+
+
+def _validate_declared_item_counts(payload: Any, path: str = "$") -> None:
+    """Require every embedded ``total_records`` claim to match its item list."""
+
+    if isinstance(payload, dict):
+        if "rows" in payload and "row_count" in payload:
+            rows = payload["rows"]
+            row_count = payload["row_count"]
+            if not isinstance(rows, list) or type(row_count) is not int:
+                raise PublicationError(
+                    f"nested rows/row_count must be a list and integer at {path}"
+                )
+            if row_count < 0 or len(rows) != row_count:
+                raise PublicationError(
+                    f"nested row_count does not match rows length at {path}"
+                )
+        if "items" in payload and "total_records" in payload:
+            items = payload["items"]
+            total_records = payload["total_records"]
+            if not isinstance(items, list) or type(total_records) is not int:
+                raise PublicationError(
+                    f"nested items/total_records must be a list and integer at {path}"
+                )
+            resource_groups = payload.get("resource_groups")
+            other_record_lists = [
+                key
+                for key, child in payload.items()
+                if key != "items" and isinstance(child, list)
+            ]
+            summarized_by_resource_groups = (
+                not items
+                and other_record_lists == ["resource_groups"]
+                and isinstance(resource_groups, list)
+                and bool(resource_groups)
+                and all(
+                    isinstance(group, dict) and type(group.get("row_count")) is int
+                    for group in resource_groups
+                )
+                and sum(group["row_count"] for group in resource_groups) == total_records
+            )
+            item_total_is_direct = not other_record_lists
+            if total_records < 0 or (
+                item_total_is_direct
+                and len(items) != total_records
+                and not summarized_by_resource_groups
+            ) or (
+                other_record_lists == ["resource_groups"]
+                and len(items) != total_records
+                and not summarized_by_resource_groups
+            ):
+                raise PublicationError(
+                    f"nested total_records does not match items length at {path}"
+                )
+        for key, child in payload.items():
+            safe_key = str(key) if SAFE_REPORT_KEY_RE.fullmatch(str(key)) else "<map-key>"
+            _validate_declared_item_counts(child, f"{path}.{safe_key}")
+    elif isinstance(payload, list):
+        for child in payload:
+            _validate_declared_item_counts(child, f"{path}[]")
 
 
 def _parse_datetime(value: Any) -> datetime | None:
