@@ -96,12 +96,10 @@ Dataset/ความหมาย/contract/builder/`serving_manifest.json` ให
 
 เริ่มจาก `templates/connector/` และอ่าน [คู่มือเพิ่ม Connector](docs/connector-development.md)
 
-คำสั่งตรวจมาตรฐาน:
+คำสั่งตรวจมาตรฐาน — ชุดเดียวกับ CI ครบในคำสั่งเดียว:
 
 ```powershell
-python -m app.cli validate-pipeline
-python tools/validate_public_repo.py
-python -m pytest -q
+python -m app.cli check
 ```
 
 ## เอกสารที่ทีมต้องใช้
@@ -117,6 +115,7 @@ python -m pytest -q
 | [Deployment](docs/deployment.md) | deploy, health check และ rollback |
 | [Database Explorer](docs/database-explorer.md) | รันและใช้ Explorer |
 | [AGENTS.md](AGENTS.md) | กติกาสำหรับ Codex/AI coding agents |
+| [CLAUDE.md](CLAUDE.md) | ชี้ AI agent (Claude Code ฯลฯ) เข้า repo แล้วให้เริ่มงานถูกที่ในไม่กี่บรรทัด |
 
 ## โครงสร้าง repository
 

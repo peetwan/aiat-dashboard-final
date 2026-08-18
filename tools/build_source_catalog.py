@@ -476,7 +476,24 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
     return " | ".join(note.strip() for note in notes if note and note.strip())
 
 
+def require_evidence_workspace() -> None:
+    """Fail with a next-step message instead of a raw traceback on fresh clones."""
+
+    if REGISTRY_PATH.exists():
+        return
+    raise SystemExit(
+        "ไม่พบ canonical registry: "
+        f"{REGISTRY_PATH}\n"
+        "เครื่องนี้ยังไม่มี evidence workspace (AIAT_Project) หรือยังไม่ได้ชี้ AIAT_EVIDENCE_ROOT\n"
+        "- ถ้ามี workspace อยู่โฟลเดอร์อื่น: ตั้ง environment variable AIAT_EVIDENCE_ROOT "
+        "ให้ชี้โฟลเดอร์นั้นก่อนรันใหม่\n"
+        "- ถ้าไม่มี workspace: ไม่ต้องรันไฟล์นี้ — config/source_catalog.json ที่ commit ไว้"
+        "คือผลลัพธ์ generated ล่าสุดแล้ว ใช้ต่อได้เลย (ดู docs/add-new-source.md ขั้น 1)"
+    )
+
+
 def build_catalog(merged_root: Path) -> dict:
+    require_evidence_workspace()
     registry = read_json(REGISTRY_PATH)
     ingestion_plans = read_json(INGESTION_PLANS_PATH).get("sources", {})
     index_path = merged_root / "00_INDEX.csv"

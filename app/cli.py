@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -150,6 +152,41 @@ def command_validate_pipeline() -> int:
     return 0
 
 
+def check_steps(*, skip_tests: bool) -> list[tuple[str, list[str]]]:
+    """The exact command sequence CI runs, so one local command mirrors the gate."""
+
+    steps = [
+        ("compile", [sys.executable, "-m", "compileall", "-q", "app", "explorer", "tools"]),
+        ("validate-pipeline", [sys.executable, "-m", "app.cli", "validate-pipeline"]),
+        ("publication-validate", [sys.executable, "-m", "app.cli", "publication", "validate"]),
+        ("public-repo-boundary", [sys.executable, "tools/validate_public_repo.py"]),
+    ]
+    if not skip_tests:
+        steps.append(("pytest", [sys.executable, "-m", "pytest", "-q"]))
+    return steps
+
+
+def command_check(args: argparse.Namespace) -> int:
+    results: list[dict[str, object]] = []
+    for name, command in check_steps(skip_tests=args.skip_tests):
+        print(f"== {name}: {' '.join(command[1:])}", flush=True)
+        completed = subprocess.run(command, cwd=PROJECT_ROOT)
+        results.append({"step": name, "exit_code": completed.returncode})
+    failed = [item["step"] for item in results if item["exit_code"] != 0]
+    print(
+        json.dumps(
+            {
+                "status": "passed" if not failed else "failed",
+                "steps": results,
+                "failed_steps": failed,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 1 if failed else 0
+
+
 def command_publication(args: argparse.Namespace) -> int:
     if args.publication_command == "receipt":
         receipt = write_receipt(
@@ -229,6 +266,15 @@ def main() -> int:
         "validate-pipeline",
         help="ตรวจ registry, connector entrypoint, grain, completeness และ privacy contract โดยไม่เรียก network",
     )
+    check = subparsers.add_parser(
+        "check",
+        help="รันชุดตรวจเดียวกับ CI ทั้งหมดในคำสั่งเดียว (compile, validate-pipeline, publication validate, boundary, pytest)",
+    )
+    check.add_argument(
+        "--skip-tests",
+        action="store_true",
+        help="ข้าม pytest เมื่ออยากได้รอบตรวจเร็ว (CI จริงยังรัน pytest เสมอ)",
+    )
     publication = subparsers.add_parser(
         "publication",
         help="ตรวจหรือสร้าง receipt สำหรับ reviewed public artifacts",
@@ -263,6 +309,8 @@ def main() -> int:
         return command_import_flood_snapshots(args)
     if args.command == "validate-pipeline":
         return command_validate_pipeline()
+    if args.command == "check":
+        return command_check(args)
     if args.command == "publication":
         return command_publication(args)
     return command_status()
