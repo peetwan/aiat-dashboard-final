@@ -15,7 +15,7 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl, unquote, urlsplit
 
 
 CONTRACT_VERSION = "1.0"
@@ -160,6 +160,11 @@ CREDENTIAL_QUERY_KEYS = {
     "token",
     "x_amz_credential",
     "x_amz_signature",
+}
+APPROVED_EXCLUDED_AUDIT_KEYS = {
+    "restricted_source_ids_excluded",
+    "restricted_sources_excluded",
+    "restricted_values_excluded",
 }
 
 SEMANTIC_VALUE_KEYS = {
@@ -400,15 +405,28 @@ def _canonical_url(value: Any, *, catalog: bool) -> CanonicalUrl:
     if not path.startswith("/"):
         path = f"/{path}"
     query = tuple(sorted(parse_qsl(parsed.query, keep_blank_values=True)))
-    if not catalog and any(
-        "%" in key
-        or key.strip().lower().replace("-", "_") in CREDENTIAL_QUERY_KEYS
-        for key, _ in query
-    ):
+    if not catalog and _query_has_credential_parameter(parsed.query):
         raise PublicationError(
             "embedded provenance URL contains a credential query parameter"
         )
     return CanonicalUrl(scheme, host, port, path, query)
+
+
+def _query_has_credential_parameter(raw_query: str) -> bool:
+    """Detect credential parameters across ordinary and encoded separators."""
+
+    candidate = raw_query
+    for _ in range(3):
+        for segment in re.split(r"[&;]", candidate):
+            key = segment.partition("=")[0]
+            normalized = key.strip().lower().replace("-", "_")
+            if "%" in key or normalized in CREDENTIAL_QUERY_KEYS:
+                return True
+        decoded = unquote(candidate)
+        if decoded == candidate:
+            break
+        candidate = decoded
+    return False
 
 
 def _has_credential_query_url(value: str) -> bool:
@@ -454,7 +472,7 @@ def _is_negative_audit(key: str, value: Any) -> bool:
             return True
         if key.endswith("_values_redacted") and type(value) is int and value >= 0:
             return True
-        if key.endswith("_excluded") and isinstance(value, list):
+        if key in APPROVED_EXCLUDED_AUDIT_KEYS and isinstance(value, list):
             return True
     return False
 

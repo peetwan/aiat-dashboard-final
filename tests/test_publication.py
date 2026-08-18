@@ -936,6 +936,34 @@ def test_percent_encoded_credential_query_key_is_rejected_and_redacted(
     assert credential_url not in encoded
 
 
+@pytest.mark.parametrize("separator", [";", "%3B"])
+def test_semicolon_credential_query_key_is_rejected_and_redacted(
+    tmp_path, separator
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    credential_url = (
+        f"https://source-a.example/data?view=public{separator}api_key="
+        + "TOPSECRET"
+    )
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_link": credential_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "credential query parameter" in encoded
+    assert "TOPSECRET" not in encoded
+    assert credential_url not in encoded
+
+
 def test_percent_encoded_credential_query_in_map_key_is_rejected_and_redacted(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path)
     credential_url = "https://source-a.example/data?api%5fkey=" + "A" * 24
@@ -956,6 +984,27 @@ def test_percent_encoded_credential_query_in_map_key_is_rejected_and_redacted(tm
     assert "signed/credential URL in object key" in encoded
     assert "<map-key>" in encoded
     assert credential_url not in encoded
+
+
+def test_unapproved_excluded_list_cannot_bypass_sensitive_field_scan(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    private_name = "Alice Smith"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "person_name_excluded": [private_name],
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "private/contact field" in encoded
+    assert private_name not in encoded
 
 
 def test_duplicate_identity_is_rejected(tmp_path):
