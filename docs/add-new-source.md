@@ -57,21 +57,32 @@ print(dropped)   # [(field, เหตุผล), ...]
 
 ## ขั้น 5 — เพิ่ม ingestion plan (เมื่อมี public endpoint ที่ดึงได้)
 
-เติม entry ใต้ `sources` ใน `config/ingestion_plans.json` ตามโครงนี้ แล้วปรับ
-request ให้ตรงกับที่ public frontend เรียกจริง:
+ก่อนเพิ่ม plan ต้องผ่านการอนุมัติ policy ก่อนหนึ่งจังหวะ: source ใหม่เริ่มต้นเป็น
+`metadata_only` เสมอ ทีมต้อง review แล้วเพิ่ม `source_id` เข้า `APPROVED_PUBLIC_MODES`
+ใน `tools/build_source_catalog.py` และ regenerate catalog (ขั้น 2) — ถ้าเพิ่ม plan
+โดย source ยังไม่ถูกอนุมัติเป็น public candidate, `validate-pipeline` จะปฏิเสธว่า
+source นั้นไม่ใช่ production-approved
+
+จากนั้นเติม entry ใต้ `sources` ใน `config/ingestion_plans.json` — โครงด้านล่างตรงกับ
+connector ที่ scaffold สร้างให้ (ขั้น 4) ซึ่งอ่าน `plan["url"]` เป็น GET หน้าแรก:
 
 ```json
 "<source_id>": {
   "driver": "<source_id>",
   "connector": "app.connectors.<source_id>:<ClassName>Connector",
-  "requests": [
-    {"url": "https://.../api/...", "params": {"page": "$PAGE"}}
-  ],
+  "url": "https://.../api/...",
   "explicit_exclusions": ["endpoint ที่ห้ามเรียก เช่น detail รายบุคคล"]
 }
 ```
 
-Source ที่มีแต่ snapshot ยังไม่ต้องมี plan — ระบบรองรับ snapshot fallback อยู่แล้ว
+ต้นทางที่ pagination หลายหน้า หรือหลาย endpoint ใช้โครงอื่นได้ (`requests`, `datasets`,
+`package_show_url` — ดูตัวอย่างจริงใน `config/ingestion_plans.json`) แต่ connector
+ต้องอ่าน field เดียวกับที่ plan ประกาศ ถ้าเปลี่ยนโครง plan ต้องแก้ `fetch()` ให้ตรงกันด้วย
+
+Source ที่มีแต่ snapshot (ยังไม่มี public endpoint ให้ดึง) ให้ **ข้ามทั้งขั้น 4 และขั้น 5**
+ไปก่อน — `validate-pipeline` บังคับให้ connector contract กับ plan ตรงกันแบบ exact
+การ scaffold connector/contract ทิ้งไว้โดยไม่มี plan จะทำให้ validate fail
+(`extra=[<source_id>]`) ค่อยกลับมาทำสองขั้นนี้พร้อมกันเมื่อ source เปิด executable ingestion
 
 ## ขั้น 6 — ตรวจแล้วเปิด PR
 
@@ -87,10 +98,18 @@ python -m pytest -q
 
 ## ถาม-ตอบสั้น
 
-- **ข้อมูลครัวเรือน/การเงินที่เว็บรัฐโชว์เอง ดึงได้ไหม?** ได้ — เก็บเป็น Candidate
-  ตามปกติ กติกา privacy ตัดเฉพาะชื่อบุคคล เบอร์โทร อีเมล ที่อยู่บ้าน และเลขบัตร
+- **ข้อมูลครัวเรือน/การเงินที่เว็บรัฐโชว์เอง ดึงได้ไหม?** ได้เฉพาะค่า **aggregate**
+  เช่น ยอดรวมรายจังหวัด รายอำเภอ หรือรายพื้นที่ — ข้อมูล**ระดับบุคคลหรือรายครัวเรือน**
+  (รายชื่อครัวเรือน รายได้/หนี้สินรายคน สุขภาพ) ต้องเข้า restricted lane (local-only)
+  เสมอ แม้เว็บสาธารณะจะแสดงเองก็ตาม การตัดชื่อ เบอร์โทร หรือที่อยู่ออกไม่ทำให้
+  record ระดับบุคคลปลอดภัยพอจะเป็น Candidate ใน repo นี้
+  (ดูรายการ restricted ที่ตรวจไว้ใน `tests/test_policy.py`)
 - **เพิ่ม source แล้ว test จำนวนแหล่งจะพังไหม?** ไม่ — tests นับจาก catalog จริง
   มีแค่ 2 อย่างที่ต้องทำเพิ่ม: โปรไฟล์ Explorer (ขั้น 3) และ (ถ้าเป็นเลน restricted)
   อัปเดตรายการ restricted ใน tests อย่างตั้งใจ
-- **รหัสโครงการขึ้นต้นด้วย 66/67 โดน redact เป็นเบอร์โทรไหม?** ไม่แล้ว —
-  ตัว redact เบอร์โทรตรวจรูปแบบเบอร์ไทยจริงเท่านั้น
+- **รหัสโครงการขึ้นต้นด้วยปี พ.ศ. เช่น `66079123456` โดน redact เป็นเบอร์โทรไหม?**
+  ไม่ — รูปแบบ `66` ตามด้วยเลขศูนย์ไม่ตรงรูปเบอร์ไทย และรหัสขึ้นต้น `67` ขึ้นไป
+  ไม่โดนอยู่แล้ว แต่ตัวเลขล้วน 10-11 หลักที่ขึ้นต้น `66` แล้วตามด้วยเลข 1-9
+  (เช่น `6681234567`) แยกไม่ออกจากเบอร์รูปแบบสากลและยังถูก redact —
+  ถ้ารหัสของ source เป็นทรงนั้น อย่าใช้เป็น identity field ให้ใช้ field
+  ที่ไม่ใช่ตัวเลขล้วนหรือรหัสที่มีตัวคั่นแทน
