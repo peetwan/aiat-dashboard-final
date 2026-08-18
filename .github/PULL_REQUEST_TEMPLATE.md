@@ -19,9 +19,7 @@
 
 ## ตรวจแล้ว
 
-- [ ] `python -m app.cli validate-pipeline`
-- [ ] `python tools/validate_public_repo.py`
-- [ ] `python -m pytest -q`
+- [ ] `python -m app.cli check` ผ่านครบ (หรือรันแยก: `validate-pipeline`, `publication validate`, `tools/validate_public_repo.py`, `pytest -q`)
 - [ ] Public data: `python -m app.cli publication receipt` แล้ว `python -m app.cli publication validate`
 - [ ] ก่อน merge: Codex review ครอบคลุม head SHA ล่าสุด, ไม่มี P0/P1/conversation ค้าง และ required checks ผ่าน
 

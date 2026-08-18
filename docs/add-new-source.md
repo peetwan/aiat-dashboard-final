@@ -76,12 +76,11 @@ Source ที่มีแต่ snapshot ยังไม่ต้องมี pl
 ## ขั้น 6 — ตรวจแล้วเปิด PR
 
 ```powershell
-python -m app.cli validate-pipeline
-python tools/validate_public_repo.py
-python -m pytest -q
+python -m app.cli check
 ```
 
-เปิด PR ตาม [CONTRIBUTING.md](../CONTRIBUTING.md) — CI จะรันชุดเดียวกันนี้
+คำสั่งเดียวรันครบชุดเดียวกับ CI (compile, validate-pipeline, publication validate,
+public-repo boundary, pytest) เปิด PR ตาม [CONTRIBUTING.md](../CONTRIBUTING.md)
 ผลจาก connector เป็น Candidate เสมอ การเผยแพร่ค่าจริงต้องผ่าน
 [Publication workflow](publication-workflow.md) แยกอีกชั้น
 

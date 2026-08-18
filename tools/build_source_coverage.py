@@ -300,6 +300,16 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
 
 
 def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
+    if not REGISTRY_PATH.exists():
+        raise SystemExit(
+            "ไม่พบ canonical registry: "
+            f"{REGISTRY_PATH}\n"
+            "เครื่องนี้ยังไม่มี evidence workspace (AIAT_Project) หรือยังไม่ได้ชี้ AIAT_EVIDENCE_ROOT\n"
+            "- ถ้ามี workspace อยู่โฟลเดอร์อื่น: ตั้ง environment variable AIAT_EVIDENCE_ROOT "
+            "ให้ชี้โฟลเดอร์นั้นก่อนรันใหม่\n"
+            "- ถ้าไม่มี workspace: ไม่ต้องรันไฟล์นี้ — data/public/source_coverage.json ที่ commit ไว้"
+            "คือผลลัพธ์ generated ล่าสุดแล้ว ใช้ต่อได้เลย (ดู docs/add-new-source.md ขั้น 1)"
+        )
     registry = read_json(REGISTRY_PATH)
     catalog = read_json(catalog_path)
     if len(catalog.get("sources", [])) != registry["total_records"]:
