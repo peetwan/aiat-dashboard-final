@@ -20,14 +20,30 @@ def seed_catalog() -> None:
         sync_catalog(session)
 
 
-def test_source_profiles_cover_the_full_catalog() -> None:
+def catalog_sources() -> list[dict]:
     catalog = json.loads((ROOT / "config/source_catalog.json").read_text(encoding="utf-8"))
-    source_ids = {item["source_id"] for item in catalog["sources"]}
+    return catalog["sources"]
+
+
+def catalog_policy_counts() -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for source in catalog_sources():
+        counts[source["cloud_policy"]] = counts.get(source["cloud_policy"], 0) + 1
+    return counts
+
+
+def test_source_profiles_cover_the_full_catalog() -> None:
+    source_ids = {item["source_id"] for item in catalog_sources()}
     validate_profile_coverage(source_ids)
-    assert len(SOURCE_PROFILES) == 28
+    # Coverage is exact against the generated catalog; the catalog itself may
+    # grow past the original 28 as the team adds sources.
+    assert len(SOURCE_PROFILES) == len(source_ids)
+    assert len(source_ids) >= 28
 
 
 def test_explorer_health_and_overview_read_live_database() -> None:
+    expected_total = len(catalog_sources())
+    policy_counts = catalog_policy_counts()
     seed_catalog()
     with TestClient(app) as client:
         health = client.get("/health")
@@ -35,31 +51,28 @@ def test_explorer_health_and_overview_read_live_database() -> None:
 
     assert health.status_code == 200
     assert health.json()["database"] == "connected"
-    assert health.json()["source_total"] == 28
+    assert health.json()["source_total"] == expected_total
     assert overview.status_code == 200
-    assert overview.json()["source_total"] == 28
-    assert overview.json()["public_candidate_sources"] == 11
-    assert overview.json()["metadata_only_sources"] == 12
-    assert overview.json()["restricted_sources"] == 5
+    assert overview.json()["source_total"] == expected_total
+    assert overview.json()["public_candidate_sources"] == policy_counts["team_approved_public"]
+    assert overview.json()["metadata_only_sources"] == policy_counts["metadata_only"]
+    assert overview.json()["restricted_sources"] == policy_counts["restricted_local_only"]
 
 
-def test_explorer_sources_explain_data_and_grain_for_all_28_sources() -> None:
+def test_explorer_sources_explain_data_and_grain_for_every_source() -> None:
+    expected_total = len(catalog_sources())
     seed_catalog()
     with TestClient(app) as client:
         response = client.get("/api/sources")
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["source_count"] == 28
-    assert len(payload["sources"]) == 28
+    assert payload["source_count"] == expected_total
+    assert len(payload["sources"]) == expected_total
     assert all(item["what_we_use_th"] for item in payload["sources"])
     assert all(item["grain_th"] for item in payload["sources"])
     assert all(item["database_targets"] for item in payload["sources"])
-    assert payload["policy_counts"] == {
-        "metadata_only": 12,
-        "team_approved_public": 11,
-        "restricted_local_only": 5,
-    }
+    assert payload["policy_counts"] == catalog_policy_counts()
 
 
 def test_explorer_schema_lists_current_nine_serving_tables_without_payloads() -> None:

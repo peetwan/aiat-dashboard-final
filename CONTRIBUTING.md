@@ -34,7 +34,9 @@ python -m pytest -q
 
 ## เพิ่ม URL หรือ Connector
 
-อ่าน [คู่มือเพิ่ม Connector](docs/connector-development.md) และเริ่มจาก `templates/connector/`
+เส้นทางครบวงจรตั้งแต่ลงทะเบียน source จนเปิด PR อยู่ที่
+[เพิ่ม source ใหม่ (Quickstart)](docs/add-new-source.md)
+รายละเอียดต่อชั้นอ่าน [คู่มือเพิ่ม Connector](docs/connector-development.md) และเริ่มจาก `templates/connector/`
 
 สร้าง connector + contract + fixture + offline test ตั้งต้นได้ด้วย:
 
