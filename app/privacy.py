@@ -6,38 +6,76 @@ import re
 from typing import Any
 
 
-FORBIDDEN_KEY_PARTS = {
-    "email",
-    "phone",
-    "mobile",
-    "telephone",
-    "address",
-    "citizen",
-    "id_card",
-    "national_id",
-    "password",
-    "secret",
-    "token",
-    "cookie",
-    "authorization",
-    "api_key",
-    "apikey",
-    "ownercontact",
-    "owner_name",
-    "ownername",
-    "contactperson",
-    "contact_name",
-    "firstname",
-    "first_name",
-    "lastname",
-    "last_name",
-    "person_name",
-    "personname",
-    "researcher_name",
-    "researchername",
-}
+# Ingestion-side privacy projection.
+#
+# Policy (mirrors the canonical workspace rule): drop person-level contact and
+# identity fields, redact phone/email values, and keep every public measure the
+# source publishes — household/financial aggregates, geography, and record codes
+# included.  Matching is token-bounded (after camelCase -> snake_case
+# normalisation), not substring-based, so public fields whose names merely
+# contain a sensitive word — `address_province` (geography), `citizen_count`
+# (aggregate), `secretariat_name` (organisation) — are not silently lost.
+_CAMEL_BOUNDARY = re.compile(r"([a-z0-9])([A-Z])")
+
+
+def normalise_key(key: object) -> str:
+    text = _CAMEL_BOUNDARY.sub(r"\1_\2", str(key))
+    return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
+
+
+# Administrative-geography keys prefixed with `address_` are location metadata,
+# not a person's street address.  A map-first dashboard cannot place records
+# without them.
+_ADMIN_GEO_ADDRESS = re.compile(
+    r"^address_(?:province|district|subdistrict|sub_district|tambon|amphoe|amphur|"
+    r"region|zone|zipcode|postcode|postal_code)$"
+)
+
+# Each rule matches whole `_`-bounded tokens.  Concatenated legacy spellings the
+# previous substring set caught explicitly (ownercontact, researchername,
+# firstname, apikey, ...) are covered by the optional `_?` in each alternative.
+# A bare `citizen` key stays: it is usually an aggregate count, and if it is a
+# container its person-level sub-keys are still dropped recursively.
+FORBIDDEN_KEY_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "contact key",
+        re.compile(
+            r"(?:^|_)(?:phone|telephone|tel|mobile|e_?mail|contact|"
+            r"owner_?contact|contact_?person)(?:_|$)"
+        ),
+    ),
+    (
+        "person name key",
+        re.compile(
+            r"(?:^|_)(?:first|last|person|owner|researcher|contact)_?name(?:_|$)"
+        ),
+    ),
+    (
+        "person id key",
+        re.compile(r"(?:^|_)(?:citizen_?id|national_?id|id_?card)(?:_|$)"),
+    ),
+    (
+        "credential key",
+        re.compile(
+            r"(?:^|_)(?:password|secret|token|cookie|authorization|api_?key)(?:_|$)"
+        ),
+    ),
+    (
+        "address key",
+        re.compile(
+            r"(?:^|_)(?:(?:home|residential|mailing|postal)_?address|address)(?:_|$)"
+        ),
+    ),
+)
+
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
-PHONE_RE = re.compile(r"(?<!\d)(?:\+?66|0)\d[\d -]{7,12}\d(?!\d)")
+# Thai phone numbers are 9-10 digits domestically (or 8-9 digits after +66),
+# and mobile/landline prefixes never have 0 as their second digit.  Requiring
+# that shape keeps Buddhist-era-prefixed record codes (e.g. procurement IDs
+# starting with 66/67) and other numeric measures out of the redaction.
+PHONE_RE = re.compile(
+    r"(?<!\d)(?:(?:\+?66)[\s().-]*[1-9]|0[1-9])(?:[\s().-]*\d){7,8}(?!\d)"
+)
 MAX_RECORD_ID_LENGTH = 200
 
 
@@ -45,17 +83,42 @@ class RecordIdentityError(ValueError):
     """A connector record cannot produce a safe, stable database identity."""
 
 
-def sanitize_payload(value: Any) -> Any:
+def forbidden_key_reason(key: object) -> str | None:
+    """Explain why a key is dropped, or return None when it is allowed."""
+
+    normalised = normalise_key(key)
+    if _ADMIN_GEO_ADDRESS.fullmatch(normalised):
+        return None
+    for reason, rule in FORBIDDEN_KEY_RULES:
+        if rule.search(normalised):
+            return reason
+    return None
+
+
+def sanitize_payload(
+    value: Any,
+    *,
+    dropped: list[tuple[str, str]] | None = None,
+) -> Any:
+    """Drop forbidden keys and redact contact values.
+
+    Pass a list as ``dropped`` to record ``(key, reason)`` for every removed
+    field — dropping is otherwise silent, and "why did my field disappear?" is
+    the first question a connector author asks.
+    """
+
     if isinstance(value, dict):
         clean: dict[str, Any] = {}
         for key, item in value.items():
-            normalized = str(key).lower().replace("-", "_")
-            if any(part in normalized for part in FORBIDDEN_KEY_PARTS):
+            reason = forbidden_key_reason(key)
+            if reason is not None:
+                if dropped is not None:
+                    dropped.append((str(key), reason))
                 continue
-            clean[str(key)] = sanitize_payload(item)
+            clean[str(key)] = sanitize_payload(item, dropped=dropped)
         return clean
     if isinstance(value, list):
-        return [sanitize_payload(item) for item in value]
+        return [sanitize_payload(item, dropped=dropped) for item in value]
     if isinstance(value, str):
         value = EMAIL_RE.sub("[redacted-email]", value)
         return PHONE_RE.sub("[redacted-phone]", value)
