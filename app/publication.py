@@ -467,10 +467,12 @@ def _query_has_credential_parameter(
 
     candidate = raw_query
     for _ in range(4):
-        for segment in re.split(r"[&;]", candidate):
+        for segment in re.split(r"[?&;]", candidate):
             key, separator, query_value = segment.partition("=")
             normalized = key.strip().lower().replace("-", "_")
             if "%" in key:
+                return True
+            if _has_exposed_credential_assignment(query_value):
                 return True
             if normalized in CREDENTIAL_QUERY_KEYS:
                 if allow_empty_credentials and separator and query_value == "":
@@ -603,6 +605,12 @@ def _privacy_problems(
         if len(problems) >= 50:
             return
         if isinstance(value, dict):
+            has_direct_private_identity = any(
+                _normalise_key(key) in {"id", "case_id", "record_id"}
+                and child not in (None, "")
+                and not isinstance(child, (bool, dict, list))
+                for key, child in value.items()
+            )
             for key, child in value.items():
                 provisional_path = _report_key_path(
                     path,
@@ -645,6 +653,15 @@ def _privacy_problems(
                         append(child_path, "invalid restricted-value exclusion audit")
                 if _sensitive_key(str(key), child):
                     append(child_path, "private/contact field")
+                if (
+                    has_direct_private_identity
+                    and isinstance(child, str)
+                    and PERSON_LEVEL_SENSITIVE_RE.search(child)
+                ):
+                    append(
+                        child_path,
+                        "person-level financial/health/household value",
+                    )
                 walk(child, child_path)
             return
         if isinstance(value, list):
