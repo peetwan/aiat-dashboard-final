@@ -183,9 +183,10 @@ Production ยังไม่มี daily source scheduler (`automatic_refresh_e
 ## 10. Team workflow
 
 ```text
-ตั้ง URL/dataset/ความหมายใหม่ → team review → merge
+PR ของ peetwan → Codex review latest SHA → no unresolved P0/P1
+                 → pipeline + publication-gate → Peet squash merge
 routine data refresh → receipt → publication-gate → exact-revision review
-                     → codex-publication-reviewed → squash merge
+PR ของ contributor → codex-publication-reviewed → squash auto-merge
                      → Railway auto-deploy/startup sync
 ```
 

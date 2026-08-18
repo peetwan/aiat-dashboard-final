@@ -9,6 +9,8 @@ AUTO_MERGE_WORKFLOW_PATH = (
     PROJECT_ROOT / ".github/workflows/publication-auto-merge.yml"
 )
 CI_WORKFLOW_PATH = PROJECT_ROOT / ".github/workflows/ci.yml"
+CONTRIBUTING_PATH = PROJECT_ROOT / "CONTRIBUTING.md"
+PUBLICATION_WORKFLOW_DOC_PATH = PROJECT_ROOT / "docs/publication-workflow.md"
 CHECKOUT_V4_SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
 SETUP_PYTHON_V6_SHA = "a309ff8b426b58ec0e2a45f0f869d46889d02405"
 GITHUB_SCRIPT_V9_SHA = "373c709c69115d41ff229c7e5df9f8788daa9553"
@@ -156,3 +158,15 @@ def test_privileged_publication_workflow_never_executes_pull_request_content():
     assert ".github/scripts/verify_publication.py" not in workflow
     assert "\n        run:" not in workflow
     assert "secrets." not in workflow
+
+
+def test_owner_manual_merge_requires_latest_codex_review_and_ci_without_peer_approval():
+    contributing = CONTRIBUTING_PATH.read_text(encoding="utf-8")
+    publication_doc = PUBLICATION_WORKFLOW_DOC_PATH.read_text(encoding="utf-8")
+
+    assert "Codex review เป็น findings ไม่ใช่ GitHub approval" in publication_doc
+    assert "branch protection ไม่บังคับ teammate Approve" in publication_doc
+    assert "Codex review ครอบคลุม head SHA ล่าสุด" in contributing
+    assert "ไม่มี P0/P1 หรือ conversation ค้าง" in contributing
+    assert "required checks ผ่าน" in contributing
+    assert "กด squash merge เองได้" in contributing

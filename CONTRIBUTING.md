@@ -28,7 +28,7 @@ python -m pytest -q
 5. เปิด Pull Request และกรอก checklist
 6. รอ CI และ Codex review
 7. แก้ P0/P1, failed checks และ review conversations ให้หมด
-8. PR ปกติใช้ `codex-automerge`; routine public-data refresh ใช้ `codex-publication-reviewed` หลังตรวจ revision ล่าสุด แล้ว GitHub จึงเปิด squash auto-merge
+8. ถ้า `peetwan` เป็น PR author ให้ตรวจว่า Codex review ครอบคลุม head SHA ล่าสุดและกด squash merge เองได้; PR ของ contributor ยังใช้ `codex-automerge` หรือ `codex-publication-reviewed` ตามชนิดงาน
 
 ห้าม push ตรงเข้า `main`
 
@@ -99,7 +99,7 @@ python -m app.cli publication receipt
 python -m app.cli publication validate
 ```
 
-เปิด PR แล้วรอ `pipeline` และ `publication-gate` ผ่าน ผู้ตรวจที่ไม่ใช่ PR author จึงใส่ `codex-publication-reviewed` ให้ revision ล่าสุดเพื่อเปิด squash auto-merge การ push เพิ่มหรือ `main` เดินหน้าจะยกเลิกสิทธิ์เดิม
+เปิด PR แล้วรอ `pipeline` และ `publication-gate` ผ่าน ถ้า `peetwan` เป็นผู้เขียน ให้ตรวจว่า Codex review ครอบคลุม head SHA ล่าสุด ไม่มี P0/P1 หรือ conversation ค้าง แล้วกด squash merge เองได้โดยไม่ต้องรอ approving review จาก teammate ส่วน PR ของ contributor ใช้ผู้ตรวจที่ไม่ใช่ PR author ใส่ `codex-publication-reviewed` เพื่อเปิด squash auto-merge การ push เพิ่มหรือ `main` เดินหน้าจะยกเลิกสิทธิ์เดิม
 
 ห้าม copy `dashboard_records` ไป `public_artifacts` ตรงๆ เพราะ Candidate ยังไม่ใช่ข้อมูลที่อนุมัติให้เผยแพร่ Railway startup เป็นผู้ sync reviewed revision หลัง merge; review automation ไม่เขียน database เอง
 
@@ -140,4 +140,4 @@ Repository ถูกสร้างเริ่มต้นใต้บัญช
 
 Repository มี `AGENTS.md` สำหรับกฎ review เฉพาะระบบนี้ เมื่อเชื่อม repository กับ Codex cloud สามารถเปิด Automatic reviews หรือใช้ `@codex review` ใน PR ได้
 
-Codex review เป็นด่านเสริม CI ไม่ใช่ด่านแทน CI การ merge ต้องมี required checks ผ่านและไม่มีปัญหาสำคัญที่ยังไม่แก้
+Codex review โพสต์ findings บน GitHub แต่ไม่ใช่ GitHub approving review ก่อน merge ผู้กด merge ต้องยืนยันว่า review ครอบคลุม head SHA ล่าสุด, ไม่มี P0/P1 หรือ conversation ค้าง และ required checks ผ่าน Branch protection ไม่บังคับ approving review จาก teammate เพื่อให้ `peetwan` กด squash merge เองได้

@@ -66,7 +66,7 @@ python -m app.cli publication receipt
 python -m app.cli publication validate
 ```
 
-GitHub รัน check `publication-gate` กับ head SHA ของ PR ผู้ตรวจที่ไม่ใช่ PR author จึงใส่ `codex-publication-reviewed`; privileged workflow ตรวจ `pipeline`, `publication-gate`, label actor และ revision ซ้ำก่อนเปิด squash auto-merge
+GitHub รัน check `publication-gate` กับ head SHA ของ PR ถ้า `peetwan` เป็น PR author ให้ตรวจว่า Codex review ครอบคลุม head ล่าสุด ไม่มี P0/P1/conversation ค้าง และ `pipeline` กับ `publication-gate` ผ่าน แล้วกด squash merge เองได้โดยไม่ต้องรอ teammate Approve ส่วน PR ของ contributor ยังใช้ผู้ตรวจที่ไม่ใช่ author ใส่ `codex-publication-reviewed`; privileged workflow ตรวจ checks, label actor และ revision ซ้ำก่อนเปิด squash auto-merge
 
 สองคำสั่งต่อไปเป็น local Docker build smoke test ที่แนะนำเมื่อแก้ Dockerfile/deployment config แต่ยังไม่ใช่ job ใน GitHub Actions ปัจจุบัน:
 

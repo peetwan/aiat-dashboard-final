@@ -21,7 +21,8 @@ Repository ถูกสร้างเริ่มต้นใต้บัญช
 | เหตุการณ์ | ผลที่เกิดขึ้น |
 |---|---|
 | เปิด Pull Request | GitHub Actions รัน `pipeline`; ถ้าแตะ Public data จะรัน `publication-gate` กับ revision นั้นด้วย |
-| Routine public-data refresh ผ่าน review | Codex/team automation ใส่ `codex-publication-reviewed`; GitHub เปิด squash auto-merge ให้ revision ที่ตรวจแล้วเท่านั้น |
+| PR ที่ `peetwan` เป็นผู้เขียนผ่าน Codex review | Peet ตรวจว่า review ครอบคลุม head SHA ล่าสุด, ไม่มี P0/P1 ค้าง และ required checks ผ่าน แล้วกด squash merge เองได้โดยไม่ต้องรอ teammate Approve |
+| Routine public-data refresh ของ contributor ผ่าน review | Codex/team automation ใส่ `codex-publication-reviewed`; GitHub เปิด squash auto-merge ให้ revision ที่ตรวจแล้วเท่านั้น |
 | PR ผ่านและ merge เข้า `main` | Railway auto-deploy Dashboard และ Explorer จาก branch `main` |
 | Dashboard เริ่มทำงาน | สร้าง schema ที่ขาด ขยาย `data/public/serving_manifest.json` และ sync reviewed artifacts เข้า serving database แบบ idempotent |
 | Explorer เริ่มทำงาน | อ่านฐานข้อมูลเดียวกันเท่านั้น ไม่แก้ข้อมูลและไม่ fetch เว็บไซต์ต้นทาง |

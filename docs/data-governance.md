@@ -63,9 +63,11 @@
 
 ## Publication workflow แบบ 2 เลน
 
-- URL/dataset ใหม่ หรือการเปลี่ยน grain, identity, unit, denominator, geography, `as_of`, contract, builder หรือ `serving_manifest.json` ต้องให้ทีม review และ merge ด้วยมือ
+- URL/dataset ใหม่ หรือการเปลี่ยน grain, identity, unit, denominator, geography, `as_of`, contract, builder หรือ `serving_manifest.json` ต้องผ่าน Codex review และ merge ด้วยมือ
 - Routine refresh อัตโนมัติได้เฉพาะ output/provenance ใต้ `data/public/` ที่ contract เดิมประกาศไว้ พร้อม `publication_receipt.json` ที่คำนวณใหม่
 - `publication-gate` ตรวจ schema, identity, count, privacy, source policy, SHA-256 และ semantic diff ก่อน label `codex-publication-reviewed` จะใช้กับ revision นั้นได้
+- ถ้า `peetwan` เป็น PR author ให้ตรวจว่า Codex review ครอบคลุม head SHA ล่าสุด ไม่มี P0/P1/conversation ค้าง และ required checks ผ่าน แล้วกด squash merge เองได้โดยไม่ต้องรอ teammate Approve
+- Codex review เป็น findings ไม่ใช่ GitHub approving review; PR ของ contributor ยังใช้ผู้ตรวจที่ไม่ใช่ author ใส่ auto-merge label ตาม lane
 - `data/spatial/` และ `data/demand/` ยังเป็น manual lane; scheduled automation ตรวจ PR/deployment แต่ไม่เขียน Production database เอง
 - ความหมายที่หลักฐานยังไม่บอกต้องคง `needs_review` ห้ามให้ automation เดาเติม
 

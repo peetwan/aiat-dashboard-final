@@ -4,8 +4,8 @@
 
 | เลน | ใช้เมื่อ | วิธี merge |
 |---|---|---|
-| ตั้งชุดข้อมูล/ความหมายใหม่ | เพิ่ม URL หรือ dataset, เปลี่ยนความหมาย, `config/publication_contracts/`, builder, `data/public/serving_manifest.json`, code/config/workflow หรือไฟล์ใต้ `data/spatial/` และ `data/demand/` | ทีมตรวจเองและ merge แบบ PR ปกติ |
-| อัปเดตข้อมูลรอบเดิม | builder เดิมเขียนทับเฉพาะไฟล์ที่ contract เดิมประกาศไว้ใต้ `data/public/` และสร้าง `data/public/publication_receipt.json` ใหม่ | `publication-gate` + review revision ล่าสุด + label `codex-publication-reviewed` + squash auto-merge |
+| ตั้งชุดข้อมูล/ความหมายใหม่ | เพิ่ม URL หรือ dataset, เปลี่ยนความหมาย, `config/publication_contracts/`, builder, `data/public/serving_manifest.json`, code/config/workflow หรือไฟล์ใต้ `data/spatial/` และ `data/demand/` | Codex review + checks; ถ้า `peetwan` เป็นผู้เขียนให้ Peet กด squash merge เอง |
+| อัปเดตข้อมูลรอบเดิม | builder เดิมเขียนทับเฉพาะไฟล์ที่ contract เดิมประกาศไว้ใต้ `data/public/` และสร้าง `data/public/publication_receipt.json` ใหม่ | PR ของ `peetwan`: owner manual squash merge หลัง Codex review; PR ของ contributor: `codex-publication-reviewed` + squash auto-merge |
 
 ถ้าไม่แน่ใจว่าอยู่เลนไหน ให้ใช้เลนตรวจเองก่อน การเพิ่ม contract ครั้งแรกต้องตรวจเองเสมอ แต่รอบถัดไปของ dataset เดิมใช้เลนอัปเดตอัตโนมัติได้
 
@@ -22,10 +22,10 @@ python -m app.cli publication validate
 
 4. เปิด Pull Request ชนิด `Routine public-data refresh`
 5. รอ checks `pipeline` และ `publication-gate` ผ่าน
-6. Codex automation หรือผู้ตรวจที่มีสิทธิ์ตรวจ revision ล่าสุด แล้วใส่ label `codex-publication-reviewed`
-7. GitHub เปิด squash auto-merge ให้ revision นั้นเท่านั้น
+6. ให้ Codex review revision ล่าสุดและแก้ P0/P1 หรือ conversation ให้หมด
+7. ถ้า `peetwan` เป็นผู้เขียน ให้ Peet ตรวจ head SHA ล่าสุดแล้วกด squash merge เอง; ถ้า contributor เป็นผู้เขียน ผู้ตรวจที่ไม่ใช่ author จึงใส่ `codex-publication-reviewed` เพื่อเปิด auto-merge
 
-ห้ามใส่ label ให้ PR ของตัวเอง ทุกครั้งที่ push commit เพิ่ม, เปลี่ยน base หรือ `main` เดินหน้า ระบบจะยกเลิกสิทธิ์เดิมและต้องตรวจ revision ใหม่
+Codex review เป็น findings ไม่ใช่ GitHub approval และ branch protection ไม่บังคับ teammate Approve ผู้กด merge ต้องตรวจเองว่า review ครอบคลุม head SHA ล่าสุด ไม่มี P0/P1 ค้าง และ checks ผ่าน ห้ามใส่ auto-merge label ให้ PR ของตัวเอง ทุกครั้งที่ push commit เพิ่ม, เปลี่ยน base หรือ `main` เดินหน้า ต้องตรวจ revision ใหม่
 
 เลนอัตโนมัตินี้ใช้กับ branch ของ collaborator ภายใน repository เดียวกันเท่านั้น เพราะต้องผูก GitHub check กับ PR/head/base แบบตรวจสอบได้ PR จาก fork ให้ผ่าน gate เหมือนเดิมแต่ทีมต้อง review และ merge เอง
 
