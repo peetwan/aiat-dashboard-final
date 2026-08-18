@@ -1024,7 +1024,34 @@ def test_approved_exclusion_audit_rejects_values_outside_restricted_catalog(tmp_
     encoded = json.dumps(report, ensure_ascii=False)
 
     assert report["status"] == "invalid"
-    assert "invalid restricted-source exclusion audit" in encoded
+    assert "invalid restricted-value exclusion audit" in encoded
+    assert private_name not in encoded
+
+
+@pytest.mark.parametrize(
+    "audit_key",
+    ["restricted_sources_excluded", "restricted_values_excluded"],
+)
+def test_every_approved_exclusion_audit_rejects_wrong_typed_private_list(
+    tmp_path, audit_key
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    private_name = "Alice Smith"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            audit_key: [private_name],
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "invalid restricted-value exclusion audit" in encoded
     assert private_name not in encoded
 
 
@@ -1099,6 +1126,32 @@ def test_generic_credential_assignment_is_rejected_without_logging_value(
 
 
 @pytest.mark.parametrize(
+    "unsafe_value",
+    [
+        "Authorization: Basic redacted.dXNlcjpwYXNz",
+        "password=redacted.SuperSecret123",
+    ],
+)
+def test_redaction_prefix_cannot_hide_a_credential_assignment(tmp_path, unsafe_value):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, "note": unsafe_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "credential-like value" in encoded
+    assert unsafe_value not in encoded
+
+
+@pytest.mark.parametrize(
     "safe_value",
     [
         "Authorization: Basic redacted",
@@ -1120,6 +1173,53 @@ def test_explicitly_redacted_credential_audit_values_remain_valid(tmp_path, safe
     report = validate_workspace(root, contracts_root, catalog_path)
 
     assert report["status"] == "valid"
+
+
+@pytest.mark.parametrize(
+    "private_value",
+    [
+        "Personal annual income: 420000 baht; household H-123",
+        "medical condition: HIV positive for case H-123",
+        "household debt: 100000 baht for record R-1",
+    ],
+)
+def test_person_level_financial_health_or_household_text_is_rejected_and_redacted(
+    tmp_path, private_value
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, "note": private_value}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "person-level financial/health/household value" in encoded
+    assert private_value not in encoded
+
+
+def test_catalog_url_with_credential_query_is_rejected_without_logging_value(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    secret = "TOP" + "SECRET"
+    catalog["sources"][0]["endpoints"][0]["url"] = (
+        "https://api.source-a.example/v1/records?api_key=" + secret
+    )
+    _write_json(catalog_path, catalog)
+
+    with pytest.raises(PublicationError) as exc_info:
+        validate_workspace(root, contracts_root, catalog_path)
+
+    assert "source catalog URL contains a credential query parameter" in str(
+        exc_info.value
+    )
+    assert secret not in str(exc_info.value)
 
 
 def test_csv_contact_value_is_rejected_without_logging_the_value(tmp_path):

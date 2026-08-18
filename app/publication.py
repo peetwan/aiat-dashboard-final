@@ -80,14 +80,31 @@ SECRET_VALUE_RE = re.compile(
 )
 CREDENTIAL_ASSIGNMENT_RE = re.compile(
     r"(?i)(?:"
-    r"\bauthorization\s*:\s*(?:basic|bearer)\s+"
-    r"(?!(?:redacted|removed|unknown|none|null|not_available)\b)"
-    r"[A-Za-z0-9._~+/=-]{8,}|"
+    r"\bauthorization\s*:\s*(?:basic|bearer)\s+(?P<authorization>[^,;\r\n]+)|"
     r"\b(?:password|passwd|pwd|client_secret|api_?key|access_token|token)"
-    r"\s*[:=]\s*"
-    r"(?!(?:redacted|removed|unknown|none|null|false|not_available)\b)"
-    r"[^\s,;]{8,}"
+    r"\s*[:=]\s*(?P<assignment>[^,;\r\n]+)"
     r")"
+)
+SAFE_REDACTION_VALUES = {
+    "false",
+    "none",
+    "not_available",
+    "null",
+    "redacted",
+    "removed",
+    "unknown",
+}
+PERSON_LEVEL_SENSITIVE_RE = re.compile(
+    r"(?is)(?:\bpersonal\s+(?:annual\s+)?income\b|\bhousehold\s+debt\b|"
+    r"\bmedical\s+condition\b|\bhealth\s+(?:condition|diagnosis)\b|"
+    r"\bhiv\s+positive\b|รายได้(?:ส่วนบุคคล|รายบุคคล)|หนี้ครัวเรือน|"
+    r"โรคประจำตัว|ผลตรวจสุขภาพ|ผู้ติดเชื้อ)"
+)
+PERSON_LEVEL_IDENTIFIER_RE = re.compile(
+    r"(?is)(?:\b(?:household|case|record|patient|respondent)\s*"
+    r"(?:id\s*)?[:#-]?\s*[A-Z]{0,8}-?\d{1,20}\b|"
+    r"(?:รหัส)?(?:ครัวเรือน|ผู้ป่วย|ผู้ตอบ|รายบุคคล)\s*[:#-]?\s*"
+    r"[A-Za-zก-๙]{0,8}-?\d{1,20})"
 )
 NUMERIC_CELL_RE = re.compile(
     r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$"
@@ -335,6 +352,21 @@ def _normalise_key(value: object) -> str:
     return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
 
 
+def _has_exposed_credential_assignment(value: str) -> bool:
+    for match in CREDENTIAL_ASSIGNMENT_RE.finditer(value):
+        assigned = match.group("authorization") or match.group("assignment") or ""
+        if assigned.strip().lower() not in SAFE_REDACTION_VALUES:
+            return True
+    return False
+
+
+def _has_person_level_private_value(value: str) -> bool:
+    return (
+        PERSON_LEVEL_SENSITIVE_RE.search(value) is not None
+        and PERSON_LEVEL_IDENTIFIER_RE.search(value) is not None
+    )
+
+
 def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
     return (
         text in restricted_source_ids
@@ -344,7 +376,8 @@ def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
         or ADDRESS_VALUE_RE.search(text) is not None
         or SIGNED_URL_RE.search(text) is not None
         or SECRET_VALUE_RE.search(text) is not None
-        or CREDENTIAL_ASSIGNMENT_RE.search(text) is not None
+        or _has_exposed_credential_assignment(text)
+        or _has_person_level_private_value(text)
         or _has_credential_query_url(text)
     )
 
@@ -417,22 +450,31 @@ def _canonical_url(value: Any, *, catalog: bool) -> CanonicalUrl:
     if not path.startswith("/"):
         path = f"/{path}"
     query = tuple(sorted(parse_qsl(parsed.query, keep_blank_values=True)))
-    if not catalog and _query_has_credential_parameter(parsed.query):
-        raise PublicationError(
-            "embedded provenance URL contains a credential query parameter"
-        )
+    if _query_has_credential_parameter(
+        parsed.query,
+        allow_empty_credentials=catalog,
+    ):
+        raise PublicationError(f"{label} contains a credential query parameter")
     return CanonicalUrl(scheme, host, port, path, query)
 
 
-def _query_has_credential_parameter(raw_query: str) -> bool:
+def _query_has_credential_parameter(
+    raw_query: str,
+    *,
+    allow_empty_credentials: bool = False,
+) -> bool:
     """Detect credential parameters across ordinary and encoded separators."""
 
     candidate = raw_query
     for _ in range(4):
         for segment in re.split(r"[&;]", candidate):
-            key = segment.partition("=")[0]
+            key, separator, query_value = segment.partition("=")
             normalized = key.strip().lower().replace("-", "_")
-            if "%" in key or normalized in CREDENTIAL_QUERY_KEYS:
+            if "%" in key:
+                return True
+            if normalized in CREDENTIAL_QUERY_KEYS:
+                if allow_empty_credentials and separator and query_value == "":
+                    continue
                 return True
         decoded = unquote(candidate)
         if decoded == candidate:
@@ -486,7 +528,11 @@ def _is_negative_audit(key: str, value: Any) -> bool:
             return True
         if key.endswith("_values_redacted") and type(value) is int and value >= 0:
             return True
-        if key in APPROVED_EXCLUDED_AUDIT_KEYS and isinstance(value, list):
+        if key == "restricted_source_ids_excluded" and isinstance(value, list):
+            return True
+        if key == "restricted_sources_excluded" and type(value) is int and value >= 0:
+            return True
+        if key == "restricted_values_excluded" and type(value) is bool:
             return True
     return False
 
@@ -524,8 +570,10 @@ def _privacy_reasons_for_text(
         reasons.append("signed/credential URL")
     elif _has_credential_query_url(value):
         reasons.append("signed/credential URL")
-    if SECRET_VALUE_RE.search(value) or CREDENTIAL_ASSIGNMENT_RE.search(value):
+    if SECRET_VALUE_RE.search(value) or _has_exposed_credential_assignment(value):
         reasons.append("credential-like value")
+    if _has_person_level_private_value(value):
+        reasons.append("person-level financial/health/household value")
     if PHONE_RE.search(value):
         reasons.append("Thai phone-like value")
     return reasons
@@ -577,14 +625,24 @@ def _privacy_problems(
                 )
                 for reason in key_reasons:
                     append(child_path, f"{reason} in object key")
-                if normalized_key == "restricted_source_ids_excluded" and (
-                    not isinstance(child, list)
-                    or any(
-                        not isinstance(item, str) or item not in restricted_source_ids
-                        for item in child
+                if normalized_key in APPROVED_EXCLUDED_AUDIT_KEYS:
+                    valid_exclusion_audit = (
+                        normalized_key == "restricted_source_ids_excluded"
+                        and isinstance(child, list)
+                        and all(
+                            isinstance(item, str) and item in restricted_source_ids
+                            for item in child
+                        )
+                    ) or (
+                        normalized_key == "restricted_sources_excluded"
+                        and type(child) is int
+                        and child >= 0
+                    ) or (
+                        normalized_key == "restricted_values_excluded"
+                        and type(child) is bool
                     )
-                ):
-                    append(child_path, "invalid restricted-source exclusion audit")
+                    if not valid_exclusion_audit:
+                        append(child_path, "invalid restricted-value exclusion audit")
                 if _sensitive_key(str(key), child):
                     append(child_path, "private/contact field")
                 walk(child, child_path)
