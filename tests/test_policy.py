@@ -5,16 +5,56 @@ import pytest
 from app.catalog import load_catalog, load_ingestion_plans
 
 
+# The originally reviewed acceptance set.  The catalog may grow past it, but
+# none of these identities may disappear or be swapped for a different source
+# while keeping the count — removal requires a conscious edit here.
+BASELINE_SOURCE_IDS = frozenset(
+    {
+        "f1_sradss_ppaos",
+        "f1_pppconnext",
+        "f2_culturalmap_university",
+        "f2_cultural_market_civil",
+        "f2_icommunity",
+        "f2_rmutdb",
+        "f2_apptech_mtr",
+        "f2_apptech_mru",
+        "f2_target_household",
+        "f2_learning_dashboard",
+        "f2_learning_area_based",
+        "f2_wallet_all_realtime",
+        "f2_wallet_cluster_realtime",
+        "f3_city_capital_open_data",
+        "f3_nonthaburi_city_learning",
+        "f3_ruamthiao_lamphun",
+        "f3_ruamrian",
+        "f3_ruamkhai",
+        "f3_ruamjai_thungsong",
+        "f3_healthcare_nonthaburi",
+        "f3_ciap_smartcity",
+        "f3_learning_city_platform",
+        "f3_housing_portal",
+        "f4_research_dashboard_psu",
+        "spu_sukhothai_care",
+        "spu_sukhothai_water",
+        "spu_nsn_flood",
+        "spu_rawangphai_uru",
+    }
+)
+
+
 def test_catalog_covers_all_registry_sources_and_public_candidates():
     catalog = load_catalog()
     sources = catalog["sources"]
     source_ids = [source["source_id"] for source in sources]
     # The catalog may grow as the team registers new sources through the
-    # canonical evidence workspace; it must never shrink below the original
-    # reviewed 28 or contain duplicates.  Growth is not pinned to a literal
-    # count — that would fail CI for every legitimate new source.
+    # canonical evidence workspace; growth is not pinned to a literal count —
+    # that would fail CI for every legitimate new source.  But the original
+    # reviewed identities must all remain present, not merely "at least 28
+    # rows": count alone would let a baseline source vanish unnoticed.
     assert len(source_ids) == len(set(source_ids))
-    assert len(source_ids) >= 28
+    assert len(BASELINE_SOURCE_IDS) == 28
+    missing_baseline = BASELINE_SOURCE_IDS - set(source_ids)
+    assert not missing_baseline, f"baseline sources missing from catalog: {sorted(missing_baseline)}"
     # Whether values may reach production is a policy lane decision, not a
     # frozen tally: the flag must agree with cloud_policy for every source.
     for source in sources:
