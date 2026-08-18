@@ -1162,10 +1162,10 @@ function renderInnovations(section) {
       ).filter(Boolean).join(" | ");
       const target = (item.target_groups || [])[0];
       const leads = (item.research_leads || []).map((lead) =>
-        [lead.name, lead.faculty, lead.institute].filter(Boolean).join(" · "),
+        [lead.faculty, lead.institute].filter(Boolean).join(" · "),
       ).filter(Boolean);
       const ip = item.ip || {};
-      const ipText = [ip.type, ip.asset_name, ip.rights_owner ? `เจ้าของสิทธิ์ ${ip.rights_owner}` : ""].filter(Boolean).join(" · ");
+      const ipText = [ip.type, ip.asset_name].filter(Boolean).join(" · ");
       const roi = item.roi_indicator !== null && item.roi_indicator !== undefined
         ? `${item.roi_indicator}${item.roi_unit ? ` ${item.roi_unit}` : ""}`
         : "ไม่ระบุ";
@@ -1182,7 +1182,7 @@ function renderInnovations(section) {
             <div><dt>ประเภท</dt><dd>${escapeHtml(item.innovation_type || "ไม่ระบุ")}</dd></div>
             <div><dt>เงินทุนที่ต้นทางกรอก</dt><dd>${escapeHtml(funding || "ไม่ระบุ")}</dd></div>
             <div><dt>กลุ่มเป้าหมาย</dt><dd>${escapeHtml(trimText(target || "ไม่ระบุ", 150))}</dd></div>
-            <div><dt>หัวหน้า/ผู้รับผิดชอบ</dt><dd>${escapeHtml(leads.join(" | ") || "ไม่ระบุ")}</dd></div>
+            <div><dt>สังกัดนักวิจัย</dt><dd>${escapeHtml(leads.join(" | ") || "ไม่ระบุ")}</dd></div>
             <div><dt>ทรัพย์สินทางปัญญา</dt><dd>${escapeHtml(ipText || "ไม่ระบุ")}</dd></div>
             <div><dt>ROI / SROI</dt><dd>${escapeHtml(`${roi} / ${sroi}`)}</dd></div>
           </dl>

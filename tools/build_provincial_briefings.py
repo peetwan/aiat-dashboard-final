@@ -1074,7 +1074,6 @@ def build() -> None:
                 "highlights": fields.get("highlights") or [],
                 "research_leads": [
                     {
-                        "name": clean(researcher.get("name")),
                         "faculty": clean(researcher.get("faculty")),
                         "institute": clean(researcher.get("institute")),
                     }
@@ -1083,7 +1082,6 @@ def build() -> None:
                 "co_researcher_count": len(fields.get("co_researchers") or []),
                 "ip": {
                     "type": clean(fields.get("ip_type")),
-                    "rights_owner": clean(fields.get("ip_rights_owner")),
                     "asset_name": clean(fields.get("ip_asset_name")),
                     "application_number": clean(fields.get("ip_application_number")),
                     "patent_number": clean(fields.get("ip_patent_number")),

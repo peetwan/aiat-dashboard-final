@@ -1262,6 +1262,59 @@ def test_person_level_text_uses_sibling_record_identity_context(
     assert private_id not in encoded
 
 
+@pytest.mark.parametrize("identity_field", ["household_key", "subject_key", "person_id"])
+def test_person_level_text_recognizes_sibling_identity_aliases(
+    tmp_path, identity_field
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    private_id = "H-123"
+    private_note = "medical condition: HIV positive"
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [
+                {identity_field: private_id, "count": 1, "note": private_note}
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "person-level financial/health/household value" in encoded
+    assert private_note not in encoded
+    assert private_id not in encoded
+
+
+@pytest.mark.parametrize(
+    "private_context",
+    [
+        {"research_leads": [{"name": "Private Person", "faculty": "Faculty"}]},
+        {"ip": {"type": "patent", "rights_owner": "Private Person"}},
+    ],
+)
+def test_researcher_and_rights_owner_names_are_rejected(tmp_path, private_context):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "items": [{"id": "one", "count": 1, **private_context}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "private/contact field" in encoded
+    assert "Private Person" not in encoded
+
+
 def test_csv_contact_value_is_rejected_without_logging_the_value(tmp_path):
     root, contracts_root, catalog_path = _fixture(tmp_path, include_csv=True)
     (root / "data" / "public" / "rows.csv").write_text(

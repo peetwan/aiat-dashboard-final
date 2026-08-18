@@ -606,7 +606,10 @@ def _privacy_problems(
             return
         if isinstance(value, dict):
             has_direct_private_identity = any(
-                _normalise_key(key) in {"id", "case_id", "record_id"}
+                (
+                    _normalise_key(key) in {"id", "case_id", "record_id"}
+                    or _normalise_key(key).endswith(("_id", "_key"))
+                )
                 and child not in (None, "")
                 and not isinstance(child, (bool, dict, list))
                 for key, child in value.items()
@@ -652,6 +655,10 @@ def _privacy_problems(
                     if not valid_exclusion_audit:
                         append(child_path, "invalid restricted-value exclusion audit")
                 if _sensitive_key(str(key), child):
+                    append(child_path, "private/contact field")
+                if normalized_key == "rights_owner" or (
+                    normalized_key == "name" and ".research_leads" in child_path
+                ):
                     append(child_path, "private/contact field")
                 if (
                     has_direct_private_identity
