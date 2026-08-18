@@ -10,7 +10,7 @@ Repository นี้มี 3 หน้าที่:
 2. เป็น framework สำหรับเพิ่ม connector ราย URL ผ่าน Pull Request
 3. เป็น deployment seed สำหรับ serving database บน Railway
 
-Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน evidence workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace สมาชิกทีมที่ได้รับ evidence package สามารถชี้ builder ไปที่ root นั้นด้วย `AIAT_EVIDENCE_ROOT`
+Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน evidence workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace สมาชิกทีมที่มี key อ่านของ team evidence bucket ดึง run ลงเครื่องด้วย `tools/evidence_pull.py` แล้วชี้ builder ไปที่ root นั้นด้วย `AIAT_EVIDENCE_ROOT` (ดู [evidence-storage.md](evidence-storage.md))
 
 ขอบเขตปัจจุบันคือ catalog 28 แหล่ง แต่มี executable plans/connectors/contracts 6 แหล่ง แหล่งอื่นใช้ reviewed snapshot, metadata-only หรือ restricted lane จนกว่าจะเพิ่ม operational connector พร้อม contract และ tests
 

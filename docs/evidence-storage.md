@@ -87,3 +87,18 @@ python tools/evidence_push.py <source_id> ./out/<run_dir>
 - ห้าม commit key ลง repo (`.env` ถูก gitignore แล้ว)
 - ห้ามแชร์ key ในช่องทางสาธารณะ ส่งตรงถึงตัวเท่านั้น และ roll ได้ทันทีจาก
   Cloudflare dashboard → R2 → Manage API tokens เมื่อสงสัยว่ารั่ว
+
+## ใช้กับ flood snapshot importer
+
+run แรกของ SPU flood sources ทั้ง 4 ตัว (`spu_sukhothai_care`, `spu_sukhothai_water`,
+`spu_nsn_flood`, `spu_rawangphai_uru` — run `20260815T…Z` migrate มาจาก Drive เดิม)
+อยู่บน bucket แล้ว ขั้นตอนเอาเข้า `dashboard_records` บนเครื่องตัวเอง:
+
+```bash
+python tools/evidence_pull.py spu_sukhothai_care     # ทำครบทั้ง 4 source
+python -m app.cli import-flood-snapshots --evidence-root <โฟลเดอร์ workspace>
+```
+
+importer ตรวจจำนวนแถวกับ `row_count` ใน manifest ของ run — ไม่มีตัวเลข hardcode
+ในซอร์สโค้ดอีกแล้ว และคำสั่งนี้ต้องระบุ `--evidence-root` (หรือ export
+`AIAT_EVIDENCE_ROOT`) เสมอ เพราะ web runtime ห้ามแตะ workspace โดย default

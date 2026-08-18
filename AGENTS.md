@@ -25,6 +25,7 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 | เพิ่ม source ใหม่ทั้งเส้นทาง | ตาม [docs/add-new-source.md](docs/add-new-source.md) ทีละขั้น — ขั้น 1 อยู่ใน evidence workspace, ขั้น 2-6 อยู่ใน repo นี้ |
 | สร้าง connector ตั้งต้น | `python tools/scaffold_connector.py <source_id> ...` แล้วแก้ parser/completeness ให้ตรงต้นทางจริง |
 | แก้ connector เดิม | `app/connectors/<source_id>.py` + contract ใน `config/connector_contracts/` + fixture ใน `tests/fixtures/connectors/` |
+| ดึง/อัปโหลด raw snapshot กับ team bucket | `python tools/evidence_pull.py <source_id>` / `python tools/evidence_push.py <source_id> <run_dir>` ตาม [docs/evidence-storage.md](docs/evidence-storage.md) — หนึ่ง run ห้ามเขียนทับ |
 | regenerate catalog/coverage | `python tools/build_source_catalog.py` แล้ว `python tools/build_source_coverage.py` (ต้องมี evidence workspace; ถ้าไม่มีจะได้ข้อความบอกทางไม่ใช่ traceback) |
 | publish ข้อมูลเข้า dashboard | builder ใน `tools/` → `python -m app.cli publication receipt` → ตาม [docs/publication-workflow.md](docs/publication-workflow.md) |
 | แก้ UI | Dashboard: `app/templates/` + `app/static/`; Explorer: `explorer/templates/` + `explorer/static/` |

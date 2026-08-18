@@ -13,6 +13,7 @@ Public serving application ของ AIAT Provincial Evidence Map (FastAPI + SQL
 
 - **AIAT_Project** (evidence workspace, ไม่อยู่บน GitHub): registry, source cards, raw/staged evidence
   ค่าเริ่มต้นของ `AIAT_EVIDENCE_ROOT` คือโฟลเดอร์แม่ของ repo นี้
+  raw snapshot กลางอยู่บน team bucket (Cloudflare R2) — ดึงด้วย `python tools/evidence_pull.py <source_id>`
 - **repo นี้**: connector pipeline, review gates, publication contracts และ Dashboard/Explorer ที่ deploy จริง
 - Clone ที่ไม่มี evidence workspace ทำงานได้ปกติทุกอย่าง ยกเว้นการ regenerate catalog/coverage
 
@@ -35,6 +36,7 @@ public-repo boundary → pytest) เพิ่ม `--skip-tests` เมื่อ�
 | เขียนหรือแก้ connector | [docs/connector-development.md](docs/connector-development.md) + `python tools/scaffold_connector.py` |
 | เอาข้อมูลเข้า public dashboard (publish) | [docs/publication-workflow.md](docs/publication-workflow.md) |
 | เข้าใจโครงระบบก่อนแก้ | [docs/architecture.md](docs/architecture.md) |
+| ดึง/อัปโหลด raw snapshot (evidence bucket) | [docs/evidence-storage.md](docs/evidence-storage.md) |
 | branch/PR/review workflow ของทีม | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | กติกาบังคับทั้งหมด + review rules | [AGENTS.md](AGENTS.md) |
 
