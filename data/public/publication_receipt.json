@@ -1,0 +1,1707 @@
+{
+  "receipt_version": "1.0",
+  "release_digest": "f4d1c072f543d344aa474c4e0f26537acd71115c9bec93d94c3aee905f10ade7",
+  "artifact_count": 170,
+  "artifacts": [
+    {
+      "path": "data/public/cultural_points.geojson",
+      "contract_id": "cultural_map",
+      "dataset_key": "cultural_points",
+      "role": "database",
+      "format": "geojson",
+      "bytes": 3363771,
+      "sha256": "067a931e71c35d9bd40d17eeb837a780203bb959e002dff468e179074d183e84",
+      "contract_sha256": "17e48099814b867236e8f2b603c2d096472a73d8465995ba8b73d4b584f91691"
+    },
+    {
+      "path": "data/public/executive_summaries/10.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 31169,
+      "sha256": "100f789696f0ef29e525f5699cc6819760b5eb3dbb40d22d0ded447977ad708a",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/11.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24763,
+      "sha256": "f8b347dc1a71ac3a275c9f188319e0c9accddbd5a62c89a2ce584a2c4b5d480e",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/12.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22971,
+      "sha256": "69d55ea407644f03e9b16a0db459733ff93016feb48bee7b40919c305b8eccd1",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/13.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29240,
+      "sha256": "f4bacec2fb1bf8011c1739899fb4c61d642fa31c474a16436abc29e67bffeb42",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/14.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25815,
+      "sha256": "caf89aa0689b39eee7bfe31413f6fbfbc5065f487b48197a93ad36c4f94413ed",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/15.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20346,
+      "sha256": "adac88c486b1ccb7abb485daab96dd191cfc6e79e3ebd0dec485216410ccc9a0",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/16.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22836,
+      "sha256": "3761002a1533059c6ad432d80d2eec00734d09fd03de0339b9a5fe9a23a2fac5",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/17.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 18991,
+      "sha256": "c5897bafe8673c0ea352ca648adc4bef784773dafce8e3f2ae002c554f8b5623",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/18.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 28909,
+      "sha256": "168e0f6e2f8ea2aba88b6bfb392eccf38e9e9c3056489bf9ae266fa30215fa36",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/19.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23421,
+      "sha256": "d6bbbcd74c541865e738431a2f49294a743f24a0cb9a7ec58367699b539542f5",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/20.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 26467,
+      "sha256": "be4623c6bdacc7ed95bf9c0b335e7bc1326fa8f1ffa49c5087f6fcb761cfe306",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/21.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21756,
+      "sha256": "7da4e30b4d12415cc90d097e9a73f0c5d5cc555801d9100af0adb20bda991427",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/22.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22761,
+      "sha256": "98b40403583e5050523fd7ebccf2034b3e112c35dc5b8db315e384c8d34f1944",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/23.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 18211,
+      "sha256": "e5348338f1207d0d889bfaa92ed01f9f8f32fd5a84927c05940304a67c0366d4",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/24.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29961,
+      "sha256": "4c2e80d8f20dd0ade473e64b61ae8997c7c6e8c0dad46bdde5a975b7a15992c2",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/25.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22622,
+      "sha256": "1f67ec2bc13a789a76a4801d876c6c023e331f153b7a6ce6e0bd1cf8ffe926d0",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/26.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20242,
+      "sha256": "fe874c5e4eacb28b730ee59586fdec31564a4e77fbafa6953daa6f95fb5fb759",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/27.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21838,
+      "sha256": "363ec3239c65f78f9266bf6fcfc3fb9f4e3d78153914041f29943128fd011254",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/30.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 30193,
+      "sha256": "d3241ae84a23dfb794557198220bea864ab263f3490b0e477f67c82e8f9e699c",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/31.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29103,
+      "sha256": "597a23c29e87c52909baa03a08fe24e2c5829f15206787555b3eeac6d81f2d1f",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/32.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 28539,
+      "sha256": "60ff9fea1785c8c87bc13ef651d96a6cb213449441a9b634294b834abd2e2705",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/33.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 34864,
+      "sha256": "85d77a62c91a8c763a6a09e14eb273bdd3e34d012ff446099bb09ff85632a8b4",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/34.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29401,
+      "sha256": "93b0dd4165b095e16f716d7efd2f1b2575d7cb7fd993ef1f2b8b4ee8f264b39d",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/35.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25373,
+      "sha256": "bf998c649f327109f4c669c8a29dba1f56dc197f625a37fe34adad86489d6739",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/36.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23896,
+      "sha256": "7db340281629dc484140e672ad2e7ebbd500f9611bcedc90a8d3d970c2684ee3",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/37.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24842,
+      "sha256": "0b787939582b2315ae9994bf5c592c3c874bf89cfff8fa186d75321d9211cc3c",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/38.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20928,
+      "sha256": "9685f1d35e22c92a6b808e70e849c5812447679207d5e63a87b860378670e6db",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/39.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20807,
+      "sha256": "96c985a3472dde2f57f733f8aa4ce904007222bc8c27f5b259182d93fd59c106",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/40.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 28547,
+      "sha256": "a611c8a4d0a16759fc6f8c37b0cda558dd3dc83c72fd968a1f002ff96f9d015a",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/41.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24857,
+      "sha256": "a5bbde003911d0276aac5eb99207c93943c0fd358c71f97bca9cb8f558a3b43a",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/42.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 27908,
+      "sha256": "eaf01c45d0761094e97c13703acb0bdb8e6d4c146adceae42b10d9353c5a99fa",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/43.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 19083,
+      "sha256": "a2d106bef83d7271322a9054faa37c6b8e1d22405ab497f193b1cf2423f18011",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/44.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25467,
+      "sha256": "d3ad46ecfb744ee04eb63bbdf5492efabe815524025ba30c8b88858e6d7a91ab",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/45.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 36647,
+      "sha256": "06a66e2b9be19d9ed160a322af430372f84eb3f39b9eb2365526a320aa72a5e3",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/46.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29316,
+      "sha256": "76d13b6beedfbbe9e9a14074301690f6ff35897a5fbcee239821d2d3e4ad0f2a",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/47.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 31601,
+      "sha256": "f67370c657d5114ce0f58fba3b2e56f3a0203504962afeaca5e221b13a52acb2",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/48.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23978,
+      "sha256": "989394d8289d1b965f44f05c06501fcc64914eaa88a2dafac36781ddb9e9a3c5",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/49.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24692,
+      "sha256": "beacc7cfe24b8c073091ecbfb1a7b501ba73b84997077a1aa034c31fc6792920",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/50.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 34009,
+      "sha256": "c40543ab74932dd2d3410afd2083a16360a9c499d5baf95f060d5e0b842f4292",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/51.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 27300,
+      "sha256": "e3131cfe5856c35391d8816a46c21d081d72065c5cfc7ed3f0926a83ac2c6dd8",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/52.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 32192,
+      "sha256": "221cac390accf9830c25499a71d3d0afdca1fae79e52e7b7619897b761dc72e8",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/53.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25256,
+      "sha256": "17f15f4701a62626a207791aafbe0c68e54e422c6615cc800807e3ed53be9fef",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/54.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25972,
+      "sha256": "269b03484bfecc6b3cf981f0758001fb62d445844f88b65004b61e27a53ec7e2",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/55.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23996,
+      "sha256": "94c387cbe8967fe4c96b9bd8c53186a0687921a5100ee53d3215a0f5334d8eb3",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/56.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23855,
+      "sha256": "c37679ec895ad77fcdf67c56cea10243d268addadb2afe41584a9de4d8ef5aaf",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/57.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29620,
+      "sha256": "32308492070e99c653710852437bdea319a90814e8b1b6fc7cfcf14061e8e94e",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/58.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 26326,
+      "sha256": "5063e92593aa65bc376c2f2dff89cf2992c7238354217b35cb8ab845bd2d858c",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/60.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23576,
+      "sha256": "d2806a33835dc30b1d5453bc0f5095f8321ccd46ba36586980491a5436d6b079",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/61.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 18742,
+      "sha256": "7ee9b52c39a179481c9363734130e03e25c3a58ab67686f3fbd37a5fa3dc188f",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/62.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 26135,
+      "sha256": "f917ed9141e29f8c443401de2b0457f81f670d276b615057ea24d22397a52859",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/63.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21851,
+      "sha256": "ba26f37bc8ec319890a561bd32bfdecb63c39c6fa9e0764068bb1130daef2f9c",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/64.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20090,
+      "sha256": "1309474610dc679ab8f9b54a3055ae73b821ea9f69be30946fffe0748b32060e",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/65.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 31985,
+      "sha256": "8aadb1542b7f0c6e1dc97dd92f6df0f5fef3309e443d0a18702af6188ec2d9b9",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/66.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 18731,
+      "sha256": "9882e8e8925373d5688cea381dc4119dd5a7eaaf3609a96ec0e98bbff5acce3e",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/67.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23803,
+      "sha256": "5edceca5b6f0116bc18415cb4d379bca80ef495e6e6f9b17dd97ec9c5c9a3cae",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/70.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22518,
+      "sha256": "8a9e4d0fef059a2f9e15a8c2bd95435a0bb12ac9cfc2a15e31b402d21d9caeca",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/71.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24438,
+      "sha256": "381d7b5243e3401200913efce00498e28307cef49c39d91c51f588d3305deb86",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/72.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 24183,
+      "sha256": "81b59a4dff94207594fd9511259288f3b66ebd3af8613a5238a27f5e099ceb6c",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/73.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 26073,
+      "sha256": "9c4f7ef849fd41ae73b9b5146e5cf3b16baabd659a6697c407a1657b83693c43",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/74.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 22376,
+      "sha256": "6489ec816e797a62e61dd43114e4777cd753b2e5b67a10c5df548683cce4ebff",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/75.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23489,
+      "sha256": "d6d6bc9cffa9747238e61ffb09b27272e6fe38441bbf3d03fac2df30749af4cc",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/76.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25386,
+      "sha256": "55324e617090e821b4e45c72f69abd329e0d79ab8e20cb9ce9be10ae7238be1a",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/77.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21504,
+      "sha256": "791da95ec342ccdd8b701f8adce5758ed719bd42e1f5e039bc79ee5234ea82f8",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/80.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 30515,
+      "sha256": "5e262792256301edc39bde520ba63f8ca621f30103ad34733941a38470c03622",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/81.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21549,
+      "sha256": "73793bd794e90d8933529e00368fe6a92fe5d4643b91537163aa0928ff763d33",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/82.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20247,
+      "sha256": "14cf5edec40fd75cede197a4e4a581df84e45802ee3a9f6d8785d8d41e9dafc4",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/83.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 25654,
+      "sha256": "41936cb09519fdcc2b2641cb30da0f91405420f3fd1a46fe0338bdf89564558b",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/84.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 26352,
+      "sha256": "d2e45c3a26c83da6aabff7998c5d65f72cdde9897ee9fd2bb8555d8fffae2583",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/85.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 20485,
+      "sha256": "6d2888ee6b3b6dd29ede6b3dd1457e43d59665f51bc3d4f98896e5a6fa0c8317",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/86.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23332,
+      "sha256": "d885299939b8606b9dd7f9c00b69adbb93bd9d3a37d2a4709dd010576a53eafa",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/90.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 29444,
+      "sha256": "d1f1a4dbcb147f97e15f967a53149d61c90cf3a467be7b7fb82ea42dcc79b842",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/91.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 21408,
+      "sha256": "b6c4f8bdeaf0219fd3293e1f777ce2288e95b31dce6ddf5b3080d1fd9068060b",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/92.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 23677,
+      "sha256": "30645816af47fbf2cdef56fd10ed889b1a3a7fa2e97c08393543381bd8e109aa",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/93.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 27278,
+      "sha256": "b88fe1f187af0cc3faf4d11ccdca8be8551ebd4577c5d9801107af3ed22d9215",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/94.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 31689,
+      "sha256": "aea110938c9dddf1f8a085160928229f67bd0f3185df6af624f9b8cb2e4d80d8",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/95.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 35103,
+      "sha256": "71ba2441ed77f6658e54a3b3bb840612df24ccbd32fd0e7a0b58ea7bd2f81724",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/96.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 28701,
+      "sha256": "aa3b002c999af53a7c9ab5f54f320e7e978d4d0418b091c55b016210e07e08e5",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/executive_summaries/index.json",
+      "contract_id": "executive_summaries",
+      "dataset_key": "executive_summaries",
+      "role": "support",
+      "format": "json",
+      "bytes": 21985,
+      "sha256": "0d30236fffaf6c8a53f6b21063baf5c783afa04dda40607d1b2326a087852289",
+      "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/housing_demand_summary.json",
+      "contract_id": "housing_summaries",
+      "dataset_key": "housing_public_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 1661083,
+      "sha256": "8f387f6b02445a6de332f55196cd0c11feeeadb8dd2eda6d697e7bbd36caffad",
+      "contract_sha256": "24dcece6e39448448adf8fcac8147060a57226e36f503aefc59a68d9205d4d0b"
+    },
+    {
+      "path": "data/public/housing_spatial_summary.json",
+      "contract_id": "housing_summaries",
+      "dataset_key": "housing_public_summaries",
+      "role": "database",
+      "format": "json",
+      "bytes": 5195,
+      "sha256": "caebe7f6a96fcd104e4f567f78872fb295943679c69a257cf55f245892d92937",
+      "contract_sha256": "24dcece6e39448448adf8fcac8147060a57226e36f503aefc59a68d9205d4d0b"
+    },
+    {
+      "path": "data/public/learning_dashboard.json",
+      "contract_id": "learning_dashboard",
+      "dataset_key": "learning_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 103592,
+      "sha256": "a7eb64aec6c752793717bffc31eaf9536005c3a17e4f09d967e9d0750d555e28",
+      "contract_sha256": "b3128b14684c4b22e9ce5e35a8e089607a119a900e1e46ccaf15b2d6f2eac739"
+    },
+    {
+      "path": "data/public/learning_dashboard_manifest.json",
+      "contract_id": "learning_dashboard",
+      "dataset_key": "learning_dashboard",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 779,
+      "sha256": "89d92b528ed65a1d3a75225db42ac69a6bacd53536c7b2b410d64fbf7b8ec7e0",
+      "contract_sha256": "b3128b14684c4b22e9ce5e35a8e089607a119a900e1e46ccaf15b2d6f2eac739"
+    },
+    {
+      "path": "data/public/manifest.json",
+      "contract_id": "dashboard_core",
+      "dataset_key": "province_dashboard",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 15395,
+      "sha256": "d4aa2340633549419bd9640484218cc0d9d6e807daf4cc3f4bac3703765de6ea",
+      "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
+    },
+    {
+      "path": "data/public/province_evidence.csv",
+      "contract_id": "dashboard_core",
+      "dataset_key": "province_dashboard",
+      "role": "download",
+      "format": "csv",
+      "bytes": 11651,
+      "sha256": "bd676d7d3a8227fecd660b1a5f98d9651d7080180a216f3dcb9ff1bc0ef533c0",
+      "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
+    },
+    {
+      "path": "data/public/provincial_briefings/10.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 1463081,
+      "sha256": "21df69ce15de73741b289347f69ba62033ffd853679b791b8bdb4bdfcb00ccfa",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/11.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 203226,
+      "sha256": "3ca14b8bf5b7b3cedcb50e33eda90484bc708c5e07afe79ee92126200f88d2a3",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/12.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 42674,
+      "sha256": "cbe0b945428e7b1e55c87b6edbf7bee32d4190e2b4f41da3911dcac5c84c9c8f",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/13.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 629448,
+      "sha256": "f81df1ad747d3b079f4c4c345c6163208b95c4221a220115a13b03b22926493b",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/14.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 181214,
+      "sha256": "6ce24c7411280f4503a2ffbfd8f75fe4dff16ce7930ea43b9ec02ad072782c2f",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/15.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 39510,
+      "sha256": "02d7a6f1c2cc5c23ee29e311607c7b090e051cbc5088b1933d0d346ee8417a8c",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/16.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 99143,
+      "sha256": "ed9ade86d122a8d4aa6ef8351bd6d02015cf7fb09ca2522a0109f98a1f5a77eb",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/17.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 36848,
+      "sha256": "fb7cdf5a8b375729703d913cba0aabd69b759704c161d0e877df7074e86f9164",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/18.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 180228,
+      "sha256": "b9647d8c79c38d88de684f33bd37d14f723346df848b7ecd3ecd5902f469b156",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/19.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 47549,
+      "sha256": "2531a4fd7c6170513814ecd3c1b5979b50a72b115c21e8de06cf7782ba8952c4",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/20.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 96710,
+      "sha256": "b601fbfa090c0ea0823594efdbe9727ae7028a3f1257ab4c86c013cf7a5fb562",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/21.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 45423,
+      "sha256": "976dff8ebfdccc2433a9f149570bc20a0fbcf8a413e6f2aff1bb760a4b3c434a",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/22.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 103476,
+      "sha256": "714b741b3cad049832adfb78e7069a2c613b6036dc3404e4ec0507f03e2a0369",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/23.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 32242,
+      "sha256": "e51d4b118a55371ebce73abcc5d098da84022bc87527b6a34d70afdf8870da84",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/24.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 514587,
+      "sha256": "8af03d2c55f9397ba0361b5342259e2b02cf3661766c7a95b0ff01f860207304",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/25.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 111586,
+      "sha256": "a88bf797f2b645fa30fa8aa534c979244b7eae2aeec7535d258e968d19f86a6c",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/26.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 34888,
+      "sha256": "9bc28aad620e7ca8a93f40c2595b55c834a7975392fe97b6a78523d945679316",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/27.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 79927,
+      "sha256": "9f2f9d4a2d0f41c9326e476defe5a0132d6be4ad00ce9a864648f47b10cefa01",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/30.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 260633,
+      "sha256": "2618bc16fc93816ab65de93d7d6d6e07719a2f3927132cc4bf123608bab88089",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/31.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 95995,
+      "sha256": "63b95654aa859ffe511a25a9dcfe68ad4c697d34b967f161786c33d3fa63b187",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/32.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 166252,
+      "sha256": "7a028dcc53ff8e5b903e73549963d700ecd93166e4b0537f99771389cfdc4979",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/33.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 508908,
+      "sha256": "db6017fa8f1dcdd76e0a4c33b3b4f14f31a993b636da4c390ee7b05ad06d3b1a",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/34.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 292595,
+      "sha256": "1def19219cfa463135db901b49c3b8f5301e685d45b0d1480349aef91fcbdbae",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/35.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 53825,
+      "sha256": "b9977a211df63b41dcddc81c43a5eabbf018fd0fa04b1fa4bdad8133ff3c1f1c",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/36.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 95627,
+      "sha256": "4a7a831e2b99beb372e5e0cee97f66048f06b8700bbeadb2d85e283d7c4d41a7",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/37.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 65008,
+      "sha256": "fb75ad7adf866be5ecff8e01a8ed1b3052d5d7c9285039e7d949cd79f08f0062",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/38.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 87591,
+      "sha256": "484bcb74180bab93e208b503a73edf9618a92332886f0984a77c6c98400387c3",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/39.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 38176,
+      "sha256": "a800c2b84ac0b7a6e67ae57deab2eb73e61b937347e14e2b2c2f05f4221c5f24",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/40.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 395603,
+      "sha256": "13a279ae6176b0bba859d41386e8726290033a00098bf60e222565edebb05789",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/41.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 199996,
+      "sha256": "710a8c6edcdc91e1ae0f74019eeea3d0abea90353f502996952ae5ccd5b05e71",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/42.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 112192,
+      "sha256": "a4905508441980570fc0e692644aa647744ba6823e600d56af7c8b15ff33d640",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/43.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 36872,
+      "sha256": "71437a0dc50dfc206094a6657f7221f34f82789b71a54176e73a5acc9b6d2bf4",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/44.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 399927,
+      "sha256": "04f05106cc83a90ba21f0b73ca9482ea48134823bf77580b8b890412e995a6df",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/45.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 406947,
+      "sha256": "75ae2bf46b76e587793dfc6594a7217dffed067d3c89cf2de984826fff7b59cc",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/46.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 66408,
+      "sha256": "0636f771e16a84819a6a268447c3614af629c6e22aaf3bb7568d0a4c33039270",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/47.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 180176,
+      "sha256": "158c678a8efc8c8f90d1fb9eb7378c65a6d660f794f7f7ef68831ff004a98d97",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/48.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 140606,
+      "sha256": "53aad0d56e3c3726dc65169ad0f9d4393ffae8f196b6b431df5802a8017cdec7",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/49.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 61563,
+      "sha256": "410051c44c204940caa6cbe08168f900041b55cb54d2c1f88cebb036a76e6308",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/50.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 827120,
+      "sha256": "3bebfd14d864e2a3dd37bee028d8bcf3ad0ca283e688a1930c0b0dff28b571ba",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/51.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 98581,
+      "sha256": "986ecfb6b657176bffd90963525b525f3c6cd7c0b22718acc29f2998c27fe7d9",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/52.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 208158,
+      "sha256": "07fc61cc0cadbb62dcfc306ffd9c5f90d62609ea78a443985dd901cee282fa9d",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/53.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 129467,
+      "sha256": "755fad4610aad53f74c0022ecfcf8df3a9e08e3442be99b0403396649a7246e6",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/54.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 91864,
+      "sha256": "72d84e6424d4599b26994ec9d0d871cb939c833f2c9636aeb84075c0edb5aefa",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/55.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 96845,
+      "sha256": "aa948168d8afb964d94f502dc210dc5427d4900262d4de4507b4c11e267461d0",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/56.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 305559,
+      "sha256": "08a604ca4d3e829960e603320f2d66dafa677365f1bbd6e0ea5eaa901f5b5b4d",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/57.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 442466,
+      "sha256": "d6d0831d4eb1e42131894606959268802b8893e97ad0c426304d258d53e6e2b1",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/58.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 118355,
+      "sha256": "091fef0406529154eb62a0f73a116be81f8583cc70a6ae57e0e0d78505817f72",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/60.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 120686,
+      "sha256": "4e0e6d2af6547d32f76e1ca874e47556c3fb12c2a27ed7135c471c746f0d0cb3",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/61.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 33618,
+      "sha256": "0819014fe8fa7435ec241e7bdff63d21a8a58fcbdd5e62ceebd8328dbac0a32f",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/62.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 138510,
+      "sha256": "263f4ee797dfcffec42acde52dfa07f53026f7792187b61b9c1dbb08a9203ae5",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/63.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 50892,
+      "sha256": "062706b4a3eb71c4541abf49320b17de8173899ddb283dad3e6d0a1f1e0fb279",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/64.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 109136,
+      "sha256": "299dc0f14c4f5acf2a3a83d5c6cb5ffbc9cd3f0ab02660134f5039b3e1e81eae",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/65.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 253312,
+      "sha256": "b2ff6775dd3640bd3f89409d24e064172d4eabd7b8e7785f19f153aee052c5a1",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/66.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 33064,
+      "sha256": "d0699a64b19af6d28c27546f6511d01e57444060922fff44eca4d965be35233a",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/67.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 86397,
+      "sha256": "c30284e235b638055983ecec00f38641d86d9248680738051ca6df8e6d4ab558",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/70.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 226508,
+      "sha256": "4043ef821558b89383efb62036ff41fb36544f63951a7b6545f06cde745f64a9",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/71.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 175649,
+      "sha256": "ae1a37506443f5ffb31c21503dd8b320ad6b1199122d6cf1a7a852090c99aeea",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/72.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 118715,
+      "sha256": "c169907b56555b81db2ba5c246030f41d411d3bb6d4adb527d3a884de4a4e2a2",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/73.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 101173,
+      "sha256": "150c75620e0d39647a91e88991b69cea2b19960e44ac70536b4cb978257986f3",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/74.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 188349,
+      "sha256": "94f150a64aa3df4ab352ffed8962b3ea306acfb9e774524fe1c5fa5a58eec643",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/75.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 162038,
+      "sha256": "27e60e19c5e04c1d87764953e2324fdbbfcb95024776b7f026f0e5c800bc2975",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/76.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 133247,
+      "sha256": "6802b63eaf9642c8030ce35631ba9fd7fc3f82c6032fa1a58690731843694d5b",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/77.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 51322,
+      "sha256": "80e2d88d1f8e16d8d44e2964dbdce5a82a3e24824134ed54c1e06aa349240c7b",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/80.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 583799,
+      "sha256": "ee6b734d5444a9bcd19a47ca0873f75cef51ebfce2277d1bb0eaf241bbfbdfd3",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/81.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 65899,
+      "sha256": "425c284894d529c8cd6f2421e906672afb26a7fa09b5e3df5477a00e59d29e2a",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/82.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 83247,
+      "sha256": "b8148a79e9e1417fd3168f25a46de8258e5cfb4546a37a47b398e5eb6ebef889",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/83.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 500480,
+      "sha256": "3cb0c9b8701cd05e661511a22ddc83fc170f1271cb321bb9388df096e193bf35",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/84.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 432520,
+      "sha256": "95bed1747d61eb39bcc2094a1cadb8ef6ef274c4e765647b14c452bb0acab752",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/85.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 90686,
+      "sha256": "904ad460d82a388c9b32b686987a0948d51487ce58015fe50cd1f211904759ee",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/86.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 58277,
+      "sha256": "1eaa484bbed5379cbad2786f0c849145cf2b27addf6472988dec499ea3d116b7",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/90.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 864306,
+      "sha256": "77b221910122059026445ee6bbe35d32e401b936afd898ae18a674548ef3ad5a",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/91.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 79519,
+      "sha256": "1fcc7c9776940c4e046b3b516e6cd87036ee443dc8cd1acaad87d5633e8cbc52",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/92.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 115569,
+      "sha256": "76a67fa233af380edd2a61681197483923223039d21ed0c1f77b177567947fcd",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/93.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 95171,
+      "sha256": "b8cb4d250361ba6d4bc0fbe846d1acbd39ee57e674bd585996ba36d73213a4a2",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/94.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 276541,
+      "sha256": "1f8a1329958dbc7bf47c9315a25a10876e64267860a5b32dba05e6714a40801e",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/95.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 521209,
+      "sha256": "bde7c54c8956689506e0b8c9415de552fdd5a8dc2b7a5a341e2d6c3f3212a254",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/96.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "database",
+      "format": "json",
+      "bytes": 94948,
+      "sha256": "41ee4873bead61a6fb467c6344c4174c3ee9a93bb4b25d3b482a6ceb17398e9e",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/provincial_briefings/index.json",
+      "contract_id": "provincial_briefings",
+      "dataset_key": "provincial_briefings",
+      "role": "support",
+      "format": "json",
+      "bytes": 24120,
+      "sha256": "a073ed4953c6bbf626c1a4e8001ff7e2155bd3f7f9ea9d0b58d29d5e1696a0d9",
+      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+    },
+    {
+      "path": "data/public/public_dashboard.json",
+      "contract_id": "dashboard_core",
+      "dataset_key": "province_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 147304,
+      "sha256": "6d91d88dabb7b0a63950282779289ac35ee1d99706c85a63639fe328cc562f78",
+      "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
+    },
+    {
+      "path": "data/public/source_coverage.json",
+      "contract_id": "source_coverage",
+      "dataset_key": "source_coverage",
+      "role": "database",
+      "format": "json",
+      "bytes": 86854,
+      "sha256": "8aa89b7f814193358355133f63c723f0aa23d71cd29da51c8f80da9932aa00cd",
+      "contract_sha256": "73d0a3e21b27b4f0ec7acc10a37678439a3044052045f5c9b5005ff28d98251a"
+    },
+    {
+      "path": "data/public/source_insights.json",
+      "contract_id": "source_insights",
+      "dataset_key": "source_insights",
+      "role": "database",
+      "format": "json",
+      "bytes": 405337,
+      "sha256": "0dbb997e7b494b4f913019a8ce9afdca4ebb981ebad0a7de333f10b049c87507",
+      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
+    },
+    {
+      "path": "data/public/source_insights_manifest.json",
+      "contract_id": "source_insights",
+      "dataset_key": "source_insights",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 7370,
+      "sha256": "5cbbeeaa50a07c048a7f14ccccb5176bb727fd2095144bd864d46108c6d971ef",
+      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
+    },
+    {
+      "path": "data/public/source_inventory.csv",
+      "contract_id": "dashboard_core",
+      "dataset_key": "province_dashboard",
+      "role": "download",
+      "format": "csv",
+      "bytes": 2947,
+      "sha256": "53e6e3eab58e676e52dcb4f96496de1fe17cde0ded786cc73ecd9d9ea0650aaf",
+      "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
+    },
+    {
+      "path": "data/public/thailand_provinces.geojson",
+      "contract_id": "reference_map",
+      "dataset_key": "thailand_provinces",
+      "role": "database",
+      "format": "geojson",
+      "bytes": 1519764,
+      "sha256": "88fa273ccfcbbe7a0c492e7e7281eee8701074cd2a9b2b60f68cd8aab2a8b2e6",
+      "contract_sha256": "7e27bb02656f823404cecb8b73598aac9f46696dc30740ad4a25dc85a4c1eb08"
+    },
+    {
+      "path": "data/public/unmapped_records.json",
+      "contract_id": "unmapped_records",
+      "dataset_key": "unmapped_records",
+      "role": "database",
+      "format": "json",
+      "bytes": 449796,
+      "sha256": "9c2d74a7c6d3b19445bf0a6ae4d34e756c355a5232931caa8fabd8a2247cbf2a",
+      "contract_sha256": "3950761edbe5fc8b2c06733f8b511ad9341d1be02482ca90efce0026b9b567e6"
+    }
+  ]
+}

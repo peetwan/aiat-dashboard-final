@@ -1,0 +1,41 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "provincial_briefings",
+  "dataset_key": "provincial_briefings",
+  "source_scope": "approved_values",
+  "source_ids": ["f1_sradss_ppaos", "f1_pppconnext", "f2_culturalmap_university", "f2_rmutdb", "f2_apptech_mtr", "f2_apptech_mru", "f2_learning_dashboard", "f2_learning_area_based", "f3_city_capital_open_data", "f3_ruamthiao_lamphun", "f3_housing_portal"],
+  "builder": "tools.build_provincial_briefings:main",
+  "grain_th": "หนึ่งไฟล์ต่อหนึ่งจังหวัด",
+  "identity": {"province": ["province.province_code"]},
+  "geography": {"level": "province", "fields": ["province.province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "sections.*.as_of"]},
+  "measures": [
+    {"name": "province briefing measures", "unit": "ระบุในแต่ละ section", "denominator": "ระบุในแต่ละ section หรือไม่ระบุ"}
+  ],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path_glob": "data/public/provincial_briefings/[0-9][0-9].json",
+      "expected_files": 77,
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 3145728,
+      "records_pointer": "$",
+      "identity_fields": ["province.province_code"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 1,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/provincial_briefings/index.json",
+      "format": "json",
+      "role": "support",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

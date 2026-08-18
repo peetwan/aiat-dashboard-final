@@ -46,6 +46,8 @@ def test_province_panel_separates_decisions_projects_people_and_quality() -> Non
     assert "in_scope_no_current_value" in script
     assert "ไม่แทนค่าที่ไม่พบด้วยศูนย์" in template
     assert "linked_province_count" in script
+    assert "research_lead_affiliations" in script
+    assert "research_lead_names" not in script
 
 
 def test_insights_exposes_all_source_coverage_without_controls() -> None:

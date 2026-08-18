@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from sqlalchemy import func, select
 
@@ -12,10 +13,26 @@ from app.ingestion import IngestionPipeline, PolicyViolation
 from app.models import DashboardRecord, HousingDemandRecord, IngestionRun, PublicArtifact, Source
 from app.demand_artifacts import sync_housing_demand
 from app.public_artifacts import database_artifact_counts, sync_public_artifacts
+from app.publication import validate_git_revision, validate_workspace, write_receipt
 from app.spatial_artifacts import database_spatial_counts, sync_spatial_layers
+from app.settings import PROJECT_ROOT
+
+
+PUBLICATION_CONTRACTS_ROOT = PROJECT_ROOT / "config" / "publication_contracts"
+SOURCE_CATALOG_PATH = PROJECT_ROOT / "config" / "source_catalog.json"
 
 
 def initialize() -> None:
+    publication_report = validate_workspace(
+        PROJECT_ROOT,
+        PUBLICATION_CONTRACTS_ROOT,
+        SOURCE_CATALOG_PATH,
+    )
+    if publication_report["status"] != "valid":
+        raise RuntimeError(
+            "publication preflight failed: "
+            + "; ".join(publication_report["problems"][:10])
+        )
     init_db()
     with SessionLocal() as session:
         sync_catalog(session)
@@ -119,6 +136,48 @@ def command_validate_pipeline() -> int:
     return 0
 
 
+def command_publication(args: argparse.Namespace) -> int:
+    if args.publication_command == "receipt":
+        receipt = write_receipt(
+            PROJECT_ROOT,
+            PUBLICATION_CONTRACTS_ROOT,
+            SOURCE_CATALOG_PATH,
+        )
+        print(
+            json.dumps(
+                {
+                    "status": "written",
+                    "path": "data/public/publication_receipt.json",
+                    "artifact_count": receipt["artifact_count"],
+                    "release_digest": receipt["release_digest"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.publication_command == "diff":
+        report, valid = validate_git_revision(
+            PROJECT_ROOT,
+            PUBLICATION_CONTRACTS_ROOT,
+            SOURCE_CATALOG_PATH,
+            args.base_sha,
+            args.head_sha,
+        )
+        encoded = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        if args.report:
+            Path(args.report).write_text(encoded, encoding="utf-8")
+        print(encoded, end="")
+        return 0 if valid else 1
+    report = validate_workspace(
+        PROJECT_ROOT,
+        PUBLICATION_CONTRACTS_ROOT,
+        SOURCE_CATALOG_PATH,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report["status"] == "valid" else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="AIAT dashboard database workflow")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -136,6 +195,29 @@ def main() -> int:
         "validate-pipeline",
         help="ตรวจ registry, connector entrypoint, grain, completeness และ privacy contract โดยไม่เรียก network",
     )
+    publication = subparsers.add_parser(
+        "publication",
+        help="ตรวจหรือสร้าง receipt สำหรับ reviewed public artifacts",
+    )
+    publication_commands = publication.add_subparsers(
+        dest="publication_command",
+        required=True,
+    )
+    publication_commands.add_parser(
+        "validate",
+        help="ตรวจ contracts, ทุกไฟล์ public, privacy, identity, count และ receipt",
+    )
+    publication_commands.add_parser(
+        "receipt",
+        help="สร้าง deterministic receipt หลัง builder เขียน data/public เสร็จ",
+    )
+    publication_diff = publication_commands.add_parser(
+        "diff",
+        help="สร้าง semantic diff แบบไม่พิมพ์ค่าของ record",
+    )
+    publication_diff.add_argument("--base-sha", required=True)
+    publication_diff.add_argument("--head-sha", required=True)
+    publication_diff.add_argument("--report")
     args = parser.parse_args()
     if args.command == "init-db":
         initialize()
@@ -145,6 +227,8 @@ def main() -> int:
         return command_ingest(args)
     if args.command == "validate-pipeline":
         return command_validate_pipeline()
+    if args.command == "publication":
+        return command_publication(args)
     return command_status()
 
 

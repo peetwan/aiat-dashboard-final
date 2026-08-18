@@ -1,0 +1,33 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "cultural_map",
+  "dataset_key": "cultural_points",
+  "source_scope": "approved_values",
+  "source_ids": ["f2_culturalmap_university"],
+  "builder": "tools.build_public_data:main",
+  "grain_th": "หนึ่ง feature ต่อหนึ่งจุดวัฒนธรรมที่ตัดข้อมูลติดต่อแล้ว",
+  "identity": {"point": ["properties.external_id"]},
+  "geography": {"level": "point_and_province", "fields": ["geometry", "properties.province_code"]},
+  "as_of": {"status": "not_provided", "fields": []},
+  "measures": [
+    {"name": "cultural point classification", "unit": "รายการ", "denominator": "จุดที่เผยแพร่ใน projection"}
+  ],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/cultural_points.geojson",
+      "format": "geojson",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 10485760,
+      "records_pointer": "/features",
+      "identity_fields": ["properties.external_id"],
+      "max_identity_churn_ratio": 0.25,
+      "minimum_count": 1,
+      "max_count_drop_ratio": 0.05,
+      "max_count_increase_ratio": 1,
+      "schema_policy": "stable"
+    }
+  ]
+}

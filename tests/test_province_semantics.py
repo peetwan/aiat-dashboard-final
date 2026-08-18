@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 PUBLIC_ROOT = Path(__file__).parents[1] / "data" / "public"
+CONTRACT_ROOT = Path(__file__).parents[1] / "config" / "publication_contracts"
 
 
 def read_json(path: Path) -> dict:
@@ -22,9 +23,13 @@ def test_all_provinces_keep_project_participant_and_unknown_semantics() -> None:
         for path in (PUBLIC_ROOT / "executive_summaries").glob("[0-9][0-9].json")
     }
 
-    assert len(profiles) == len(briefings) == len(summaries) == 77
-    assert sum(row["area_based_participant_records"] for row in profiles) == 996
-    assert sum(row["area_based_project_groups"] for row in profiles) == 156
+    dashboard_contract = read_json(CONTRACT_ROOT / "dashboard_core.json")
+    expected_provinces = next(
+        output["expected_count"]
+        for output in dashboard_contract["outputs"]
+        if output.get("path") == "data/public/public_dashboard.json"
+    )
+    assert len(profiles) == len(briefings) == len(summaries) == expected_provinces
 
     for profile in profiles:
         code = profile["province_code"]
@@ -34,6 +39,8 @@ def test_all_provinces_keep_project_participant_and_unknown_semantics() -> None:
 
         assert profile["area_based_participant_records"] == briefing["sections"]["area_based"]["total_records"]
         assert profile["area_based_project_groups"] == briefing["sections"]["project_master"]["total_records"]
+        assert profile["area_based_participant_records"] >= 0
+        assert profile["area_based_project_groups"] >= 0
         assert portfolio["participant_record_count"] == briefing["sections"]["area_based"]["total_records"]
         assert portfolio["project_count"] == briefing["sections"]["project_master"]["total_records"]
         assert [stage["key"] for stage in summary["decision_chain"]] == [

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 
+import pytest
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
+from app import demand_artifacts
 from app.demand_artifacts import REQUIRED_DEMAND_COUNT, sync_housing_demand
 from app.models import Base, HousingDemandRecord, HousingDemandSnapshot
 
@@ -15,6 +19,45 @@ CONTACT_FIELD_RE = re.compile(
     r"(?i)(?:^|_)(?:first_name|last_name|full_name|person_name|name|"
     r"phone|telephone|tel|mobile|email|e_mail|contact)(?:_|$)"
 )
+
+
+def test_demand_manifest_binds_the_exact_serving_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(demand_artifacts, "REQUIRED_DEMAND_COUNT", 1)
+    root = tmp_path / "data" / "demand"
+    root.mkdir(parents=True)
+    artifact_path = root / "housing_demand.ndjson.gz"
+    artifact_path.write_bytes(b"reviewed-demand-bytes")
+    raw = artifact_path.read_bytes()
+    manifest_path = root / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "validation_status": "pass",
+                "source_id": "f3_housing_portal",
+                "record_count": 1,
+                "privacy_projection": {
+                    "excluded_source_fields": ["id"],
+                    "source_identifier_published": False,
+                    "name_fields_in_source_schema": 0,
+                    "phone_fields_in_source_schema": 0,
+                    "email_fields_in_source_schema": 0,
+                },
+                "artifacts": {
+                    "records": {
+                        "path": "data/demand/housing_demand.ndjson.gz",
+                        "bytes": len(raw),
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert demand_artifacts.load_demand_manifest(manifest_path)["record_count"] == 1
+    artifact_path.write_bytes(raw + b"corrupt")
+    with pytest.raises(RuntimeError, match="byte count mismatch"):
+        demand_artifacts.load_demand_manifest(manifest_path)
 
 
 def test_housing_demand_sync_is_exact_private_and_idempotent(tmp_path):

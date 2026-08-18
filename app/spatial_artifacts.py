@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 from collections import Counter
 from datetime import datetime, timezone
@@ -11,6 +12,7 @@ from sqlalchemy import delete, func, insert, select
 from sqlalchemy.orm import Session
 
 from app.models import SpatialFeature, SpatialLayerSnapshot, utc_now
+from app.privacy import sanitize_payload
 from app.settings import PROJECT_ROOT
 
 
@@ -47,6 +49,17 @@ def load_spatial_manifest(path: Path = SPATIAL_MANIFEST_PATH) -> dict[str, Any]:
         raise RuntimeError("respondent-level demand rows must not enter Railway")
     if privacy.get("contact_fields_included") != 0:
         raise RuntimeError("contact fields must not enter Railway")
+    root = path.parent.resolve()
+    for layer_id in REQUIRED_SPATIAL_COUNTS:
+        layer = payload["layers"][layer_id]
+        artifact_path = (root / Path(str(layer.get("artifact_path"))).name).resolve()
+        if root not in artifact_path.parents or not artifact_path.is_file():
+            raise RuntimeError(f"housing spatial artifact is missing: {layer_id}")
+        raw = artifact_path.read_bytes()
+        if len(raw) != int(layer.get("artifact_bytes", -1)):
+            raise RuntimeError(f"housing spatial artifact byte count mismatch: {layer_id}")
+        if hashlib.sha256(raw).hexdigest() != str(layer.get("artifact_sha256", "")):
+            raise RuntimeError(f"housing spatial artifact hash mismatch: {layer_id}")
     return payload
 
 
@@ -94,6 +107,11 @@ def _mapping(row: dict[str, Any], layer_id: str) -> dict[str, Any]:
     geometry = row.get("geometry")
     if not isinstance(properties, dict) or not isinstance(geometry, dict):
         raise ValueError(f"invalid spatial payload in {layer_id}:{row.get('feature_id')}")
+    if sanitize_payload(properties) != properties:
+        raise ValueError(
+            f"private/contact value leaked into spatial properties: "
+            f"{layer_id}:{row.get('feature_id')}"
+        )
     if row.get("source_id") != SOURCE_ID or row.get("layer_id") != layer_id:
         raise ValueError(f"spatial source/layer mismatch: {layer_id}:{row.get('feature_id')}")
     return {

@@ -1012,11 +1012,15 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any]:
         ),
         default=None,
     )
-    research_leads = {
-        name
+    research_lead_affiliations = {
+        (
+            clean_text(researcher.get("faculty")),
+            clean_text(researcher.get("institute")),
+        )
         for item in innovations
         for researcher in item.get("research_leads") or []
-        if (name := clean_text(researcher.get("name"))) is not None
+        if clean_text(researcher.get("faculty")) is not None
+        or clean_text(researcher.get("institute")) is not None
     }
     roi_known = sum(
         1
@@ -1081,7 +1085,7 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any]:
         },
         "trl_distribution": trl_distribution,
         "outcome_coverage": {
-            "research_lead_names": len(research_leads),
+            "research_lead_affiliations": len(research_lead_affiliations),
             "ip_records": ip_known,
             "roi_records": roi_known,
             "sroi_records": sroi_known,
@@ -1090,7 +1094,7 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any]:
         "latest_update": latest_update,
         "data_gaps_th": [
             "ยังไม่มี Project ID ทางการสำหรับเชื่อม Area-Based กับระบบโครงการหลัก",
-            "ชื่อหัวหน้าโครงการของ Area-Based ยังไม่มี; ชื่อนักวิจัยที่มีอยู่เป็นของทะเบียนนวัตกรรม",
+            "ชื่อบุคคลถูกตัดออกจาก public projection; คงไว้เฉพาะสังกัดนักวิจัยจากทะเบียนนวัตกรรม",
             "สถานะดำเนินงานรายโครงการ (อยู่ระหว่าง/เสร็จสิ้น) ต้นทางไม่ระบุ",
             "งบประมาณจัดสรรและสถานะเบิกจ่ายรายกรอบ/รายฝ่าย ต้องใช้ระบบภายในของ บพท.",
         ],

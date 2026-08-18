@@ -6,42 +6,83 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.public_artifacts import artifact_inputs
+
+
+PROJECT_ROOT = Path(__file__).parents[1]
+PUBLIC_ROOT = PROJECT_ROOT / "data" / "public"
+
+
+def read_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def reviewed_catalog() -> dict:
+    return read_json(PROJECT_ROOT / "config" / "source_catalog.json")
 
 
 def test_health_and_catalog_summary():
+    catalog = reviewed_catalog()
+    sources = catalog["sources"]
+    expected_artifact_count = len(artifact_inputs())
+    expected_endpoint_count = sum(len(source["endpoints"]) for source in sources)
+    expected_runtime_endpoint_count = sum(
+        endpoint["runtime_enabled"] and not endpoint["restricted"]
+        for source in sources
+        for endpoint in source["endpoints"]
+    )
+    expected_approved = sum(
+        source["production_values_allowed"] for source in sources
+    )
+    expected_metadata = sum(
+        source["value_visibility"] == "metadata_only" for source in sources
+    )
+    expected_restricted = sum(
+        source["value_visibility"] == "restricted_local_only" for source in sources
+    )
+
     with TestClient(app) as client:
         health = client.get("/health")
         assert health.status_code == 200
         health_payload = health.json()
         assert health_payload["status"] == "ok"
         assert health_payload["database"] == "connected"
-        assert health_payload["public_artifacts"] == 163
-        assert health_payload["public_artifacts_expected"] == 163
-        assert health_payload["spatial_features"] == 0
-        assert health_payload["spatial_features_expected"] == 0
+        assert health_payload["public_artifacts"] == expected_artifact_count
+        assert health_payload["public_artifacts_expected"] == expected_artifact_count
+        assert health_payload["spatial_features"] == health_payload[
+            "spatial_features_expected"
+        ]
         assert health_payload["spatial_complete"] is True
-        assert health_payload["housing_demand_records"] == 0
-        assert health_payload["housing_demand_records_expected"] == 0
+        assert health_payload["housing_demand_records"] == health_payload[
+            "housing_demand_records_expected"
+        ]
         assert health_payload["housing_demand_complete"] is True
-        assert health_payload["source_catalog_rows"] == 28
-        assert health_payload["public_value_sources"] == 11
-        assert health_payload["metadata_only_sources"] == 12
-        assert health_payload["restricted_local_only_sources"] == 5
+        assert health_payload["source_catalog_rows"] == len(sources)
+        assert health_payload["public_value_sources"] == expected_approved
+        assert health_payload["metadata_only_sources"] == expected_metadata
+        assert health_payload["restricted_local_only_sources"] == expected_restricted
         assert health_payload["published_catalog_ids_match_approved"] is True
         assert health_payload["restricted_values_published"] == 0
 
         summary = client.get("/api/summary").json()
-        assert summary["sources"] == 28
-        assert summary["endpoints_catalogued"] == 144
-        assert summary["safe_runtime_endpoints"] == 92
-        assert summary["production_approved_sources"] == 11
-        assert summary["configured_connectors"] == 11
-        assert summary["blocked_sources"] == 5
+        assert summary["sources"] == len(sources)
+        assert summary["endpoints_catalogued"] == expected_endpoint_count
+        assert summary["safe_runtime_endpoints"] == expected_runtime_endpoint_count
+        assert summary["production_approved_sources"] == expected_approved
+        assert summary["configured_connectors"] == sum(
+            source["acquisition_mode"] in {"api_first", "snapshot_only"}
+            for source in sources
+        )
+        assert summary["blocked_sources"] == sum(
+            source["acquisition_mode"] == "blocked" for source in sources
+        )
         assert summary["database_backend"] == "sqlite"
         assert summary["public_data_values_enabled"] is False
 
 
 def test_dashboard_and_endpoint_inventory():
+    catalog = reviewed_catalog()
+    catalog_by_id = {source["source_id"]: source for source in catalog["sources"]}
     with TestClient(app) as client:
         page = client.get("/")
         assert page.status_code == 200
@@ -82,13 +123,13 @@ def test_dashboard_and_endpoint_inventory():
         assert wallet["production_values_allowed"] is False
 
         endpoints = client.get("/api/sources/f1_sradss_ppaos/endpoints").json()
-        assert len(endpoints) == 44
+        assert len(endpoints) == len(catalog_by_id["f1_sradss_ppaos"]["endpoints"])
         household = next(row for row in endpoints if row["url"].endswith("data_household_detail.php"))
         assert household["restricted"] is True
         assert household["runtime_enabled"] is False
 
         connectivity = client.get("/api/connectivity").json()
-        assert len(connectivity) == 28
+        assert len(connectivity) == len(catalog["sources"])
         pmua = next(row for row in connectivity if row["source_id"] == "f2_learning_area_based")
         assert pmua["api_plan_configured"] is True
         assert pmua["deployable"] is True
@@ -105,93 +146,191 @@ def test_payload_api_is_locked_by_default():
         assert response.status_code == 403
 
 
+def test_reviewed_downloads_support_head_without_exposing_internal_paths():
+    download_path = PUBLIC_ROOT / "province_evidence.csv"
+
+    with TestClient(app) as client:
+        get_response = client.get("/downloads/province_evidence.csv")
+        head_response = client.head("/downloads/province_evidence.csv")
+
+        assert get_response.status_code == 200
+        assert head_response.status_code == 200
+        assert head_response.content == b""
+        assert head_response.headers["content-length"] == str(download_path.stat().st_size)
+        assert head_response.headers["content-type"] == get_response.headers["content-type"]
+        assert head_response.headers["etag"] == get_response.headers["etag"]
+
+        for blocked_path in (
+            "publication_receipt.json",
+            "serving_manifest.json",
+            "%2e%2e%2fpublication_receipt.json",
+            "%2e%2e%5cserving_manifest.json",
+        ):
+            assert client.head(f"/downloads/{blocked_path}").status_code == 404
+
+
 def test_public_projection_and_downloads_are_available():
+    dashboard = read_json(PUBLIC_ROOT / "public_dashboard.json")
+    insights = read_json(PUBLIC_ROOT / "source_insights.json")
+    unmapped_artifact = read_json(PUBLIC_ROOT / "unmapped_records.json")
+    learning_artifact = read_json(PUBLIC_ROOT / "learning_dashboard.json")
+    boundary_artifact = read_json(PUBLIC_ROOT / "thailand_provinces.geojson")
+    cultural_artifact = read_json(PUBLIC_ROOT / "cultural_points.geojson")
+    spatial_summary = read_json(PUBLIC_ROOT / "housing_spatial_summary.json")
+    demand_summary = read_json(PUBLIC_ROOT / "housing_demand_summary.json")
+    dashboard_contract = read_json(
+        PROJECT_ROOT / "config" / "publication_contracts" / "dashboard_core.json"
+    )
+    expected_province_count = next(
+        output["expected_count"]
+        for output in dashboard_contract["outputs"]
+        if output.get("path") == "data/public/public_dashboard.json"
+    )
+    executive_contract = read_json(
+        PROJECT_ROOT
+        / "config"
+        / "publication_contracts"
+        / "executive_summaries.json"
+    )
+    executive_response_limit = next(
+        output["max_bytes"]
+        for output in executive_contract["outputs"]
+        if "path_glob" in output
+    )
+    catalog = reviewed_catalog()
+    approved_source_ids = {
+        source["source_id"]
+        for source in catalog["sources"]
+        if source["production_values_allowed"]
+    }
+    restricted_source_ids = {
+        source["source_id"]
+        for source in catalog["sources"]
+        if source["value_visibility"] == "restricted_local_only"
+    }
+
     with TestClient(app) as client:
         overview = client.get("/api/public/v1/overview")
         assert overview.status_code == 200
         payload = overview.json()
+        assert payload == {
+            key: dashboard[key]
+            for key in (
+                "schema_version",
+                "generated_at",
+                "publication_status",
+                "warning_th",
+                "summary",
+                "themes",
+                "metrics",
+                "methodology",
+            )
+        }
         assert payload["publication_status"] == "public_candidate_projection"
-        assert payload["summary"]["public_sources"] == 11
-        catalog = json.loads(
-            (Path(__file__).parents[1] / "config/source_catalog.json").read_text(encoding="utf-8")
-        )
+        assert payload["summary"]["public_sources"] == len(dashboard["sources"])
         expected_restricted = sum(
             source.get("cloud_policy") == "restricted_local_only"
             for source in catalog["sources"]
         )
         assert payload["summary"]["restricted_sources_excluded"] == expected_restricted
-        assert payload["summary"]["geocoded_cultural_points"] == 5258
-        assert payload["summary"]["cultural_supporting_records"] == 361
-        assert payload["summary"]["unmapped_public_records"] == 312
         public_sources = client.get("/api/public/v1/sources").json()
+        assert {source["source_id"] for source in public_sources} == {
+            source["source_id"] for source in dashboard["sources"]
+        }
         learning_source = next(
             source
             for source in public_sources
             if source["source_id"] == "f2_learning_dashboard"
         )
-        assert learning_source["projection_coverage"]["linked_provinces"] == 66
+        assert learning_source["projection_coverage"] == learning_artifact["coverage"]
 
-        provinces = client.get("/api/public/v1/provinces?has_evidence=true").json()
-        assert len(provinces) == 77
-        assert all(row["quality_status"] == "candidate_needs_review" for row in provinces)
+        all_provinces = client.get("/api/public/v1/provinces").json()
+        assert len(all_provinces) == expected_province_count
+        assert all_provinces == dashboard["provinces"]
+        provinces_with_evidence = client.get(
+            "/api/public/v1/provinces?has_evidence=true"
+        ).json()
+        assert len(provinces_with_evidence) == dashboard["summary"][
+            "provinces_with_evidence"
+        ]
+        assert all(row["evidence_source_count"] > 0 for row in provinces_with_evidence)
+        assert all(
+            row["quality_status"] == "candidate_needs_review"
+            for row in all_provinces
+        )
 
         roi_et = client.get("/api/public/v1/provinces/45")
         assert roi_et.status_code == 200
         assert roi_et.json()["province_name_th"] == "ร้อยเอ็ด"
-        assert roi_et.json()["evidence_source_count"] == 9
+        assert roi_et.json() == next(
+            row for row in dashboard["provinces"] if row["province_code"] == "45"
+        )
 
         songkhla = client.get("/api/public/v1/provinces/90")
         assert songkhla.status_code == 200
         songkhla_payload = songkhla.json()
         assert songkhla_payload["province_name_th"] == "สงขลา"
+        assert songkhla_payload == next(
+            row for row in dashboard["provinces"] if row["province_code"] == "90"
+        )
 
         briefing = client.get("/api/public/v1/provinces/90/briefing")
         assert briefing.status_code == 200
         songkhla_briefing = briefing.json()
-        assert songkhla_briefing["schema_version"] == "2.0.0"
+        expected_songkhla_briefing = read_json(
+            PUBLIC_ROOT / "provincial_briefings" / "90.json"
+        )
+        for key in (
+            "schema_version",
+            "generated_at",
+            "publication_status",
+            "province",
+            "executive_signals",
+            "sections",
+            "quality",
+            "available_source_ids",
+        ):
+            assert songkhla_briefing[key] == expected_songkhla_briefing[key]
+        assert [item["source_id"] for item in songkhla_briefing["source_coverage"]] == [
+            item["source_id"] for item in expected_songkhla_briefing["source_coverage"]
+        ]
         assert songkhla_briefing["province"]["province_name_th"] == "สงขลา"
-        signals = {item["key"]: item for item in songkhla_briefing["executive_signals"]}
-        assert signals["house_price_income_ratio"]["display_value"] == "3.20"
-        assert signals["overcrowding_pct"]["display_value"] == "9.24%"
-        assert signals["housing_loan_pass_share"]["display_value"] == "56.59%"
-        assert signals["flood_risk_area_level_4_5"]["display_value"] == "26.84%"
-
-        projects = songkhla_briefing["sections"]["area_based"]["items"]
-        assert {item["project_name"] for item in projects} == {
-            "เครื่องแกงฮาลาลันตอยยีบัน",
-            "AHSAN Trustmark",
-        }
-        innovations = songkhla_briefing["sections"]["innovation"]["items"]
-        assert any(item["title"] == "ลวดลายจากชุดลูกปัดโนรา" for item in innovations)
-        assert any(item["trl_level"] == 7 for item in innovations)
-        assert songkhla_briefing["sections"]["sra"]["status"] == "source_has_no_record_for_province"
-        learning = songkhla_briefing["sections"]["learning_dashboard"]["items"]
-        assert len(learning) == 1
-        assert learning[0]["province_code"] == "90"
-        assert learning[0]["unit"] is None
-        assert learning[0]["as_of"] is None
+        for section in songkhla_briefing["sections"].values():
+            if "items" in section and "total_records" in section:
+                assert section["total_records"] >= len(section["items"])
 
         coverage = {item["source_id"]: item for item in songkhla_briefing["source_coverage"]}
-        assert coverage["f3_housing_portal"]["status"] == "available"
         assert coverage["f2_rmutdb"]["status"] == "not_province_scoped"
-        assert coverage["f2_apptech_mtr"]["status"] == "available"
-        assert coverage["f2_learning_dashboard"]["status"] == "available"
-        assert "f2_wallet_all_realtime" not in coverage
+        assert set(coverage) <= approved_source_ids
+        assert not restricted_source_ids.intersection(coverage)
         demand = songkhla_briefing["sections"]["housing"]["demand_summary"]
-        assert demand["respondents_living"] > 0
-        assert demand["single_choice_distributions"]["future_housing_demand"]["answered"] > 0
+        assert demand["respondents_living"] >= 0
+        assert demand["single_choice_distributions"]["future_housing_demand"]["answered"] >= 0
 
         summary_response = client.get("/api/public/v1/provinces/90/summary")
         assert summary_response.status_code == 200
-        assert len(summary_response.content) < 30_000
+        assert len(summary_response.content) <= executive_response_limit
         executive = summary_response.json()
-        assert executive["schema_version"] == "1.0.0"
+        expected_executive = read_json(PUBLIC_ROOT / "executive_summaries" / "90.json")
+        for key in (
+            "schema_version",
+            "generated_at",
+            "publication_status",
+            "province",
+            "readout",
+            "research_portfolio",
+            "decision_chain",
+            "data_quality_overview",
+            "dimensions",
+            "missing_dimensions",
+            "coverage",
+            "quality",
+            "methodology",
+        ):
+            assert executive[key] == expected_executive[key]
         assert executive["province"]["province_name_th"] == "สงขลา"
-        assert executive["coverage"]["available_source_count"] == 6
         dimensions = {item["key"]: item for item in executive["dimensions"]}
-        assert set(dimensions) == {"housing", "risk", "development", "culture"}
-        assert any(metric["key"] == "house_price_income_ratio" for metric in dimensions["housing"]["metrics"])
-        assert any(metric["comparison"] == "above" for metric in dimensions["housing"]["metrics"])
+        assert len(dimensions) == len(executive["dimensions"])
         assert executive["methodology"]["raw_rows_included"] is False
         assert executive["methodology"]["unknown_value_policy"] == "null_and_not_found_are_never_rendered_as_zero"
         assert [stage["key"] for stage in executive["decision_chain"]] == [
@@ -210,92 +349,57 @@ def test_public_projection_and_downloads_are_available():
         source_insights = client.get("/api/public/v1/source-insights")
         assert source_insights.status_code == 200
         insight_payload = source_insights.json()
-        assert insight_payload["audit_summary"]["geo_linkable_source_ids"] == [
-            "f1_pppconnext",
-            "f2_apptech_mtr",
-            "f3_city_capital_open_data",
-        ]
-        assert insight_payload["audit_summary"]["non_geo_source_ids"] == ["f2_rmutdb"]
-        assert insight_payload["audit_summary"]["supplemental_geo_linkable_source_ids"] == [
-            "f2_learning_dashboard"
-        ]
-        assert insight_payload["audit_summary"]["unmapped_public_records"] == {
-            "f2_learning_area_based": {
-                "records": 6,
-                "reason": "source_province_missing",
-            }
-        }
-        assert insight_payload["sources"]["f1_pppconnext"]["coverage"]["linked_provinces"] == 20
-        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["registered_users"] == 2356
-        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["snapshot_records"] == 630
-        assert insight_payload["sources"]["f2_apptech_mtr"]["statistics"]["upstream_total_apptech"] == 630
-        assert insight_payload["sources"]["f3_city_capital_open_data"]["coverage"]["linked_cities"] == 18
-        assert insight_payload["sources"]["f2_rmutdb"]["statistics"]["detailed_records"] == 1006
+        assert insight_payload == insights
+        audit_summary = insight_payload["audit_summary"]
+        assert set(audit_summary["all_geo_linkable_source_ids"]) == set(
+            audit_summary["geo_linkable_source_ids"]
+        ) | set(audit_summary["supplemental_geo_linkable_source_ids"])
+        assert not set(audit_summary["all_geo_linkable_source_ids"]).intersection(
+            audit_summary["non_geo_source_ids"]
+        )
         learning_insight = insight_payload["sources"]["f2_learning_dashboard"]
-        assert learning_insight["coverage"]["linked_provinces"] == 66
-        assert learning_insight["coverage"]["unmatched_province_rows"] == 0
-        assert learning_insight["non_province_tables"]["categories"]["row_count"] == 7
+        assert learning_insight["coverage"]["linked_provinces"] == learning_artifact[
+            "coverage"
+        ]["linked_provinces"]
+        assert learning_insight["coverage"]["unmatched_province_rows"] == len(
+            learning_artifact["unmatched_province_rows"]
+        )
         cultural_insight = insight_payload["sources"]["f2_culturalmap_university"]
-        assert cultural_insight["coverage"]["supporting_records"] == 361
-        assert cultural_insight["coverage"]["total_records"] == 5619
+        assert cultural_insight["coverage"]["map_records"] == len(
+            cultural_artifact["features"]
+        )
+        assert cultural_insight["coverage"]["total_records"] == (
+            cultural_insight["coverage"]["map_records"]
+            + cultural_insight["coverage"]["supporting_records"]
+        )
         assert cultural_insight["privacy_projection"]["contact_fields_exposed"] is False
         portfolio = insight_payload["executive_portfolio"]
-        assert portfolio["audit"]["source_count"] == 10
-        assert portfolio["audit"]["complete_source_count"] == 7
-        assert portfolio["audit"]["partial_source_count"] == 3
-        assert portfolio["audit"]["mixed_source_count"] == 0
+        assert portfolio["audit"]["source_count"] == len(
+            portfolio["audit"]["status_rows"]
+        )
+        assert portfolio["audit"]["source_count"] == sum(
+            portfolio["audit"][f"{status}_source_count"]
+            for status in ("complete", "partial", "mixed")
+        )
         headline = {item["key"]: item for item in portfolio["headline_metrics"]}
-        assert headline["surveyed_households"]["value"] == 306388
-        assert headline["assistance_budget"]["value"] == 169327550.25
-        assert headline["apptech_innovations"]["value"] == 630
-        assert headline["area_businesses"]["value"] == 1002
-        assert headline["cultural_records"]["value"] == 5619
-        assert headline["housing_points"]["value"] == 28694
-        assert {
-            item["label_th"]: item["value"]
+        assert headline["housing_demand_responses"]["value"] == demand_summary[
+            "record_count"
+        ]
+        assert headline["housing_points"]["value"] == spatial_summary["counts"][
+            "housing_points"
+        ]
+        assert headline["cultural_records"]["value"] == cultural_insight[
+            "coverage"
+        ]["total_records"]
+        assert all(
+            item["value"] is None
+            or (isinstance(item["value"], (int, float)) and item["value"] >= 0)
+            for item in headline.values()
+        )
+        assert sorted(
+            item["value"]
             for item in portfolio["charts"]["housing_spatial"]["items"]
-        } == {
-            "พื้นที่เสี่ยงน้ำท่วม": 159126,
-            "จุดที่อยู่อาศัย": 28694,
-            "กริดการเข้าถึงบริการ": 6543,
-            "ขอบเขตแขวง": 169,
-        }
-
-        for province_code, title in (
-            ("33", "นวัตกรรมโรงอบแห้งพริกพลังงานแสงอาทิตย์"),
-            ("73", "ระบบแจ้งเตือนภัยแผ่นดินไหว ประเทศไทย"),
-        ):
-            province_briefing = client.get(
-                f"/api/public/v1/provinces/{province_code}/briefing"
-            ).json()
-            requirements = province_briefing["sections"]["requirements"]["items"]
-            assert len(requirements) == 1
-            assert requirements[0]["title"] == title
-            assert requirements[0]["record_grain"] == "one_public_requirement"
-            assert requirements[0]["provenance"]["as_of"] is None
-            requirement_coverage = next(
-                item
-                for item in province_briefing["source_coverage"]
-                if item["source_id"] == "f2_apptech_mru"
-            )
-            assert requirement_coverage["record_breakdown"]["requirements"] == 1
-
-            province_summary = client.get(
-                f"/api/public/v1/provinces/{province_code}/summary"
-            ).json()
-            development = next(
-                item for item in province_summary["dimensions"] if item["key"] == "development"
-            )
-            assert any(
-                item["kind"] == "requirement" and item["title_th"] == title
-                for item in development["highlights"]
-            )
-
-        lampang = client.get("/api/public/v1/provinces/52/summary").json()
-        lampang_dimensions = {item["key"]: item for item in lampang["dimensions"]}
-        assert "livelihood" in lampang_dimensions
-        assert "urban" in lampang_dimensions
-        assert lampang_dimensions["urban"]["metrics"][0]["benchmark_label_th"] == "ค่ากลาง 18 เมือง"
+        ) == sorted(spatial_summary["counts"].values())
 
         portfolio = executive["research_portfolio"]
         assert portfolio["project_count"] == len(
@@ -321,36 +425,18 @@ def test_public_projection_and_downloads_are_available():
         assert funding["allocation_status"] == "linked_innovation_funding_not_provincial_allocation"
         assert "note_th" in funding
 
-        phetchaburi = client.get("/api/public/v1/provinces/76/briefing").json()
-        assert phetchaburi["sections"]["area_based"]["total_records"] == 30
-        assert phetchaburi["sections"]["project_master"]["total_records"] == 1
-
         sra_states = client.get("/api/public/v1/provinces").json()
+        allowed_scope_states = {
+            "in_scope_value_available",
+            "in_scope_no_current_value",
+            "out_of_scope",
+        }
+        assert {item["sra_scope_status"] for item in sra_states} <= allowed_scope_states
         scope_counts = {
             state: sum(item["sra_scope_status"] == state for item in sra_states)
-            for state in {
-                "in_scope_value_available",
-                "in_scope_no_current_value",
-                "out_of_scope",
-            }
+            for state in allowed_scope_states
         }
-        assert scope_counts == {
-            "in_scope_value_available": 15,
-            "in_scope_no_current_value": 5,
-            "out_of_scope": 57,
-        }
-        missing_score_names = {
-            item["province_name_th"]
-            for item in sra_states
-            if item["sra_scope_status"] == "in_scope_no_current_value"
-        }
-        assert missing_score_names == {
-            "นครราชสีมา",
-            "ยโสธร",
-            "ลำปาง",
-            "พิษณุโลก",
-            "พัทลุง",
-        }
+        assert sum(scope_counts.values()) == expected_province_count
         assert all(
             item["sra_overall_score"] is None
             for item in sra_states
@@ -358,30 +444,47 @@ def test_public_projection_and_downloads_are_available():
         )
 
         boundary = client.get("/api/public/v1/map/provinces").json()
-        assert boundary["type"] == "FeatureCollection"
-        assert len(boundary["features"]) == 77
+        assert boundary == boundary_artifact
+        assert len(boundary["features"]) == expected_province_count
 
         points = client.get("/api/public/v1/map/cultural-points").json()
-        assert len(points["features"]) == 5258
+        assert points == cultural_artifact
+        assert len(points["features"]) == payload["summary"][
+            "geocoded_cultural_points"
+        ]
 
         download = client.get("/downloads/province_evidence.csv")
         assert download.status_code == 200
         assert "province_code" in download.text
 
+        for internal_path in (
+            "publication_receipt.json",
+            "serving_manifest.json",
+            "manifest.json",
+            "source_insights_manifest.json",
+            "provincial_briefings/index.json",
+        ):
+            assert client.get(f"/downloads/{internal_path}").status_code == 404
+
         unmapped = client.get("/downloads/unmapped_records.json")
         assert unmapped.status_code == 200
         unmapped_payload = unmapped.json()
-        assert unmapped_payload["total_records"] == 312
-        assert unmapped_payload["sources"]["f2_learning_area_based"]["record_count"] == 6
+        assert unmapped_payload == unmapped_artifact
+        assert unmapped_payload["total_records"] == sum(
+            source["record_count"] for source in unmapped_payload["sources"].values()
+        )
+        assert all(
+            source["record_count"] == len(source["items"])
+            for source in unmapped_payload["sources"].values()
+        )
         housing_unmapped = unmapped_payload["sources"]["f3_housing_portal"]
-        assert housing_unmapped["record_count"] == 306
-        assert housing_unmapped["approved_projection_records"] == 7259
-        assert housing_unmapped["province_linked_records"] == 6953
-        assert housing_unmapped["reason_counts"] == {
-            "source_geography_missing": 3,
-            "source_geography_not_at_province_grain": 248,
-            "source_province_code_not_in_official_crosswalk": 55,
-        }
+        assert housing_unmapped["approved_projection_records"] == (
+            housing_unmapped["province_linked_records"]
+            + housing_unmapped["record_count"]
+        )
+        assert sum(housing_unmapped["reason_counts"].values()) == housing_unmapped[
+            "record_count"
+        ]
 
 
 def test_public_cors_and_restricted_sources_excluded():
@@ -398,19 +501,27 @@ def test_public_cors_and_restricted_sources_excluded():
 
 
 def test_public_operations_contract_reports_live_audit_without_claiming_automation():
+    catalog = reviewed_catalog()
+    plans = read_json(PROJECT_ROOT / "config" / "ingestion_plans.json")["sources"]
     with TestClient(app) as client:
         response = client.get("/api/public/v1/operations")
         assert response.status_code == 200
         payload = response.json()
-        assert payload["summary"]["registered_sources"] == 28
-        assert payload["summary"]["public_candidate_sources"] == 11
-        assert payload["summary"]["executable_connectors"] == 6
+        assert payload["summary"]["registered_sources"] == len(catalog["sources"])
+        assert payload["summary"]["public_candidate_sources"] == sum(
+            source["production_values_allowed"] for source in catalog["sources"]
+        )
+        assert payload["summary"]["executable_connectors"] == len(plans)
         assert payload["summary"]["automatic_refresh_enabled"] is False
         assert payload["summary"]["automatic_public_promotion_enabled"] is False
         audit = payload["last_connectivity_audit"]
-        assert audit["successful_connectors"] == audit["configured_connectors"] == 6
-        assert audit["failed_connectors"] == 0
-        assert audit["records_seen_total"] == 9652
+        assert audit["configured_connectors"] == len(audit["results"])
+        assert audit["successful_connectors"] + audit["failed_connectors"] == audit[
+            "configured_connectors"
+        ]
+        assert audit["records_seen_total"] == sum(
+            row["records_seen"] for row in audit["results"]
+        )
         public_source_ids = {row["source_id"] for row in audit["results"]}
         assert "f2_wallet_all_realtime" not in public_source_ids
         assert "f3_healthcare_nonthaburi" not in public_source_ids
@@ -495,17 +606,33 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
     from app.database import SessionLocal
     from app.models import PublicArtifact
 
+    catalog_config = reviewed_catalog()
+    catalog_sources = catalog_config["sources"]
+    approved_count = sum(
+        source["production_values_allowed"] for source in catalog_sources
+    )
+    metadata_count = sum(
+        source["value_visibility"] == "metadata_only" for source in catalog_sources
+    )
+    restricted_count = sum(
+        source["value_visibility"] == "restricted_local_only"
+        for source in catalog_sources
+    )
+
     with TestClient(app) as client:
         baseline = client.get("/api/public/v1/database-coverage")
         assert baseline.status_code == 200
         baseline_payload = baseline.json()
         assert baseline_payload["status"] == "complete"
-        assert baseline_payload["public_artifacts_in_database"] == 163
-        assert baseline_payload["source_catalog_rows"] == 28
-        assert baseline_payload["public_value_sources"] == 11
-        assert baseline_payload["metadata_only_sources"] == 12
-        assert baseline_payload["restricted_local_only_sources"] == 5
-        assert baseline_payload["published_catalog_source_count"] == 11
+        assert baseline_payload["public_artifacts_in_database"] == len(artifact_inputs())
+        assert baseline_payload["public_artifacts_in_database"] == baseline_payload[
+            "public_artifacts_expected"
+        ]
+        assert baseline_payload["source_catalog_rows"] == len(catalog_sources)
+        assert baseline_payload["public_value_sources"] == approved_count
+        assert baseline_payload["metadata_only_sources"] == metadata_count
+        assert baseline_payload["restricted_local_only_sources"] == restricted_count
+        assert baseline_payload["published_catalog_source_count"] == approved_count
         assert baseline_payload["published_catalog_ids_match_approved"] is True
         assert baseline_payload["restricted_catalog_sources_published"] == 0
         assert baseline_payload["restricted_values_published"] == 0

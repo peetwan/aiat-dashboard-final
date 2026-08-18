@@ -20,11 +20,13 @@ Repository ถูกสร้างเริ่มต้นใต้บัญช
 
 | เหตุการณ์ | ผลที่เกิดขึ้น |
 |---|---|
-| เปิด Pull Request | GitHub Actions ตรวจ connector contracts, public-repo safety และ tests |
+| เปิด Pull Request | GitHub Actions รัน `pipeline`; ถ้าแตะ Public data จะรัน `publication-gate` กับ revision นั้นด้วย |
+| PR ที่ `peetwan` เป็นผู้เขียนผ่าน Codex review | Peet ตรวจว่า review ครอบคลุม head SHA ล่าสุด, ไม่มี P0/P1 ค้าง และ required checks ผ่าน แล้วกด squash merge เองได้โดยไม่ต้องรอ teammate Approve |
+| Routine public-data refresh ของ contributor ผ่าน review | Codex/team automation ใส่ `codex-publication-reviewed`; GitHub เปิด squash auto-merge ให้ revision ที่ตรวจแล้วเท่านั้น |
 | PR ผ่านและ merge เข้า `main` | Railway auto-deploy Dashboard และ Explorer จาก branch `main` |
 | Dashboard เริ่มทำงาน | สร้าง schema ที่ขาด ขยาย `data/public/serving_manifest.json` และ sync reviewed artifacts เข้า serving database แบบ idempotent |
 | Explorer เริ่มทำงาน | อ่านฐานข้อมูลเดียวกันเท่านั้น ไม่แก้ข้อมูลและไม่ fetch เว็บไซต์ต้นทาง |
-| เว็บไซต์ต้นทางเปลี่ยน | ยังไม่ publish อัตโนมัติ; connector เก็บเป็น Candidate และต้อง review/build/test ก่อน release ใหม่ |
+| เว็บไซต์ต้นทางเปลี่ยน | Connector เก็บเป็น Candidate; ยังไม่มีการย้ายเข้า Public หรือเขียน production database อัตโนมัติ |
 
 ดังนั้น “merge code แล้ว database เปลี่ยนไหม” มีคำตอบสองแบบ:
 
@@ -69,15 +71,16 @@ connector เฉพาะ URL ── API / form JSON / CKAN CSV / snapshot
 central orchestrator ── evidence / hash / manifest / privacy / idempotency
         ↓
 dashboard_records (Candidate)
-        ↓  review + deterministic builders + tests
-data/public/*.json + serving_manifest.json
-        ↓  deploy/startup sync
+        ↓  deterministic builder + publication contract
+contract-declared data/public/* + publication_receipt.json
+        ↓  publication-gate + exact-revision review
+        ↓  merge → Railway deploy/startup sync
 public_artifacts + spatial tables → API / Dashboard / Explorer
 ```
 
 ระบบ generalize ที่ “ขั้นตอนและกติกา” ไม่ใช่บังคับ schema เดียวกับทุกเว็บ ตัวอย่างเช่น CKAN อาจคืน CSV หลาย resource, Dashboard บางแห่งคืน header-array และ AppTech ใช้ pagination JSON แต่ทั้งหมดต้องประกาศ grain, identity, geography, completeness และ forbidden fields ใน contract รูปแบบเดียวกัน
 
-Public artifact ใหม่ต้องเป็น reviewed JSON object ใต้ `data/public/` และมี entry ใน `serving_manifest.json`; entry ที่ไม่ใช่ serving core ต้องระบุ `source_ids` ที่อนุมัติให้เผยแพร่แล้ว หลัง merge ดูรายการได้ที่ `/api/public/v1/artifacts` และอ่านชุดใดๆ ด้วย `/api/public/v1/artifacts/{artifact_key}` โดยไม่ต้องเพิ่ม route เฉพาะ source
+Dataset/ความหมาย/contract/builder/`serving_manifest.json` ใหม่ต้องให้ทีมตรวจเองก่อน รอบ refresh ถัดไปจึงใช้เลนอัตโนมัติที่เปลี่ยนได้เฉพาะ output เดิมใต้ `data/public/` พร้อม receipt ดูขั้นตอนและความต่างของ manifest ทั้งสามแบบที่ [Publication workflow](docs/publication-workflow.md)
 
 ## เพิ่ม Connector หรือ URL
 
@@ -108,6 +111,7 @@ python -m pytest -q
 | [CONTRIBUTING.md](CONTRIBUTING.md) | workflow branch, PR และ review |
 | [Architecture](docs/architecture.md) | เข้าใจ connector, database, Railway และ publication flow |
 | [Connector development](docs/connector-development.md) | เพิ่มหรือแก้ URL |
+| [Publication workflow](docs/publication-workflow.md) | เลือกเลน release, สร้าง receipt และใช้ auto-merge อย่างปลอดภัย |
 | [Data governance](docs/data-governance.md) | ตรวจ classification, privacy และ publication gate |
 | [Deployment](docs/deployment.md) | deploy, health check และ rollback |
 | [Database Explorer](docs/database-explorer.md) | รันและใช้ Explorer |
@@ -117,8 +121,8 @@ python -m pytest -q
 
 ```text
 app/                    FastAPI, database, orchestrator และ connectors
-config/                 generated source catalog, ingestion plans และ contracts
-data/public/            reviewed deployment seeds
+config/                 generated source catalog, ingestion plans และ connector/publication contracts
+data/public/            reviewed deployment seeds และ deterministic publication receipt
 explorer/               read-only Database Explorer
 templates/connector/    จุดเริ่มต้น connector ใหม่
 tests/                   unit, contract, privacy และ serving tests

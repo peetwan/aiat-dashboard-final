@@ -1,0 +1,45 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "housing_summaries",
+  "dataset_key": "housing_public_summaries",
+  "source_scope": "approved_values",
+  "source_ids": ["f3_housing_portal"],
+  "builder": "tools.build_public_data:main",
+  "grain_th": "spatial summary หนึ่ง snapshot และ demand summary หนึ่ง block ต่อจังหวัด",
+  "identity": {"spatial": ["source_id"], "demand_province": ["province_code"]},
+  "geography": {"level": "province_and_spatial_grid", "fields": ["province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "as_of"]},
+  "measures": [
+    {"name": "housing/spatial aggregate measures", "unit": "ระบุในแต่ละ field", "denominator": "aggregate เท่านั้น; ไม่มี respondent identifier"}
+  ],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/housing_spatial_summary.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 1048576,
+      "records_pointer": "$",
+      "identity_fields": ["source_id"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 1,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/housing_demand_summary.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 5242880,
+      "records_pointer": "/provinces",
+      "identity_fields": ["$key"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 77,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    }
+  ]
+}
