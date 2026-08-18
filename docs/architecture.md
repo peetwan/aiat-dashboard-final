@@ -49,6 +49,11 @@ Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence �
                            read + seed         read-only
 ```
 
+ผังด้านบนคือฝั่ง serving; ฝั่ง raw evidence มีวงจรของทีมอยู่ก่อนหน้า:
+สมาชิกดึงข้อมูล → push ขึ้น team bucket เป็น run ที่แก้ย้อนหลังไม่ได้ →
+คนอื่น pull มา build/import ต่อ (ตรวจ sha256 ให้อัตโนมัติ) ดูผังเต็มและบทบาทของแต่ละคนที่
+[evidence-storage.md](evidence-storage.md)
+
 ## 3. Generalize ตรงไหน และแยกราย URL ตรงไหน
 
 ข้อมูลของแต่ละเว็บอาจต่างกันโดยสิ้นเชิง จึงไม่ควรสร้าง parser ใหญ่ตัวเดียวที่มี `if/elif` ตามชื่อ source
