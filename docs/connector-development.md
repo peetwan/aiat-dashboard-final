@@ -10,7 +10,7 @@
 4. เพิ่ม contract ที่ `config/connector_contracts/<source_id>.json`
 5. เพิ่ม fixture ที่ลบข้อมูลระบุตัวบุคคลแล้วใน `tests/fixtures/connectors/<source_id>.json`
 6. เพิ่ม unit tests ที่ใช้ fixture หรือ fake recorder; ห้ามเรียก network จริงใน CI
-7. รัน `python -m app.cli validate-pipeline`, `python tools/validate_public_repo.py` และ `python -m pytest -q`
+7. รัน `python -m app.cli check` (ครบชุดเดียวกับ CI ในคำสั่งเดียว)
 
 เริ่มจากไฟล์ใน `templates/connector/` หรือให้ tool สร้าง connector + contract + fixture + offline test ตั้งต้น:
 

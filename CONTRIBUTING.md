@@ -12,10 +12,11 @@ cd aiat-dashboard-final
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python -m app.cli validate-pipeline
-python tools/validate_public_repo.py
-python -m pytest -q
+python -m app.cli check
 ```
+
+`python -m app.cli check` รันชุดตรวจเดียวกับ CI ครบในคำสั่งเดียว
+(compile, `validate-pipeline`, `publication validate`, `tools/validate_public_repo.py`, `pytest -q`)
 
 บน macOS/Linux ใช้ `source .venv/bin/activate` แทนคำสั่ง activate ของ PowerShell
 
@@ -24,7 +25,7 @@ python -m pytest -q
 1. สร้าง issue หรืออธิบาย source/bug ที่จะทำ
 2. สร้าง branch จาก `main` เช่น `feature/f2-new-source` หรือ `fix/apptech-pagination`
 3. แก้เฉพาะขอบเขตที่จำเป็น พร้อม tests
-4. รันคำสั่งตรวจทั้งสามคำสั่ง
+4. รัน `python -m app.cli check` ให้ผ่านครบ
 5. เปิด Pull Request และกรอก checklist
 6. รอ CI และ Codex review
 7. แก้ P0/P1, failed checks และ review conversations ให้หมด
