@@ -310,8 +310,17 @@ def test_phone_shaped_value_is_rejected_in_every_opaque_field_without_logging(
     assert phone_value not in encoded
 
 
-@pytest.mark.parametrize("phone_value", ["66812345678", "+66812345678", 66812345678])
-def test_country_code_phone_string_or_integer_is_rejected_without_logging(
+@pytest.mark.parametrize(
+    "phone_value",
+    [
+        "66812345678",
+        "+66812345678",
+        66812345678,
+        66812345678.0,
+        6.6812345678e10,
+    ],
+)
+def test_country_code_phone_string_or_numeric_is_rejected_without_logging(
     tmp_path, phone_value
 ):
     root, contracts_root, catalog_path = _fixture(tmp_path)

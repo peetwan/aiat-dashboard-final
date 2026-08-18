@@ -552,8 +552,11 @@ def _privacy_problems(
             for child in value:
                 walk(child, f"{path}[]")
             return
-        if type(value) is int:
-            if PHONE_RE.fullmatch(str(value)):
+        if type(value) is int or (
+            type(value) is float and math.isfinite(value) and value.is_integer()
+        ):
+            numeric_text = str(int(value))
+            if PHONE_RE.fullmatch(numeric_text):
                 append(path, "Thai phone-like numeric value")
             return
         if not isinstance(value, str):
