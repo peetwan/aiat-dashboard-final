@@ -117,6 +117,32 @@ const MAP_MODES = {
       { min: 1, color: "#b0cde4", label: "1–39" },
     ],
   },
+  disaster: {
+    label: "ติดตามภัย",
+    legendTitle: "ข้อมูลติดตามภัย (SPU)",
+    legendNote: "จำนวนแหล่งข้อมูลสถานการณ์น้ำ · สีเข้ม = หลายแหล่ง",
+    zeroLabel: "ไม่มีข้อมูล",
+    value: (province) => {
+      const tracking = state.disasterTracking || {};
+      return Object.keys(tracking.sources || {}).length > 0 ? Object.keys(tracking.sources || {}).length : null;
+    },
+    format: (value) => `${formatNumber(value)} แหล่งติดตามภัย`,
+    summarize: (summary) => `${formatNumber(summary.total)} ระเบียนติดตามภัย`,
+    steps: [
+      { min: 4, color: "#8b1a1a", label: "4 แหล่ง" },
+      { min: 3, color: "#b33636", label: "3 แหล่ง" },
+      { min: 2, color: "#d96c6c", label: "2 แหล่ง" },
+      { min: 1, color: "#f0b3b3", label: "1 แหล่ง" },
+    ],
+    regionLegendTitle: "ข้อมูลติดตามภัยรวมรายภาค",
+    regionLegendNote: "สีเข้ม = มีข้อมูลติดตามภัย",
+    regionValue: (summary) => (summary.withData ? summary.total : null),
+    regionSteps: [
+      { min: 4, color: "#8b1a1a", label: "4+" },
+      { min: 2, color: "#b33636", label: "2–3" },
+      { min: 1, color: "#f0b3b3", label: "1" },
+    ],
+  },
   coverage: {
     label: "ความครอบคลุมข้อมูล",
     legendTitle: "ความครอบคลุมข้อมูล",
@@ -252,6 +278,11 @@ function setMapMode(mode) {
   renderLegend();
   updateRegionMarkerColors();
   applyFillForLevel();
+  if (mode === "disaster" && state.selectedCode) {
+    renderDisaster();
+  } else if (mode !== "disaster") {
+    document.getElementById("disasterSection").hidden = true;
+  }
 }
 
 function setPrompt(title, hint) {
@@ -654,6 +685,7 @@ function openPanelLoading(province) {
     "povertySection",
     "citySection",
     "housingSection",
+    "disasterSection",
   ].forEach((id) => {
     document.getElementById(id).hidden = true;
   });
@@ -1028,6 +1060,64 @@ function renderCityCapital(section = {}) {
         </article>`;
     })
     .join("");
+}
+
+async function renderDisaster() {
+  const wrapper = document.getElementById("disasterSection");
+  const content = document.getElementById("disasterContent");
+  const code = state.selectedCode;
+  if (!code) { wrapper.hidden = true; return; }
+  
+  try {
+    const response = await fetch(`/api/public/v1/provinces/${code}/disaster-tracking`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Disaster API ${response.status}`);
+    const data = await response.json();
+    if (state.selectedCode !== code) return;
+    
+    state.disasterTracking = data;
+    const sources = data.sources || {};
+    const sourceCount = Object.keys(sources).length;
+    
+    if (sourceCount === 0) {
+      wrapper.hidden = true;
+      return;
+    }
+    
+    wrapper.hidden = false;
+    const sourceNames = {
+      spu_rawangphai_uru: "RawangPhai อุตรดิตถ์",
+      spu_sukhothai_water: " Sukhothai Water",
+      spu_sukhothai_care: " Sukhothai Care",
+      spu_nsn_flood: " NSN Flood",
+    };
+    
+    let html = `<div class="disaster-summary"><strong>${sourceCount} แหล่งติดตามภัย</strong><small>ข้อมูลสถานการณ์น้ำและภัย</small></div>`;
+    
+    for (const [sid, info] of Object.entries(sources)) {
+      const name = sourceNames[sid] || sid;
+      html += `<details class="disaster-source" open>
+        <summary><strong>${name}</strong> <small>${info.count} รายการ</small></summary>
+        <div class="disaster-records">`;
+      
+      for (const record of info.records.slice(0, 20)) {
+        const fields = Object.entries(record).filter(([k]) => !k.startsWith("_")).slice(0, 8);
+        html += '<div class="disaster-record"><table>';
+        for (const [key, val] of fields) {
+          const display = typeof val === "object" ? JSON.stringify(val).slice(0, 60) : String(val ?? "").slice(0, 60);
+          if (display) html += `<tr><td>${escapeHtml(key)}</td><td>${escapeHtml(display)}</td></tr>`;
+        }
+        html += '</table></div>';
+      }
+      
+      if (info.count > 20) html += `<p class="disaster-more">…และอีก ${info.count - 20} รายการ</p>`;
+      html += '</div></details>';
+    }
+    
+    content.innerHTML = html;
+  } catch (error) {
+    console.error("Disaster load error:", error);
+    wrapper.hidden = true;
+  }
 }
 
 function renderHousing(section = {}) {
@@ -1616,6 +1706,7 @@ async function ensurePortfolioLoaded() {
     renderPoverty(briefing.sections.pppconnext);
     renderCityCapital(briefing.sections.city_capital);
     renderHousing(briefing.sections.housing);
+    if (state.mapMode === "disaster") renderDisaster();
     renderPeopleAreaOverview(state.currentSummary, briefing);
     renderSources({ source_coverage: briefing.source_coverage || [] });
     const hasProjects = ["project_master", "innovation", "requirements"].some(

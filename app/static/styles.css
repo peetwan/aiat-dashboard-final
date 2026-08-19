@@ -2680,3 +2680,85 @@
     .project-participants ul { grid-template-columns: 1fr; }
   }
 }
+
+/* Disaster tracking section */
+.disaster-summary {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border-radius: 8px;
+  border: 1px solid #f0c4c4;
+}
+.disaster-summary strong {
+  display: block;
+  font-size: 15px;
+  color: #8b1a1a;
+}
+.disaster-summary small {
+  font-size: 12px;
+  color: #666;
+}
+
+.disaster-source {
+  margin-bottom: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #fafafa;
+}
+.disaster-source summary {
+  cursor: pointer;
+  padding: 4px 0;
+}
+.disaster-source summary strong {
+  font-size: 14px;
+  color: #333;
+}
+.disaster-source summary small {
+  font-size: 12px;
+  color: #888;
+  margin-left: 8px;
+}
+
+.disaster-records {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.disaster-record {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.disaster-record table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.disaster-record td {
+  padding: 1px 4px;
+  vertical-align: top;
+}
+.disaster-record td:first-child {
+  color: #666;
+  width: 40%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.disaster-record td:last-child {
+  color: #333;
+  word-break: break-all;
+}
+
+.disaster-more {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  padding: 4px;
+}

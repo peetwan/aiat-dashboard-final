@@ -53,6 +53,7 @@
         <button type="button" data-map-mode="sra"><i></i>ความเปราะบาง</button>
         <button type="button" data-map-mode="innovation"><i></i>นวัตกรรม</button>
         <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
+        <button type="button" data-map-mode="disaster"><i></i>ติดตามภัย</button>
       </div>
 
       <div class="map-corner">
@@ -212,6 +213,10 @@
                 <div class="city-grid" id="cityItems"></div>
               </div>
 
+              <div class="panel-section disaster-section" id="disasterSection" hidden>
+                <div class="section-heading"><span>ติดตามภัย (SPU)</span><small id="disasterNote">ข้อมูลสถานการณ์น้ำและภัยจากระบบติดตาม</small></div>
+                <div id="disasterContent"></div>
+              </div>
               <div class="panel-section" id="housingSection" hidden>
                 <div class="section-heading"><span>ที่อยู่อาศัยและความเสี่ยงเมือง</span><small id="housingNote"></small></div>
                 <div id="housingSpatialSummary"></div>

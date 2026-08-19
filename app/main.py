@@ -1077,3 +1077,61 @@ def records(
                 row["payload"] = item.payload
             result.append(row)
         return result
+
+# --- SPU disaster tracking ---
+
+from app.models import DashboardRecord
+
+
+@app.get(
+    "/api/public/v1/provinces/{province_code}/disaster-tracking",
+    tags=["SPU disaster tracking"],
+)
+def public_data_disaster_tracking(province_code: str):
+    """Return SPU flood/disaster monitoring data for a province from candidate records."""
+    code = province_code.strip().zfill(2)
+    
+    # Province code to name mapping and which SPU sources are relevant
+    province_sources = {
+        "68": {  # Sukhothai
+            "name": "สุโขทัย",
+            "sources": ["spu_sukhothai_care", "spu_sukhothai_water"],
+        },
+        "64": {  # Nakhon Sawan (NSN)
+            "name": "นครสวรรค์",
+            "sources": ["spu_nsn_flood"],
+        },
+        "69": {  # Uttaradit (RawangPhai)
+            "name": "อุตรดิตถ์",
+            "sources": ["spu_rawangphai_uru"],
+        },
+    }
+
+    config = province_sources.get(code)
+    if not config:
+        return {"province_code": code, "province_name": "", "sources": {}}
+
+    province_name = config["name"]
+    spu_sources = config["sources"]
+
+    with SessionLocal() as session:
+        result: dict = {"province_code": code, "province_name": province_name, "sources": {}}
+
+        for sid in spu_sources:
+            records = session.execute(
+                select(DashboardRecord)
+                .where(DashboardRecord.source_id == sid)
+                .limit(200)
+            ).scalars().all()
+
+            # Province-specific source - include all records
+            matched = [r.payload for r in records]
+
+            if matched:
+                result["sources"][sid] = {
+                    "count": len(matched),
+                    "records": matched[:50],
+                    "dataset_keys": sorted(set(r.dataset_key for r in records)),
+                }
+
+        return result
