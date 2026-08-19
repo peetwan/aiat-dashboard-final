@@ -19,6 +19,7 @@ const state = {
   projectDistrict: "",
   hoverPopup: null,
   mapMode: "projects",
+  disasterProvinces: null,
   selectedRegion: null,
   hoveredRegion: null,
   regions: {},
@@ -120,11 +121,12 @@ const MAP_MODES = {
   disaster: {
     label: "ติดตามภัย",
     legendTitle: "ข้อมูลติดตามภัย (SPU)",
-    legendNote: "จำนวนแหล่งข้อมูลสถานการณ์น้ำ · สีเข้ม = หลายแหล่ง",
+    legendNote: "สีเข้ม = มีหลายแหล่งติดตามสถานการณ์น้ำ",
     zeroLabel: "ไม่มีข้อมูล",
     value: (province) => {
-      const tracking = state.disasterTracking || {};
-      return Object.keys(tracking.sources || {}).length > 0 ? Object.keys(tracking.sources || {}).length : null;
+      const dp = state.disasterProvinces?.provinces || {};
+      const info = dp[province.province_code];
+      return info ? info.sources.length : null;
     },
     format: (value) => `${formatNumber(value)} แหล่งติดตามภัย`,
     summarize: (summary) => `${formatNumber(summary.total)} ระเบียนติดตามภัย`,
@@ -278,9 +280,14 @@ function setMapMode(mode) {
   renderLegend();
   updateRegionMarkerColors();
   applyFillForLevel();
-  if (mode === "disaster" && state.selectedCode) {
-    renderDisaster();
-  } else if (mode !== "disaster") {
+  if (mode === "disaster") {
+    loadDisasterProvinces().then(() => {
+      renderLegend();
+      updateRegionMarkerColors();
+      applyFillForLevel();
+      if (state.selectedCode) renderDisaster();
+    });
+  } else {
     document.getElementById("disasterSection").hidden = true;
   }
 }
@@ -288,6 +295,17 @@ function setMapMode(mode) {
 function setPrompt(title, hint) {
   document.getElementById("promptTitle").textContent = title;
   document.getElementById("promptHint").textContent = hint;
+}
+
+async function loadDisasterProvinces() {
+  try {
+    const response = await fetch("/api/public/v1/disaster/provinces", { cache: "no-store" });
+    if (response.ok) {
+      state.disasterProvinces = await response.json();
+    }
+  } catch (e) {
+    console.error("Failed to load disaster provinces:", e);
+  }
 }
 
 function escapeHtml(value) {

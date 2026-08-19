@@ -1135,3 +1135,39 @@ def public_data_disaster_tracking(province_code: str):
                 }
 
         return result
+
+@app.get(
+    "/api/public/v1/disaster/provinces",
+    tags=["SPU disaster tracking"],
+)
+def public_disaster_provinces():
+    """Return province codes that have SPU disaster monitoring data."""
+    from app.database import SessionLocal
+    from app.models import DashboardRecord
+    from sqlalchemy import select, func
+    
+    # Province mapping: source_id -> province_code
+    source_province_map = {
+        "spu_sukhothai_care": "68",
+        "spu_sukhothai_water": "68",
+        "spu_nsn_flood": "64",
+        "spu_rawangphai_uru": "69",
+    }
+    
+    with SessionLocal() as session:
+        result = {}
+        for sid, pcode in source_province_map.items():
+            count = session.scalar(
+                select(func.count()).select_from(DashboardRecord)
+                .where(DashboardRecord.source_id == sid)
+            ) or 0
+            if count > 0:
+                if pcode not in result:
+                    result[pcode] = {"sources": [], "total_records": 0}
+                result[pcode]["sources"].append(sid)
+                result[pcode]["total_records"] += count
+        
+        return {
+            "provinces": result,
+            "total_provinces": len(result),
+        }
