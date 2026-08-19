@@ -6,37 +6,11 @@
   "dataset_grains": [
     {
       "key_pattern": "^stations\\.row$",
-      "grain_th": "สถานีตรวจวัดหนึ่งแห่ง",
+      "grain_th": "สถานีตรวจวัดน้ำหนึ่งแห่งจากหน้า water-level",
       "identity_options": [
         [
           "station_code"
         ],
-        [
-          "$payload_hash"
-        ]
-      ],
-      "geography_fields": [],
-      "as_of_fields": [
-        "_fetched_at"
-      ]
-    },
-    {
-      "key_pattern": "^station_tables\\.\\d+$",
-      "grain_th": "ข้อมูลตารางหนึ่งแถวจากสถานี",
-      "identity_options": [
-        [
-          "$payload_hash"
-        ]
-      ],
-      "geography_fields": [],
-      "as_of_fields": [
-        "_fetched_at"
-      ]
-    },
-    {
-      "key_pattern": "^forecast_chart\\.\\d+$",
-      "grain_th": "ข้อมูลพยากรณ์อากาศ",
-      "identity_options": [
         [
           "$payload_hash"
         ]

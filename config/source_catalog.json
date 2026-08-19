@@ -2854,9 +2854,9 @@
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "d0f42996dfc7fdd86210669b8a4832091b685b16fcff43924c585d3a743363d7",
+          "endpoint_id": "2a48d348870b5f7068273d75e5eccf5f8c292ec012d2bcde5295c8ec7e84442a",
           "method": "GET",
-          "url": "https://nsn-flood.nsru.ac.th/forecast",
+          "url": "https://nsn-flood.nsru.ac.th/water-level",
           "kind": "public_api",
           "access": "public_200",
           "team_action": "call_without_login",
@@ -2865,7 +2865,7 @@
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "SPU NSN flood water level page"
         }
       ]
     },

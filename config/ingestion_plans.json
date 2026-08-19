@@ -301,8 +301,8 @@
       "connector": "app.connectors.spu_nsn_flood:SpuNsnFloodConnector",
       "datasets": [
         {
-          "name": "forecast_page",
-          "url": "https://nsn-flood.nsru.ac.th/forecast"
+          "name": "water_level_page",
+          "url": "https://nsn-flood.nsru.ac.th/water-level"
         }
       ]
     }
