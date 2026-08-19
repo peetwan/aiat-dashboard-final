@@ -1674,6 +1674,7 @@ function renderProvincePanel(summary) {
   // Load the briefing right away: the overview now carries briefing-backed
   // sections (poverty households), not just the projects/portfolio tabs.
   ensurePortfolioLoaded();
+  if (state.mapMode === "disaster") renderDisaster();
   document.getElementById("panelUpdated").textContent = `อัปเดตชุดสรุป ${formatDate(summary.generated_at)}`;
   document.getElementById("provinceApiLink").href = `/api/public/v1/provinces/${province.province_code}/briefing`;
   document.getElementById("fullProvinceLink").href = `/province/${province.province_code}`;
@@ -1706,7 +1707,6 @@ async function ensurePortfolioLoaded() {
     renderPoverty(briefing.sections.pppconnext);
     renderCityCapital(briefing.sections.city_capital);
     renderHousing(briefing.sections.housing);
-    if (state.mapMode === "disaster") renderDisaster();
     renderPeopleAreaOverview(state.currentSummary, briefing);
     renderSources({ source_coverage: briefing.source_coverage || [] });
     const hasProjects = ["project_master", "innovation", "requirements"].some(
