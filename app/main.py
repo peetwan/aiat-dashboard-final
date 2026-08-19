@@ -1171,3 +1171,116 @@ def public_disaster_provinces():
             "provinces": result,
             "total_provinces": len(result),
         }
+
+@app.get(
+    "/api/public/v1/provinces/{province_code}/disaster-timeseries",
+    tags=["SPU disaster tracking"],
+)
+def public_disaster_timeseries(province_code: str):
+    """Return time-series data suitable for charting from SPU sources."""
+    code = province_code.strip().zfill(2)
+    
+    province_sources = {
+        "68": {"name": "สุโขทัย", "sources": ["spu_sukhothai_care", "spu_sukhothai_water"]},
+        "64": {"name": "นครสวรรค์", "sources": ["spu_nsn_flood"]},
+        "69": {"name": "อุตรดิตถ์", "sources": ["spu_rawangphai_uru"]},
+    }
+    
+    config = province_sources.get(code)
+    if not config:
+        return {"province_code": code, "series": []}
+    
+    with SessionLocal() as session:
+        series = []
+        
+        # Sukhothai Water - water levels time series
+        if "spu_sukhothai_water" in config["sources"]:
+            records = session.execute(
+                select(DashboardRecord)
+                .where(DashboardRecord.source_id == "spu_sukhothai_water")
+                .where(DashboardRecord.dataset_key == "water_levels.row")
+                .limit(500)
+            ).scalars().all()
+            
+            stations = {}
+            for r in records:
+                p = r.payload
+                station = p.get("station_name_th") or p.get("station_name_en") or "unknown"
+                ts = p.get("waterlevel_datetime")
+                val = p.get("waterlevel_msl")
+                if ts and val is not None:
+                    if station not in stations:
+                        stations[station] = {"label": station, "points": []}
+                    stations[station]["points"].append({
+                        "t": ts,
+                        "v": float(val),
+                    })
+            
+            for station_data in stations.values():
+                station_data["points"].sort(key=lambda pt: pt["t"])
+                station_data["points"] = station_data["points"][-100:]  # last 100
+                station_data["unit"] = "ม.รทก."
+                station_data["metric"] = "ระดับน้ำ"
+                series.append(station_data)
+        
+        # Sukhothai Water - rain 24h
+        if "spu_sukhothai_water" in config["sources"]:
+            records = session.execute(
+                select(DashboardRecord)
+                .where(DashboardRecord.source_id == "spu_sukhothai_water")
+                .where(DashboardRecord.dataset_key == "rain_24h.row")
+                .limit(500)
+            ).scalars().all()
+            
+            stations = {}
+            for r in records:
+                p = r.payload
+                station = p.get("station_name_th") or p.get("station_name_en") or "unknown"
+                ts = p.get("rainfall_datetime")
+                val = p.get("rain_24h")
+                if ts and val is not None:
+                    if station not in stations:
+                        stations[station] = {"label": station, "points": []}
+                    stations[station]["points"].append({
+                        "t": ts,
+                        "v": float(val),
+                    })
+            
+            for station_data in stations.values():
+                station_data["points"].sort(key=lambda pt: pt["t"])
+                station_data["points"] = station_data["points"][-100:]
+                station_data["unit"] = "มม."
+                station_data["metric"] = "ปริมาณฝน 24 ชม."
+                series.append(station_data)
+        
+        # RawangPhai - rain analysis
+        if "spu_rawangphai_uru" in config["sources"]:
+            records = session.execute(
+                select(DashboardRecord)
+                .where(DashboardRecord.source_id == "spu_rawangphai_uru")
+                .where(DashboardRecord.dataset_key.like("%rain%"))
+                .limit(500)
+            ).scalars().all()
+            
+            stations = {}
+            for r in records:
+                p = r.payload
+                station = p.get("province") or "unknown"
+                ts = p.get("timestamp")
+                val = p.get("avg_rain_mm")
+                if ts and val is not None:
+                    if station not in stations:
+                        stations[station] = {"label": station, "points": []}
+                    stations[station]["points"].append({
+                        "t": ts,
+                        "v": float(val),
+                    })
+            
+            for station_data in stations.values():
+                station_data["points"].sort(key=lambda pt: pt["t"])
+                station_data["points"] = station_data["points"][-100:]
+                station_data["unit"] = "มม."
+                station_data["metric"] = "ปริมาณน้ำฝนเฉลี่ย"
+                series.append(station_data)
+        
+        return {"province_code": code, "province_name": config["name"], "series": series}

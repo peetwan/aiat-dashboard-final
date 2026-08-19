@@ -1081,40 +1081,27 @@ function renderCityCapital(section = {}) {
 }
 
 async function renderDisaster() {
-  const wrapper = document.getElementById("disasterSection");
-  const content = document.getElementById("disasterContent");
-  const code = state.selectedCode;
-  console.log("renderDisaster called, code:", code, "mapMode:", state.mapMode);
-  if (!code) { 
-    console.log("No code, hiding disaster section");
+  var wrapper = document.getElementById("disasterSection");
+  var content = document.getElementById("disasterContent");
+  var code = state.selectedCode;
+  if (!code || !wrapper || !content) { 
     if (wrapper) wrapper.hidden = true; 
     return; 
   }
-  if (!wrapper || !content) {
-    console.error("Disaster elements not found in DOM");
-    return;
-  }
   
   try {
-    console.log("Fetching disaster data for", code);
-    const response = await fetch("/api/public/v1/provinces/" + code + "/disaster-tracking", { cache: "no-store" });
-    console.log("Disaster API response:", response.status);
+    var response = await fetch("/api/public/v1/provinces/" + code + "/disaster-tracking", { cache: "no-store" });
     if (!response.ok) throw new Error("Disaster API " + response.status);
-    const data = await response.json();
-    console.log("Disaster data:", data);
+    var data = await response.json();
     if (state.selectedCode !== code) return;
     
-    const sources = data.sources || {};
-    const sourceCount = Object.keys(sources).length;
-    console.log("Source count:", sourceCount);
+    var sources = data.sources || {};
+    var sourceCount = Object.keys(sources).length;
     
-    if (sourceCount === 0) {
-      wrapper.hidden = true;
-      return;
-    }
-    
+    if (sourceCount === 0) { wrapper.hidden = true; return; }
     wrapper.hidden = false;
-    const sourceNames = {
+    
+    var sourceNames = {
       spu_rawangphai_uru: "RawangPhai อุตรดิตถ์",
       spu_sukhothai_water: "Sukhothai Water",
       spu_sukhothai_care: "Sukhothai Care",
@@ -1131,12 +1118,12 @@ async function renderDisaster() {
       var records = info.records || [];
       for (var i = 0; i < Math.min(records.length, 20); i++) {
         var record = records[i];
-        var fields = Object.entries(record).filter(function(kv) { return !kv[0].startsWith("_"); }).slice(0, 8);
+        var fields = Object.entries(record).filter(function(kv) { return !kv[0].startsWith("_"); }).slice(0, 6);
         html += '<div class="disaster-record"><table>';
         for (var j = 0; j < fields.length; j++) {
           var key = fields[j][0];
           var val = fields[j][1];
-          var display = typeof val === "object" ? JSON.stringify(val).slice(0, 60) : String(val ?? "").slice(0, 60);
+          var display = typeof val === "object" ? JSON.stringify(val).slice(0, 80) : String(val ?? "").slice(0, 80);
           if (display) html += "<tr><td>" + escapeHtml(key) + "</td><td>" + escapeHtml(display) + "</td></tr>";
         }
         html += "</table></div>";
@@ -1147,9 +1134,8 @@ async function renderDisaster() {
     }
     
     content.innerHTML = html;
-    console.log("Disaster render complete");
   } catch (error) {
-    console.error("Disaster load error:", error);
+    console.error("Disaster error:", error);
     if (wrapper) wrapper.hidden = true;
   }
 }
