@@ -1084,17 +1084,29 @@ async function renderDisaster() {
   const wrapper = document.getElementById("disasterSection");
   const content = document.getElementById("disasterContent");
   const code = state.selectedCode;
-  if (!code) { wrapper.hidden = true; return; }
+  console.log("renderDisaster called, code:", code, "mapMode:", state.mapMode);
+  if (!code) { 
+    console.log("No code, hiding disaster section");
+    if (wrapper) wrapper.hidden = true; 
+    return; 
+  }
+  if (!wrapper || !content) {
+    console.error("Disaster elements not found in DOM");
+    return;
+  }
   
   try {
-    const response = await fetch(`/api/public/v1/provinces/${code}/disaster-tracking`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Disaster API ${response.status}`);
+    console.log("Fetching disaster data for", code);
+    const response = await fetch("/api/public/v1/provinces/" + code + "/disaster-tracking", { cache: "no-store" });
+    console.log("Disaster API response:", response.status);
+    if (!response.ok) throw new Error("Disaster API " + response.status);
     const data = await response.json();
+    console.log("Disaster data:", data);
     if (state.selectedCode !== code) return;
     
-    state.disasterTracking = data;
     const sources = data.sources || {};
     const sourceCount = Object.keys(sources).length;
+    console.log("Source count:", sourceCount);
     
     if (sourceCount === 0) {
       wrapper.hidden = true;
@@ -1104,37 +1116,41 @@ async function renderDisaster() {
     wrapper.hidden = false;
     const sourceNames = {
       spu_rawangphai_uru: "RawangPhai อุตรดิตถ์",
-      spu_sukhothai_water: " Sukhothai Water",
-      spu_sukhothai_care: " Sukhothai Care",
-      spu_nsn_flood: " NSN Flood",
+      spu_sukhothai_water: "Sukhothai Water",
+      spu_sukhothai_care: "Sukhothai Care",
+      spu_nsn_flood: "NSN Flood",
     };
     
-    let html = `<div class="disaster-summary"><strong>${sourceCount} แหล่งติดตามภัย</strong><small>ข้อมูลสถานการณ์น้ำและภัย</small></div>`;
+    var html = '<div class="disaster-summary"><strong>' + sourceCount + ' แหล่งติดตามภัย</strong><small>ข้อมูลสถานการณ์น้ำและภัย</small></div>';
     
-    for (const [sid, info] of Object.entries(sources)) {
-      const name = sourceNames[sid] || sid;
-      html += `<details class="disaster-source" open>
-        <summary><strong>${name}</strong> <small>${info.count} รายการ</small></summary>
-        <div class="disaster-records">`;
+    for (var sid in sources) {
+      var info = sources[sid];
+      var name = sourceNames[sid] || sid;
+      html += '<details class="disaster-source" open><summary><strong>' + name + '</strong> <small>' + info.count + ' รายการ</small></summary><div class="disaster-records">';
       
-      for (const record of info.records.slice(0, 20)) {
-        const fields = Object.entries(record).filter(([k]) => !k.startsWith("_")).slice(0, 8);
+      var records = info.records || [];
+      for (var i = 0; i < Math.min(records.length, 20); i++) {
+        var record = records[i];
+        var fields = Object.entries(record).filter(function(kv) { return !kv[0].startsWith("_"); }).slice(0, 8);
         html += '<div class="disaster-record"><table>';
-        for (const [key, val] of fields) {
-          const display = typeof val === "object" ? JSON.stringify(val).slice(0, 60) : String(val ?? "").slice(0, 60);
-          if (display) html += `<tr><td>${escapeHtml(key)}</td><td>${escapeHtml(display)}</td></tr>`;
+        for (var j = 0; j < fields.length; j++) {
+          var key = fields[j][0];
+          var val = fields[j][1];
+          var display = typeof val === "object" ? JSON.stringify(val).slice(0, 60) : String(val ?? "").slice(0, 60);
+          if (display) html += "<tr><td>" + escapeHtml(key) + "</td><td>" + escapeHtml(display) + "</td></tr>";
         }
-        html += '</table></div>';
+        html += "</table></div>";
       }
       
-      if (info.count > 20) html += `<p class="disaster-more">…และอีก ${info.count - 20} รายการ</p>`;
-      html += '</div></details>';
+      if (info.count > 20) html += '<p class="disaster-more">…และอีก ' + (info.count - 20) + ' รายการ</p>';
+      html += "</div></details>";
     }
     
     content.innerHTML = html;
+    console.log("Disaster render complete");
   } catch (error) {
     console.error("Disaster load error:", error);
-    wrapper.hidden = true;
+    if (wrapper) wrapper.hidden = true;
   }
 }
 
