@@ -26,6 +26,10 @@ const state = {
   regionMarkers: [],
   countryZoom: null,
   pendingLock: null,
+  disasterCharts: [],
+  pendingDisasterCharts: [],
+  disasterChartSequence: 0,
+  stationHistoryChart: null,
 };
 
 const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
@@ -121,15 +125,11 @@ const MAP_MODES = {
   disaster: {
     label: "ติดตามภัย",
     legendTitle: "ข้อมูลติดตามภัย (SPU)",
-    legendNote: "สีเข้ม = มีหลายแหล่งติดตามสถานการณ์น้ำ",
+    legendNote: "สีเข้ม = มีหลายแหล่งติดตามสถานการณ์น้ำ · candidate เท่านั้น",
     zeroLabel: "ไม่มีข้อมูล",
-    value: (province) => {
-      const dp = state.disasterProvinces?.provinces || {};
-      const info = dp[province.province_code];
-      return info ? info.sources.length : null;
-    },
+    value: (province) => Number(province.disaster_source_count || 0) || null,
     format: (value) => `${formatNumber(value)} แหล่งติดตามภัย`,
-    summarize: (summary) => `${formatNumber(summary.total)} ระเบียนติดตามภัย`,
+    summarize: (summary) => `${formatNumber(summary.total)} แหล่งติดตามภัย`,
     steps: [
       { min: 4, color: "#8b1a1a", label: "4 แหล่ง" },
       { min: 3, color: "#b33636", label: "3 แหล่ง" },
@@ -302,6 +302,13 @@ async function loadDisasterProvinces() {
     const response = await fetch("/api/public/v1/disaster/provinces", { cache: "no-store" });
     if (response.ok) {
       state.disasterProvinces = await response.json();
+      const provinces = state.disasterProvinces?.provinces || {};
+      (state.catalog?.provinces || []).forEach((province) => {
+        const info = provinces[province.province_code];
+        province.disaster_source_count = info ? info.sources.length : 0;
+        province.disaster_record_count = info ? Number(info.total_records || 0) : 0;
+        province.disaster_sources = info ? info.sources : [];
+      });
     }
   } catch (e) {
     console.error("Failed to load disaster provinces:", e);
@@ -1081,63 +1088,462 @@ function renderCityCapital(section = {}) {
 }
 
 async function renderDisaster() {
-  var wrapper = document.getElementById("disasterSection");
-  var content = document.getElementById("disasterContent");
-  var code = state.selectedCode;
+  const wrapper = document.getElementById("disasterSection");
+  const content = document.getElementById("disasterContent");
+  const note = document.getElementById("disasterNote");
+  const code = state.selectedCode;
   if (!code || !wrapper || !content) { 
+    destroyDisasterCharts();
     if (wrapper) wrapper.hidden = true; 
     return; 
   }
   
   try {
-    var response = await fetch("/api/public/v1/provinces/" + code + "/disaster-tracking", { cache: "no-store" });
+    const response = await fetch("/api/public/v1/provinces/" + code + "/disaster-tracking", { cache: "no-store" });
     if (!response.ok) throw new Error("Disaster API " + response.status);
-    var data = await response.json();
+    const data = await response.json();
     if (state.selectedCode !== code) return;
     
-    var sources = data.sources || {};
-    var sourceCount = Object.keys(sources).length;
+    const sources = data.sources || {};
+    const sourceCount = Number(data.source_count || Object.keys(sources).length || 0);
+    const recordCount = Number(data.record_count || 0);
     
-    if (sourceCount === 0) { wrapper.hidden = true; return; }
-    wrapper.hidden = false;
-    
-    var sourceNames = {
-      spu_rawangphai_uru: "RawangPhai อุตรดิตถ์",
-      spu_sukhothai_water: "Sukhothai Water",
-      spu_sukhothai_care: "Sukhothai Care",
-      spu_nsn_flood: "NSN Flood",
-    };
-    
-    var html = '<div class="disaster-summary"><strong>' + sourceCount + ' แหล่งติดตามภัย</strong><small>ข้อมูลสถานการณ์น้ำและภัย</small></div>';
-    
-    for (var sid in sources) {
-      var info = sources[sid];
-      var name = sourceNames[sid] || sid;
-      html += '<details class="disaster-source" open><summary><strong>' + name + '</strong> <small>' + info.count + ' รายการ</small></summary><div class="disaster-records">';
-      
-      var records = info.records || [];
-      for (var i = 0; i < Math.min(records.length, 20); i++) {
-        var record = records[i];
-        var fields = Object.entries(record).filter(function(kv) { return !kv[0].startsWith("_"); }).slice(0, 6);
-        html += '<div class="disaster-record"><table>';
-        for (var j = 0; j < fields.length; j++) {
-          var key = fields[j][0];
-          var val = fields[j][1];
-          var display = typeof val === "object" ? JSON.stringify(val).slice(0, 80) : String(val ?? "").slice(0, 80);
-          if (display) html += "<tr><td>" + escapeHtml(key) + "</td><td>" + escapeHtml(display) + "</td></tr>";
-        }
-        html += "</table></div>";
-      }
-      
-      if (info.count > 20) html += '<p class="disaster-more">…และอีก ' + (info.count - 20) + ' รายการ</p>';
-      html += "</div></details>";
+    if (sourceCount === 0) {
+      destroyDisasterCharts();
+      wrapper.hidden = true;
+      return;
     }
+    wrapper.hidden = false;
+    if (note) note.textContent = data.quality_label_th || "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง";
+    destroyDisasterCharts();
+    state.pendingDisasterCharts = [];
     
+    const html = `
+      <div class="disaster-summary">
+        <article><span>แหล่งติดตามภัย</span><strong>${formatNumber(sourceCount)}</strong></article>
+        <article><span>candidate records</span><strong>${formatNumber(recordCount)}</strong></article>
+        <article><span>อัปเดตล่าสุดที่พบ</span><strong>${escapeHtml(data.latest_observed_at || "ไม่ระบุ")}</strong></article>
+      </div>
+      <div class="disaster-source-list">
+        ${Object.values(sources)
+          .map((info) => {
+            const records = info.records || [];
+            const datasetTags = (info.dataset_keys || [])
+              .map((key) => `<span>${escapeHtml(formatDisasterDatasetLabel(key))}</span>`)
+              .join("");
+            return `
+              <article class="disaster-source-card">
+                <header>
+                  <div><strong>${escapeHtml(info.name_th || info.source_id)}</strong><small>${escapeHtml(info.quality_label_th || data.quality_label_th || "")}</small></div>
+                  <span>${formatNumber(info.count || 0)} รายการ</span>
+                </header>
+                ${datasetTags ? `<div class="disaster-tags">${datasetTags}</div>` : ""}
+                ${renderDisasterInsights(info.insights || {}, records)}
+                ${Number(info.count || 0) > records.length ? `<p class="disaster-more">ยังมีอีก ${formatNumber(Number(info.count || 0) - records.length)} รายการใน candidate database</p>` : ""}
+              </article>`;
+          })
+          .join("")}
+      </div>`;
     content.innerHTML = html;
+    requestAnimationFrame(renderPendingDisasterCharts);
   } catch (error) {
     console.error("Disaster error:", error);
     if (wrapper) wrapper.hidden = true;
   }
+}
+
+function renderDisasterInsights(insights = {}, records = []) {
+  const datasetCounts = insights.dataset_counts || [];
+  const datasetBars = datasetCounts.length
+    ? `<section class="disaster-insight-block"><h4>ข้อมูลที่ดึงได้</h4>${disasterBars(datasetCounts)}</section>`
+    : "";
+  if (insights.kind === "incident_feed") {
+    const statusBars = (insights.status_counts || []).length
+      ? `<section class="disaster-insight-block"><h4>ประเภทเหตุการณ์</h4>${disasterBars(insights.status_counts)}</section>`
+      : "";
+    const priorityBars = (insights.priority_counts || []).length
+      ? `<section class="disaster-insight-block"><h4>ระดับประกาศ</h4>${disasterBars(insights.priority_counts)}</section>`
+      : "";
+    const highlights = (insights.highlights || []).length
+      ? `<section class="disaster-insight-block disaster-highlights"><h4>ประกาศล่าสุด</h4>${insights.highlights
+          .map((item) => `<article><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml([item.status, item.observed_at].filter(Boolean).join(" · "))}</small></article>`)
+          .join("")}</section>`
+      : "";
+    return `<div class="disaster-insights">${statusBars}${priorityBars}${highlights}${datasetBars}</div>`;
+  }
+  if (insights.kind === "water_metrics") {
+    return `
+      <div class="disaster-insights">
+        ${renderDisasterMetrics(insights.metrics || [])}
+        ${renderDisasterTrends(insights.trends || [])}
+        ${datasetBars}
+      </div>`;
+  }
+  if (insights.kind === "station_status") {
+    const stations = (insights.stations || []).filter((item) => item.station).slice(0, 10);
+    const stationCards = stations.length
+      ? `<section class="disaster-insight-block"><h4>สถานีตรวจวัด</h4><div class="disaster-station-grid">${stations
+          .map((item) => `
+            <article>
+              <strong>${escapeHtml(item.station)}</strong>
+              <span>${escapeHtml(item.status || "ไม่ระบุสถานะ")}</span>
+              <small>${[
+                item.water_level !== null && item.water_level !== undefined ? `ระดับน้ำ ${formatNumber(item.water_level, 2)} ม.รทก.` : null,
+                item.water_percent !== null && item.water_percent !== undefined ? `ปริมาณน้ำ ${formatNumber(item.water_percent, 1)}%` : null,
+                item.bank_level !== null && item.bank_level !== undefined ? `ตลิ่ง ${formatNumber(item.bank_level, 2)} ม.รทก.` : null,
+              ].filter(Boolean).map(escapeHtml).join(" · ")}</small>
+            </article>`)
+          .join("")}</div></section>`
+      : "";
+    const statusBars = (insights.status_counts || []).length
+      ? `<section class="disaster-insight-block"><h4>สถานะสถานี</h4>${disasterBars(insights.status_counts)}</section>`
+      : "";
+    return `<div class="disaster-insights">${statusBars}${stationCards}${datasetBars}</div>`;
+  }
+  if (insights.kind === "rain_shelter") {
+    const districtBars = (insights.district_counts || []).length
+      ? `<section class="disaster-insight-block"><h4>ศูนย์พักพิงตามอำเภอ</h4>${disasterBars(insights.district_counts)}</section>`
+      : "";
+    return `
+      <div class="disaster-insights">
+        ${renderDisasterMetrics(insights.metrics || [])}
+        ${renderDisasterTrends(insights.trends || [])}
+        ${districtBars}
+        ${datasetBars}
+      </div>`;
+  }
+  return records.length
+    ? `<div class="disaster-records">${records.slice(0, 4).map(renderDisasterRecord).join("")}</div>`
+    : datasetBars;
+}
+
+function formatDisasterDatasetLabel(key = "") {
+  const labels = {
+    "announcements.row": "ประกาศ",
+    "incident_map.row": "เหตุการณ์บนแผนที่",
+    "incidents.row": "รายงานเหตุการณ์",
+    "water_levels.row": "ระดับน้ำ",
+    "rain_24h.row": "ฝน 24 ชม.",
+    "stations.row": "สถานีตรวจวัด",
+    "shelters.row": "ศูนย์พักพิง",
+    "rain_analysis.row": "เรดาร์ฝน",
+    "dams.dam_medium": "เขื่อนขนาดกลาง",
+    "dams.dam_small_tele": "เขื่อนโทรมาตร",
+    "dams.dam_daily": "เขื่อนรายวัน",
+    "dams.dam_hourly": "เขื่อนรายชั่วโมง",
+  };
+  return labels[key] || String(key).replace(/_/g, " ");
+}
+
+function renderDisasterMetrics(metrics = []) {
+  const items = metrics.filter((item) => item.value !== null && item.value !== undefined);
+  if (!items.length) return "";
+  return `<section class="disaster-metrics">${items
+    .map((item) => `<article><span>${escapeHtml(item.label)}</span><strong>${formatNumber(item.value, 2)}</strong><small>${escapeHtml(item.unit || "")}</small></article>`)
+    .join("")}</section>`;
+}
+
+function renderDisasterTrends(trends = []) {
+  const visible = trends.filter((trend) => (trend.series || []).length || (trend.latest_points || []).length);
+  if (!visible.length) return "";
+  return visible
+    .map((trend) => `
+      <section class="disaster-insight-block">
+        <h4>${escapeHtml(trend.title)} <span>${escapeHtml(trend.unit || "")}</span></h4>
+        ${(trend.series || []).length || (trend.latest_points || []).length ? `<div class="disaster-trend-list">${[...(trend.series || []), ...(trend.latest_points || [])].map((series) => renderDisasterLineChart(series, trend.unit)).join("")}</div>` : ""}
+      </section>`)
+    .join("");
+}
+
+function renderDisasterLineChart(series = {}, unit = "") {
+  const points = (series.points || []).filter((point) => Number.isFinite(Number(point.v)));
+  if (!points.length) return "";
+  const chartId = `disasterChart${++state.disasterChartSequence}`;
+  state.pendingDisasterCharts.push({
+    id: chartId,
+    label: series.label || "สถานี",
+    stationId: series.station_id || series.label || "",
+    metric: series.metric || "water",
+    unit,
+    points,
+  });
+  const firstLabel = points[0]?.t ? formatShortDateTime(points[0].t) : "";
+  const lastLabel = points[points.length - 1]?.t ? formatShortDateTime(points[points.length - 1].t) : "";
+  return `
+    <article class="disaster-trend">
+      <div class="disaster-trend-head">
+        <div>
+          <strong>${escapeHtml(series.label)}</strong>
+          <small>${formatNumber(series.latest, 2)} ${escapeHtml(unit || "")}</small>
+        </div>
+        <button type="button" data-disaster-history data-station-id="${escapeHtml(series.station_id || series.label || "")}" data-station-name="${escapeHtml(series.label || "")}" data-metric="${escapeHtml(series.metric || "water")}">ขยาย</button>
+      </div>
+      <div class="disaster-chart-frame"><canvas id="${chartId}" aria-label="${escapeHtml(series.label)}"></canvas></div>
+      <div class="disaster-trend-axis"><span>${escapeHtml(firstLabel)}</span><span>${escapeHtml(lastLabel)}</span></div>
+    </article>`;
+}
+
+function destroyDisasterCharts() {
+  state.disasterCharts.forEach((chart) => chart.destroy());
+  state.disasterCharts = [];
+}
+
+function renderPendingDisasterCharts() {
+  if (!window.Chart) return;
+  state.pendingDisasterCharts.forEach((spec) => {
+    const canvas = document.getElementById(spec.id);
+    if (!canvas) return;
+    const labels = spec.points.map((point) => formatShortDateTime(point.t));
+    const values = spec.points.map((point) => Number(point.v));
+    const chart = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: spec.label,
+            data: values,
+            borderColor: "#a92626",
+            backgroundColor: "rgba(169, 38, 38, 0.12)",
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            tension: 0.25,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { intersect: false, mode: "index" },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `${formatNumber(context.parsed.y, 2)} ${spec.unit || ""}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: "#7b8580", maxTicksLimit: 4, font: { size: 10 } },
+            grid: { display: false },
+          },
+          y: {
+            ticks: {
+              color: "#7b8580",
+              font: { size: 10 },
+              callback: (value) => formatNumber(value, 1),
+            },
+            grid: { color: "rgba(160, 120, 120, 0.18)" },
+          },
+        },
+      },
+    });
+    state.disasterCharts.push(chart);
+  });
+  state.pendingDisasterCharts = [];
+}
+
+function ensureStationHistoryModal() {
+  let modal = document.getElementById("stationHistoryModal");
+  if (modal) return modal;
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
+      <div class="station-history-modal" id="stationHistoryModal" hidden>
+        <div class="station-history-dialog" role="dialog" aria-modal="true" aria-labelledby="stationHistoryTitle">
+          <header>
+            <div>
+              <span id="stationHistoryKicker">ติดตามภัย</span>
+              <h3 id="stationHistoryTitle">ประวัติสถานี</h3>
+              <small id="stationHistoryStatus"></small>
+            </div>
+            <button type="button" data-station-history-close aria-label="ปิด">×</button>
+          </header>
+          <div class="station-history-controls" role="group" aria-label="เลือกช่วงกราฟ">
+            <button type="button" class="active" data-history-grain="daily">Daily</button>
+            <button type="button" data-history-grain="weekly">Weekly</button>
+            <button type="button" data-history-grain="monthly">Monthly</button>
+          </div>
+          <div class="station-history-chart"><canvas id="stationHistoryChart"></canvas></div>
+          <p id="stationHistoryMessage"></p>
+        </div>
+      </div>`
+  );
+  modal = document.getElementById("stationHistoryModal");
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal || event.target.closest("[data-station-history-close]")) {
+      closeStationHistoryModal();
+    }
+    const grainButton = event.target.closest("[data-history-grain]");
+    if (grainButton) {
+      modal.querySelectorAll("[data-history-grain]").forEach((button) => {
+        button.classList.toggle("active", button === grainButton);
+      });
+      loadStationHistory({
+        stationId: modal.dataset.stationId,
+        stationName: modal.dataset.stationName,
+        metric: modal.dataset.metric,
+        grain: grainButton.dataset.historyGrain,
+      });
+    }
+  });
+  return modal;
+}
+
+function closeStationHistoryModal() {
+  const modal = document.getElementById("stationHistoryModal");
+  if (modal) modal.hidden = true;
+  if (state.stationHistoryChart) {
+    state.stationHistoryChart.destroy();
+    state.stationHistoryChart = null;
+  }
+}
+
+function openStationHistoryModal({ stationId, stationName, metric }) {
+  if (!state.selectedCode || !stationId) return;
+  const modal = ensureStationHistoryModal();
+  modal.dataset.stationId = stationId;
+  modal.dataset.stationName = stationName || stationId;
+  modal.dataset.metric = metric || "water";
+  modal.hidden = false;
+  modal.querySelectorAll("[data-history-grain]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.historyGrain === "daily");
+  });
+  loadStationHistory({ stationId, stationName, metric: metric || "water", grain: "daily" });
+}
+
+async function loadStationHistory({ stationId, stationName, metric, grain }) {
+  const modal = ensureStationHistoryModal();
+  const title = document.getElementById("stationHistoryTitle");
+  const status = document.getElementById("stationHistoryStatus");
+  const message = document.getElementById("stationHistoryMessage");
+  title.textContent = stationName || stationId;
+  status.textContent = "กำลังโหลดประวัติ 90 วัน";
+  message.textContent = "";
+  const params = new URLSearchParams({ metric: metric || "water", grain: grain || "daily", days: "90" });
+  try {
+    const response = await fetch(`/api/public/v1/provinces/${state.selectedCode}/disaster-stations/${encodeURIComponent(stationId)}/history?${params}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`History API ${response.status}`);
+    const data = await response.json();
+    status.textContent = stationHistoryStatusText(data);
+    renderStationHistoryChart(data);
+    if (!data.points?.length) {
+      message.textContent = "ยังไม่มีประวัติย้อนหลังของสถานีนี้จาก endpoint ที่เชื่อมอยู่";
+    } else if (data.history_status === "snapshot_only") {
+      message.textContent = "ตอนนี้แสดงจาก snapshot ที่เก็บไว้ ยังไม่ใช่ backfill 90 วันจาก historical endpoint";
+    } else {
+      message.textContent = data.quality_label_th || "";
+    }
+  } catch (error) {
+    console.error("Station history error:", error);
+    status.textContent = "โหลดประวัติไม่สำเร็จ";
+    message.textContent = "ยังไม่สามารถเชื่อมประวัติย้อนหลังของสถานีนี้ได้";
+    renderStationHistoryChart({ metric, grain, unit: "", points: [] });
+  }
+}
+
+function stationHistoryStatusText(data = {}) {
+  const metric = data.metric === "rain" ? "ฝน" : "ระดับน้ำ";
+  const grain = { daily: "รายวัน", weekly: "รายสัปดาห์", monthly: "รายเดือน" }[data.grain] || "รายวัน";
+  const status = data.history_status === "available" ? "history connected" : data.history_status === "snapshot_only" ? "snapshot only" : "ยังไม่เชื่อม history";
+  return `${metric} ${grain} · ${data.days || 90} วัน · ${status}`;
+}
+
+function renderStationHistoryChart(data = {}) {
+  if (state.stationHistoryChart) {
+    state.stationHistoryChart.destroy();
+    state.stationHistoryChart = null;
+  }
+  const canvas = document.getElementById("stationHistoryChart");
+  if (!canvas || !window.Chart) return;
+  const points = data.points || [];
+  const chartType = data.metric === "rain" ? "bar" : "line";
+  state.stationHistoryChart = new Chart(canvas, {
+    type: chartType,
+    data: {
+      labels: points.map((point) => point.t),
+      datasets: [{
+        label: data.metric === "rain" ? "ฝน" : "ระดับน้ำ",
+        data: points.map((point) => Number(point.v)),
+        borderColor: "#a92626",
+        backgroundColor: data.metric === "rain" ? "rgba(169, 38, 38, 0.32)" : "rgba(169, 38, 38, 0.12)",
+        borderWidth: 2,
+        pointRadius: data.metric === "rain" ? 0 : 2,
+        tension: 0.25,
+        fill: data.metric !== "rain",
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `${formatNumber(context.parsed.y, 2)} ${data.unit || ""}`,
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: "#6f7b75", maxTicksLimit: 8 }, grid: { display: false } },
+        y: {
+          ticks: { color: "#6f7b75", callback: (value) => formatNumber(value, 1) },
+          grid: { color: "rgba(160, 120, 120, 0.18)" },
+        },
+      },
+    },
+  });
+}
+
+function renderDisasterLatestPoints(points = [], unit = "") {
+  const items = points.filter((point) => point.label && Number.isFinite(Number(point.latest)));
+  if (!items.length) return "";
+  return `
+    <div class="disaster-latest-grid">
+      ${items.map((item) => `
+        <article>
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${formatNumber(item.latest, 2)}</strong>
+          <small>${escapeHtml(unit || "")}</small>
+        </article>`).join("")}
+    </div>`;
+}
+
+function formatShortDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 16);
+  return date.toLocaleDateString("th-TH", { month: "short", day: "numeric" });
+}
+
+function disasterBars(items = []) {
+  const max = Math.max(...items.map((item) => Number(item.value) || 0), 1);
+  return `<div class="disaster-bars">${items
+    .map((item) => {
+      const value = Number(item.value) || 0;
+      return `<p><span>${escapeHtml(item.label)}</span><i><b style="width:${Math.max(2, (value / max) * 100).toFixed(1)}%"></b></i><strong>${formatNumber(value)}</strong></p>`;
+    })
+    .join("")}</div>`;
+}
+
+function renderDisasterRecord(record = {}) {
+  const primary = record.label || record.status || record.dataset_key || "ระเบียนติดตามภัย";
+  const facts = [
+    record.district ? ["พื้นที่", record.district] : null,
+    record.observed_at ? ["เวลา", record.observed_at] : null,
+    record.water_level !== undefined ? ["ระดับน้ำ", record.water_level] : null,
+    record.rainfall !== undefined ? ["ฝน", record.rainfall] : null,
+    record.status ? ["สถานะ", record.status] : null,
+  ].filter(Boolean);
+  return `
+    <div class="disaster-record">
+      <strong>${escapeHtml(primary)}</strong>
+      ${facts.length ? `<dl>${facts.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>` : ""}
+    </div>`;
 }
 
 function renderHousing(section = {}) {
@@ -1804,6 +2210,8 @@ async function selectProvince(code, moveMap = true) {
 
 function closePanel(refitMap = true) {
   state.requestToken += 1;
+  closeStationHistoryModal();
+  destroyDisasterCharts();
   if (state.mapLoaded && state.selectedCode) {
     state.map.setFeatureState({ source: "provinces", id: state.selectedCode }, { selected: false });
   }
@@ -1875,9 +2283,19 @@ function bindEvents() {
     state.cultureVisible += 12;
     if (state.currentBriefing) renderCulture(state.currentBriefing.sections.culture);
   });
+  document.addEventListener("click", (event) => {
+    const historyButton = event.target.closest("[data-disaster-history]");
+    if (!historyButton) return;
+    openStationHistoryModal({
+      stationId: historyButton.dataset.stationId,
+      stationName: historyButton.dataset.stationName,
+      metric: historyButton.dataset.metric,
+    });
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
-    if (state.selectedCode) closePanel();
+    if (!document.getElementById("stationHistoryModal")?.hidden) closeStationHistoryModal();
+    else if (state.selectedCode) closePanel();
     else if (state.selectedRegion) backToCountry();
   });
 }

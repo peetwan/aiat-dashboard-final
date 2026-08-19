@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.database import SessionLocal
+from app.models import DashboardRecord
 from app.public_artifacts import artifact_inputs
 
 
@@ -19,6 +22,27 @@ def read_json(path: Path) -> dict:
 
 def reviewed_catalog() -> dict:
     return read_json(PROJECT_ROOT / "config" / "source_catalog.json")
+
+
+def catalog_with_default_disaster_fields(dashboard: dict) -> list[dict]:
+    rows = []
+    for province in dashboard["provinces"]:
+        item = dict(province)
+        item.setdefault("disaster_source_count", 0)
+        item.setdefault("disaster_record_count", 0)
+        item.setdefault("disaster_sources", [])
+        rows.append(item)
+    return rows
+
+
+def boundaries_with_default_disaster_fields(boundary_artifact: dict) -> dict:
+    payload = json.loads(json.dumps(boundary_artifact))
+    for feature in payload["features"]:
+        props = feature.setdefault("properties", {})
+        props.setdefault("disaster_source_count", 0)
+        props.setdefault("disaster_record_count", 0)
+        props.setdefault("disaster_sources", [])
+    return payload
 
 
 def test_health_and_catalog_summary():
@@ -146,6 +170,310 @@ def test_payload_api_is_locked_by_default():
         assert response.status_code == 403
 
 
+def _seed_disaster_record(source_id: str, dataset_key: str, payload: dict, index: int) -> None:
+    now = datetime.now(timezone.utc)
+    with SessionLocal() as session:
+        session.add(
+            DashboardRecord(
+                source_id=source_id,
+                dataset_key=dataset_key,
+                source_record_id=f"{source_id}-{index}",
+                record_hash=f"{index:064x}",
+                quality_status="needs_review",
+                fetched_at=now,
+                as_of=None,
+                payload=payload,
+            )
+        )
+        session.commit()
+
+
+def test_disaster_tracking_uses_correct_province_mapping_and_safe_preview():
+    with TestClient(app) as client:
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุโขทัย",
+                "station_name_th": "สถานีทดสอบสุโขทัย",
+                "amphoe_th": "เมืองสุโขทัย",
+                "waterlevel_datetime": "2026-08-19T01:00:00+07:00",
+                "waterlevel_msl": 42.1,
+                "address": "hidden address",
+                "phone": "0800000000",
+                "email": "hidden@example.com",
+                "token": "secret",
+                "cookie": "secret",
+            },
+            1,
+        )
+        _seed_disaster_record(
+            "spu_nsn_flood",
+            "stations.row",
+            {
+                "station_name": "สถานีนครสวรรค์",
+                "station_code": "NSN-1",
+                "station_url": "https://nsn-flood.nsru.ac.th/water-station/1",
+            },
+            2,
+        )
+        _seed_disaster_record(
+            "spu_rawangphai_uru",
+            "rain_analysis.row",
+            {
+                "province": "อุตรดิตถ์",
+                "timestamp": "2026-08-19T02:00:00+07:00",
+                "avg_rain_mm": 12.5,
+            },
+            3,
+        )
+
+        provinces = client.get("/api/public/v1/disaster/provinces").json()["provinces"]
+        assert provinces["64"]["sources"] == ["spu_sukhothai_water"]
+        assert provinces["60"]["sources"] == ["spu_nsn_flood"]
+        assert provinces["53"]["sources"] == ["spu_rawangphai_uru"]
+        assert "68" not in provinces
+        assert "69" not in provinces
+
+        sukhothai = client.get("/api/public/v1/provinces/64/disaster-tracking")
+        assert sukhothai.status_code == 200
+        payload = sukhothai.json()
+        assert payload["province_name"] == "สุโขทัย"
+        assert payload["source_count"] == 1
+        assert payload["record_count"] == 1
+        response_text = json.dumps(payload, ensure_ascii=False)
+        for sensitive in ("hidden address", "0800000000", "hidden@example.com", "secret"):
+            assert sensitive not in response_text
+        for forbidden_key in ("address", "phone", "email", "token", "cookie"):
+            assert forbidden_key not in response_text
+
+        assert client.get("/api/public/v1/provinces/68/disaster-tracking").json()[
+            "source_count"
+        ] == 0
+        assert client.get("/api/public/v1/provinces/69/disaster-tracking").json()[
+            "source_count"
+        ] == 0
+
+
+def test_public_catalog_exposes_live_disaster_counts():
+    with TestClient(app) as client:
+        _seed_disaster_record(
+            "spu_sukhothai_care",
+            "incidents.row",
+            {"title": "ประกาศทดสอบ", "_fetched_at": "2026-08-19T01:00:00+00:00"},
+            4,
+        )
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "rain_24h.row",
+            {"province_th": "สุโขทัย", "station_name_th": "สถานีฝน", "rainfall_datetime": "2026-08-19T02:00:00+00:00", "rain_24h": 4},
+            5,
+        )
+
+        provinces = client.get("/api/public/v1/provinces").json()
+        assert all("disaster_source_count" in row for row in provinces)
+        assert all("disaster_record_count" in row for row in provinces)
+        sukhothai = next(row for row in provinces if row["province_code"] == "64")
+        assert sukhothai["disaster_source_count"] == 2
+        assert sukhothai["disaster_record_count"] == 2
+        assert sukhothai["disaster_sources"] == [
+            "spu_sukhothai_care",
+            "spu_sukhothai_water",
+        ]
+
+
+def test_sukhothai_water_filters_national_rows_to_sukhothai():
+    with TestClient(app) as client:
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุโขทัย",
+                "station_name_th": "สถานีสุโขทัย",
+                "waterlevel_datetime": "2026-08-19T02:00:00+00:00",
+                "waterlevel_msl": 31.2,
+            },
+            6,
+        )
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุราษฎร์ธานี",
+                "station_name_th": "สถานีนอกพื้นที่",
+                "waterlevel_datetime": "2026-08-19T02:00:00+00:00",
+                "waterlevel_msl": 4.7,
+            },
+            7,
+        )
+
+        payload = client.get("/api/public/v1/provinces/64/disaster-tracking").json()
+        assert payload["source_count"] == 1
+        assert payload["record_count"] == 1
+        response_text = json.dumps(payload, ensure_ascii=False)
+        assert "สถานีสุโขทัย" in response_text
+        assert "สถานีนอกพื้นที่" not in response_text
+
+
+def test_thaiwater_maps_national_rows_to_catalog_provinces():
+    with TestClient(app) as client:
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "เชียงใหม่",
+                "station_name_th": "สถานีเชียงใหม่",
+                "waterlevel_datetime": "2026-08-19T01:00:00+00:00",
+                "waterlevel_msl": 11.5,
+            },
+            8,
+        )
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุโขทัย",
+                "station_name_th": "สถานีสุโขทัย",
+                "waterlevel_datetime": "2026-08-19T01:00:00+00:00",
+                "waterlevel_msl": 22.5,
+            },
+            9,
+        )
+
+        provinces = client.get("/api/public/v1/disaster/provinces").json()["provinces"]
+        assert "50" in provinces
+        assert provinces["50"]["sources"] == ["spu_sukhothai_water"]
+
+        chiang_mai = client.get("/api/public/v1/provinces/50/disaster-tracking").json()
+        assert chiang_mai["province_name"] == "เชียงใหม่"
+        assert chiang_mai["source_count"] == 1
+        assert chiang_mai["record_count"] == 1
+        response_text = json.dumps(chiang_mai, ensure_ascii=False)
+        assert "ThaiWater ระดับน้ำ/ฝน/เขื่อน" in response_text
+        assert "สถานีเชียงใหม่" in response_text
+        assert "สถานีสุโขทัย" not in response_text
+
+
+def test_disaster_station_history_aggregates_water_grains_without_raw_fields():
+    with TestClient(app) as client:
+        rows = [
+            ("2026-06-01T07:00:00+00:00", 10.0),
+            ("2026-06-02T07:00:00+00:00", 12.0),
+            ("2026-07-01T07:00:00+00:00", 14.0),
+        ]
+        for offset, (timestamp, value) in enumerate(rows, start=20):
+            _seed_disaster_record(
+                "spu_sukhothai_water",
+                "water_levels.row",
+                {
+                    "province_th": "เชียงใหม่",
+                    "station_id": 900,
+                    "station_name_th": "สถานีประวัติน้ำ",
+                    "waterlevel_datetime": timestamp,
+                    "waterlevel_msl": value,
+                    "phone": "0800000000",
+                },
+                offset,
+            )
+
+        daily = client.get(
+            "/api/public/v1/provinces/50/disaster-stations/900/history?metric=water&grain=daily&days=90"
+        )
+        assert daily.status_code == 200
+        payload = daily.json()
+        assert payload["history_status"] == "snapshot_only"
+        assert payload["unit"] == "ม.รทก."
+        assert payload["station_name"] == "สถานีประวัติน้ำ"
+        assert [point["v"] for point in payload["points"]] == [10.0, 12.0, 14.0]
+        assert "0800000000" not in json.dumps(payload, ensure_ascii=False)
+        assert "phone" not in json.dumps(payload, ensure_ascii=False)
+
+        monthly = client.get(
+            "/api/public/v1/provinces/50/disaster-stations/900/history?metric=water&grain=monthly&days=90"
+        ).json()
+        assert monthly["points"] == [
+            {"t": "2026-06", "v": 11.0, "samples": 2},
+            {"t": "2026-07", "v": 14.0, "samples": 1},
+        ]
+
+
+def test_disaster_station_history_uses_stable_station_code_identity():
+    with TestClient(app) as client:
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุโขทัย",
+                "station_id": 2972,
+                "station_code": "Y.15",
+                "station_name_th": "บ้านกง",
+                "waterlevel_datetime": "2026-08-19T16:00:00+00:00",
+                "waterlevel_msl": 41.33,
+            },
+            40,
+        )
+        _seed_disaster_record(
+            "spu_sukhothai_water",
+            "water_levels.row",
+            {
+                "province_th": "สุโขทัย",
+                "station_id": 11688944,
+                "station_code": "ridhydro_Y.15",
+                "station_name_th": "บ้านกง",
+                "waterlevel_datetime": "2026-08-19T21:00:00+00:00",
+                "waterlevel_msl": 41.30,
+            },
+            41,
+        )
+
+        detail = client.get("/api/public/v1/provinces/64/disaster-tracking").json()
+        water = detail["sources"]["spu_sukhothai_water"]["insights"]["trends"][0]
+        station = next(item for item in water["series"] if item["station_id"] == "Y.15")
+        assert station["label"] == "บ้านกง"
+        assert len(station["points"]) == 2
+
+        history = client.get(
+            "/api/public/v1/provinces/64/disaster-stations/Y.15/history?metric=water&grain=daily&days=90"
+        ).json()
+        assert history["history_status"] == "snapshot_only"
+        assert history["points"] == [{"t": "2026-08-19", "v": 41.315, "samples": 2}]
+
+
+def test_disaster_station_history_aggregates_rain_totals_and_unavailable():
+    with TestClient(app) as client:
+        rows = [
+            ("2026-06-01T07:00:00+00:00", 2.0),
+            ("2026-06-02T07:00:00+00:00", 3.0),
+            ("2026-06-09T07:00:00+00:00", 5.0),
+        ]
+        for offset, (timestamp, value) in enumerate(rows, start=30):
+            _seed_disaster_record(
+                "spu_sukhothai_water",
+                "rain_24h.row",
+                {
+                    "province_th": "เชียงใหม่",
+                    "station_id": 901,
+                    "station_name_th": "สถานีประวัติฝน",
+                    "rainfall_datetime": timestamp,
+                    "rain_24h": value,
+                },
+                offset,
+            )
+
+        weekly = client.get(
+            "/api/public/v1/provinces/50/disaster-stations/901/history?metric=rain&grain=weekly&days=90"
+        ).json()
+        assert weekly["unit"] == "มม."
+        assert weekly["history_status"] == "snapshot_only"
+        assert [point["v"] for point in weekly["points"]] == [5.0, 5.0]
+
+        unavailable = client.get(
+            "/api/public/v1/provinces/50/disaster-stations/missing/history?metric=rain&grain=daily&days=90"
+        ).json()
+        assert unavailable["history_status"] == "unavailable"
+        assert unavailable["points"] == []
+
+
 def test_reviewed_downloads_support_head_without_exposing_internal_paths():
     download_path = PUBLIC_ROOT / "province_evidence.csv"
 
@@ -246,7 +574,7 @@ def test_public_projection_and_downloads_are_available():
 
         all_provinces = client.get("/api/public/v1/provinces").json()
         assert len(all_provinces) == expected_province_count
-        assert all_provinces == dashboard["provinces"]
+        assert all_provinces == catalog_with_default_disaster_fields(dashboard)
         provinces_with_evidence = client.get(
             "/api/public/v1/provinces?has_evidence=true"
         ).json()
@@ -263,7 +591,9 @@ def test_public_projection_and_downloads_are_available():
         assert roi_et.status_code == 200
         assert roi_et.json()["province_name_th"] == "ร้อยเอ็ด"
         assert roi_et.json() == next(
-            row for row in dashboard["provinces"] if row["province_code"] == "45"
+            row
+            for row in catalog_with_default_disaster_fields(dashboard)
+            if row["province_code"] == "45"
         )
 
         songkhla = client.get("/api/public/v1/provinces/90")
@@ -271,7 +601,9 @@ def test_public_projection_and_downloads_are_available():
         songkhla_payload = songkhla.json()
         assert songkhla_payload["province_name_th"] == "สงขลา"
         assert songkhla_payload == next(
-            row for row in dashboard["provinces"] if row["province_code"] == "90"
+            row
+            for row in catalog_with_default_disaster_fields(dashboard)
+            if row["province_code"] == "90"
         )
 
         briefing = client.get("/api/public/v1/provinces/90/briefing")
@@ -444,7 +776,7 @@ def test_public_projection_and_downloads_are_available():
         )
 
         boundary = client.get("/api/public/v1/map/provinces").json()
-        assert boundary == boundary_artifact
+        assert boundary == boundaries_with_default_disaster_fields(boundary_artifact)
         assert len(boundary["features"]) == expected_province_count
 
         points = client.get("/api/public/v1/map/cultural-points").json()
@@ -666,7 +998,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 20
+    assert len(public_operations) == 24
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

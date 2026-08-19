@@ -61,6 +61,9 @@ class ProvinceResponse(PublicApiModel):
     apptech_registered_users: int | float | None
     apptech_interactions: int
     city_capital_cities: int
+    disaster_source_count: int
+    disaster_record_count: int
+    disaster_sources: list[str]
     evidence_sources: list[str]
     evidence_source_count: int
     quality_status: str
@@ -177,6 +180,61 @@ class LearningDashboardResponse(PublicApiModel):
     non_province_tables: dict[str, JsonObject]
     non_province_impact: JsonObject
     evidence: list[str]
+
+
+class DisasterSourceSummary(PublicApiModel):
+    source_id: str
+    name_th: str
+    count: int
+    dataset_keys: list[str]
+    latest_observed_at: str | None
+    latest_fetched_at: str | None
+    quality_label_th: str
+    insights: JsonObject
+    records: list[JsonObject]
+
+
+class DisasterTrackingResponse(PublicApiModel):
+    province_code: str
+    province_name: str
+    source_count: int
+    record_count: int
+    latest_observed_at: str | None
+    quality_label_th: str
+    sources: dict[str, DisasterSourceSummary]
+
+
+class DisasterProvinceIndexItem(PublicApiModel):
+    province_name: str
+    sources: list[str]
+    total_records: int
+
+
+class DisasterProvinceIndexResponse(PublicApiModel):
+    provinces: dict[str, DisasterProvinceIndexItem]
+    total_provinces: int
+
+
+class DisasterTimeseriesResponse(PublicApiModel):
+    province_code: str
+    province_name: str | None = None
+    series: list[JsonObject]
+
+
+class DisasterStationHistoryResponse(PublicApiModel):
+    province_code: str
+    province_name: str | None = None
+    station_id: str
+    station_name: str | None = None
+    metric: Literal["water", "rain"]
+    grain: Literal["daily", "weekly", "monthly"]
+    days: int
+    window_start: str | None = None
+    window_end: str | None = None
+    unit: str
+    history_status: Literal["available", "snapshot_only", "unavailable"]
+    quality_label_th: str
+    points: list[JsonObject]
 
 
 class DatabaseCoverageResponse(PublicApiModel):
