@@ -1,0 +1,96 @@
+{
+  "contract_version": "1.1",
+  "source_id": "spu_rawangphai_uru",
+  "connector": "app.connectors.spu_rawangphai_uru:SpuRawangphaiUruConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^water_levels\\.row$",
+      "grain_th": "ระดับน้ำหนึ่งสถานี",
+      "identity_options": [
+        [
+          "station_id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "district",
+        "subdistrict"
+      ],
+      "as_of_fields": [
+        "measured_at",
+        "updated_at",
+        "fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^rain_analysis\\.row$",
+      "grain_th": "ข้อมูลฝนหนึ่งจุด",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "point_no"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province"
+      ],
+      "as_of_fields": [
+        "timestamp",
+        "fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^shelters\\.row$",
+      "grain_th": "ที่พักพิงหนึ่งแห่ง",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "name"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "district",
+        "subdistrict"
+      ],
+      "as_of_fields": [
+        "fetched_at"
+      ]
+    }
+  ],
+  "completeness_checks": [
+    "JSON API responses must have a 'data' key with an array",
+    "Each record is flattened to extract meaningful fields"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
+  },
+  "notes_th": "Connector สำหรับ RawangPhai URU platform ดึงข้อมูลระดับน้ำ ฝน และที่พักพิงจาก JSON API",
+  "sample_fixture": "tests/fixtures/connectors/spu_rawangphai_uru.json"
+}

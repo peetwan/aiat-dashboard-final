@@ -1,0 +1,9 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "spu_rawangphai_uru",
+  "records": [
+    {"dataset_key": "water_levels.row", "payload": {"station_id": "fixture-station-01", "name_th": "สถานีตัวอย่าง", "province": "อุตรดิตถ์", "fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "rain_analysis.row", "payload": {"id": "fixture-rain-01", "province": "อุตรดิตถ์", "avg_rain_mm": 0.0, "fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "shelters.row", "payload": {"id": "fixture-shelter-01", "name": "ที่พักตัวอย่าง", "province": "อุตรดิตถ์", "fetched_at": "2026-08-19T00:00:00Z"}}
+  ]
+}

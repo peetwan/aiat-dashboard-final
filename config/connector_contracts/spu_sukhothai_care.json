@@ -1,0 +1,101 @@
+{
+  "contract_version": "1.1",
+  "source_id": "spu_sukhothai_care",
+  "connector": "app.connectors.spu_sukhothai_care:SpuSukhothaiCareConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^announcements\\.row$",
+      "grain_th": "ประกาศหนึ่งรายการ",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [],
+      "as_of_fields": [
+        "createdAt",
+        "updatedAt",
+        "_fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^incidents\\.row$",
+      "grain_th": "เหตุการณ์หนึ่งรายการ",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "district",
+        "subdistrict"
+      ],
+      "as_of_fields": [
+        "createdAt",
+        "updatedAt",
+        "_fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^incident_map\\.row$",
+      "grain_th": "ตำแหน่งเหตุการณ์หนึ่งจุดบนแผนที่",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "lat",
+        "lng"
+      ],
+      "as_of_fields": [
+        "_fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^incident_stats\\.row$",
+      "grain_th": "สถิติเหตุการณ์หนึ่งรายการ",
+      "identity_options": [
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [],
+      "as_of_fields": [
+        "_fetched_at"
+      ]
+    }
+  ],
+  "completeness_checks": [
+    "API endpoints return JSON with pagination support",
+    "Collection extraction via data/items/results/records key"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
+  },
+  "notes_th": "Connector สำหรับ SukhothaiCare FloodGuard ดึงข้อมูลประกาศ เหตุการณ์ และสถิติ",
+  "sample_fixture": "tests/fixtures/connectors/spu_sukhothai_care.json"
+}

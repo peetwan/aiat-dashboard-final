@@ -2701,7 +2701,7 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/25_spu_sukhothai_care/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "metadata_only",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
       "readiness_status": "metadata_only",
       "cloud_policy": "metadata_only",
@@ -2710,7 +2710,64 @@
       "expected_record_count": 0,
       "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "86c60efb74bcda7474755a59fcf8465c126a8969f3d87f2baef8afed2f15f290",
+          "method": "GET",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/announcements",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "page=<value>&limit=<value>"
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "0794fcfe63c2529e7687f110248294b0e5073634b75e0247d24cb0e871696e33",
+          "method": "GET",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "page=<value>&limit=<value>"
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "bbe4d66ebf2319adf40ff68976ba4369ccd70c478c43092a0821fa9dff2f30eb",
+          "method": "GET",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/map",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "swLat=<value>&swLng=<value>&neLat=<value>&neLng=<value>"
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "2a820f99395d3db17d800e2a795439c16115e5f55e6556653f4cb385c5550268",
+          "method": "GET",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/stats",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        }
+      ]
     },
     {
       "ordinal": 26,
@@ -2722,7 +2779,7 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/26_spu_sukhothai_water/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "metadata_only",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
       "readiness_status": "metadata_only",
       "cloud_policy": "metadata_only",
@@ -2731,7 +2788,50 @@
       "expected_record_count": 0,
       "notes_th": "ตรวจ historical measurement, timestamp และ data endpoint",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "94378c2628c8a9848a6b5f50bc807d2ed54c80ba537e8e19df91e497f31f5484",
+          "method": "GET",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "17baecab05cd5de6c7caa05ff3bfb376feac60cba53d8d9971d6df662b72a202",
+          "method": "GET",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "cf5d7b7a7b933892e8871c8a834cbcdbb80dbeca4e146b02246446406b2130b5",
+          "method": "GET",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/analyst/dam",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        }
+      ]
     },
     {
       "ordinal": 27,
@@ -2743,7 +2843,7 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/27_spu_nsn_flood/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "metadata_only",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
       "readiness_status": "metadata_only",
       "cloud_policy": "metadata_only",
@@ -2752,7 +2852,22 @@
       "expected_record_count": 0,
       "notes_th": "ตรวจ domain availability และ data freshness",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "d0f42996dfc7fdd86210669b8a4832091b685b16fcff43924c585d3a743363d7",
+          "method": "GET",
+          "url": "https://nsn-flood.nsru.ac.th/forecast",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        }
+      ]
     },
     {
       "ordinal": 28,
@@ -2764,7 +2879,7 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/28_spu_rawangphai_uru/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "metadata_only",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
       "readiness_status": "metadata_only",
       "cloud_policy": "metadata_only",
@@ -2773,7 +2888,50 @@
       "expected_record_count": 0,
       "notes_th": "ตรวจ alert feed, incident history และ API/JSON endpoint",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "a0e8f2bf57f3485238600690f00f9decfbed989d1e773ab01a3e78bc9415e6f8",
+          "method": "GET",
+          "url": "https://rawangphai.uru.ac.th/api/water-level",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "d22fac2589e619e91c79b52161feb3cc946ad254701c77127758883d917bbaaa",
+          "method": "GET",
+          "url": "https://rawangphai.uru.ac.th/api/rain-analysis?active=true",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        },
+        {
+          "endpoint_id": "51e3d6684b6adb257572a80fe9ca099f3ad05dfa74b8ff678a2d247827822584",
+          "method": "GET",
+          "url": "https://rawangphai.uru.ac.th/api/shelters",
+          "kind": "public_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": ""
+          },
+          "notes_th": "SPU connector endpoint"
+        }
+      ]
     }
   ]
 }

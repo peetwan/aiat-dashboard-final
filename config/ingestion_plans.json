@@ -9,37 +9,64 @@
         {
           "name": "summary_updated_at",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_summary_updated_at.php",
-          "params": {"_nc": "1"}
+          "params": {
+            "_nc": "1"
+          }
         },
         {
           "name": "provinces",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces.php",
-          "params": {"year": "$SRA_YEAR"}
+          "params": {
+            "year": "$SRA_YEAR"
+          }
         },
         {
           "name": "poverty_map_core",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_map_core.php",
-          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+          "params": {
+            "year": "$SRA_YEAR",
+            "amp": "ALL",
+            "prov": "ALL",
+            "tambon": "ALL"
+          }
         },
         {
           "name": "poverty_situation",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_poverty_situation.php",
-          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+          "params": {
+            "year": "$SRA_YEAR",
+            "amp": "ALL",
+            "prov": "ALL",
+            "tambon": "ALL"
+          }
         },
         {
           "name": "provinces_summary",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_provinces_summary.php",
-          "params": {"year": "$SRA_YEAR", "prov": "ALL"}
+          "params": {
+            "year": "$SRA_YEAR",
+            "prov": "ALL"
+          }
         },
         {
           "name": "continuous_poor",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_continuous_poor.php",
-          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+          "params": {
+            "year": "$SRA_YEAR",
+            "amp": "ALL",
+            "prov": "ALL",
+            "tambon": "ALL"
+          }
         },
         {
           "name": "data_analysis",
           "url": "https://sradss.ppaos.com/dashboard/api/ppaos_data_analysis.php",
-          "params": {"year": "$SRA_YEAR", "amp": "ALL", "prov": "ALL", "tambon": "ALL"}
+          "params": {
+            "year": "$SRA_YEAR",
+            "amp": "ALL",
+            "prov": "ALL",
+            "tambon": "ALL"
+          }
         }
       ],
       "explicit_exclusions": [
@@ -173,13 +200,110 @@
         "radius_query_endpoint": "https://data.thaihousingportal.com/api/housing-stock/radius"
       },
       "datasets": [
-        {"id": "demand", "value_policy": "schema_only"},
-        {"id": "demandgap", "value_policy": "values"},
-        {"id": "economic", "value_policy": "values"},
-        {"id": "housingindex", "value_policy": "values"},
-        {"id": "housingsupply", "value_policy": "values"},
-        {"id": "policy-assessment", "value_policy": "blocked"},
-        {"id": "population", "value_policy": "values"}
+        {
+          "id": "demand",
+          "value_policy": "schema_only"
+        },
+        {
+          "id": "demandgap",
+          "value_policy": "values"
+        },
+        {
+          "id": "economic",
+          "value_policy": "values"
+        },
+        {
+          "id": "housingindex",
+          "value_policy": "values"
+        },
+        {
+          "id": "housingsupply",
+          "value_policy": "values"
+        },
+        {
+          "id": "policy-assessment",
+          "value_policy": "blocked"
+        },
+        {
+          "id": "population",
+          "value_policy": "values"
+        }
+      ]
+    },
+    "spu_rawangphai_uru": {
+      "driver": "spu_rawangphai_uru",
+      "connector": "app.connectors.spu_rawangphai_uru:SpuRawangphaiUruConnector",
+      "datasets": [
+        {
+          "name": "water_levels",
+          "url": "https://rawangphai.uru.ac.th/api/water-level"
+        },
+        {
+          "name": "rain_analysis",
+          "url": "https://rawangphai.uru.ac.th/api/rain-analysis?active=true"
+        },
+        {
+          "name": "shelters",
+          "url": "https://rawangphai.uru.ac.th/api/shelters"
+        }
+      ]
+    },
+    "spu_sukhothai_water": {
+      "driver": "spu_sukhothai_water",
+      "connector": "app.connectors.spu_sukhothai_water:SpuSukhothaiWaterConnector",
+      "datasets": [
+        {
+          "name": "water_levels",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load"
+        },
+        {
+          "name": "rain_24h",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h"
+        },
+        {
+          "name": "dams",
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/analyst/dam"
+        }
+      ]
+    },
+    "spu_sukhothai_care": {
+      "driver": "spu_sukhothai_care",
+      "connector": "app.connectors.spu_sukhothai_care:SpuSukhothaiCareConnector",
+      "datasets": [
+        {
+          "name": "announcements",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/announcements",
+          "paginate": true,
+          "page_size": 100,
+          "max_pages": 50
+        },
+        {
+          "name": "incidents",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents",
+          "paginate": true,
+          "page_size": 100,
+          "max_pages": 50
+        },
+        {
+          "name": "incident_map",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/map",
+          "paginate": false
+        },
+        {
+          "name": "incident_stats",
+          "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/stats",
+          "paginate": false
+        }
+      ]
+    },
+    "spu_nsn_flood": {
+      "driver": "spu_nsn_flood",
+      "connector": "app.connectors.spu_nsn_flood:SpuNsnFloodConnector",
+      "datasets": [
+        {
+          "name": "forecast_page",
+          "url": "https://nsn-flood.nsru.ac.th/forecast"
+        }
       ]
     }
   }

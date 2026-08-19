@@ -1,0 +1,10 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "spu_sukhothai_care",
+  "records": [
+    {"dataset_key": "announcements.row", "payload": {"id": 1, "title": "ประกาศตัวอย่าง", "_fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "incidents.row", "payload": {"id": 1, "title": "เหตุการณ์ตัวอย่าง", "province": "สุโขทัย", "_fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "incident_map.row", "payload": {"id": 1, "lat": 17.0, "lng": 99.5, "_fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "incident_stats.row", "payload": {"total": 10, "open": 5, "closed": 5, "_fetched_at": "2026-08-19T00:00:00Z"}}
+  ]
+}
