@@ -16,8 +16,17 @@ raw/<department>/<source_id>/<run_id>/
 - `run_id` = UTC timestamp รูปแบบ `20260818T041500Z`
 - `department` มาจาก `group` ใน generated `config/source_catalog.json` เท่านั้น:
   `f1`, `f2`, `f3`, `f4` หรือ `spu`
-- กฎเหล็ก: หนึ่ง run = หนึ่งโฟลเดอร์ ห้ามแก้ย้อนหลัง — ดึงใหม่คือ run ใหม่
-  (`evidence_push.py` ปฏิเสธ run_id ซ้ำ และ bucket ตั้ง lock กันลบ/ทับบน prefix `raw/`)
+- กฎเหล็ก: หนึ่ง run = หนึ่งโฟลเดอร์ canonical ห้ามแก้ย้อนหลัง — ดึงใหม่คือ run ใหม่
+  (`evidence_push.py` ปฏิเสธ run_id ซ้ำ และ bucket ตั้ง lock กันลบ/ทับบน prefix canonical `raw/<department>/`)
+- ข้อยกเว้น legacy keys: หลังย้ายไป `raw/<department>/<source_id>/<run_id>/` แล้ว
+  key รูปแบบเก่า `raw/<source_id>/<run_id>/<file>` ลบได้เมื่อ verify แล้วว่าสำเนา canonical
+  มี `Content-Length` และ `ETag` ตรงกันทุกไฟล์ (เช่น `scripts/migrate_r2_department_layout.py --mode verify`
+  ใน evidence workspace) ห้ามลบ canonical object และห้าม overwrite
+- Team bucket ตั้ง Object Lock แบบไม่มีกำหนดแยกตาม canonical prefix:
+  `raw/f1/`, `raw/f2/`, `raw/f3/`, `raw/f4/` และ `raw/spu/`
+  จึงห้ามเปลี่ยนกลับเป็นกฎกว้างที่ปลด canonical prefix ใด prefix หนึ่งโดยไม่ได้ตั้งใจ
+- Legacy keys ชุดก่อนเพิ่มฝ่ายถูก verify และลบแล้วเมื่อ 2026-08-20; inventory หลังลบต้องไม่มี
+  object นอก canonical prefixes ทั้งห้านี้
 
 ## ภาพรวม data flow ของทีม
 
