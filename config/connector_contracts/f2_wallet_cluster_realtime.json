@@ -1,0 +1,36 @@
+{
+  "contract_version": "1.1",
+  "source_id": "f2_wallet_cluster_realtime",
+  "connector": "app.connectors.wallet_cluster_realtime:WalletClusterRealtimeConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^household_cluster$",
+      "grain_th": "ค่ากระเป๋าครัวเรือนรวมหนึ่งกลุ่มธุรกิจในเดือนปัจจุบัน ตามที่หน้าข้อมูลเปิดแสดง",
+      "identity_options": [["thisMonth", "category"]],
+      "geography_fields": [],
+      "as_of_fields": ["thisMonth", "as_of"]
+    },
+    {
+      "key_pattern": "^business_cluster$",
+      "grain_th": "ค่ากระเป๋าธุรกิจรวมหนึ่งกลุ่มธุรกิจในเดือนปัจจุบัน ตามที่หน้าข้อมูลเปิดแสดง",
+      "identity_options": [["thisMonth", "category"]],
+      "geography_fields": [],
+      "as_of_fields": ["thisMonth", "as_of"]
+    }
+  ],
+  "completeness_checks": [
+    "POST empty JSON ครบ cluster/hh และ cluster/bu",
+    "snapshotClusters ของครัวเรือนและธุรกิจต้องมีชื่อกลุ่มเดียวกันและตรง clustersName",
+    "ได้ 14 Candidate records จาก 7 กลุ่ม × 2 ประเภทกระเป๋า เมื่อต้นทางยังส่ง 7 กลุ่ม",
+    "ไม่ล้มเพราะยอดรวมที่ frontend ฮาร์ดโค้ดไม่เท่าผลรวมหมวดจาก API; กลุ่มขนาดเล็กยังเป็นค่าที่หน้าเว็บเผยแพร่แล้วและคง needs_review",
+    "เก็บ as_of จาก thisMonth ของต้นทาง ไม่ใช้ fetched_at แทน"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_wallet_cluster_realtime.json",
+  "notes_th": "หน้าเปรียบเทียบคลัสเตอร์เป็นข้อมูลเปิดสาธารณะ; serving ดึงเดือนปัจจุบันตามที่แดชบอร์ดเรียก"
+}

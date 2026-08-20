@@ -14,9 +14,6 @@ CATALOG_PATH = DASHBOARD_ROOT / "config/source_catalog.json"
 CONTRACT_ROOT = DASHBOARD_ROOT / "config/publication_contracts"
 
 RESTRICTED_SOURCE_IDS = {
-    "f2_target_household",
-    "f2_wallet_all_realtime",
-    "f2_wallet_cluster_realtime",
     "f3_nonthaburi_city_learning",
     "f3_healthcare_nonthaburi",
 }

@@ -39,17 +39,17 @@ PUBLIC_CANDIDATES = {
     "f2_rmutdb",
     "f2_apptech_mtr",
     "f2_apptech_mru",
+    "f2_target_household",
     "f2_learning_dashboard",
     "f2_learning_area_based",
+    "f2_wallet_all_realtime",
+    "f2_wallet_cluster_realtime",
     "f3_city_capital_open_data",
     "f3_ruamthiao_lamphun",
     "f3_housing_portal",
 }
 
 RESTRICTED = {
-    "f2_target_household",
-    "f2_wallet_all_realtime",
-    "f2_wallet_cluster_realtime",
     "f3_nonthaburi_city_learning",
     "f3_healthcare_nonthaburi",
 }
@@ -149,6 +149,44 @@ def test_learning_dashboard_uses_verified_public_post_contract():
     assert "selected-project scope" in source["notes_th"]
 
 
+def test_wallet_and_target_household_use_reviewed_public_contracts():
+    catalog = read_json(CATALOG_PATH)
+    by_id = {source["source_id"]: source for source in catalog["sources"]}
+
+    target = by_id["f2_target_household"]
+    assert target["acquisition_mode"] == "api_first"
+    assert target["production_values_allowed"] is True
+    assert target["expected_record_count"] == 1160
+    assert target["snapshot_origin_files"] == []
+    assert len(target["endpoints"]) == 1
+    search = target["endpoints"][0]
+    assert search["method"] == "GET"
+    assert search["url"] == "https://pmua-apptech.com/search"
+    assert search["request_template"]["query_or_body"] == "page=<value>"
+    assert search["runtime_enabled"] is True
+    assert search["restricted"] is False
+
+    wallet_all = by_id["f2_wallet_all_realtime"]
+    assert wallet_all["expected_record_count"] == 2
+    assert wallet_all["snapshot_origin_files"] == []
+    assert {(item["method"], item["url"]) for item in wallet_all["endpoints"]} == {
+        ("POST", "https://lesuper.app/api/opendata/superapp/gen4/hh"),
+        ("POST", "https://lesuper.app/api/opendata/superapp/gen4/bu"),
+    }
+    assert all(item["request_template"].get("json_body") == {"date": ""} for item in wallet_all["endpoints"])
+    assert all(item["runtime_enabled"] is True and item["restricted"] is False for item in wallet_all["endpoints"])
+
+    wallet_cluster = by_id["f2_wallet_cluster_realtime"]
+    assert wallet_cluster["expected_record_count"] == 14
+    assert wallet_cluster["snapshot_origin_files"] == []
+    assert {(item["method"], item["url"]) for item in wallet_cluster["endpoints"]} == {
+        ("POST", "https://lesuper.app/api/opendata/superapp/gen4/cluster/hh"),
+        ("POST", "https://lesuper.app/api/opendata/superapp/gen4/cluster/bu"),
+    }
+    assert all(item["request_template"].get("json_body") == {} for item in wallet_cluster["endpoints"])
+    assert all(item["runtime_enabled"] is True and item["restricted"] is False for item in wallet_cluster["endpoints"])
+
+
 @pytest.mark.skipif(
     not HAS_EVIDENCE_WORKSPACE,
     reason="full endpoint evidence is not included in the public clone",
@@ -184,6 +222,7 @@ def test_every_catalog_endpoint_has_evidence_and_is_not_invented():
     )
     for endpoint in ppp_observation["observations"]:
         allowed.add(("f1_pppconnext", "GET", endpoint["url"]))
+    allowed.add(("f2_target_household", "GET", "https://pmua-apptech.com/search"))
 
     catalog = read_json(CATALOG_PATH)
     actual = {
@@ -286,8 +325,20 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     assert sources["f2_cultural_market_civil"]["public_visibility"]["classification"] == "metadata_only"
     assert sources["f2_icommunity"]["public_visibility"]["classification"] == "metadata_only"
     household = sources["f2_target_household"]
-    assert household["public_visibility"]["classification"] == "restricted_local_only"
-    assert household["records"]["observed_count"] is None
+    assert household["public_visibility"]["classification"] == "public_candidate"
+    assert household["records"]["observed_count"] == 1160
+    assert household["records"]["observed_count_basis"] == "public_product_search_listing"
+    assert household["public_visibility"]["production_values_allowed"] is True
+
+    wallet_all = sources["f2_wallet_all_realtime"]
+    assert wallet_all["public_visibility"]["classification"] == "public_candidate"
+    assert wallet_all["records"]["observed_count"] == 2
+    assert wallet_all["records"]["observed_count_basis"] == "public_current_month_hh_and_bu_snapshots"
+
+    wallet_cluster = sources["f2_wallet_cluster_realtime"]
+    assert wallet_cluster["public_visibility"]["classification"] == "public_candidate"
+    assert wallet_cluster["records"]["observed_count"] == 14
+    assert wallet_cluster["records"]["observed_count_basis"] == "public_current_month_cluster_snapshots"
 
     rmutdb = sources["f2_rmutdb"]
     assert rmutdb["geo"]["linkability"] == "not_province_scoped"

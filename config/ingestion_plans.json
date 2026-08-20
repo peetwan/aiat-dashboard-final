@@ -1,6 +1,6 @@
 {
   "plan_version": "0.1.0",
-  "notes_th": "Executable allowlist เท่านั้น; endpoint catalog ทั้งหมดอยู่ใน source_catalog.json",
+  "notes_th": "Executable allowlist เท่านั้น; endpoint catalog ทั้งหมดอยู่ใน source_catalog.json. แหล่งที่ผู้ใช้ดูแล 10 เว็บ: 9 แหล่งสาธารณะมี connector (รวม f1_pppconnext, f2_target_household และกระเป๋าตังค์สองแหล่ง) ส่วน f2_rmutdb คง snapshot_only เพราะ live JSON 503, /ebook 404 และ PDF ใหญ่เกินที่จะ GET ตอน ingest. Restricted เหลือเฉพาะ Nonthaburi สองแหล่ง.",
   "sources": {
     "f1_sradss_ppaos": {
       "driver": "sradss",
@@ -47,6 +47,39 @@
         "data_household_map.php",
         "*_detail.php ที่เป็น person/household",
         "endpoint ที่ตอบ 401 หรือ login"
+      ],
+      "notes_th": "Serving ingest ดึงเฉพาะ aggregate ปีปัจจุบันแบบ amp/prov/tambon=ALL. การไล่ทะเบียนอำเภอ/ตำบลปี 2569 อยู่เลนหลักฐาน ไม่ใส่ household row เข้า dashboard_records"
+    },
+    "f1_pppconnext": {
+      "driver": "pppconnext",
+      "connector": "app.connectors.pppconnext:PppconnextConnector",
+      "expected_record_count": 47,
+      "completeness_gate": "commit only when the four catalog APIs project to 47 aggregate grains: 20 provinces plus national/year/capital/assistance summaries",
+      "requests": [
+        {
+          "name": "national_bootstrap",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-national-bootstrap?metric=poor_households_rate&survey_year=all"
+        },
+        {
+          "name": "province_analytics",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-province-analytics?prov_code=0&survey_year=all&chart_years=2563%2C2564%2C2565%2C2566%2C2567%2C2568%2C2569&chart_sections=cumulative"
+        },
+        {
+          "name": "poor_capital_potential",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-poor-capital-potential?prov_code=0&survey_year=all"
+        },
+        {
+          "name": "assistance_summary",
+          "url": "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-assistance-summary?prov_code=0&survey_year=all"
+        }
+      ],
+      "explicit_exclusions": [
+        "/areas/provinces",
+        "/areas/districts",
+        "/areas/tambons",
+        "/external/v1/areas/",
+        "login POST",
+        "per-province analytics outside the catalog prov_code=0 URL"
       ]
     },
     "f2_apptech_mtr": {
@@ -120,8 +153,26 @@
       "explicit_exclusions": [
         "/backend/ajax/auth/*",
         "/backend/ajax/user/*",
-        "write actions"
+        "write actions",
+        "live HTML detail pages (province/funding/IP/TRL) — parse from reviewed evidence when the list API times out; never copy researcher names"
       ]
+    },
+    "f2_target_household": {
+      "driver": "target_household",
+      "connector": "app.connectors.target_household:TargetHouseholdConnector",
+      "url": "https://pmua-apptech.com/search",
+      "query_params": {
+        "page": "$PAGE"
+      },
+      "completeness_gate": "commit only when every advertised /search page is fetched, each page has product links, and product IDs are unique; do not freeze a prior listing count",
+      "explicit_exclusions": [
+        "/login",
+        "/userlogin",
+        "/dashboard/familydashboard as household-row extract",
+        "/product/show/* live detail GET during serving ingest",
+        "EPMS / POST login"
+      ],
+      "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; serving เก็บเฉพาะรายการจาก /search และตัดชื่อ เบอร์โทร อีเมล"
     },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",
@@ -135,7 +186,8 @@
         "categories",
         "geography",
         "geographyImpact",
-        "impactSummary"
+        "impactSummary",
+        "excludedResourceExpense"
       ],
       "scope_warning_th": "ข้อมูลครอบคลุมผู้เข้าร่วมโครงการที่ต้นทางเลือก ไม่ใช่ธุรกิจชุมชนทั้งหมด; ต้นทางไม่ระบุหน่วยหรือ as_of ระดับชุดข้อมูล"
     },
@@ -145,6 +197,58 @@
       "url": "https://lesuper.app/api/opendata/pmua/area-based",
       "completeness_gate": "unique non-null IDs and stats.totalRecords must equal data rows; every published stats dimension must reconcile before commit",
       "database_projection": "store 1,002 participant/business rows separately from source-published aggregate dimensions; never count aggregate rows as participants or projects"
+    },
+    "f2_wallet_all_realtime": {
+      "driver": "wallet_all_realtime",
+      "connector": "app.connectors.wallet_all_realtime:WalletAllRealtimeConnector",
+      "expected_record_count": 2,
+      "completeness_gate": "commit only when current-month POST {date:\"\"} returns both household and business envelopes with matching thisMonth",
+      "requests": [
+        {
+          "name": "household_month",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/hh",
+          "json_body": {"date": ""}
+        },
+        {
+          "name": "business_month",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/bu",
+          "json_body": {"date": ""}
+        }
+      ],
+      "explicit_exclusions": [
+        "GET /api/opendata/superapp/gen4/hh",
+        "GET /api/opendata/superapp/gen4/bu",
+        "historical monthly POST date=YYYY-MM-DD loops"
+      ],
+      "notes_th": "ดึงเดือนปัจจุบันตามที่หน้าข้อมูลเปิดเรียก; ประวัติรายเดือนเต็มอยู่เลนหลักฐาน/R2"
+    },
+    "f2_wallet_cluster_realtime": {
+      "driver": "wallet_cluster_realtime",
+      "connector": "app.connectors.wallet_cluster_realtime:WalletClusterRealtimeConnector",
+      "expected_cluster_count": 7,
+      "expected_record_count": 14,
+      "completeness_gate": "commit only when household and business cluster inventories match and equal expected_cluster_count; do not fail on frontend hardcoded population totals",
+      "requests": [
+        {
+          "name": "household_cluster",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/cluster/hh",
+          "json_body": {}
+        },
+        {
+          "name": "business_cluster",
+          "method": "POST",
+          "url": "https://lesuper.app/api/opendata/superapp/gen4/cluster/bu",
+          "json_body": {}
+        }
+      ],
+      "explicit_exclusions": [
+        "GET cluster endpoints",
+        "person-level or household-row extracts"
+      ],
+      "notes_th": "ดึงเดือนปัจจุบัน 7 กลุ่มธุรกิจตามที่หน้าข้อมูลเปิดแสดง; กลุ่มขนาดเล็กยังเป็น Candidate/needs_review"
     },
     "f3_housing_portal": {
       "driver": "housing_ckan",

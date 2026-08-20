@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T14:24:32.632331+00:00",
+  "generated_at": "2026-08-20T14:31:10.861906+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "efad2bd41e3a89dd9afdb833f632cff8a719cc85056b91a00e8c212265fd0148"
+      "sha256": "8bd9979fe8255ee76e527a24354ebb9d37dcaa87c7ee37b626866fe02e728641"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,17 +18,17 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 28,
-      "aggregate_sha256": "57079f860c29697e66296d66f74acf1225d4b8cc25bcd86ece25f4cebfdaf528"
+      "aggregate_sha256": "3cf80529e412d703c5f5bfc3d29139e303d9197629269960c0892b08d5476c98"
     }
   },
   "summary": {
     "registry_source_count": 28,
     "catalog_metadata_source_count": 28,
-    "public_candidate_source_count": 11,
+    "public_candidate_source_count": 14,
     "metadata_only_source_count": 12,
-    "restricted_local_only_source_count": 5,
+    "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
-    "public_candidates_with_observed_count": 11,
+    "public_candidates_with_observed_count": 14,
     "current_public_data_artifact_source_count": 11,
     "current_province_projection_source_count": 9,
     "restricted_value_leak_count": 0
@@ -634,21 +634,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "STATIC_CANDIDATE_REVIEWED",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 1160,
+        "observed_count_basis": "public_product_search_listing",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -662,25 +662,29 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/09_f2_target_household/source_card.json",
         "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "approval_basis": "source_card_candidate_scope_needs_review",
+        "catalogued_endpoint_count": 1,
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_target_household/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/09_f2_target_household/evidence/map_observation.json",
+          "data/source_audit/09_f2_target_household/evidence/gate_observation.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted"
       ]
     },
@@ -825,21 +829,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "VERIFIED_COMPLETE_ENUMERATION",
         "data_inventory": "COMPLETE_FROM_REAL_PAYLOADS",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 2,
+        "observed_count_basis": "public_current_month_hh_and_bu_snapshots",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -853,25 +857,38 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/12_f2_wallet_all_realtime/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "none",
+        "approval_basis": "source_card_candidate_scope_needs_review",
         "catalogued_endpoint_count": 2,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_wallet_all_realtime/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/manifest.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/today.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-09.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-08.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-07.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/today.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-09.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-08.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-07.json",
+          "data/source_audit/12_f2_wallet_all_realtime/evidence/gate_observation.json",
+          "data/raw/network/f2_wallet_all_realtime/20260811T_dashboard_snapshot_12/manifest.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
@@ -885,21 +902,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "VERIFIED_COMPLETE_ENUMERATION",
         "data_inventory": "COMPLETE_FROM_REAL_PAYLOADS",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 14,
+        "observed_count_basis": "public_current_month_cluster_snapshots",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -913,25 +930,38 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/13_f2_wallet_cluster_realtime/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "none",
+        "approval_basis": "source_card_candidate_scope_needs_review",
         "catalogued_endpoint_count": 2,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_wallet_cluster_realtime/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/manifest.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/today_nobody.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/today_emptydate.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/2026-07.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/2024-09.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/today_nobody.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/today_emptydate.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/2026-07.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/2024-09.json",
+          "data/source_audit/13_f2_wallet_cluster_realtime/evidence/gate_observation.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260811T_dashboard_snapshot_13/manifest.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },

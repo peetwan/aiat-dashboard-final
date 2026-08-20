@@ -10,9 +10,9 @@
 
 - ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
 - ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
-- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 11 แหล่ง
+- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 14 แหล่ง
 - Metadata-only: 12 แหล่ง
-- Restricted local-only: 5 แหล่ง
+- Restricted local-only: 2 แหล่ง
 
 ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้
 
@@ -30,11 +30,11 @@
 | 6 | `f2_rmutdb` | Snapshot | public candidate | 2,001 | 14 | 0 |
 | 7 | `f2_apptech_mtr` | API-first | public candidate | 630 | 6 | 6 |
 | 8 | `f2_apptech_mru` | API-first | public candidate | 503 | 8 | 5 |
-| 9 | `f2_target_household` | Blocked | restricted local-only | 0 | 0 | 0 |
+| 9 | `f2_target_household` | API-first | public candidate | 1,160 | 1 | 1 |
 | 10 | `f2_learning_dashboard` | API-first | public candidate | 66 | 1 | 1 |
 | 11 | `f2_learning_area_based` | API-first | public candidate | 1,002 | 1 | 1 |
-| 12 | `f2_wallet_all_realtime` | Blocked | restricted local-only | 0 | 2 | 0 |
-| 13 | `f2_wallet_cluster_realtime` | Blocked | restricted local-only | 0 | 2 | 0 |
+| 12 | `f2_wallet_all_realtime` | API-first | public candidate | 2 | 2 | 2 |
+| 13 | `f2_wallet_cluster_realtime` | API-first | public candidate | 14 | 2 | 2 |
 | 14 | `f3_city_capital_open_data` | Snapshot | public candidate | 702 | 1 | 0 |
 | 15 | `f3_nonthaburi_city_learning` | Blocked | restricted local-only | 0 | 0 | 0 |
 | 16 | `f3_ruamthiao_lamphun` | Snapshot | public candidate | 54 | 5 | 0 |
@@ -92,7 +92,7 @@ Artifacts ที่เพื่อนร่วมทีมนำเข้าต�
 
 ## Checklist ก่อน publication/deploy
 
-1. Source อยู่ใน public candidate 11 แหล่งและไม่ใช่ restricted lane
+1. Source อยู่ใน public candidate 14 แหล่งและไม่ใช่ restricted lane
 2. มี publication scope เป็นลายลักษณ์อักษร
 3. ยืนยัน schema, grain, unit, denominator, `as_of` และ freshness เท่าที่หลักฐานรองรับ
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection

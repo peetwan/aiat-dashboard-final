@@ -27,6 +27,14 @@ PPPCONNEXT_2026_OBSERVATION = (
     / "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json"
 )
 PPPCONNEXT_2026_RECORD_COUNT = 47
+TARGET_HOUSEHOLD_OBSERVATION = (
+    PROJECT_ROOT
+    / "data/raw/network/f2_target_household/20260818T163000Z_pmua_apptech_catalogue_01/observation.json"
+)
+TARGET_HOUSEHOLD_SEARCH_URL = "https://pmua-apptech.com/search"
+TARGET_PUBLIC_PRODUCT_LISTING_COUNT = 1160
+WALLET_ALL_CURRENT_MONTH_RECORDS = 2
+WALLET_CLUSTER_CURRENT_MONTH_RECORDS = 14
 APPTECH_CURRENT_MANIFEST = (
     PROJECT_ROOT
     / "data/staged/f2_apptech_mtr/20260817T_public_api_silver_07/manifest.json"
@@ -50,20 +58,21 @@ APPROVED_PUBLIC_MODES = {
     "f2_rmutdb": "snapshot_only",
     "f2_apptech_mtr": "api_first",
     "f2_apptech_mru": "api_first",
+    "f2_target_household": "api_first",
     "f2_learning_dashboard": "api_first",
     "f2_learning_area_based": "api_first",
+    "f2_wallet_all_realtime": "api_first",
+    "f2_wallet_cluster_realtime": "api_first",
     "f3_city_capital_open_data": "snapshot_only",
     "f3_ruamthiao_lamphun": "snapshot_only",
     "f3_housing_portal": "api_first",
 }
 
-# These lanes contain household, financial, health, or person-linked data and
-# remain local-only even when a public page happens to expose an endpoint.
+# These lanes remain local-only. Public AppTech product search and Super App
+# open-data wallet aggregates are not in this set: the live pages publish those
+# surfaces without login. Nonthaburi health/learning stay restricted.
 RESTRICTED_SOURCE_IDS = frozenset(
     {
-        "f2_target_household",
-        "f2_wallet_all_realtime",
-        "f2_wallet_cluster_realtime",
         "f3_nonthaburi_city_learning",
         "f3_healthcare_nonthaburi",
     }
@@ -389,6 +398,33 @@ def load_pppconnext_2026_endpoints(acquisition_mode: str) -> list[dict]:
     return endpoints
 
 
+def load_target_household_search_endpoint(acquisition_mode: str) -> list[dict]:
+    url = TARGET_HOUSEHOLD_SEARCH_URL
+    if TARGET_HOUSEHOLD_OBSERVATION.exists():
+        observation = read_json(TARGET_HOUSEHOLD_OBSERVATION)
+        observed_url = observation.get("public_surface", {}).get("search_url")
+        if observed_url != url:
+            raise RuntimeError("PMUA AppTech public search URL evidence no longer matches /search")
+    action = "call_without_login"
+    return [
+        {
+            "endpoint_id": endpoint_id("f2_target_household", "GET", url, action),
+            "method": "GET",
+            "url": url,
+            "kind": "public_product_search",
+            "access": "unauthenticated_get_http_200",
+            "team_action": action,
+            "restricted": False,
+            "runtime_enabled": acquisition_mode == "api_first",
+            "request_template": {"query_or_body": "page=<value>"},
+            "notes_th": (
+                "หน้ารวมนวัตกรรมสาธารณะ; page=1 ตรงกับ /search ที่ไม่มี query. "
+                "ไม่ดึง login/EPMS และไม่แตก familydashboard เป็นแถวครัวเรือน."
+            ),
+        }
+    ]
+
+
 def source_policy(source_id: str) -> tuple[str, str, str, bool]:
     if source_id in RESTRICTED_SOURCE_IDS:
         return "blocked", "restricted_local_only", "restricted_local_only", False
@@ -446,12 +482,31 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
             "แต่หยุดคืน JSON ที่ parse ได้ก่อนจบ จึงคง snapshot เดิมและห้าม publish partial run. "
             "Railway commit รอบใหม่ได้เฉพาะ unique IDs เท่ากับ totaldata ครบทุก dataset."
         )
+    if source_id == "f2_target_household":
+        notes.append(
+            "หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination "
+            "เป็นรายการสินค้าตัดชื่อ/เบอร์/อีเมล. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ "
+            "และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. "
+            "ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest."
+        )
     if source_id == "f2_learning_area_based":
         notes.append(
             "ตรวจหน้าและ API ล่าสุด 2026-08-17 แล้ว response byte-identical กับ snapshot: "
             "1,002 rows/1,002 unique IDs; หน้าแสดง 6 ภูมิภาค, 55 จังหวัด, 256 อำเภอ, "
             "533 ตำบล และ 1,002 ธุรกิจตรงกับ stats envelope. business type มีเฉพาะ aggregate; "
             "Railway เก็บ aggregate แยก grain และตรวจทุกผลรวมก่อน commit."
+        )
+    if source_id == "f2_wallet_all_realtime":
+        notes.append(
+            "หน้า lesuper เป็นแดชบอร์ดข้อมูลเปิด; serving ดึงเดือนปัจจุบันด้วย POST {\"date\": \"\"} "
+            "ได้ 2 aggregate (ครัวเรือน+ธุรกิจ) ไม่ใช่รายการรายบุคคล. ประวัติรายเดือนเต็มอยู่เลนหลักฐาน/R2. "
+            "as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review."
+        )
+    if source_id == "f2_wallet_cluster_realtime":
+        notes.append(
+            "หน้าเปรียบเทียบคลัสเตอร์เป็นข้อมูลเปิด; serving ดึงเดือนปัจจุบัน 7 กลุ่ม × 2 กระเป๋า = 14 records. "
+            "กลุ่มขนาดเล็กเป็นค่าที่หน้าเว็บเผยแพร่แล้ว จึงเก็บเป็น Candidate และไม่เทียบยอดรวมที่ frontend ฮาร์ดโค้ด. "
+            "as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review."
         )
     if source_id == "f3_city_capital_open_data":
         notes.append(
@@ -518,6 +573,8 @@ def build_catalog(merged_root: Path) -> dict:
             endpoints = load_learning_dashboard_endpoint(acquisition_mode)
         if source_id == "f1_pppconnext":
             endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
+        if source_id == "f2_target_household":
+            endpoints = load_target_household_search_endpoint(acquisition_mode)
         endpoints = apply_runtime_request_templates(
             source_id,
             endpoints,
@@ -528,6 +585,10 @@ def build_catalog(merged_root: Path) -> dict:
             if data_location and production_values_allowed
             else []
         )
+        if source_id in {"f2_wallet_all_realtime", "f2_wallet_cluster_realtime"}:
+            # INDEX row counts are historical monthly dumps, not the current-month
+            # serving grain.
+            snapshot_files = []
         if source_id == "f2_apptech_mtr":
             current_manifest = read_json(APPTECH_CURRENT_MANIFEST)
             if current_manifest.get("source_id") != source_id or current_manifest.get("row_count") != 630:
@@ -540,6 +601,12 @@ def build_catalog(merged_root: Path) -> dict:
             expected_record_count = PPPCONNEXT_2026_RECORD_COUNT
         elif source_id == "f2_apptech_mtr":
             expected_record_count = int(current_manifest["row_count"])
+        elif source_id == "f2_wallet_all_realtime":
+            expected_record_count = WALLET_ALL_CURRENT_MONTH_RECORDS
+        elif source_id == "f2_wallet_cluster_realtime":
+            expected_record_count = WALLET_CLUSTER_CURRENT_MONTH_RECORDS
+        elif source_id == "f2_target_household":
+            expected_record_count = TARGET_PUBLIC_PRODUCT_LISTING_COUNT
         elif index_row and production_values_allowed:
             expected_record_count = int(index_row["data_row_count"])
         else:
@@ -595,6 +662,7 @@ def build_catalog(merged_root: Path) -> dict:
                 provenance_path(LEARNING_DASHBOARD_OBSERVATION),
                 provenance_path(PPPCONNEXT_2026_OBSERVATION),
                 provenance_path(APPTECH_CURRENT_OBSERVATION),
+                provenance_path(TARGET_HOUSEHOLD_OBSERVATION),
             ],
         },
         "policy": {
