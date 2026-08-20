@@ -7,13 +7,15 @@
 - Layout บน bucket:
 
 ```text
-raw/<source_id>/<run_id>/
+raw/<department>/<source_id>/<run_id>/
     manifest.json              # สร้างโดย evidence_push.py — run ที่ไม่มีไฟล์นี้ = ใช้ไม่ได้
     <dataset>.jsonl.gz         # ข้อมูลตามที่ดึงมา (push ทำ gzip ให้)
     network_observation.json   # ไฟล์ประกอบอื่น ๆ อัปโหลดตามจริง
 ```
 
 - `run_id` = UTC timestamp รูปแบบ `20260818T041500Z`
+- `department` มาจาก `group` ใน generated `config/source_catalog.json` เท่านั้น:
+  `f1`, `f2`, `f3`, `f4` หรือ `spu`
 - กฎเหล็ก: หนึ่ง run = หนึ่งโฟลเดอร์ ห้ามแก้ย้อนหลัง — ดึงใหม่คือ run ใหม่
   (`evidence_push.py` ปฏิเสธ run_id ซ้ำ และ bucket ตั้ง lock กันลบ/ทับบน prefix `raw/`)
 
@@ -28,7 +30,7 @@ raw/<source_id>/<run_id>/
                และปฏิเสธ run_id ซ้ำ — เขียนทับไม่ได้)
         ↓
 [2] Team bucket (Cloudflare R2, private)
-        raw/<source_id>/<run_id>/ ... immutable, หนึ่งครั้งดึง = หนึ่ง run
+        raw/<department>/<source_id>/<run_id>/ ... immutable, หนึ่งครั้งดึง = หนึ่ง run
         ↓
 [3] ทุกคนในทีม (key read-only)
         python tools/evidence_pull.py <source_id>
