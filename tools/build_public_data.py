@@ -156,19 +156,36 @@ def build_public_data(refresh_boundaries: bool) -> None:
         if source.get("cloud_policy") == "restricted_local_only"
     )
     restricted_source_count = len(restricted_source_ids)
-    public_sources = [
-        source
-        for source in catalog["sources"]
-        if source.get("production_values_allowed")
-        and source.get("cloud_policy") != "restricted_local_only"
-    ]
+    # Catalog public_candidate can include ingestible sources that still lack a
+    # reviewed public artifact. The dashboard projection follows dashboard_core.
+    dashboard_contract = read_json(
+        PROJECT_ROOT / "config/publication_contracts/dashboard_core.json"
+    )
+    dashboard_source_ids = dashboard_contract["source_ids"]
+    if len(dashboard_source_ids) != len(set(dashboard_source_ids)):
+        raise RuntimeError("dashboard_core.source_ids contains duplicates")
+    dashboard_id_set = set(dashboard_source_ids)
+    public_sources = []
+    for source in catalog["sources"]:
+        if source["source_id"] not in dashboard_id_set:
+            continue
+        if not source.get("production_values_allowed"):
+            raise RuntimeError(
+                f"{source['source_id']} is in the public dashboard set but catalog "
+                "no longer allows production values"
+            )
+        public_sources.append(source)
     learning_payload = read_json(LEARNING_PATH)
     learning_source = learning_payload["source"]
     if not any(source["source_id"] == learning_source["source_id"] for source in public_sources):
         public_sources.append(learning_source)
     public_sources.sort(key=lambda source: source["ordinal"])
-    if len(public_sources) != 11:
-        raise RuntimeError(f"Expected 11 approved public sources, received {len(public_sources)}")
+    if len(public_sources) != len(dashboard_source_ids):
+        raise RuntimeError(
+            "Expected "
+            f"{len(dashboard_source_ids)} reviewed dashboard sources, "
+            f"received {len(public_sources)}"
+        )
 
     boundaries = fetch_boundaries(refresh_boundaries)
     boundary_by_code: dict[str, dict[str, Any]] = {}

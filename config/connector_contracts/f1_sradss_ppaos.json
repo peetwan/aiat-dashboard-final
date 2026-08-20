@@ -30,5 +30,5 @@
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
   },
   "sample_fixture": "tests/fixtures/connectors/f1_sradss_ppaos.json",
-  "notes_th": "Connector นี้ดึงเฉพาะข้อมูลรวมสาธารณะและไม่แตะ household detail"
+  "notes_th": "Connector นี้ดึงเฉพาะข้อมูลรวมสาธารณะปีปัจจุบันแบบ amp/prov/tambon=ALL และไม่แตะ household detail. การไล่ทะเบียนอำเภอ/ตำบลอยู่เลนหลักฐาน"
 }

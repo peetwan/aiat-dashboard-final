@@ -1,0 +1,15 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_target_household",
+  "records": [
+    {
+      "dataset_key": "public_product",
+      "payload": {
+        "product_id": "10001",
+        "source_url": "https://pmua-apptech.com/product/show/10001",
+        "title": "นวัตกรรมตัวอย่าง",
+        "as_of": null
+      }
+    }
+  ]
+}

@@ -119,8 +119,8 @@ def test_dashboard_and_endpoint_inventory():
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
-        assert wallet["cloud_policy"] == "restricted_local_only"
-        assert wallet["production_values_allowed"] is False
+        assert wallet["cloud_policy"] == "team_approved_public"
+        assert wallet["production_values_allowed"] is True
 
         endpoints = client.get("/api/sources/f1_sradss_ppaos/endpoints").json()
         assert len(endpoints) == len(catalog_by_id["f1_sradss_ppaos"]["endpoints"])
@@ -137,7 +137,7 @@ def test_dashboard_and_endpoint_inventory():
         wallet_connection = next(
             row for row in connectivity if row["source_id"] == "f2_wallet_cluster_realtime"
         )
-        assert wallet_connection["deployable"] is False
+        assert wallet_connection["deployable"] is True
 
 
 def test_payload_api_is_locked_by_default():
@@ -498,6 +498,9 @@ def test_public_cors_and_restricted_sources_excluded():
         source_ids = {row["source_id"] for row in response.json()}
         assert "f2_wallet_all_realtime" not in source_ids
         assert "f2_wallet_cluster_realtime" not in source_ids
+        assert "f2_target_household" not in source_ids
+        assert "f3_healthcare_nonthaburi" not in source_ids
+        assert "f3_nonthaburi_city_learning" not in source_ids
 
 
 def test_public_operations_contract_reports_live_audit_without_claiming_automation():
@@ -551,7 +554,7 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
                         payload={"value": "must-not-serve"},
                     ),
                     DashboardRecord(
-                        source_id="f2_wallet_all_realtime",
+                        source_id="f3_healthcare_nonthaburi",
                         dataset_key="restricted",
                         source_record_id="restricted-1",
                         record_hash="c" * 64,
@@ -566,7 +569,7 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
         assert [row["source_id"] for row in metadata_only.json()] == ["f1_pppconnext"]
         assert "payload" not in metadata_only.json()[0]
         assert client.get(
-            "/api/records?source_id=f2_wallet_all_realtime"
+            "/api/records?source_id=f3_healthcare_nonthaburi"
         ).json() == []
 
         monkeypatch.setattr(settings, "public_data_values_enabled", True)
@@ -632,7 +635,14 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
         assert baseline_payload["public_value_sources"] == approved_count
         assert baseline_payload["metadata_only_sources"] == metadata_count
         assert baseline_payload["restricted_local_only_sources"] == restricted_count
-        assert baseline_payload["published_catalog_source_count"] == approved_count
+        dashboard_contract = read_json(
+            PROJECT_ROOT / "config" / "publication_contracts" / "dashboard_core.json"
+        )
+        published_dashboard_ids = set(dashboard_contract["source_ids"])
+        assert baseline_payload["published_catalog_source_count"] == len(
+            published_dashboard_ids
+        )
+        assert baseline_payload["published_catalog_source_count"] <= approved_count
         assert baseline_payload["published_catalog_ids_match_approved"] is True
         assert baseline_payload["restricted_catalog_sources_published"] == 0
         assert baseline_payload["restricted_values_published"] == 0
@@ -641,7 +651,7 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
             catalog = session.get(PublicArtifact, "catalog")
             payload = dict(catalog.payload)
             sources = [dict(source) for source in payload["sources"]]
-            sources[0]["source_id"] = "f2_wallet_all_realtime"
+            sources[0]["source_id"] = "f3_healthcare_nonthaburi"
             catalog.payload = {**payload, "sources": sources}
             session.commit()
 

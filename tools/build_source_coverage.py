@@ -343,6 +343,12 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
             count_basis = "verified_province_rows_excluding_header"
         elif source_id == "f2_apptech_mtr":
             count_basis = "validated_current_public_api_silver_2026_08_17"
+        elif source_id == "f2_wallet_all_realtime":
+            count_basis = "public_current_month_hh_and_bu_snapshots"
+        elif source_id == "f2_wallet_cluster_realtime":
+            count_basis = "public_current_month_cluster_snapshots"
+        elif source_id == "f2_target_household":
+            count_basis = "public_product_search_listing"
         elif observed_count is not None:
             count_basis = "merged_index_data_row_count"
         elif restricted:
@@ -368,6 +374,12 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
 
         approval = card.get("dashboard_publication_approval_2026_08_16") or {}
         if source_id == "f2_learning_dashboard":
+            approval_basis = "source_card_candidate_scope_needs_review"
+        elif source_id in {
+            "f2_target_household",
+            "f2_wallet_all_realtime",
+            "f2_wallet_cluster_realtime",
+        }:
             approval_basis = "source_card_candidate_scope_needs_review"
         elif approval.get("production_allowed"):
             approval_basis = "source_card_dashboard_publication_scope"

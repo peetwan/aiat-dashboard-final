@@ -12,17 +12,17 @@ Repository นี้มี 3 หน้าที่:
 
 Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence และ audit history ขนาดใหญ่อยู่ใน evidence workspace ภายนอก public repo เพื่อนร่วมทีม clone repo นี้แล้วพัฒนา connector, รัน tests, เปิด Dashboard และสร้าง local serving database ได้โดยไม่ต้องมี raw workspace สมาชิกทีมที่มี key อ่านของ team evidence bucket ดึง run ลงเครื่องด้วย `tools/evidence_pull.py` แล้วชี้ builder ไปที่ root นั้นด้วย `AIAT_EVIDENCE_ROOT` (ดู [evidence-storage.md](evidence-storage.md))
 
-ขอบเขตปัจจุบันคือ catalog 28 แหล่ง แต่มี executable plans/connectors/contracts 6 แหล่ง แหล่งอื่นใช้ reviewed snapshot, metadata-only หรือ restricted lane จนกว่าจะเพิ่ม operational connector พร้อม contract และ tests
+ขอบเขตปัจจุบันคือ catalog 28 แหล่ง แต่มี executable plans/connectors/contracts 10 แหล่ง แหล่งอื่นใช้ reviewed snapshot, metadata-only หรือ restricted lane จนกว่าจะเพิ่ม operational connector พร้อม contract และ tests
 
 ## 2. ภาพรวม component
 
 ```text
                  ┌──────────────────────────────────────┐
-28 source URLs → │ Catalog 28 + executable plans 6      │
+28 source URLs → │ Catalog 28 + executable plans 10     │
                  └──────────────────┬───────────────────┘
                                     │
                   ┌─────────────────▼─────────────────┐
-                  │ Connector เฉพาะ 6 executable URLs │
+                  │ Connector เฉพาะ 10 executable URLs│
                   │ JSON / form / CKAN                 │
                   └─────────────────┬─────────────────┘
                                     │ Candidate datasets
@@ -79,9 +79,9 @@ Repository นี้ไม่ใช่ raw data lake หลัก Raw evidence �
 
 `config/source_catalog.json` เป็น generated serving catalog ของ 28 แหล่งและแยก publication policy ดังนี้; canonical `config/source_registry.json` กับ source cards อยู่ใน evidence workspace และเป็น input ตอน regenerate:
 
-- `public_candidate` 11 แหล่ง — มี reviewed projection ที่อนุญาตให้แสดงพร้อมคำเตือน
+- `public_candidate` 14 แหล่ง — มี reviewed projection ที่อนุญาตให้แสดงพร้อมคำเตือน
 - `metadata_only` 12 แหล่ง — แสดงชื่อ URL และสถานะ แต่ยังไม่เอาค่าข้อมูลขึ้น Dashboard
-- `restricted_local_only` 5 แหล่ง — Cloud เก็บ metadata เท่านั้นและไม่มี executable public connector
+- `restricted_local_only` 2 แหล่ง — Cloud เก็บ metadata เท่านั้นและไม่มี executable public connector (Nonthaburi)
 
 การมี HTTP 200 หรือดึงข้อมูลได้ไม่เปลี่ยน source ให้เป็น accepted KPI โดยอัตโนมัติ
 

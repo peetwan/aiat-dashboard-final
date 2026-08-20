@@ -84,6 +84,42 @@ EXPECTED_SOURCE_COUNT = len(_REVIEWED_SOURCES)
 EXPECTED_PUBLIC_SOURCE_COUNT = sum(
     source.get("cloud_policy") == "team_approved_public" for source in _REVIEWED_SOURCES
 )
+
+
+def _reviewed_dashboard_source_ids() -> frozenset[str]:
+    """Return the reviewed public-dashboard inventory, not every ingestible source.
+
+    Catalog `team_approved_public` can grow before a publication rebuild adds the
+    source to `public_dashboard.json`. Health still requires the published
+    inventory to match `dashboard_core.source_ids` and stay inside the approved set.
+    """
+
+    contract = json.loads(
+        (PUBLICATION_CONTRACTS_ROOT / "dashboard_core.json").read_text(encoding="utf-8")
+    )
+    source_ids = contract.get("source_ids")
+    if not isinstance(source_ids, list) or not source_ids:
+        raise RuntimeError("dashboard_core.source_ids must be a non-empty list")
+    if len(source_ids) != len(set(source_ids)):
+        raise RuntimeError("dashboard_core.source_ids contains duplicates")
+    if any(not isinstance(item, str) or not item.strip() for item in source_ids):
+        raise RuntimeError("dashboard_core.source_ids must be non-empty strings")
+    approved_ids = {
+        source["source_id"]
+        for source in _REVIEWED_SOURCES
+        if source.get("cloud_policy") == "team_approved_public"
+    }
+    unknown = sorted(set(source_ids) - approved_ids)
+    if unknown:
+        raise RuntimeError(
+            "dashboard_core.source_ids includes sources that are not "
+            "team_approved_public: " + ", ".join(unknown)
+        )
+    return frozenset(source_ids)
+
+
+REVIEWED_DASHBOARD_SOURCE_IDS = _reviewed_dashboard_source_ids()
+EXPECTED_PUBLISHED_DASHBOARD_SOURCE_COUNT = len(REVIEWED_DASHBOARD_SOURCE_IDS)
 EXPECTED_METADATA_SOURCE_COUNT = sum(
     source.get("cloud_policy") == "metadata_only" for source in _REVIEWED_SOURCES
 )
@@ -207,10 +243,11 @@ def _serving_contract_snapshot(session) -> dict:
     published_id_set = set(published_ids)
     published_ids_match_approved = (
         isinstance(catalog_rows, list)
-        and len(catalog_rows) == EXPECTED_PUBLIC_SOURCE_COUNT
+        and len(catalog_rows) == EXPECTED_PUBLISHED_DASHBOARD_SOURCE_COUNT
         and len(published_ids) == len(catalog_rows)
         and len(published_id_set) == len(published_ids)
-        and published_id_set == approved_ids
+        and published_id_set == REVIEWED_DASHBOARD_SOURCE_IDS
+        and published_id_set <= approved_ids
     )
     restricted_catalog_sources = published_id_set & restricted_ids
     disallowed_operational_records = (

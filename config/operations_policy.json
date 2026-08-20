@@ -27,17 +27,20 @@
     ]
   },
   "refresh_sources": [
+    {"source_id": "f1_pppconnext", "cadence": "daily_probe", "time_local": "02:00", "strategy": "four public 2026 aggregate APIs; commit only when 47 grains reconcile", "change_trigger": "province/year count or record hash drift", "publish": "manual approval after semantic review"},
     {"source_id": "f1_sradss_ppaos", "cadence": "daily", "time_local": "02:15", "strategy": "current-year aggregate fetch", "change_trigger": "snapshot_date or updated_at", "publish": "manual approval after validation"},
     {"source_id": "f2_apptech_mtr", "cadence": "daily_probe", "time_local": "02:35", "strategy": "totalCount probe; full fetch on change", "change_trigger": "totalCount or record hash drift", "publish": "manual approval after privacy/diff review"},
     {"source_id": "f2_apptech_mru", "cadence": "daily_probe", "time_local": "02:50", "strategy": "totaldata probe; full fetch on change", "change_trigger": "innovation/requirement totaldata", "publish": "manual approval after schema/diff review"},
     {"source_id": "f2_learning_dashboard", "cadence": "daily_probe", "time_local": "03:05", "strategy": "schema and response-hash probe", "change_trigger": "schema keys, row count or response hash", "publish": "manual approval because unit/as_of are missing"},
     {"source_id": "f2_learning_area_based", "cadence": "daily_probe", "time_local": "03:20", "strategy": "row-count and updatedAt-watermark probe", "change_trigger": "count, unique IDs or watermark", "publish": "manual approval after geography/privacy checks"},
+    {"source_id": "f2_target_household", "cadence": "daily_probe", "time_local": "03:25", "strategy": "paginate public /search; commit only when advertised pages and unique product IDs reconcile", "change_trigger": "pagination last-page or unique product_id drift", "publish": "manual approval after privacy/diff review"},
+    {"source_id": "f2_wallet_all_realtime", "cadence": "daily_probe", "time_local": "03:28", "strategy": "current-month POST {date:\"\"} schema and thisMonth probe", "change_trigger": "thisMonth, schema keys or snapshot hash", "publish": "manual approval because unit/denominator remain needs_review"},
+    {"source_id": "f2_wallet_cluster_realtime", "cadence": "daily_probe", "time_local": "03:31", "strategy": "current-month empty POST; commit when hh/bu category inventories match", "change_trigger": "cluster count, category names or snapshot hash", "publish": "manual approval; small cells stay needs_review"},
     {"source_id": "f3_housing_portal", "cadence": "daily_probe", "time_local": "03:35", "strategy": "CKAN resource metadata probe; full fetch on change", "change_trigger": "resource.last_modified, URL or hash", "publish": "manual approval after unit/privacy checks"}
   ],
   "snapshot_sources": [
-    {"source_id": "f1_pppconnext", "cadence": "weekly_or_owner_export", "reason_th": "live BI shell เคยตอบ 404"},
     {"source_id": "f2_culturalmap_university", "cadence": "weekly_or_on_change", "reason_th": "ใช้ structured external export"},
-    {"source_id": "f2_rmutdb", "cadence": "monthly_or_export_change", "reason_th": "record API มี auth boundary"},
+    {"source_id": "f2_rmutdb", "cadence": "monthly_or_export_change", "reason_th": "live dashboard/search JSON ตอบ 503, /ebook 404; ใช้ snapshot 2,001 แถวและ PDF inventory ในหลักฐาน ห้าม GET ไฟล์ 123MB ตอน ingest"},
     {"source_id": "f3_city_capital_open_data", "cadence": "weekly_or_on_change", "reason_th": "static structured bundle"},
     {"source_id": "f3_ruamthiao_lamphun", "cadence": "weekly_or_on_change", "reason_th": "static public bundle"}
   ],

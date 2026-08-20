@@ -1,6 +1,6 @@
 # AIAT Provincial Evidence Map
 
-Public dashboard ที่มี source catalog ครบ 28 แหล่ง และ central connector pipeline สำหรับ 6 แหล่งที่เปิด operational ingestion อยู่ในปัจจุบัน แหล่งที่เหลือใช้ snapshot, metadata-only หรือ restricted lane ตาม policy; เมื่อเปิด source เพิ่ม จึงค่อยมี connector และ contract เฉพาะ URL นั้น ส่วนระบบกลางดูแลหลักฐาน ความครบ privacy, versioning และการเขียนฐานข้อมูลแบบเดียวกัน
+Public dashboard ที่มี source catalog ครบ 28 แหล่ง และ central connector pipeline สำหรับ 10 แหล่งที่เปิด operational ingestion อยู่ในปัจจุบัน แหล่งที่เหลือใช้ snapshot, metadata-only หรือ restricted lane ตาม policy; เมื่อเปิด source เพิ่ม จึงค่อยมี connector และ contract เฉพาะ URL นั้น ส่วนระบบกลางดูแลหลักฐาน ความครบ privacy, versioning และการเขียนฐานข้อมูลแบบเดียวกัน
 
 > ข้อมูลที่เผยแพร่ยังเป็น `candidate`/`needs_review` ไม่ใช่ KPI ที่หน่วยงานรับรอง และระบบไม่เดา grain, หน่วย, ปี หรือจังหวัดเมื่อหลักฐานไม่พอ
 

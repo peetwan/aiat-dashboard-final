@@ -1,0 +1,30 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f1_pppconnext",
+  "records": [
+    {
+      "dataset_key": "national_summary",
+      "payload": {
+        "record_id": "fixture-national-summary",
+        "record_type": "national_summary",
+        "geography_code": "0",
+        "geography_name_th": "ภาพรวม 20 จังหวัด",
+        "survey_year": null,
+        "as_of": null,
+        "values": {"households_total": 1}
+      }
+    },
+    {
+      "dataset_key": "province_summary",
+      "payload": {
+        "record_id": "fixture-province-18",
+        "record_type": "province_summary",
+        "geography_code": "18",
+        "geography_name_th": "จังหวัดตัวอย่าง",
+        "survey_year": null,
+        "as_of": null,
+        "values": {"households_total": 1}
+      }
+    }
+  ]
+}
