@@ -68,9 +68,6 @@ def test_catalog_covers_all_registry_sources_and_public_candidates():
         for source in sources
         if source["cloud_policy"] == "restricted_local_only"
     } == {
-        "f2_target_household",
-        "f2_wallet_all_realtime",
-        "f2_wallet_cluster_realtime",
         "f3_nonthaburi_city_learning",
         "f3_healthcare_nonthaburi",
     }
@@ -87,10 +84,14 @@ def test_executable_plans_never_include_restricted_sources():
     plans = load_ingestion_plans()["sources"]
     assert set(plans) == {
         "f1_sradss_ppaos",
+        "f1_pppconnext",
         "f2_apptech_mtr",
         "f2_apptech_mru",
+        "f2_target_household",
         "f2_learning_dashboard",
         "f2_learning_area_based",
+        "f2_wallet_all_realtime",
+        "f2_wallet_cluster_realtime",
         "f3_housing_portal",
     }
     executable_urls = []

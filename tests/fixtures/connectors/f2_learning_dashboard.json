@@ -9,6 +9,10 @@
     {
       "dataset_key": "impactSummary",
       "payload": {"totalEmployeeAmount": 1, "as_of": null, "unit": null}
+    },
+    {
+      "dataset_key": "excludedResourceExpense",
+      "payload": {"value": 1, "as_of": null, "unit": null}
     }
   ]
 }

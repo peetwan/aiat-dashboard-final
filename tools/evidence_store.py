@@ -3,7 +3,7 @@
 
 กฎที่ module นี้บังคับ (รายละเอียดใน docs/evidence-storage.md):
 
-- หนึ่ง run = หนึ่ง prefix ``raw/<source_id>/<run_id>/`` และห้ามเขียนทับ
+- หนึ่ง run = หนึ่ง prefix ``raw/<department>/<source_id>/<run_id>/`` และห้ามเขียนทับ
   (push ปฏิเสธ run_id ที่มีอยู่แล้ว ไม่ใช่พึ่งวินัยคน)
 - ``manifest.json`` ถูกอัปโหลดเป็นไฟล์สุดท้ายเสมอ run ที่ไม่มี manifest = ใช้ไม่ได้
 - ``as_of`` และ ``grain`` ต้องมาจากคนที่รู้ข้อมูล เครื่องมือห้ามเดา (ตาม AGENTS.md)
@@ -25,10 +25,18 @@ from typing import Any, Iterator
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
 
-TOOL_VERSION = "0.1.0"
+TOOL_VERSION = "0.2.0"
 MANIFEST_NAME = "manifest.json"
 MANIFEST_INPUT_NAME = "manifest_input.json"
 RUN_ID_PATTERN = re.compile(r"^\d{8}T\d{6}Z$")
+SOURCE_CATALOG_PATH = DASHBOARD_ROOT / "config" / "source_catalog.json"
+DEPARTMENT_CODES = {
+    "ฝ่าย 1": "f1",
+    "ฝ่าย 2": "f2",
+    "ฝ่าย 3": "f3",
+    "ฝ่าย 4": "f4",
+    "ฝ่าย SPU": "spu",
+}
 REQUIRED_ENV_KEYS = (
     "AIAT_S3_ENDPOINT",
     "AIAT_S3_BUCKET",
@@ -161,8 +169,37 @@ def _iter_keys(client, bucket: str, prefix: str) -> Iterator[str]:
         token = response.get("NextContinuationToken")
 
 
+def source_department(source_id: str) -> str:
+    """คืนรหัสฝ่ายจาก generated source catalog ซึ่งเป็นสำเนาของ canonical registry"""
+    try:
+        catalog = json.loads(SOURCE_CATALOG_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise EvidenceStoreError(f"อ่าน source catalog ไม่ได้: {SOURCE_CATALOG_PATH}: {exc}") from exc
+
+    source = next(
+        (item for item in catalog.get("sources", []) if item.get("source_id") == source_id),
+        None,
+    )
+    if source is None:
+        raise EvidenceStoreError(f"source_id ไม่มีใน config/source_catalog.json: {source_id}")
+    group = source.get("group")
+    department = DEPARTMENT_CODES.get(group)
+    if department is None:
+        raise EvidenceStoreError(f"ยังไม่มีรหัส R2 สำหรับ group={group!r} ของ {source_id}")
+    return department
+
+
+def remote_source_prefix(config: StoreConfig, source_id: str) -> str:
+    department = source_department(source_id)
+    return f"{config.raw_prefix}{department}/{source_id}/"
+
+
+def remote_run_prefix(config: StoreConfig, source_id: str, run_id: str) -> str:
+    return f"{remote_source_prefix(config, source_id)}{run_id}/"
+
+
 def list_runs(client, config: StoreConfig, source_id: str) -> list[str]:
-    prefix = f"{config.raw_prefix}{source_id}/"
+    prefix = remote_source_prefix(config, source_id)
     run_ids = set()
     for key in _iter_keys(client, config.bucket, prefix):
         run_id = key[len(prefix):].split("/", 1)[0]
@@ -235,7 +272,7 @@ def push_run(
             f"run_id ต้องอยู่ในรูป UTC timestamp เช่น 20260818T041500Z (ได้ {run_id!r})"
         )
 
-    prefix = f"{config.raw_prefix}{source_id}/{run_id}/"
+    prefix = remote_run_prefix(config, source_id, run_id)
     if next(_iter_keys(client, config.bucket, prefix), None) is not None:
         raise RunAlreadyExistsError(
             f"run {source_id}/{run_id} มีอยู่แล้วใน bucket — ดึงใหม่ = run ใหม่ ห้ามทับของเก่า"
@@ -351,7 +388,7 @@ def pull_run(
     if not RUN_ID_PATTERN.match(run):
         raise EvidenceStoreError(f"run_id ไม่ถูกรูปแบบ: {run!r}")
 
-    prefix = f"{config.raw_prefix}{source_id}/{run}/"
+    prefix = remote_run_prefix(config, source_id, run)
     remote_keys = set(_iter_keys(client, config.bucket, prefix))
     manifest_key = prefix + MANIFEST_NAME
     if manifest_key not in remote_keys:

@@ -68,18 +68,21 @@ class LearningDashboardConnector:
             )
             for row_number, row in enumerate(impact_rows, start=1)
         )
-        impact_summary = payload.get("impactSummary")
-        if not isinstance(impact_summary, dict):
-            raise RuntimeError("learning dashboard impactSummary must be an object")
-        records.append(
-            (
-                "impactSummary",
-                {
-                    **impact_summary,
-                    "unit": None,
-                    "as_of": None,
-                    "scope_warning_th": scope_warning,
-                },
+        for object_name in ("impactSummary", "excludedResourceExpense"):
+            if object_name not in expected_keys:
+                continue
+            value = payload.get(object_name)
+            if not isinstance(value, dict):
+                raise RuntimeError(f"learning dashboard {object_name} must be an object")
+            records.append(
+                (
+                    object_name,
+                    {
+                        **value,
+                        "unit": None,
+                        "as_of": None,
+                        "scope_warning_th": scope_warning,
+                    },
+                )
             )
-        )
         return context.apply_limit(records)

@@ -12,7 +12,7 @@
       "as_of_fields": []
     },
     {
-      "key_pattern": "^(?:geographyImpact|impactSummary)$",
+      "key_pattern": "^(?:geographyImpact|impactSummary|excludedResourceExpense)$",
       "grain_th": "ค่าผลกระทบรวมหนึ่งรายการตามขอบเขตต้นทาง",
       "identity_options": [["source_row_number"], ["geography"], ["$payload_hash"]],
       "geography_fields": ["geography", "province"],
@@ -20,7 +20,7 @@
     }
   ],
   "completeness_checks": [
-    "response ต้องมี expected keys ครบ",
+    "response ต้องมี expected keys ครบ รวม excludedResourceExpense ที่ live API ส่งมา",
     "ตาราง header-array ต้องมีความกว้างสองคอลัมน์",
     "เก็บ unit และ as_of เป็น null เมื่อแหล่งข้อมูลไม่ระบุ"
   ],

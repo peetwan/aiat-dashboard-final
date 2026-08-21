@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.1",
+  "source_id": "f2_target_household",
+  "connector": "app.connectors.target_household:TargetHouseholdConnector",
+  "transport": "http_html",
+  "dataset_grains": [
+    {
+      "key_pattern": "^public_product$",
+      "grain_th": "นวัตกรรมสาธารณะหนึ่งรายการจากหน้ารวม /search ไม่ใช่ครัวเรือนหรือบุคคลหนึ่งราย",
+      "identity_options": [["product_id"]],
+      "geography_fields": [],
+      "as_of_fields": []
+    }
+  ],
+  "completeness_checks": [
+    "ดึงทุกหน้าตาม pagination ที่หน้า /search โฆษณา และ page=1 ต้องมีสินค้า",
+    "product_id ต้องไม่ซ้ำและทุกหน้าที่ยิงต้องมีลิงก์ /product/show/{id}",
+    "pagination ที่เปลี่ยนระหว่างดึงทำให้รันล้มก่อน commit",
+    "ไม่ถือจำนวนสินค้าคงที่จากรอบก่อนเป็น completeness gate เพราะหน้ารวมอาจเพิ่ม/ลดได้",
+    "ไม่เรียก login, EPMS, หรือแตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดสินค้าตอน serving"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_target_household.json",
+  "notes_th": "ชื่อใน registry ยังเป็นครัวเรือนมุ่งเป้า แต่เว็บสาธารณะคือตลาดนวัตกรรม AppTech; grain ที่ serving ใช้คือรายการสินค้าจาก /search"
+}

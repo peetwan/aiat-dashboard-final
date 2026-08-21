@@ -1,0 +1,24 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_wallet_all_realtime",
+  "records": [
+    {
+      "dataset_key": "household_month",
+      "payload": {
+        "thisMonth": "2026-08",
+        "thisMonthName": "สิงหาคม 69",
+        "as_of": "2026-08",
+        "snapshot": {"totalCash": 1, "totalIncome": 1, "totalExpense": 1}
+      }
+    },
+    {
+      "dataset_key": "business_month",
+      "payload": {
+        "thisMonth": "2026-08",
+        "thisMonthName": "สิงหาคม 69",
+        "as_of": "2026-08",
+        "snapshot": {"totalCash": 1, "totalIncome": 1, "totalExpense": 1}
+      }
+    }
+  ]
+}

@@ -147,11 +147,13 @@ def test_restricted_sources_are_blocked_and_approved_public_sources_pass_guard()
         sync_catalog(session)
         pipeline = IngestionPipeline(session, settings)
         with pytest.raises(PolicyViolation):
-            pipeline.ingest_source("f2_wallet_all_realtime")
+            pipeline.ingest_source("f3_healthcare_nonthaburi")
         pipeline._guard_source(source_config("f3_city_capital_open_data"))
+        pipeline._guard_source(source_config("f2_wallet_all_realtime"))
+        pipeline._guard_source(source_config("f2_target_household"))
 
 
-def test_production_allows_approved_source_but_blocks_wallet():
+def test_production_allows_approved_source_but_blocks_nonthaburi():
     settings = Settings(
         app_env="production",
         database_url="sqlite:///unused.sqlite",
@@ -161,8 +163,9 @@ def test_production_allows_approved_source_but_blocks_wallet():
         sync_catalog(session)
         pipeline = IngestionPipeline(session, settings)
         pipeline._guard_source(source_config("f2_apptech_mtr"))
+        pipeline._guard_source(source_config("f2_wallet_cluster_realtime"))
         with pytest.raises(PolicyViolation):
-            pipeline.ingest_source("f2_wallet_cluster_realtime")
+            pipeline.ingest_source("f3_nonthaburi_city_learning")
 
 
 def test_learning_dashboard_driver_keeps_all_source_grains_separate():
@@ -173,6 +176,7 @@ def test_learning_dashboard_driver_keeps_all_source_grains_separate():
         "geography": [["Geography", "Popularity"], ["ภาคใต้", 4]],
         "geographyImpact": [{"geography": "ภาคใต้", "employee": 5}],
         "impactSummary": {"totalEmployeeAmount": 5},
+        "excludedResourceExpense": {"value": 1},
     }
     plan = {
         "url": "https://lesuper.app/api/opendata/pmua",
@@ -194,6 +198,7 @@ def test_learning_dashboard_driver_keeps_all_source_grains_separate():
         "geography",
         "geographyImpact",
         "impactSummary",
+        "excludedResourceExpense",
     ]
     assert all(record["unit"] is None and record["as_of"] is None for _, record in records)
     assert all(record["scope_warning_th"] == "selected project scope" for _, record in records)
@@ -764,6 +769,20 @@ def test_all_executable_plan_requests_match_the_generated_runtime_allowlist():
         }
         assert sra_recorder._request_is_allowed("GET", request["url"], params)
 
+    ppp_recorder = recorder_for("f1_pppconnext")
+    for request in plans["f1_pppconnext"]["requests"]:
+        assert ppp_recorder._request_is_allowed("GET", request["url"], None)
+    assert not ppp_recorder._request_is_allowed(
+        "GET",
+        "https://ppaos.com/2026/api/khm/v1/dashboard/ppaos-province-analytics",
+        {"prov_code": "18"},
+    )
+    assert not ppp_recorder._request_is_allowed(
+        "GET",
+        "https://ppaos.com/2026/api/khm/v1/areas/provinces",
+        None,
+    )
+
     apptech_recorder = recorder_for("f2_apptech_mtr")
     apptech_plan = plans["f2_apptech_mtr"]
     apptech_params = {
@@ -810,6 +829,55 @@ def test_all_executable_plan_requests_match_the_generated_runtime_allowlist():
     area_plan = plans["f2_learning_area_based"]
     area_recorder = recorder_for("f2_learning_area_based")
     assert area_recorder._request_is_allowed("GET", area_plan["url"], None)
+
+    target_plan = plans["f2_target_household"]
+    target_recorder = recorder_for("f2_target_household")
+    assert target_recorder._request_is_allowed(
+        "GET",
+        target_plan["url"],
+        {"page": 1},
+    )
+    assert not target_recorder._request_is_allowed("GET", target_plan["url"], None)
+    assert not target_recorder._request_is_allowed(
+        "GET",
+        "https://pmua-apptech.com/dashboard/familydashboard",
+        None,
+    )
+
+    wallet_all_recorder = recorder_for("f2_wallet_all_realtime")
+    for request in plans["f2_wallet_all_realtime"]["requests"]:
+        assert wallet_all_recorder._request_is_allowed(
+            "POST",
+            request["url"],
+            None,
+            None,
+            request["json_body"],
+        )
+        assert not wallet_all_recorder._request_is_allowed(
+            "POST",
+            request["url"],
+            None,
+            None,
+            {"date": "2026-08-31"},
+        )
+        assert not wallet_all_recorder._request_is_allowed("GET", request["url"], None)
+
+    wallet_cluster_recorder = recorder_for("f2_wallet_cluster_realtime")
+    for request in plans["f2_wallet_cluster_realtime"]["requests"]:
+        assert wallet_cluster_recorder._request_is_allowed(
+            "POST",
+            request["url"],
+            None,
+            None,
+            request["json_body"],
+        )
+        assert not wallet_cluster_recorder._request_is_allowed(
+            "POST",
+            request["url"],
+            None,
+            None,
+            {"date": ""},
+        )
 
     housing_source = source_config("f3_housing_portal")
     housing_recorder = recorder_for("f3_housing_portal")

@@ -7,16 +7,17 @@
     "verified_endpoint_observations": [
       "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json",
       "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json",
-      "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json"
+      "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json",
+      "data/raw/network/f2_target_household/20260818T163000Z_pmua_apptech_catalogue_01/observation.json"
     ]
   },
   "policy": {
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
     "registry_source_count": 28,
-    "approved_public_source_count": 11,
+    "approved_public_source_count": 14,
     "metadata_only_source_count": 12,
-    "restricted_source_count": 5,
+    "restricted_source_count": 2,
     "restricted_sources_are_never_deployed": true,
     "candidate_records_are_not_kpi_facts": true
   },
@@ -1439,16 +1440,31 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/09_f2_target_household/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 1160,
+      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted | หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination เป็นรายการสินค้าตัดชื่อ/เบอร์/อีเมล. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest.",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "b075547d21b14afa086d8a9f438168fde2b7418020a8c0dccfb60656cfb5e8b4",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/search",
+          "kind": "public_product_search",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "page=<value>"
+          },
+          "notes_th": "หน้ารวมนวัตกรรมสาธารณะ; page=1 ตรงกับ /search ที่ไม่มี query. ไม่ดึง login/EPMS และไม่แตก familydashboard เป็นแถวครัวเรือน."
+        }
+      ]
     },
     {
       "ordinal": 10,
@@ -1535,14 +1551,14 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/12_f2_wallet_all_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 2,
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี | หน้า lesuper เป็นแดชบอร์ดข้อมูลเปิด; serving ดึงเดือนปัจจุบันด้วย POST {\"date\": \"\"} ได้ 2 aggregate (ครัวเรือน+ธุรกิจ) ไม่ใช่รายการรายบุคคล. ประวัติรายเดือนเต็มอยู่เลนหลักฐาน/R2. as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1552,10 +1568,13 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}",
+            "json_body": {
+              "date": ""
+            }
           },
           "notes_th": "aggregate ครัวเรือนรายเดือน ไม่ต้อง login; GET=405"
         },
@@ -1566,10 +1585,13 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}",
+            "json_body": {
+              "date": ""
+            }
           },
           "notes_th": "aggregate ธุรกิจรายเดือน ไม่ต้อง login; GET=405"
         }
@@ -1585,14 +1607,14 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/13_f2_wallet_cluster_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 14,
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง | หน้าเปรียบเทียบคลัสเตอร์เป็นข้อมูลเปิด; serving ดึงเดือนปัจจุบัน 7 กลุ่ม × 2 กระเป๋า = 14 records. กลุ่มขนาดเล็กเป็นค่าที่หน้าเว็บเผยแพร่แล้ว จึงเก็บเป็น Candidate และไม่เทียบยอดรวมที่ frontend ฮาร์ดโค้ด. as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1602,10 +1624,11 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "",
+            "json_body": {}
           },
           "notes_th": "aggregate ครัวเรือนแยกกลุ่มธุรกิจ ไม่ต้อง login"
         },
@@ -1616,10 +1639,11 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "",
+            "json_body": {}
           },
           "notes_th": "aggregate ธุรกิจแยกกลุ่ม ไม่ต้อง login"
         }

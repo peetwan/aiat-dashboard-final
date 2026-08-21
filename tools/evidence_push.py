@@ -20,6 +20,7 @@ from tools.evidence_store import (  # noqa: E402
     config_from_env,
     make_client,
     push_run,
+    remote_run_prefix,
 )
 
 
@@ -42,7 +43,7 @@ def main() -> int:
         print(f"push ล้มเหลว: {error}", file=sys.stderr)
         return 2
 
-    prefix = f"{config.raw_prefix}{args.source_id}/{manifest['run_id']}/"
+    prefix = remote_run_prefix(config, args.source_id, manifest["run_id"])
     print(f"push สำเร็จ → s3://{config.bucket}/{prefix}")
     for entry in manifest["datasets"]:
         print(

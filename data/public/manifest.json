@@ -277,9 +277,6 @@
     }
   ],
   "excluded_source_ids": [
-    "f2_target_household",
-    "f2_wallet_all_realtime",
-    "f2_wallet_cluster_realtime",
     "f3_healthcare_nonthaburi",
     "f3_nonthaburi_city_learning"
   ]
