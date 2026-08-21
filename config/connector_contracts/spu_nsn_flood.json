@@ -22,8 +22,8 @@
     }
   ],
   "completeness_checks": [
-    "HTML page is parsed with BeautifulSoup to extract station list",
-    "Each station page is fetched and tables are extracted"
+    "HTML page is parsed with BeautifulSoup to extract the complete station-link listing",
+    "The run fails when no station links are found or a record limit would truncate the listing"
   ],
   "privacy": {
     "candidate_only": true,
@@ -40,6 +40,6 @@
       "national_id"
     ]
   },
-  "notes_th": "Connector สำหรับ NSN Flood ดึงข้อมูลสถานีน้ำและพยากรณ์จาก HTML",
+  "notes_th": "Connector สำหรับ NSN Flood ดึงรายการลิงก์สถานีน้ำจากหน้า water-level; ยังไม่ได้ดึงรายละเอียดรายสถานี",
   "sample_fixture": "tests/fixtures/connectors/spu_nsn_flood.json"
 }

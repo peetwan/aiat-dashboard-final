@@ -1,7 +1,7 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "5af338a42c6c2dd74a5b226ce14728356e3f76a052f5a5c5c62db2c783022a4d",
-  "artifact_count": 170,
+  "release_digest": "9e658d9a14dbcd57b7ef6acd119d1ef7b84aeffcd4edb48e4f8a4815f10be0da",
+  "artifact_count": 171,
   "artifacts": [
     {
       "path": "data/public/cultural_points.geojson",
@@ -12,6 +12,16 @@
       "bytes": 3363771,
       "sha256": "067a931e71c35d9bd40d17eeb837a780203bb959e002dff468e179074d183e84",
       "contract_sha256": "17e48099814b867236e8f2b603c2d096472a73d8465995ba8b73d4b584f91691"
+    },
+    {
+      "path": "data/public/disaster_tracking.json",
+      "contract_id": "disaster_tracking",
+      "dataset_key": "disaster_tracking",
+      "role": "database",
+      "format": "json",
+      "bytes": 366,
+      "sha256": "5e0026d06b7de0f213d379be86b224cf230968b70e37177c49d10b15d0b74060",
+      "contract_sha256": "1c58d81d80e011ada863b94640323b346ea8016b5b4691fe6c672b8c75efc549"
     },
     {
       "path": "data/public/executive_summaries/10.json",
@@ -1649,8 +1659,8 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 89593,
-      "sha256": "6b01911e3ef1ea902d0e226233c9a51bf2be7c6b3fcfef409e08d9e9fc60ab94",
+      "bytes": 89692,
+      "sha256": "3669be9dcb40a96c20f31be919e8563f584818c1074c6f6b42843d25aaa0f8dd",
       "contract_sha256": "73d0a3e21b27b4f0ec7acc10a37678439a3044052045f5c9b5005ff28d98251a"
     },
     {

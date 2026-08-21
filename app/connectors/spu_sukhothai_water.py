@@ -136,24 +136,53 @@ class SpuSukhothaiWaterConnector:
             url = dataset["url"]
             response, _ = context.recorder.request("GET", url, name=name)
             payload = response.json()
+            if not isinstance(payload, dict):
+                raise RuntimeError(f"ThaiWater {name} response is not an object")
 
             if name == "water_levels":
-                rows = payload.get("waterlevel_data", {}).get("data", [])
+                waterlevel_data = payload.get("waterlevel_data")
+                if not isinstance(waterlevel_data, dict) or not isinstance(
+                    waterlevel_data.get("data"), list
+                ):
+                    raise RuntimeError("ThaiWater water_levels response has unexpected schema")
+                rows = waterlevel_data["data"]
                 for row in rows:
+                    if not isinstance(row, dict):
+                        raise RuntimeError("ThaiWater water_levels returned a non-object row")
                     records.append(("water_levels.row", _flatten_water_level(row, url, fetched_at)))
             elif name == "rain_24h":
-                rows = payload.get("data", [])
+                rows = payload.get("data")
+                if not isinstance(rows, list):
+                    raise RuntimeError("ThaiWater rain_24h response has unexpected schema")
                 for row in rows:
+                    if not isinstance(row, dict):
+                        raise RuntimeError("ThaiWater rain_24h returned a non-object row")
                     records.append(("rain_24h.row", _flatten_rain_24h(row, url, fetched_at)))
             elif name == "dams":
-                data = payload.get("data", {})
+                data = payload.get("data")
+                if not isinstance(data, dict):
+                    raise RuntimeError("ThaiWater dams response has unexpected schema")
                 for dam_dataset, rows in data.items():
                     if not isinstance(rows, list):
-                        continue
+                        raise RuntimeError(
+                            f"ThaiWater dams.{dam_dataset} is not an array"
+                        )
                     for row in rows:
+                        if not isinstance(row, dict):
+                            raise RuntimeError(
+                                f"ThaiWater dams.{dam_dataset} returned a non-object row"
+                            )
                         records.append((f"dams.{dam_dataset}", _flatten_dam(row, url, fetched_at, dam_dataset)))
+            else:
+                raise RuntimeError(f"ThaiWater plan contains unsupported dataset: {name}")
 
-            if context.limit_reached(len(records)):
-                return context.apply_limit(records)
+            if (
+                context.settings.max_records_per_source > 0
+                and len(records) > context.settings.max_records_per_source
+            ):
+                raise RuntimeError(
+                    "ThaiWater max_records_per_source would truncate a complete snapshot; "
+                    "partial commits are forbidden"
+                )
 
         return records

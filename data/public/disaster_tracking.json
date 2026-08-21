@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": null,
+  "publication_status": "reviewed_candidate_projection",
+  "quality_label_th": "ข้อมูล candidate ที่ผ่าน publication review · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+  "provinces": {},
+  "station_samples": {},
+  "timeseries": {}
+}

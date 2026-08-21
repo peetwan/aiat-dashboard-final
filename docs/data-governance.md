@@ -10,8 +10,8 @@
 
 - ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
 - ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
-- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 14 แหล่ง
-- Metadata-only: 12 แหล่ง
+- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 18 แหล่ง
+- Metadata-only: 8 แหล่ง
 - Restricted local-only: 2 แหล่ง
 
 ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้
@@ -46,10 +46,10 @@
 | 22 | `f3_learning_city_platform` | Metadata | metadata-only | 0 | 0 | 0 |
 | 23 | `f3_housing_portal` | API-first | public candidate | 7,259 | 50 | 47 |
 | 24 | `f4_research_dashboard_psu` | Metadata | metadata-only | 0 | 0 | 0 |
-| 25 | `spu_sukhothai_care` | Metadata | metadata-only | 0 | 0 | 0 |
-| 26 | `spu_sukhothai_water` | Metadata | metadata-only | 0 | 0 | 0 |
-| 27 | `spu_nsn_flood` | Metadata | metadata-only | 0 | 0 | 0 |
-| 28 | `spu_rawangphai_uru` | Metadata | metadata-only | 0 | 0 | 0 |
+| 25 | `spu_sukhothai_care` | API-first | public candidate | 0 | 4 | 4 |
+| 26 | `spu_sukhothai_water` | API-first | public candidate | 0 | 3 | 3 |
+| 27 | `spu_nsn_flood` | API-first | public candidate | 0 | 1 | 1 |
+| 28 | `spu_rawangphai_uru` | API-first | public candidate | 0 | 3 | 3 |
 
 ตัวเลข records เป็น reference count ของ source ไม่ใช่จำนวนที่ต้องแสดงทั้งหมดใน UI และ runtime-safe เป็น technical allowlist ไม่ใช่การรับรองความหมายหรือ freshness
 
@@ -92,7 +92,7 @@ Artifacts ที่เพื่อนร่วมทีมนำเข้าต�
 
 ## Checklist ก่อน publication/deploy
 
-1. Source อยู่ใน public candidate 14 แหล่งและไม่ใช่ restricted lane
+1. Source อยู่ใน public candidate 18 แหล่งและไม่ใช่ restricted lane
 2. มี publication scope เป็นลายลักษณ์อักษร
 3. ยืนยัน schema, grain, unit, denominator, `as_of` และ freshness เท่าที่หลักฐานรองรับ
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection

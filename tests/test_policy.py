@@ -93,6 +93,10 @@ def test_executable_plans_never_include_restricted_sources():
         "f2_wallet_all_realtime",
         "f2_wallet_cluster_realtime",
         "f3_housing_portal",
+        "spu_sukhothai_care",
+        "spu_sukhothai_water",
+        "spu_nsn_flood",
+        "spu_rawangphai_uru",
     }
     executable_urls = []
     for plan in plans.values():

@@ -15,8 +15,8 @@
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
     "registry_source_count": 28,
-    "approved_public_source_count": 14,
-    "metadata_only_source_count": 12,
+    "approved_public_source_count": 18,
+    "metadata_only_source_count": 8,
     "restricted_source_count": 2,
     "restricted_sources_are_never_deployed": true,
     "candidate_records_are_not_kpi_facts": true
@@ -2727,69 +2727,69 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
+      "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "86c60efb74bcda7474755a59fcf8465c126a8969f3d87f2baef8afed2f15f290",
+          "endpoint_id": "2073ee3fa521c045d93a0879eabefe7f337d42d69c86c35d6e50fb2a31d019c4",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/announcements",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "page=<value>&limit=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "0794fcfe63c2529e7687f110248294b0e5073634b75e0247d24cb0e871696e33",
+          "endpoint_id": "3a7727b8fbaf27a2f9d57a887a917d170b48e4e9f1e78dfe4c1d1f12851c7627",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "page=<value>&limit=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "bbe4d66ebf2319adf40ff68976ba4369ccd70c478c43092a0821fa9dff2f30eb",
+          "endpoint_id": "01fbb801e7afde1abd8b0c4f9aa0f5a9c3116cadafb044fd94f51f88e661378f",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/map",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "swLat=<value>&swLng=<value>&neLat=<value>&neLng=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "2a820f99395d3db17d800e2a795439c16115e5f55e6556653f4cb385c5550268",
+          "endpoint_id": "982baaed39d39c27cd58cc7f53d54db93892f637e0598390a71d6b1b8c268527",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/stats",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2805,55 +2805,55 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ historical measurement, timestamp และ data endpoint",
+      "notes_th": "ตรวจ historical measurement, timestamp และ data endpoint | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "94378c2628c8a9848a6b5f50bc807d2ed54c80ba537e8e19df91e497f31f5484",
+          "endpoint_id": "6df279ef6078efff7e0441509e21271b80218bb9252f278eeecda54e4716f2be",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "17baecab05cd5de6c7caa05ff3bfb376feac60cba53d8d9971d6df662b72a202",
+          "endpoint_id": "9a3584b2bb8907d3798c55e224be833a7f661a7a9e506bfff15b945d16589a30",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "cf5d7b7a7b933892e8871c8a834cbcdbb80dbeca4e146b02246446406b2130b5",
+          "endpoint_id": "6118dfedae46313df6ce03ae64c335289c24f96eb3c8b99b82b35244fdc18ef9",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/analyst/dam",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2869,27 +2869,27 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ domain availability และ data freshness",
+      "notes_th": "ตรวจ domain availability และ data freshness | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "2a48d348870b5f7068273d75e5eccf5f8c292ec012d2bcde5295c8ec7e84442a",
+          "endpoint_id": "b9d720ee68c1b82638ca7718a117db1f51003e219c15218e9a89648383bdcbb0",
           "method": "GET",
           "url": "https://nsn-flood.nsru.ac.th/water-level",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU NSN flood water level page"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2905,55 +2905,55 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ alert feed, incident history และ API/JSON endpoint",
+      "notes_th": "ตรวจ alert feed, incident history และ API/JSON endpoint | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "a0e8f2bf57f3485238600690f00f9decfbed989d1e773ab01a3e78bc9415e6f8",
+          "endpoint_id": "463f10b49dcfc6107ed3ab6a8cbe663cac71f2ebafe2f14ea4063a1c174c9c3e",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/water-level",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "d22fac2589e619e91c79b52161feb3cc946ad254701c77127758883d917bbaaa",
+          "endpoint_id": "d79642f0ab727db006445989b283e40ba43dce385e070196733059213b2907ea",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/rain-analysis?active=true",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "51e3d6684b6adb257572a80fe9ca099f3ad05dfa74b8ff678a2d247827822584",
+          "endpoint_id": "6f961eebe4c5870128b2ce105d1dc51ad7a42725cc47149ce8b852f12e6a386e",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/shelters",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     }

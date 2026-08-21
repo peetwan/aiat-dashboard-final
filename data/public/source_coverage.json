@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-20T14:31:10.861906+00:00",
+  "generated_at": "2026-08-21T01:16:00.504988+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "8bd9979fe8255ee76e527a24354ebb9d37dcaa87c7ee37b626866fe02e728641"
+      "sha256": "566ab5d76af2876dd15f27ee3141c3f0fb808fa65c7b559ccbc9d60c565758db"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,17 +18,17 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 28,
-      "aggregate_sha256": "3cf80529e412d703c5f5bfc3d29139e303d9197629269960c0892b08d5476c98"
+      "aggregate_sha256": "54d249e4f6e1edc6ab6fd829946945771c6e081d7740b3496698856c7d5ef63c"
     }
   },
   "summary": {
     "registry_source_count": 28,
     "catalog_metadata_source_count": 28,
-    "public_candidate_source_count": 14,
-    "metadata_only_source_count": 12,
+    "public_candidate_source_count": 18,
+    "metadata_only_source_count": 8,
     "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
-    "public_candidates_with_observed_count": 14,
+    "public_candidates_with_observed_count": 18,
     "current_public_data_artifact_source_count": 11,
     "current_province_projection_source_count": 9,
     "restricted_value_leak_count": 0
@@ -1702,15 +1702,15 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
+        "readiness": "needs_review",
         "network_api_export": "NO_VERIFIED_ENDPOINT_IN_PRIOR_EVIDENCE",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
@@ -1730,10 +1730,10 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "metadata_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
@@ -1743,7 +1743,7 @@
         "source_card": "data/source_audit/25_spu_sukhothai_care/source_card.json",
         "merged_index": null,
         "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
+        "catalogued_endpoint_count": 4,
         "primary_paths": [
           "data/raw/firecrawl_map/spu_sukhothai_care/20260803T_url_audit_map_01/manifest.json",
           "data/source_audit/25_spu_sukhothai_care/evidence/map_observation.json",
@@ -1752,7 +1752,7 @@
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
@@ -1766,15 +1766,15 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
+        "readiness": "needs_review",
         "network_api_export": "STATIC_CANDIDATE_REVIEWED",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
@@ -1794,10 +1794,10 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "metadata_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
@@ -1807,7 +1807,7 @@
         "source_card": "data/source_audit/26_spu_sukhothai_water/source_card.json",
         "merged_index": null,
         "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
+        "catalogued_endpoint_count": 3,
         "primary_paths": [
           "data/raw/firecrawl_map/spu_sukhothai_water/20260803T_url_audit_map_01/manifest.json",
           "data/source_audit/26_spu_sukhothai_water/evidence/map_observation.json",
@@ -1816,7 +1816,7 @@
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ตรวจ historical measurement, timestamp และ data endpoint"
       ]
     },
@@ -1830,15 +1830,15 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
+        "readiness": "needs_review",
         "network_api_export": "STATIC_CANDIDATE_REVIEWED",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
@@ -1858,10 +1858,10 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "metadata_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
@@ -1871,7 +1871,7 @@
         "source_card": "data/source_audit/27_spu_nsn_flood/source_card.json",
         "merged_index": null,
         "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
+        "catalogued_endpoint_count": 1,
         "primary_paths": [
           "data/raw/firecrawl_map/spu_nsn_flood/20260803T_url_audit_map_01/manifest.json",
           "data/source_audit/27_spu_nsn_flood/evidence/map_observation.json",
@@ -1880,7 +1880,7 @@
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ตรวจ domain availability และ data freshness"
       ]
     },
@@ -1894,15 +1894,15 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
+        "readiness": "needs_review",
         "network_api_export": "STATIC_CANDIDATE_REVIEWED",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
@@ -1922,10 +1922,10 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "metadata_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
@@ -1935,7 +1935,7 @@
         "source_card": "data/source_audit/28_spu_rawangphai_uru/source_card.json",
         "merged_index": null,
         "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
+        "catalogued_endpoint_count": 3,
         "primary_paths": [
           "data/raw/firecrawl_map/spu_rawangphai_uru/20260803T_url_audit_map_01/manifest.json",
           "data/source_audit/28_spu_rawangphai_uru/evidence/map_observation.json",
@@ -1944,7 +1944,7 @@
         "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ตรวจ alert feed, incident history และ API/JSON endpoint"
       ]
     }

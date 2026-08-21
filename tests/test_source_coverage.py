@@ -47,6 +47,10 @@ PUBLIC_CANDIDATES = {
     "f3_city_capital_open_data",
     "f3_ruamthiao_lamphun",
     "f3_housing_portal",
+    "spu_sukhothai_care",
+    "spu_sukhothai_water",
+    "spu_nsn_flood",
+    "spu_rawangphai_uru",
 }
 
 RESTRICTED = {

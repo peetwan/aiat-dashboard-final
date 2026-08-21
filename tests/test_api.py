@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, build_candidate_disaster_tracking_artifact
 from app.database import SessionLocal
-from app.models import DashboardRecord
+from app.models import DashboardRecord, PublicArtifact
 from app.public_artifacts import artifact_inputs
 
 
@@ -171,6 +172,8 @@ def test_payload_api_is_locked_by_default():
 
 
 def _seed_disaster_record(source_id: str, dataset_key: str, payload: dict, index: int) -> None:
+    """Seed a candidate and explicitly publish the resulting reviewed test projection."""
+
     now = datetime.now(timezone.utc)
     with SessionLocal() as session:
         session.add(
@@ -185,7 +188,49 @@ def _seed_disaster_record(source_id: str, dataset_key: str, payload: dict, index
                 payload=payload,
             )
         )
+        session.flush()
+        reviewed_payload = build_candidate_disaster_tracking_artifact(session)
+        encoded = json.dumps(
+            reviewed_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        artifact = session.get(PublicArtifact, "disaster-tracking")
+        if artifact is None:
+            artifact = PublicArtifact(artifact_key="disaster-tracking")
+        artifact.artifact_group = "source_dataset"
+        artifact.province_code = None
+        artifact.content_hash = hashlib.sha256(encoded).hexdigest()
+        artifact.source_path = "data/public/disaster_tracking.json"
+        artifact.item_count = len(reviewed_payload["provinces"])
+        artifact.payload = reviewed_payload
+        session.add(artifact)
         session.commit()
+
+
+def test_disaster_candidate_rows_are_not_public_without_publication_review():
+    with TestClient(app) as client:
+        now = datetime.now(timezone.utc)
+        with SessionLocal() as session:
+            session.add(
+                DashboardRecord(
+                    source_id="spu_sukhothai_water",
+                    dataset_key="water_levels.row",
+                    source_record_id="unreviewed-candidate",
+                    record_hash="f" * 64,
+                    quality_status="needs_review",
+                    fetched_at=now,
+                    payload={
+                        "province_th": "สุโขทัย",
+                        "station_name_th": "candidate ที่ยังไม่ review",
+                        "waterlevel_msl": 42.1,
+                    },
+                )
+            )
+            session.commit()
+
+        tracking = client.get("/api/public/v1/provinces/64/disaster-tracking").json()
+        assert tracking["source_count"] == 0
+        assert tracking["record_count"] == 0
+        assert "candidate ที่ยังไม่ review" not in json.dumps(tracking, ensure_ascii=False)
 
 
 def test_disaster_tracking_uses_correct_province_mapping_and_safe_preview():

@@ -66,7 +66,20 @@ APPROVED_PUBLIC_MODES = {
     "f3_city_capital_open_data": "snapshot_only",
     "f3_ruamthiao_lamphun": "snapshot_only",
     "f3_housing_portal": "api_first",
+    "spu_sukhothai_care": "api_first",
+    "spu_sukhothai_water": "api_first",
+    "spu_nsn_flood": "api_first",
+    "spu_rawangphai_uru": "api_first",
 }
+
+SPU_DISASTER_SOURCE_IDS = frozenset(
+    {
+        "spu_sukhothai_care",
+        "spu_sukhothai_water",
+        "spu_nsn_flood",
+        "spu_rawangphai_uru",
+    }
+)
 
 # These lanes remain local-only. Public AppTech product search and Super App
 # open-data wallet aggregates are not in this set: the live pages publish those
@@ -425,6 +438,49 @@ def load_target_household_search_endpoint(acquisition_mode: str) -> list[dict]:
     ]
 
 
+def load_spu_disaster_endpoints(
+    source_id: str,
+    acquisition_mode: str,
+    plan: dict[str, Any] | None,
+) -> list[dict]:
+    """Build the reviewed SPU runtime allowlist from the explicit PR plan."""
+
+    datasets = list((plan or {}).get("datasets", []))
+    if not datasets:
+        raise RuntimeError(f"{source_id}: reviewed SPU plan must declare datasets")
+    endpoints: list[dict] = []
+    for dataset in datasets:
+        url = str(dataset.get("url") or "").strip()
+        name = str(dataset.get("name") or "").strip()
+        if not url.startswith("https://") or not name:
+            raise RuntimeError(f"{source_id}: SPU dataset requires an HTTPS URL and name")
+        action = "call_without_login"
+        if dataset.get("paginate") is True:
+            request_shape = "page=<value>&limit=<value>"
+        elif name == "incident_map":
+            request_shape = "swLat=<value>&swLng=<value>&neLat=<value>&neLng=<value>"
+        else:
+            request_shape = ""
+        endpoints.append(
+            {
+                "endpoint_id": endpoint_id(source_id, "GET", url, action),
+                "method": "GET",
+                "url": url,
+                "kind": "public_disaster_monitoring_candidate",
+                "access": "maintainer_reviewed_public_candidate",
+                "team_action": action,
+                "restricted": False,
+                "runtime_enabled": acquisition_mode == "api_first",
+                "request_template": {"query_or_body": request_shape},
+                "notes_th": (
+                    "Operational Candidate approved in PR #21; raw responses must use "
+                    "ResponseRecorder and public serving must use a reviewed artifact."
+                ),
+            }
+        )
+    return endpoints
+
+
 def source_policy(source_id: str) -> tuple[str, str, str, bool]:
     if source_id in RESTRICTED_SOURCE_IDS:
         return "blocked", "restricted_local_only", "restricted_local_only", False
@@ -528,6 +584,11 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
             "159,126 flood grids เข้า serving database แล้ว. Demand 25,919 respondent rows เผยแพร่แบบ "
             "privacy projection โดยตัด source id และผ่านการตรวจชื่อ เบอร์โทร และอีเมล; ยังเป็น needs_review."
         )
+    if source_id in SPU_DISASTER_SOURCE_IDS:
+        notes.append(
+            "Operational disaster records remain Candidate; public serving reads only the "
+            "reviewed disaster_tracking artifact and never reads dashboard_records directly."
+        )
     return " | ".join(note.strip() for note in notes if note and note.strip())
 
 
@@ -575,6 +636,12 @@ def build_catalog(merged_root: Path) -> dict:
             endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
         if source_id == "f2_target_household":
             endpoints = load_target_household_search_endpoint(acquisition_mode)
+        if source_id in SPU_DISASTER_SOURCE_IDS:
+            endpoints = load_spu_disaster_endpoints(
+                source_id,
+                acquisition_mode,
+                ingestion_plans.get(source_id),
+            )
         endpoints = apply_runtime_request_templates(
             source_id,
             endpoints,
