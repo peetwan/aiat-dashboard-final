@@ -53,6 +53,7 @@
         <button type="button" data-map-mode="sra"><i></i>ความเปราะบาง</button>
         <button type="button" data-map-mode="innovation"><i></i>นวัตกรรม</button>
         <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
+        <button type="button" data-map-mode="disaster"><i></i>ติดตามภัย</button>
       </div>
 
       <div class="map-corner">
@@ -140,6 +141,10 @@
             <section class="panel-view" data-panel-view="projects" hidden>
               <div class="portfolio-loading" id="projectsLoading"><span></span><span></span><span></span></div>
               <div class="portfolio-empty" id="projectsEmpty" hidden>ยังไม่มีรายการโครงการหรือนวัตกรรมที่ผูกกับจังหวัดนี้</div>
+              <div class="panel-section disaster-section" id="disasterSection" hidden>
+                <div class="section-heading"><span>ติดตามภัย (SPU)</span><small id="disasterNote">ข้อมูลสถานการณ์น้ำและภัยจากระบบติดตาม</small></div>
+                <div id="disasterContent"></div>
+              </div>
               <div class="panel-section research-section" id="researchSection" hidden>
                 <div class="section-heading"><span>โครงการและงบที่เชื่อมได้</span><small id="researchScope"></small></div>
                 <div id="researchPortfolio"></div>
@@ -259,6 +264,7 @@
     </main>
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
     <script src="/static/app.js" defer></script>
   </body>
 </html>

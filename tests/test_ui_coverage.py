@@ -50,6 +50,41 @@ def test_province_panel_separates_decisions_projects_people_and_quality() -> Non
     assert "research_lead_names" not in script
 
 
+def test_disaster_lens_uses_connected_counts_and_normalized_cards() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+
+    assert "ติดตามภัย" in template
+    assert 'data-map-mode="disaster"' in template
+    assert "chart.js" in template.lower()
+    assert "province.disaster_source_count" in script
+    assert "province.disaster_record_count" in script
+    assert "quality_label_th" in script
+    assert "renderDisasterInsights" in script
+    assert "renderDisasterTrends" in script
+    assert "renderDisasterLineChart" in script
+    assert "renderDisasterLatestPoints" in script
+    assert "openStationHistoryModal" in script
+    assert "data-disaster-history" in script
+    assert "data-history-grain" in script
+    assert "disaster-stations" in script
+    assert "new Chart" in script
+    assert "if (!points.length) return" in script
+    assert "renderDisasterRecord" in script
+    disaster_script = script.split("async function renderDisaster()", 1)[1].split("function renderHousing", 1)[0]
+    assert "<table" not in disaster_script.lower()
+    assert "Object.entries(record)" not in disaster_script
+    assert ".disaster-source-card" in styles
+    assert ".disaster-metrics" in styles
+    assert ".disaster-trend" in styles
+    assert ".disaster-latest-grid" in styles
+    assert ".station-history-modal" in styles
+    assert ".station-history-controls" in styles
+    assert "overflow-x: auto" in styles
+    assert ".disaster-record table" not in styles
+
+
 def test_insights_exposes_all_source_coverage_without_controls() -> None:
     template = read("app/templates/insights.html")
     script = read("app/static/insights.js")

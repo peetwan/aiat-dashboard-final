@@ -73,6 +73,12 @@ def learning_dashboard() -> dict[str, Any]:
     return load_public_artifact("learning-dashboard", "learning_dashboard.json")
 
 
+def disaster_tracking() -> dict[str, Any]:
+    """Return the reviewed disaster projection, never operational candidate rows."""
+
+    return load_public_artifact("disaster-tracking", "disaster_tracking.json")
+
+
 @lru_cache(maxsize=77)
 def provincial_briefing(province_code: str) -> dict[str, Any]:
     code = province_code.strip().zfill(2)

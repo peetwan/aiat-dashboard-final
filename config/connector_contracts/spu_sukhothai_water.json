@@ -1,0 +1,107 @@
+{
+  "contract_version": "1.1",
+  "source_id": "spu_sukhothai_water",
+  "connector": "app.connectors.spu_sukhothai_water:SpuSukhothaiWaterConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^water_levels\\.row$",
+      "grain_th": "ระดับน้ำหนึ่งสถานีจาก ThaiWater API",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "station_id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province_th",
+        "province_en",
+        "amphoe_th",
+        "tumbon_th"
+      ],
+      "as_of_fields": [
+        "waterlevel_datetime",
+        "fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^rain_24h\\.row$",
+      "grain_th": "ปริมาณฝน 24 ชม. หนึ่งสถานีจาก ThaiWater API",
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "station_id"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [
+        "province_th",
+        "province_en",
+        "amphoe_th",
+        "tumbon_th"
+      ],
+      "as_of_fields": [
+        "rainfall_datetime",
+        "fetched_at"
+      ]
+    },
+    {
+      "key_pattern": "^dams\\..+$",
+      "grain_th": "ข้อมูลเขื่อนหนึ่งแห่งจาก ThaiWater API",
+      "identity_options": [
+        [
+          "$payload_hash"
+        ],
+        [
+          "id"
+        ],
+        [
+          "dam_id"
+        ],
+        [
+          "dam_code"
+        ]
+      ],
+      "geography_fields": [
+        "province_th",
+        "province_en",
+        "amphoe_th",
+        "tumbon_th"
+      ],
+      "as_of_fields": [
+        "dam_date",
+        "fetched_at"
+      ]
+    }
+  ],
+  "completeness_checks": [
+    "ThaiWater API responses must have expected structure",
+    "Water level data under waterlevel_data.data, rain under data, dams under data.{key}"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
+  },
+  "notes_th": "Connector สำหรับ Sukhothai Water Dashboard ดึงข้อมูลระดับน้ำ ฝน และเขื่อนจาก ThaiWater API",
+  "sample_fixture": "tests/fixtures/connectors/spu_sukhothai_water.json"
+}

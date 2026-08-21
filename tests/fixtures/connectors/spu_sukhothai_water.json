@@ -1,0 +1,9 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "spu_sukhothai_water",
+  "records": [
+    {"dataset_key": "water_levels.row", "payload": {"id": 1, "station_id": 1001, "station_name_th": "สถานีตัวอย่าง", "province_th": "สุโขทัย", "fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "rain_24h.row", "payload": {"id": 1, "station_id": 1001, "station_name_th": "สถานีฝนตัวอย่าง", "province_th": "สุโขทัย", "rain_24h": 0.0, "fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "dams.dam", "payload": {"id": 1, "dam_id": 2001, "dam_name_th": "เขื่อนตัวอย่าง", "province_th": "สุโขทัย", "fetched_at": "2026-08-19T00:00:00Z"}}
+  ]
+}

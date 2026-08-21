@@ -1,0 +1,8 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "spu_nsn_flood",
+  "records": [
+    {"dataset_key": "stations.row", "payload": {"station_code": "P.17", "station_name": "P.17", "station_url": "https://nsn-flood.nsru.ac.th/water-station/P.17", "_fetched_at": "2026-08-19T00:00:00Z"}},
+    {"dataset_key": "stations.row", "payload": {"station_code": "N.67", "station_name": "N.67", "station_url": "https://nsn-flood.nsru.ac.th/water-station/N.67", "_fetched_at": "2026-08-19T00:00:00Z"}}
+  ]
+}

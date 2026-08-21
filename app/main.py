@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
+from copy import deepcopy
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +19,10 @@ from app.models import DashboardRecord, Endpoint, IngestionRun, PublicArtifact, 
 from app.api_schemas import (
     CulturalPointFeatureCollectionResponse,
     DatabaseCoverageResponse,
+    DisasterProvinceIndexResponse,
+    DisasterStationHistoryResponse,
+    DisasterTimeseriesResponse,
+    DisasterTrackingResponse,
     ExecutiveSummaryResponse,
     HealthResponse,
     HousingDemandSummaryResponse,
@@ -46,6 +53,7 @@ from app.publication import (
 )
 from app.public_data import (
     cultural_points,
+    disaster_tracking,
     executive_summary,
     housing_spatial_summary,
     housing_demand_summary,
@@ -142,6 +150,32 @@ DEMAND_DATABASE_REQUIRED = (
 )
 EXPECTED_DEMAND_RECORDS = REQUIRED_DEMAND_COUNT if DEMAND_DATABASE_REQUIRED else 0
 _PUBLICATION_PREFLIGHT_COMPLETE = False
+THAIWATER_SOURCE_ID = "spu_sukhothai_water"
+SPU_DISASTER_PROVINCES = {
+    "64": {
+        "province_name": "สุโขทัย",
+        "sources": ("spu_sukhothai_care",),
+    },
+    "60": {
+        "province_name": "นครสวรรค์",
+        "sources": ("spu_nsn_flood",),
+    },
+    "53": {
+        "province_name": "อุตรดิตถ์",
+        "sources": ("spu_rawangphai_uru",),
+    },
+}
+SPU_DISASTER_SOURCE_NAMES = {
+    "spu_rawangphai_uru": "RawangPhai อุตรดิตถ์",
+    "spu_sukhothai_water": "ThaiWater ระดับน้ำ/ฝน/เขื่อน",
+    "spu_sukhothai_care": "Sukhothai Care",
+    "spu_nsn_flood": "NSN Flood",
+}
+SPU_PROVINCE_SPECIFIC_DISASTER_SOURCE_PROVINCES = {
+    source_id: province_code
+    for province_code, config in SPU_DISASTER_PROVINCES.items()
+    for source_id in config["sources"]
+}
 
 
 def _debug_api_enabled() -> bool:
@@ -338,6 +372,150 @@ def _require_local_debug_api() -> None:
         raise HTTPException(status_code=404, detail="Not Found")
 
 
+def _province_catalog_index() -> tuple[dict[str, str], dict[str, str]]:
+    by_code: dict[str, str] = {}
+    by_name: dict[str, str] = {}
+    for province in public_catalog().get("provinces", []):
+        code = str(province.get("province_code") or "").zfill(2)
+        name = str(province.get("province_name_th") or "").strip()
+        if not code or not name:
+            continue
+        by_code[code] = name
+        by_name[_normalize_disaster_text(name)] = code
+    return by_code, by_name
+
+
+def _disaster_province_name(province_code: str) -> str | None:
+    by_code, _ = _province_catalog_index()
+    return by_code.get(province_code)
+
+
+def _count_disaster_rows(
+    counts: dict[str, dict],
+    province_code: str,
+    source_id: str,
+    record_count: int,
+) -> None:
+    if record_count <= 0:
+        return
+    item = counts.setdefault(
+        province_code,
+        {
+            "disaster_source_count": 0,
+            "disaster_record_count": 0,
+            "disaster_sources": [],
+        },
+    )
+    if source_id not in item["disaster_sources"]:
+        item["disaster_source_count"] += 1
+        item["disaster_sources"].append(source_id)
+    item["disaster_record_count"] += record_count
+
+
+def _candidate_disaster_counts_by_province(session) -> dict[str, dict]:
+    counts: dict[str, dict] = {}
+    for source_id, province_code in SPU_PROVINCE_SPECIFIC_DISASTER_SOURCE_PROVINCES.items():
+        province_name = SPU_DISASTER_PROVINCES[province_code]["province_name"]
+        record_count = len(
+            _disaster_rows_for_source(session, source_id, province_code, province_name)
+        )
+        _count_disaster_rows(counts, province_code, source_id, record_count)
+
+    _, province_code_by_name = _province_catalog_index()
+    thaiwater_counts: dict[str, int] = {}
+    for record in _disaster_rows_for_source(session, THAIWATER_SOURCE_ID):
+        payload = record.payload if isinstance(record.payload, dict) else {}
+        province_value = _safe_disaster_value(
+            payload,
+            ("province_th", "province_name_th", "province", "province_name"),
+        )
+        province_code = province_code_by_name.get(_normalize_disaster_text(province_value))
+        if province_code:
+            thaiwater_counts[province_code] = thaiwater_counts.get(province_code, 0) + 1
+    for province_code, record_count in thaiwater_counts.items():
+        _count_disaster_rows(counts, province_code, THAIWATER_SOURCE_ID, record_count)
+    return counts
+
+
+def _disaster_counts_by_province() -> dict[str, dict]:
+    """Read counts only from the reviewed public projection."""
+
+    counts: dict[str, dict] = {}
+    for province_code, province in disaster_tracking().get("provinces", {}).items():
+        sources = province.get("sources", {}) if isinstance(province, dict) else {}
+        counts[str(province_code).zfill(2)] = {
+            "disaster_source_count": int(province.get("source_count", len(sources)) or 0),
+            "disaster_record_count": int(province.get("record_count", 0) or 0),
+            "disaster_sources": list(sources),
+        }
+    return counts
+
+
+def _disaster_sources_for_province(
+    session,
+    province_code: str,
+    province_name: str,
+) -> list[tuple[str, list[DashboardRecord]]]:
+    sources: list[tuple[str, list[DashboardRecord]]] = []
+    for source_id in SPU_DISASTER_PROVINCES.get(province_code, {}).get("sources", ()):
+        records = _disaster_rows_for_source(session, source_id, province_code, province_name)
+        if records:
+            sources.append((source_id, records))
+
+    thaiwater_records = _disaster_rows_for_source(
+        session,
+        THAIWATER_SOURCE_ID,
+        province_code,
+        province_name,
+        allow_missing_province=False,
+    )
+    if thaiwater_records:
+        sources.append((THAIWATER_SOURCE_ID, thaiwater_records))
+    return sources
+
+
+def _catalog_with_disaster_counts() -> dict:
+    catalog = deepcopy(public_catalog())
+    counts = _disaster_counts_by_province()
+    for province in catalog.get("provinces", []):
+        province_counts = counts.get(province.get("province_code"), {})
+        province["disaster_source_count"] = int(
+            province_counts.get("disaster_source_count", province.get("disaster_source_count", 0))
+            or 0
+        )
+        province["disaster_record_count"] = int(
+            province_counts.get("disaster_record_count", province.get("disaster_record_count", 0))
+            or 0
+        )
+        province["disaster_sources"] = list(
+            province_counts.get("disaster_sources", province.get("disaster_sources", []))
+            or []
+        )
+    return catalog
+
+
+def _province_boundaries_with_disaster_counts() -> dict:
+    boundaries = deepcopy(province_boundaries())
+    counts = _disaster_counts_by_province()
+    for feature in boundaries.get("features", []):
+        props = feature.setdefault("properties", {})
+        code = props.get("province_code") or str(props.get("PROV_CODE", "")).zfill(2)
+        province_counts = counts.get(code, {})
+        props["disaster_source_count"] = int(
+            province_counts.get("disaster_source_count", props.get("disaster_source_count", 0))
+            or 0
+        )
+        props["disaster_record_count"] = int(
+            province_counts.get("disaster_record_count", props.get("disaster_record_count", 0))
+            or 0
+        )
+        props["disaster_sources"] = list(
+            province_counts.get("disaster_sources", props.get("disaster_sources", []))
+            or []
+        )
+    return boundaries
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     _preflight_publication_release()
@@ -486,7 +664,7 @@ def health():
 )
 def public_data_catalog():
     """Return the complete approved public projection and its semantic labels."""
-    return public_catalog()
+    return _catalog_with_disaster_counts()
 
 
 @app.get(
@@ -765,7 +943,7 @@ def public_data_sources():
 def public_data_provinces(
     has_evidence: bool = Query(False, description="Return only provinces covered by at least one public metric"),
 ):
-    provinces = public_catalog()["provinces"]
+    provinces = _catalog_with_disaster_counts()["provinces"]
     if has_evidence:
         provinces = [row for row in provinces if row["evidence_source_count"] > 0]
     return provinces
@@ -779,7 +957,7 @@ def public_data_provinces(
 def public_data_province(province_code: str):
     code = province_code.strip().zfill(2)
     province = next(
-        (row for row in public_catalog()["provinces"] if row["province_code"] == code),
+        (row for row in _catalog_with_disaster_counts()["provinces"] if row["province_code"] == code),
         None,
     )
     if province is None:
@@ -819,7 +997,7 @@ def public_data_executive_summary(province_code: str):
     response_model=ProvinceFeatureCollectionResponse,
 )
 def public_map_provinces():
-    return province_boundaries()
+    return _province_boundaries_with_disaster_counts()
 
 
 @app.get(
@@ -1114,3 +1292,890 @@ def records(
                 row["payload"] = item.payload
             result.append(row)
         return result
+
+# --- SPU disaster tracking ---
+
+
+def _safe_disaster_value(payload: dict, keys: tuple[str, ...]):
+    for key in keys:
+        value = payload.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _normalize_disaster_text(value) -> str:
+    return "".join(str(value or "").lower().replace("จังหวัด", "").split())
+
+
+def _disaster_record_matches_province(
+    record: DashboardRecord,
+    province_code: str,
+    province_name: str,
+    *,
+    allow_missing_province: bool = True,
+) -> bool:
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    province_value = _safe_disaster_value(
+        payload,
+        ("province_th", "province_name_th", "province", "province_name"),
+    )
+    if province_value is None:
+        return allow_missing_province
+    normalized_value = _normalize_disaster_text(province_value)
+    normalized_name = _normalize_disaster_text(province_name)
+    if normalized_value == normalized_name or normalized_name in normalized_value:
+        return True
+    romanized = {"53": "uttaradit", "60": "nakhonsawan", "64": "sukhothai"}
+    return bool(romanized.get(province_code) and romanized[province_code] in normalized_value)
+
+
+def _disaster_observed_at(record: DashboardRecord) -> str | None:
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    value = _safe_disaster_value(
+        payload,
+        (
+            "waterlevel_datetime",
+            "rainfall_datetime",
+            "dam_date",
+            "measured_at",
+            "updated_at",
+            "timestamp",
+            "fetched_at",
+            "_fetched_at",
+        ),
+    )
+    if value is not None:
+        return str(value)
+    if record.as_of:
+        return str(record.as_of)
+    if record.fetched_at:
+        return record.fetched_at.isoformat()
+    return None
+
+
+def _disaster_preview(record: DashboardRecord) -> dict:
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    observed_at = _disaster_observed_at(record)
+    preview = {
+        "dataset_key": record.dataset_key,
+        "label": _safe_disaster_value(
+            payload,
+            (
+                "station_name_th",
+                "station_name_en",
+                "name_th",
+                "name_en",
+                "name",
+                "dam_name_th",
+                "dam_name_en",
+                "station_name",
+                "station_code",
+                "old_code",
+                "id",
+            ),
+        ),
+        "district": _safe_disaster_value(
+            payload, ("amphoe_th", "district", "district_th", "tumbon_th", "subdistrict")
+        ),
+        "observed_at": observed_at,
+        "water_level": _safe_disaster_value(
+            payload,
+            ("waterlevel_msl", "water_level_msl", "waterlevel_m", "water_level", "dam_storage_percent"),
+        ),
+        "rainfall": _safe_disaster_value(payload, ("rain_24h", "avg_rain_mm", "max_rain_mm")),
+        "status": _safe_disaster_value(
+            payload,
+            (
+                "situation_text",
+                "situation_level",
+                "diff_wl_bank_text",
+                "diff_from_bank_text",
+                "type",
+                "category",
+                "title",
+            ),
+        ),
+        "source_url": _safe_disaster_value(payload, ("source_url", "_source_url", "station_url")),
+        "quality_status": record.quality_status,
+    }
+    return {key: value for key, value in preview.items() if value not in (None, "")}
+
+
+def _disaster_float(value) -> float | None:
+    try:
+        number = float(str(value).replace(",", ""))
+    except (TypeError, ValueError):
+        return None
+    return number
+
+
+def _disaster_counter(items, limit: int = 6) -> list[dict]:
+    counts = {}
+    for item in items:
+        if item in (None, ""):
+            continue
+        label = str(item)
+        counts[label] = counts.get(label, 0) + 1
+    return [
+        {"label": label, "value": value}
+        for label, value in sorted(counts.items(), key=lambda row: (-row[1], row[0]))[:limit]
+    ]
+
+
+def _disaster_dataset_label(dataset_key: str) -> str:
+    labels = {
+        "announcements.row": "ประกาศ",
+        "incident_map.row": "เหตุการณ์บนแผนที่",
+        "incidents.row": "รายงานเหตุการณ์",
+        "water_levels.row": "ระดับน้ำ",
+        "rain_24h.row": "ฝน 24 ชม.",
+        "stations.row": "สถานีตรวจวัด",
+        "shelters.row": "ศูนย์พักพิง",
+        "rain_analysis.row": "เรดาร์ฝน",
+    }
+    return labels.get(dataset_key, dataset_key.replace("_", " "))
+
+
+def _disaster_station_identity(payload: dict) -> str | None:
+    station_code = _safe_disaster_value(payload, ("station_code", "old_code"))
+    if station_code not in (None, ""):
+        text_value = str(station_code)
+        for prefix in ("ridhydro_", "telewater_", "hydro_"):
+            if text_value.startswith(prefix):
+                text_value = text_value[len(prefix):]
+        return text_value
+    value = _safe_disaster_value(
+        payload,
+        ("station_id", "id", "station_name_th", "station_name_en"),
+    )
+    return str(value) if value not in (None, "") else None
+
+
+def _disaster_grouped_trends(
+    records: list[DashboardRecord],
+    *,
+    dataset_key: str,
+    value_keys: tuple[str, ...],
+    time_keys: tuple[str, ...],
+    station_keys: tuple[str, ...],
+    station_id_keys: tuple[str, ...],
+    metric: str,
+) -> list[dict]:
+    grouped: dict[str, list[dict]] = {}
+    station_ids: dict[str, str] = {}
+    station_labels: dict[str, str] = {}
+    for record in records:
+        if record.dataset_key != dataset_key:
+            continue
+        payload = record.payload if isinstance(record.payload, dict) else {}
+        value = _disaster_float(_safe_disaster_value(payload, value_keys))
+        timestamp = _safe_disaster_value(payload, time_keys) or _disaster_observed_at(record)
+        label = _safe_disaster_value(payload, station_keys)
+        if value is None or timestamp is None or label is None:
+            continue
+        group_key = _disaster_station_identity(payload) or str(_safe_disaster_value(payload, station_id_keys) or label)
+        grouped.setdefault(group_key, []).append({"t": str(timestamp), "v": value})
+        station_ids[group_key] = group_key
+        station_labels[group_key] = str(label)
+    series = []
+    latest_points = []
+    for group_key, points in grouped.items():
+        points.sort(key=lambda point: point["t"])
+        latest = points[-1]["v"]
+        item = {
+            "station_id": station_ids[group_key],
+            "label": station_labels.get(group_key, group_key),
+            "metric": metric,
+            "latest": latest,
+            "points": points[-12:],
+        }
+        if len(points) >= 2:
+            series.append(item)
+        else:
+            latest_points.append(item)
+    return {
+        "series": sorted(series, key=lambda row: row["latest"], reverse=True),
+        "latest_points": sorted(latest_points, key=lambda row: row["latest"], reverse=True),
+    }
+
+
+def _nsn_station_summary(record: DashboardRecord) -> dict:
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    link_text = str(payload.get("link_text") or "")
+    water_level = None
+    water_percent = None
+    bank_level = None
+    status = None
+    level_match = re.search(r"([0-9][0-9,.]*)ม\.รทก\.ปริมาณน้ำ([0-9][0-9,.]*)%", link_text)
+    if level_match:
+        water_level = _disaster_float(level_match.group(1))
+        water_percent = _disaster_float(level_match.group(2))
+    bank_match = re.search(r"ตลิ่ง([0-9][0-9,.]*)ม\.รทก\.", link_text)
+    if bank_match:
+        bank_level = _disaster_float(bank_match.group(1))
+    for marker in ("วิกฤต", "เตือนภัย", "เฝ้าระวัง", "ปกติ", "ต่ำกว่าตลิ่ง"):
+        if marker in link_text:
+            status = marker
+            break
+    return {
+        "station": payload.get("station_name") or payload.get("station_code"),
+        "water_level": water_level,
+        "water_percent": water_percent,
+        "bank_level": bank_level,
+        "status": status,
+        "source_url": payload.get("station_url"),
+    }
+
+
+def _disaster_source_insights(source_id: str, records: list[DashboardRecord]) -> dict:
+    dataset_counts = _disaster_counter([record.dataset_key for record in records], 10)
+    pairs = [
+        (record, record.payload)
+        for record in records
+        if isinstance(record.payload, dict)
+    ]
+    if source_id == "spu_sukhothai_care":
+        incidents = [
+            payload
+            for record, payload in pairs
+            if record.dataset_key in {"incidents.row", "incident_map.row"}
+        ]
+        announcements = [
+            payload
+            for record, payload in pairs
+            if record.dataset_key == "announcements.row"
+        ]
+        return {
+            "kind": "incident_feed",
+            "dataset_counts": dataset_counts,
+            "status_counts": _disaster_counter([item.get("type") or item.get("status") for item in incidents]),
+            "priority_counts": _disaster_counter([item.get("priority") for item in announcements]),
+            "highlights": [
+                {
+                    "title": item.get("title"),
+                    "status": item.get("priority"),
+                    "observed_at": item.get("createdAt") or item.get("updatedAt"),
+                }
+                for item in announcements[:4]
+                if item.get("title")
+            ],
+        }
+    if source_id == "spu_sukhothai_water":
+        water_trends = _disaster_grouped_trends(
+            records,
+            dataset_key="water_levels.row",
+            value_keys=("waterlevel_msl", "waterlevel_m"),
+            time_keys=("waterlevel_datetime", "fetched_at"),
+            station_keys=("station_name_th", "station_name_en", "station_code"),
+            station_id_keys=("station_id", "station_code", "id"),
+            metric="water",
+        )
+        rain_trends = _disaster_grouped_trends(
+            records,
+            dataset_key="rain_24h.row",
+            value_keys=("rain_24h", "rain_1h"),
+            time_keys=("rainfall_datetime", "fetched_at"),
+            station_keys=("station_name_th", "station_name_en", "station_code"),
+            station_id_keys=("station_id", "station_code", "id"),
+            metric="rain",
+        )
+        water_values = [
+            _disaster_float(payload.get("waterlevel_msl"))
+            for record, payload in pairs
+            if record.dataset_key == "water_levels.row"
+        ]
+        rain_values = [
+            _disaster_float(payload.get("rain_24h"))
+            for record, payload in pairs
+            if record.dataset_key == "rain_24h.row"
+        ]
+        dam_values = [
+            _disaster_float(payload.get("dam_storage_percent"))
+            for record, payload in pairs
+            if record.dataset_key.startswith("dams.")
+        ]
+        water_values = [value for value in water_values if value is not None]
+        rain_values = [value for value in rain_values if value is not None]
+        dam_values = [value for value in dam_values if value is not None]
+        return {
+            "kind": "water_metrics",
+            "dataset_counts": dataset_counts,
+            "metrics": [
+                {"label": "สถานีระดับน้ำ", "value": sum(1 for record in records if record.dataset_key == "water_levels.row"), "unit": "สถานี"},
+                {"label": "ฝนสูงสุด 24 ชม.", "value": max(rain_values) if rain_values else None, "unit": "มม."},
+                {"label": "ระดับน้ำสูงสุด", "value": max(water_values) if water_values else None, "unit": "ม.รทก."},
+                {"label": "ความจุเขื่อนสูงสุด", "value": max(dam_values) if dam_values else None, "unit": "%"},
+            ],
+            "trends": [
+                {
+                    "title": "ระดับน้ำรายสถานี",
+                    "unit": "ม.รทก.",
+                    "series": water_trends["series"],
+                    "latest_points": water_trends["latest_points"],
+                },
+                {
+                    "title": "ฝน 24 ชม. รายสถานี",
+                    "unit": "มม.",
+                    "series": rain_trends["series"],
+                    "latest_points": rain_trends["latest_points"],
+                },
+            ],
+        }
+    if source_id == "spu_nsn_flood":
+        stations = [_nsn_station_summary(record) for record in records]
+        return {
+            "kind": "station_status",
+            "dataset_counts": dataset_counts,
+            "status_counts": _disaster_counter([item.get("status") for item in stations]),
+            "stations": stations,
+        }
+    if source_id == "spu_rawangphai_uru":
+        rawang_rain_trends = _disaster_grouped_trends(
+            records,
+            dataset_key="rain_analysis.row",
+            value_keys=("max_rain_mm", "avg_rain_mm"),
+            time_keys=("timestamp", "fetched_at"),
+            station_keys=("point_no", "id_utm", "province"),
+            station_id_keys=("point_no", "id_utm", "id"),
+            metric="rain",
+        )
+        rain = [
+            _disaster_float(payload.get("max_rain_mm"))
+            for record, payload in pairs
+            if record.dataset_key == "rain_analysis.row"
+        ]
+        shelter_capacity = [
+            _disaster_float(payload.get("capacity"))
+            for record, payload in pairs
+            if record.dataset_key == "shelters.row"
+        ]
+        rain = [value for value in rain if value is not None]
+        shelter_capacity = [value for value in shelter_capacity if value is not None]
+        return {
+            "kind": "rain_shelter",
+            "dataset_counts": dataset_counts,
+            "metrics": [
+                {"label": "กริดเรดาร์ฝน", "value": sum(1 for record in records if record.dataset_key == "rain_analysis.row"), "unit": "กริด"},
+                {"label": "ฝนสูงสุด", "value": max(rain) if rain else None, "unit": "มม."},
+                {"label": "ศูนย์พักพิง", "value": sum(1 for record in records if record.dataset_key == "shelters.row"), "unit": "แห่ง"},
+                {"label": "รองรับรวม", "value": sum(shelter_capacity) if shelter_capacity else None, "unit": "คน"},
+            ],
+            "district_counts": _disaster_counter(
+                [
+                    payload.get("district")
+                    for record, payload in pairs
+                    if record.dataset_key == "shelters.row"
+                ]
+            ),
+            "trends": [
+                {
+                    "title": "ฝนสูงสุดตามกริด",
+                    "unit": "มม.",
+                    "series": rawang_rain_trends["series"],
+                    "latest_points": rawang_rain_trends["latest_points"],
+                }
+            ],
+        }
+    return {"kind": "records", "dataset_counts": dataset_counts}
+
+
+def _latest_text(values: list[str | None]) -> str | None:
+    clean = [str(value) for value in values if value]
+    return max(clean) if clean else None
+
+
+def _disaster_rows_for_source(
+    session,
+    source_id: str,
+    province_code: str | None = None,
+    province_name: str | None = None,
+    *,
+    allow_missing_province: bool = True,
+) -> list[DashboardRecord]:
+    rows = list(
+        session.scalars(
+            select(DashboardRecord)
+            .where(DashboardRecord.source_id == source_id)
+            .order_by(desc(DashboardRecord.fetched_at), desc(DashboardRecord.id))
+        ).all()
+    )
+    if province_code and province_name:
+        rows = [
+            record
+            for record in rows
+            if _disaster_record_matches_province(
+                record,
+                province_code,
+                province_name,
+                allow_missing_province=allow_missing_province,
+            )
+        ]
+    return rows
+
+
+def _disaster_preview_rows(records: list[DashboardRecord], limit: int = 12) -> list[DashboardRecord]:
+    return records[:limit]
+
+
+def _disaster_source_summary(
+    source_id: str,
+    records: list[DashboardRecord],
+    total_count: int,
+) -> dict | None:
+    if not total_count:
+        return None
+    dataset_keys = sorted({record.dataset_key for record in records})
+    latest_observed_at = _latest_text([_disaster_observed_at(record) for record in records])
+    latest_fetched_at = _latest_text(
+        [record.fetched_at.isoformat() if record.fetched_at else None for record in records]
+    )
+    return {
+        "source_id": source_id,
+        "name_th": SPU_DISASTER_SOURCE_NAMES.get(source_id, source_id),
+        "count": total_count,
+        "dataset_keys": dataset_keys,
+        "latest_observed_at": latest_observed_at,
+        "latest_fetched_at": latest_fetched_at,
+        "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+        "insights": _disaster_source_insights(source_id, records),
+        "records": [_disaster_preview(record) for record in _disaster_preview_rows(records)],
+    }
+
+
+def _parse_disaster_datetime(value) -> datetime | None:
+    if value in (None, ""):
+        return None
+    text_value = str(value).strip().replace("Z", "+00:00")
+    for candidate in (text_value, text_value.replace(" ", "T")):
+        try:
+            parsed = datetime.fromisoformat(candidate)
+            return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
+def _station_history_bucket(timestamp: datetime, grain: str) -> str:
+    local_time = timestamp.astimezone(timezone.utc)
+    if grain == "weekly":
+        year, week, _ = local_time.isocalendar()
+        return f"{year}-W{week:02d}"
+    if grain == "monthly":
+        return local_time.strftime("%Y-%m")
+    return local_time.date().isoformat()
+
+
+def _station_history_points(records: list[DashboardRecord], metric: str, grain: str) -> list[dict]:
+    value_keys = {
+        "water": ("waterlevel_msl", "waterlevel_m"),
+        "rain": ("rain_24h", "rain_1h"),
+    }[metric]
+    time_keys = {
+        "water": ("waterlevel_datetime", "fetched_at"),
+        "rain": ("rainfall_datetime", "fetched_at"),
+    }[metric]
+    grouped: dict[str, list[float]] = {}
+    bucket_times: dict[str, datetime] = {}
+    for record in records:
+        payload = record.payload if isinstance(record.payload, dict) else {}
+        value = _disaster_float(_safe_disaster_value(payload, value_keys))
+        timestamp = _parse_disaster_datetime(
+            _safe_disaster_value(payload, time_keys) or _disaster_observed_at(record)
+        )
+        if value is None or timestamp is None:
+            continue
+        bucket = _station_history_bucket(timestamp, grain)
+        grouped.setdefault(bucket, []).append(value)
+        bucket_times[bucket] = min(bucket_times.get(bucket, timestamp), timestamp)
+
+    points = []
+    for bucket, values in grouped.items():
+        if metric == "rain" and grain in {"weekly", "monthly"}:
+            value = sum(values)
+        elif metric == "rain" and grain == "daily":
+            value = max(values)
+        else:
+            value = sum(values) / len(values)
+        points.append({"t": bucket, "v": round(value, 3), "samples": len(values)})
+    return sorted(points, key=lambda point: bucket_times[point["t"]])
+
+
+def _station_history_record_matches(record: DashboardRecord, station_id: str, metric: str) -> bool:
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    return (_disaster_station_identity(payload) or "") == station_id
+
+
+def _candidate_disaster_tracking_for_province(
+    session,
+    province_code: str,
+    province_name: str,
+) -> dict:
+    """Build the contributor's projection from candidate rows for explicit review."""
+
+    result: dict = {
+        "province_code": province_code,
+        "province_name": province_name,
+        "source_count": 0,
+        "record_count": 0,
+        "latest_observed_at": None,
+        "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+        "sources": {},
+    }
+    latest_values = []
+    for source_id, records in _disaster_sources_for_province(
+        session, province_code, province_name
+    ):
+        summary = _disaster_source_summary(source_id, records, len(records))
+        if summary:
+            result["sources"][source_id] = summary
+            result["record_count"] += summary["count"]
+            latest_values.append(summary["latest_observed_at"])
+    result["source_count"] = len(result["sources"])
+    result["latest_observed_at"] = _latest_text(latest_values)
+    return result
+
+
+def _candidate_disaster_timeseries_for_province(
+    session,
+    province_code: str,
+    province_name: str,
+) -> list[dict]:
+    series: list[dict] = []
+    thaiwater_records = _disaster_rows_for_source(
+        session,
+        THAIWATER_SOURCE_ID,
+        province_code,
+        province_name,
+        allow_missing_province=False,
+    )
+    for trend in _disaster_source_insights(THAIWATER_SOURCE_ID, thaiwater_records).get(
+        "trends", []
+    ):
+        for station_data in trend.get("series", []):
+            item = deepcopy(station_data)
+            item["unit"] = trend.get("unit")
+            item["metric"] = trend.get("title")
+            series.append(item)
+
+    if province_code == "53":
+        records = [
+            record
+            for record in _disaster_rows_for_source(
+                session,
+                "spu_rawangphai_uru",
+                province_code,
+                province_name,
+            )
+            if "rain" in record.dataset_key
+        ]
+        stations: dict[str, dict] = {}
+        for record in records:
+            payload = record.payload if isinstance(record.payload, dict) else {}
+            station = str(payload.get("province") or "unknown")
+            timestamp = payload.get("timestamp")
+            value = _disaster_float(payload.get("avg_rain_mm"))
+            if timestamp and value is not None:
+                stations.setdefault(station, {"label": station, "points": []})[
+                    "points"
+                ].append({"t": timestamp, "v": value})
+        for station_data in stations.values():
+            station_data["points"].sort(key=lambda point: point["t"])
+            station_data["points"] = station_data["points"][-100:]
+            station_data["unit"] = "มม."
+            station_data["metric"] = "ปริมาณน้ำฝนเฉลี่ย"
+            series.append(station_data)
+    return series
+
+
+def _candidate_disaster_station_samples(session) -> dict[str, dict]:
+    """Project only fields required for public station history calculations."""
+
+    _, province_code_by_name = _province_catalog_index()
+    samples: dict[str, dict] = {}
+    for record in _disaster_rows_for_source(session, THAIWATER_SOURCE_ID):
+        if record.dataset_key == "water_levels.row":
+            metric = "water"
+            value_keys = ("waterlevel_msl", "waterlevel_m")
+            time_keys = ("waterlevel_datetime", "fetched_at")
+        elif record.dataset_key == "rain_24h.row":
+            metric = "rain"
+            value_keys = ("rain_24h", "rain_1h")
+            time_keys = ("rainfall_datetime", "fetched_at")
+        else:
+            continue
+
+        payload = record.payload if isinstance(record.payload, dict) else {}
+        province_value = _safe_disaster_value(
+            payload,
+            ("province_th", "province_name_th", "province", "province_name"),
+        )
+        province_code = province_code_by_name.get(_normalize_disaster_text(province_value))
+        station_id = _disaster_station_identity(payload)
+        value = _disaster_float(_safe_disaster_value(payload, value_keys))
+        timestamp = _parse_disaster_datetime(
+            _safe_disaster_value(payload, time_keys) or _disaster_observed_at(record)
+        )
+        if not province_code or not station_id or value is None or timestamp is None:
+            continue
+        station = (
+            samples.setdefault(province_code, {})
+            .setdefault(metric, {})
+            .setdefault(
+                station_id,
+                {
+                    "station_name": str(
+                        _safe_disaster_value(
+                            payload,
+                            ("station_name_th", "station_name_en", "station_code", "id"),
+                        )
+                        or station_id
+                    ),
+                    "samples": [],
+                },
+            )
+        )
+        station["samples"].append(
+            {
+                "t": timestamp.isoformat(),
+                "v": value,
+                "dataset_key": record.dataset_key,
+            }
+        )
+
+    for province in samples.values():
+        for metric_stations in province.values():
+            for station in metric_stations.values():
+                station["samples"].sort(key=lambda sample: sample["t"])
+    return samples
+
+
+def build_candidate_disaster_tracking_artifact(session) -> dict:
+    """Create a deterministic candidate projection for publication review."""
+
+    counts = _candidate_disaster_counts_by_province(session)
+    province_names, _ = _province_catalog_index()
+    provinces: dict[str, dict] = {}
+    timeseries: dict[str, list[dict]] = {}
+    for province_code in sorted(counts):
+        province_name = province_names.get(province_code)
+        if not province_name:
+            continue
+        province = _candidate_disaster_tracking_for_province(
+            session, province_code, province_name
+        )
+        if province["record_count"] <= 0:
+            continue
+        provinces[province_code] = province
+        timeseries[province_code] = _candidate_disaster_timeseries_for_province(
+            session, province_code, province_name
+        )
+
+    latest_fetched_at = session.scalar(
+        select(func.max(DashboardRecord.fetched_at)).where(
+            DashboardRecord.source_id.in_(SPU_DISASTER_SOURCE_NAMES)
+        )
+    )
+    return {
+        "schema_version": "1.0.0",
+        "generated_at": latest_fetched_at.isoformat() if latest_fetched_at else None,
+        "publication_status": "reviewed_candidate_projection",
+        "quality_label_th": "ข้อมูล candidate ที่ผ่าน publication review · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+        "provinces": provinces,
+        "station_samples": _candidate_disaster_station_samples(session),
+        "timeseries": timeseries,
+    }
+
+
+def _station_history_points_from_samples(samples: list[dict], metric: str, grain: str) -> list[dict]:
+    grouped: dict[str, list[float]] = {}
+    bucket_times: dict[str, datetime] = {}
+    for sample in samples:
+        timestamp = _parse_disaster_datetime(sample.get("t"))
+        value = _disaster_float(sample.get("v"))
+        if timestamp is None or value is None:
+            continue
+        bucket = _station_history_bucket(timestamp, grain)
+        grouped.setdefault(bucket, []).append(value)
+        bucket_times[bucket] = min(bucket_times.get(bucket, timestamp), timestamp)
+
+    points = []
+    for bucket, values in grouped.items():
+        if metric == "rain" and grain in {"weekly", "monthly"}:
+            value = sum(values)
+        elif metric == "rain" and grain == "daily":
+            value = max(values)
+        else:
+            value = sum(values) / len(values)
+        points.append({"t": bucket, "v": round(value, 3), "samples": len(values)})
+    return sorted(points, key=lambda point: bucket_times[point["t"]])
+
+
+@app.get(
+    "/api/public/v1/provinces/{province_code}/disaster-tracking",
+    tags=["SPU disaster tracking"],
+    response_model=DisasterTrackingResponse,
+)
+def public_data_disaster_tracking(province_code: str):
+    """Return the reviewed SPU flood/disaster projection for a province."""
+    code = province_code.strip().zfill(2)
+    province_name = _disaster_province_name(code)
+    if not province_name:
+        return {
+            "province_code": code,
+            "province_name": "",
+            "source_count": 0,
+            "record_count": 0,
+            "latest_observed_at": None,
+            "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+            "sources": {},
+        }
+
+    reviewed = disaster_tracking().get("provinces", {}).get(code)
+    if isinstance(reviewed, dict):
+        return reviewed
+    return {
+        "province_code": code,
+        "province_name": province_name,
+        "source_count": 0,
+        "record_count": 0,
+        "latest_observed_at": None,
+        "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+        "sources": {},
+    }
+
+
+@app.get(
+    "/api/public/v1/provinces/{province_code}/disaster-stations/{station_id}/history",
+    tags=["SPU disaster tracking"],
+    response_model=DisasterStationHistoryResponse,
+)
+def public_disaster_station_history(
+    province_code: str,
+    station_id: str,
+    metric: str = Query("water", pattern="^(water|rain)$"),
+    grain: str = Query("daily", pattern="^(daily|weekly|monthly)$"),
+    days: int = Query(90, ge=30, le=365),
+):
+    """Return normalized station history for expanded disaster charts."""
+    code = province_code.strip().zfill(2)
+    province_name = _disaster_province_name(code)
+    metric_name = "rain" if metric == "rain" else "water"
+    grain_name = grain if grain in {"daily", "weekly", "monthly"} else "daily"
+    bounded_days = min(max(int(days), 30), 365)
+    unit = "มม." if metric_name == "rain" else "ม.รทก."
+
+    if not province_name:
+        return {
+            "province_code": code,
+            "province_name": None,
+            "station_id": station_id,
+            "station_name": None,
+            "metric": metric_name,
+            "grain": grain_name,
+            "days": bounded_days,
+            "window_start": None,
+            "window_end": None,
+            "unit": unit,
+            "history_status": "unavailable",
+            "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+            "points": [],
+        }
+
+    station = (
+        disaster_tracking()
+        .get("station_samples", {})
+        .get(code, {})
+        .get(metric_name, {})
+        .get(station_id)
+    )
+    if isinstance(station, dict):
+        dated_samples = []
+        for sample in station.get("samples", []):
+            timestamp = _parse_disaster_datetime(sample.get("t"))
+            if timestamp is not None:
+                dated_samples.append((sample, timestamp))
+        if dated_samples:
+            latest = max(timestamp for _, timestamp in dated_samples)
+            window_start_dt = latest - timedelta(days=bounded_days)
+            window_samples = [
+                sample for sample, timestamp in dated_samples if timestamp >= window_start_dt
+            ]
+            points = _station_history_points_from_samples(
+                window_samples, metric_name, grain_name
+            )
+            has_history_dataset = any(
+                "history" in str(sample.get("dataset_key", "")).lower()
+                or "runoff" in str(sample.get("dataset_key", "")).lower()
+                for sample in window_samples
+            )
+            return {
+                "province_code": code,
+                "province_name": province_name,
+                "station_id": station_id,
+                "station_name": str(station.get("station_name") or station_id),
+                "metric": metric_name,
+                "grain": grain_name,
+                "days": bounded_days,
+                "window_start": window_start_dt.date().isoformat(),
+                "window_end": latest.date().isoformat(),
+                "unit": unit,
+                "history_status": "available" if has_history_dataset else "snapshot_only",
+                "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+                "points": points,
+            }
+
+    return {
+        "province_code": code,
+        "province_name": province_name,
+        "station_id": station_id,
+        "station_name": None,
+        "metric": metric_name,
+        "grain": grain_name,
+        "days": bounded_days,
+        "window_start": None,
+        "window_end": None,
+        "unit": unit,
+        "history_status": "unavailable",
+        "quality_label_th": "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง",
+        "points": [],
+    }
+
+@app.get(
+    "/api/public/v1/disaster/provinces",
+    tags=["SPU disaster tracking"],
+    response_model=DisasterProvinceIndexResponse,
+)
+def public_disaster_provinces():
+    """Return province codes that have SPU disaster monitoring data."""
+
+    province_names, _ = _province_catalog_index()
+    counts = _disaster_counts_by_province()
+    result = {
+        province_code: {
+            "province_name": province_names.get(province_code, ""),
+            "sources": values["disaster_sources"],
+            "total_records": values["disaster_record_count"],
+        }
+        for province_code, values in sorted(counts.items())
+        if province_code in province_names and values["disaster_record_count"] > 0
+    }
+
+    return {
+        "provinces": result,
+        "total_provinces": len(result),
+    }
+
+@app.get(
+    "/api/public/v1/provinces/{province_code}/disaster-timeseries",
+    tags=["SPU disaster tracking"],
+    response_model=DisasterTimeseriesResponse,
+)
+def public_disaster_timeseries(province_code: str):
+    """Return reviewed time-series data suitable for charting from SPU sources."""
+    code = province_code.strip().zfill(2)
+    province_name = _disaster_province_name(code)
+    if not province_name:
+        return {"province_code": code, "series": []}
+    series = disaster_tracking().get("timeseries", {}).get(code, [])
+    return {"province_code": code, "province_name": province_name, "series": series}

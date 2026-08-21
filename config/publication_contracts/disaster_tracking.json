@@ -1,0 +1,47 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "disaster_tracking",
+  "dataset_key": "disaster_tracking",
+  "source_scope": "approved_values",
+  "source_ids": [
+    "spu_sukhothai_care",
+    "spu_sukhothai_water",
+    "spu_nsn_flood",
+    "spu_rawangphai_uru"
+  ],
+  "builder": "tools.build_disaster_tracking:main",
+  "grain_th": "หนึ่งสรุปต่อจังหวัดจากระเบียน candidate ที่ผ่าน publication review",
+  "identity": {"province": ["province_code"]},
+  "geography": {"level": "province", "fields": ["province_code"]},
+  "as_of": {"status": "mixed", "fields": ["generated_at", "latest_observed_at"]},
+  "measures": [
+    {
+      "name": "disaster monitoring candidate summaries",
+      "unit": "ระบุตามแต่ละชุดข้อมูลต้นทาง",
+      "denominator": "ไม่ระบุจากต้นทาง"
+    }
+  ],
+  "completeness": {
+    "policy": "output_contracts",
+    "needs_review": true,
+    "review_items": [
+      "ตรวจ privacy และ semantic projection ก่อนสร้าง receipt ใหม่ทุกครั้ง",
+      "ห้าม public serving อ่าน dashboard_records โดยตรง"
+    ]
+  },
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/disaster_tracking.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 5242880,
+      "records_pointer": "/provinces",
+      "identity_fields": ["$key"],
+      "max_identity_churn_ratio": 1,
+      "minimum_count": 0,
+      "schema_policy": "stable"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "contract_version": "1.1",
+  "source_id": "spu_nsn_flood",
+  "connector": "app.connectors.spu_nsn_flood:SpuNsnFloodConnector",
+  "transport": "http_html",
+  "dataset_grains": [
+    {
+      "key_pattern": "^stations\\.row$",
+      "grain_th": "สถานีตรวจวัดน้ำหนึ่งแห่งจากหน้า water-level",
+      "identity_options": [
+        [
+          "station_code"
+        ],
+        [
+          "$payload_hash"
+        ]
+      ],
+      "geography_fields": [],
+      "as_of_fields": [
+        "_fetched_at"
+      ]
+    }
+  ],
+  "completeness_checks": [
+    "HTML page is parsed with BeautifulSoup to extract the complete station-link listing",
+    "The run fails when no station links are found or a record limit would truncate the listing"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
+  },
+  "notes_th": "Connector สำหรับ NSN Flood ดึงรายการลิงก์สถานีน้ำจากหน้า water-level; ยังไม่ได้ดึงรายละเอียดรายสถานี",
+  "sample_fixture": "tests/fixtures/connectors/spu_nsn_flood.json"
+}
