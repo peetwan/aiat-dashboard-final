@@ -95,6 +95,29 @@ class PublicOverviewResponse(PublicApiModel):
     methodology: JsonObject
 
 
+class F1OverviewResponse(PublicApiModel):
+    schema_version: str
+    generated_at: str | None
+    publication_status: str
+    scope: JsonObject
+    totals: JsonObject
+    regions: list[JsonObject]
+    provinces: list[JsonObject]
+    quality: JsonObject
+
+
+class F1ProvinceDetailResponse(PublicApiModel):
+    schema_version: str
+    generated_at: str
+    publication_status: str
+    source_id: Literal["f1_sradss_ppaos"]
+    as_of: str
+    source_url: str
+    dashboard_url: str
+    privacy: JsonObject
+    province: JsonObject
+
+
 class SourceInsightsResponse(PublicApiModel):
     schema_version: str
     generated_at: str

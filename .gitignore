@@ -12,3 +12,11 @@ data/snapshots/*
 !data/snapshots/.gitkeep
 data/cache/*
 !data/cache/.gitkeep
+
+# Local agent and analysis artifacts
+.codex-worktrees/
+.firecrawl/
+outputs/
+tmp/
+_tmp_*
+tools/_tmp_*.py
