@@ -111,8 +111,8 @@ def test_dashboard_and_endpoint_inventory():
     with TestClient(app) as client:
         page = client.get("/")
         assert page.status_code == 200
-        assert "Provincial Evidence Map" in page.text
-        assert "เลือกจังหวัดเพื่อเปิดข้อมูล" in page.text
+        assert "AIAT แผนที่ข้อมูลจังหวัด" in page.text
+        assert "เลือกภาคหรือจังหวัด" in page.text
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
         assert 'data-panel-tab="dimensions"' in page.text
@@ -136,7 +136,7 @@ def test_dashboard_and_endpoint_inventory():
 
         insights_page = client.get("/insights")
         assert insights_page.status_code == 200
-        assert "AIAT Data Insights" in insights_page.text
+        assert "AIAT ภาพรวมข้อมูล" in insights_page.text
         assert "โดยไม่ต้องไล่เปิด" in insights_page.text
         assert "ทีละชุด" in insights_page.text
         assert "select" not in insights_page.text.lower()

@@ -125,7 +125,7 @@ const MAP_MODES = {
   disaster: {
     label: "ติดตามภัย",
     legendTitle: "ข้อมูลติดตามภัย (SPU)",
-    legendNote: "สีเข้ม = มีหลายแหล่งติดตามสถานการณ์น้ำ · candidate เท่านั้น",
+    legendNote: "สีเข้ม = มีหลายแหล่งติดตามสถานการณ์น้ำ · ข้อมูลเบื้องต้น",
     zeroLabel: "ไม่มีข้อมูล",
     value: (province) => Number(province.disaster_source_count || 0) || null,
     format: (value) => `${formatNumber(value)} แหล่งติดตามภัย`,
@@ -322,6 +322,24 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function plainLanguage(value) {
+  return String(value ?? "")
+    .replace(/public projection/gi, "ข้อมูลที่เผยแพร่")
+    .replace(/candidate database/gi, "ฐานข้อมูลเบื้องต้น")
+    .replace(/candidate/gi, "ข้อมูลเบื้องต้น")
+    .replace(/needs[_ ]review/gi, "รอตรวจ")
+    .replace(/accepted/gi, "ผ่านการตรวจ")
+    .replace(/quality gate/gi, "การตรวจคุณภาพ")
+    .replace(/data owner/gi, "เจ้าของข้อมูล")
+    .replace(/snapshot/gi, "ข้อมูลที่บันทึกไว้")
+    .replace(/metadata/gi, "รายละเอียดแหล่งข้อมูล")
+    .replace(/grain/gi, "หน่วยนับ")
+    .replace(/records?/gi, "รายการ")
+    .replace(/as_of/gi, "วันที่ข้อมูล")
+    .replace(/fetched_at/gi, "วันที่ดึง")
+    .replace(/source id/gi, "รหัสแหล่งข้อมูล");
 }
 
 function formatNumber(value, maximumFractionDigits = 0) {
@@ -765,11 +783,11 @@ function renderResearchPortfolio(summary) {
     return;
   }
   section.hidden = false;
-  document.getElementById("researchScope").textContent = "แยกกลุ่มโครงการออกจากระเบียนผู้เข้าร่วม · Candidate";
+  document.getElementById("researchScope").textContent = "แยกกลุ่มโครงการออกจากรายการผู้เข้าร่วม";
 
   const stats = [
     ["กลุ่มโครงการ", portfolio.project_count, portfolio.project_count_status, "กลุ่ม"],
-    ["ผู้เข้าร่วม", portfolio.participant_record_count, portfolio.participant_record_status, "ระเบียน"],
+    ["ผู้เข้าร่วม", portfolio.participant_record_count, portfolio.participant_record_status, "รายการ"],
     ["หน่วยวิจัย", portfolio.university_count, portfolio.project_count_status, "แห่ง"],
     ["พื้นที่ครอบคลุม", portfolio.district_count, portfolio.project_count_status, "อำเภอ"],
     ["นวัตกรรม", portfolio.innovation_count, portfolio.innovation_count_status, "รายการ"],
@@ -821,7 +839,7 @@ function renderResearchPortfolio(summary) {
       <div class="funding-grid">
         <article><span>ระบุสังกัดนักวิจัย</span><strong>${formatNumber(outcomes.research_lead_affiliations || 0)}</strong><small>สังกัด</small></article>
         <article><span>ระบุทรัพย์สินทางปัญญา</span><strong>${formatNumber(outcomes.ip_records || 0)}</strong><small>นวัตกรรม</small></article>
-        <article><span>ระบุ ROI / SROI</span><strong>${formatNumber((outcomes.roi_records || 0) + (outcomes.sroi_records || 0))}</strong><small>ระเบียนที่มีค่า</small></article>
+        <article><span>ระบุ ROI / SROI</span><strong>${formatNumber((outcomes.roi_records || 0) + (outcomes.sroi_records || 0))}</strong><small>รายการที่มีค่า</small></article>
       </div>
       ${outcomes.note_th ? `<small class="funding-note">${escapeHtml(outcomes.note_th)}</small>` : ""}
     </section>`;
@@ -885,7 +903,7 @@ function renderProvinceOverview(summary) {
   const demandMetric = (housingDimension.metrics || []).find((item) => item.key === "housing_demand_respondents");
   const metrics = [
     { label: "กลุ่มโครงการ", value: portfolio.project_count, status: portfolio.project_count_status, note: "การจัดกลุ่มเบื้องต้น", tab: "projects" },
-    { label: "ผู้เข้าร่วมโครงการ", value: portfolio.participant_record_count, status: portfolio.participant_record_status, note: "ระเบียนผู้เข้าร่วม", tab: "portfolio" },
+    { label: "ผู้เข้าร่วมโครงการ", value: portfolio.participant_record_count, status: portfolio.participant_record_status, note: "รายการผู้เข้าร่วม", tab: "portfolio" },
     { label: "นวัตกรรม", value: portfolio.innovation_count, status: portfolio.innovation_count_status, note: "รายการที่เชื่อมจังหวัด", tab: "projects" },
     { label: "Housing demand", value: demandMetric?.value, status: demandMetric ? "available" : "missing", note: "คำตอบแบบสำรวจ ไม่ใช่ประชากร", tab: "portfolio" },
   ];
@@ -905,9 +923,9 @@ function renderProvinceOverview(summary) {
   const outcomeRecords = Number(outcomes.roi_records || 0) + Number(outcomes.sroi_records || 0);
   const flow = [
     { label: "กลุ่มโครงการ", value: projectsKnown ? portfolio.project_count : null, unit: "กลุ่ม" },
-    { label: "ผู้เข้าร่วม", value: participantsKnown ? portfolio.participant_record_count : null, unit: "ระเบียน" },
+    { label: "ผู้เข้าร่วม", value: participantsKnown ? portfolio.participant_record_count : null, unit: "รายการ" },
     { label: "นวัตกรรม", value: innovationsKnown ? portfolio.innovation_count : null, unit: "รายการ" },
-    { label: "ทรัพย์สินทางปัญญา", value: innovationsKnown ? outcomes.ip_records : null, unit: "ระเบียน" },
+    { label: "ทรัพย์สินทางปัญญา", value: innovationsKnown ? outcomes.ip_records : null, unit: "รายการ" },
     { label: "ROI / SROI", value: innovationsKnown ? outcomeRecords : null, unit: "ช่องข้อมูล" },
   ];
   document.getElementById("overviewFlow").innerHTML = flow.map((item) => `
@@ -1003,7 +1021,7 @@ function renderSraArea(section = {}) {
   const projectMetrics = section.project_metrics_latest || [];
   document.getElementById("sraProjectMetrics").innerHTML = projectMetrics.length
     ? `<section class="sra-detail-block"><h4>ตัวชี้วัดการดำเนินงานที่ต้นทางรายงาน ปี ${escapeHtml(projectMetrics[0]?.year || "ล่าสุด")}</h4><div class="sra-project-metrics">${projectMetrics.map((metric) => `
-        <article><span>${escapeHtml(metric.metric_label || metric.metric_key)}</span><strong>${formatNumber(metric.value, 2)}</strong><small>${escapeHtml(metric.unit || "ไม่ระบุหน่วย")}${metric.target_value !== null && metric.target_value !== undefined ? ` · เป้าหมาย ${formatNumber(metric.target_value, 2)}` : ""}</small></article>`).join("")}</div><p class="section-method-note">${escapeHtml(section.quality_note_th || "ข้อมูล candidate/needs review จาก API ต้นทาง")}</p></section>`
+        <article><span>${escapeHtml(metric.metric_label || metric.metric_key)}</span><strong>${formatNumber(metric.value, 2)}</strong><small>${escapeHtml(metric.unit || "ไม่ระบุหน่วย")}${metric.target_value !== null && metric.target_value !== undefined ? ` · เป้าหมาย ${formatNumber(metric.target_value, 2)}` : ""}</small></article>`).join("")}</div><p class="section-method-note">${escapeHtml(plainLanguage(section.quality_note_th || "ข้อมูลเบื้องต้นจากต้นทาง"))}</p></section>`
     : "";
 }
 
@@ -1046,7 +1064,7 @@ function renderPoverty(section = {}) {
   if (pppSurvey) benchmarkParts.push(`ฐานสำรวจ PPPConnext 2564–65: ${formatNumber(pppSurvey.value)}`);
   const sourceUrl = safeExternalUrl(items[0]?.source_url);
 
-  document.getElementById("povertyNote").textContent = "ตัวเลข candidate จากหน้า BI ต้นทาง PPAOS";
+  document.getElementById("povertyNote").textContent = "ตัวเลขเบื้องต้นจากหน้า PPAOS";
   document.getElementById("povertyContent").innerHTML = `
     <div class="poverty-stats">
       <article><span>ครัวเรือนที่สำรวจ</span><strong>${formatNumber(total?.value || 0)}</strong></article>
@@ -1114,14 +1132,14 @@ async function renderDisaster() {
       return;
     }
     wrapper.hidden = false;
-    if (note) note.textContent = data.quality_label_th || "ข้อมูล candidate · ยังไม่ใช่สถานการณ์ภัยที่รับรอง";
+    if (note) note.textContent = plainLanguage(data.quality_label_th || "ข้อมูลเบื้องต้น · ยังไม่ใช่สถานการณ์ภัยที่รับรอง");
     destroyDisasterCharts();
     state.pendingDisasterCharts = [];
     
     const html = `
       <div class="disaster-summary">
         <article><span>แหล่งติดตามภัย</span><strong>${formatNumber(sourceCount)}</strong></article>
-        <article><span>candidate records</span><strong>${formatNumber(recordCount)}</strong></article>
+        <article><span>รายการเบื้องต้น</span><strong>${formatNumber(recordCount)}</strong></article>
         <article><span>อัปเดตล่าสุดที่พบ</span><strong>${escapeHtml(data.latest_observed_at || "ไม่ระบุ")}</strong></article>
       </div>
       <div class="disaster-source-list">
@@ -1134,12 +1152,12 @@ async function renderDisaster() {
             return `
               <article class="disaster-source-card">
                 <header>
-                  <div><strong>${escapeHtml(info.name_th || info.source_id)}</strong><small>${escapeHtml(info.quality_label_th || data.quality_label_th || "")}</small></div>
+                  <div><strong>${escapeHtml(info.name_th || info.source_id)}</strong><small>${escapeHtml(plainLanguage(info.quality_label_th || data.quality_label_th || ""))}</small></div>
                   <span>${formatNumber(info.count || 0)} รายการ</span>
                 </header>
                 ${datasetTags ? `<div class="disaster-tags">${datasetTags}</div>` : ""}
                 ${renderDisasterInsights(info.insights || {}, records)}
-                ${Number(info.count || 0) > records.length ? `<p class="disaster-more">ยังมีอีก ${formatNumber(Number(info.count || 0) - records.length)} รายการใน candidate database</p>` : ""}
+                ${Number(info.count || 0) > records.length ? `<p class="disaster-more">ยังมีอีก ${formatNumber(Number(info.count || 0) - records.length)} รายการ</p>` : ""}
               </article>`;
           })
           .join("")}
@@ -1364,9 +1382,9 @@ function ensureStationHistoryModal() {
             <button type="button" data-station-history-close aria-label="ปิด">×</button>
           </header>
           <div class="station-history-controls" role="group" aria-label="เลือกช่วงกราฟ">
-            <button type="button" class="active" data-history-grain="daily">Daily</button>
-            <button type="button" data-history-grain="weekly">Weekly</button>
-            <button type="button" data-history-grain="monthly">Monthly</button>
+            <button type="button" class="active" data-history-grain="daily">รายวัน</button>
+            <button type="button" data-history-grain="weekly">รายสัปดาห์</button>
+            <button type="button" data-history-grain="monthly">รายเดือน</button>
           </div>
           <div class="station-history-chart"><canvas id="stationHistoryChart"></canvas></div>
           <p id="stationHistoryMessage"></p>
@@ -1432,9 +1450,9 @@ async function loadStationHistory({ stationId, stationName, metric, grain }) {
     status.textContent = stationHistoryStatusText(data);
     renderStationHistoryChart(data);
     if (!data.points?.length) {
-      message.textContent = "ยังไม่มีประวัติย้อนหลังของสถานีนี้จาก endpoint ที่เชื่อมอยู่";
+      message.textContent = "ยังไม่มีข้อมูลย้อนหลังของสถานีนี้";
     } else if (data.history_status === "snapshot_only") {
-      message.textContent = "ตอนนี้แสดงจาก snapshot ที่เก็บไว้ ยังไม่ใช่ backfill 90 วันจาก historical endpoint";
+      message.textContent = "มีเฉพาะข้อมูลที่บันทึกไว้ ยังไม่มีข้อมูลย้อนหลังครบ 90 วัน";
     } else {
       message.textContent = data.quality_label_th || "";
     }
@@ -1449,7 +1467,7 @@ async function loadStationHistory({ stationId, stationName, metric, grain }) {
 function stationHistoryStatusText(data = {}) {
   const metric = data.metric === "rain" ? "ฝน" : "ระดับน้ำ";
   const grain = { daily: "รายวัน", weekly: "รายสัปดาห์", monthly: "รายเดือน" }[data.grain] || "รายวัน";
-  const status = data.history_status === "available" ? "history connected" : data.history_status === "snapshot_only" ? "snapshot only" : "ยังไม่เชื่อม history";
+  const status = data.history_status === "available" ? "มีข้อมูลย้อนหลัง" : data.history_status === "snapshot_only" ? "มีข้อมูลที่บันทึกไว้" : "ยังไม่มีข้อมูลย้อนหลัง";
   return `${metric} ${grain} · ${data.days || 90} วัน · ${status}`;
 }
 
@@ -1531,7 +1549,7 @@ function disasterBars(items = []) {
 }
 
 function renderDisasterRecord(record = {}) {
-  const primary = record.label || record.status || record.dataset_key || "ระเบียนติดตามภัย";
+  const primary = record.label || record.status || record.dataset_key || "รายการติดตามภัย";
   const facts = [
     record.district ? ["พื้นที่", record.district] : null,
     record.observed_at ? ["เวลา", record.observed_at] : null,
@@ -1556,9 +1574,9 @@ function renderHousing(section = {}) {
   if (!available) return;
   const spatialTotal = Number(section.spatial_feature_total || spatial?.total_spatial_features || 0);
   document.getElementById("housingNote").textContent = [
-    `${formatNumber(section.total_records || 0)} CKAN rows`,
-    spatial ? `${formatNumber(spatialTotal)} spatial features` : null,
-    demand ? `${formatNumber(section.demand_record_total || demand.respondents_living || 0)} demand responses` : null,
+    `${formatNumber(section.total_records || 0)} รายการ`,
+    spatial ? `${formatNumber(spatialTotal)} จุดและพื้นที่` : null,
+    demand ? `${formatNumber(section.demand_record_total || demand.respondents_living || 0)} คำตอบ` : null,
   ].filter(Boolean).join(" · ");
   const counts = spatial?.counts || {};
   const categories = Object.entries(spatial?.housing_points?.by_category || {})
@@ -1652,10 +1670,10 @@ function renderAreaProjects(section) {
       const sourceUrl = safeExternalUrl(item.source_url);
       return `
         <article class="data-card project-card">
-          <div class="record-kicker"><span>ปีงบประมาณ ${escapeHtml(item.fiscal_year || "ไม่ระบุ")}</span><span>กลุ่มชั่วคราว · ไม่มี Project ID กลาง</span></div>
+          <div class="record-kicker"><span>ปีงบประมาณ ${escapeHtml(item.fiscal_year || "ไม่ระบุ")}</span><span>กลุ่มชั่วคราว · ไม่มีรหัสโครงการกลาง</span></div>
           <h3>${escapeHtml(item.project_name || "ไม่ระบุชื่อโครงการ")}</h3>
           <div class="project-record-stats">
-            <span><strong>${formatNumber(item.participant_record_count)}</strong> ระเบียนผู้เข้าร่วม</span>
+            <span><strong>${formatNumber(item.participant_record_count)}</strong> รายการผู้เข้าร่วม</span>
             <span><strong>${formatNumber(item.business_count)}</strong> กลุ่ม/ธุรกิจ</span>
             <span><strong>${formatNumber((item.geography || []).length)}</strong> อำเภอ</span>
           </div>
@@ -1691,7 +1709,7 @@ function renderInnovations(section) {
       const sourceUrl = safeExternalUrl(item.source_url);
       return `
         <article class="data-card innovation-card">
-          <div class="record-kicker"><span>TRL ${escapeHtml(item.trl_level ?? "ไม่ระบุ")} · SRL ${escapeHtml(item.srl_level ?? "ไม่ระบุ")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
+          <div class="record-kicker"><span>ความพร้อมเทคโนโลยี ${escapeHtml(item.trl_level ?? "ไม่ระบุ")} · ความพร้อมสังคม ${escapeHtml(item.srl_level ?? "ไม่ระบุ")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
           <h3>${escapeHtml(item.title || "ไม่ระบุชื่อนวัตกรรม")}</h3>
           <p>${escapeHtml(trimText((item.highlights || [])[0] || target || item.description, 220))}</p>
           <dl>
@@ -1741,7 +1759,7 @@ function renderRequirements(section = {}) {
         <div class="record-kicker"><span>${escapeHtml(item.category || item.category_label || "โจทย์ความต้องการ")}</span><span>${escapeHtml(location || "ยืนยันระดับจังหวัด")}</span></div>
         <h3>${escapeHtml(item.title || item.requirement_title || item.name || "ไม่ระบุชื่อโจทย์")}</h3>
         <p>${escapeHtml(trimText(item.summary || item.description || "โจทย์จากทะเบียนสาธารณะของ AppTech", 180))}</p>
-        <footer><span>${escapeHtml(item.owner_affiliation_name || item.organization || item.scope_note_th || "ข้อมูล candidate")}</span>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">ต้นทาง</a>` : ""}</footer>
+        <footer><span>${escapeHtml(plainLanguage(item.owner_affiliation_name || item.organization || item.scope_note_th || "ข้อมูลเบื้องต้น"))}</span>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">ต้นทาง</a>` : ""}</footer>
       </article>`;
   }).join("");
 }
@@ -1779,7 +1797,7 @@ function renderTourism(section = {}) {
   const serviceAvailability = contact.service_availability || [];
   const scrapedAt = (section.items || []).map((item) => item.scraped_at).filter(Boolean).sort().at(-1);
 
-  document.getElementById("tourismUpdated").textContent = scrapedAt ? `snapshot ${formatDate(scrapedAt)}` : "public snapshot";
+  document.getElementById("tourismUpdated").textContent = scrapedAt ? `บันทึกเมื่อ ${formatDate(scrapedAt)}` : "ข้อมูลที่บันทึกไว้";
   document.getElementById("tourismFacts").innerHTML = [
     ["เรื่องแนะนำ", recommendations.length],
     ["สถานีหลัก", stations.length],
@@ -1874,7 +1892,7 @@ function renderPeopleAreaOverview(summary = state.currentSummary, briefing = sta
   const sections = briefing?.sections || {};
   const metrics = [];
   if (isObservedStatus(portfolio.participant_record_status)) {
-    metrics.push(["ผู้เข้าร่วม", portfolio.participant_record_count, "ระเบียน"]);
+    metrics.push(["ผู้เข้าร่วม", portfolio.participant_record_count, "รายการ"]);
   }
   if (isObservedStatus(portfolio.project_count_status)) {
     metrics.push(["พื้นที่โครงการ", portfolio.district_count, "อำเภอ"]);
@@ -2026,8 +2044,8 @@ function renderSources(summary) {
       const apiFirst = source.acquisition_mode === "api_first";
       const sourceUrl = safeExternalUrl(source.url);
       const dates = [
-        source.observed_as_of ? `ข้อมูล ณ ${source.observed_as_of}` : "ไม่ระบุ as_of",
-        source.observed_fetched_at ? `ดึง ${formatDate(source.observed_fetched_at)}` : "ไม่ระบุ fetched_at",
+        source.observed_as_of ? `ข้อมูล ณ ${source.observed_as_of}` : "ไม่ระบุวันที่ข้อมูล",
+        source.observed_fetched_at ? `ดึง ${formatDate(source.observed_fetched_at)}` : "ไม่ระบุวันที่ดึง",
       ].join(" · ");
       const breakdown = source.record_breakdown
         ? Object.entries(source.record_breakdown).map(([key, value]) => `${key}: ${formatNumber(value)}`).join(" · ")
@@ -2035,19 +2053,19 @@ function renderSources(summary) {
       return `
         <details class="source-row ${escapeHtml(source.status)}">
           <summary>
-            <span class="source-mode${apiFirst ? "" : " snapshot"}">${apiFirst ? "API" : "RAW"}</span>
+            <span class="source-mode${apiFirst ? "" : " snapshot"}">${apiFirst ? "เชื่อมตรง" : "ไฟล์ข้อมูล"}</span>
             <span class="source-summary-copy">
               <strong>${escapeHtml(source.name_th)}</strong>
-              <small>${escapeHtml(statusLabel[source.status] || source.status)} · ${escapeHtml(source.quality_label_th || source.readiness_status || "ไม่ระบุคุณภาพ")}</small>
+              <small>${escapeHtml(plainLanguage(statusLabel[source.status] || source.status))} · ${escapeHtml(plainLanguage(source.quality_label_th || source.readiness_status || "ไม่ระบุคุณภาพ"))}</small>
             </span>
-            <span class="source-count"><strong>${source.records === null || source.records === undefined ? "—" : formatNumber(source.records)}</strong><small>ระเบียน</small></span>
+            <span class="source-count"><strong>${source.records === null || source.records === undefined ? "—" : formatNumber(source.records)}</strong><small>รายการ</small></span>
             <i class="source-chevron" aria-hidden="true">รายละเอียด</i>
           </summary>
           <div class="source-detail">
-            <p><span>ระดับข้อมูล</span>${escapeHtml(source.data_grain_th || "ไม่ระบุ")}</p>
+            <p><span>ระดับข้อมูล</span>${escapeHtml(plainLanguage(source.data_grain_th || "ไม่ระบุ"))}</p>
             ${breakdown ? `<p><span>องค์ประกอบ</span>${escapeHtml(breakdown)}</p>` : ""}
             <p><span>เวลาอ้างอิง</span>${escapeHtml(dates)}</p>
-            ${(source.note_th || source.source_note_th) ? `<p class="source-note">${escapeHtml(source.note_th || source.source_note_th)}</p>` : ""}
+            ${(source.note_th || source.source_note_th) ? `<p class="source-note">${escapeHtml(plainLanguage(source.note_th || source.source_note_th))}</p>` : ""}
             ${sourceUrl ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดข้อมูลต้นทาง</a>` : ""}
           </div>
         </details>`;
@@ -2065,21 +2083,21 @@ function renderDataQuality(summary) {
   const datedPct = totalSources ? (datedSources / totalSources) * 100 : 0;
   document.getElementById("dataQualitySummary").innerHTML = `
     <div class="quality-overview-card">
-      <div class="quality-ring" style="--quality-progress:${acceptedPct.toFixed(1)}%" aria-label="ผ่าน Accepted ${formatNumber(acceptedSources)} จาก ${formatNumber(totalSources)} แหล่ง">
-        <span><strong>${formatNumber(acceptedSources)}/${formatNumber(totalSources)}</strong><small>Accepted</small></span>
+      <div class="quality-ring" style="--quality-progress:${acceptedPct.toFixed(1)}%" aria-label="ผ่านการตรวจ ${formatNumber(acceptedSources)} จาก ${formatNumber(totalSources)} แหล่ง">
+        <span><strong>${formatNumber(acceptedSources)}/${formatNumber(totalSources)}</strong><small>ผ่าน</small></span>
       </div>
       <div class="quality-status-copy">
         <span class="quality-status-badge">ใช้สำรวจได้</span>
-        <h3>ยังไม่ใช่ KPI รับรอง</h3>
-        <p>ตัวเลขทั้งหมดเป็น Candidate/Needs review และต้องผ่าน data owner กับ quality gate ก่อนอ้างอิงเชิงนโยบาย</p>
+        <h3>ยังไม่ใช่ตัวเลขทางการ</h3>
+        <p>ข้อมูลยังรอตรวจ จึงไม่ควรใช้อ้างอิงเชิงนโยบาย</p>
       </div>
     </div>
     <div class="quality-mini-stats">
-      <article><strong>${formatNumber(quality.candidate_or_review_source_count ?? 0)}</strong><span>แหล่งที่รอตรวจรับรอง</span><small>Candidate / Needs review</small></article>
-      <article><strong>${formatNumber(datedSources)}/${formatNumber(totalSources)}</strong><span>มีวันที่ as_of ชัดเจน</span><i><b style="width:${datedPct.toFixed(1)}%"></b></i></article>
+      <article><strong>${formatNumber(quality.candidate_or_review_source_count ?? 0)}</strong><span>แหล่งที่รอตรวจรับรอง</span><small>รอตรวจ</small></article>
+      <article><strong>${formatNumber(datedSources)}/${formatNumber(totalSources)}</strong><span>มีวันที่ข้อมูลชัดเจน</span><i><b style="width:${datedPct.toFixed(1)}%"></b></i></article>
       <article><strong>${quality.latest_observed_fetch ? escapeHtml(formatDate(quality.latest_observed_fetch)) : "—"}</strong><span>ดึงข้อมูลล่าสุด · ไม่ใช่วันที่ของข้อมูลเสมอไป</span></article>
     </div>
-    ${rules.length ? `<details class="quality-rules"><summary>หลักการอ่านข้อมูล ${formatNumber(rules.length)} ข้อ</summary><ul>${rules.map((rule) => `<li>${escapeHtml(rule)}</li>`).join("")}</ul></details>` : ""}`;
+    ${rules.length ? `<details class="quality-rules"><summary>หลักการอ่านข้อมูล ${formatNumber(rules.length)} ข้อ</summary><ul>${rules.map((rule) => `<li>${escapeHtml(plainLanguage(rule))}</li>`).join("")}</ul></details>` : ""}`;
 }
 
 function renderProvincePanel(summary) {

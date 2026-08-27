@@ -4,8 +4,28 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
 }
 
+function plainLanguage(value) {
+  return String(value ?? "")
+    .replace(/public projection/gi, "ข้อมูลที่เผยแพร่")
+    .replace(/public surface/gi, "หน้าเว็บที่เปิดเผย")
+    .replace(/public database/gi, "ฐานข้อมูลสาธารณะ")
+    .replace(/data lane/gi, "รูปแบบข้อมูล")
+    .replace(/exact (name )?crosswalk/gi, "การจับคู่ชื่อให้ตรงกัน")
+    .replace(/candidate/gi, "ข้อมูลเบื้องต้น")
+    .replace(/needs[_ ]review/gi, "รอตรวจ")
+    .replace(/snapshot/gi, "ข้อมูลที่บันทึกไว้")
+    .replace(/aggregate/gi, "ข้อมูลรวม")
+    .replace(/metadata/gi, "รายละเอียดแหล่งข้อมูล")
+    .replace(/grain/gi, "หน่วยนับ")
+    .replace(/records?/gi, "รายการ")
+    .replace(/source/gi, "แหล่งข้อมูล")
+    .replace(/audit/gi, "การตรวจ")
+    .replace(/readiness/gi, "ความพร้อม")
+    .replace(/auth boundary/gi, "ต้องเข้าสู่ระบบ");
+}
+
 function compactText(value, limit = 150) {
-  const text = String(value ?? "").trim();
+  const text = plainLanguage(value).trim();
   return text.length > limit ? `${text.slice(0, limit).trim()}…` : text;
 }
 
@@ -88,17 +108,17 @@ function geographyLabel(source) {
 
 function modeLabel(value) {
   const mode = String(value || "").toLowerCase();
-  if (/api|network/.test(mode)) return "API";
-  if (/gis/.test(mode)) return "GIS / directory";
-  if (/export|snapshot|structured/.test(mode)) return "Raw snapshot";
-  if (/dashboard|portal/.test(mode)) return "Dashboard";
-  return String(value || "Metadata").replaceAll("_", " ");
+  if (/api|network/.test(mode)) return "เชื่อมตรง";
+  if (/gis/.test(mode)) return "ข้อมูลแผนที่";
+  if (/export|snapshot|structured/.test(mode)) return "ข้อมูลที่บันทึกไว้";
+  if (/dashboard|portal/.test(mode)) return "หน้าเว็บ";
+  return plainLanguage(String(value || "รายละเอียดแหล่งข้อมูล").replaceAll("_", " "));
 }
 
 function normalizeSource(source, index) {
   const state = coverageClass(source);
   const statusLabels = {
-    ready: "พร้อมใช้บน Dashboard",
+    ready: "พร้อมนำไปแสดง",
     review: "กำลังตรวจข้อมูล",
     discovery: "มีหลักฐานหน้าเว็บ",
     blocked: "ยังเข้าถึงข้อมูลไม่ได้",
@@ -122,7 +142,7 @@ function normalizeSource(source, index) {
     group: firstDefined(source.group, source.phase, source.team, ""),
     mode: modeLabel(firstDefined(source.access_mode, source.acquisition_mode, source.mode, source.status?.network_api_export, source.source_type, source.latest_usable_asset?.access_mode, "Metadata")),
     statusClass: state,
-    statusLabel: source.public_visibility?.classification === "metadata_only" ? "มีเฉพาะ Metadata" : statusLabels[state],
+    statusLabel: source.public_visibility?.classification === "metadata_only" ? "มีเฉพาะรายละเอียดแหล่งข้อมูล" : statusLabels[state],
     geography: geographyLabel(source),
     count: state === "ready" ? publicCount ?? usableCount : null,
     nonMapCount: firstFinite(source.records?.additional_public_non_map_count),
@@ -137,7 +157,7 @@ function renderSourceCoverage(payload) {
     .sort((a, b) => a.ordinal - b.ordinal);
   const state = document.getElementById("sourceCoverageState");
   if (!sources.length) {
-    state.textContent = "ยังไม่มีทะเบียน public projection สำหรับรอบนี้";
+    state.textContent = "ยังไม่มีรายชื่อแหล่งข้อมูลสำหรับรอบนี้";
     return [];
   }
 
@@ -155,9 +175,9 @@ function renderSourceCoverage(payload) {
   document.getElementById("sourceCoverageGrid").innerHTML = sources.map((source) => `
     <article class="source-coverage-card is-${source.statusClass}">
       <header><span class="source-order">${String(source.ordinal).padStart(2, "0")}</span><div><small>${escapeHtml(source.group || source.sourceId)}</small><h3>${escapeHtml(source.name)}</h3></div><b>${escapeHtml(source.statusLabel)}</b></header>
-      <div class="source-coverage-tags"><span>${escapeHtml(source.mode)}</span><span>${escapeHtml(source.geography)}</span>${source.count !== null ? `<span>${number.format(source.count)} รายการ public</span>` : ""}${source.nonMapCount ? `<span>${number.format(source.nonMapCount)} รายการนอกแผนที่</span>` : ""}</div>
+      <div class="source-coverage-tags"><span>${escapeHtml(source.mode)}</span><span>${escapeHtml(source.geography)}</span>${source.count !== null ? `<span>${number.format(source.count)} รายการพร้อมใช้</span>` : ""}${source.nonMapCount ? `<span>${number.format(source.nonMapCount)} รายการนอกแผนที่</span>` : ""}</div>
       ${source.note ? `<p>${escapeHtml(compactText(source.note))}</p>` : ""}
-      ${source.url ? `<a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">เปิด URL ต้นทาง</a>` : ""}
+      ${source.url ? `<a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">เปิดเว็บไซต์ต้นทาง</a>` : ""}
     </article>`).join("");
   return sources;
 }
@@ -224,7 +244,7 @@ function collectUnmappedProjection(payload) {
         scope: "unmapped",
         source_id: source.source_id,
         title_th: source.source_id === "f3_housing_portal" ? "ข้อมูลที่อยู่อาศัยนอกชั้นจังหวัด" : source.source_id,
-        summary_th: "เก็บไว้ครบใน public database แต่ไม่บังคับผูกจังหวัด เพราะ grain หรือรหัสพื้นที่จากต้นทางยังไม่ผ่าน exact crosswalk",
+        summary_th: "เก็บไว้ครบ แต่ยังไม่ผูกจังหวัด เพราะชื่อหรือรหัสพื้นที่จากต้นทางจับคู่ไม่ได้",
         record_count: source.record_count || items.length,
         source_url: items.find((item) => item.source_url)?.source_url,
         display_metrics: [
@@ -283,7 +303,7 @@ function renderLooseData(payload, unmappedPayload = null) {
   }
   document.getElementById("unmapped").hidden = false;
   document.getElementById("looseDataGrid").innerHTML = rows.map((item) => {
-    const title = firstDefined(item.title_th, item.name_th, item.label_th, item.source_name_th, item.source_id, "ข้อมูลจาก public projection");
+    const title = firstDefined(item.title_th, item.name_th, item.label_th, item.source_name_th, item.source_id, "ข้อมูลที่เผยแพร่");
     const note = firstDefined(item.summary_th, item.note_th, item.reason_th, item.description_th, item.status_reason, "");
     const metrics = looseMetrics(item);
     const sourceUrl = safeUrl(firstDefined(item.url, item.source_url, ""));
@@ -323,7 +343,7 @@ function renderLearningSummary(payload, sources) {
   if (!items.length) return;
   document.getElementById("learningSummary").hidden = false;
   document.getElementById("learningSummaryGrid").innerHTML = items.map((item) => {
-    const title = firstDefined(item.title_th, item.label_th, item.name_th, "ภาพรวมจาก Dashboard LE");
+    const title = firstDefined(item.title_th, item.label_th, item.name_th, "ภาพรวมข้อมูลการเรียนรู้");
     const text = firstDefined(item.summary_th, item.text_th, item.readout_th, item.description_th, "");
     const metrics = looseMetrics(item);
     return `<article class="learning-summary-card"><span>Source 10</span><h3>${escapeHtml(title)}</h3>${text ? `<p>${escapeHtml(compactText(text, 220))}</p>` : ""}${metrics.length ? `<div>${metrics.map((metric) => `<small>${escapeHtml(metric.label)} <strong>${escapeHtml(metric.value)}</strong></small>`).join("")}</div>` : ""}</article>`;
@@ -374,7 +394,7 @@ function renderLearningDashboard(payload) {
   document.getElementById("learningSummary").hidden = false;
   document.getElementById("learningSummaryGrid").innerHTML = cards.map((card) => `
     <article class="learning-summary-card">
-      <span>Source 10 · Candidate</span>
+      <span>แหล่งที่ 10 · ข้อมูลเบื้องต้น</span>
       <h3>${escapeHtml(card.title)}</h3>
       ${card.text ? `<p>${escapeHtml(compactText(card.text, 240))}</p>` : ""}
       <div>${card.metrics.map((metric) => `<small>${escapeHtml(metric.label)} <strong>${escapeHtml(metric.value)}</strong></small>`).join("")}</div>
@@ -404,7 +424,7 @@ async function loadSourceCoverage() {
     renderLearningSummary(payload, sources);
     renderLooseData(payload, unmappedPayload);
   } else {
-    document.getElementById("sourceCoverageState").textContent = "ทะเบียน public projection ยังไม่ถูกสร้างใน environment นี้";
+    document.getElementById("sourceCoverageState").textContent = "ยังไม่มีรายชื่อแหล่งข้อมูลในระบบนี้";
     document.getElementById("sourceCoverageState").classList.add("is-warning");
   }
   if (learningPayload) renderLearningDashboard(learningPayload);
@@ -434,7 +454,7 @@ function renderExecutivePortfolio(portfolio) {
     return `<article class="portfolio-kpi" data-source="${escapeHtml(metric.source_id)}">
       <span>${escapeHtml(metric.label_th)}</span>
       <div><strong>${escapeHtml(display)}</strong><b>${escapeHtml(metric.unit)}</b></div>
-      <small>${escapeHtml(metric.note_th)}</small>
+      <small>${escapeHtml(plainLanguage(metric.note_th))}</small>
     </article>`;
   }).join("");
 
@@ -449,9 +469,9 @@ function renderExecutivePortfolio(portfolio) {
       <div><strong>${number.format(audit.source_count)}</strong><span>เว็บไซต์</span></div>
     </div>
     <div class="readiness-legend">
-      <span class="is-complete"><i></i><b>${number.format(audit.complete_source_count)}</b> ครบตาม public surface</span>
+      <span class="is-complete"><i></i><b>${number.format(audit.complete_source_count)}</b> ดึงได้ครบ</span>
       <span class="is-partial"><i></i><b>${number.format(audit.partial_source_count)}</b> ใช้ได้บางส่วน</span>
-      ${audit.mixed_source_count ? `<span class="is-mixed"><i></i><b>${number.format(audit.mixed_source_count)}</b> มีหลาย data lane</span>` : ""}
+      ${audit.mixed_source_count ? `<span class="is-mixed"><i></i><b>${number.format(audit.mixed_source_count)}</b> มีข้อมูลหลายแบบ</span>` : ""}
     </div>`;
 
   const charts = portfolio.charts || {};
@@ -466,7 +486,7 @@ function renderExecutivePortfolio(portfolio) {
     <article class="source-health-card is-${escapeHtml(source.status)}">
       <header><strong>${escapeHtml(source.label_th)}</strong><span>${escapeHtml(source.status_th)}</span></header>
       <p>${escapeHtml(source.summary_th)}</p>
-      <div class="source-tab-chips">${(source.dashboard_tabs || []).map((tab) => `<span>${escapeHtml(tab)}</span>`).join("")}</div>
+      <div class="source-tab-chips">${(source.dashboard_tabs || []).map((tab) => `<span>${escapeHtml(plainLanguage(tab))}</span>`).join("")}</div>
     </article>`).join("");
 }
 
@@ -502,7 +522,7 @@ function metricLine(metric) {
 function renderAudit(payload) {
   const labels = {
     f1_pppconnext: ["PPPConnext", "ผูกระดับจังหวัด"],
-    f2_apptech_mtr: ["AppTech MTR", "API จังหวัด"],
+    f2_apptech_mtr: ["AppTech MTR", "ข้อมูลรายจังหวัด"],
     f3_city_capital_open_data: ["City Capital", "ทะเบียนเทศบาล"],
     f2_rmutdb: ["RMUTDB", "ไม่ฝืนผูกพื้นที่"],
   };
@@ -514,12 +534,12 @@ function renderAudit(payload) {
 }
 
 function renderPpp(source) {
-  document.getElementById("pppReadout").textContent = source.readout_th;
+  document.getElementById("pppReadout").textContent = plainLanguage(source.readout_th);
   document.getElementById("pppFacts").innerHTML = [
-    fact("ระดับข้อมูล", "ภาค จังหวัด อำเภอ", "แยก grain ชัดเจน"),
-    fact("พื้นที่ที่ผูกได้", `${number.format(source.coverage.linked_provinces)} จังหวัด`, "exact name crosswalk"),
-    fact("ตัวชี้วัดจังหวัด", number.format(source.coverage.province_rows), "aggregate rows"),
-    fact("ความสด", "ไม่ระบุ", "แสดงเป็น snapshot"),
+    fact("ระดับข้อมูล", "ภาค จังหวัด อำเภอ", "แยกหน่วยนับชัดเจน"),
+    fact("พื้นที่ที่ผูกได้", `${number.format(source.coverage.linked_provinces)} จังหวัด`, "จับคู่ชื่อจังหวัดตรงกัน"),
+    fact("ตัวชี้วัดจังหวัด", number.format(source.coverage.province_rows), "รายการสรุป"),
+    fact("วันที่ข้อมูล", "ไม่ระบุ", "ใช้ข้อมูลที่บันทึกไว้"),
   ].join("");
   document.getElementById("pppProfiles").innerHTML = [
     profileCard("จำนวนครัวเรือน", topMetric(source, "จำนวนครัวเรือน")),
@@ -530,11 +550,11 @@ function renderPpp(source) {
 
 function renderApptech(source) {
   const stats = source.statistics;
-  document.getElementById("apptechReadout").textContent = source.readout_th;
+  document.getElementById("apptechReadout").textContent = plainLanguage(source.readout_th);
   document.getElementById("apptechFacts").innerHTML = [
-    fact("ผลงานใน snapshot", number.format(stats.snapshot_records), "รายการ public API"),
-    fact("ผู้ใช้ที่ลงทะเบียน", number.format(stats.registered_users), "รวมจาก API จังหวัด"),
-    fact("การปฏิสัมพันธ์", number.format(stats.province_interaction_total), "รวมจาก API จังหวัด"),
+    fact("ผลงานที่บันทึกไว้", number.format(stats.snapshot_records), "รายการสาธารณะ"),
+    fact("ผู้ใช้ที่ลงทะเบียน", number.format(stats.registered_users), "รวมรายจังหวัด"),
+    fact("การปฏิสัมพันธ์", number.format(stats.province_interaction_total), "รวมรายจังหวัด"),
     fact("ความต้องการที่จับคู่", number.format(stats.matched_requirements), `จาก ${number.format(stats.requirements)} ความต้องการ`),
   ].join("");
   renderBars("apptechCategories", source.distributions.categories, "#467d64", 8);
@@ -542,7 +562,7 @@ function renderApptech(source) {
 }
 
 function renderCity(source) {
-  document.getElementById("cityReadout").textContent = source.readout_th;
+  document.getElementById("cityReadout").textContent = plainLanguage(source.readout_th);
   document.getElementById("cityFacts").innerHTML = [
     fact("เทศบาล", number.format(source.coverage.cities), "เชื่อมทะเบียนครบทุกเมือง"),
     fact("จังหวัด", number.format(source.coverage.linked_provinces), "เก็บระดับเมืองแยกกัน"),
@@ -563,11 +583,11 @@ function renderCity(source) {
 
 function renderRmut(source) {
   const stats = source.statistics;
-  document.getElementById("rmutReadout").textContent = source.readout_th;
+  document.getElementById("rmutReadout").textContent = plainLanguage(source.readout_th);
   document.getElementById("rmutFacts").innerHTML = [
-    fact("ฉบับละเอียด", number.format(stats.detailed_records), "มีเทคโนโลยี TRL และ IP"),
+    fact("ฉบับละเอียด", number.format(stats.detailed_records), "มีระดับความพร้อมและทรัพย์สินทางปัญญา"),
     fact("สรุปประจำปี", number.format(stats.annual_summary_records), "รูปแบบข้อมูลต่างกัน"),
-    fact("แหล่งข้อมูล", "Public e-book", "API มี auth boundary"),
+    fact("แหล่งข้อมูล", "หนังสือออนไลน์", "บางส่วนต้องเข้าสู่ระบบ"),
     fact("ระดับพื้นที่", "ไม่ระบุ", "ไม่เดาจากชื่อมหาวิทยาลัย"),
   ].join("");
   renderBars("rmutTechnology", source.distributions.technology_groups, "#1f5b43", 10);

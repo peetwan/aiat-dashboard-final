@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="แผนที่ข้อมูลสาธารณะรายจังหวัดสำหรับผู้บริหาร สำรวจตัวเลข หลักฐาน และแหล่งข้อมูลของแต่ละพื้นที่" />
     <meta name="theme-color" content="#eef1ec" />
-    <title>AIAT Provincial Evidence Map</title>
+    <title>AIAT แผนที่ข้อมูลจังหวัด</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,9 +21,9 @@
       <div id="provinceMap" class="province-map" role="application" aria-label="แผนที่ข้อมูลสาธารณะรายจังหวัดของประเทศไทย"></div>
 
       <header class="map-header">
-        <a class="brand" href="/" aria-label="AIAT Provincial Evidence Map หน้าแรก">
+        <a class="brand" href="/" aria-label="AIAT แผนที่ข้อมูลจังหวัด หน้าแรก">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span><strong>AIAT</strong><small>Provincial Evidence Map</small></span>
+          <span><strong>AIAT</strong><small>แผนที่ข้อมูลจังหวัด</small></span>
         </a>
 
         <label class="province-picker" for="provinceSelect">
@@ -36,15 +36,15 @@
         </label>
 
         <div class="header-meta">
-          <span class="live-state"><i></i> Public API</span>
+          <span class="live-state"><i></i> ข้อมูลพร้อมใช้</span>
           <a class="insights-link" href="/insights"><span class="desktop-label">ภาพรวม</span><span class="mobile-label">สรุป</span></a>
-          <a class="api-docs-link" href="/docs" target="_blank" rel="noreferrer"><span>API</span></a>
+          <a class="api-docs-link" href="/docs" target="_blank" rel="noreferrer"><span>ข้อมูลเปิด</span></a>
         </div>
       </header>
 
       <div class="map-prompt" id="mapPrompt" aria-live="polite">
         <span class="prompt-pointer" aria-hidden="true"></span>
-        <div><strong id="promptTitle">เลือกภาค แล้วเจาะลงรายจังหวัด</strong><small id="promptHint">ซูมเข้าไปเลือกจังหวัดเพื่อเปิดข้อมูลจริงจาก URL ต้นทาง</small></div>
+        <div><strong id="promptTitle">เลือกภาคหรือจังหวัด</strong><small id="promptHint">กดบนแผนที่เพื่อดูข้อมูล</small></div>
       </div>
 
       <div class="mode-dock" role="group" aria-label="เลือกมุมมองข้อมูลบนแผนที่">
@@ -133,7 +133,7 @@
 
                 <section class="overview-funding" id="overviewFunding" hidden></section>
                 <a class="overview-full-cta" id="fullProvinceLink" href="#">
-                  <span><strong>เปิดข้อมูลจังหวัดฉบับเต็ม</strong><small>ดูรายละเอียดโครงการ คน พื้นที่ และคุณภาพข้อมูล</small></span><b>เปิดหน้า</b>
+                  <span><strong>ดูข้อมูลจังหวัดทั้งหมด</strong><small>โครงการ คน และพื้นที่</small></span><b>เปิด</b>
                 </a>
               </div>
             </section>
@@ -151,7 +151,7 @@
               </div>
               <div class="panel-section" id="areaSection" hidden>
                 <div class="section-heading"><span>ทะเบียนโครงการพัฒนาระดับพื้นที่</span><small id="projectResultCount"></small></div>
-                <p class="section-method-note">จำนวนโครงการเป็นการจัดกลุ่มชั่วคราวจาก ชื่อโครงการ + ปีงบประมาณ + หน่วยวิจัย เพราะต้นทางยังไม่มี Project ID กลาง ส่วนจำนวนผู้เข้าร่วมแสดงแยกต่างหาก</p>
+                <p class="section-method-note">จัดกลุ่มจากชื่อโครงการ ปีงบประมาณ และหน่วยวิจัย จำนวนผู้เข้าร่วมแสดงแยกต่างหาก</p>
                 <div class="collection-tools project-tools">
                   <label><span>ค้นหาโครงการ หน่วยวิจัย ผู้เข้าร่วม หรือพื้นที่</span><input id="projectSearch" type="search" placeholder="ชื่อโครงการ หน่วยวิจัย กลุ่ม/ธุรกิจ อำเภอ ตำบล" autocomplete="off" /></label>
                   <div class="filter-row">
@@ -181,7 +181,7 @@
               <div class="portfolio-loading" id="portfolioLoading"><span></span><span></span><span></span></div>
               <div class="portfolio-empty" id="portfolioEmpty" hidden>ยังไม่มีข้อมูลพื้นที่เพิ่มเติมของจังหวัดนี้</div>
               <div class="panel-section people-overview-section" id="peopleOverviewSection" hidden>
-                <div class="section-heading"><span>ภาพรวมคนและพื้นที่</span><small>สรุปก่อนดูรายการรายละเอียด</small></div>
+                <div class="section-heading"><span>ภาพรวมคนและพื้นที่</span></div>
                 <div id="peopleAreaOverview"></div>
               </div>
               <div class="panel-section sra-area-section" id="sraAreaSection" hidden>
@@ -226,7 +226,7 @@
 
             <section class="panel-view" data-panel-view="dimensions" hidden>
               <div class="panel-section all-data-section">
-                <div class="section-heading"><span>ภาพรวมรายมิติ</span><small>กราฟแสดงค่าที่พบ พร้อมป้ายระดับหลักฐาน</small></div>
+                <div class="section-heading"><span>ภาพรวมรายมิติ</span><small>แสดงแต่ละหน่วยแยกกัน</small></div>
                 <div class="dimension-summary-list" id="allDataSections"></div>
               </div>
             </section>
@@ -237,12 +237,12 @@
                 <div class="data-quality-summary" id="dataQualitySummary"></div>
               </div>
               <div class="panel-section source-section">
-                <div class="section-heading"><span>รายละเอียดแหล่งข้อมูล</span><small>กดแต่ละแหล่งเพื่อดู grain และวันที่อ้างอิง</small></div>
+                <div class="section-heading"><span>รายละเอียดแหล่งข้อมูล</span><small>กดเพื่อดูหน่วยนับและวันที่ข้อมูล</small></div>
                 <div class="province-sources" id="provinceSources"></div>
               </div>
               <footer class="panel-footer">
-                <div><span class="candidate-dot"></span><p><strong>Candidate data</strong><small id="panelUpdated">กำลังตรวจสอบวันที่</small></p></div>
-                <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">ดูข้อมูล JSON</a>
+                <div><span class="candidate-dot"></span><p><strong>ข้อมูลเบื้องต้น</strong><small id="panelUpdated">กำลังตรวจสอบวันที่</small></p></div>
+                <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">ดูข้อมูล</a>
               </footer>
             </section>
           </div>
@@ -256,7 +256,7 @@
       </aside>
 
       <div class="map-fallback" id="mapFallback" hidden>
-        <strong>ไม่สามารถเปิดแผนที่ WebGL ได้</strong>
+        <strong>เปิดแผนที่ไม่ได้</strong>
         <p>ยังเลือกจังหวัดจากช่องค้นหาด้านบนได้</p>
       </div>
 

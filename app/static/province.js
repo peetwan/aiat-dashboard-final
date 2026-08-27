@@ -33,13 +33,13 @@ const SECTION_LABELS = {
 };
 
 const FIELD_LABELS = {
-  official_project_id: "Project ID ทางการ",
+  official_project_id: "รหัสโครงการทางการ",
   fiscal_year: "ปีงบประมาณ",
   research_unit: "หน่วยวิจัย",
   definition_status: "สถานะนิยาม",
   project_status: "สถานะโครงการ",
   budget_status: "สถานะงบประมาณ",
-  participant_record_count: "ระเบียนผู้เข้าร่วม",
+  participant_record_count: "รายการผู้เข้าร่วม",
   business_count: "กลุ่ม/ธุรกิจ",
   businesses: "กลุ่ม/ธุรกิจที่เชื่อมได้",
   geography: "พื้นที่ดำเนินงาน",
@@ -82,7 +82,7 @@ const STATUS_LABELS = {
   not_province_scoped: "ไม่ใช่ข้อมูลระดับจังหวัด",
   metadata_only: "มีเฉพาะข้อมูลอธิบาย",
   blocked: "ไม่เผยแพร่ค่า",
-  candidate_needs_review: "Candidate · รอตรวจรับรอง",
+  candidate_needs_review: "ข้อมูลเบื้องต้น · รอตรวจ",
   projected_from_source: "สรุปจากต้นทาง",
 };
 
@@ -113,6 +113,34 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function plainLanguage(value) {
+  return String(value ?? "")
+    .replace(/public projection/gi, "ข้อมูลที่เผยแพร่")
+    .replace(/public API/gi, "ข้อมูลเปิด")
+    .replace(/candidate/gi, "ข้อมูลเบื้องต้น")
+    .replace(/needs[_ ]review/gi, "รอตรวจ")
+    .replace(/accepted gate/gi, "การตรวจรับรอง")
+    .replace(/quality gate/gi, "การตรวจคุณภาพ")
+    .replace(/data owner/gi, "เจ้าของข้อมูล")
+    .replace(/snapshot/gi, "ข้อมูลที่บันทึกไว้")
+    .replace(/metadata/gi, "รายละเอียดแหล่งข้อมูล")
+    .replace(/grain/gi, "หน่วยนับ")
+    .replace(/records?/gi, "รายการ")
+    .replace(/connector/gi, "การเชื่อมต่อ")
+    .replace(/production/gi, "ระบบจริง")
+    .replace(/scheduler/gi, "รอบอัปเดต")
+    .replace(/as_of/gi, "วันที่ข้อมูล")
+    .replace(/source id/gi, "รหัสแหล่งข้อมูล");
+}
+
+function acquisitionLabel(value) {
+  const mode = String(value || "").toLowerCase();
+  if (mode.includes("api")) return "เชื่อมตรง";
+  if (mode.includes("snapshot") || mode.includes("export")) return "ใช้ข้อมูลที่บันทึกไว้";
+  if (mode.includes("metadata")) return "ใช้รายละเอียดแหล่งข้อมูล";
+  return plainLanguage(String(value || "ไม่ระบุ").replaceAll("_", " "));
 }
 
 function formatNumber(value, digits = 0) {
@@ -211,9 +239,9 @@ function renderKpis(summary, briefing) {
   const demand = briefing.sections?.housing?.demand_record_total;
   const metrics = [
     [portfolio.project_count, "กลุ่มโครงการ", "จัดกลุ่มเบื้องต้น"],
-    [portfolio.participant_record_count, "ระเบียนผู้เข้าร่วม", "ไม่ใช่จำนวนโครงการ"],
+    [portfolio.participant_record_count, "รายการผู้เข้าร่วม", "ไม่ใช่จำนวนโครงการ"],
     [portfolio.innovation_count, "นวัตกรรม", "ผลงานที่เชื่อมจังหวัด"],
-    [culture, "ทุนวัฒนธรรม", "ระเบียนที่บันทึกในพื้นที่"],
+    [culture, "ทุนวัฒนธรรม", "รายการที่บันทึกในพื้นที่"],
     [demand, "คำตอบ Housing demand", "ผู้ตอบที่อาศัยในจังหวัด ไม่ใช่ประชากร"],
   ];
   document.getElementById("executiveKpis").innerHTML = metrics.map(([value, label, note]) => `
@@ -247,8 +275,8 @@ function renderHousingDemand(briefing) {
   target.innerHTML = `
     <article class="demand-panel">
       <header class="demand-heading">
-        <div><span>Housing demand</span><h3>ความต้องการที่อยู่อาศัยของผู้ตอบในจังหวัด</h3></div>
-        <p>สรุปจากแบบสำรวจที่ตัด source id และตรวจชื่อ เบอร์โทร อีเมลแล้ว</p>
+        <div><span>ความต้องการที่อยู่อาศัย</span><h3>ความต้องการที่อยู่อาศัยของผู้ตอบในจังหวัด</h3></div>
+        <p>สรุปจากแบบสำรวจที่ตัดรหัสแหล่งข้อมูลและข้อมูลติดต่อแล้ว</p>
       </header>
       <div class="demand-facts">
         <article><span>ผู้ตอบที่อาศัยในจังหวัด</span><strong>${formatNumber(demand.respondents_living)}</strong><small>คำตอบแบบสำรวจ</small></article>
@@ -419,12 +447,12 @@ function recordSourceLink(item) {
 function renderProjectDigest(item, fallback) {
   const areas = humanValue(item.geography);
   const countLine = [
-    hasValue(item.participant_record_count) ? `${formatNumber(item.participant_record_count)} ระเบียนผู้เข้าร่วม` : "",
+    hasValue(item.participant_record_count) ? `${formatNumber(item.participant_record_count)} รายการผู้เข้าร่วม` : "",
     hasValue(item.business_count) ? `${formatNumber(item.business_count)} กลุ่ม/ธุรกิจ` : "",
     areas !== "ไม่ระบุ" ? areas : "",
   ].filter(Boolean).join(" · ");
   return `<article class="record-card record-project">
-    <header><div><span class="record-kind">โครงการ</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div><span class="record-value">${formatNumber(item.participant_record_count)} records</span></header>
+    <header><div><span class="record-kind">โครงการ</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div><span class="record-value">${formatNumber(item.participant_record_count)} รายการ</span></header>
     <div class="record-meta">${recordMeta(item).map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</div>
     ${countLine ? `<p class="record-summary">${escapeHtml(countLine)}</p>` : ""}
     <details><summary>ดูสาระสำคัญ</summary>${renderFactList([
@@ -496,7 +524,7 @@ function renderResearchSection(targetId, section, emptyText, kind) {
     </div>
     ${items.length
       ? `<div class="record-grid">${items.map((item) => renderRecordDigest(item, emptyText, kind)).join("")}</div>`
-      : `<p class="empty-block">${escapeHtml(emptyText)} — ยังไม่มีระเบียนที่เชื่อมจังหวัดนี้</p>`}`;
+      : `<p class="empty-block">${escapeHtml(emptyText)} — ยังไม่มีรายการที่เชื่อมจังหวัดนี้</p>`}`;
 }
 
 function renderResearch(briefing, summary) {
@@ -651,30 +679,30 @@ function renderSources(summary) {
   document.getElementById("detailQuality").innerHTML = `
     <div class="quality-heading">
       <span>สถานะชุดข้อมูล</span>
-      <strong>${escapeHtml(STATUS_LABELS[quality.status] || "Candidate · รอตรวจรับรอง")}</strong>
-      <p>ยังไม่มีแหล่งใดผ่าน accepted gate จึงไม่เรียกค่าบนหน้านี้ว่า KPI</p>
+      <strong>${escapeHtml(STATUS_LABELS[quality.status] || "ข้อมูลเบื้องต้น · รอตรวจ")}</strong>
+      <p>ข้อมูลยังรอตรวจ จึงไม่ควรใช้เป็นตัวเลขทางการ</p>
     </div>
     <div class="quality-facts">
       <span><strong>${formatNumber(coverage.available_source_count)}</strong>/${formatNumber(coverage.public_source_count)} แหล่งมีข้อมูลจังหวัดนี้</span>
-      <span><strong>${formatNumber(quality.sources_with_explicit_as_of)}</strong> แหล่งระบุ as_of ชัดเจน</span>
+      <span><strong>${formatNumber(quality.sources_with_explicit_as_of)}</strong> แหล่งระบุวันที่ข้อมูลชัดเจน</span>
       <span>พบการดึงล่าสุด <strong>${escapeHtml(latest)}</strong></span>
     </div>`;
 
   document.getElementById("detailSources").innerHTML = (summary.source_coverage || []).map((source) => {
     const url = safeExternalUrl(source.url);
-    const recordText = source.records === null || source.records === undefined ? "ไม่ใช่ข้อมูลจังหวัด" : `${formatNumber(source.records)} ระเบียน`;
+    const recordText = source.records === null || source.records === undefined ? "ไม่ใช่ข้อมูลจังหวัด" : `${formatNumber(source.records)} รายการ`;
     return `<details class="source-row">
       <summary>
-        <div><h3>${escapeHtml(source.name_th)}</h3><small>${escapeHtml(source.data_grain_th || "ไม่ระบุระดับข้อมูล")}</small></div>
-        <span class="status-pill">${escapeHtml(STATUS_LABELS[source.status] || source.status || "ไม่ระบุ")}</span>
+        <div><h3>${escapeHtml(source.name_th)}</h3><small>${escapeHtml(plainLanguage(source.data_grain_th || "ไม่ระบุระดับข้อมูล"))}</small></div>
+        <span class="status-pill">${escapeHtml(plainLanguage(STATUS_LABELS[source.status] || source.status || "ไม่ระบุ"))}</span>
         <strong>${escapeHtml(recordText)}</strong>
       </summary>
       <div class="source-body">
         <dl>
-          <div><dt>วิธีนำเข้า</dt><dd>${escapeHtml(source.acquisition_mode || "ไม่ระบุ")}</dd></div>
+          <div><dt>วิธีนำเข้า</dt><dd>${escapeHtml(acquisitionLabel(source.acquisition_mode))}</dd></div>
           <div><dt>ข้อมูล ณ วันที่</dt><dd>${escapeHtml(source.observed_as_of || "ไม่ระบุ")}</dd></div>
           <div><dt>ดึงข้อมูลเมื่อ</dt><dd>${escapeHtml(source.observed_fetched_at ? formatDate(source.observed_fetched_at) : "ไม่ระบุ")}</dd></div>
-          <div><dt>ข้อจำกัด</dt><dd>${escapeHtml(source.note_th || source.source_note_th || source.quality_label_th || "ไม่ระบุ")}</dd></div>
+          <div><dt>ข้อจำกัด</dt><dd>${escapeHtml(plainLanguage(source.note_th || source.source_note_th || source.quality_label_th || "ไม่ระบุ"))}</dd></div>
         </dl>
         ${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">เปิดแหล่งข้อมูล</a>` : ""}
       </div>
@@ -689,17 +717,17 @@ function renderOperations(operations) {
   const sourceNames = Object.fromEntries((detailState.summary?.source_coverage || []).map((source) => [source.source_id, source.name_th]));
   document.getElementById("operationsStatus").innerHTML = `
     <div class="ops-overview">
-      <article><span>Connector ที่ทดสอบสำเร็จ</span><strong>${formatNumber(audit.successful_connectors)}/${formatNumber(audit.configured_connectors)}</strong></article>
-      <article><span>Candidate records ที่พบ</span><strong>${formatNumber(audit.records_seen_total)}</strong></article>
-      <article><span>ดึงอัตโนมัติบน Production</span><strong>${summary.automatic_refresh_enabled ? "เปิดอยู่" : "ยังไม่เปิด"}</strong></article>
+      <article><span>แหล่งที่เชื่อมสำเร็จ</span><strong>${formatNumber(audit.successful_connectors)}/${formatNumber(audit.configured_connectors)}</strong></article>
+      <article><span>รายการที่พบ</span><strong>${formatNumber(audit.records_seen_total)}</strong></article>
+      <article><span>ดึงอัตโนมัติในระบบจริง</span><strong>${summary.automatic_refresh_enabled ? "เปิดอยู่" : "ยังไม่เปิด"}</strong></article>
     </div>
-    <div class="scheduler-note"><strong>${escapeHtml(scheduler.status_th || "ยังไม่ระบุสถานะ scheduler")}</strong><p>${escapeHtml(scheduler.reason_th || "")}</p></div>
-    <ol class="ops-pipeline">${(operations.pipeline || []).map((stage) => `<li><span>${escapeHtml(stage.stage)}</span><p>${escapeHtml(stage.rule_th)}</p></li>`).join("")}</ol>
+    <div class="scheduler-note"><strong>${escapeHtml(plainLanguage(scheduler.status_th || "ยังไม่ระบุรอบอัปเดต"))}</strong><p>${escapeHtml(plainLanguage(scheduler.reason_th || ""))}</p></div>
+    <ol class="ops-pipeline">${(operations.pipeline || []).map((stage) => `<li><span>${escapeHtml(plainLanguage(stage.stage))}</span><p>${escapeHtml(plainLanguage(stage.rule_th))}</p></li>`).join("")}</ol>
     <div class="ops-audit">
       <h3>ผลตรวจการเชื่อมต่อล่าสุด <span>${escapeHtml(formatDate(audit.audited_at))}</span></h3>
-      ${(audit.results || []).map((row) => `<div class="ops-row"><span>${escapeHtml(sourceNames[row.source_id] || row.source_id)}</span><strong>${formatNumber(row.records_seen)} records</strong><p>${escapeHtml(row.note_th)}</p></div>`).join("")}
+      ${(audit.results || []).map((row) => `<div class="ops-row"><span>${escapeHtml(sourceNames[row.source_id] || row.source_id)}</span><strong>${formatNumber(row.records_seen)} รายการ</strong><p>${escapeHtml(plainLanguage(row.note_th))}</p></div>`).join("")}
     </div>
-    <a class="ops-link" href="/docs" target="_blank" rel="noreferrer">ดูสัญญา Public API</a>`;
+    <a class="ops-link" href="/docs" target="_blank" rel="noreferrer">ดูคู่มือข้อมูลเปิด</a>`;
 }
 
 function setupSectionNavigation() {
