@@ -1,0 +1,35 @@
+{
+  "contract_version": "1.1",
+  "source_id": "f2_wallet_all_realtime",
+  "connector": "app.connectors.wallet_all_realtime:WalletAllRealtimeConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^household_month$",
+      "grain_th": "ค่ากระเป๋าครัวเรือนรวมเดือนปัจจุบันหนึ่งชุด ตามที่หน้าข้อมูลเปิดแสดง ไม่ใช่รายการรายบุคคล",
+      "identity_options": [["thisMonth"]],
+      "geography_fields": [],
+      "as_of_fields": ["thisMonth", "as_of"]
+    },
+    {
+      "key_pattern": "^business_month$",
+      "grain_th": "ค่ากระเป๋าธุรกิจรวมเดือนปัจจุบันหนึ่งชุด ตามที่หน้าข้อมูลเปิดแสดง ไม่ใช่รายการรายบุคคล",
+      "identity_options": [["thisMonth"]],
+      "geography_fields": [],
+      "as_of_fields": ["thisMonth", "as_of"]
+    }
+  ],
+  "completeness_checks": [
+    "POST {\"date\": \"\"} ครบ /hh และ /bu; ไม่เรียก GET ที่ตอบ 405 และไม่ดึงประวัติรายเดือนทั้งหมดตอน serving",
+    "response ต้องมี key ที่หน้าเว็บใช้ และ thisMonth ของสองกระเป๋าต้องเป็นเดือนเดียวกันรูปแบบ YYYY-MM",
+    "ได้ 2 Candidate records: household_month และ business_month",
+    "เก็บ as_of จาก thisMonth ของต้นทาง ไม่ใช้ fetched_at แทน"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/f2_wallet_all_realtime.json",
+  "notes_th": "หน้า lesuper ติดป้ายแดชบอร์ดข้อมูลเปิด และ API สาธารณะคืนค่า aggregate; ประวัติรายเดือนเต็มอยู่เลนหลักฐาน/R2"
+}

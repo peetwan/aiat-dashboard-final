@@ -1,0 +1,26 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f2_wallet_cluster_realtime",
+  "records": [
+    {
+      "dataset_key": "household_cluster",
+      "payload": {
+        "thisMonth": "2026-08",
+        "thisMonthName": "สิงหาคม 69",
+        "category": "กลุ่มตัวอย่าง ก",
+        "as_of": "2026-08",
+        "snapshot": {"category": "กลุ่มตัวอย่าง ก", "totalCash": 1}
+      }
+    },
+    {
+      "dataset_key": "business_cluster",
+      "payload": {
+        "thisMonth": "2026-08",
+        "thisMonthName": "สิงหาคม 69",
+        "category": "กลุ่มตัวอย่าง ก",
+        "as_of": "2026-08",
+        "snapshot": {"category": "กลุ่มตัวอย่าง ก", "totalCash": 1}
+      }
+    }
+  ]
+}

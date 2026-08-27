@@ -53,11 +53,21 @@ class SpuNsnFloodConnector:
             soup = BeautifulSoup(response.text, "html.parser")
 
             stations = _parse_station_links(soup, url)
+            if not stations:
+                raise RuntimeError(
+                    f"NSN Flood {name} returned no station links; HTML schema may have drifted"
+                )
             for station in stations:
                 station["_fetched_at"] = fetched_at
                 records.append(("stations.row", station))
 
-            if context.limit_reached(len(records)):
-                return context.apply_limit(records)
+            if (
+                context.settings.max_records_per_source > 0
+                and len(records) > context.settings.max_records_per_source
+            ):
+                raise RuntimeError(
+                    "NSN Flood max_records_per_source would truncate the station snapshot; "
+                    "partial commits are forbidden"
+                )
 
         return records

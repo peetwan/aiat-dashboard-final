@@ -181,7 +181,7 @@ def _write_manifest(tmp_path, entry):
                 "key": "example",
                 "group": "source_dataset",
                 "path": "example.json",
-                "source_ids": ["f2_target_household"],
+                "source_ids": ["f3_healthcare_nonthaburi"],
             },
             "non-approved sources",
         ),
@@ -236,7 +236,7 @@ def test_public_artifact_manifest_rejects_unknown_top_level_fields(tmp_path):
         {"items": [{"note": "โทรศัพท์: 081-234-5678"}]},
         {"items": [{"value": "0812345678"}]},
         {"items": [{"note": "บ้านเลขที่ 1"}]},
-        {"items": [{"source_id": "f2_target_household"}]},
+        {"items": [{"source_id": "f3_healthcare_nonthaburi"}]},
     ],
 )
 def test_generic_public_artifact_policy_rejects_private_or_restricted_values(
@@ -256,7 +256,7 @@ def test_restricted_ids_are_allowed_only_in_explicit_audit_path(tmp_path):
         json.dumps(
             {
                 "quality": {
-                    "restricted_source_ids_excluded": ["f2_target_household"]
+                    "restricted_source_ids_excluded": ["f3_healthcare_nonthaburi"]
                 }
             }
         ),
@@ -272,7 +272,7 @@ def test_restricted_ids_are_allowed_only_in_explicit_audit_path(tmp_path):
 
     leaked_path = tmp_path / "leaked.json"
     leaked_path.write_text(
-        json.dumps({"sections": {"source_id": "f2_target_household"}}),
+        json.dumps({"sections": {"source_id": "f3_healthcare_nonthaburi"}}),
         encoding="utf-8",
     )
     leaked = ArtifactInput(

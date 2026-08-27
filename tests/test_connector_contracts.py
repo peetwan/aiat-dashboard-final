@@ -21,15 +21,22 @@ def test_every_executable_source_has_an_importable_connector_contract():
 
     assert report["status"] == "valid"
     assert report["contract_version"] == "1.1"
-    assert report["connector_count"] == 7
+    assert report["connector_count"] == 14
     assert {item["source_id"] for item in report["connectors"]} == {
-        "clig_projects",
         "f1_sradss_ppaos",
+        "f1_pppconnext",
         "f2_apptech_mtr",
         "f2_apptech_mru",
+        "f2_target_household",
         "f2_learning_dashboard",
         "f2_learning_area_based",
+        "f2_wallet_all_realtime",
+        "f2_wallet_cluster_realtime",
         "f3_housing_portal",
+        "spu_sukhothai_care",
+        "spu_sukhothai_water",
+        "spu_nsn_flood",
+        "spu_rawangphai_uru",
     }
     assert all(item["grains"] >= 1 for item in report["connectors"])
     assert all(item["completeness_checks"] >= 1 for item in report["connectors"])

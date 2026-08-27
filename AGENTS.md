@@ -4,7 +4,7 @@
 
 ## เป้าหมายของ repository
 
-นี่คือ public serving application ที่ catalog ครอบทุกแหล่งใน canonical registry (ชุดตรวจรับแรก 28 แหล่ง และทีมเพิ่มได้ต่อเนื่อง) และ connector-based operational ingestion สำหรับ 6 แหล่งปัจจุบัน ที่เหลืออยู่ใน snapshot/metadata/restricted lane ไม่ใช่ raw evidence lake หลัก
+นี่คือ public serving application ที่ catalog ครอบทุกแหล่งใน canonical registry (ชุดตรวจรับแรก 28 แหล่ง และทีมเพิ่มได้ต่อเนื่อง) และ connector-based operational ingestion สำหรับ 10 แหล่งปัจจุบัน ที่เหลืออยู่ใน snapshot/metadata/restricted lane ไม่ใช่ raw evidence lake หลัก
 
 ## คำสั่งตรวจที่ต้องผ่าน
 
@@ -25,7 +25,7 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 | เพิ่ม source ใหม่ทั้งเส้นทาง | ตาม [docs/add-new-source.md](docs/add-new-source.md) ทีละขั้น — ขั้น 1 อยู่ใน evidence workspace, ขั้น 2-6 อยู่ใน repo นี้ |
 | สร้าง connector ตั้งต้น | `python tools/scaffold_connector.py <source_id> ...` แล้วแก้ parser/completeness ให้ตรงต้นทางจริง |
 | แก้ connector เดิม | `app/connectors/<source_id>.py` + contract ใน `config/connector_contracts/` + fixture ใน `tests/fixtures/connectors/` |
-| ดึง/อัปโหลด raw snapshot กับ team bucket | `python tools/evidence_pull.py <source_id>` / `python tools/evidence_push.py <source_id> <run_dir>` ตาม [docs/evidence-storage.md](docs/evidence-storage.md) — หนึ่ง run ห้ามเขียนทับ |
+| ดึง/อัปโหลด raw snapshot กับ team bucket | `python tools/evidence_pull.py <source_id>` / `python tools/evidence_push.py <source_id> <run_dir>` ตาม [docs/evidence-storage.md](docs/evidence-storage.md) — canonical run ห้ามเขียนทับ; ลบได้เฉพาะ legacy R2 key ที่ verify แล้วว่าเป็นสำเนา |
 | regenerate catalog/coverage | `python tools/build_source_catalog.py` แล้ว `python tools/build_source_coverage.py` (ต้องมี evidence workspace; ถ้าไม่มีจะได้ข้อความบอกทางไม่ใช่ traceback) |
 | publish ข้อมูลเข้า dashboard | builder ใน `tools/` → `python -m app.cli publication receipt` → ตาม [docs/publication-workflow.md](docs/publication-workflow.md) |
 | แก้ UI | Dashboard: `app/templates/` + `app/static/`; Explorer: `explorer/templates/` + `explorer/static/` |
@@ -38,6 +38,8 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 - Executable source ต้องมี plan, importable connector, contract และ tests
 - Connector คืน Candidate records เท่านั้น ห้ามเขียน `public_artifacts` หรือ publish เอง
 - Raw response ต้องผ่าน central `ResponseRecorder` เพื่อให้มี SHA-256 และ manifest
+- Canonical raw บน team bucket (`raw/<department>/<source_id>/<run_id>/`) ห้าม overwrite และห้ามลบ ดึงใหม่คือ run ใหม่
+- ข้อยกเว้น: ลบ legacy R2 key รูปแบบ `raw/<source_id>/<run_id>/<file>` ได้เมื่อตรวจคู่สำเนากับ canonical key แล้วว่า `Content-Length` และ `ETag` ตรงกันทุกไฟล์ ห้ามลบ canonical object ห้าม overwrite และห้ามขยายข้อยกเว้นนี้ไปยัง run ที่ไม่มีสำเนาคู่
 - ห้ามเดา grain, unit, geography, `as_of`, denominator หรือความหมาย field
 - ห้าม commit `.env`, token, cookie, database dump, raw response, ชื่อบุคคล เบอร์โทร อีเมล หรือที่อยู่
 - Restricted source ห้ามมี executable connector ใน public application
@@ -64,6 +66,11 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 ### Public data safety
 
 - Flag tracked raw payloads, credentials, personal contact values, person-level financial/health/household values, or changes that weaken forbidden-field/contact scans. Keep fixtures small and redacted; public output must remain a reviewed projection.
+
+### Evidence storage
+
+- Flag overwrite or deletion of canonical R2 keys `raw/<department>/<source_id>/<run_id>/...`.
+- Do not flag deletion of legacy keys `raw/<source_id>/<run_id>/...` when a verify report already shows a canonical copy with matching `Content-Length` and `ETag`. Flag the deletion if any key has no verified pair, if a canonical object would be removed, or if any object would be overwritten.
 
 ### Repository workflow
 

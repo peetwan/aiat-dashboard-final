@@ -1,0 +1,28 @@
+{
+  "contract_version": "1.1",
+  "source_id": "f1_pppconnext",
+  "connector": "app.connectors.pppconnext:PppconnextConnector",
+  "transport": "http_json",
+  "dataset_grains": [
+    {
+      "key_pattern": "^(?:national_summary|province_summary|survey_year_households|survey_year_cumulative|capital_dimension|capital_overall|assistance_dimension|assistance_summary)$",
+      "grain_th": "ค่ารวมสาธารณะหนึ่งรายการตาม grain ที่หน้า Dashboard 2026 ส่งมา ไม่ใช่ครัวเรือนรายหลัง",
+      "identity_options": [["record_id"], ["$payload_hash"]],
+      "geography_fields": ["geography_code", "geography_name_th"],
+      "as_of_fields": []
+    }
+  ],
+  "completeness_checks": [
+    "เรียกครบ 4 public aggregate APIs ใน catalog และทุก envelope ต้อง success=true",
+    "map_summary.items ต้องมี 20 จังหวัดตรง allowed_province_codes",
+    "ต้องได้ 47 Candidate grains: 1 national + 20 จังหวัด + 7 ปีสำรวจ + 7 cumulative + 5 ทุน + 1 รวมทุน + 5 ความช่วยเหลือ + 1 สรุปความช่วยเหลือ",
+    "ไม่เรียก /areas/* ที่สังเกตแล้วว่า 401 และไม่เดา district/tambon id"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/f1_pppconnext.json",
+  "notes_th": "Connector นี้ดึงเฉพาะ API รวมสาธารณะ 4 เส้นทางของหน้า 2026; ลูป analytics รายจังหวัดและพื้นที่ที่ต้อง login อยู่เลนหลักฐาน ไม่ใช่ serving ingest"
+}

@@ -28,7 +28,9 @@ def _data_payload(data):
             return data["data"]
         if isinstance(data.get("features"), list):
             return data["features"]
-    return data if isinstance(data, list) else []
+    if isinstance(data, list):
+        return data
+    raise RuntimeError("RawangPhai response has no supported object-list payload")
 
 
 def _flatten_water_level(record, source_url, fetched_at):
@@ -138,12 +140,18 @@ class SpuRawangphaiUruConnector:
 
             for row in rows:
                 if not isinstance(row, dict):
-                    continue
+                    raise RuntimeError(f"RawangPhai {name} returned a non-object row")
                 if flatten:
                     row = flatten(row, url, fetched_at)
                 records.append((f"{name}.row", row))
 
-            if context.limit_reached(len(records)):
-                return context.apply_limit(records)
+            if (
+                context.settings.max_records_per_source > 0
+                and len(records) > context.settings.max_records_per_source
+            ):
+                raise RuntimeError(
+                    "RawangPhai max_records_per_source would truncate a complete snapshot; "
+                    "partial commits are forbidden"
+                )
 
         return records

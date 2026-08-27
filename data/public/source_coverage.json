@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-17T14:24:32.632331+00:00",
+  "generated_at": "2026-08-21T01:16:00.504988+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "47e607feebd3f3981f2f679d21f49324874111cb85d72c4e42dc5b008f6d2102"
+      "sha256": "520b500d2f0c896a5ab768d8a9f6ce042f90718568cf1ec2c609835070e1e017"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,19 +18,19 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 29,
-      "aggregate_sha256": "57079f860c29697e66296d66f74acf1225d4b8cc25bcd86ece25f4cebfdaf528"
+      "aggregate_sha256": "54d249e4f6e1edc6ab6fd829946945771c6e081d7740b3496698856c7d5ef63c"
     }
   },
   "summary": {
     "registry_source_count": 29,
     "catalog_metadata_source_count": 29,
-    "public_candidate_source_count": 12,
-    "metadata_only_source_count": 12,
-    "restricted_local_only_source_count": 5,
+    "public_candidate_source_count": 19,
+    "metadata_only_source_count": 8,
+    "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
-    "public_candidates_with_observed_count": 12,
+    "public_candidates_with_observed_count": 19,
     "current_public_data_artifact_source_count": 11,
-    "current_province_projection_source_count": 9,
+    "current_province_projection_source_count": 10,
     "restricted_value_leak_count": 0
   },
   "sources": [
@@ -634,21 +634,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "STATIC_CANDIDATE_REVIEWED",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 1160,
+        "observed_count_basis": "public_product_search_listing",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -662,25 +662,29 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/09_f2_target_household/source_card.json",
         "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "approval_basis": "source_card_candidate_scope_needs_review",
+        "catalogued_endpoint_count": 1,
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_target_household/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/09_f2_target_household/evidence/map_observation.json",
+          "data/source_audit/09_f2_target_household/evidence/gate_observation.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted"
       ]
     },
@@ -825,21 +829,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "VERIFIED_COMPLETE_ENUMERATION",
         "data_inventory": "COMPLETE_FROM_REAL_PAYLOADS",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 2,
+        "observed_count_basis": "public_current_month_hh_and_bu_snapshots",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -853,25 +857,38 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/12_f2_wallet_all_realtime/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "none",
+        "approval_basis": "source_card_candidate_scope_needs_review",
         "catalogued_endpoint_count": 2,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_wallet_all_realtime/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/manifest.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/today.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-09.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-08.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/hh/2024-07.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/today.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-09.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-08.json",
+          "data/raw/network/f2_wallet_all_realtime/20260804T_full_audit_12/bu/2024-07.json",
+          "data/source_audit/12_f2_wallet_all_realtime/evidence/gate_observation.json",
+          "data/raw/network/f2_wallet_all_realtime/20260811T_dashboard_snapshot_12/manifest.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
@@ -885,21 +902,21 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "restricted",
+        "readiness": "needs_review",
         "network_api_export": "VERIFIED_COMPLETE_ENUMERATION",
         "data_inventory": "COMPLETE_FROM_REAL_PAYLOADS",
-        "fact_acceptance": "not_allowed_restricted"
+        "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": true,
-        "observed_count": null,
-        "observed_count_basis": "restricted_local_only_count_withheld",
+        "observed_count": 14,
+        "observed_count_basis": "public_current_month_cluster_snapshots",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
         "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": true
+        "local_record_count_withheld": false
       },
       "geo": {
         "expected_by_registry": true,
@@ -913,25 +930,38 @@
         "known_omissions": []
       },
       "public_visibility": {
-        "classification": "restricted_local_only",
+        "classification": "public_candidate",
         "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
         "current_public_data_artifact": false,
         "current_province_projection": false,
-        "restricted_values_excluded": true
+        "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
         "source_card": "data/source_audit/13_f2_wallet_cluster_realtime/source_card.json",
         "merged_index": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
-        "approval_basis": "none",
+        "approval_basis": "source_card_candidate_scope_needs_review",
         "catalogued_endpoint_count": 2,
-        "primary_paths": [],
-        "local_evidence_paths_withheld": true
+        "primary_paths": [
+          "data/raw/firecrawl_map/f2_wallet_cluster_realtime/20260803T_url_audit_map_01/manifest.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/manifest.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/today_nobody.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/today_emptydate.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/2026-07.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/hh/2024-09.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/today_nobody.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/today_emptydate.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/2026-07.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260805T_full_audit_13/bu/2024-09.json",
+          "data/source_audit/13_f2_wallet_cluster_realtime/evidence/gate_observation.json",
+          "data/raw/network/f2_wallet_cluster_realtime/20260811T_dashboard_snapshot_13/manifest.json"
+        ],
+        "local_evidence_paths_withheld": false
       },
       "notes_th": [
-        "เผยแพร่เฉพาะ metadata; ไม่ส่ง payload หรือจำนวน record ภายในขึ้น Cloud",
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
       ]
     },
@@ -1672,271 +1702,15 @@
       "sensitivity_lane": "public_unknown",
       "status": {
         "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
+        "readiness": "needs_review",
         "network_api_export": "NO_VERIFIED_ENDPOINT_IN_PRIOR_EVIDENCE",
         "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
-      },
-      "records": {
-        "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
-        "serving_projection_count": null,
-        "serving_numeric_value_count": null,
-        "serving_projection_grain": null,
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": false
-      },
-      "geo": {
-        "expected_by_registry": true,
-        "grain": "unverified",
-        "linkability": "unverified",
-        "linked_area_count": null,
-        "related_area_count": null,
-        "decision": null,
-        "current_map_area_count": 0,
-        "numeric_value_area_count": null,
-        "known_omissions": []
-      },
-      "public_visibility": {
-        "classification": "metadata_only",
-        "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
-        "current_public_data_artifact": false,
-        "current_province_projection": false,
-        "restricted_values_excluded": false
-      },
-      "evidence": {
-        "registry": "config/source_registry.json",
-        "source_card": "data/source_audit/25_spu_sukhothai_care/source_card.json",
-        "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [
-          "data/raw/firecrawl_map/spu_sukhothai_care/20260803T_url_audit_map_01/manifest.json",
-          "data/source_audit/25_spu_sukhothai_care/evidence/map_observation.json",
-          "data/source_audit/25_spu_sukhothai_care/evidence/gate_observation.json"
-        ],
-        "local_evidence_paths_withheld": false
-      },
-      "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
-        "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
-      ]
-    },
-    {
-      "ordinal": 26,
-      "source_id": "spu_sukhothai_water",
-      "group": "ฝ่าย SPU",
-      "name_th": "ระบบข้อมูลแผนที่ภัยพิบัติและน้ำสุโขทัย",
-      "url": "https://sukhothai-water-dashboard.vercel.app/water-diagram/full-version",
-      "source_type": "water_disaster_gis",
-      "sensitivity_lane": "public_unknown",
-      "status": {
-        "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
-        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
-        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
-      },
-      "records": {
-        "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
-        "serving_projection_count": null,
-        "serving_numeric_value_count": null,
-        "serving_projection_grain": null,
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": false
-      },
-      "geo": {
-        "expected_by_registry": true,
-        "grain": "unverified",
-        "linkability": "unverified",
-        "linked_area_count": null,
-        "related_area_count": null,
-        "decision": null,
-        "current_map_area_count": 0,
-        "numeric_value_area_count": null,
-        "known_omissions": []
-      },
-      "public_visibility": {
-        "classification": "metadata_only",
-        "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
-        "current_public_data_artifact": false,
-        "current_province_projection": false,
-        "restricted_values_excluded": false
-      },
-      "evidence": {
-        "registry": "config/source_registry.json",
-        "source_card": "data/source_audit/26_spu_sukhothai_water/source_card.json",
-        "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [
-          "data/raw/firecrawl_map/spu_sukhothai_water/20260803T_url_audit_map_01/manifest.json",
-          "data/source_audit/26_spu_sukhothai_water/evidence/map_observation.json",
-          "data/source_audit/26_spu_sukhothai_water/evidence/gate_observation.json"
-        ],
-        "local_evidence_paths_withheld": false
-      },
-      "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
-        "ตรวจ historical measurement, timestamp และ data endpoint"
-      ]
-    },
-    {
-      "ordinal": 27,
-      "source_id": "spu_nsn_flood",
-      "group": "ฝ่าย SPU",
-      "name_th": "NSN สู้ Flood",
-      "url": "https://nsn-flood.nsru.ac.th/",
-      "source_type": "disaster_dashboard",
-      "sensitivity_lane": "public_unknown",
-      "status": {
-        "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
-        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
-        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
-      },
-      "records": {
-        "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
-        "serving_projection_count": null,
-        "serving_numeric_value_count": null,
-        "serving_projection_grain": null,
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": false
-      },
-      "geo": {
-        "expected_by_registry": true,
-        "grain": "unverified",
-        "linkability": "unverified",
-        "linked_area_count": null,
-        "related_area_count": null,
-        "decision": null,
-        "current_map_area_count": 0,
-        "numeric_value_area_count": null,
-        "known_omissions": []
-      },
-      "public_visibility": {
-        "classification": "metadata_only",
-        "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
-        "current_public_data_artifact": false,
-        "current_province_projection": false,
-        "restricted_values_excluded": false
-      },
-      "evidence": {
-        "registry": "config/source_registry.json",
-        "source_card": "data/source_audit/27_spu_nsn_flood/source_card.json",
-        "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [
-          "data/raw/firecrawl_map/spu_nsn_flood/20260803T_url_audit_map_01/manifest.json",
-          "data/source_audit/27_spu_nsn_flood/evidence/map_observation.json",
-          "data/source_audit/27_spu_nsn_flood/evidence/gate_observation.json"
-        ],
-        "local_evidence_paths_withheld": false
-      },
-      "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
-        "ตรวจ domain availability และ data freshness"
-      ]
-    },
-    {
-      "ordinal": 28,
-      "source_id": "spu_rawangphai_uru",
-      "group": "ฝ่าย SPU",
-      "name_th": "RawangPhaiURU (ระวังภัยURU) Smart Disaster Platform",
-      "url": "https://rawangphai.uru.ac.th/",
-      "source_type": "disaster_platform",
-      "sensitivity_lane": "public_unknown",
-      "status": {
-        "audit": "NEEDS_REVIEW",
-        "readiness": "metadata_only",
-        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
-        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
-        "fact_acceptance": "not_applicable_metadata_only"
-      },
-      "records": {
-        "source_index_present": false,
-        "observed_count": null,
-        "observed_count_basis": "no_approved_structured_projection",
-        "serving_projection_count": null,
-        "serving_numeric_value_count": null,
-        "serving_projection_grain": null,
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": false,
-        "local_record_count_withheld": false
-      },
-      "geo": {
-        "expected_by_registry": true,
-        "grain": "unverified",
-        "linkability": "unverified",
-        "linked_area_count": null,
-        "related_area_count": null,
-        "decision": null,
-        "current_map_area_count": 0,
-        "numeric_value_area_count": null,
-        "known_omissions": []
-      },
-      "public_visibility": {
-        "classification": "metadata_only",
-        "metadata_in_catalog": true,
-        "production_values_allowed": false,
-        "candidate_not_fact": false,
-        "current_public_data_artifact": false,
-        "current_province_projection": false,
-        "restricted_values_excluded": false
-      },
-      "evidence": {
-        "registry": "config/source_registry.json",
-        "source_card": "data/source_audit/28_spu_rawangphai_uru/source_card.json",
-        "merged_index": null,
-        "approval_basis": "none",
-        "catalogued_endpoint_count": 0,
-        "primary_paths": [
-          "data/raw/firecrawl_map/spu_rawangphai_uru/20260803T_url_audit_map_01/manifest.json",
-          "data/source_audit/28_spu_rawangphai_uru/evidence/map_observation.json",
-          "data/source_audit/28_spu_rawangphai_uru/evidence/gate_observation.json"
-        ],
-        "local_evidence_paths_withheld": false
-      },
-      "notes_th": [
-        "discovery metadata only; ยังไม่มี structured values ที่อนุมัติให้ serving",
-        "ตรวจ alert feed, incident history และ API/JSON endpoint"
-      ]
-    },
-    {
-      "ordinal": 29,
-      "source_id": "clig_projects",
-      "group": "ฝ่าย 4",
-      "name_th": "CLIG Dashboard PMUA 4 - โครงการวิจัย",
-      "url": "https://clig.oas.psu.ac.th/project/search_project",
-      "source_type": "research_project_dashboard",
-      "sensitivity_lane": "public_unknown",
-      "status": {
-        "audit": "NEEDS_REVIEW",
-        "readiness": "needs_review",
-        "network_api_export": "NOT_RECORDED",
-        "data_inventory": "NOT_RECORDED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
         "observed_count": 0,
-        "observed_count_basis": "connector_snapshot_not_yet_pushed_to_public_artifacts",
+        "observed_count_basis": "merged_index_data_row_count",
         "serving_projection_count": null,
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
@@ -1945,11 +1719,14 @@
         "local_record_count_withheld": false
       },
       "geo": {
-        "linkability": "not_yet_profiled",
-        "link_level": null,
-        "linked_area_count": 0,
+        "expected_by_registry": true,
+        "grain": "unverified",
+        "linkability": "unverified",
+        "linked_area_count": null,
+        "related_area_count": null,
+        "decision": null,
         "current_map_area_count": 0,
-        "numeric_value_area_count": 0,
+        "numeric_value_area_count": null,
         "known_omissions": []
       },
       "public_visibility": {
@@ -1963,14 +1740,279 @@
       },
       "evidence": {
         "registry": "config/source_registry.json",
-        "source_card": "data/source_audit/29_clig_projects/source_card.json",
+        "source_card": "data/source_audit/25_spu_sukhothai_care/source_card.json",
         "merged_index": null,
-        "approval_basis": "connector_candidate_scope_needs_review",
-        "catalogued_endpoint_count": 2,
-        "primary_paths": [],
+        "approval_basis": "none",
+        "catalogued_endpoint_count": 4,
+        "primary_paths": [
+          "data/raw/firecrawl_map/spu_sukhothai_care/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/25_spu_sukhothai_care/evidence/map_observation.json",
+          "data/source_audit/25_spu_sukhothai_care/evidence/gate_observation.json"
+        ],
         "local_evidence_paths_withheld": false
       },
-      "notes_th": "เพิ่ม connector สาธารณะสำหรับค้นหาโครงการวิจัย CLIG; raw/project rows เป็น candidate evidence และยังไม่ใช่ KPI facts. Runtime ดึงเฉพาะ list/detail HTML ที่ไม่ต้อง login และไม่ดึง PDF/file downloads."
+      "notes_th": [
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
+        "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี"
+      ]
+    },
+    {
+      "ordinal": 26,
+      "source_id": "spu_sukhothai_water",
+      "group": "ฝ่าย SPU",
+      "name_th": "ระบบข้อมูลแผนที่ภัยพิบัติและน้ำสุโขทัย",
+      "url": "https://sukhothai-water-dashboard.vercel.app/water-diagram/full-version",
+      "source_type": "water_disaster_gis",
+      "sensitivity_lane": "public_unknown",
+      "status": {
+        "audit": "NEEDS_REVIEW",
+        "readiness": "needs_review",
+        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
+        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
+        "fact_acceptance": "candidate_needs_review"
+      },
+      "records": {
+        "source_index_present": false,
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
+        "serving_projection_count": null,
+        "serving_numeric_value_count": null,
+        "serving_projection_grain": null,
+        "additional_public_non_map_count": null,
+        "not_all_raw_rows_are_served": false,
+        "local_record_count_withheld": false
+      },
+      "geo": {
+        "expected_by_registry": true,
+        "grain": "unverified",
+        "linkability": "unverified",
+        "linked_area_count": null,
+        "related_area_count": null,
+        "decision": null,
+        "current_map_area_count": 0,
+        "numeric_value_area_count": null,
+        "known_omissions": []
+      },
+      "public_visibility": {
+        "classification": "public_candidate",
+        "metadata_in_catalog": true,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
+        "current_public_data_artifact": false,
+        "current_province_projection": false,
+        "restricted_values_excluded": false
+      },
+      "evidence": {
+        "registry": "config/source_registry.json",
+        "source_card": "data/source_audit/26_spu_sukhothai_water/source_card.json",
+        "merged_index": null,
+        "approval_basis": "none",
+        "catalogued_endpoint_count": 3,
+        "primary_paths": [
+          "data/raw/firecrawl_map/spu_sukhothai_water/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/26_spu_sukhothai_water/evidence/map_observation.json",
+          "data/source_audit/26_spu_sukhothai_water/evidence/gate_observation.json"
+        ],
+        "local_evidence_paths_withheld": false
+      },
+      "notes_th": [
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
+        "ตรวจ historical measurement, timestamp และ data endpoint"
+      ]
+    },
+    {
+      "ordinal": 27,
+      "source_id": "spu_nsn_flood",
+      "group": "ฝ่าย SPU",
+      "name_th": "NSN สู้ Flood",
+      "url": "https://nsn-flood.nsru.ac.th/",
+      "source_type": "disaster_dashboard",
+      "sensitivity_lane": "public_unknown",
+      "status": {
+        "audit": "NEEDS_REVIEW",
+        "readiness": "needs_review",
+        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
+        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
+        "fact_acceptance": "candidate_needs_review"
+      },
+      "records": {
+        "source_index_present": false,
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
+        "serving_projection_count": null,
+        "serving_numeric_value_count": null,
+        "serving_projection_grain": null,
+        "additional_public_non_map_count": null,
+        "not_all_raw_rows_are_served": false,
+        "local_record_count_withheld": false
+      },
+      "geo": {
+        "expected_by_registry": true,
+        "grain": "unverified",
+        "linkability": "unverified",
+        "linked_area_count": null,
+        "related_area_count": null,
+        "decision": null,
+        "current_map_area_count": 0,
+        "numeric_value_area_count": null,
+        "known_omissions": []
+      },
+      "public_visibility": {
+        "classification": "public_candidate",
+        "metadata_in_catalog": true,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
+        "current_public_data_artifact": false,
+        "current_province_projection": false,
+        "restricted_values_excluded": false
+      },
+      "evidence": {
+        "registry": "config/source_registry.json",
+        "source_card": "data/source_audit/27_spu_nsn_flood/source_card.json",
+        "merged_index": null,
+        "approval_basis": "none",
+        "catalogued_endpoint_count": 1,
+        "primary_paths": [
+          "data/raw/firecrawl_map/spu_nsn_flood/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/27_spu_nsn_flood/evidence/map_observation.json",
+          "data/source_audit/27_spu_nsn_flood/evidence/gate_observation.json"
+        ],
+        "local_evidence_paths_withheld": false
+      },
+      "notes_th": [
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
+        "ตรวจ domain availability และ data freshness"
+      ]
+    },
+    {
+      "ordinal": 28,
+      "source_id": "spu_rawangphai_uru",
+      "group": "ฝ่าย SPU",
+      "name_th": "RawangPhaiURU (ระวังภัยURU) Smart Disaster Platform",
+      "url": "https://rawangphai.uru.ac.th/",
+      "source_type": "disaster_platform",
+      "sensitivity_lane": "public_unknown",
+      "status": {
+        "audit": "NEEDS_REVIEW",
+        "readiness": "needs_review",
+        "network_api_export": "STATIC_CANDIDATE_REVIEWED",
+        "data_inventory": "PREPOPULATED_FROM_PRIOR_EVIDENCE",
+        "fact_acceptance": "candidate_needs_review"
+      },
+      "records": {
+        "source_index_present": false,
+        "observed_count": 0,
+        "observed_count_basis": "merged_index_data_row_count",
+        "serving_projection_count": null,
+        "serving_numeric_value_count": null,
+        "serving_projection_grain": null,
+        "additional_public_non_map_count": null,
+        "not_all_raw_rows_are_served": false,
+        "local_record_count_withheld": false
+      },
+      "geo": {
+        "expected_by_registry": true,
+        "grain": "unverified",
+        "linkability": "unverified",
+        "linked_area_count": null,
+        "related_area_count": null,
+        "decision": null,
+        "current_map_area_count": 0,
+        "numeric_value_area_count": null,
+        "known_omissions": []
+      },
+      "public_visibility": {
+        "classification": "public_candidate",
+        "metadata_in_catalog": true,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
+        "current_public_data_artifact": false,
+        "current_province_projection": false,
+        "restricted_values_excluded": false
+      },
+      "evidence": {
+        "registry": "config/source_registry.json",
+        "source_card": "data/source_audit/28_spu_rawangphai_uru/source_card.json",
+        "merged_index": null,
+        "approval_basis": "none",
+        "catalogued_endpoint_count": 3,
+        "primary_paths": [
+          "data/raw/firecrawl_map/spu_rawangphai_uru/20260803T_url_audit_map_01/manifest.json",
+          "data/source_audit/28_spu_rawangphai_uru/evidence/map_observation.json",
+          "data/source_audit/28_spu_rawangphai_uru/evidence/gate_observation.json"
+        ],
+        "local_evidence_paths_withheld": false
+      },
+      "notes_th": [
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
+        "ตรวจ alert feed, incident history และ API/JSON endpoint"
+      ]
+    },
+    {
+      "ordinal": 29,
+      "source_id": "clig_projects",
+      "group": "ฝ่าย 4",
+      "name_th": "CLIG โครงการวิจัยเสริมพลังท้องถิ่น",
+      "url": "https://clig.oas.psu.ac.th/project/search_project",
+      "source_type": "research_project_catalog",
+      "sensitivity_lane": "public_unknown",
+      "status": {
+        "audit": "NEEDS_REVIEW",
+        "readiness": "needs_review",
+        "network_api_export": "VERIFIED_PUBLIC_PROJECT_SEARCH_AND_DETAIL",
+        "data_inventory": "F4_R2_EVIDENCE_SNAPSHOT",
+        "fact_acceptance": "candidate_needs_review"
+      },
+      "records": {
+        "source_index_present": false,
+        "observed_count": 107,
+        "observed_count_basis": "R2 manifest clig.projects.row_count",
+        "serving_projection_count": 107,
+        "serving_numeric_value_count": null,
+        "serving_projection_grain": "research_project_rows",
+        "additional_public_non_map_count": null,
+        "not_all_raw_rows_are_served": false,
+        "local_record_count_withheld": false
+      },
+      "geo": {
+        "expected_by_registry": false,
+        "grain": "text_matched_province_evidence",
+        "linkability": "province_name_text_candidate",
+        "linked_area_count": 78,
+        "related_area_count": null,
+        "decision": "ใช้ text match สำหรับ province drilldown v1",
+        "current_map_area_count": 78,
+        "numeric_value_area_count": null,
+        "known_omissions": [
+          {
+            "kind": "unmapped_project_text",
+            "count": 29,
+            "labels_th": []
+          }
+        ]
+      },
+      "public_visibility": {
+        "classification": "public_candidate",
+        "metadata_in_catalog": true,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
+        "current_public_data_artifact": false,
+        "current_province_projection": true,
+        "restricted_values_excluded": false
+      },
+      "evidence": {
+        "registry": "config/source_registry.json",
+        "source_card": "dashboard_final/config/connector_contracts/clig_projects.json",
+        "merged_index": null,
+        "approval_basis": "current_catalog_policy_and_source_cards",
+        "catalogued_endpoint_count": 2,
+        "primary_paths": [
+          "raw/f4/clig_projects/20260823T072251Z/manifest.json",
+          "raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz"
+        ],
+        "local_evidence_paths_withheld": false
+      },
+      "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ใช้เป็น evidence drilldown สำหรับ F4 ยังไม่ใช่ KPI รับรอง"
     }
   ]
 }

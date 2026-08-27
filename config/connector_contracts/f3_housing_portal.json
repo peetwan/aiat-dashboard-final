@@ -23,5 +23,5 @@
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "birth_year", "income", "respondent_id", "citizen", "national_id"]
   },
   "sample_fixture": "tests/fixtures/connectors/f3_housing_portal.json",
-  "notes_th": "Demand person-level values และ policy-assessment values ไม่อยู่ใน value-approved connector lane"
+  "notes_th": "Demand person-level values และ policy-assessment values ไม่อยู่ใน value-approved connector lane. Spatial counts (จุดที่อยู่อาศัย/กริด) อยู่เลนหลักฐานแยก ไม่ผสม geometry เข้า 7,259 แถว CKAN"
 }

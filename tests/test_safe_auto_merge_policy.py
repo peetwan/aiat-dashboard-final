@@ -5,7 +5,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = PROJECT_ROOT / ".github/workflows/safe-auto-merge.yml"
-GITHUB_SCRIPT_V9_SHA = "373c709c69115d41ff229c7e5df9f8788daa9553"
+GITHUB_SCRIPT_V9_SHA = "3a2844b7e9c422d3c10d287c895573f7108da1b3"
 
 
 def workflow_text() -> str:

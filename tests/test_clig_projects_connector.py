@@ -174,6 +174,6 @@ def test_clig_run_folder_is_compatible_with_evidence_push(tmp_path: Path) -> Non
         "policy_candidates.jsonl.gz",
     ]
     assert [dataset["row_count"] for dataset in manifest["datasets"]] == [1, 1]
-    prefix = "raw/clig_projects/20260823T010203Z/"
+    prefix = "raw/f4/clig_projects/20260823T010203Z/"
     assert gzip.decompress(client.objects[prefix + "projects.jsonl.gz"]).count(b"\n") == 1
     assert client.put_order[-1] == prefix + "manifest.json"

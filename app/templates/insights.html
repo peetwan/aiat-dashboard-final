@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="ภาพรวมข้อมูลสาธารณะด้านครัวเรือน นวัตกรรม และทุนเมือง ที่ผ่านการ clean และตรวจระดับพื้นที่แล้ว" />
+    <meta name="description" content="ภาพรวมข้อมูลสาธารณะด้านครัวเรือน นวัตกรรม และทุนเมือง" />
     <meta name="theme-color" content="#f2f5ef" />
-    <title>AIAT Data Insights</title>
+    <title>AIAT ภาพรวมข้อมูล</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,25 +18,25 @@
     <header class="site-header">
       <a class="insight-brand" href="/" aria-label="กลับหน้าแผนที่จังหวัด">
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>AIAT</strong><small>Public Data</small></span>
+        <span><strong>AIAT</strong><small>ภาพรวมข้อมูล</small></span>
       </a>
       <nav aria-label="เมนูหลัก">
         <a href="/">แผนที่จังหวัด</a>
-        <a href="/docs" target="_blank" rel="noreferrer">API</a>
+        <a href="/docs" target="_blank" rel="noreferrer">ข้อมูลเปิด</a>
       </nav>
     </header>
 
     <main id="insightMain">
       <section class="insight-hero">
-        <p class="eyebrow"><i></i> ภาพรวมข้อมูลที่ผ่านการจัดรูปแล้ว</p>
+        <p class="eyebrow"><i></i> ภาพรวมข้อมูล</p>
         <h1><span class="hero-line">เห็นประเด็นสำคัญ</span><span class="hero-line">โดยไม่ต้องไล่เปิด<br class="mobile-only" />ทีละชุด</span></h1>
-        <p class="hero-copy">ข้อมูลแต่ละแหล่งคงหน่วยและระดับพื้นที่<br class="mobile-only" />ของต้นทาง ไม่รวมเป็นคะแนนเดียว</p>
-        <div class="audit-strip" id="auditStrip" aria-label="ผล audit การเชื่อมพื้นที่"></div>
+        <p class="hero-copy">ตัวเลขต่างหน่วยจะแสดงแยกกัน</p>
+        <div class="audit-strip" id="auditStrip" aria-label="สถานะแหล่งข้อมูล"></div>
       </section>
 
       <nav class="source-index" aria-label="ข้ามไปยังแหล่งข้อมูล">
         <a href="#executivePortfolio">ภาพรวมผู้บริหาร</a>
-        <a href="#coverage">29 แหล่งข้อมูล</a>
+        <a href="#coverage">28 แหล่งข้อมูล</a>
         <a href="#unmapped">ข้อมูลไม่ผูกพื้นที่</a>
         <a href="#ppp">ครัวเรือน</a>
         <a href="#apptech">นวัตกรรม</a>
@@ -46,15 +46,14 @@
 
       <section class="source-section executive-portfolio" id="executivePortfolio" aria-labelledby="executivePortfolioTitle" hidden>
         <header class="section-head portfolio-head">
-          <div><span>Executive portfolio</span><h2 id="executivePortfolioTitle">ข้อมูลที่ควรใช้ประกอบการตัดสินใจ</h2></div>
-          <p>คัดจาก 10 เว็บไซต์ที่ audit แล้ว แสดงตามหน่วยของต้นทางและไม่รวมตัวเลขต่างความหมายเข้าด้วยกัน</p>
+          <div><span>ภาพรวม</span><h2 id="executivePortfolioTitle">ข้อมูลสำคัญสำหรับการตัดสินใจ</h2></div>
         </header>
 
         <div class="portfolio-kpis" id="executiveKpis"></div>
 
         <div class="portfolio-lead-grid">
           <article class="readiness-card">
-            <header><div><span>Data readiness</span><h3>ความพร้อมของ 10 เว็บไซต์</h3></div><small>ตรวจเมื่อ 17 ส.ค. 2569</small></header>
+            <header><div><span>ความพร้อมของข้อมูล</span><h3>สถานะ 10 เว็บไซต์</h3></div><small>ตรวจเมื่อ 17 ส.ค. 2569</small></header>
             <div class="readiness-visual" id="auditReadiness"></div>
           </article>
           <article class="visual-card portfolio-chart-card">
@@ -64,21 +63,21 @@
         </div>
 
         <div class="portfolio-chart-grid">
-          <article class="visual-card portfolio-chart-card"><header><h3>ประเภทธุรกิจ Area Based</h3><small>หน่วยธุรกิจ</small></header><div id="businessTypeChart"></div></article>
-          <article class="visual-card portfolio-chart-card"><header><h3>องค์ประกอบข้อมูลวัฒนธรรม</h3><small>public records</small></header><div id="culturalChart"></div></article>
-          <article class="visual-card portfolio-chart-card"><header><h3>ข้อมูลแผนที่ที่อยู่อาศัย</h3><small>spatial features</small></header><div id="housingSpatialChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ประเภทธุรกิจในพื้นที่</h3><small>หน่วยธุรกิจ</small></header><div id="businessTypeChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>องค์ประกอบข้อมูลวัฒนธรรม</h3><small>รายการสาธารณะ</small></header><div id="culturalChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ข้อมูลแผนที่ที่อยู่อาศัย</h3><small>จุดและพื้นที่</small></header><div id="housingSpatialChart"></div></article>
           <article class="visual-card portfolio-chart-card"><header><h3>ข้อมูลท่องเที่ยวลำพูน</h3><small>รายการสาธารณะ</small></header><div id="tourismChart"></div></article>
-          <article class="visual-card portfolio-chart-card"><header><h3>ความครบของข้อมูลทุนเมือง</h3><small>702 observations</small></header><div id="cityCompletenessChart"></div></article>
+          <article class="visual-card portfolio-chart-card"><header><h3>ความครบของข้อมูลทุนเมือง</h3><small>702 ค่า</small></header><div id="cityCompletenessChart"></div></article>
         </div>
 
-        <div class="portfolio-health-head"><div><span>Audit health</span><h3>สถานะที่ต้องรู้ก่อนใช้ตัวเลข</h3></div><p>สถานะนี้บอกความครบของหน้าเว็บและ API ไม่ใช่การรับรองนิยาม KPI ทางนโยบาย</p></div>
+        <div class="portfolio-health-head"><div><span>ผลการตรวจ</span><h3>สถานะก่อนใช้ตัวเลข</h3></div></div>
         <div class="source-health-grid" id="sourceHealthGrid"></div>
       </section>
 
       <section class="source-section coverage-section" id="coverage" aria-labelledby="coverageTitle">
         <header class="section-head coverage-head">
-          <div><span>Source audit</span><h2 id="coverageTitle">ทะเบียน 29 แหล่งข้อมูล</h2></div>
-          <p>เห็นทันทีว่าแหล่งใดมีข้อมูลพร้อมใช้ ผูกจังหวัดได้ หรือยังอยู่ระหว่างตรวจ</p>
+          <div><span>แหล่งข้อมูล</span><h2 id="coverageTitle">ทะเบียน 29 แหล่งข้อมูล</h2></div>
+          <p>ดูว่าแหล่งใดพร้อมใช้หรือยังอยู่ระหว่างตรวจ</p>
         </header>
         <div class="coverage-ledger" id="sourceCoverageMeta" aria-live="polite"></div>
         <div class="coverage-state" id="sourceCoverageState" role="status">กำลังโหลดทะเบียนแหล่งข้อมูล</div>
@@ -87,16 +86,14 @@
 
       <section class="source-section learning-summary-section" id="learningSummary" hidden>
         <header class="section-head compact-head">
-          <div><span>Dashboard LE</span><h2>ภาพรวมจากแหล่งที่ 10</h2></div>
-          <p>สรุปเฉพาะค่าที่ public projection ระบุไว้ โดยคงหน่วยของต้นทาง</p>
+          <div><span>ข้อมูลการเรียนรู้</span><h2>ภาพรวมจากแหล่งที่ 10</h2></div>
         </header>
         <div class="learning-summary-grid" id="learningSummaryGrid"></div>
       </section>
 
       <section class="source-section loose-data-section" id="unmapped" hidden>
         <header class="section-head compact-head">
-          <div><span>Outside the map</span><h2>ข้อมูลที่ไม่ควรหายไปจากภาพรวม</h2></div>
-          <p>รายการระดับประเทศและรายการที่ยังไม่มีรหัสจังหวัด แสดงแยกจากแผนที่อย่างชัดเจน</p>
+          <div><span>นอกแผนที่</span><h2>ข้อมูลที่ยังไม่ผูกจังหวัด</h2></div>
         </header>
         <div class="loose-data-grid" id="looseDataGrid"></div>
       </section>
@@ -122,10 +119,10 @@
           </header>
           <div class="source-facts" id="apptechFacts"></div>
           <div class="split-grid">
-            <article class="visual-card"><header><h3>หมวดนวัตกรรม</h3><small>snapshot รายการ</small></header><div id="apptechCategories"></div></article>
-            <article class="visual-card"><header><h3>ผู้ใช้ตามจังหวัด</h3><small>API aggregate</small></header><div id="apptechProvinces"></div></article>
+            <article class="visual-card"><header><h3>หมวดนวัตกรรม</h3><small>รายการที่บันทึกไว้</small></header><div id="apptechCategories"></div></article>
+            <article class="visual-card"><header><h3>ผู้ใช้ตามจังหวัด</h3><small>ยอดรวม</small></header><div id="apptechProvinces"></div></article>
           </div>
-          <p class="source-note">จำนวนผู้ใช้ การปฏิสัมพันธ์ และจำนวนผลงานเป็นคนละ grain</p>
+          <p class="source-note">จำนวนผู้ใช้ การใช้งาน และผลงานเป็นคนละหน่วยนับ</p>
         </section>
 
         <section class="source-section section-city" id="city">
@@ -156,8 +153,8 @@
     </main>
 
     <footer class="site-footer">
-      <span>Public candidate data</span>
-      <a href="/api/public/v1/source-insights">เปิด JSON</a>
+      <span>ข้อมูลสาธารณะเบื้องต้น</span>
+      <a href="/api/public/v1/source-insights">เปิดข้อมูล</a>
     </footer>
 
     <script src="/static/insights.js" defer></script>

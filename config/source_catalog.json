@@ -7,16 +7,17 @@
     "verified_endpoint_observations": [
       "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json",
       "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json",
-      "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json"
+      "data/raw/network/f2_apptech_mtr/20260817T_public_api_completeness_07/api_probe_observation.json",
+      "data/raw/network/f2_target_household/20260818T163000Z_pmua_apptech_catalogue_01/observation.json"
     ]
   },
   "policy": {
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
     "registry_source_count": 29,
-    "approved_public_source_count": 12,
-    "metadata_only_source_count": 12,
-    "restricted_source_count": 5,
+    "approved_public_source_count": 19,
+    "metadata_only_source_count": 8,
+    "restricted_source_count": 2,
     "restricted_sources_are_never_deployed": true,
     "candidate_records_are_not_kpi_facts": true
   },
@@ -1439,16 +1440,31 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/09_f2_target_household/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 1160,
+      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted | หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination เป็นรายการสินค้าตัดชื่อ/เบอร์/อีเมล. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest.",
       "snapshot_origin_files": [],
-      "endpoints": []
+      "endpoints": [
+        {
+          "endpoint_id": "b075547d21b14afa086d8a9f438168fde2b7418020a8c0dccfb60656cfb5e8b4",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/search",
+          "kind": "public_product_search",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "page=<value>"
+          },
+          "notes_th": "หน้ารวมนวัตกรรมสาธารณะ; page=1 ตรงกับ /search ที่ไม่มี query. ไม่ดึง login/EPMS และไม่แตก familydashboard เป็นแถวครัวเรือน."
+        }
+      ]
     },
     {
       "ordinal": 10,
@@ -1535,14 +1551,14 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/12_f2_wallet_all_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 2,
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บ as_of; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายเดือน ไม่ใช่รายบุคคล; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง ไม่ครบทุกเดือนที่ API มี | หน้า lesuper เป็นแดชบอร์ดข้อมูลเปิด; serving ดึงเดือนปัจจุบันด้วย POST {\"date\": \"\"} ได้ 2 aggregate (ครัวเรือน+ธุรกิจ) ไม่ใช่รายการรายบุคคล. ประวัติรายเดือนเต็มอยู่เลนหลักฐาน/R2. as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1552,10 +1568,13 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}",
+            "json_body": {
+              "date": ""
+            }
           },
           "notes_th": "aggregate ครัวเรือนรายเดือน ไม่ต้อง login; GET=405"
         },
@@ -1566,10 +1585,13 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}"
+            "query_or_body": "{\"date\":\"\"} or {\"date\":\"YYYY-MM-DD\"}",
+            "json_body": {
+              "date": ""
+            }
           },
           "notes_th": "aggregate ธุรกิจรายเดือน ไม่ต้อง login; GET=405"
         }
@@ -1585,14 +1607,14 @@
       "sensitivity_lane": "public_unknown",
       "source_card": "data/source_audit/13_f2_wallet_cluster_realtime/source_card.json",
       "audit_status": "NEEDS_REVIEW",
-      "acquisition_mode": "blocked",
+      "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "restricted",
-      "cloud_policy": "restricted_local_only",
-      "value_visibility": "restricted_local_only",
-      "production_values_allowed": false,
-      "expected_record_count": 0,
-      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง",
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 14,
+      "notes_th": "ดึง API ตามที่หน้าเว็บเรียก เก็บช่วงเวลา/นิยามกลุ่ม; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | ตัวเลขรวมรายกลุ่มธุรกิจ ไม่ใช่รายบุคคล; บางกลุ่มมีจำนวนน้อย; ไฟล์ในชุดนี้เป็นเดือนที่มี snapshot ในเครื่อง | หน้าเปรียบเทียบคลัสเตอร์เป็นข้อมูลเปิด; serving ดึงเดือนปัจจุบัน 7 กลุ่ม × 2 กระเป๋า = 14 records. กลุ่มขนาดเล็กเป็นค่าที่หน้าเว็บเผยแพร่แล้ว จึงเก็บเป็น Candidate และไม่เทียบยอดรวมที่ frontend ฮาร์ดโค้ด. as_of ใช้ thisMonth ของต้นทาง และยังเป็น needs_review.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1602,10 +1624,11 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "",
+            "json_body": {}
           },
           "notes_th": "aggregate ครัวเรือนแยกกลุ่มธุรกิจ ไม่ต้อง login"
         },
@@ -1616,10 +1639,11 @@
           "kind": "public_aggregate_api",
           "access": "public_200",
           "team_action": "call_without_login",
-          "restricted": true,
-          "runtime_enabled": false,
+          "restricted": false,
+          "runtime_enabled": true,
           "request_template": {
-            "query_or_body": ""
+            "query_or_body": "",
+            "json_body": {}
           },
           "notes_th": "aggregate ธุรกิจแยกกลุ่ม ไม่ต้อง login"
         }
@@ -2703,69 +2727,69 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี",
+      "notes_th": "ดึงตามที่หน้าเว็บสาธารณะเปิดไว้; ตัดชื่อ เบอร์โทร อีเมลถ้ามี | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "86c60efb74bcda7474755a59fcf8465c126a8969f3d87f2baef8afed2f15f290",
+          "endpoint_id": "2073ee3fa521c045d93a0879eabefe7f337d42d69c86c35d6e50fb2a31d019c4",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/announcements",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "page=<value>&limit=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "0794fcfe63c2529e7687f110248294b0e5073634b75e0247d24cb0e871696e33",
+          "endpoint_id": "3a7727b8fbaf27a2f9d57a887a917d170b48e4e9f1e78dfe4c1d1f12851c7627",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "page=<value>&limit=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "bbe4d66ebf2319adf40ff68976ba4369ccd70c478c43092a0821fa9dff2f30eb",
+          "endpoint_id": "01fbb801e7afde1abd8b0c4f9aa0f5a9c3116cadafb044fd94f51f88e661378f",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/map",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": "swLat=<value>&swLng=<value>&neLat=<value>&neLng=<value>"
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "2a820f99395d3db17d800e2a795439c16115e5f55e6556653f4cb385c5550268",
+          "endpoint_id": "982baaed39d39c27cd58cc7f53d54db93892f637e0598390a71d6b1b8c268527",
           "method": "GET",
           "url": "https://uat.sukhothaicare.in.th:3004/api/incidents/stats",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2781,55 +2805,55 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ historical measurement, timestamp และ data endpoint",
+      "notes_th": "ตรวจ historical measurement, timestamp และ data endpoint | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "94378c2628c8a9848a6b5f50bc807d2ed54c80ba537e8e19df91e497f31f5484",
+          "endpoint_id": "6df279ef6078efff7e0441509e21271b80218bb9252f278eeecda54e4716f2be",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "17baecab05cd5de6c7caa05ff3bfb376feac60cba53d8d9971d6df662b72a202",
+          "endpoint_id": "9a3584b2bb8907d3798c55e224be833a7f661a7a9e506bfff15b945d16589a30",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "cf5d7b7a7b933892e8871c8a834cbcdbb80dbeca4e146b02246446406b2130b5",
+          "endpoint_id": "6118dfedae46313df6ce03ae64c335289c24f96eb3c8b99b82b35244fdc18ef9",
           "method": "GET",
           "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/analyst/dam",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2845,27 +2869,27 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ domain availability และ data freshness",
+      "notes_th": "ตรวจ domain availability และ data freshness | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "2a48d348870b5f7068273d75e5eccf5f8c292ec012d2bcde5295c8ec7e84442a",
+          "endpoint_id": "b9d720ee68c1b82638ca7718a117db1f51003e219c15218e9a89648383bdcbb0",
           "method": "GET",
           "url": "https://nsn-flood.nsru.ac.th/water-level",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU NSN flood water level page"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2881,55 +2905,55 @@
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
-      "readiness_status": "metadata_only",
-      "cloud_policy": "metadata_only",
-      "value_visibility": "metadata_only",
-      "production_values_allowed": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
       "expected_record_count": 0,
-      "notes_th": "ตรวจ alert feed, incident history และ API/JSON endpoint",
+      "notes_th": "ตรวจ alert feed, incident history และ API/JSON endpoint | Operational disaster records remain Candidate; public serving reads only the reviewed disaster_tracking artifact and never reads dashboard_records directly.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "a0e8f2bf57f3485238600690f00f9decfbed989d1e773ab01a3e78bc9415e6f8",
+          "endpoint_id": "463f10b49dcfc6107ed3ab6a8cbe663cac71f2ebafe2f14ea4063a1c174c9c3e",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/water-level",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "d22fac2589e619e91c79b52161feb3cc946ad254701c77127758883d917bbaaa",
+          "endpoint_id": "d79642f0ab727db006445989b283e40ba43dce385e070196733059213b2907ea",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/rain-analysis?active=true",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         },
         {
-          "endpoint_id": "51e3d6684b6adb257572a80fe9ca099f3ad05dfa74b8ff678a2d247827822584",
+          "endpoint_id": "6f961eebe4c5870128b2ce105d1dc51ad7a42725cc47149ce8b852f12e6a386e",
           "method": "GET",
           "url": "https://rawangphai.uru.ac.th/api/shelters",
-          "kind": "public_api",
-          "access": "public_200",
+          "kind": "public_disaster_monitoring_candidate",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
             "query_or_body": ""
           },
-          "notes_th": "SPU connector endpoint"
+          "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
         }
       ]
     },
@@ -2937,11 +2961,11 @@
       "ordinal": 29,
       "source_id": "clig_projects",
       "group": "ฝ่าย 4",
-      "name_th": "CLIG Dashboard PMUA 4 - โครงการวิจัย",
+      "name_th": "CLIG โครงการวิจัยเสริมพลังท้องถิ่น",
       "url": "https://clig.oas.psu.ac.th/project/search_project",
-      "source_type": "research_project_dashboard",
+      "source_type": "research_project_catalog",
       "sensitivity_lane": "public_unknown",
-      "source_card": "data/source_audit/29_clig_projects/source_card.json",
+      "source_card": "config/connector_contracts/clig_projects.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,
@@ -2949,41 +2973,37 @@
       "cloud_policy": "team_approved_public",
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
-      "expected_record_count": 0,
-      "notes_th": "เพิ่ม connector สาธารณะสำหรับค้นหาโครงการวิจัย CLIG; raw/project rows เป็น candidate evidence และยังไม่ใช่ KPI facts. Runtime ดึงเฉพาะ list/detail HTML ที่ไม่ต้อง login และไม่ดึง PDF/file downloads.",
+      "expected_record_count": 107,
+      "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ไม่ดึงไฟล์ PDF และไม่เก็บชื่อบุคคลใน payload; ใช้เป็น evidence drilldown สำหรับ F4 ยังไม่ใช่ KPI รับรอง",
       "snapshot_origin_files": [],
       "endpoints": [
         {
           "endpoint_id": "f460bd75f1e8ccc89e0bb0642fc715b7778023b205c25154fc23d7d8e3fbe3d7",
           "method": "POST",
           "url": "https://clig.oas.psu.ac.th/api/project/search_project",
-          "kind": "public_html_fragment_api",
-          "access": "public_200",
+          "kind": "research_project_search",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "form_body": {
-              "project_name": "<value>",
-              "project_year": "<value>",
-              "page": "<value>"
-            }
+            "query_or_body": "project_name=<value>&project_year=<value>&page=<value>"
           },
-          "notes_th": "CLIG project search returns public HTML table fragments."
+          "notes_th": "รายการโครงการวิจัย CLIG จาก endpoint สาธารณะ; ห้ามเรียก login/admin/write endpoints"
         },
         {
-          "endpoint_id": "b58350f39044cc7929b694074b07ddbcbfe99034f087a70176593aeae8172c55",
+          "endpoint_id": "59bb7ca9cd4716b1ff653f2cab86eb975edd8e58ec0bb2c937f7262a07e1d4b9",
           "method": "GET",
-          "url": "https://clig.oas.psu.ac.th/iframe/project/project_info",
-          "kind": "public_html_detail",
-          "access": "public_200",
+          "url": "https://clig.oas.psu.ac.th/iframe/project/project_info?id={project_id}",
+          "kind": "research_project_detail",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query": "id=<value>"
+            "query_or_body": "project_id=<value>"
           },
-          "notes_th": "CLIG public project detail iframe; individual project id query only."
+          "notes_th": "รายละเอียดโครงการวิจัยสาธารณะ; ไม่ดาวน์โหลดเอกสารแนบ"
         }
       ]
     }

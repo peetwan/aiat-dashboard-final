@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, build_candidate_disaster_tracking_artifact
 from app.database import SessionLocal
-from app.models import DashboardRecord
+from app.models import DashboardRecord, PublicArtifact
 from app.public_artifacts import artifact_inputs
 
 
@@ -110,8 +111,8 @@ def test_dashboard_and_endpoint_inventory():
     with TestClient(app) as client:
         page = client.get("/")
         assert page.status_code == 200
-        assert "Provincial Evidence Map" in page.text
-        assert "เลือกจังหวัดเพื่อเปิดข้อมูล" in page.text
+        assert "AIAT แผนที่ข้อมูลจังหวัด" in page.text
+        assert "เลือกภาคหรือจังหวัด" in page.text
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
         assert "เสริมพลังท้องถิ่น" in page.text
@@ -137,7 +138,7 @@ def test_dashboard_and_endpoint_inventory():
 
         insights_page = client.get("/insights")
         assert insights_page.status_code == 200
-        assert "AIAT Data Insights" in insights_page.text
+        assert "AIAT ภาพรวมข้อมูล" in insights_page.text
         assert "โดยไม่ต้องไล่เปิด" in insights_page.text
         assert "ทีละชุด" in insights_page.text
         assert "select" not in insights_page.text.lower()
@@ -145,8 +146,8 @@ def test_dashboard_and_endpoint_inventory():
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")
-        assert wallet["cloud_policy"] == "restricted_local_only"
-        assert wallet["production_values_allowed"] is False
+        assert wallet["cloud_policy"] == "team_approved_public"
+        assert wallet["production_values_allowed"] is True
 
         endpoints = client.get("/api/sources/f1_sradss_ppaos/endpoints").json()
         assert len(endpoints) == len(catalog_by_id["f1_sradss_ppaos"]["endpoints"])
@@ -163,7 +164,7 @@ def test_dashboard_and_endpoint_inventory():
         wallet_connection = next(
             row for row in connectivity if row["source_id"] == "f2_wallet_cluster_realtime"
         )
-        assert wallet_connection["deployable"] is False
+        assert wallet_connection["deployable"] is True
 
 
 def test_f4_public_api_uses_r2_backed_loaders(monkeypatch):
@@ -301,6 +302,8 @@ def test_payload_api_is_locked_by_default():
 
 
 def _seed_disaster_record(source_id: str, dataset_key: str, payload: dict, index: int) -> None:
+    """Seed a candidate and explicitly publish the resulting reviewed test projection."""
+
     now = datetime.now(timezone.utc)
     with SessionLocal() as session:
         session.add(
@@ -315,7 +318,49 @@ def _seed_disaster_record(source_id: str, dataset_key: str, payload: dict, index
                 payload=payload,
             )
         )
+        session.flush()
+        reviewed_payload = build_candidate_disaster_tracking_artifact(session)
+        encoded = json.dumps(
+            reviewed_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        artifact = session.get(PublicArtifact, "disaster-tracking")
+        if artifact is None:
+            artifact = PublicArtifact(artifact_key="disaster-tracking")
+        artifact.artifact_group = "source_dataset"
+        artifact.province_code = None
+        artifact.content_hash = hashlib.sha256(encoded).hexdigest()
+        artifact.source_path = "data/public/disaster_tracking.json"
+        artifact.item_count = len(reviewed_payload["provinces"])
+        artifact.payload = reviewed_payload
+        session.add(artifact)
         session.commit()
+
+
+def test_disaster_candidate_rows_are_not_public_without_publication_review():
+    with TestClient(app) as client:
+        now = datetime.now(timezone.utc)
+        with SessionLocal() as session:
+            session.add(
+                DashboardRecord(
+                    source_id="spu_sukhothai_water",
+                    dataset_key="water_levels.row",
+                    source_record_id="unreviewed-candidate",
+                    record_hash="f" * 64,
+                    quality_status="needs_review",
+                    fetched_at=now,
+                    payload={
+                        "province_th": "สุโขทัย",
+                        "station_name_th": "candidate ที่ยังไม่ review",
+                        "waterlevel_msl": 42.1,
+                    },
+                )
+            )
+            session.commit()
+
+        tracking = client.get("/api/public/v1/provinces/64/disaster-tracking").json()
+        assert tracking["source_count"] == 0
+        assert tracking["record_count"] == 0
+        assert "candidate ที่ยังไม่ review" not in json.dumps(tracking, ensure_ascii=False)
 
 
 def test_disaster_tracking_uses_correct_province_mapping_and_safe_preview():
@@ -960,6 +1005,9 @@ def test_public_cors_and_restricted_sources_excluded():
         source_ids = {row["source_id"] for row in response.json()}
         assert "f2_wallet_all_realtime" not in source_ids
         assert "f2_wallet_cluster_realtime" not in source_ids
+        assert "f2_target_household" not in source_ids
+        assert "f3_healthcare_nonthaburi" not in source_ids
+        assert "f3_nonthaburi_city_learning" not in source_ids
 
 
 def test_public_operations_contract_reports_live_audit_without_claiming_automation():
@@ -1013,7 +1061,7 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
                         payload={"value": "must-not-serve"},
                     ),
                     DashboardRecord(
-                        source_id="f2_wallet_all_realtime",
+                        source_id="f3_healthcare_nonthaburi",
                         dataset_key="restricted",
                         source_record_id="restricted-1",
                         record_hash="c" * 64,
@@ -1028,7 +1076,7 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
         assert [row["source_id"] for row in metadata_only.json()] == ["f1_pppconnext"]
         assert "payload" not in metadata_only.json()[0]
         assert client.get(
-            "/api/records?source_id=f2_wallet_all_realtime"
+            "/api/records?source_id=f3_healthcare_nonthaburi"
         ).json() == []
 
         monkeypatch.setattr(settings, "public_data_values_enabled", True)
@@ -1094,7 +1142,14 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
         assert baseline_payload["public_value_sources"] == approved_count
         assert baseline_payload["metadata_only_sources"] == metadata_count
         assert baseline_payload["restricted_local_only_sources"] == restricted_count
-        assert baseline_payload["published_catalog_source_count"] == approved_count
+        dashboard_contract = read_json(
+            PROJECT_ROOT / "config" / "publication_contracts" / "dashboard_core.json"
+        )
+        published_dashboard_ids = set(dashboard_contract["source_ids"])
+        assert baseline_payload["published_catalog_source_count"] == len(
+            published_dashboard_ids
+        )
+        assert baseline_payload["published_catalog_source_count"] <= approved_count
         assert baseline_payload["published_catalog_ids_match_approved"] is True
         assert baseline_payload["restricted_catalog_sources_published"] == 0
         assert baseline_payload["restricted_values_published"] == 0
@@ -1103,7 +1158,7 @@ def test_health_and_database_coverage_fail_closed_on_catalog_drift():
             catalog = session.get(PublicArtifact, "catalog")
             payload = dict(catalog.payload)
             sources = [dict(source) for source in payload["sources"]]
-            sources[0]["source_id"] = "f2_wallet_all_realtime"
+            sources[0]["source_id"] = "f3_healthcare_nonthaburi"
             catalog.payload = {**payload, "sources": sources}
             session.commit()
 
@@ -1128,7 +1183,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 24
+    assert len(public_operations) == 33
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"
