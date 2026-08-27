@@ -53,8 +53,79 @@
         <button type="button" data-map-mode="sra"><i></i>ความเปราะบาง</button>
         <button type="button" data-map-mode="innovation"><i></i>นวัตกรรม</button>
         <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
+        <button type="button" data-map-mode="f4"><i></i>เสริมพลังท้องถิ่น</button>
         <button type="button" data-map-mode="disaster"><i></i>ติดตามภัย</button>
       </div>
+
+      <section class="f4-country-panel" id="f4CountryPanel" hidden aria-label="ภาพรวมเสริมพลังท้องถิ่นระดับประเทศ">
+        <header>
+          <div>
+            <span><i></i> <b id="f4PanelScopeLabel">ข้อมูลประเทศ</b></span>
+            <h2 id="f4PanelTitle">เสริมพลังท้องถิ่น</h2>
+            <p id="f4PanelSubtitle">Thailand · Overview KPI</p>
+          </div>
+          <button type="button" id="closeF4Country" aria-label="ซ่อนภาพรวมเสริมพลังท้องถิ่น">×</button>
+        </header>
+        <nav class="f4-country-tabs" aria-label="หมวดเสริมพลังท้องถิ่น">
+          <button type="button" class="active" data-f4-tab="overview" aria-selected="true">ภาพรวม</button>
+          <button type="button" data-f4-tab="innovations" aria-selected="false">เทคโนโลยี/นวัตกรรม</button>
+          <button type="button" data-f4-tab="policy" aria-selected="false">นวัตกรรมเชิงนโยบาย</button>
+          <button type="button" data-f4-tab="evidence" aria-selected="false">หลักฐาน R2</button>
+        </nav>
+        <section class="f4-tab-panel active" data-f4-panel="overview">
+          <div class="f4-section-heading">
+            <strong id="f4OverviewHeading">Overview KPI ระดับประเทศ</strong>
+          </div>
+          <div class="f4-card-grid" id="f4CountryCards"></div>
+        </section>
+        <section class="f4-tab-panel" data-f4-panel="innovations" hidden>
+          <div class="f4-section-heading">
+            <strong>เทคโนโลยี/นวัตกรรม</strong>
+          </div>
+          <section class="f4-list-panel">
+            <header>
+              <h3>รายการเทคโนโลยี/นวัตกรรม</h3>
+              <input id="f4InnovationSearch" type="search" placeholder="ค้นหารายการ" autocomplete="off" />
+            </header>
+            <div class="f4-list-summary" id="f4InnovationListSummary"></div>
+            <div class="f4-record-list" id="f4InnovationRows"></div>
+          </section>
+        </section>
+        <section class="f4-tab-panel" data-f4-panel="policy" hidden>
+          <div class="f4-policy-window">
+            <div class="f4-policy-main">
+              <span>นวัตกรรมเชิงนโยบาย</span>
+              <strong id="f4PolicyTotal">107</strong>
+              <small>โครงการวิจัย</small>
+            </div>
+            <div class="f4-policy-chart">
+              <div class="f4-donut" id="f4PolicyDonut" aria-label="สัดส่วนสถานะโครงการ"></div>
+              <div class="f4-status-legend" id="f4PolicyStatusLegend"></div>
+            </div>
+            <div class="f4-fund-summary">
+              <span>งบประมาณรวมในชุดโครงการ</span>
+              <strong id="f4PolicyBudget">—</strong>
+            </div>
+          </div>
+          <section class="f4-list-panel">
+            <header>
+              <h3>รายการนวัตกรรมเชิงนโยบาย</h3>
+              <input id="f4PolicySearch" type="search" placeholder="ค้นหารายการ" autocomplete="off" />
+            </header>
+            <div class="f4-list-summary" id="f4PolicyListSummary"></div>
+            <div class="f4-record-list" id="f4PolicyRows"></div>
+          </section>
+        </section>
+        <section class="f4-tab-panel" data-f4-panel="evidence" hidden>
+          <div class="f4-section-heading">
+            <strong>หลักฐาน R2</strong>
+            <small>แหล่งข้อมูลและข้อควรอ่านตัวเลข</small>
+          </div>
+          <div class="f4-notes" id="f4CountryNotes"></div>
+          <div class="f4-source-grid" id="f4SourceGrid"></div>
+        </section>
+      </section>
+      <button type="button" class="f4-board-toggle" id="showF4Country" hidden>เปิด KPI board</button>
 
       <div class="map-corner">
         <div class="map-actions" aria-label="เครื่องมือแผนที่">
@@ -265,6 +336,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/app.js" defer></script>
+    <script src="/static/app.js?v=f4-20260827-01" defer></script>
   </body>
 </html>

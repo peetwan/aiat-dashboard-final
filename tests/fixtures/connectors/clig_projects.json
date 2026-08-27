@@ -1,0 +1,36 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "clig_projects",
+  "records": [
+    {
+      "dataset_key": "projects",
+      "payload": {
+        "contract_no": "A13F660055",
+        "project_id": "ZItoamyI",
+        "fiscal_year": "2566",
+        "project_title": "การเพิ่มประสิทธิภาพการจัดเก็บรายได้ท้องถิ่นขององค์กรปกครองส่วนท้องถิ่น",
+        "budget_baht": 2027400.0,
+        "status": "ปิดโครงการ 18",
+        "area_count": 8,
+        "lead_organization": "มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ",
+        "fetched_at": "2026-08-23T00:00:00+00:00"
+      }
+    },
+    {
+      "dataset_key": "policy_candidates",
+      "payload": {
+        "contract_no": "A13F660055",
+        "project_id": "ZItoamyI",
+        "fiscal_year": "2566",
+        "project_title": "การเพิ่มประสิทธิภาพการจัดเก็บรายได้ท้องถิ่นขององค์กรปกครองส่วนท้องถิ่น",
+        "budget_baht": 2027400.0,
+        "status": "ปิดโครงการ 18",
+        "area_count": 8,
+        "lead_organization": "มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ",
+        "candidate_keywords": ["องค์กรปกครองส่วนท้องถิ่น"],
+        "candidate_basis": "keyword_match_local_government_policy_mechanism_measure",
+        "fetched_at": "2026-08-23T00:00:00+00:00"
+      }
+    }
+  ]
+}

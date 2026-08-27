@@ -78,6 +78,14 @@ from app.demand_artifacts import (
     demand_contract_snapshot,
     sync_housing_demand,
 )
+from app.f4_data import (
+    F4DataError,
+    f4_innovations,
+    f4_overview,
+    f4_policy_projects,
+    f4_province_summary,
+    f4_region_summary,
+)
 
 
 settings = get_settings()
@@ -383,6 +391,35 @@ def _province_catalog_index() -> tuple[dict[str, str], dict[str, str]]:
         by_code[code] = name
         by_name[_normalize_disaster_text(name)] = code
     return by_code, by_name
+
+
+def _province_or_404(province_code: str) -> dict:
+    code = province_code.strip().zfill(2)
+    province = next(
+        (row for row in _catalog_with_disaster_counts()["provinces"] if row["province_code"] == code),
+        None,
+    )
+    if province is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรหัสจังหวัด")
+    return province
+
+
+def _region_or_404(region_name: str) -> dict:
+    normalized = region_name.strip()
+    provinces = [
+        row for row in _catalog_with_disaster_counts()["provinces"]
+        if row.get("region") == normalized
+    ]
+    if not provinces:
+        raise HTTPException(status_code=404, detail="ไม่พบภูมิภาค")
+    return {
+        "region_name_th": normalized,
+        "province_codes": [province["province_code"] for province in provinces],
+        "province_names_by_code": {
+            province["province_code"]: province["province_name_th"]
+            for province in provinces
+        },
+    }
 
 
 def _disaster_province_name(province_code: str) -> str | None:
@@ -1007,6 +1044,135 @@ def public_map_provinces():
 )
 def public_map_cultural_points():
     return cultural_points()
+
+
+def _f4_or_503(loader):
+    try:
+        return loader()
+    except F4DataError as error:
+        raise HTTPException(status_code=503, detail="F4 R2 evidence unavailable") from error
+
+
+@app.get(
+    "/api/public/v1/f4/overview",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_overview():
+    province_codes_by_name = {
+        str(province.get("province_name_th") or "").strip(): str(province.get("province_code") or "").zfill(2)
+        for province in public_catalog().get("provinces", [])
+        if province.get("province_name_th") and province.get("province_code")
+    }
+    return _f4_or_503(lambda: f4_overview(province_codes_by_name))
+
+
+@app.get(
+    "/api/public/v1/f4/innovations",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_innovations():
+    by_code, _ = _province_catalog_index()
+    return _f4_or_503(lambda: f4_innovations(province_names_by_code=by_code))
+
+
+@app.get(
+    "/api/public/v1/f4/policy-projects",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_policy_projects():
+    return _f4_or_503(f4_policy_projects)
+
+
+@app.get(
+    "/api/public/v1/f4/regions/{region_name}",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_region(region_name: str):
+    region = _region_or_404(region_name)
+    return _f4_or_503(
+        lambda: f4_region_summary(
+            region["region_name_th"],
+            region["province_codes"],
+            region["province_names_by_code"],
+        )
+    )
+
+
+@app.get(
+    "/api/public/v1/f4/regions/{region_name}/innovations",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_region_innovations(region_name: str):
+    region = _region_or_404(region_name)
+    by_code, _ = _province_catalog_index()
+    return _f4_or_503(
+        lambda: f4_innovations(
+            province_codes=region["province_codes"],
+            province_names_by_code=by_code,
+        )
+    )
+
+
+@app.get(
+    "/api/public/v1/f4/regions/{region_name}/policy-projects",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_region_policy_projects(region_name: str):
+    region = _region_or_404(region_name)
+    return _f4_or_503(
+        lambda: f4_policy_projects(
+            province_names_th=list(region["province_names_by_code"].values()),
+        )
+    )
+
+
+@app.get(
+    "/api/public/v1/f4/provinces/{province_code}",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_province(province_code: str):
+    province = _province_or_404(province_code)
+    by_code, _ = _province_catalog_index()
+    return _f4_or_503(
+        lambda: f4_province_summary(
+            province["province_code"],
+            province["province_name_th"],
+            by_code,
+        )
+    )
+
+
+@app.get(
+    "/api/public/v1/f4/provinces/{province_code}/innovations",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_province_innovations(province_code: str):
+    province = _province_or_404(province_code)
+    by_code, _ = _province_catalog_index()
+    return _f4_or_503(
+        lambda: f4_innovations(
+            province_code=province["province_code"],
+            province_names_by_code=by_code,
+        )
+    )
+
+
+@app.get(
+    "/api/public/v1/f4/provinces/{province_code}/policy-projects",
+    tags=["Public data"],
+    response_model=dict[str, object],
+)
+def public_f4_province_policy_projects(province_code: str):
+    province = _province_or_404(province_code)
+    return _f4_or_503(lambda: f4_policy_projects(province["province_name_th"]))
 
 
 @app.get(

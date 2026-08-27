@@ -1,6 +1,6 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "9e658d9a14dbcd57b7ef6acd119d1ef7b84aeffcd4edb48e4f8a4815f10be0da",
+  "release_digest": "a21f06b3108981dfedafa75210efe480afdfca050e87315cad8211b0a916f3a6",
   "artifact_count": 171,
   "artifacts": [
     {
@@ -1659,9 +1659,9 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 89692,
-      "sha256": "3669be9dcb40a96c20f31be919e8563f584818c1074c6f6b42843d25aaa0f8dd",
-      "contract_sha256": "73d0a3e21b27b4f0ec7acc10a37678439a3044052045f5c9b5005ff28d98251a"
+      "bytes": 92464,
+      "sha256": "8b7f66cb67bdc10aebe9559871dae26386754cd7902c92412098be5028368afb",
+      "contract_sha256": "fca31aed78f157e0ba9ab0161daaa93d9fcd74996884315623aa9d071f9e35a7"
     },
     {
       "path": "data/public/source_insights.json",

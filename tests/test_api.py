@@ -115,6 +115,8 @@ def test_dashboard_and_endpoint_inventory():
         assert "เลือกภาคหรือจังหวัด" in page.text
         assert "Anuphan" in page.text
         assert "ความครอบคลุมข้อมูล" in page.text
+        assert "เสริมพลังท้องถิ่น" in page.text
+        assert page.text.index("เสริมพลังท้องถิ่น") < page.text.index("ติดตามภัย")
         assert 'data-panel-tab="dimensions"' in page.text
         assert "ภาพรวมรายมิติ" in page.text
         assert "โครงการและงบ" in page.text
@@ -163,6 +165,134 @@ def test_dashboard_and_endpoint_inventory():
             row for row in connectivity if row["source_id"] == "f2_wallet_cluster_realtime"
         )
         assert wallet_connection["deployable"] is True
+
+
+def test_f4_public_api_uses_r2_backed_loaders(monkeypatch):
+    from app import main
+
+    monkeypatch.setattr(main, "_preflight_publication_release", lambda: None)
+    monkeypatch.setattr(
+            main,
+            "f4_overview",
+            lambda province_codes_by_name=None: {
+                "cards": [
+                    {"key": "target_provinces", "value": 67},
+                    {"key": "innovations", "value": 1172},
+                    {"key": "policy_projects", "value": 107},
+                    {"key": "local_innovators", "value": 12059},
+                ],
+                "target_province_codes": sorted((province_codes_by_name or {}).values())[:1],
+                "evidence_notes": [],
+            },
+        )
+    monkeypatch.setattr(
+        main,
+        "f4_innovations",
+        lambda province_code=None, province_codes=None, province_names_by_code=None: {
+            "total": 1,
+            "rows": [
+                {
+                    "title": "เทคโนโลยี A",
+                    "product_id": 1,
+                    "provinces": [province_code or (province_codes or ["90"])[0]],
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(
+        main,
+        "f4_policy_projects",
+        lambda province_name_th=None, province_names_th=None: {
+            "total": 1,
+            "rows": [
+                {
+                    "project_title": f"โครงการ {province_name_th or (province_names_th or ['ประเทศ'])[0]}",
+                    "project_id": "p1",
+                }
+            ],
+            "status_summary": [{"label": "อยู่ระหว่างดำเนินการ", "count": 1}],
+            "budget_baht_total": 100,
+            "budget_known_rows": 1,
+        },
+    )
+    monkeypatch.setattr(
+        main,
+        "f4_region_summary",
+        lambda region_name_th, province_codes, province_names_by_code: {
+            "region_name_th": region_name_th,
+            "province_codes": province_codes,
+            "cards": [
+                {"key": "target_provinces", "value": len(province_codes)},
+                {"key": "innovations", "value": 1},
+                {"key": "policy_projects", "value": 1},
+                {"key": "local_innovators", "value": None},
+            ],
+        },
+    )
+    monkeypatch.setattr(
+        main,
+        "f4_province_summary",
+        lambda province_code, province_name_th, province_names_by_code: {
+            "province_code": province_code,
+            "province_name_th": province_name_th,
+            "is_target_province": True,
+            "target_membership_source": "raw/f2/f2_learning_dashboard/learning_dashboard.json",
+            "cards": [
+                {"key": "target_membership", "value": 1},
+                {"key": "innovations", "value": 1},
+                {"key": "policy_projects", "value": 1},
+            ],
+        },
+    )
+
+    with TestClient(app) as client:
+        overview = client.get("/api/public/v1/f4/overview")
+        assert overview.status_code == 200
+        assert [card["key"] for card in overview.json()["cards"]] == [
+            "target_provinces",
+            "innovations",
+            "policy_projects",
+            "local_innovators",
+        ]
+
+        innovations = client.get("/api/public/v1/f4/innovations")
+        assert innovations.status_code == 200
+        assert innovations.json()["rows"][0]["title"] == "เทคโนโลยี A"
+
+        clig = client.get("/api/public/v1/f4/policy-projects")
+        assert clig.status_code == 200
+        assert clig.json()["rows"][0]["project_id"] == "p1"
+
+        province = client.get("/api/public/v1/f4/provinces/90")
+        assert province.status_code == 200
+        assert province.json()["province_name_th"] == "สงขลา"
+        assert province.json()["is_target_province"] is True
+        assert province.json()["cards"][0]["key"] == "target_membership"
+
+        province_innovations = client.get("/api/public/v1/f4/provinces/90/innovations")
+        assert province_innovations.status_code == 200
+        assert province_innovations.json()["rows"][0]["provinces"] == ["90"]
+
+        province_projects = client.get("/api/public/v1/f4/provinces/90/policy-projects")
+        assert province_projects.status_code == 200
+        assert "สงขลา" in province_projects.json()["rows"][0]["project_title"]
+        assert province_projects.json()["status_summary"][0]["count"] == 1
+        assert province_projects.json()["budget_baht_total"] == 100
+
+        region = client.get("/api/public/v1/f4/regions/ภาคใต้")
+        assert region.status_code == 200
+        assert region.json()["region_name_th"] == "ภาคใต้"
+
+        region_innovations = client.get("/api/public/v1/f4/regions/ภาคใต้/innovations")
+        assert region_innovations.status_code == 200
+        assert region_innovations.json()["rows"][0]["title"] == "เทคโนโลยี A"
+
+        region_projects = client.get("/api/public/v1/f4/regions/ภาคใต้/policy-projects")
+        assert region_projects.status_code == 200
+        assert region_projects.json()["rows"][0]["project_id"] == "p1"
+
+        assert client.get("/api/public/v1/f4/regions/ภาคไม่มีจริง").status_code == 404
+        assert client.get("/api/public/v1/f4/provinces/999").status_code == 404
 
 
 def test_payload_api_is_locked_by_default():
@@ -1053,7 +1183,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 24
+    assert len(public_operations) == 33
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

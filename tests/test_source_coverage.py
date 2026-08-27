@@ -33,6 +33,7 @@ HAS_EVIDENCE_WORKSPACE = (
 )
 
 PUBLIC_CANDIDATES = {
+    "clig_projects",
     "f1_sradss_ppaos",
     "f1_pppconnext",
     "f2_culturalmap_university",

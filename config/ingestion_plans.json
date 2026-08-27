@@ -2,6 +2,23 @@
   "plan_version": "0.1.0",
   "notes_th": "Executable allowlist เท่านั้น; endpoint catalog ทั้งหมดอยู่ใน source_catalog.json. แหล่งที่ผู้ใช้ดูแล 10 เว็บ: 9 แหล่งสาธารณะมี connector (รวม f1_pppconnext, f2_target_household และกระเป๋าตังค์สองแหล่ง) ส่วน f2_rmutdb คง snapshot_only เพราะ live JSON 503, /ebook 404 และ PDF ใหญ่เกินที่จะ GET ตอน ingest. Restricted เหลือเฉพาะ Nonthaburi สองแหล่ง.",
   "sources": {
+    "clig_projects": {
+      "driver": "clig_projects",
+      "connector": "app.connectors.clig_projects:CligProjectsConnector",
+      "list_url": "https://clig.oas.psu.ac.th/api/project/search_project",
+      "detail_url_template": "https://clig.oas.psu.ac.th/iframe/project/project_info?id={project_id}",
+      "project_name": "",
+      "project_year": "",
+      "max_pages": 500,
+      "expected_policy_candidate_count": 107,
+      "completeness_gate": "project_id ต้องไม่ซ้ำ; pagination ต้องจบด้วย empty/no-data page หรือหน้าสุดท้ายที่แสดง",
+      "explicit_exclusions": [
+        "/login",
+        "/admin",
+        "write actions",
+        "project PDF/file downloads until separately approved"
+      ]
+    },
     "f1_sradss_ppaos": {
       "driver": "sradss",
       "connector": "app.connectors.sradss:SradssConnector",

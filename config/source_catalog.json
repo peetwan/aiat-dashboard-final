@@ -14,8 +14,8 @@
   "policy": {
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
-    "registry_source_count": 28,
-    "approved_public_source_count": 18,
+    "registry_source_count": 29,
+    "approved_public_source_count": 19,
     "metadata_only_source_count": 8,
     "restricted_source_count": 2,
     "restricted_sources_are_never_deployed": true,
@@ -2954,6 +2954,56 @@
             "query_or_body": ""
           },
           "notes_th": "Operational Candidate approved in PR #21; raw responses must use ResponseRecorder and public serving must use a reviewed artifact."
+        }
+      ]
+    },
+    {
+      "ordinal": 29,
+      "source_id": "clig_projects",
+      "group": "ฝ่าย 4",
+      "name_th": "CLIG โครงการวิจัยเสริมพลังท้องถิ่น",
+      "url": "https://clig.oas.psu.ac.th/project/search_project",
+      "source_type": "research_project_catalog",
+      "sensitivity_lane": "public_unknown",
+      "source_card": "config/connector_contracts/clig_projects.json",
+      "audit_status": "NEEDS_REVIEW",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 107,
+      "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ไม่ดึงไฟล์ PDF และไม่เก็บชื่อบุคคลใน payload; ใช้เป็น evidence drilldown สำหรับ F4 ยังไม่ใช่ KPI รับรอง",
+      "snapshot_origin_files": [],
+      "endpoints": [
+        {
+          "endpoint_id": "f460bd75f1e8ccc89e0bb0642fc715b7778023b205c25154fc23d7d8e3fbe3d7",
+          "method": "POST",
+          "url": "https://clig.oas.psu.ac.th/api/project/search_project",
+          "kind": "research_project_search",
+          "access": "maintainer_reviewed_public_candidate",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "project_name=<value>&project_year=<value>&page=<value>"
+          },
+          "notes_th": "รายการโครงการวิจัย CLIG จาก endpoint สาธารณะ; ห้ามเรียก login/admin/write endpoints"
+        },
+        {
+          "endpoint_id": "59bb7ca9cd4716b1ff653f2cab86eb975edd8e58ec0bb2c937f7262a07e1d4b9",
+          "method": "GET",
+          "url": "https://clig.oas.psu.ac.th/iframe/project/project_info?id={project_id}",
+          "kind": "research_project_detail",
+          "access": "maintainer_reviewed_public_candidate",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "project_id=<value>"
+          },
+          "notes_th": "รายละเอียดโครงการวิจัยสาธารณะ; ไม่ดาวน์โหลดเอกสารแนบ"
         }
       ]
     }

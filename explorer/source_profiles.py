@@ -172,6 +172,13 @@ SOURCE_PROFILES: dict[str, dict[str, object]] = {
         "excluded_th": "ยังไม่เผยแพร่ค่าข้อมูลหรือสร้าง KPI",
         "database_targets": ["sources"],
     },
+    "clig_projects": {
+        "what_we_use_th": "ข้อมูลโครงการวิจัยเสริมพลังท้องถิ่นจาก CLIG 107 โครงการ พร้อมรายละเอียด สถานะ ปีงบประมาณ เลขสัญญา หน่วยงานหลัก และงบประมาณเมื่อพบในหน้ารายละเอียด",
+        "grain_th": "หนึ่งแถว = หนึ่งโครงการวิจัยจาก CLIG; policy_candidates เป็น subset ที่ tag จากคำเกี่ยวกับ อปท./นโยบาย/กลไก/มาตรการ",
+        "dashboard_use_th": "ใช้เป็น evidence drilldown สำหรับ F4 นวัตกรรมเชิงนโยบาย รวมถึงสถานะโครงการ งบประมาณรวม และการจับคู่จังหวัดจากข้อความภาษาไทย",
+        "excluded_th": "ไม่เรียก login/admin/write endpoints, ไม่ดาวน์โหลดไฟล์แนบ และไม่เผยแพร่ข้อมูลติดต่อหรือข้อมูลบุคคล",
+        "database_targets": ["sources", "endpoints", "dashboard_records", "public_artifacts"],
+    },
     "spu_sukhothai_care": {
         "what_we_use_th": "ปัจจุบันเก็บเฉพาะทะเบียน Sukhothai Care; ต้องสำรวจข้อมูลบริการ/ชุมชนที่หน้าเว็บเปิดต่อ",
         "grain_th": "ยังไม่กำหนด เพราะยังไม่มี value dataset ใน Serving Database",

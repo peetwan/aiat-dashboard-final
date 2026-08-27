@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "566ab5d76af2876dd15f27ee3141c3f0fb808fa65c7b559ccbc9d60c565758db"
+      "sha256": "520b500d2f0c896a5ab768d8a9f6ce042f90718568cf1ec2c609835070e1e017"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -17,20 +17,20 @@
     },
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
-      "count": 28,
+      "count": 29,
       "aggregate_sha256": "54d249e4f6e1edc6ab6fd829946945771c6e081d7740b3496698856c7d5ef63c"
     }
   },
   "summary": {
-    "registry_source_count": 28,
-    "catalog_metadata_source_count": 28,
-    "public_candidate_source_count": 18,
+    "registry_source_count": 29,
+    "catalog_metadata_source_count": 29,
+    "public_candidate_source_count": 19,
     "metadata_only_source_count": 8,
     "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
-    "public_candidates_with_observed_count": 18,
+    "public_candidates_with_observed_count": 19,
     "current_public_data_artifact_source_count": 11,
-    "current_province_projection_source_count": 9,
+    "current_province_projection_source_count": 10,
     "restricted_value_leak_count": 0
   },
   "sources": [
@@ -1947,6 +1947,72 @@
         "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
         "ตรวจ alert feed, incident history และ API/JSON endpoint"
       ]
+    },
+    {
+      "ordinal": 29,
+      "source_id": "clig_projects",
+      "group": "ฝ่าย 4",
+      "name_th": "CLIG โครงการวิจัยเสริมพลังท้องถิ่น",
+      "url": "https://clig.oas.psu.ac.th/project/search_project",
+      "source_type": "research_project_catalog",
+      "sensitivity_lane": "public_unknown",
+      "status": {
+        "audit": "NEEDS_REVIEW",
+        "readiness": "needs_review",
+        "network_api_export": "VERIFIED_PUBLIC_PROJECT_SEARCH_AND_DETAIL",
+        "data_inventory": "F4_R2_EVIDENCE_SNAPSHOT",
+        "fact_acceptance": "candidate_needs_review"
+      },
+      "records": {
+        "source_index_present": false,
+        "observed_count": 107,
+        "observed_count_basis": "R2 manifest clig.projects.row_count",
+        "serving_projection_count": 107,
+        "serving_numeric_value_count": null,
+        "serving_projection_grain": "research_project_rows",
+        "additional_public_non_map_count": null,
+        "not_all_raw_rows_are_served": false,
+        "local_record_count_withheld": false
+      },
+      "geo": {
+        "expected_by_registry": false,
+        "grain": "text_matched_province_evidence",
+        "linkability": "province_name_text_candidate",
+        "linked_area_count": 78,
+        "related_area_count": null,
+        "decision": "ใช้ text match สำหรับ province drilldown v1",
+        "current_map_area_count": 78,
+        "numeric_value_area_count": null,
+        "known_omissions": [
+          {
+            "kind": "unmapped_project_text",
+            "count": 29,
+            "labels_th": []
+          }
+        ]
+      },
+      "public_visibility": {
+        "classification": "public_candidate",
+        "metadata_in_catalog": true,
+        "production_values_allowed": true,
+        "candidate_not_fact": true,
+        "current_public_data_artifact": false,
+        "current_province_projection": true,
+        "restricted_values_excluded": false
+      },
+      "evidence": {
+        "registry": "config/source_registry.json",
+        "source_card": "dashboard_final/config/connector_contracts/clig_projects.json",
+        "merged_index": null,
+        "approval_basis": "current_catalog_policy_and_source_cards",
+        "catalogued_endpoint_count": 2,
+        "primary_paths": [
+          "raw/f4/clig_projects/20260823T072251Z/manifest.json",
+          "raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz"
+        ],
+        "local_evidence_paths_withheld": false
+      },
+      "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ใช้เป็น evidence drilldown สำหรับ F4 ยังไม่ใช่ KPI รับรอง"
     }
   ]
 }
