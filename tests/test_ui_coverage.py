@@ -228,6 +228,8 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert 'document.getElementById("showF1Country").addEventListener("click", showF1CountryPanel)' in script
     assert 'document.getElementById("showWorkspacePanel").addEventListener("click", showWorkspacePanel)' in script
     assert 'function usesMobileMapFirst()' in script
+    assert 'function syncResponsiveWorkspace()' in script
+    assert 'mobileLayoutQuery.addEventListener("change", syncResponsiveWorkspace)' in script
     assert 'hideF1CountryPanel(true);' in script
     assert 'state.f4BoardCollapsed = usesMobileMapFirst() && !state.selectedCode' in script
     assert 'hideWorkspacePanel(true);' in script

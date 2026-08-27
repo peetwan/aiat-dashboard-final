@@ -257,6 +257,35 @@ function usesMobileMapFirst() {
   return window.matchMedia("(max-width: 720px)").matches;
 }
 
+function syncResponsiveWorkspace() {
+  if (!state.catalog || state.selectedCode) return;
+  const mobileMapFirst = usesMobileMapFirst();
+
+  if (state.mapMode === "f1") {
+    if (mobileMapFirst) hideF1CountryPanel(true);
+    else showF1CountryPanel();
+  } else if (state.mapMode === "f4") {
+    state.f4BoardCollapsed = mobileMapFirst;
+    document.getElementById("f4CountryPanel").hidden = mobileMapFirst;
+    document.getElementById("showF4Country").hidden = !mobileMapFirst;
+    document.body.classList.toggle("f4-country-open", !mobileMapFirst);
+    if (!mobileMapFirst) {
+      if (state.f4Overview) renderF4CountryPanel();
+      else loadF4Overview();
+    }
+  } else {
+    if (mobileMapFirst) hideWorkspacePanel(true);
+    else showWorkspacePanel();
+  }
+
+  if (!state.mapLoaded) return;
+  window.requestAnimationFrame(() => {
+    state.map.resize();
+    if (state.selectedRegion) fitRegionBounds(state.regions[state.selectedRegion], 0);
+    else lockCountryView(false);
+  });
+}
+
 function colorFromSteps(steps, value) {
   if (value === null || value === undefined) return NO_DATA_COLOR;
   if (steps[0].max !== undefined) {
@@ -3879,6 +3908,12 @@ function bindEvents() {
   document.querySelectorAll("[data-map-mode]").forEach((button) => {
     button.addEventListener("click", () => setMapMode(button.dataset.mapMode));
   });
+  const mobileLayoutQuery = window.matchMedia("(max-width: 720px)");
+  if (typeof mobileLayoutQuery.addEventListener === "function") {
+    mobileLayoutQuery.addEventListener("change", syncResponsiveWorkspace);
+  } else {
+    mobileLayoutQuery.addListener(syncResponsiveWorkspace);
+  }
   document.getElementById("retryProvince").addEventListener("click", () => {
     if (state.selectedCode) selectProvince(state.selectedCode, false);
   });
