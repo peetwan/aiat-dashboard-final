@@ -12,7 +12,7 @@ CI_WORKFLOW_PATH = PROJECT_ROOT / ".github/workflows/ci.yml"
 CONTRIBUTING_PATH = PROJECT_ROOT / "CONTRIBUTING.md"
 PUBLICATION_WORKFLOW_DOC_PATH = PROJECT_ROOT / "docs/publication-workflow.md"
 CHECKOUT_V7_SHA = "3d3c42e5aac5ba805825da76410c181273ba90b1"
-SETUP_PYTHON_V6_SHA = "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+SETUP_PYTHON_V7_SHA = "5fda3b95a4ea91299a34e894583c3862153e4b97"
 GITHUB_SCRIPT_V9_SHA = "3a2844b7e9c422d3c10d287c895573f7108da1b3"
 
 
@@ -28,7 +28,7 @@ def test_main_pipeline_uses_pinned_actions_and_validates_current_release():
     workflow = CI_WORKFLOW_PATH.read_text(encoding="utf-8")
 
     assert f"actions/checkout@{CHECKOUT_V7_SHA} # v7.0.1" in workflow
-    assert f"actions/setup-python@{SETUP_PYTHON_V6_SHA} # v6.2.0" in workflow
+    assert f"actions/setup-python@{SETUP_PYTHON_V7_SHA} # v7.0.0" in workflow
     assert "actions/checkout@v" not in workflow
     assert "actions/setup-python@v" not in workflow
     assert "python -m app.cli publication validate" in workflow
