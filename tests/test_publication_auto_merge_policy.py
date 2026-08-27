@@ -11,7 +11,7 @@ AUTO_MERGE_WORKFLOW_PATH = (
 CI_WORKFLOW_PATH = PROJECT_ROOT / ".github/workflows/ci.yml"
 CONTRIBUTING_PATH = PROJECT_ROOT / "CONTRIBUTING.md"
 PUBLICATION_WORKFLOW_DOC_PATH = PROJECT_ROOT / "docs/publication-workflow.md"
-CHECKOUT_V4_SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
+CHECKOUT_V7_SHA = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 SETUP_PYTHON_V6_SHA = "a309ff8b426b58ec0e2a45f0f869d46889d02405"
 GITHUB_SCRIPT_V9_SHA = "3a2844b7e9c422d3c10d287c895573f7108da1b3"
 
@@ -27,7 +27,7 @@ def auto_merge_workflow_text() -> str:
 def test_main_pipeline_uses_pinned_actions_and_validates_current_release():
     workflow = CI_WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    assert f"actions/checkout@{CHECKOUT_V4_SHA} # v4.2.2" in workflow
+    assert f"actions/checkout@{CHECKOUT_V7_SHA} # v7.0.1" in workflow
     assert f"actions/setup-python@{SETUP_PYTHON_V6_SHA} # v6.2.0" in workflow
     assert "actions/checkout@v" not in workflow
     assert "actions/setup-python@v" not in workflow
@@ -50,7 +50,7 @@ def test_publication_gate_is_always_present_and_read_only_for_pull_requests():
 def test_publication_gate_checks_out_exact_head_and_passes_immutable_revisions():
     workflow = gate_workflow_text()
 
-    assert f"uses: actions/checkout@{CHECKOUT_V4_SHA} # v4.2.2" in workflow
+    assert f"uses: actions/checkout@{CHECKOUT_V7_SHA} # v7.0.1" in workflow
     assert "actions/checkout@v" not in workflow
     assert "ref: ${{ github.event.pull_request.head.sha }}" in workflow
     assert "fetch-depth: 0" in workflow
