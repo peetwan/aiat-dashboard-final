@@ -91,7 +91,7 @@ def test_insights_exposes_all_source_coverage_without_controls() -> None:
 
     assert 'id="coverage"' in template
     assert 'id="sourceCoverageGrid"' in template
-    assert "ทะเบียน 28 แหล่งข้อมูล" in template
+    assert "ข้อมูลทั้ง 28 แหล่ง" in template
     assert 'id="unmapped"' in template
     assert 'id="learningSummary"' in template
     assert 'id="executivePortfolio"' in template
@@ -114,7 +114,7 @@ def test_insights_exposes_all_source_coverage_without_controls() -> None:
     assert "source_geography_not_at_province_grain" in script
     assert "known_omissions" in script
     assert "not.province" in script
-    assert "ทะเบียน public projection ยังไม่ถูกสร้าง" in script
+    assert "ยังไม่มีรายชื่อแหล่งข้อมูลในระบบนี้" in script
     assert "<select" not in template.lower()
     assert "<table" not in template.lower()
     assert "→" not in template
@@ -181,7 +181,7 @@ def test_province_preview_visualizes_only_province_data_and_links_to_full_detail
         "fullProvinceLink",
     ):
         assert f'id="{element_id}"' in overview_template
-    assert "เปิดข้อมูลจังหวัดฉบับเต็ม" in overview_template
+    assert "ดูข้อมูลจังหวัดทั้งหมด" in overview_template
     assert "ตอบได้ตอนนี้" not in overview_script
     assert "ยังตอบไม่ได้" not in overview_script
     assert "available_source_count" not in overview_script
@@ -227,7 +227,7 @@ def test_full_province_page_summarizes_every_public_section_without_raw_field_du
     assert 'role="img"' in script
     assert "data-people-category" in script
     assert "data-load-section" in script
-    assert "restricted" in template
+    assert "ข้อมูลที่จำกัดสิทธิ์จะไม่แสดง" in template
     assert ".record-search" in styles
     assert ".metric-strip" in styles
     assert ".chart-row" in styles

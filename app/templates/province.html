@@ -18,12 +18,12 @@
     <header class="detail-topbar">
       <a class="detail-brand" href="/" aria-label="กลับหน้าแผนที่ AIAT">
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>AIAT</strong><small>Provincial Evidence Map</small></span>
+        <span><strong>AIAT</strong><small>แผนที่ข้อมูลจังหวัด</small></span>
       </a>
       <nav aria-label="เมนูหลัก">
         <a class="back-link" href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a>
         <a href="/insights">ภาพรวมประเทศ</a>
-        <a href="/docs" target="_blank" rel="noreferrer">API และข้อมูลเปิด</a>
+        <a href="/docs" target="_blank" rel="noreferrer">ข้อมูลเปิด</a>
       </nav>
     </header>
 
@@ -35,9 +35,9 @@
             <h1 id="provinceTitle">{{ province.province_name_th }}</h1>
             <span lang="en">{{ province.province_name_en }}</span>
           </div>
-          <p class="heading-lead">อ่านภาพรวมโครงการ ผู้เข้าร่วม พื้นที่ ผลผลิต และทุนวัฒนธรรมจากหลักฐานสาธารณะที่เชื่อมกับจังหวัดนี้</p>
+          <p class="heading-lead">โครงการ คน พื้นที่ ผลงาน และทุนวัฒนธรรมของจังหวัดนี้</p>
           <div class="heading-meta" aria-label="สถานะข้อมูล">
-            <span class="candidate-status"><i aria-hidden="true"></i> Candidate · รอตรวจรับรอง</span>
+            <span class="candidate-status"><i aria-hidden="true"></i> ข้อมูลเบื้องต้น · รอตรวจ</span>
             <span id="detailCoverage">กำลังตรวจความครอบคลุม</span>
             <span id="detailGenerated">กำลังโหลดวันที่ชุดข้อมูล</span>
           </div>
@@ -66,7 +66,7 @@
         <section class="detail-section" id="executive" aria-labelledby="executiveTitle">
           <header class="section-title">
             <div><small>01 · ภาพรวม</small><h2 id="executiveTitle">จังหวัดนี้มีข้อมูลอะไรบ้าง</h2></div>
-            <p>เริ่มจากตัวเลขที่มีความหมาย แล้วค่อยลงรายละเอียด</p>
+            <p>ตัวเลขสำคัญของจังหวัด</p>
           </header>
           <div class="metric-strip" id="executiveKpis"></div>
           <div class="executive-layout">
@@ -75,7 +75,7 @@
               <div id="executiveReadout"></div>
             </article>
             <article class="evidence-journey">
-              <p class="panel-label">หลักฐานตลอดเส้นทางโครงการ</p>
+              <p class="panel-label">ข้อมูลตลอดโครงการ</p>
               <div class="decision-chain" id="detailDecisionChain"></div>
             </article>
           </div>
@@ -85,7 +85,7 @@
         <section class="detail-section" id="research" aria-labelledby="researchTitle">
           <header class="section-title">
             <div><small>02 · โครงการและผลผลิต</small><h2 id="researchTitle">จากโครงการไปสู่นวัตกรรม</h2></div>
-            <p>แยกโครงการ ผู้เข้าร่วม ผลผลิต และเงินทุนตาม grain จริง</p>
+            <p>แยกตามหน่วยนับของต้นทาง</p>
           </header>
           <div id="researchSummary"></div>
           <div class="subsection" id="projectRecords"></div>
@@ -96,7 +96,7 @@
         <section class="detail-section" id="people" aria-labelledby="peopleTitle">
           <header class="section-title">
             <div><small>03 · คนและพื้นที่</small><h2 id="peopleTitle">ข้อมูลที่เกิดขึ้นในพื้นที่</h2></div>
-            <p>เลือกประเภทหรือค้นหา แล้วอ่านเฉพาะสาระสำคัญของแต่ละรายการ</p>
+            <p>เลือกประเภทหรือค้นหารายการ</p>
           </header>
           <div id="housingDemandPanel"></div>
           <div class="people-tools">
@@ -113,7 +113,7 @@
         <section class="detail-section" id="dimensions" aria-labelledby="dimensionsTitle">
           <header class="section-title">
             <div><small>04 · ภาพรายมิติ</small><h2 id="dimensionsTitle">เห็นสัดส่วนและพื้นที่ได้ทันที</h2></div>
-            <p>แต่ละกราฟแยกหน่วย ไม่รวมคะแนนคนละความหมายเข้าด้วยกัน</p>
+            <p>แต่ละกราฟแสดงหน่วยแยกกัน</p>
           </header>
           <div class="dimension-list" id="detailDimensions"></div>
           <div class="missing-dimensions" id="missingDimensions"></div>
@@ -121,8 +121,8 @@
 
         <section class="detail-section" id="sources" aria-labelledby="sourcesTitle">
           <header class="section-title">
-            <div><small>05 · ที่มาข้อมูล</small><h2 id="sourcesTitle">ตรวจสอบความพร้อมและหลักฐาน</h2></div>
-            <p>แสดง grain วันที่ และข้อจำกัดของแหล่งข้อมูล โดยไม่เปิด raw หรือข้อมูล restricted</p>
+            <div><small>05 · ที่มาข้อมูล</small><h2 id="sourcesTitle">ที่มาและความพร้อมของข้อมูล</h2></div>
+            <p>แสดงหน่วยนับ วันที่ และข้อจำกัด ข้อมูลที่จำกัดสิทธิ์จะไม่แสดง</p>
           </header>
           <div class="quality-banner" id="detailQuality"></div>
           <div class="source-list" id="detailSources"></div>
@@ -146,7 +146,7 @@
     </main>
 
     <footer class="detail-footer">
-      <p>AIAT Provincial Evidence Map · ข้อมูลสาธารณะเพื่อการสำรวจ ไม่ใช่ KPI ที่รับรองแล้ว</p>
+      <p>AIAT แผนที่ข้อมูลจังหวัด · ข้อมูลเบื้องต้นเพื่อการสำรวจ</p>
       <a href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a>
     </footer>
     <script src="/static/province.js" defer></script>

@@ -60,7 +60,7 @@ function policyLabel(policy) {
 
 function connectionLabel(status) {
   return {
-    api_connected: "เชื่อม API แล้ว",
+    api_connected: "เชื่อมตรงแล้ว",
     snapshot_connected: "ใช้ไฟล์ที่บันทึกไว้",
     public_projection: "มีข้อมูลที่คัดและตรวจแล้ว",
     catalog_only: "มีเฉพาะรายชื่อแหล่ง",
@@ -86,12 +86,16 @@ function artifactGroupLabel(group) {
 function plainLanguage(value) {
   let text = String(value ?? "");
   const replacements = [
-    [/Public snapshot/gi, "ไฟล์ข้อมูลสาธารณะที่บันทึกไว้"],
-    [/public aggregate APIs?/gi, "API สาธารณะที่ให้ข้อมูลสรุป"],
-    [/public APIs?/gi, "API สาธารณะ"],
-    [/Serving Database/gi, "ฐานข้อมูลของ Dashboard"],
+    [/Public snapshot/gi, "ข้อมูลสาธารณะที่บันทึกไว้"],
+    [/public aggregate APIs?/gi, "ช่องทางข้อมูลรวม"],
+    [/public APIs?/gi, "ช่องทางข้อมูล"],
+    [/public projection/gi, "ข้อมูลที่เผยแพร่"],
+    [/Serving Database/gi, "ฐานข้อมูลที่นำไปแสดง"],
     [/Source Insights/gi, "หน้าสรุปข้อมูลต้นทาง"],
     [/Source Coverage/gi, "หน้ารายชื่อแหล่งข้อมูล"],
+    [/spatial features/gi, "จุดและพื้นที่"],
+    [/datasets?/gi, "ชุดข้อมูล"],
+    [/resources?/gi, "ไฟล์ข้อมูล"],
     [/value dataset/gi, "ชุดข้อมูลที่นำมาแสดงได้"],
     [/local lane/gi, "เครื่องของเรา"],
     [/accepted KPI/gi, "ตัวเลขที่รับรองแล้ว"],
@@ -107,6 +111,10 @@ function plainLanguage(value) {
     [/\bendpoints?\b/gi, "ช่องทางข้อมูล"],
     [/\bfields?\b/gi, "ช่องข้อมูล"],
     [/\bcontract\b/gi, "รูปแบบข้อมูล"],
+    [/\bgrain\b/gi, "หน่วยนับ"],
+    [/\bscope\b/gi, "ขอบเขต"],
+    [/\bas_of\b/gi, "วันที่ข้อมูล"],
+    [/\bAPI\b/gi, "ช่องทางข้อมูล"],
     [/\bvalues?\b/gi, "ค่าข้อมูล"],
     [/\bCloud\b/gi, "เว็บไซต์ออนไลน์"],
     [/\bauth\b/gi, "หน้าล็อกอิน"],
@@ -346,8 +354,8 @@ function artifactBlock(artifact) {
       <strong>${escapeHtml(artifact.file_name)}</strong>
       <span class="artifact-key">รหัส: ${escapeHtml(artifact.artifact_key)}</span>
       <span class="artifact-source-path">${escapeHtml(artifact.source_path)}</span>
-      <span class="artifact-location"><i>DB</i><span>ตาราง public_artifacts <b>→</b> ช่อง payload</span></span>
-      <span class="artifact-block-foot"><span>${escapeHtml(province)}</span><b>ดู JSON →</b></span>
+      <span class="artifact-location"><i>DB</i><span>ข้อมูลพร้อมใช้</span></span>
+      <span class="artifact-block-foot"><span>${escapeHtml(province)}</span><b>ดูข้อมูล →</b></span>
     </button>
   `;
 }
@@ -373,7 +381,7 @@ function renderArtifacts() {
   const visible = filtered.slice(0, state.artifactVisibleLimit);
   $("#artifact-blocks").innerHTML = visible.length
     ? visible.map(artifactBlock).join("")
-    : `<div class="preview-loading">ไม่พบไฟล์ JSON ที่ตรงกับตัวกรอง</div>`;
+    : `<div class="preview-loading">ไม่พบชุดข้อมูลที่ตรงกับตัวกรอง</div>`;
   $("#artifact-summary").textContent = `แสดง ${formatNumber(visible.length)} จาก ${formatNumber(filtered.length)} ไฟล์ · ทั้งหมด ${formatNumber(state.artifacts.length)}`;
   $("#artifact-show-more").hidden = visible.length >= filtered.length;
   document.querySelectorAll("[data-artifact-key]").forEach((button) => {
@@ -385,14 +393,14 @@ function populateArtifactGroups() {
   const select = $("#artifact-group-filter");
   const current = select.value;
   const groups = [...new Set(state.artifacts.map((artifact) => artifact.artifact_group).filter(Boolean))];
-  select.innerHTML = `<option value="">ทุกกลุ่ม JSON</option>${groups.map((group) => `<option value="${escapeHtml(group)}">${escapeHtml(artifactGroupLabel(group))}</option>`).join("")}`;
+  select.innerHTML = `<option value="">ทุกกลุ่มข้อมูล</option>${groups.map((group) => `<option value="${escapeHtml(group)}">${escapeHtml(artifactGroupLabel(group))}</option>`).join("")}`;
   select.value = current;
 }
 
 async function openArtifactPreview(artifactKey) {
   const dialog = $("#artifact-preview-dialog");
   const content = $("#artifact-preview-content");
-  content.innerHTML = `<div class="preview-empty">กำลังอ่านตัวอย่าง JSON…</div>`;
+  content.innerHTML = `<div class="preview-empty">กำลังอ่านตัวอย่างข้อมูล…</div>`;
   dialog.showModal();
   try {
     const query = new URLSearchParams({ artifact_key: artifactKey });
@@ -400,7 +408,7 @@ async function openArtifactPreview(artifactKey) {
     const prettyJson = JSON.stringify(data.payload_preview, null, 2);
     content.innerHTML = `
       <header class="preview-dialog-head artifact-dialog-head">
-        <span class="kicker">ตัวอย่าง JSON จากฐานข้อมูล</span>
+        <span class="kicker">ตัวอย่างข้อมูล</span>
         <h2>${escapeHtml(data.file_name)}</h2>
         <p>${escapeHtml(data.source_path)}</p>
         <div class="preview-dialog-meta">
@@ -412,15 +420,15 @@ async function openArtifactPreview(artifactKey) {
       </header>
       <div class="artifact-db-address">
         <span>เก็บอยู่ที่</span>
-        <strong>PostgreSQL</strong><b>→</b><strong>${escapeHtml(data.database_table)}</strong><b>→</b><strong>${escapeHtml(data.database_column)}</strong>
-        <small>รูปแบบ JSON</small>
+        <strong>ฐานข้อมูล</strong><b>→</b><strong>${escapeHtml(data.database_table)}</strong><b>→</b><strong>${escapeHtml(data.database_column)}</strong>
+        <small>ข้อมูลตัวอย่าง</small>
       </div>
       <div class="json-preview-wrap"><pre><code>${escapeHtml(prettyJson)}</code></pre></div>
       <p class="preview-safety-note">${data.truncated ? "แสดงเพียงบางส่วนเพื่อให้เปิดได้เร็ว · " : ""}ซ่อนช่องข้อมูลที่ใช้ติดต่อหรือระบุตัวบุคคลแล้ว</p>
     `;
   } catch (error) {
     console.error(error);
-    content.innerHTML = `<div class="preview-empty">อ่าน JSON ตัวอย่างไม่สำเร็จ</div>`;
+    content.innerHTML = `<div class="preview-empty">อ่านข้อมูลตัวอย่างไม่สำเร็จ</div>`;
   }
 }
 
@@ -476,7 +484,7 @@ function renderSchema(data) {
 function endpointKindLabel(kind) {
   const value = String(kind || "").toLowerCase();
   if (value.includes("ckan")) return "CKAN · คลังชุดข้อมูล";
-  if (value.includes("api")) return "API · ขอข้อมูลแบบเป็นระเบียบ";
+  if (value.includes("api")) return "เชื่อมข้อมูลตรง";
   if (value.includes("pdf")) return "ไฟล์ PDF";
   if (value.includes("auth") || value.includes("login")) return "ช่องทางที่ต้องล็อกอิน";
   return "หน้าเว็บ";
@@ -515,7 +523,7 @@ function openSourceDialog(sourceId) {
   const runHtml = source.latest_run ? `
     <div class="run-grid">
       <div><span>สถานะ</span><strong>${escapeHtml(runStatusLabel(source.latest_run.status))}</strong></div>
-      <div><span>วิธีดึง</span><strong>${escapeHtml(source.latest_run.strategy === "api" ? "API" : plainLanguage(source.latest_run.strategy))}</strong></div>
+      <div><span>วิธีดึง</span><strong>${escapeHtml(source.latest_run.strategy === "api" ? "เชื่อมตรง" : plainLanguage(source.latest_run.strategy))}</strong></div>
       <div><span>พบ</span><strong>${formatNumber(source.latest_run.records_seen)}</strong></div>
       <div><span>บันทึก</span><strong>${formatNumber(source.latest_run.records_loaded)}</strong></div>
     </div>
@@ -534,7 +542,7 @@ function openSourceDialog(sourceId) {
     <div class="detail-grid">
       <section class="detail-box"><h3>ข้อมูลที่เราดึง</h3><p>${escapeHtml(plainLanguage(source.what_we_use_th))}</p></section>
       <section class="detail-box"><h3>1 แถวหมายถึงอะไร</h3><p>${escapeHtml(plainLanguage(source.grain_th))}</p></section>
-      <section class="detail-box"><h3>Dashboard นำไปใช้อย่างไร</h3><p>${escapeHtml(plainLanguage(source.dashboard_use_th))}</p></section>
+      <section class="detail-box"><h3>นำไปแสดงอย่างไร</h3><p>${escapeHtml(plainLanguage(source.dashboard_use_th))}</p></section>
       <section class="detail-box"><h3>ข้อมูลที่ไม่แสดงและข้อควรระวัง</h3><p>${escapeHtml(plainLanguage(source.excluded_th))}</p></section>
       <section class="detail-box wide"><h3>เก็บในตารางใด</h3><div class="target-list">${source.database_targets.map((target) => `<span class="target-chip">${escapeHtml(target)}</span>`).join("")}</div></section>
       <section class="detail-box wide"><h3>ดึงข้อมูลครั้งล่าสุด</h3>${runHtml}</section>

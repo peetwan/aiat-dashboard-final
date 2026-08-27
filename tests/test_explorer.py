@@ -190,12 +190,12 @@ def test_explorer_home_uses_plain_thai_for_the_database_map() -> None:
         response = client.get("/")
 
     assert response.status_code == 200
-    assert "AIAT Database Explorer" in response.text
+    assert "AIAT ดูฐานข้อมูล" in response.text
     assert "ข้อมูลมาจากไหน และไปอยู่ที่ไหน" in response.text
     assert response.text.index('id="database-map"') < response.text.index('id="sources"')
     assert "ดูข้อมูลอย่างเดียว" in response.text
     assert "กดดูแถวตัวอย่างในฐานข้อมูล" in response.text
-    assert "ไฟล์ JSON ที่ Dashboard ใช้" in response.text
+    assert "ชุดข้อมูลที่นำไปแสดง" in response.text
     assert 'id="artifact-gallery"' in response.text
     assert "ELI5 GLOSSARY" not in response.text
     assert "Candidate" not in response.text

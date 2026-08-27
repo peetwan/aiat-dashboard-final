@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="แผนที่ฐานข้อมูลของ AIAT Dashboard: ข้อมูลมาจากไหน เก็บที่ตารางใด และ Dashboard อ่านอะไร" />
-    <title>AIAT Database Explorer</title>
+    <meta name="description" content="ดูที่มา ขั้นตอน และตัวอย่างข้อมูลของแผนที่ AIAT" />
+    <title>AIAT ดูฐานข้อมูล</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2379f2b2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23042317'%3EDB%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="/static/styles.css?v=plain-language-1" />
   </head>
@@ -13,10 +13,10 @@
     <div class="ambient ambient-two"></div>
 
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="AIAT Database Explorer">
+      <a class="brand" href="#top" aria-label="AIAT ดูฐานข้อมูล">
         <span class="brand-mark">DB</span>
         <span>
-          <strong>AIAT Database Explorer</strong>
+          <strong>AIAT ดูฐานข้อมูล</strong>
           <small>ดูเส้นทางข้อมูลทั้ง 28 แหล่ง</small>
         </span>
       </a>
@@ -24,9 +24,9 @@
         <a href="#database-map">ภาพรวมฐานข้อมูล</a>
         <a href="#sources">28 แหล่ง</a>
         <a href="#data-preview">ตัวอย่างตาราง</a>
-        <a href="#artifact-gallery">ไฟล์ JSON</a>
+        <a href="#artifact-gallery">ข้อมูลพร้อมใช้</a>
         <a href="#pipeline">เส้นทางข้อมูล</a>
-        <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
+          <a class="button-link" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิดหน้าแผนที่ ↗</a>
       </nav>
     </header>
 
@@ -41,14 +41,14 @@
           </div>
           <div class="map-hero-actions">
             <a class="secondary-action" href="#sources">ดูข้อมูลทั้ง 28 แหล่ง</a>
-            <a class="primary-action" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิด Dashboard ↗</a>
+          <a class="primary-action" href="{{ dashboard_url }}" target="_blank" rel="noreferrer">เปิดหน้าแผนที่ ↗</a>
           </div>
         </header>
 
         <div class="map-status-strip" aria-label="สถานะฐานข้อมูลล่าสุด">
-          <span id="backend-badge" class="status-pill neutral">กำลังตรวจ PostgreSQL</span>
+          <span id="backend-badge" class="status-pill neutral">กำลังตรวจฐานข้อมูล</span>
           <span><b id="map-table-total">9</b> ตาราง</span>
-          <span><b id="artifact-inline">—</b> ไฟล์ JSON พร้อมใช้</span>
+          <span><b id="artifact-inline">—</b> ชุดข้อมูลพร้อมใช้</span>
           <span><b id="candidate-inline">—</b> แถวที่ยังรอตรวจ</span>
           <span>อัปเดต <b id="checked-at">—</b></span>
           <span class="read-only-mark">ดูข้อมูลอย่างเดียว</span>
@@ -67,10 +67,10 @@
             </section>
             <div class="map-flow-link" aria-hidden="true"><span>นำเข้า</span></div>
             <section class="map-column role-candidate">
-              <header><span>03</span><div><strong>ข้อมูลที่ยังรอตรวจ</strong><small>ยังไม่ให้ Dashboard ใช้</small></div></header>
+              <header><span>03</span><div><strong>ข้อมูลที่ยังรอตรวจ</strong><small>ยังไม่นำไปแสดง</small></div></header>
               <div id="map-candidate" class="map-table-stack"></div>
             </section>
-            <div class="map-flow-link gate-link" aria-hidden="true"><span>QA</span></div>
+            <div class="map-flow-link gate-link" aria-hidden="true"><span>ตรวจ</span></div>
             <section class="map-gate" aria-label="ขั้นตอนตรวจข้อมูล">
               <span>ตรวจข้อมูล</span>
               <strong>ความหมาย · ความถูกต้อง · ข้อมูลส่วนบุคคล</strong>
@@ -78,15 +78,15 @@
             </section>
             <div class="map-flow-link" aria-hidden="true"><span>บันทึก</span></div>
             <section class="map-column role-public">
-              <header><span>04</span><div><strong>ข้อมูลพร้อมใช้</strong><small>JSON ที่ตรวจแล้ว</small></div></header>
+              <header><span>04</span><div><strong>ข้อมูลพร้อมใช้</strong><small>ตรวจแล้ว</small></div></header>
               <div id="map-public" class="map-table-stack"></div>
             </section>
             <div class="map-flow-link" aria-hidden="true"><span>ส่งให้</span></div>
             <section class="map-consumer">
               <span>05 · เว็บไซต์</span>
-              <strong>ระบบส่งข้อมูล</strong>
+              <strong>ข้อมูลที่แสดง</strong>
               <div class="consumer-arrow">↓</div>
-              <b>Dashboard 77 จังหวัด</b>
+            <b>แผนที่ 77 จังหวัด</b>
             </section>
           </div>
 
@@ -117,33 +117,32 @@
         <article class="stat-card accent-green"><span>มีข้อมูลสาธารณะ</span><strong id="public-total">—</strong><small>ยังต้องอ่านคำเตือนกำกับ</small></article>
         <article class="stat-card accent-yellow"><span>มีเฉพาะรายละเอียดแหล่ง</span><strong id="metadata-total">—</strong><small>ยังไม่มีตัวเลขให้แสดง</small></article>
         <article class="stat-card accent-red"><span>เก็บในเครื่องเท่านั้น</span><strong id="restricted-total">—</strong><small>ไม่ส่งค่าข้อมูลขึ้นเว็บไซต์</small></article>
-        <article class="stat-card accent-purple"><span>ไฟล์ JSON พร้อมใช้</span><strong id="artifact-total">—</strong><small>Dashboard อ่านข้อมูลกลุ่มนี้</small></article>
+        <article class="stat-card accent-purple"><span>ชุดข้อมูลพร้อมใช้</span><strong id="artifact-total">—</strong><small>ข้อมูลที่นำไปแสดง</small></article>
         <article class="stat-card accent-cyan"><span>จุดและพื้นที่บนแผนที่</span><strong id="spatial-total">—</strong><small>ข้อมูลที่อยู่อาศัย</small></article>
       </section>
 
       <section id="pipeline" class="section shell">
         <div class="section-heading">
-          <div><span class="kicker">ขั้นตอนทำข้อมูล</span><h2>จากเว็บไซต์ต้นทางถึง Dashboard</h2></div>
-          <p>ข้อมูลดิบจะถูกเก็บและตรวจสอบก่อนเสมอ ไม่ได้นำขึ้น Dashboard ทันที</p>
+          <div><span class="kicker">ขั้นตอนทำข้อมูล</span><h2>จากเว็บไซต์ต้นทางถึงหน้าแผนที่</h2></div>
+          <p>เก็บ ตรวจ แล้วจึงนำไปแสดง</p>
         </div>
 
         <div class="pipeline-grid">
-          <article class="pipeline-step step-source"><span class="step-number">01</span><div class="step-icon">GET</div><h3>ดึงข้อมูล</h3><p>ใช้ API, ไฟล์ดาวน์โหลด, CKAN, ArcGIS หรืออ่านหน้าเว็บ ตามที่แต่ละแหล่งมี</p></article>
+          <article class="pipeline-step step-source"><span class="step-number">01</span><div class="step-icon">1</div><h3>ดึงข้อมูล</h3><p>ดึงตามช่องทางที่แต่ละเว็บไซต์มี</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-control"><span class="step-number">02</span><div class="step-icon">RAW</div><h3>เก็บต้นฉบับ</h3><p>เก็บไฟล์เดิม เวลา URL และหลักฐานไว้ โดยไม่แก้ทับรอบเก่า</p></article>
+          <article class="pipeline-step step-control"><span class="step-number">02</span><div class="step-icon">2</div><h3>เก็บต้นฉบับ</h3><p>เก็บไฟล์เดิมและวันที่ดึง โดยไม่แก้ทับรอบเก่า</p></article>
           <span class="pipeline-arrow">→</span>
           <article class="pipeline-step step-stage"><span class="step-number">03</span><div class="step-icon">✓</div><h3>จัดและตรวจข้อมูล</h3><p>จัดชื่อช่อง จังหวัด ปี และหน่วยให้ตรงกัน พร้อมตัดชื่อ เบอร์โทร และอีเมล</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-build"><span class="step-number">04</span><div class="step-icon">{ }</div><h3>สร้างไฟล์ JSON</h3><p>สร้างข้อมูลส่วนกลางและข้อมูลสรุปแยกตาม 77 จังหวัด</p></article>
+          <article class="pipeline-step step-build"><span class="step-number">04</span><div class="step-icon">4</div><h3>เตรียมข้อมูล</h3><p>สร้างข้อมูลส่วนกลางและสรุปแยก 77 จังหวัด</p></article>
           <span class="pipeline-arrow">→</span>
-          <article class="pipeline-step step-serve"><span class="step-number">05</span><div class="step-icon">DB</div><h3>ใส่ฐานข้อมูล</h3><p>บันทึก JSON ใน <code>public_artifacts.payload</code> แล้วส่งให้ Dashboard อ่าน</p></article>
+          <article class="pipeline-step step-serve"><span class="step-number">05</span><div class="step-icon">5</div><h3>นำไปแสดง</h3><p>ใช้เฉพาะข้อมูลที่ผ่านการตรวจแล้ว</p></article>
         </div>
 
         <div class="guardrail">
           <strong>จำง่าย:</strong>
-          <span><code>dashboard_records</code> คือข้อมูลที่ยังรอตรวจ</span>
-          <span><code>public_artifacts</code> คือ JSON ที่ตรวจและสร้างเสร็จแล้ว</span>
-          <span>ตัวเลขที่ยังไม่รู้หน่วย ปี หรือขอบเขต จะไม่เรียกว่าเป็นตัวเลขที่รับรองแล้ว</span>
+          <span>ข้อมูลที่ยังไม่ผ่านการตรวจจะไม่นำไปแสดง</span>
+          <span>ตัวเลขที่ไม่รู้หน่วย ปี หรือขอบเขตจะไม่ใช้เป็นข้อมูลทางการ</span>
         </div>
       </section>
 
@@ -175,7 +174,7 @@
             <span class="sr-only">กรองการเชื่อมต่อ</span>
             <select id="connection-filter">
               <option value="">ทุกการเชื่อมต่อ</option>
-              <option value="api_connected">เชื่อม API แล้ว</option>
+              <option value="api_connected">เชื่อมตรงแล้ว</option>
               <option value="snapshot_connected">ใช้ไฟล์ที่บันทึกไว้</option>
               <option value="public_projection">มีข้อมูลที่คัดแล้ว</option>
               <option value="catalog_only">มีเฉพาะรายชื่อแหล่ง</option>
@@ -229,33 +228,33 @@
 
       <section id="artifact-gallery" class="section shell artifact-gallery-section">
         <div class="section-heading artifact-heading">
-          <div><span class="kicker">JSON ที่ใช้งานจริง</span><h2>ไฟล์ JSON ที่ Dashboard ใช้</h2></div>
-          <p>แต่ละช่องคือ JSON หนึ่งไฟล์ กดเพื่อดูตัวอย่างและตำแหน่งที่เก็บในฐานข้อมูล</p>
+          <div><span class="kicker">ข้อมูลที่ใช้งานจริง</span><h2>ชุดข้อมูลที่นำไปแสดง</h2></div>
+          <p>กดเพื่อดูตัวอย่างข้อมูล</p>
         </div>
 
         <div class="artifact-toolbar">
           <label class="artifact-search">
             <span>⌕</span>
-            <input id="artifact-search-input" type="search" placeholder="ค้นหาชื่อไฟล์, artifact key หรือจังหวัด…" autocomplete="off" />
+            <input id="artifact-search-input" type="search" placeholder="ค้นหาชุดข้อมูลหรือจังหวัด…" autocomplete="off" />
           </label>
           <label>
-            <span class="sr-only">กรองกลุ่ม JSON</span>
-            <select id="artifact-group-filter"><option value="">ทุกกลุ่ม JSON</option></select>
+            <span class="sr-only">กรองกลุ่มข้อมูล</span>
+            <select id="artifact-group-filter"><option value="">ทุกกลุ่มข้อมูล</option></select>
           </label>
-          <div id="artifact-summary" class="artifact-summary">กำลังอ่านรายชื่อไฟล์ JSON…</div>
+          <div id="artifact-summary" class="artifact-summary">กำลังอ่านรายชื่อชุดข้อมูล…</div>
           <span class="safe-preview-badge">ตัวอย่างขนาดย่อ</span>
         </div>
 
         <div id="artifact-blocks" class="artifact-block-grid" aria-live="polite">
-          <div class="preview-loading">กำลังอ่านรายชื่อ JSON จาก public_artifacts…</div>
+          <div class="preview-loading">กำลังอ่านข้อมูลที่พร้อมใช้…</div>
         </div>
         <button id="artifact-show-more" class="artifact-show-more" type="button" hidden>แสดงเพิ่ม</button>
       </section>
     </main>
 
     <footer class="footer shell">
-      <div><strong>AIAT Database Explorer</strong><span>ดูเส้นทางข้อมูลและตัวอย่างจากฐานข้อมูล</span></div>
-      <div><span id="footer-refresh">อัปเดตอัตโนมัติทุก {{ refresh_interval_seconds }} วินาที</span><a href="/docs" target="_blank">คู่มือ API ↗</a></div>
+      <div><strong>AIAT ดูฐานข้อมูล</strong><span>ดูที่มาและตัวอย่างข้อมูล</span></div>
+      <div><span id="footer-refresh">อัปเดตอัตโนมัติทุก {{ refresh_interval_seconds }} วินาที</span><a href="/docs" target="_blank">คู่มือข้อมูลเปิด ↗</a></div>
     </footer>
 
     <dialog id="source-dialog" class="source-dialog">
