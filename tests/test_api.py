@@ -114,17 +114,22 @@ def test_dashboard_and_endpoint_inventory():
         assert "AIAT แผนที่ข้อมูลจังหวัด" in page.text
         assert "เลือกภาคหรือจังหวัด" in page.text
         assert "Anuphan" in page.text
-        assert "ความครอบคลุมข้อมูล" in page.text
-        assert "เสริมพลังท้องถิ่น" in page.text
-        assert page.text.index("เสริมพลังท้องถิ่น") < page.text.index("ติดตามภัย")
-        assert 'data-panel-tab="dimensions"' in page.text
-        assert "ภาพรวมรายมิติ" in page.text
-        assert "โครงการและงบ" in page.text
-        assert "คนและพื้นที่" in page.text
-        assert "คุณภาพข้อมูล" in page.text
+        for mode in ("f1", "f2", "f3", "f4", "executive"):
+            assert f'data-map-mode="{mode}"' in page.text
+        for removed_mode in ("projects", "sra", "innovation", "coverage", "disaster"):
+            assert f'data-map-mode="{removed_mode}"' not in page.text
+        assert 'id="provincePanelTabs"' not in page.text
+        assert 'data-panel-tab=' not in page.text
+        assert "ฝ่าย 1 ขจัดความยากจน" in page.text
+        assert "ฝ่าย 2" in page.text
+        assert "ฝ่าย 3" in page.text
+        assert "ฝ่าย 4" in page.text
+        assert "ผู้บริหาร" in page.text
+        assert 'id="workspacePanel"' in page.text
+        assert 'data-panel-view="department"' in page.text
         assert 'id="overviewFlow"' in page.text
         assert 'id="dataQualitySummary"' in page.text
-        assert 'href="/insights"' in page.text
+        assert 'href="/insights"' not in page.text
         assert "สำรวจรายละเอียดตามมิติ" not in page.text
         assert "↗" not in page.text
 
@@ -165,6 +170,71 @@ def test_dashboard_and_endpoint_inventory():
             row for row in connectivity if row["source_id"] == "f2_wallet_cluster_realtime"
         )
         assert wallet_connection["deployable"] is True
+
+
+def test_f1_overview_aggregates_only_reviewed_province_artifacts():
+    dashboard = read_json(PUBLIC_ROOT / "public_dashboard.json")
+    target_codes = {
+        row["province_code"]
+        for row in dashboard["provinces"]
+        if str(row.get("sra_scope_status") or "").startswith("in_scope")
+    }
+    expected = {
+        "om_count": 0,
+        "chain_count": 0,
+        "om_capital_baht": 0,
+        "people": 0,
+        "households": 0,
+        "assistance_households": 0,
+        "assistance_episodes": 0,
+    }
+    for code in target_codes:
+        briefing = read_json(PUBLIC_ROOT / "provincial_briefings" / f"{code}.json")
+        sra = briefing["sections"]["sra"]
+        ppp = briefing["sections"]["pppconnext"]
+        om = sra.get("om_total") or {}
+        expected["om_count"] += om.get("om_count") or 0
+        expected["chain_count"] += om.get("chain_count") or 0
+        expected["om_capital_baht"] += om.get("capital_baht") or 0
+        ppp_values = {item["metric_key"]: item["value"] for item in ppp.get("items", [])}
+        expected["people"] += ppp_values.get("members_total") or 0
+        expected["households"] += ppp_values.get("households_total") or 0
+        assistance = sorted(
+            sra.get("assistance_trend", []),
+            key=lambda item: int(item.get("year") or 0),
+        )
+        if assistance:
+            expected["assistance_households"] += assistance[-1].get("households") or 0
+            expected["assistance_episodes"] += assistance[-1].get("episodes") or 0
+
+    with TestClient(app) as client:
+        response = client.get("/api/public/v1/f1/overview")
+        assert response.status_code == 200
+        payload = response.json()
+
+    assert set(payload["scope"]["province_codes"]) == target_codes
+    assert len(payload["provinces"]) == len(target_codes)
+    assert payload["totals"]["province_count"] == len(target_codes)
+    for key, value in expected.items():
+        assert payload["totals"][key] == value
+    assert sum(region["totals"]["province_count"] for region in payload["regions"]) == len(target_codes)
+    assert {row["province_code"] for row in payload["provinces"]} == target_codes
+    assert payload["quality"]["note_th"]
+    assert payload["national_profile"]["fetched_at"]
+    assert len(payload["national_profile"]["capital_dimensions"]) == 5
+    assert payload["national_profile"]["assistance_all_years"]["households"] > 0
+    assert len(payload["totals"]["assistance_dimensions_latest"]) == 5
+    assert all(
+        {"dimension_key", "households", "episodes", "budget_baht"}.issubset(item)
+        for item in payload["totals"]["assistance_dimensions_latest"]
+    )
+    assert all("project_metrics" in row for row in payload["provinces"])
+    assert all(
+        {"metric_key", "value", "unit"}.issubset(metric)
+        for row in payload["provinces"]
+        for metric in row["project_metrics"]
+    )
+    assert all("items" not in row for row in payload["provinces"])
 
 
 def test_f4_public_api_uses_r2_backed_loaders(monkeypatch):
@@ -1183,7 +1253,7 @@ def test_every_public_v1_route_has_an_explicit_openapi_response_schema():
         for path, item in document["paths"].items()
         if path.startswith("/api/public/v1/")
     }
-    assert len(public_operations) == 33
+    assert len(public_operations) == 35
     for path, operation in public_operations.items():
         response_schema = operation["responses"]["200"]["content"][
             "application/json"

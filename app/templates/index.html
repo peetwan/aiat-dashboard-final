@@ -37,7 +37,6 @@
 
         <div class="header-meta">
           <span class="live-state"><i></i> ข้อมูลพร้อมใช้</span>
-          <a class="insights-link" href="/insights"><span class="desktop-label">ภาพรวม</span><span class="mobile-label">สรุป</span></a>
           <a class="api-docs-link" href="/docs" target="_blank" rel="noreferrer"><span>ข้อมูลเปิด</span></a>
         </div>
       </header>
@@ -47,44 +46,102 @@
         <div><strong id="promptTitle">เลือกภาคหรือจังหวัด</strong><small id="promptHint">กดบนแผนที่เพื่อดูข้อมูล</small></div>
       </div>
 
-      <div class="mode-dock" role="group" aria-label="เลือกมุมมองข้อมูลบนแผนที่">
-        <span class="dock-label">มุมมอง</span>
-        <button type="button" class="active" data-map-mode="projects"><i></i>โครงการ บพท.</button>
-        <button type="button" data-map-mode="sra"><i></i>ความเปราะบาง</button>
-        <button type="button" data-map-mode="innovation"><i></i>นวัตกรรม</button>
-        <button type="button" data-map-mode="coverage"><i></i>ความครอบคลุมข้อมูล</button>
-        <button type="button" data-map-mode="f4"><i></i>เสริมพลังท้องถิ่น</button>
-        <button type="button" data-map-mode="disaster"><i></i>ติดตามภัย</button>
+      <div class="mode-dock department-dock" role="tablist" aria-label="เลือกฝ่ายหรือภาพรวมผู้บริหาร">
+        <span class="dock-label">ส่วนงาน</span>
+        <button type="button" class="active" data-map-mode="f1" role="tab" aria-selected="true">
+          <span><strong>ฝ่าย 1</strong><small>ขจัดความยากจน</small></span>
+        </button>
+        <button type="button" data-map-mode="f2" role="tab" aria-selected="false">
+          <span><strong>ฝ่าย 2</strong><small>พื้นที่เฉพาะฝ่าย</small></span>
+        </button>
+        <button type="button" data-map-mode="f3" role="tab" aria-selected="false">
+          <span><strong>ฝ่าย 3</strong><small>พื้นที่เฉพาะฝ่าย</small></span>
+        </button>
+        <button type="button" data-map-mode="f4" role="tab" aria-selected="false">
+          <span><strong>ฝ่าย 4</strong><small>เสริมพลังท้องถิ่น</small></span>
+        </button>
+        <button type="button" data-map-mode="executive" role="tab" aria-selected="false">
+          <span><strong>ผู้บริหาร</strong><small>ภาพรวมทุกพื้นที่</small></span>
+        </button>
       </div>
 
-      <section class="f4-country-panel" id="f4CountryPanel" hidden aria-label="ภาพรวมเสริมพลังท้องถิ่นระดับประเทศ">
-        <header>
+      <div class="map-corner">
+        <div class="map-actions" aria-label="เครื่องมือแผนที่">
+          <button id="backToCountry" type="button" hidden>ทุกภาค</button>
+          <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
+        </div>
+
+        <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
+          <div><strong id="legendTitle">โครงการ บพท. รวมรายภาค</strong><small id="legendNote">สีเข้ม = โครงการรวมมาก</small></div>
+          <ol id="legendItems">
+            <li><i style="background:#a9d3b8"></i><span>1–49</span></li>
+            <li><i style="background:#63ac79"></i><span>50–119</span></li>
+            <li><i style="background:#2e7d51"></i><span>120–239</span></li>
+            <li><i style="background:#14532e"></i><span>240+</span></li>
+          </ol>
+        </section>
+      </div>
+
+      <aside class="department-panel department-panel--f1 f1-country-panel" id="f1CountryPanel" aria-hidden="true" hidden>
+        <header class="department-panel-head f1-country-head">
           <div>
-            <span><i></i> <b id="f4PanelScopeLabel">ข้อมูลประเทศ</b></span>
-            <h2 id="f4PanelTitle">เสริมพลังท้องถิ่น</h2>
-            <p id="f4PanelSubtitle">Thailand · Overview KPI</p>
+            <span class="f1-kicker">ฝ่าย 1</span>
+            <h2>ขจัดความยากจน</h2>
+            <p id="f1CountryScope">ภาพรวมประเทศไทย</p>
           </div>
-          <button type="button" id="closeF4Country" aria-label="ซ่อนภาพรวมเสริมพลังท้องถิ่น">×</button>
+          <button id="closeF1Country" type="button" aria-label="ปิดภาพรวมฝ่าย 1">×</button>
         </header>
-        <nav class="f4-country-tabs" aria-label="หมวดเสริมพลังท้องถิ่น">
+        <div class="department-flow f1-flow" aria-label="ลำดับการดูข้อมูลฝ่าย 1">
+          <span class="active"><b>1</b> ประเทศ</span>
+          <span id="f1RegionStep"><b>2</b> เลือกภาค</span>
+          <span><b>3</b> เลือกจังหวัด</span>
+        </div>
+        <div class="f1-country-loading" id="f1CountryLoading">กำลังรวมข้อมูลฝ่าย 1</div>
+        <div class="f1-country-content" id="f1CountryContent" hidden>
+          <div class="department-kpi-grid f1-country-kpis" id="f1CountryKpis"></div>
+          <section class="department-detail-card f1-country-detail" id="f1CountryDetail" aria-live="polite" tabindex="-1"></section>
+          <footer>
+            <span id="f1CountryQuality"></span>
+            <strong>กดภาคหรือจังหวัดบนแผนที่เพื่อดูข้อมูลพื้นที่</strong>
+          </footer>
+        </div>
+      </aside>
+      <button type="button" class="department-board-toggle f1-board-toggle" id="showF1Country" hidden>เปิดข้อมูลฝ่าย 1</button>
+
+      <section class="department-panel department-panel--f4 f4-country-panel" id="f4CountryPanel" hidden aria-label="ภาพรวมเสริมพลังท้องถิ่น">
+        <header class="department-panel-head f4-country-head">
+          <div>
+            <span class="department-kicker department-kicker--f4">ฝ่าย 4</span>
+            <h2 id="f4PanelTitle">เสริมพลังท้องถิ่น</h2>
+            <p id="f4PanelSubtitle">ภาพรวมประเทศไทย</p>
+            <span class="department-scope"><i></i> <b id="f4PanelScopeLabel">ข้อมูลประเทศ</b></span>
+          </div>
+          <button type="button" id="closeF4Country" aria-label="ซ่อนข้อมูลฝ่าย 4">×</button>
+        </header>
+        <div class="department-flow f4-flow" aria-label="ลำดับการดูข้อมูลฝ่าย 4">
+          <span class="active" id="f4CountryStep"><b>1</b> ประเทศ</span>
+          <span id="f4RegionStep"><b>2</b> เลือกภาค</span>
+          <span id="f4ProvinceStep"><b>3</b> เลือกจังหวัด</span>
+        </div>
+        <nav class="f4-country-tabs" aria-label="ข้อมูลฝ่าย 4">
           <button type="button" class="active" data-f4-tab="overview" aria-selected="true">ภาพรวม</button>
-          <button type="button" data-f4-tab="innovations" aria-selected="false">เทคโนโลยี/นวัตกรรม</button>
+          <button type="button" data-f4-tab="innovations" aria-selected="false">เทคโนโลยีและนวัตกรรม</button>
           <button type="button" data-f4-tab="policy" aria-selected="false">นวัตกรรมเชิงนโยบาย</button>
-          <button type="button" data-f4-tab="evidence" aria-selected="false">หลักฐาน R2</button>
+          <button type="button" data-f4-tab="evidence" aria-selected="false">แหล่งข้อมูล</button>
         </nav>
         <section class="f4-tab-panel active" data-f4-panel="overview">
           <div class="f4-section-heading">
-            <strong id="f4OverviewHeading">Overview KPI ระดับประเทศ</strong>
+            <strong id="f4OverviewHeading">ภาพรวมระดับประเทศ</strong>
           </div>
-          <div class="f4-card-grid" id="f4CountryCards"></div>
+          <div class="department-kpi-grid f4-card-grid" id="f4CountryCards"></div>
         </section>
         <section class="f4-tab-panel" data-f4-panel="innovations" hidden>
           <div class="f4-section-heading">
-            <strong>เทคโนโลยี/นวัตกรรม</strong>
+            <strong>เทคโนโลยีและนวัตกรรม</strong>
           </div>
           <section class="f4-list-panel">
             <header>
-              <h3>รายการเทคโนโลยี/นวัตกรรม</h3>
+              <h3>รายการเทคโนโลยีและนวัตกรรม</h3>
               <input id="f4InnovationSearch" type="search" placeholder="ค้นหารายการ" autocomplete="off" />
             </header>
             <div class="f4-list-summary" id="f4InnovationListSummary"></div>
@@ -104,7 +161,7 @@
             </div>
             <div class="f4-fund-summary">
               <span>งบประมาณรวมในชุดโครงการ</span>
-              <strong id="f4PolicyBudget">—</strong>
+              <strong id="f4PolicyBudget">ยังไม่มีข้อมูล</strong>
             </div>
           </div>
           <section class="f4-list-panel">
@@ -118,31 +175,26 @@
         </section>
         <section class="f4-tab-panel" data-f4-panel="evidence" hidden>
           <div class="f4-section-heading">
-            <strong>หลักฐาน R2</strong>
-            <small>แหล่งข้อมูลและข้อควรอ่านตัวเลข</small>
+            <strong>แหล่งข้อมูล</strong>
+            <small>ที่มาและข้อควรอ่านตัวเลข</small>
           </div>
           <div class="f4-notes" id="f4CountryNotes"></div>
           <div class="f4-source-grid" id="f4SourceGrid"></div>
         </section>
       </section>
-      <button type="button" class="f4-board-toggle" id="showF4Country" hidden>เปิด KPI board</button>
+      <button type="button" class="department-board-toggle f4-board-toggle" id="showF4Country" hidden>เปิดข้อมูลฝ่าย 4</button>
 
-      <div class="map-corner">
-        <div class="map-actions" aria-label="เครื่องมือแผนที่">
-          <button id="backToCountry" type="button" hidden>ทุกภาค</button>
-          <button id="togglePoints" type="button" aria-pressed="false" title="แสดงจุดวัฒนธรรม"><span></span> จุดวัฒนธรรม</button>
-        </div>
-
-        <section class="evidence-legend" aria-label="คำอธิบายสีบนแผนที่">
-          <div><strong id="legendTitle">โครงการ บพท. รวมรายภาค</strong><small id="legendNote">สีเข้ม = โครงการรวมมาก</small></div>
-          <ol id="legendItems">
-            <li><i style="background:#a9d3b8"></i><span>1–49</span></li>
-            <li><i style="background:#63ac79"></i><span>50–119</span></li>
-            <li><i style="background:#2e7d51"></i><span>120–239</span></li>
-            <li><i style="background:#14532e"></i><span>240+</span></li>
-          </ol>
-        </section>
-      </div>
+      <aside class="department-panel workspace-panel" id="workspacePanel" aria-hidden="true" hidden>
+        <header class="department-panel-head workspace-panel-head">
+          <div>
+            <span id="workspaceKicker">ฝ่าย 2</span>
+            <h2 id="workspaceTitle">พื้นที่ข้อมูลฝ่าย 2</h2>
+            <p id="workspaceScope">ภาพรวมประเทศไทย</p>
+          </div>
+          <button id="closeWorkspacePanel" type="button" aria-label="ปิดแผงข้อมูล">×</button>
+        </header>
+        <div class="workspace-panel-body" id="workspacePanelBody"></div>
+      </aside>
 
       <aside class="province-panel" id="provincePanel" aria-hidden="true" aria-live="polite">
         <div class="panel-loading" id="panelLoading" hidden>
@@ -152,7 +204,7 @@
         <div class="panel-content" id="panelContent" hidden>
           <header class="panel-head">
             <div>
-              <span class="api-chip"><i></i> ข้อมูลจังหวัด</span>
+              <span class="api-chip" id="provincePanelChip"><i></i> ข้อมูลจังหวัด</span>
             </div>
             <button class="panel-close" id="closePanel" type="button" aria-label="ปิดข้อมูลจังหวัด">×</button>
           </header>
@@ -166,14 +218,6 @@
               <span class="hero-chip" id="provinceMeta">จังหวัด</span>
             </div>
           </section>
-
-          <nav class="panel-tabs" aria-label="หมวดข้อมูลจังหวัด">
-            <button class="active" type="button" data-panel-tab="overview" aria-selected="true"><span>ภาพรวม</span></button>
-            <button type="button" data-panel-tab="projects" aria-selected="false"><span>โครงการและงบ</span></button>
-            <button type="button" data-panel-tab="portfolio" aria-selected="false"><span>คนและพื้นที่</span></button>
-            <button type="button" data-panel-tab="dimensions" aria-selected="false"><span>มิติการพัฒนา</span></button>
-            <button type="button" data-panel-tab="sources" aria-selected="false"><span>คุณภาพข้อมูล</span></button>
-          </nav>
 
           <div class="panel-stage" id="panelStage">
             <section class="panel-view active" data-panel-view="overview">
@@ -207,6 +251,25 @@
                   <span><strong>ดูข้อมูลจังหวัดทั้งหมด</strong><small>โครงการ คน และพื้นที่</small></span><b>เปิด</b>
                 </a>
               </div>
+            </section>
+
+            <section class="panel-view" data-panel-view="f1" hidden>
+              <div class="f1-province-loading" id="f1ProvinceLoading">กำลังโหลดข้อมูลฝ่าย 1 ของจังหวัดนี้</div>
+              <div class="f1-province-content" id="f1ProvinceContent" hidden>
+                <div class="f1-province-toolbar" id="f1ProvinceToolbar">
+                  <div class="f1-province-heading">
+                    <strong>ฝ่าย 1 ขจัดความยากจน</strong>
+                    <small id="f1ProvinceScope"></small>
+                  </div>
+                  <nav class="f1-province-tabs" id="f1ProvinceKpis" aria-label="ข้อมูลฝ่าย 1"></nav>
+                </div>
+                <div class="panel-section f1-province-detail" id="f1ProvinceDetail" aria-live="polite" tabindex="-1"></div>
+                <div class="panel-section f1-source-note" id="f1ProvinceSources"></div>
+              </div>
+            </section>
+
+            <section class="panel-view" data-panel-view="department" hidden>
+              <div class="department-province-empty" id="departmentProvinceView"></div>
             </section>
 
             <section class="panel-view" data-panel-view="projects" hidden>
@@ -336,6 +399,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/app.js?v=f4-20260827-01" defer></script>
+    <script src="/static/app.js?v=departments-20260827-02" defer></script>
   </body>
 </html>

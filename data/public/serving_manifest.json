@@ -8,6 +8,7 @@
     {"key": "housing-spatial-summary", "group": "housing_spatial_summary", "path": "housing_spatial_summary.json"},
     {"key": "housing-demand-summary", "group": "housing_demand_summary", "path": "housing_demand_summary.json"},
     {"key": "learning-dashboard", "group": "source_dataset", "path": "learning_dashboard.json", "source_ids": ["f2_learning_dashboard"]},
+    {"key": "f1/details", "group": "source_dataset", "path": "f1_detail_projection.json", "source_ids": ["f1_sradss_ppaos"]},
     {"key": "disaster-tracking", "group": "source_dataset", "path": "disaster_tracking.json", "source_ids": ["spu_sukhothai_care", "spu_sukhothai_water", "spu_nsn_flood", "spu_rawangphai_uru"]},
     {"key": "map/provinces", "group": "map", "path": "thailand_provinces.geojson"},
     {"key": "map/cultural-points", "group": "map", "path": "cultural_points.geojson"},

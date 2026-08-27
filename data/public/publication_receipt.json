@@ -1,7 +1,7 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "a21f06b3108981dfedafa75210efe480afdfca050e87315cad8211b0a916f3a6",
-  "artifact_count": 171,
+  "release_digest": "cca922ac6588db00a8719e00ca7381f949e0a3b8fc272ab7cb395c8892ac4c6f",
+  "artifact_count": 173,
   "artifacts": [
     {
       "path": "data/public/cultural_points.geojson",
@@ -802,6 +802,26 @@
       "bytes": 21985,
       "sha256": "0d30236fffaf6c8a53f6b21063baf5c783afa04dda40607d1b2326a087852289",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
+    },
+    {
+      "path": "data/public/f1_detail_projection.json",
+      "contract_id": "f1_detail_projection",
+      "dataset_key": "f1_detail_projection",
+      "role": "database",
+      "format": "json",
+      "bytes": 1308950,
+      "sha256": "616978b609ddce4d1e20cf301115c22f4f6741a8442f27f371189c7e8d5ac4e7",
+      "contract_sha256": "b268600338315469f878acd5f0d8cba28f834fb045a4494d3b8ef7273b0c921b"
+    },
+    {
+      "path": "data/public/f1_detail_projection_manifest.json",
+      "contract_id": "f1_detail_projection",
+      "dataset_key": "f1_detail_projection",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 749,
+      "sha256": "24d4af11631b0ea69cf322a964565808271b4858f1f5cddf37f959305495f527",
+      "contract_sha256": "b268600338315469f878acd5f0d8cba28f834fb045a4494d3b8ef7273b0c921b"
     },
     {
       "path": "data/public/housing_demand_summary.json",

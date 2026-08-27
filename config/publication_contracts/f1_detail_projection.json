@@ -1,0 +1,40 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "f1_detail_projection",
+  "dataset_key": "f1_detail_projection",
+  "source_scope": "approved_values",
+  "source_ids": ["f1_sradss_ppaos"],
+  "builder": "tools.build_f1_detail_projection:main",
+  "grain_th": "ข้อมูลรวมระดับจังหวัด อำเภอ และตำบลของ 20 จังหวัดฝ่ายแก้จน",
+  "identity": {"province": ["province_code"]},
+  "geography": {"level": "province_district_tambon", "fields": ["province_code", "district_id", "tambon_code"]},
+  "as_of": {"status": "observed", "fields": ["as_of", "generated_at"]},
+  "measures": [
+    {"name": "ข้อมูลฝ่ายแก้จน", "unit": "ระบุในแต่ละหัวข้อ", "denominator": "ตามข้อมูลรวมของพื้นที่ที่เลือก"}
+  ],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [
+    {
+      "path": "data/public/f1_detail_projection.json",
+      "format": "json",
+      "role": "database",
+      "downloadable": true,
+      "max_bytes": 4194304,
+      "records_pointer": "/provinces",
+      "identity_fields": ["$key"],
+      "max_identity_churn_ratio": 0,
+      "expected_count": 20,
+      "as_of_pointer": "/generated_at",
+      "schema_policy": "stable"
+    },
+    {
+      "path": "data/public/f1_detail_projection_manifest.json",
+      "format": "json",
+      "role": "provenance",
+      "downloadable": false,
+      "max_bytes": 1048576,
+      "schema_policy": "stable"
+    }
+  ]
+}

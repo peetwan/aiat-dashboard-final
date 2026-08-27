@@ -24,6 +24,8 @@ from app.api_schemas import (
     DisasterTimeseriesResponse,
     DisasterTrackingResponse,
     ExecutiveSummaryResponse,
+    F1OverviewResponse,
+    F1ProvinceDetailResponse,
     HealthResponse,
     HousingDemandSummaryResponse,
     HousingSpatialFeatureCollectionResponse,
@@ -55,6 +57,8 @@ from app.public_data import (
     cultural_points,
     disaster_tracking,
     executive_summary,
+    f1_overview,
+    f1_province_details,
     housing_spatial_summary,
     housing_demand_summary,
     learning_dashboard,
@@ -1026,6 +1030,29 @@ def public_data_executive_summary(province_code: str):
         return executive_summary(province_code)
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลสรุปรายมิติของจังหวัด") from error
+
+
+@app.get(
+    "/api/public/v1/f1/overview",
+    tags=["Public data"],
+    response_model=F1OverviewResponse,
+)
+def public_f1_overview():
+    """Return country, region and province totals for the F1 map experience."""
+    return f1_overview()
+
+
+@app.get(
+    "/api/public/v1/f1/provinces/{province_code}",
+    tags=["Public data"],
+    response_model=F1ProvinceDetailResponse,
+)
+def public_f1_province_details(province_code: str):
+    """Return reviewed F1 aggregate data down to district and tambon level."""
+    try:
+        return f1_province_details(province_code)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="ไม่พบข้อมูลฝ่าย 1 ของจังหวัด") from error
 
 
 @app.get(

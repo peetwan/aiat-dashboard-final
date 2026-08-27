@@ -26,12 +26,17 @@ def test_province_panel_has_clean_tourism_and_requirement_sections() -> None:
     assert "<table" not in template.lower()
 
 
-def test_province_panel_separates_decisions_projects_people_and_quality() -> None:
+def test_dashboard_separates_departments_and_removes_old_province_tabs() -> None:
     template = read("app/templates/index.html")
     script = read("app/static/app.js")
 
-    for label in ("ภาพรวม", "โครงการและงบ", "คนและพื้นที่", "มิติการพัฒนา", "คุณภาพข้อมูล"):
+    for label in ("ฝ่าย 1", "ฝ่าย 2", "ฝ่าย 3", "ฝ่าย 4", "ผู้บริหาร"):
         assert label in template
+    assert 'data-panel-tab=' not in template
+    assert 'id="provincePanelTabs"' not in template
+    assert 'data-panel-view="department"' in template
+    assert 'data-panel-view="f1"' in template
+    assert 'data-panel-view="overview"' in template
     for element_id in (
         "overviewFlow",
         "researchSection",
@@ -50,13 +55,13 @@ def test_province_panel_separates_decisions_projects_people_and_quality() -> Non
     assert "research_lead_names" not in script
 
 
-def test_disaster_lens_uses_connected_counts_and_normalized_cards() -> None:
+def test_disaster_renderer_is_not_exposed_as_a_separate_top_level_tab() -> None:
     template = read("app/templates/index.html")
     script = read("app/static/app.js")
     styles = read("app/static/styles.css")
 
     assert "ติดตามภัย" in template
-    assert 'data-map-mode="disaster"' in template
+    assert 'data-map-mode="disaster"' not in template
     assert "chart.js" in template.lower()
     assert "province.disaster_source_count" in script
     assert "province.disaster_record_count" in script
@@ -85,13 +90,16 @@ def test_disaster_lens_uses_connected_counts_and_normalized_cards() -> None:
     assert ".disaster-record table" not in styles
 
 
-def test_f4_lens_is_r2_backed_and_before_disaster() -> None:
+def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None:
     template = read("app/templates/index.html")
     script = read("app/static/app.js")
     styles = read("app/static/styles.css")
 
+    assert 'data-map-mode="f3"' in template
     assert 'data-map-mode="f4"' in template
-    assert template.index('data-map-mode="f4"') < template.index('data-map-mode="disaster"')
+    assert 'data-map-mode="executive"' in template
+    assert template.index('data-map-mode="f3"') < template.index('data-map-mode="f4"')
+    assert template.index('data-map-mode="f4"') < template.index('data-map-mode="executive"')
     assert "เสริมพลังท้องถิ่น" in template
     for element_id in (
         "f4CountryPanel",
@@ -106,49 +114,35 @@ def test_f4_lens_is_r2_backed_and_before_disaster() -> None:
         "f4PolicyBudget",
     ):
         assert f'id="{element_id}"' in template
-    assert "f4ProvinceSection" not in template
-    assert "data-f4-province" not in template
-    assert "/api/public/v1/f4/overview" in script
-    assert "/api/public/v1/f4/innovations" in script
-    assert "/api/public/v1/f4/policy-projects" in script
-    assert "/api/public/v1/f4/regions/" in script
-    assert "/api/public/v1/f4/provinces/${encodeURIComponent(state.selectedCode)}" in script
-    assert "/api/public/v1/f4/provinces/${normalized}" in script
-    assert "setF4CountryTab" in script
-    assert "PROVINCE KPI" in script
-    assert "Overview KPI ระดับภาค" in script
-    assert "state.f4BoardCollapsed = true" in script
-    assert "renderF4PolicySummary" in script
-    assert "f4ReadinessLabel" in script
-    assert "f4RoiLabel" not in script
-    assert "section_labels || []).join" not in script
-    assert ".f4-record-metrics" in styles
-    assert "resetF4ToCountryOverview" in script
-    assert "collapseF4Board" in script
-    assert "showF4Board" in script
-    assert "applyF4TargetProvinceMembership" in script
+
+    for endpoint in (
+        "/api/public/v1/f4/overview",
+        "/api/public/v1/f4/innovations",
+        "/api/public/v1/f4/policy-projects",
+        "/api/public/v1/f4/regions/",
+        "/api/public/v1/f4/provinces/${normalized}",
+    ):
+        assert endpoint in script
+    for function_name in (
+        "applyF4TargetProvinceMembership",
+        "renderF4CountryPanel",
+        "renderF4PolicySummary",
+        "f4ReadinessLabel",
+        "resetF4ToCountryOverview",
+        "collapseF4Board",
+        "showF4Board",
+    ):
+        assert function_name in script
+    assert 'return ["f2", "f3"].includes(mode)' in script
     assert "f4_target_province" in script
-    assert 'state.mapMode === "f4"' in script
-    assert "raw/f2" not in script
-    assert "AIAT_S3" not in script
+    assert "trl_level" in script
+    assert "budget_baht" in script
+    assert "status_summary" in script
     assert ".f4-country-panel" in styles
     assert ".f4-board-toggle" in styles
     assert ".f4-policy-window" in styles
     assert ".f4-donut" in styles
     assert ".f4-record-card" in styles
-    assert '.filter((card) => ["innovations", "policy_projects"].includes(card.key))' in script
-    assert "openPanelLoading(provinceMeta)" in script
-    assert "loadF4ProvinceOverview(normalized)" in script
-    assert "Overview KPI ระดับจังหวัด" in script
-    assert "right: 820" not in script
-    assert "[-330, 0]" not in script
-    assert "f4BoardIsOpen" in script
-    assert "mapPanelPadding" in script
-    assert "mapPanelOffset" in script
-    assert "[-340, 0]" in script
-    assert "return [0, 0]" in script
-    assert "offset: mapPanelOffset()" in script
-    assert "position: fixed" in styles
 
 
 def test_insights_exposes_all_source_coverage_without_controls() -> None:
@@ -206,6 +200,45 @@ def test_successful_province_load_hides_the_error_state() -> None:
 
     assert ".panel-error[hidden]" in styles
     assert "display: none" in styles
+
+
+def test_f1_and_f4_share_the_department_panel_pattern() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+
+    assert 'class="department-panel department-panel--f1 f1-country-panel"' in template
+    assert 'class="department-panel department-panel--f4 f4-country-panel"' in template
+    assert 'class="department-panel workspace-panel"' in template
+    assert 'class="department-board-toggle f1-board-toggle"' in template
+    assert 'class="department-board-toggle f4-board-toggle"' in template
+    assert 'class="department-flow f1-flow"' in template
+    assert 'class="department-flow f4-flow"' in template
+    for element_id in ("f4CountryStep", "f4RegionStep", "f4ProvinceStep"):
+        assert f'id="{element_id}"' in template
+    assert 'class="department-kpi-grid f1-country-kpis"' in template
+    assert 'class="department-kpi-grid f4-card-grid"' in template
+    assert 'class="department-kpi-card province-kpi f4-kpi"' in script
+    assert 'class="department-kpi-card ${state.f1CountryMetric' in script
+    assert 'regionStep.classList.toggle("active", Boolean(state.selectedRegion))' in script
+    assert 'provinceStep.classList.toggle("active", Boolean(state.selectedCode))' in script
+    assert 'card.match_type ?' not in script
+    assert 'document.body.classList.toggle("f1-province-open"' in script
+    assert 'document.getElementById("showF1Country").addEventListener("click", showF1CountryPanel)' in script
+    assert ".department-panel--f1" in styles
+    assert ".department-panel--f4" in styles
+    assert ".department-flow" in styles
+    assert ".department-kpi-card" in styles
+    assert ".department-board-toggle" in styles
+    assert '.province-panel[aria-hidden="true"]' in styles
+    assert "body.f1-province-open .mode-dock" in styles
+    assert "width: min(620px, calc(100vw - 44px))" in styles
+    assert "height: min(68dvh, 720px)" in styles
+    assert '.department-dock button[data-map-mode="f1"]' in styles
+    assert '.department-dock button[data-map-mode="f4"]' in styles
+    assert "left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2)" in styles
+    assert "body.workspace-panel-open .map-corner" in styles
+    assert "@media (min-width: 721px) and (max-width: 949px)" in styles
 
 
 def test_executive_ui_is_summary_first_and_mobile_tabs_do_not_clip() -> None:

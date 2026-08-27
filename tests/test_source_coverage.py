@@ -19,9 +19,29 @@ PUBLIC_ROOT = DASHBOARD_ROOT / "data/public"
 CONTRACT_ROOT = DASHBOARD_ROOT / "config/publication_contracts"
 REGISTRY_PATH = PROJECT_ROOT / "config/source_registry.json"
 MERGED_ROOT = PROJECT_ROOT / "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01"
+MERGED_INDEX_PATH = MERGED_ROOT / "00_INDEX.csv"
+if MERGED_INDEX_PATH.is_file():
+    with MERGED_INDEX_PATH.open(encoding="utf-8-sig", newline="") as handle:
+        MERGED_SOURCE_IDS = {row["source_id"] for row in csv.DictReader(handle)}
+else:
+    MERGED_SOURCE_IDS = set()
+if CATALOG_PATH.is_file():
+    _catalog_for_evidence_check = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    CATALOG_ENDPOINT_SOURCE_IDS = {
+        source["source_id"]
+        for source in _catalog_for_evidence_check["sources"]
+        if source.get("endpoints")
+    }
+else:
+    CATALOG_ENDPOINT_SOURCE_IDS = set()
+SEPARATE_ENDPOINT_EVIDENCE_SOURCE_IDS = {
+    "f1_pppconnext",
+    "f2_learning_dashboard",
+    "f2_target_household",
+}
 HAS_EVIDENCE_WORKSPACE = (
     REGISTRY_PATH.is_file()
-    and (MERGED_ROOT / "00_INDEX.csv").is_file()
+    and MERGED_INDEX_PATH.is_file()
     and (
         PROJECT_ROOT
         / "data/raw/network/f2_learning_dashboard/20260803T_network/observation.json"
@@ -30,6 +50,8 @@ HAS_EVIDENCE_WORKSPACE = (
         PROJECT_ROOT
         / "data/raw/network/f1_pppconnext/20260817T_public_api_fetch_02/network_observation.json"
     ).is_file()
+    and CATALOG_ENDPOINT_SOURCE_IDS
+    <= MERGED_SOURCE_IDS | SEPARATE_ENDPOINT_EVIDENCE_SOURCE_IDS
 )
 
 PUBLIC_CANDIDATES = {
