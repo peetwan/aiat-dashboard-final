@@ -4985,3 +4985,234 @@
     pointer-events: none;
   }
 }
+
+/* Mobile map-first flow: choose a department, then choose an area. */
+@media (max-width: 720px) {
+  .map-header {
+    inset: 10px 10px auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .header-meta,
+  .map-prompt {
+    display: none;
+  }
+
+  .brand {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 6px;
+  }
+
+  .province-picker {
+    min-height: 48px;
+    padding-inline: 10px;
+  }
+
+  .picker-copy strong {
+    max-width: none;
+    font-size: 11px;
+  }
+
+  .department-board-toggle {
+    top: 72px;
+    right: 10px;
+    min-height: 36px;
+    max-width: calc(100vw - 20px);
+    padding: 0 11px;
+    border-radius: 10px;
+    font-size: 10.5px;
+  }
+
+  .workspace-board-toggle[data-workspace-mode="f2"] { color: #24576a; }
+  .workspace-board-toggle[data-workspace-mode="f3"] { color: #1e594d; }
+  .workspace-board-toggle[data-workspace-mode="executive"] { color: #173d2f; }
+
+  .department-dock,
+  .mode-dock.department-dock {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-width: none;
+    min-height: 52px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    padding: 4px;
+    overflow: visible;
+    transform: none;
+    border-radius: 14px;
+  }
+
+  .department-dock button,
+  .mode-dock.department-dock button {
+    min-width: 0;
+    min-height: 42px;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 4px;
+    border-radius: 10px;
+  }
+
+  .department-dock button::before {
+    width: 6px;
+    height: 6px;
+  }
+
+  .department-dock button > span {
+    display: block;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .department-dock button strong {
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .map-corner {
+    left: 10px;
+    bottom: 68px;
+    gap: 6px;
+  }
+
+  .map-actions button {
+    min-height: 36px;
+    padding-inline: 10px;
+    font-size: 10px;
+  }
+
+  .evidence-legend {
+    width: min(194px, calc(100vw - 20px));
+    padding: 11px;
+    border-radius: 13px;
+  }
+
+  .evidence-legend > div small {
+    display: none;
+  }
+
+  .evidence-legend strong {
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+
+  .evidence-legend ol {
+    gap: 5px 8px;
+    margin-top: 8px;
+  }
+
+  .evidence-legend li {
+    font-size: 8.5px;
+  }
+
+  .region-label {
+    gap: 5px;
+    padding: 5px 9px;
+  }
+
+  .region-label strong {
+    font-size: 10.5px;
+  }
+
+  .region-label span {
+    font-size: 8.5px;
+  }
+
+  .department-panel,
+  .workspace-panel,
+  .province-panel.f1-only,
+  .f4-country-panel {
+    right: 8px;
+    bottom: 64px;
+    left: 8px;
+    width: auto;
+    height: min(72dvh, 720px);
+    border-radius: 20px;
+  }
+
+  .department-panel > .department-panel-head,
+  .f4-country-panel > .department-panel-head,
+  .workspace-panel > .department-panel-head {
+    min-height: 86px;
+    height: auto;
+    padding: 20px 14px 12px;
+  }
+
+  .department-panel > .department-panel-head::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: #ccd3cc;
+    border-radius: 99px;
+  }
+
+  .department-panel-head h2,
+  .f4-country-panel .department-panel-head h2,
+  .workspace-panel .department-panel-head h2 {
+    margin-top: 5px;
+    font-size: 22px;
+  }
+
+  .department-panel > .department-panel-head > button,
+  .workspace-panel .department-panel-head > button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .department-flow {
+    display: none;
+  }
+
+  .f1-country-content,
+  .f4-tab-panel,
+  .workspace-panel-body {
+    padding: 12px 14px 16px;
+  }
+
+  .f4-country-tabs {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    padding: 8px 14px;
+    overflow: visible;
+  }
+
+  .f4-country-tabs button {
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    white-space: normal;
+  }
+
+  .department-kpi-card,
+  .f1-country-kpis .department-kpi-card,
+  .f4-country-panel .department-kpi-card {
+    min-height: 100px;
+    padding: 11px 12px;
+  }
+}
+
+@media (max-width: 350px) {
+  .department-dock button strong {
+    font-size: 9px;
+  }
+
+  .department-kpi-grid,
+  .f4-country-panel .department-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
