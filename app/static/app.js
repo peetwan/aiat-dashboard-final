@@ -253,6 +253,10 @@ function departmentNumber(mode = state.mapMode) {
 
 const WORKSPACE_MODES = ["f1", "f2", "f3", "f4", "executive"];
 
+function usesMobileMapFirst() {
+  return window.matchMedia("(max-width: 720px)").matches;
+}
+
 function colorFromSteps(steps, value) {
   if (value === null || value === undefined) return NO_DATA_COLOR;
   if (steps[0].max !== undefined) {
@@ -401,17 +405,20 @@ function setMapMode(mode) {
     if (state.selectedCode) {
       hideF1CountryPanel();
       selectProvince(state.selectedCode, false);
+    } else if (usesMobileMapFirst()) {
+      hideF1CountryPanel(true);
+      loadF1Overview();
     } else {
       showF1CountryPanel();
     }
   } else if (mode === "f4") {
     hideF1CountryPanel();
     hideWorkspacePanel();
-    state.f4BoardCollapsed = false;
+    state.f4BoardCollapsed = usesMobileMapFirst() && !state.selectedCode;
     state.f4ListContextKey = "";
-    f4Panel.hidden = false;
-    f4Toggle.hidden = true;
-    document.body.classList.add("f4-country-open");
+    f4Panel.hidden = state.f4BoardCollapsed;
+    f4Toggle.hidden = !state.f4BoardCollapsed;
+    document.body.classList.toggle("f4-country-open", !state.f4BoardCollapsed);
     provincePanel.classList.remove("is-open");
     provincePanel.setAttribute("aria-hidden", "true");
     document.body.classList.remove("panel-open");
@@ -444,6 +451,8 @@ function setMapMode(mode) {
     );
     if (state.selectedCode) {
       selectProvince(state.selectedCode, false);
+    } else if (usesMobileMapFirst()) {
+      hideWorkspacePanel(true);
     } else if (!state.selectedCode) {
       showWorkspacePanel();
     }
@@ -517,21 +526,35 @@ function renderWorkspacePanel() {
     <p class="workspace-hint">เลือกภาคหรือจังหวัดบนแผนที่เพื่อดูภาพรวมพื้นที่</p>`;
 }
 
+function updateWorkspaceToggle() {
+  const toggle = document.getElementById("showWorkspacePanel");
+  if (!toggle) return;
+  toggle.dataset.workspaceMode = state.mapMode;
+  toggle.textContent = state.mapMode === "executive"
+    ? "ดูภาพรวมผู้บริหาร"
+    : `ดูภาพรวมฝ่าย ${departmentNumber()}`;
+}
+
 function showWorkspacePanel() {
   if (state.selectedCode || ["f1", "f4"].includes(state.mapMode)) return;
   const panel = document.getElementById("workspacePanel");
+  document.getElementById("showWorkspacePanel").hidden = true;
   panel.hidden = false;
   panel.setAttribute("aria-hidden", "false");
   document.body.classList.add("workspace-panel-open");
   renderWorkspacePanel();
 }
 
-function hideWorkspacePanel() {
+function hideWorkspacePanel(showToggle = false) {
   const panel = document.getElementById("workspacePanel");
   if (!panel) return;
   panel.hidden = true;
   panel.setAttribute("aria-hidden", "true");
   document.body.classList.remove("workspace-panel-open");
+  const toggle = document.getElementById("showWorkspacePanel");
+  const canShowToggle = showToggle && !state.selectedCode && !["f1", "f4"].includes(state.mapMode);
+  toggle.hidden = !canShowToggle;
+  if (canShowToggle) updateWorkspaceToggle();
 }
 
 async function fetchPublicJson(url) {
@@ -1998,19 +2021,25 @@ function backToCountry() {
   applyRegionFocus();
   updateLabelVisibility();
   if (state.mapMode === "f1") {
-    showF1CountryPanel();
+    if (usesMobileMapFirst()) {
+      hideF1CountryPanel(true);
+      loadF1Overview();
+    } else {
+      showF1CountryPanel();
+    }
     renderF1CountryOverview();
   } else if (state.mapMode === "f4") {
     state.f4Province = null;
     state.f4CountryTab = "overview";
     state.f4ListContextKey = "";
-    state.f4BoardCollapsed = false;
-    document.getElementById("f4CountryPanel").hidden = false;
-    document.getElementById("showF4Country").hidden = true;
-    document.body.classList.add("f4-country-open");
+    state.f4BoardCollapsed = usesMobileMapFirst();
+    document.getElementById("f4CountryPanel").hidden = state.f4BoardCollapsed;
+    document.getElementById("showF4Country").hidden = !state.f4BoardCollapsed;
+    document.body.classList.toggle("f4-country-open", !state.f4BoardCollapsed);
     renderF4CountryPanel();
   } else {
-    showWorkspacePanel();
+    if (usesMobileMapFirst()) hideWorkspacePanel(true);
+    else showWorkspacePanel();
   }
   if (state.mapLoaded) lockCountryView(true);
 }
@@ -2020,7 +2049,7 @@ function resetF4ToCountryOverview() {
   state.selectedRegion = null;
   state.selectedCode = null;
   state.f4Province = null;
-  state.f4BoardCollapsed = false;
+  state.f4BoardCollapsed = usesMobileMapFirst();
   state.f4CountryTab = "overview";
   state.f4ListContextKey = "";
   state.f4InnovationQuery = "";
@@ -2028,9 +2057,9 @@ function resetF4ToCountryOverview() {
   document.getElementById("f4InnovationSearch").value = "";
   document.getElementById("f4PolicySearch").value = "";
   document.getElementById("backToCountry").hidden = true;
-  document.getElementById("f4CountryPanel").hidden = false;
-  document.getElementById("showF4Country").hidden = true;
-  document.body.classList.add("f4-country-open");
+  document.getElementById("f4CountryPanel").hidden = state.f4BoardCollapsed;
+  document.getElementById("showF4Country").hidden = !state.f4BoardCollapsed;
+  document.body.classList.toggle("f4-country-open", !state.f4BoardCollapsed);
   document.getElementById("mapPrompt").classList.remove("is-hidden");
   document.querySelector(".picker-copy strong").textContent = "คลิกจังหวัด หรือค้นหาที่นี่";
   document.getElementById("provinceSelect").value = "";
@@ -3726,6 +3755,7 @@ async function selectProvince(code, moveMap = true) {
     document.body.classList.remove("panel-open");
     document.getElementById("showF4Country").hidden = true;
     document.getElementById("f4CountryPanel").hidden = false;
+    document.body.classList.add("f4-country-open");
     document.querySelector(".picker-copy strong").textContent = provinceMeta.province_name_th;
     document.getElementById("provinceSelect").value = normalized;
     if (moveMap) fitProvince(provinceMeta);
@@ -3789,7 +3819,14 @@ function closePanel(refitMap = true) {
   url.searchParams.delete("province");
   url.searchParams.delete("view");
   window.history.replaceState({}, "", url);
-  if (state.mapMode === "f1") showF1CountryPanel();
+  if (state.mapMode === "f1") {
+    if (usesMobileMapFirst()) {
+      hideF1CountryPanel(true);
+      loadF1Overview();
+    } else {
+      showF1CountryPanel();
+    }
+  }
   else if (state.mapMode === "f4") {
     state.f4ListContextKey = "";
     if (state.f4BoardCollapsed) {
@@ -3798,7 +3835,8 @@ function closePanel(refitMap = true) {
     } else {
       renderF4CountryPanel();
     }
-  } else showWorkspacePanel();
+  } else if (usesMobileMapFirst()) hideWorkspacePanel(true);
+  else showWorkspacePanel();
   // Ease back to the region overview so opening and closing a province always
   // lands on the same stable view instead of wherever the last fit left off.
   if (refitMap && state.selectedRegion) {
@@ -3823,7 +3861,8 @@ function bindEvents() {
   document.getElementById("togglePoints").addEventListener("click", toggleCulturalPoints);
   document.getElementById("closeF1Country").addEventListener("click", () => hideF1CountryPanel(true));
   document.getElementById("showF1Country").addEventListener("click", showF1CountryPanel);
-  document.getElementById("closeWorkspacePanel").addEventListener("click", hideWorkspacePanel);
+  document.getElementById("closeWorkspacePanel").addEventListener("click", () => hideWorkspacePanel(true));
+  document.getElementById("showWorkspacePanel").addEventListener("click", showWorkspacePanel);
   document.getElementById("closeF4Country").addEventListener("click", collapseF4Board);
   document.getElementById("showF4Country").addEventListener("click", showF4Board);
   document.querySelectorAll("[data-f4-tab]").forEach((button) => {

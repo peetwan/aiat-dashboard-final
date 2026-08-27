@@ -212,6 +212,7 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert 'class="department-panel workspace-panel"' in template
     assert 'class="department-board-toggle f1-board-toggle"' in template
     assert 'class="department-board-toggle f4-board-toggle"' in template
+    assert 'class="department-board-toggle workspace-board-toggle"' in template
     assert 'class="department-flow f1-flow"' in template
     assert 'class="department-flow f4-flow"' in template
     for element_id in ("f4CountryStep", "f4RegionStep", "f4ProvinceStep"):
@@ -225,6 +226,11 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert 'card.match_type ?' not in script
     assert 'document.body.classList.toggle("f1-province-open"' in script
     assert 'document.getElementById("showF1Country").addEventListener("click", showF1CountryPanel)' in script
+    assert 'document.getElementById("showWorkspacePanel").addEventListener("click", showWorkspacePanel)' in script
+    assert 'function usesMobileMapFirst()' in script
+    assert 'hideF1CountryPanel(true);' in script
+    assert 'state.f4BoardCollapsed = usesMobileMapFirst() && !state.selectedCode' in script
+    assert 'hideWorkspacePanel(true);' in script
     assert ".department-panel--f1" in styles
     assert ".department-panel--f4" in styles
     assert ".department-flow" in styles
@@ -239,6 +245,9 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert "left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2)" in styles
     assert "body.workspace-panel-open .map-corner" in styles
     assert "@media (min-width: 721px) and (max-width: 949px)" in styles
+    assert "grid-template-columns: repeat(5, minmax(0, 1fr))" in styles
+    assert ".department-flow {\n    display: none;" in styles
+    assert ".f4-country-tabs {\n    position: static;" in styles
 
 
 def test_executive_ui_is_summary_first_and_mobile_tabs_do_not_clip() -> None:
