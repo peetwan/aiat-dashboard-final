@@ -86,6 +86,7 @@ def test_catalog_covers_all_registry_sources_and_public_candidates():
 def test_executable_plans_never_include_restricted_sources():
     plans = load_ingestion_plans()["sources"]
     assert set(plans) == {
+        "clig_projects",
         "f1_sradss_ppaos",
         "f2_apptech_mtr",
         "f2_apptech_mru",

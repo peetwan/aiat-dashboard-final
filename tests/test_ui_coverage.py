@@ -85,13 +85,79 @@ def test_disaster_lens_uses_connected_counts_and_normalized_cards() -> None:
     assert ".disaster-record table" not in styles
 
 
+def test_f4_lens_is_r2_backed_and_before_disaster() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+
+    assert 'data-map-mode="f4"' in template
+    assert template.index('data-map-mode="f4"') < template.index('data-map-mode="disaster"')
+    assert "เสริมพลังท้องถิ่น" in template
+    for element_id in (
+        "f4CountryPanel",
+        "f4PanelScopeLabel",
+        "f4OverviewHeading",
+        "showF4Country",
+        "f4CountryCards",
+        "f4CountryNotes",
+        "f4InnovationRows",
+        "f4PolicyRows",
+        "f4PolicyDonut",
+        "f4PolicyBudget",
+    ):
+        assert f'id="{element_id}"' in template
+    assert "f4ProvinceSection" not in template
+    assert "data-f4-province" not in template
+    assert "/api/public/v1/f4/overview" in script
+    assert "/api/public/v1/f4/innovations" in script
+    assert "/api/public/v1/f4/policy-projects" in script
+    assert "/api/public/v1/f4/regions/" in script
+    assert "/api/public/v1/f4/provinces/${encodeURIComponent(state.selectedCode)}" in script
+    assert "/api/public/v1/f4/provinces/${normalized}" in script
+    assert "setF4CountryTab" in script
+    assert "PROVINCE KPI" in script
+    assert "Overview KPI ระดับภาค" in script
+    assert "state.f4BoardCollapsed = true" in script
+    assert "renderF4PolicySummary" in script
+    assert "f4ReadinessLabel" in script
+    assert "f4RoiLabel" not in script
+    assert "section_labels || []).join" not in script
+    assert ".f4-record-metrics" in styles
+    assert "resetF4ToCountryOverview" in script
+    assert "collapseF4Board" in script
+    assert "showF4Board" in script
+    assert "applyF4TargetProvinceMembership" in script
+    assert "f4_target_province" in script
+    assert 'state.mapMode === "f4"' in script
+    assert "raw/f2" not in script
+    assert "AIAT_S3" not in script
+    assert ".f4-country-panel" in styles
+    assert ".f4-board-toggle" in styles
+    assert ".f4-policy-window" in styles
+    assert ".f4-donut" in styles
+    assert ".f4-record-card" in styles
+    assert '.filter((card) => ["innovations", "policy_projects"].includes(card.key))' in script
+    assert "openPanelLoading(provinceMeta)" in script
+    assert "loadF4ProvinceOverview(normalized)" in script
+    assert "Overview KPI ระดับจังหวัด" in script
+    assert "right: 820" not in script
+    assert "[-330, 0]" not in script
+    assert "f4BoardIsOpen" in script
+    assert "mapPanelPadding" in script
+    assert "mapPanelOffset" in script
+    assert "[-340, 0]" in script
+    assert "return [0, 0]" in script
+    assert "offset: mapPanelOffset()" in script
+    assert "position: fixed" in styles
+
+
 def test_insights_exposes_all_source_coverage_without_controls() -> None:
     template = read("app/templates/insights.html")
     script = read("app/static/insights.js")
 
     assert 'id="coverage"' in template
     assert 'id="sourceCoverageGrid"' in template
-    assert "ทะเบียน 28 แหล่งข้อมูล" in template
+    assert "ทะเบียน 29 แหล่งข้อมูล" in template
     assert 'id="unmapped"' in template
     assert 'id="learningSummary"' in template
     assert 'id="executivePortfolio"' in template

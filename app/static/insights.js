@@ -150,8 +150,8 @@ function renderSourceCoverage(payload) {
     `<span><strong>${number.format(linked)}</strong> ผูกจังหวัดได้</span>`,
     localOnly ? `<span><strong>${number.format(localOnly)}</strong> เก็บเฉพาะในเครื่อง</span>` : "",
   ].join("");
-  state.textContent = sources.length === 28 ? "แสดงครบทั้ง 28 แหล่ง" : `แสดง ${number.format(sources.length)} จาก 28 แหล่งที่อยู่ในทะเบียน`;
-  state.classList.toggle("is-warning", sources.length !== 28);
+  state.textContent = sources.length === 29 ? "แสดงครบทั้ง 29 แหล่ง" : `แสดง ${number.format(sources.length)} จาก 29 แหล่งที่อยู่ในทะเบียน`;
+  state.classList.toggle("is-warning", sources.length !== 29);
   document.getElementById("sourceCoverageGrid").innerHTML = sources.map((source) => `
     <article class="source-coverage-card is-${source.statusClass}">
       <header><span class="source-order">${String(source.ordinal).padStart(2, "0")}</span><div><small>${escapeHtml(source.group || source.sourceId)}</small><h3>${escapeHtml(source.name)}</h3></div><b>${escapeHtml(source.statusLabel)}</b></header>

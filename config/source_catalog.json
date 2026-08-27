@@ -13,8 +13,8 @@
   "policy": {
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
-    "registry_source_count": 28,
-    "approved_public_source_count": 11,
+    "registry_source_count": 29,
+    "approved_public_source_count": 12,
     "metadata_only_source_count": 12,
     "restricted_source_count": 5,
     "restricted_sources_are_never_deployed": true,
@@ -2930,6 +2930,60 @@
             "query_or_body": ""
           },
           "notes_th": "SPU connector endpoint"
+        }
+      ]
+    },
+    {
+      "ordinal": 29,
+      "source_id": "clig_projects",
+      "group": "ฝ่าย 4",
+      "name_th": "CLIG Dashboard PMUA 4 - โครงการวิจัย",
+      "url": "https://clig.oas.psu.ac.th/project/search_project",
+      "source_type": "research_project_dashboard",
+      "sensitivity_lane": "public_unknown",
+      "source_card": "data/source_audit/29_clig_projects/source_card.json",
+      "audit_status": "NEEDS_REVIEW",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 0,
+      "notes_th": "เพิ่ม connector สาธารณะสำหรับค้นหาโครงการวิจัย CLIG; raw/project rows เป็น candidate evidence และยังไม่ใช่ KPI facts. Runtime ดึงเฉพาะ list/detail HTML ที่ไม่ต้อง login และไม่ดึง PDF/file downloads.",
+      "snapshot_origin_files": [],
+      "endpoints": [
+        {
+          "endpoint_id": "f460bd75f1e8ccc89e0bb0642fc715b7778023b205c25154fc23d7d8e3fbe3d7",
+          "method": "POST",
+          "url": "https://clig.oas.psu.ac.th/api/project/search_project",
+          "kind": "public_html_fragment_api",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "form_body": {
+              "project_name": "<value>",
+              "project_year": "<value>",
+              "page": "<value>"
+            }
+          },
+          "notes_th": "CLIG project search returns public HTML table fragments."
+        },
+        {
+          "endpoint_id": "b58350f39044cc7929b694074b07ddbcbfe99034f087a70176593aeae8172c55",
+          "method": "GET",
+          "url": "https://clig.oas.psu.ac.th/iframe/project/project_info",
+          "kind": "public_html_detail",
+          "access": "public_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query": "id=<value>"
+          },
+          "notes_th": "CLIG public project detail iframe; individual project id query only."
         }
       ]
     }

@@ -21,8 +21,9 @@ def test_every_executable_source_has_an_importable_connector_contract():
 
     assert report["status"] == "valid"
     assert report["contract_version"] == "1.1"
-    assert report["connector_count"] == 6
+    assert report["connector_count"] == 7
     assert {item["source_id"] for item in report["connectors"]} == {
+        "clig_projects",
         "f1_sradss_ppaos",
         "f2_apptech_mtr",
         "f2_apptech_mru",
