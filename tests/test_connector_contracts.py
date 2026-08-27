@@ -21,7 +21,7 @@ def test_every_executable_source_has_an_importable_connector_contract():
 
     assert report["status"] == "valid"
     assert report["contract_version"] == "1.1"
-    assert report["connector_count"] == 14
+    assert report["connector_count"] == 15
     assert {item["source_id"] for item in report["connectors"]} == {
         "f1_sradss_ppaos",
         "f1_pppconnext",
@@ -33,6 +33,7 @@ def test_every_executable_source_has_an_importable_connector_contract():
         "f2_wallet_all_realtime",
         "f2_wallet_cluster_realtime",
         "f3_housing_portal",
+        "clig_projects",
         "spu_sukhothai_care",
         "spu_sukhothai_water",
         "spu_nsn_flood",
