@@ -11,9 +11,10 @@ unique IDs, and non-empty pages.
 
 from __future__ import annotations
 
+import json
+import math
 import re
 from html import unescape
-import json
 
 from app.connectors.base import ConnectorContext, DatasetRecord
 
@@ -39,14 +40,48 @@ def clean_text(value: object) -> str:
 
 
 def parse_int(value: object) -> int:
-    if value in (None, ""):
-        return 0
-    if isinstance(value, (int, float)):
+    # A missing value is a schema failure, not an observed zero.
+    if type(value) is int and value >= 0:
+        return value
+    if type(value) is float and math.isfinite(value) and value >= 0 and value.is_integer():
         return int(value)
-    text = re.sub(r"[^\d.-]", "", str(value))
-    if not text:
-        return 0
-    return int(float(text))
+    if isinstance(value, str) and re.fullmatch(r"(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)", value.strip()):
+        return int(value.strip().replace(",", ""))
+    raise RuntimeError("AppTech dashboard count is missing or is not a non-negative integer")
+
+
+def _unique_object(pairs: list[tuple[str, object]]) -> dict:
+    result: dict = {}
+    for key, value in pairs:
+        if key in result:
+            raise RuntimeError("AppTech dashboard contains a duplicate JSON key")
+        result[key] = value
+    return result
+
+
+def _dashboard_object(html: str, pattern: re.Pattern, name: str, row_type: type) -> dict:
+    match = pattern.search(html)
+    if not match:
+        raise RuntimeError(f"AppTech dashboard {name} is missing")
+    try:
+        payload = json.loads(match.group(1), object_pairs_hook=_unique_object)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"AppTech dashboard {name} is not valid JSON") from exc
+    if not isinstance(payload, dict) or not payload:
+        raise RuntimeError(f"AppTech dashboard {name} is empty")
+    result: dict = {}
+    for key, value in payload.items():
+        name_key = clean_text(key)
+        if not name_key or name_key in result or not isinstance(value, row_type):
+            raise RuntimeError(f"AppTech dashboard {name} has an invalid or duplicate province")
+        result[name_key] = value
+    return result
+
+
+def _count_map(value: object, name: str) -> dict[str, int]:
+    if not isinstance(value, dict) or any(not clean_text(key) for key in value):
+        raise RuntimeError(f"AppTech dashboard {name} is missing or invalid")
+    return {key: parse_int(count) for key, count in value.items()}
 
 
 def parse_search_page(html: str) -> tuple[list[tuple[str, str | None]], set[int]]:
@@ -121,34 +156,18 @@ def build_candidate_records(pages: dict[int, str]) -> list[DatasetRecord]:
 
 
 def parse_prov_data(html: str) -> dict[str, dict]:
-    match = PROV_DATA_RE.search(html)
-    if not match:
-        raise RuntimeError("AppTech dashboard provData is missing")
-    try:
-        payload = json.loads(match.group(1))
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("AppTech dashboard provData is not valid JSON") from exc
-    if not isinstance(payload, dict) or not payload:
-        raise RuntimeError("AppTech dashboard provData is empty")
-    return {clean_text(key): value for key, value in payload.items() if clean_text(key) and isinstance(value, dict)}
+    return _dashboard_object(html, PROV_DATA_RE, "provData", dict)
 
 
 def parse_province_product_data(html: str) -> dict[str, list]:
-    match = PROVINCE_DATA_RE.search(html)
-    if not match:
-        raise RuntimeError("AppTech innovation dashboard provinceData is missing")
-    try:
-        payload = json.loads(match.group(1))
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("AppTech innovation dashboard provinceData is not valid JSON") from exc
-    if not isinstance(payload, dict) or not payload:
-        raise RuntimeError("AppTech innovation dashboard provinceData is empty")
-    return {clean_text(key): value for key, value in payload.items() if clean_text(key) and isinstance(value, list)}
+    return _dashboard_object(html, PROVINCE_DATA_RE, "provinceData", list)
 
 
 def parse_innovation_dashboard(html: str, year_filter: str = "all") -> list[DatasetRecord]:
     rows: list[DatasetRecord] = []
     for province_name, products in parse_province_product_data(html).items():
+        if any(not isinstance(product, dict) or not product for product in products):
+            raise RuntimeError("AppTech innovation dashboard contains an invalid product")
         rows.append(
             (
                 "innovation_dashboard_province",
@@ -165,8 +184,9 @@ def parse_innovation_dashboard(html: str, year_filter: str = "all") -> list[Data
 def parse_innovator_dashboard(html: str, year_filter: str = "all") -> list[DatasetRecord]:
     rows: list[DatasetRecord] = []
     for province_name, payload in parse_prov_data(html).items():
-        levels = payload.get("levels") if isinstance(payload.get("levels"), dict) else {}
-        level_counts = {str(level): parse_int(levels.get(str(level))) for level in range(1, 5)}
+        level_counts = _count_map(payload.get("levels"), "levels")
+        if set(level_counts) != {"1", "2", "3", "4"}:
+            raise RuntimeError("AppTech innovator dashboard must contain levels 1-4")
         rows.append(
             (
                 "innovator_dashboard_province",
@@ -195,8 +215,8 @@ def parse_family_dashboard(html: str, year_filter: str = "all") -> list[DatasetR
                     "total_members": parse_int(payload.get("total_members")),
                     "total_inno": parse_int(payload.get("total_inno")),
                     "total_gen": parse_int(payload.get("total_gen")),
-                    "districts": payload.get("districts") if isinstance(payload.get("districts"), dict) else {},
-                    "business_types": payload.get("business_types") if isinstance(payload.get("business_types"), dict) else {},
+                    "districts": _count_map(payload.get("districts"), "districts"),
+                    "business_types": _count_map(payload.get("business_types"), "business_types"),
                 },
             )
         )
@@ -209,18 +229,23 @@ def parse_household_economic_summary(html: str, year_filter: str = "all") -> Dat
         normalized_label = clean_text(unescape(label))
         amount = parse_int(raw_value)
         if "ต้นทุน" in normalized_label:
-            values["cost_reduced_baht"] = amount
+            key = "cost_reduced_baht"
         elif "รายได้สุทธิ" in normalized_label:
-            values["net_income_increased_baht"] = amount
+            key = "net_income_increased_baht"
         elif "รายได้" in normalized_label:
-            values["income_increased_baht"] = amount
+            key = "income_increased_baht"
+        else:
+            continue
+        if key in values:
+            raise RuntimeError("AppTech economic dashboard contains a duplicate measure")
+        values[key] = amount
+    if len(values) != 3:
+        raise RuntimeError("AppTech economic dashboard must contain all three monetary measures")
     return (
         "household_economic_summary",
         {
             "year_filter": year_filter,
-            "cost_reduced_baht": values.get("cost_reduced_baht", 0),
-            "income_increased_baht": values.get("income_increased_baht", 0),
-            "net_income_increased_baht": values.get("net_income_increased_baht", 0),
+            **values,
             "geography": "country",
             "geography_note_th": "AppTech public household dashboard exposes economic totals at national/year scope only.",
         },

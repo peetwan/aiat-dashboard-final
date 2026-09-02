@@ -7,10 +7,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import desc, select
-
-from app.database import SessionLocal
-from app.models import DashboardRecord
+from app.public_data import load_public_artifact
 from tools.evidence_store import config_from_env, make_client
 
 
@@ -28,7 +25,7 @@ PMUA_AREA_SUBDISTRICTS_KEY = "raw/f4/pmua_area_lookup/20260826T145433Z/subdistri
 PMUA_PRODUCT_DETAILS_KEY = "raw/f4/pmua_product_details/20260827T051354Z/product_details.jsonl.gz"
 CLIG_MANIFEST_KEY = "raw/f4/clig_projects/20260823T072251Z/manifest.json"
 CLIG_PROJECTS_KEY = "raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz"
-APPTECH_CONNECTOR_SOURCE = "dashboard_records:f2_target_household"
+APPTECH_CONNECTOR_SOURCE = "data/public/apptech_aggregates.json"
 
 CLIG_PROVINCE_FIELDS = (
     "project_title",
@@ -312,27 +309,12 @@ def _area_name_map(rows: list[dict[str, Any]], code_field: str, name_field: str)
 
 
 def _latest_apptech_records(dataset_key: str, year_filter: str | None = "all") -> list[dict[str, Any]]:
+    """อ่านเฉพาะ reviewed revision; การ ingest Candidate ไม่เปลี่ยน KPI สาธารณะ."""
     try:
-        with SessionLocal() as session:
-            rows = session.execute(
-                select(DashboardRecord)
-                .where(
-                    DashboardRecord.source_id == APPTECH_SOURCE_ID,
-                    DashboardRecord.dataset_key == dataset_key,
-                )
-                .order_by(desc(DashboardRecord.fetched_at), desc(DashboardRecord.id))
-            ).scalars()
-            latest_by_identity: dict[str, dict[str, Any]] = {}
-            for row in rows:
-                payload = row.payload if isinstance(row.payload, dict) else {}
-                if year_filter is not None and str(payload.get("year_filter") or "all") != year_filter:
-                    continue
-                identity = str(payload.get("province_name_th") or payload.get("year_filter") or row.source_record_id)
-                if identity not in latest_by_identity:
-                    latest_by_identity[identity] = payload
-            return list(latest_by_identity.values())
-    except Exception:
+        artifact = load_public_artifact("f4/apptech-aggregates", "apptech_aggregates.json")
+    except FileNotFoundError:
         return []
+    return [row for row in artifact.get(dataset_key, []) if year_filter is None or row["year_filter"] == year_filter]
 
 
 def _latest_apptech_records_by_province(dataset_key: str, year_filter: str = "all") -> dict[str, dict[str, Any]]:

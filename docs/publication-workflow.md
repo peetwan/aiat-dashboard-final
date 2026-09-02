@@ -87,6 +87,22 @@ python tools/scaffold_publication.py rmutdb_summary `
 | `data/public/serving_manifest.json` | บอก Dashboard ว่า artifact ใดเข้า `public_artifacts` และใช้ key/source ใด | ไม่ได้ ต้องให้ทีมตรวจเอง |
 | `data/public/publication_receipt.json` | รายการ hash ของ output และ contract ทั้ง release เพื่อยืนยันว่า CI กำลังตรวจไฟล์ชุดเดียวกัน | ต้องสร้างใหม่ทุกครั้ง; receipt ไม่ใช่การอนุมัติและไม่ใช่รายการ seed database |
 
+## AppTech KPI ฝ่าย 4
+
+`f4/apptech-aggregates` ใช้จำนวนรวมรายจังหวัดจาก innovator dashboard และยอดเงินระดับประเทศจาก family dashboard เท่านั้น UI และสูตร KPI อ่าน reviewed artifact ชุดเดียวกันทั้งประเทศ จังหวัด และภาค การ ingest เข้า Candidate จึงไม่เปลี่ยนค่าบนหน้า public ทันที
+
+หลัง ingest `f2_target_household` ให้ใช้ run directory ที่ `ResponseRecorder` บันทึกสถานะ `complete` แล้ว build แบบ offline:
+
+```powershell
+python -m tools.build_apptech_aggregates --run-dir data/runtime/raw/f2_target_household/<run_id>
+python -m app.cli publication receipt
+python -m app.cli check
+```
+
+Builder ตรวจ SHA-256/ขนาดของ response และบังคับให้มีสอง dashboard ครบทุก `dashboard_year_filters` ใน plan ก่อนเขียน `apptech_aggregates.json` กับ provenance manifest ถ้า schema หรือยอดเงินขาดจะหยุด ไม่แทนค่าที่หายด้วยศูนย์ `generated_at` คือเวลาบันทึกหลักฐาน ส่วน `as_of` เป็น null เพราะต้นทางไม่ได้ระบุวันที่อ้างอิงชุดข้อมูล ยอดเศรษฐกิจคงเป็นค่าที่ต้นทางแสดง ไม่คำนวณใหม่หรือกระจายลงจังหวัด
+
+ไฟล์ raw อยู่ใน runtime/evidence เท่านั้น PR เผยแพร่ได้เฉพาะ projection กับ manifest/receipt ตาม contract และต้องผ่าน review ก่อน merge
+
 ## หลัง merge
 
 Railway deploy จาก `main` แล้ว Dashboard startup จึงตรวจ manifest/payload และ sync reviewed artifact เข้า PostgreSQL แบบ idempotent ภายใต้ lock นี่เป็นจุดเดียวที่ routine publication เปลี่ยน production database

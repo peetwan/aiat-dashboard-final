@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from app.connectors.base import ConnectorContext
@@ -198,3 +200,57 @@ def test_target_household_fails_closed_on_incomplete_or_duplicate_pagination():
                 ),
             }
         )
+
+
+@pytest.mark.parametrize("value", [None, "", True, -1, 1.5, "unknown", "1,2", "12 people"])
+def test_dashboard_rejects_missing_or_invalid_counts(value):
+    payload = {"สงขลา": {"total_inno": value, "gen_users": 0, "levels": {str(n): 0 for n in range(1, 5)}}}
+    with pytest.raises(RuntimeError, match="count"):
+        parse_innovator_dashboard(f"const provData = {json.dumps(payload)};")
+
+
+def test_dashboard_preserves_explicit_zero_counts():
+    payload = {"สงขลา": {"total_inno": 0, "gen_users": 0, "levels": {str(n): 0 for n in range(1, 5)}}}
+    rows = parse_innovator_dashboard(f"const provData = {json.dumps(payload)};")
+    assert rows[0][1]["total_inno"] == 0
+    zero_money = family_dashboard_html().replace("155,478,009", "0").replace("844,299,479", "0").replace("999,777,488", "0")
+    assert parse_household_economic_summary(zero_money)[1]["net_income_increased_baht"] == 0
+
+
+@pytest.mark.parametrize("html", [
+    'const provData = {"สงขลา": {}, "เชียงใหม่": []};',
+    'const provData = {"สงขลา": {}, "สงขลา": {}};',
+    'const provData = {"สงขลา": {}, " สงขลา ": {}};',
+    'const provData = {"": {}};',
+    'const provData = {};',
+])
+def test_dashboard_rejects_partial_or_duplicate_province_schema(html):
+    with pytest.raises(RuntimeError):
+        parse_innovator_dashboard(html)
+
+
+def test_dashboard_requires_levels_and_family_count_fields():
+    with pytest.raises(RuntimeError, match="levels"):
+        parse_innovator_dashboard(innovator_dashboard_html().replace('"4":123', '"5":123'))
+    with pytest.raises(RuntimeError, match="count"):
+        parse_family_dashboard(family_dashboard_html().replace('"total_hh":1377,', ""))
+    with pytest.raises(RuntimeError, match="districts"):
+        parse_family_dashboard(family_dashboard_html().replace('"districts":{"อำเภอเมืองสงขลา":175}', '"districts":null'))
+    with pytest.raises(RuntimeError, match="province"):
+        parse_innovation_dashboard('const provinceData = {"สงขลา":[],"เชียงใหม่":{}};')
+
+
+@pytest.mark.parametrize("html", ["<html>layout changed</html>", family_dashboard_html().replace("999,777,488 ฿", "missing"), family_dashboard_html() * 2])
+def test_economic_dashboard_requires_each_measure_exactly_once(html):
+    with pytest.raises(RuntimeError, match="economic dashboard"):
+        parse_household_economic_summary(html)
+
+
+def test_connector_does_not_return_partial_records_when_last_dashboard_is_invalid():
+    recorder = PageRecorder(
+        {1: search_html(1, last_page=1, products=[("10001", "ตัวอย่าง")])},
+        {DASHBOARD_URL: innovation_dashboard_html(), INNOVATOR_DASHBOARD_URL: innovator_dashboard_html(), FAMILY_DASHBOARD_URL: family_dashboard_html().replace("999,777,488 ฿", "missing")},
+    )
+    context = ConnectorContext(source={"source_id": "f2_target_household"}, plan=PLAN, settings=Settings(_env_file=None), recorder=recorder)
+    with pytest.raises(RuntimeError, match="economic dashboard"):
+        TargetHouseholdConnector().fetch(context)

@@ -34,6 +34,8 @@ def gz_jsonl(rows: list[dict]) -> bytes:
 
 @pytest.fixture()
 def fake_r2(monkeypatch):
+    # These fixtures cover R2-only behavior before an AppTech release is available.
+    monkeypatch.setattr(f4_data, "load_public_artifact", lambda *_args: {})
     products = [
         {
             "title": "เทคโนโลยี A",
@@ -183,6 +185,35 @@ def test_f4_cache_reuses_r2_objects(fake_r2):
     f4_data.f4_overview()
 
     assert len(fake_r2.calls) == first_call_count
+
+
+def test_public_f4_uses_reviewed_artifact_and_ignores_candidate_changes(fake_r2, monkeypatch):
+    from fastapi.testclient import TestClient
+    from app.database import SessionLocal
+    from app.main import app
+    from app.models import DashboardRecord, PublicArtifact
+    from app.public_data import load_public_artifact
+
+    monkeypatch.setattr(f4_data, "load_public_artifact", load_public_artifact)
+    with TestClient(app) as client:
+        before = client.get("/api/public/v1/f4/overview").json()
+        with SessionLocal() as session:
+            session.add(DashboardRecord(source_id=f4_data.APPTECH_SOURCE_ID, dataset_key="innovator_dashboard_province", source_record_id="candidate-only", record_hash="candidate-only", payload={"year_filter": "all", "province_name_th": "สงขลา", "total_inno": 999999, "gen_users": 0, "levels": {"1": 999999, "2": 0, "3": 0, "4": 0}}))
+            session.add(DashboardRecord(source_id=f4_data.APPTECH_SOURCE_ID, dataset_key="household_economic_summary", source_record_id="candidate-country", record_hash="candidate-country", payload={"year_filter": "all", "cost_reduced_baht": 999999, "income_increased_baht": 999999, "net_income_increased_baht": 999999}))
+            session.commit()
+        after = client.get("/api/public/v1/f4/overview")
+        assert after.status_code == 200
+        assert after.json() == before
+        assert next(card for card in before["cards"] if card["key"] == "economic_impact")["value"] != 999999
+        with SessionLocal() as session:
+            artifact = session.get(PublicArtifact, "f4/apptech-aggregates")
+            revised = json.loads(json.dumps(artifact.payload))
+            all_year = next(row for row in revised["household_economic_summary"] if row["year_filter"] == "all")
+            all_year["net_income_increased_baht"] = 123
+            artifact.payload = revised
+            session.commit()
+        served = client.get("/api/public/v1/f4/overview").json()
+        assert next(card for card in served["cards"] if card["key"] == "economic_impact")["value"] == 123
 
 
 def test_f4_filters_province_lists(fake_r2):
