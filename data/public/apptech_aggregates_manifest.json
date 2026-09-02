@@ -1,0 +1,53 @@
+{
+  "as_of": null,
+  "counts": {
+    "household_economic_summary": 3,
+    "innovator_dashboard_province": 218
+  },
+  "generated_at": "2026-09-02T07:34:30.242226+00:00",
+  "inputs": [
+    {
+      "bytes": 196478,
+      "sha256": "b259de1f7b1d00d060343d72bc3ad8552a9134d306a1952b02781fa6e55d492c",
+      "source_url": "https://pmua-apptech.com/dashboard/familydashboard"
+    },
+    {
+      "bytes": 159211,
+      "sha256": "8976ad10f4bafa92a8c168b9f27b2ffe6e8cf26f98d44b61b1ba0c61ac490241",
+      "source_url": "https://pmua-apptech.com/dashboard/familydashboard?year_filter=2025"
+    },
+    {
+      "bytes": 130712,
+      "sha256": "2b4fd0ab6227057c58b4d1d65859f1cb4a7eccd66e2b8bfe5630387bb269ec1b",
+      "source_url": "https://pmua-apptech.com/dashboard/familydashboard?year_filter=2026"
+    },
+    {
+      "bytes": 71867,
+      "sha256": "6dcdca2b632c31e88e97f50aaf1efc776baed77f34daa246ab41914059b5e14e",
+      "source_url": "https://pmua-apptech.com/dashboard/innovatordashboard"
+    },
+    {
+      "bytes": 71256,
+      "sha256": "401222a4e1b0f7bf6f703587a4d4a80fb9df60a16f876c56a53ef22f02f83769",
+      "source_url": "https://pmua-apptech.com/dashboard/innovatordashboard?year_filter=2025"
+    },
+    {
+      "bytes": 70752,
+      "sha256": "b6642928756d9dccc77528855bb86deb700db14ba3fdec915c1108d3920ec493",
+      "source_url": "https://pmua-apptech.com/dashboard/innovatordashboard?year_filter=2026"
+    }
+  ],
+  "output": {
+    "path": "data/public/apptech_aggregates.json",
+    "sha256": "84b47372eca8e5c27afcb067e4fa760889487b5b8f56c9b4652e057b3e588c8d"
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "direct_identifiers_included": false,
+    "individual_records_included": false
+  },
+  "recorder_manifest_sha256": "d0a88f73505d00999aa15365e6ef5843a5c6aa4bb3a3b8eb9afb78a1faca3b9a",
+  "run_id": "20260902T073423Z_publication",
+  "schema_version": "1.0.0",
+  "source_id": "f2_target_household"
+}

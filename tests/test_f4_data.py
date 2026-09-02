@@ -34,6 +34,8 @@ def gz_jsonl(rows: list[dict]) -> bytes:
 
 @pytest.fixture()
 def fake_r2(monkeypatch):
+    # These fixtures cover R2-only behavior before an AppTech release is available.
+    monkeypatch.setattr(f4_data, "load_public_artifact", lambda *_args: {})
     products = [
         {
             "title": "เทคโนโลยี A",
@@ -173,6 +175,7 @@ def test_f4_overview_parses_r2_snapshot_and_html_count(fake_r2):
     assert payload["cards"][1]["value"] == 1172
     assert payload["cards"][1]["drilldown_row_count"] == 2
     assert payload["cards"][2]["value"] == 107
+    assert payload["economic_impact_rows"] == []
     assert "1,161" in " ".join(payload["evidence_notes"])
 
 
@@ -182,6 +185,35 @@ def test_f4_cache_reuses_r2_objects(fake_r2):
     f4_data.f4_overview()
 
     assert len(fake_r2.calls) == first_call_count
+
+
+def test_public_f4_uses_reviewed_artifact_and_ignores_candidate_changes(fake_r2, monkeypatch):
+    from fastapi.testclient import TestClient
+    from app.database import SessionLocal
+    from app.main import app
+    from app.models import DashboardRecord, PublicArtifact
+    from app.public_data import load_public_artifact
+
+    monkeypatch.setattr(f4_data, "load_public_artifact", load_public_artifact)
+    with TestClient(app) as client:
+        before = client.get("/api/public/v1/f4/overview").json()
+        with SessionLocal() as session:
+            session.add(DashboardRecord(source_id=f4_data.APPTECH_SOURCE_ID, dataset_key="innovator_dashboard_province", source_record_id="candidate-only", record_hash="candidate-only", payload={"year_filter": "all", "province_name_th": "สงขลา", "total_inno": 999999, "gen_users": 0, "levels": {"1": 999999, "2": 0, "3": 0, "4": 0}}))
+            session.add(DashboardRecord(source_id=f4_data.APPTECH_SOURCE_ID, dataset_key="household_economic_summary", source_record_id="candidate-country", record_hash="candidate-country", payload={"year_filter": "all", "cost_reduced_baht": 999999, "income_increased_baht": 999999, "net_income_increased_baht": 999999}))
+            session.commit()
+        after = client.get("/api/public/v1/f4/overview")
+        assert after.status_code == 200
+        assert after.json() == before
+        assert next(card for card in before["cards"] if card["key"] == "economic_impact")["value"] != 999999
+        with SessionLocal() as session:
+            artifact = session.get(PublicArtifact, "f4/apptech-aggregates")
+            revised = json.loads(json.dumps(artifact.payload))
+            all_year = next(row for row in revised["household_economic_summary"] if row["year_filter"] == "all")
+            all_year["net_income_increased_baht"] = 123
+            artifact.payload = revised
+            session.commit()
+        served = client.get("/api/public/v1/f4/overview").json()
+        assert next(card for card in served["cards"] if card["key"] == "economic_impact")["value"] == 123
 
 
 def test_f4_filters_province_lists(fake_r2):
@@ -226,6 +258,98 @@ def test_f4_region_summary_and_lists_filter_by_region(fake_r2):
     assert innovations["total"] == 2
     assert projects["total"] == 1
     assert projects["rows"][0]["project_id"] == "p1"
+
+
+def test_f4_uses_apptech_connector_innovator_aggregates(monkeypatch, fake_r2):
+    province_names = {"90": "สงขลา", "50": "เชียงใหม่"}
+
+    def fake_apptech_records(dataset_key: str, year_filter: str = "all") -> list[dict]:
+        assert year_filter in ("all", None)
+        if dataset_key == "innovator_dashboard_province":
+            assert year_filter == "all"
+            return [
+                {
+                    "year_filter": "all",
+                    "province_name_th": "สงขลา",
+                    "total_inno": 787,
+                    "gen_users": 300,
+                    "levels": {"1": 85, "2": 329, "3": 250, "4": 123},
+                },
+                {
+                    "year_filter": "all",
+                    "province_name_th": "เชียงใหม่",
+                    "total_inno": 563,
+                    "gen_users": 127,
+                    "levels": {"1": 128, "2": 207, "3": 168, "4": 60},
+                },
+            ]
+        if dataset_key == "household_economic_summary":
+            assert year_filter is None
+            return [
+                {
+                    "year_filter": "all",
+                    "cost_reduced_baht": 10,
+                    "income_increased_baht": 20,
+                    "net_income_increased_baht": 30,
+                    "geography_note_th": "national only",
+                },
+                {
+                    "year_filter": "2025",
+                    "cost_reduced_baht": 7,
+                    "income_increased_baht": 11,
+                    "net_income_increased_baht": 18,
+                    "geography_note_th": "national only",
+                }
+            ]
+        return []
+
+    monkeypatch.setattr(f4_data, "_latest_apptech_records", fake_apptech_records)
+
+    overview = f4_data.f4_overview(province_names)
+    local = next(card for card in overview["cards"] if card["key"] == "local_innovators")
+    economic = next(card for card in overview["cards"] if card["key"] == "economic_impact")
+    assert local["value"] == 1350
+    assert local["source_behavior"] == "apptech_connector_aggregate"
+    assert local["level_counts"] == {"1": 213, "2": 536, "3": 418, "4": 183}
+    assert local["gen_users"] == 427
+    assert economic["value"] == 30
+    assert economic["geography"] == "country"
+    assert overview["economic_impact_rows"] == [
+        {
+            "year_filter": "all",
+            "label": "รวมทั้งหมด",
+            "cost_reduced_baht": 10,
+            "income_increased_baht": 20,
+            "net_income_increased_baht": 30,
+            "geography": "country",
+            "geography_note_th": "national only",
+        },
+        {
+            "year_filter": "2025",
+            "label": "2025",
+            "cost_reduced_baht": 7,
+            "income_increased_baht": 11,
+            "net_income_increased_baht": 18,
+            "geography": "country",
+            "geography_note_th": "national only",
+        }
+    ]
+
+    province = f4_data.f4_province_summary("90", "สงขลา", province_names)
+    province_local = next(card for card in province["cards"] if card["key"] == "local_innovators")
+    province_economic = next(card for card in province["cards"] if card["key"] == "economic_impact")
+    assert province_local["value"] == 787
+    assert province_local["level_counts"]["2"] == 329
+    assert province_economic["value"] is None
+    assert province_economic["source_behavior"] == "not_available_by_province"
+
+    region = f4_data.f4_region_summary("ภาคทดสอบ", ["90", "50"], province_names)
+    region_local = next(card for card in region["cards"] if card["key"] == "local_innovators")
+    region_economic = next(card for card in region["cards"] if card["key"] == "economic_impact")
+    assert region_local["value"] == 1350
+    assert region_local["gen_users"] == 427
+    assert region_economic["value"] is None
+    assert region_economic["source_behavior"] == "not_available_by_region"
 
 
 def test_f4_policy_projects_summarizes_status_and_budget(fake_r2):

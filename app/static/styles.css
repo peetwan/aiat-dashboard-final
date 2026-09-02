@@ -222,6 +222,69 @@
 .f4-country-panel .province-kpi > span { font-size: 13px; }
 .f4-kpi[disabled] { cursor: default; }
 .f4-kpi[disabled]:hover { border-color: #dce4de; background: #fff; }
+.f4-economic-table-wrap {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 15px;
+  border: 1px solid #dfe6df;
+  background: #fff;
+  border-radius: 14px;
+}
+.f4-economic-table-wrap[hidden] { display: none; }
+.f4-economic-table-wrap header {
+  display: grid;
+  gap: 4px;
+}
+.f4-economic-table-wrap header strong {
+  color: #173428;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.f4-economic-table-wrap header small {
+  color: #68756d;
+  font-size: 11px;
+  font-weight: 720;
+  line-height: 1.45;
+}
+.f4-economic-table-scroll { overflow-x: auto; }
+.f4-economic-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.f4-economic-table th,
+.f4-economic-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e3e9e4;
+  text-align: right;
+  white-space: nowrap;
+}
+.f4-economic-table thead th {
+  color: #5c6c63;
+  font-weight: 850;
+}
+.f4-economic-table th:first-child,
+.f4-economic-table td:first-child {
+  text-align: left;
+}
+.f4-economic-table tbody th {
+  color: #173f2c;
+  font-weight: 850;
+}
+.f4-economic-table tbody tr:first-child {
+  background: #f6f8f4;
+}
+.f4-economic-table tbody td {
+  color: #36473d;
+  font-weight: 760;
+}
+.f4-economic-table tbody td strong {
+  color: #173f2c;
+  font-weight: 900;
+}
 .f4-notes {
   display: grid;
   gap: 6px;

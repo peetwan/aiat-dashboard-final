@@ -1,8 +1,28 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "cca922ac6588db00a8719e00ca7381f949e0a3b8fc272ab7cb395c8892ac4c6f",
-  "artifact_count": 173,
+  "release_digest": "4334caf2057fca2e60e264cff26e7e0580d76e9d5e8f4de0bc0b8069a161e175",
+  "artifact_count": 175,
   "artifacts": [
+    {
+      "path": "data/public/apptech_aggregates.json",
+      "contract_id": "apptech_aggregates",
+      "dataset_key": "apptech_aggregates",
+      "role": "database",
+      "format": "json",
+      "bytes": 52075,
+      "sha256": "84b47372eca8e5c27afcb067e4fa760889487b5b8f56c9b4652e057b3e588c8d",
+      "contract_sha256": "527a388f285030385f154b4a1bee17934b8428853b61f6094c184ade316fb0ff"
+    },
+    {
+      "path": "data/public/apptech_aggregates_manifest.json",
+      "contract_id": "apptech_aggregates",
+      "dataset_key": "apptech_aggregates",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 1911,
+      "sha256": "8707dba5a32cd4c0e3555cfdaf2d0dc355448441bb9fa3ef3a4a5e21796c1db6",
+      "contract_sha256": "527a388f285030385f154b4a1bee17934b8428853b61f6094c184ade316fb0ff"
+    },
     {
       "path": "data/public/cultural_points.geojson",
       "contract_id": "cultural_map",

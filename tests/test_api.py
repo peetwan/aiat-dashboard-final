@@ -252,6 +252,15 @@ def test_f4_public_api_uses_r2_backed_loaders(monkeypatch):
                     {"key": "local_innovators", "value": 12059},
                 ],
                 "target_province_codes": sorted((province_codes_by_name or {}).values())[:1],
+                "economic_impact_rows": [
+                    {
+                        "year_filter": "all",
+                        "label": "รวมทั้งหมด",
+                        "cost_reduced_baht": 10,
+                        "income_increased_baht": 20,
+                        "net_income_increased_baht": 30,
+                    }
+                ],
                 "evidence_notes": [],
             },
         )
@@ -324,6 +333,7 @@ def test_f4_public_api_uses_r2_backed_loaders(monkeypatch):
             "policy_projects",
             "local_innovators",
         ]
+        assert overview.json()["economic_impact_rows"][0]["label"] == "รวมทั้งหมด"
 
         innovations = client.get("/api/public/v1/f4/innovations")
         assert innovations.status_code == 200

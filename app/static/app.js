@@ -686,6 +686,31 @@ function renderF4Card(card, scope = "country") {
     </button>`;
 }
 
+function formatBahtMillions(value) {
+  const amount = Number(value || 0);
+  return `${(amount / 1000000).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M บาท`;
+}
+
+function renderF4EconomicImpactTable(overview) {
+  const wrap = document.getElementById("f4EconomicImpactWrap");
+  const body = document.getElementById("f4EconomicImpactRows");
+  const rows = !state.selectedCode && !state.selectedRegion ? (overview.economic_impact_rows || []) : [];
+  wrap.hidden = !rows.length;
+  if (!rows.length) {
+    body.innerHTML = "";
+    return;
+  }
+  body.innerHTML = rows
+    .map((row) => `
+      <tr>
+        <th scope="row">${escapeHtml(row.label || row.year_filter || "ไม่ระบุ")}</th>
+        <td>${escapeHtml(formatBahtMillions(row.cost_reduced_baht))}</td>
+        <td>${escapeHtml(formatBahtMillions(row.income_increased_baht))}</td>
+        <td><strong>${escapeHtml(formatBahtMillions(row.net_income_increased_baht))}</strong></td>
+      </tr>`)
+    .join("");
+}
+
 function renderF4CountryPanel() {
   if (state.mapMode !== "f4" || !state.f4Overview || state.f4BoardCollapsed) return;
   const panel = document.getElementById("f4CountryPanel");
@@ -737,11 +762,12 @@ function renderF4CountryPanel() {
       ? "ภาพรวมระดับภาค"
     : "ภาพรวมระดับประเทศ";
   const cards = state.selectedCode
-    ? (overview.cards || []).filter((card) => ["innovations", "policy_projects"].includes(card.key))
+    ? (overview.cards || []).filter((card) => ["innovations", "policy_projects", "local_innovators", "economic_impact"].includes(card.key))
     : (overview.cards || []);
   document.getElementById("f4CountryCards").innerHTML = cards
     .map((card) => renderF4Card(card, "country"))
     .join("");
+  renderF4EconomicImpactTable(overview);
   document.querySelectorAll("[data-f4-country-kind]").forEach((card) => {
     card.addEventListener("click", () => {
       const tab = card.dataset.f4CountryKind === "policy_projects" ? "policy" : "innovations";
