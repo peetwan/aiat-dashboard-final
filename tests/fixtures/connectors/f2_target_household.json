@@ -10,6 +10,57 @@
         "title": "นวัตกรรมตัวอย่าง",
         "as_of": null
       }
+    },
+    {
+      "dataset_key": "innovation_dashboard_province",
+      "payload": {
+        "year_filter": "all",
+        "province_name_th": "สงขลา",
+        "innovation_count": 115
+      }
+    },
+    {
+      "dataset_key": "innovator_dashboard_province",
+      "payload": {
+        "year_filter": "all",
+        "province_name_th": "สงขลา",
+        "total_inno": 787,
+        "gen_users": 300,
+        "levels": {
+          "1": 85,
+          "2": 329,
+          "3": 250,
+          "4": 123
+        }
+      }
+    },
+    {
+      "dataset_key": "household_dashboard_province",
+      "payload": {
+        "year_filter": "all",
+        "province_name_th": "สงขลา",
+        "total_hh": 1377,
+        "total_members": 1079,
+        "total_inno": 779,
+        "total_gen": 300,
+        "districts": {
+          "อำเภอเมืองสงขลา": 175
+        },
+        "business_types": {
+          "เกษตรกร": 106
+        }
+      }
+    },
+    {
+      "dataset_key": "household_economic_summary",
+      "payload": {
+        "year_filter": "all",
+        "cost_reduced_baht": 155478009,
+        "income_increased_baht": 844299479,
+        "net_income_increased_baht": 999777488,
+        "geography": "country",
+        "geography_note_th": "AppTech public household dashboard exposes economic totals at national/year scope only."
+      }
     }
   ]
 }

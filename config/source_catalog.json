@@ -1447,7 +1447,7 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 1160,
-      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted | หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination เป็นรายการสินค้าตัดชื่อ/เบอร์/อีเมล. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest.",
+      "notes_th": "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted | หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination เป็นรายการสินค้าและ aggregate dashboard สาธารณะเท่านั้น. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest.",
       "snapshot_origin_files": [],
       "endpoints": [
         {
@@ -1463,6 +1463,84 @@
             "query_or_body": "page=<value>"
           },
           "notes_th": "หน้ารวมนวัตกรรมสาธารณะ; page=1 ตรงกับ /search ที่ไม่มี query. ไม่ดึง login/EPMS และไม่แตก familydashboard เป็นแถวครัวเรือน."
+        },
+        {
+          "endpoint_id": "2b76efe26bea0436c2f871ba8eea49ed73dbeb85fa0d2ac07cf19af7abf8522b",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard",
+          "kind": "public_innovation_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {},
+          "notes_th": "Dashboard นวัตกรรมสาธารณะ ใช้เฉพาะ aggregate รายจังหวัด ไม่ดึง login/EPMS"
+        },
+        {
+          "endpoint_id": "d84ee0be93df8f9336a7b773178f9e840cf901dabfc8bbe9ae8eb3ef9f516f89",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard",
+          "kind": "public_innovation_dashboard_year_filter",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login_year_filter",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "year_filter=<value>"
+          },
+          "notes_th": "Dashboard นวัตกรรมสาธารณะตามปี ใช้เฉพาะ aggregate รายจังหวัด"
+        },
+        {
+          "endpoint_id": "2348b0614a26c6853b4be6959763db172367dfe7f71056cd8f9b76ee3de33adf",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard/innovatordashboard",
+          "kind": "public_innovator_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {},
+          "notes_th": "Dashboard นวัตกรชุมชนสาธารณะ ใช้เฉพาะ aggregate รายจังหวัดและระดับ 1-4"
+        },
+        {
+          "endpoint_id": "f05a605508c955a8b6d24a1ee73cfd060757544a168f9c00e768f199f5f86f28",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard/innovatordashboard",
+          "kind": "public_innovator_dashboard_year_filter",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login_year_filter",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "year_filter=<value>"
+          },
+          "notes_th": "Dashboard นวัตกรชุมชนสาธารณะตามปี ใช้เฉพาะ aggregate รายจังหวัดและระดับ 1-4"
+        },
+        {
+          "endpoint_id": "af3a1effc54f73e7f003c399ddbf6961274785cee7ba048e4b89ccb312b99081",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard/familydashboard",
+          "kind": "public_family_dashboard",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {},
+          "notes_th": "Dashboard ครัวเรือนสาธารณะ ใช้เฉพาะ aggregate รายจังหวัดและมูลค่ารวมระดับประเทศ ไม่แตกเป็นแถวครัวเรือน"
+        },
+        {
+          "endpoint_id": "c5742bc5cdd26f9c1492848f5bba064755a018ec15947280d0999d7aa9041e6a",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/dashboard/familydashboard",
+          "kind": "public_family_dashboard_year_filter",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login_year_filter",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {
+            "query_or_body": "year_filter=<value>"
+          },
+          "notes_th": "Dashboard ครัวเรือนสาธารณะตามปี ใช้เฉพาะ aggregate รายจังหวัดและมูลค่ารวมระดับประเทศ"
         }
       ]
     },

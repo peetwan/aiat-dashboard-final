@@ -208,6 +208,11 @@
       "query_params": {
         "page": "$PAGE"
       },
+      "dashboard_year_filters": [
+        "all",
+        "2025",
+        "2026"
+      ],
       "completeness_gate": "commit only when every advertised /search page is fetched, each page has product links, and product IDs are unique; do not freeze a prior listing count",
       "explicit_exclusions": [
         "/login",
@@ -216,7 +221,7 @@
         "/product/show/* live detail GET during serving ingest",
         "EPMS / POST login"
       ],
-      "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; serving เก็บเฉพาะรายการจาก /search และตัดชื่อ เบอร์โทร อีเมล"
+      "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; serving เก็บรายการจาก /search และ aggregate dashboard ระดับจังหวัด/ประเทศเท่านั้น ตัดชื่อ เบอร์โทร อีเมล"
     },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",

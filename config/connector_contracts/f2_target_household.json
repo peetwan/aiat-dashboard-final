@@ -10,6 +10,34 @@
       "identity_options": [["product_id"]],
       "geography_fields": [],
       "as_of_fields": []
+    },
+    {
+      "key_pattern": "^innovation_dashboard_province$",
+      "grain_th": "หนึ่งแถว = ยอดนวัตกรรม AppTech ที่หน้า dashboard ผูกกับจังหวัดหนึ่งจังหวัด",
+      "identity_options": [["year_filter", "province_name_th"]],
+      "geography_fields": ["province_name_th"],
+      "as_of_fields": []
+    },
+    {
+      "key_pattern": "^innovator_dashboard_province$",
+      "grain_th": "หนึ่งแถว = ยอดนวัตกรชุมชน AppTech ระดับจังหวัด พร้อมจำนวนแยกระดับ 1-4",
+      "identity_options": [["year_filter", "province_name_th"]],
+      "geography_fields": ["province_name_th"],
+      "as_of_fields": []
+    },
+    {
+      "key_pattern": "^household_dashboard_province$",
+      "grain_th": "หนึ่งแถว = aggregate ครัวเรือน/สมาชิก/ประเภทธุรกิจระดับจังหวัดจาก public dashboard ไม่ใช่แถวครัวเรือน",
+      "identity_options": [["year_filter", "province_name_th"]],
+      "geography_fields": ["province_name_th"],
+      "as_of_fields": []
+    },
+    {
+      "key_pattern": "^household_economic_summary$",
+      "grain_th": "หนึ่งแถว = มูลค่าผลกระทบเศรษฐกิจระดับประเทศตามตัวกรองปีจาก public household dashboard",
+      "identity_options": [["year_filter"]],
+      "geography_fields": [],
+      "as_of_fields": []
     }
   ],
   "completeness_checks": [
@@ -17,7 +45,8 @@
     "product_id ต้องไม่ซ้ำและทุกหน้าที่ยิงต้องมีลิงก์ /product/show/{id}",
     "pagination ที่เปลี่ยนระหว่างดึงทำให้รันล้มก่อน commit",
     "ไม่ถือจำนวนสินค้าคงที่จากรอบก่อนเป็น completeness gate เพราะหน้ารวมอาจเพิ่ม/ลดได้",
-    "ไม่เรียก login, EPMS, หรือแตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดสินค้าตอน serving"
+    "อ่านเฉพาะ aggregate จาก dashboard สาธารณะ ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน",
+    "ไม่เรียก login, EPMS หรือ GET หน้ารายละเอียดสินค้าตอน serving"
   ],
   "privacy": {
     "candidate_only": true,
@@ -25,5 +54,5 @@
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
   },
   "sample_fixture": "tests/fixtures/connectors/f2_target_household.json",
-  "notes_th": "ชื่อใน registry ยังเป็นครัวเรือนมุ่งเป้า แต่เว็บสาธารณะคือตลาดนวัตกรรม AppTech; grain ที่ serving ใช้คือรายการสินค้าจาก /search"
+  "notes_th": "ชื่อใน registry ยังเป็นครัวเรือนมุ่งเป้า แต่เว็บสาธารณะคือตลาดนวัตกรรม AppTech; grain ที่ serving ใช้คือรายการสินค้าจาก /search และ aggregate dashboard สาธารณะ"
 }

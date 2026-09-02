@@ -107,6 +107,8 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
         "f4OverviewHeading",
         "showF4Country",
         "f4CountryCards",
+        "f4EconomicImpactWrap",
+        "f4EconomicImpactRows",
         "f4CountryNotes",
         "f4InnovationRows",
         "f4PolicyRows",
@@ -126,6 +128,7 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     for function_name in (
         "applyF4TargetProvinceMembership",
         "renderF4CountryPanel",
+        "renderF4EconomicImpactTable",
         "renderF4PolicySummary",
         "f4ReadinessLabel",
         "resetF4ToCountryOverview",
@@ -139,6 +142,7 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     assert "budget_baht" in script
     assert "status_summary" in script
     assert ".f4-country-panel" in styles
+    assert ".f4-economic-table" in styles
     assert ".f4-board-toggle" in styles
     assert ".f4-policy-window" in styles
     assert ".f4-donut" in styles

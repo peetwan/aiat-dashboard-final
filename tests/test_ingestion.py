@@ -838,11 +838,14 @@ def test_all_executable_plan_requests_match_the_generated_runtime_allowlist():
         {"page": 1},
     )
     assert not target_recorder._request_is_allowed("GET", target_plan["url"], None)
-    assert not target_recorder._request_is_allowed(
-        "GET",
+    for dashboard_url in [
+        "https://pmua-apptech.com/dashboard",
+        "https://pmua-apptech.com/dashboard/innovatordashboard",
         "https://pmua-apptech.com/dashboard/familydashboard",
-        None,
-    )
+    ]:
+        assert target_recorder._request_is_allowed("GET", dashboard_url, None)
+        assert target_recorder._request_is_allowed("GET", dashboard_url, {"year_filter": "2025"})
+        assert not target_recorder._request_is_allowed("GET", dashboard_url, {"scope": "unreviewed"})
 
     wallet_all_recorder = recorder_for("f2_wallet_all_realtime")
     for request in plans["f2_wallet_all_realtime"]["requests"]:

@@ -185,13 +185,24 @@ def test_wallet_and_target_household_use_reviewed_public_contracts():
     assert target["production_values_allowed"] is True
     assert target["expected_record_count"] == 1160
     assert target["snapshot_origin_files"] == []
-    assert len(target["endpoints"]) == 1
-    search = target["endpoints"][0]
+    assert len(target["endpoints"]) == 7
+    search = next(endpoint for endpoint in target["endpoints"] if endpoint["url"] == "https://pmua-apptech.com/search")
     assert search["method"] == "GET"
-    assert search["url"] == "https://pmua-apptech.com/search"
     assert search["request_template"]["query_or_body"] == "page=<value>"
     assert search["runtime_enabled"] is True
     assert search["restricted"] is False
+    dashboard_urls = {
+        endpoint["url"]
+        for endpoint in target["endpoints"]
+        if endpoint["url"] != "https://pmua-apptech.com/search"
+    }
+    assert dashboard_urls == {
+        "https://pmua-apptech.com/dashboard",
+        "https://pmua-apptech.com/dashboard/innovatordashboard",
+        "https://pmua-apptech.com/dashboard/familydashboard",
+    }
+    assert all(endpoint["runtime_enabled"] is True for endpoint in target["endpoints"])
+    assert all(endpoint["restricted"] is False for endpoint in target["endpoints"])
 
     wallet_all = by_id["f2_wallet_all_realtime"]
     assert wallet_all["expected_record_count"] == 2
@@ -250,6 +261,9 @@ def test_every_catalog_endpoint_has_evidence_and_is_not_invented():
     for endpoint in ppp_observation["observations"]:
         allowed.add(("f1_pppconnext", "GET", endpoint["url"]))
     allowed.add(("f2_target_household", "GET", "https://pmua-apptech.com/search"))
+    allowed.add(("f2_target_household", "GET", "https://pmua-apptech.com/dashboard"))
+    allowed.add(("f2_target_household", "GET", "https://pmua-apptech.com/dashboard/innovatordashboard"))
+    allowed.add(("f2_target_household", "GET", "https://pmua-apptech.com/dashboard/familydashboard"))
 
     catalog = read_json(CATALOG_PATH)
     actual = {
