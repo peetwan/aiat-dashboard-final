@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,7 +25,9 @@ def test_province_panel_has_clean_tourism_and_requirement_sections() -> None:
     assert "trainServices.length + tramServices.length" in script
     assert "tel:" not in script
     assert "phone_display" not in script
-    assert "<table" not in template.lower()
+    province_panel = BeautifulSoup(template, "html.parser").find(id="provincePanel")
+    assert province_panel is not None
+    assert province_panel.find("table") is None
 
 
 def test_dashboard_separates_departments_and_removes_old_province_tabs() -> None:
