@@ -1,0 +1,782 @@
+/* Mobile-only redesign of the province and department sheets.
+   Loaded after styles.css and only on small screens (see index.html link
+   media attribute); every rule here also sits inside one max-width query so
+   desktop is never touched. Goal: the sheet is a reading surface, so chrome
+   (handle, kicker, title, tabs) stays small and data gets the space.
+
+   Scale used throughout:
+   sheet inset 6px, radius 22px
+   title 22px, kicker 10.5px, meta 11.5px, section title 15px
+   card label 11px, card number 22px, card note 10px
+   pill tabs 34px tall, 12px text
+   Thai text keeps letter-spacing 0 and line-height >= 1.3 everywhere. */
+
+@media (max-width: 720px) {
+  /* ------------------------------------------------------------------
+     1. Sheet geometry: one shape for every panel. The search bar stays
+        on top (it already names the province) and the department dock
+        stays reachable below, so the sheet fills what is left. */
+  .atlas-shell .province-panel,
+  .atlas-shell .department-panel,
+  .atlas-shell .f1-country-panel,
+  .atlas-shell .f4-country-panel,
+  .atlas-shell .workspace-panel {
+    top: 68px;
+    right: 6px;
+    bottom: 68px;
+    left: 6px;
+    width: auto;
+    height: auto;
+    max-height: none;
+    border-radius: 22px;
+    box-shadow: 0 18px 50px rgba(20, 29, 24, 0.22);
+  }
+
+  /* The dock is the fastest way to compare departments for the same
+     province, so it stays visible under every open sheet. */
+  body.panel-open .mode-dock,
+  body.f1-province-open .mode-dock,
+  body.f1-country-open .mode-dock,
+  body.f4-country-open .mode-dock,
+  body.workspace-panel-open .mode-dock {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ------------------------------------------------------------------
+     2. Province sheet header: handle, kicker + close, title + region.
+        About 90px in total instead of roughly 300px. */
+  .atlas-shell .province-panel .panel-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .atlas-shell .province-panel .panel-head {
+    position: relative;
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: 18px 56px 2px 18px;
+    background: transparent;
+  }
+
+  .atlas-shell .province-panel .panel-head::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: #ccd3cc;
+    border-radius: 99px;
+  }
+
+  .atlas-shell .province-panel .panel-head > div {
+    gap: 8px;
+  }
+
+  .atlas-shell .province-panel .api-chip {
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .province-panel .panel-close {
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(20, 29, 24, 0.07);
+    font-size: 20px;
+  }
+
+  .atlas-shell .province-panel .province-hero,
+  .atlas-shell .province-panel.f1-only .province-title-block,
+  .atlas-shell .province-panel.department-only .province-hero {
+    flex: 0 0 auto;
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 0 18px 12px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .atlas-shell .province-panel .hero-text {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .atlas-shell .province-panel .province-title-block h1,
+  .atlas-shell .province-panel #provinceName {
+    max-width: none;
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  /* English name is decoration at this size. */
+  .atlas-shell .province-panel .province-title-block p {
+    display: none;
+  }
+
+  .atlas-shell .province-panel .hero-chips {
+    gap: 6px;
+  }
+
+  .atlas-shell .province-panel .hero-chip,
+  .atlas-shell .province-panel #provinceMeta {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: normal;
+  }
+
+  .atlas-shell .province-panel .panel-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .atlas-shell .province-panel .panel-stage::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
+     3. Generic section rhythm inside the province sheet. */
+  .atlas-shell .province-panel .panel-section,
+  .atlas-shell .province-panel .f1-province-detail,
+  .atlas-shell .province-panel .f1-source-note {
+    padding: 14px 14px 16px;
+  }
+
+  .atlas-shell .province-panel .section-heading {
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .atlas-shell .province-panel .section-heading > span {
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.4;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .atlas-shell .province-panel .section-heading > small,
+  .atlas-shell .province-panel .section-heading small {
+    max-width: 44%;
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+
+  .atlas-shell .province-panel .overview-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+
+  .atlas-shell .province-panel .overview-heading > span {
+    font-size: 15px;
+  }
+
+  .atlas-shell .province-panel .overview-heading > small {
+    max-width: none;
+    font-size: 11px;
+    text-align: left;
+  }
+
+  .atlas-shell .province-panel .section-method-note {
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+
+  .atlas-shell .province-panel .panel-footer {
+    margin: 0 14px 14px;
+    padding: 12px 14px;
+  }
+
+  /* ------------------------------------------------------------------
+     4. Number cards: label, number, note. Two per row, no fixed height. */
+  .atlas-shell .province-panel .province-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .atlas-shell .province-panel .province-kpi {
+    min-height: 0;
+    padding: 11px 12px;
+    border-radius: 12px;
+  }
+
+  .atlas-shell .province-panel .province-kpi > span {
+    min-height: 0;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .province-panel .province-kpi > strong {
+    margin-top: 6px;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  /* A missing value is a sentence, not a headline number. Applies to every
+     number card in every sheet. */
+  .atlas-shell .province-panel .province-kpi > strong.metric-na,
+  .atlas-shell .province-panel .province-kpi > strong .metric-na,
+  .atlas-shell .province-panel strong.metric-na,
+  .atlas-shell .province-panel strong > .metric-na,
+  .atlas-shell .department-panel strong > .metric-na,
+  .atlas-shell .f4-country-panel strong > .metric-na {
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .atlas-shell .province-panel .province-kpi > small {
+    margin-top: 5px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .province-panel .overview-viz-card {
+    padding: 12px 12px 13px;
+    border-radius: 12px;
+  }
+
+  .atlas-shell .province-panel .overview-viz-card > header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 10px;
+  }
+
+  .atlas-shell .province-panel .overview-viz-card h3 {
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .atlas-shell .province-panel .overview-viz-card header small,
+  .atlas-shell .province-panel .overview-viz-card header strong {
+    font-size: 10.5px;
+    text-align: left;
+  }
+
+  .atlas-shell .province-panel .overview-flow {
+    grid-template-columns: repeat(5, minmax(96px, 1fr));
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+
+  .atlas-shell .province-panel .overview-flow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .atlas-shell .province-panel .overview-flow-node > strong {
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .atlas-shell .province-panel .overview-flow-node.is-missing > strong {
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .atlas-shell .province-panel .overview-flow-node > span {
+    margin-top: 6px;
+    font-size: 10.5px;
+  }
+
+  .atlas-shell .province-panel .overview-flow-node > small {
+    font-size: 9.5px;
+  }
+
+  .atlas-shell .province-panel .overview-funding {
+    padding: 12px 14px;
+  }
+
+  .atlas-shell .province-panel .overview-funding > strong {
+    font-size: 20px;
+  }
+
+  .atlas-shell .province-panel .overview-full-cta {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .atlas-shell .province-panel .overview-full-cta strong {
+    font-size: 13px;
+  }
+
+  .atlas-shell .province-panel .research-stats strong,
+  .atlas-shell .province-panel .poverty-stats strong,
+  .atlas-shell .province-panel .housing-spatial-kpis strong,
+  .atlas-shell .province-panel .decision-card > strong,
+  .atlas-shell .province-panel .executive-country-kpis strong {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .atlas-shell .province-panel .pillar-card {
+    padding: 13px 13px 14px;
+  }
+
+  .atlas-shell .province-panel .pillar-card > strong {
+    font-size: 24px;
+  }
+
+  .atlas-shell .province-panel .executive-dimension {
+    padding: 13px;
+    border-radius: 12px;
+  }
+
+  .atlas-shell .province-panel .executive-dimension > header span {
+    font-size: 15px;
+  }
+
+  /* ------------------------------------------------------------------
+     5. F1 province view: the toolbar is the only sticky chrome, and it
+        is one scope line plus one row of pills (about 70px). */
+  .atlas-shell .province-panel .f1-province-toolbar {
+    padding: 8px 12px 8px;
+    box-shadow: 0 6px 14px rgba(22, 38, 29, 0.05);
+  }
+
+  .atlas-shell .province-panel .f1-province-heading {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .atlas-shell .province-panel .f1-province-heading strong {
+    display: none;
+  }
+
+  .atlas-shell .province-panel .f1-province-heading small {
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: left;
+  }
+
+  .atlas-shell .province-panel .f1-province-tabs {
+    gap: 6px;
+    padding: 1px 1px 2px;
+    scrollbar-width: none;
+  }
+
+  .atlas-shell .province-panel .f1-province-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .atlas-shell .province-panel .f1-province-tabs button {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .atlas-shell .province-panel .f1-province-tabs button strong {
+    display: inline;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .atlas-shell .province-panel .f1-province-tabs button small {
+    display: inline;
+    margin: 0;
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .atlas-shell .province-panel .f1-province-detail > header {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .atlas-shell .province-panel .f1-province-detail > header h3 {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .province-panel .f1-detail-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .atlas-shell .province-panel .f1-detail-stats article {
+    padding: 10px 11px;
+    border-radius: 11px;
+  }
+
+  .atlas-shell .province-panel .f1-detail-stats span,
+  .atlas-shell .province-panel .f1-detail-stats small {
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .province-panel .f1-detail-stats strong {
+    margin: 4px 0 2px;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .atlas-shell .province-panel .f1-area-group {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .atlas-shell .province-panel .f1-plain-note,
+  .atlas-shell .province-panel .f1-coverage-note,
+  .atlas-shell .province-panel .f1-limit-note {
+    margin-top: 10px;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+
+  .atlas-shell .province-panel .f1-subsection {
+    margin-top: 12px;
+  }
+
+  .atlas-shell .province-panel .f1-subsection > header {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .atlas-shell .province-panel .f1-subsection > header h4 {
+    font-size: 13px;
+  }
+
+  .atlas-shell .province-panel .f1-subsection > header small {
+    font-size: 10.5px;
+    text-align: right;
+  }
+
+  .atlas-shell .province-panel .f1-district-card > summary {
+    min-height: 50px;
+    padding: 8px 12px;
+  }
+
+  .atlas-shell .province-panel .f1-empty-state {
+    padding: 18px 14px;
+  }
+
+  .atlas-shell .province-panel .f1-empty-state strong {
+    font-size: 14px;
+  }
+
+  .atlas-shell .province-panel .f1-source-note h3 {
+    font-size: 13px;
+  }
+
+  .atlas-shell .province-panel .f1-source-note a {
+    min-height: 36px;
+    padding: 0 12px;
+  }
+
+  /* ------------------------------------------------------------------
+     6. F2/F3 province state (no data yet): a short card, not a poster. */
+  .atlas-shell .province-panel .department-province-empty {
+    padding: 12px 14px;
+  }
+
+  .atlas-shell .province-panel .department-province-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .atlas-shell .province-panel .department-province-card h2 {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .atlas-shell .province-panel .department-province-card p {
+    font-size: 12.5px;
+  }
+
+  /* ------------------------------------------------------------------
+     7. Department sheets (F1 country, F4, F2/F3/executive workspace):
+        same header recipe as the province sheet. */
+  .atlas-shell .department-panel > .department-panel-head,
+  .atlas-shell .f4-country-panel > header,
+  .atlas-shell .workspace-panel > .department-panel-head,
+  .atlas-shell .f1-country-panel > .f1-country-head {
+    position: relative;
+    min-height: 0;
+    height: auto;
+    align-items: flex-start;
+    padding: 18px 52px 10px 14px;
+  }
+
+  .atlas-shell .f4-country-panel > header {
+    position: sticky;
+    top: 0;
+  }
+
+  .atlas-shell .department-panel > .department-panel-head::before,
+  .atlas-shell .f4-country-panel > header::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: #ccd3cc;
+    border-radius: 99px;
+  }
+
+  .atlas-shell .department-panel-head h2,
+  .atlas-shell .f4-country-panel .department-panel-head h2,
+  .atlas-shell .f4-country-panel h2,
+  .atlas-shell .workspace-panel .department-panel-head h2,
+  .atlas-shell .f1-country-head h2 {
+    margin-top: 5px;
+    font-size: 19px;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  .atlas-shell .department-panel-head p,
+  .atlas-shell .f4-country-panel header p,
+  .atlas-shell .workspace-panel .department-panel-head p {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  .atlas-shell .department-kicker,
+  .atlas-shell .f1-kicker,
+  .atlas-shell .workspace-panel-head > div > span,
+  .atlas-shell .f4-country-panel header span.department-kicker {
+    min-height: 22px;
+    padding: 0 8px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .atlas-shell .department-panel > .department-panel-head > button,
+  .atlas-shell .f4-country-panel > header button,
+  .atlas-shell .workspace-panel .department-panel-head > button,
+  .atlas-shell .f1-country-head button {
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    font-size: 20px;
+  }
+
+  .atlas-shell .department-flow {
+    display: none;
+  }
+
+  .atlas-shell .f1-country-content,
+  .atlas-shell .f4-tab-panel,
+  .atlas-shell .workspace-panel-body {
+    padding: 10px 14px 16px;
+  }
+
+  .atlas-shell .f1-country-content {
+    padding-top: 12px;
+  }
+
+  /* F4 tabs: one horizontal row of pills instead of a two-by-two grid. */
+  .atlas-shell .f4-country-tabs {
+    position: static;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 8px 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .atlas-shell .f4-country-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .atlas-shell .f4-country-tabs button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .atlas-shell .f4-section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 10px;
+  }
+
+  .atlas-shell .f4-section-heading strong {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .f4-section-heading small {
+    font-size: 11px;
+    text-align: left;
+  }
+
+  .atlas-shell .department-kpi-grid,
+  .atlas-shell .f4-country-panel .department-kpi-grid,
+  .atlas-shell .f1-country-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .atlas-shell .department-kpi-card,
+  .atlas-shell .f1-country-kpis .department-kpi-card,
+  .atlas-shell .f4-country-panel .department-kpi-card,
+  .atlas-shell .f4-country-panel .province-kpi,
+  .atlas-shell .f1-country-kpis button {
+    min-height: 0;
+    padding: 11px 12px;
+    border-radius: 12px;
+  }
+
+  .atlas-shell .department-kpi-card > span,
+  .atlas-shell .f1-country-kpis .department-kpi-card > span,
+  .atlas-shell .f4-country-panel .department-kpi-card > span,
+  .atlas-shell .f4-country-panel .province-kpi > span,
+  .atlas-shell .f1-country-kpis button > span {
+    min-height: 0;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .department-kpi-card > strong,
+  .atlas-shell .f1-country-kpis .department-kpi-card > strong,
+  .atlas-shell .f4-country-panel .department-kpi-card > strong,
+  .atlas-shell .f4-country-panel .province-kpi > strong,
+  .atlas-shell .f1-country-kpis button > strong {
+    margin-top: 6px;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .atlas-shell .department-kpi-card > small,
+  .atlas-shell .f1-country-kpis .department-kpi-card > small,
+  .atlas-shell .f4-country-panel .department-kpi-card > small,
+  .atlas-shell .f4-country-panel .province-kpi > small,
+  .atlas-shell .f1-country-kpis button > small {
+    margin-top: 5px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .f4-policy-window {
+    padding: 14px;
+  }
+
+  .atlas-shell .f4-policy-main span,
+  .atlas-shell .f4-fund-summary span {
+    font-size: 12px;
+  }
+
+  .atlas-shell .f4-policy-main strong {
+    font-size: 40px;
+    line-height: 1.1;
+  }
+
+  .atlas-shell .f4-fund-summary strong {
+    font-size: 20px;
+  }
+
+  .atlas-shell .f4-list-panel {
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  .atlas-shell .f4-list-panel > header {
+    gap: 8px;
+  }
+
+  .atlas-shell .f4-list-panel > header h3 {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .atlas-shell .f4-list-panel input {
+    min-width: 0;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .atlas-shell .f4-economic-table-wrap header strong {
+    font-size: 14px;
+  }
+
+  .atlas-shell .department-province-card,
+  .atlas-shell .workspace-empty {
+    padding: 16px;
+  }
+
+  .atlas-shell .workspace-empty h3 {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  .atlas-shell .executive-country-kpis strong {
+    font-size: 22px;
+  }
+}
+
+/* Very narrow phones: single-column number cards so digits never clip. */
+@media (max-width: 340px) {
+  .atlas-shell .province-panel .province-kpi-grid,
+  .atlas-shell .province-panel .f1-detail-stats,
+  .atlas-shell .department-kpi-grid,
+  .atlas-shell .f4-country-panel .department-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

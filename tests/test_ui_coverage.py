@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -350,3 +351,41 @@ def test_full_province_page_summarizes_every_public_section_without_raw_field_du
     assert ".metric-strip" in styles
     assert ".chart-row" in styles
     assert '@media (max-width: 480px)' in styles
+
+
+def test_mobile_stylesheet_is_scoped_to_small_screens() -> None:
+    template = read("app/templates/index.html")
+    mobile = read("app/static/mobile.css")
+    script = read("app/static/app.js")
+
+    # Loaded after the main stylesheet, and only where it applies.
+    styles_at = template.index('href="/static/styles.css"')
+    mobile_at = template.index('href="/static/mobile.css')
+    assert styles_at < mobile_at
+    assert 'media="(max-width: 720px)"' in template
+
+    # Every rule lives inside a max-width query, so desktop never sees it.
+    body = re.sub(r"/\*.*?\*/", "", mobile, flags=re.DOTALL)
+    first_rule = next(line for line in body.splitlines() if line.strip())
+    assert first_rule.startswith("@media (max-width: 720px)")
+    assert "!important" not in mobile
+    assert mobile.count("@media (max-width: 720px)") == 1
+    assert "@media (min-width" not in mobile
+
+    # One sheet geometry for every panel, dock kept reachable underneath.
+    assert ".atlas-shell .province-panel,\n  .atlas-shell .department-panel," in mobile
+    assert "top: 68px;" in mobile
+    assert "bottom: 68px;" in mobile
+    assert "body.panel-open .mode-dock," in mobile
+
+    # Compact header and F1 pills; Thai text keeps zero tracking.
+    assert ".atlas-shell .province-panel #provinceName" in mobile
+    assert ".atlas-shell .province-panel .f1-province-heading strong {\n    display: none;" in mobile
+    assert ".atlas-shell .province-panel .f1-province-tabs button {" in mobile
+    assert ".atlas-shell .f4-country-tabs button {" in mobile
+    assert "letter-spacing: -0.04" not in mobile
+
+    # Missing values render as text, not as a giant number.
+    assert '<span class="metric-na">ยังไม่มีข้อมูล</span>' in script
+    assert ".province-kpi > strong .metric-na" in mobile
+    assert 'document.getElementById("panelStage"),\n        document.getElementById("f1ProvinceDetail")' in script

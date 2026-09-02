@@ -129,7 +129,8 @@ def test_f1_ui_opens_directly_and_keeps_its_tabs_within_reach() -> None:
         assert f'data-map-mode="{department_mode}"' in template
     assert "position: sticky" in styles
     assert 'fetch(`/api/public/v1/f1/provinces/${code}`' in script
-    assert 'document.getElementById("panelContent")' in f1_script
+    # The sheet scrolls inside panelStage, so tab clicks must scroll that node.
+    assert 'document.getElementById("panelStage")' in f1_script
     assert 'initialParams.get("mode")' in script
     assert 'initialParams.get("f1tab")' in script
     for field_reference in (
