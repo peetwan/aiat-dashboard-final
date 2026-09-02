@@ -62,7 +62,7 @@ python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --
 
 | หน้า | HTML | CSS/JavaScript |
 |---|---|---|
-| Dashboard และ Insights | `app/templates/index.html`, `app/templates/insights.html` | `app/static/styles.css`, `app/static/app.js`, `app/static/insights.css`, `app/static/insights.js` |
+| Dashboard และ Insights | `app/templates/index.html`, `app/templates/insights.html` | `app/static/styles.css`, `app/static/mobile.css` (เฉพาะจอเล็ก), `app/static/app.js`, `app/static/insights.css`, `app/static/insights.js` |
 | รายละเอียดจังหวัด | `app/templates/province.html` | `app/static/province.css`, `app/static/province.js` |
 | Database Explorer | `explorer/templates/index.html` | `explorer/static/styles.css`, `explorer/static/app.js` |
 

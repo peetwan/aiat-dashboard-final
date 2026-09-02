@@ -673,7 +673,7 @@ async function loadF4ProvinceOverview(code) {
 function renderF4Card(card, scope = "country") {
   const clickable = ["innovations", "policy_projects"].includes(card.key);
   const action = clickable ? ` data-f4-${scope}-kind="${card.key}"` : "";
-  const value = card.value === null || card.value === undefined ? "ยังไม่มีข้อมูล" : formatNumber(card.value);
+  const value = card.value === null || card.value === undefined ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : formatNumber(card.value);
   const unit = String(card.unit || "")
     .replace(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/gi, "")
     .replace(/\s{2,}/g, " ")
@@ -1112,7 +1112,7 @@ function f1StatCards(rows) {
     return `
     <article class="${missing ? "is-missing" : zero ? "is-zero" : ""}">
       <span>${escapeHtml(row.label)}</span>
-      <strong>${missing ? "ยังไม่มีข้อมูล" : escapeHtml(formatNumber(row.value, row.fractionDigits || 0))}</strong>
+      <strong>${missing ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : escapeHtml(formatNumber(row.value, row.fractionDigits || 0))}</strong>
       <small>${escapeHtml(row.note || "")}</small>
     </article>`;
   }).join("")}</div>`;
@@ -1408,7 +1408,7 @@ function renderF1CountryOverview() {
     const missing = item.value === null || item.value === undefined;
     return `<button type="button" class="department-kpi-card ${state.f1CountryMetric === item.key ? "active " : ""}${missing ? "is-missing" : ""}" data-f1-country-kpi="${item.key}">
       <span><b>${escapeHtml(label[0])}</b>${escapeHtml(label[1])}</span>
-      <strong>${missing ? "ยังไม่มีข้อมูล" : escapeHtml(formatNumber(item.value))}</strong>
+      <strong>${missing ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : escapeHtml(formatNumber(item.value))}</strong>
       <small>${missing ? escapeHtml(item.note) : [item.unit, item.note].filter(Boolean).map(escapeHtml).join(" ")}</small>
     </button>`;
   }).join("");
@@ -1753,8 +1753,10 @@ function renderF1Province(briefing) {
       url.searchParams.set("f1tab", state.f1ProvinceMetric);
       window.history.replaceState({}, "", url);
       renderF1Province(briefing);
+      // panelStage is the scroll container inside the sheet; panelContent
+      // itself never scrolls, so scrolling it was a no-op on every device.
       scrollF1Detail(
-        document.getElementById("panelContent"),
+        document.getElementById("panelStage"),
         document.getElementById("f1ProvinceDetail"),
         document.getElementById("f1ProvinceToolbar"),
       );
@@ -2407,7 +2409,7 @@ function sraRank(code) {
 }
 
 function overviewMetricValue(value, status) {
-  return isObservedStatus(status) ? formatNumber(value || 0) : "ยังไม่มีข้อมูล";
+  return isObservedStatus(status) ? formatNumber(value || 0) : '<span class="metric-na">ยังไม่มีข้อมูล</span>';
 }
 
 function overviewBars(entries, widthAccessor) {
@@ -2528,10 +2530,10 @@ function renderSraArea(section = {}) {
     : `จังหวัดเป้าหมายปี ${section.scope_as_of || "ไม่ระบุ"} · มีคะแนนทุนดำรงชีพปัจจุบัน`;
   document.getElementById("sraAreaNote").textContent = scoreNote;
   document.getElementById("sraAreaSummary").innerHTML = `
-    <article><span>ครัวเรือนรับความช่วยเหลือปี ${escapeHtml(latestAssistance?.year || "ล่าสุด")}</span><strong>${latestAssistance ? formatNumber(latestAssistance.households) : "ยังไม่มีข้อมูล"}</strong><small>ครัวเรือน</small></article>
-    <article><span>เหตุการณ์ช่วยเหลือ</span><strong>${latestAssistance ? formatNumber(latestAssistance.episodes) : "ยังไม่มีข้อมูล"}</strong><small>ครั้ง</small></article>
-    <article><span>OM ที่ปรากฏ</span><strong>${om.om_count !== null && om.om_count !== undefined ? formatNumber(om.om_count) : "ยังไม่มีข้อมูล"}</strong><small>โมเดล</small></article>
-    <article><span>ทุน OM ที่ต้นทางกรอก</span><strong>${om.capital_baht !== null && om.capital_baht !== undefined ? formatNumber(om.capital_baht) : "ยังไม่มีข้อมูล"}</strong><small>บาท · ไม่ใช่งบโครงการ บพท.</small></article>`;
+    <article><span>ครัวเรือนรับความช่วยเหลือปี ${escapeHtml(latestAssistance?.year || "ล่าสุด")}</span><strong>${latestAssistance ? formatNumber(latestAssistance.households) : '<span class="metric-na">ยังไม่มีข้อมูล</span>'}</strong><small>ครัวเรือน</small></article>
+    <article><span>เหตุการณ์ช่วยเหลือ</span><strong>${latestAssistance ? formatNumber(latestAssistance.episodes) : '<span class="metric-na">ยังไม่มีข้อมูล</span>'}</strong><small>ครั้ง</small></article>
+    <article><span>OM ที่ปรากฏ</span><strong>${om.om_count !== null && om.om_count !== undefined ? formatNumber(om.om_count) : '<span class="metric-na">ยังไม่มีข้อมูล</span>'}</strong><small>โมเดล</small></article>
+    <article><span>ทุน OM ที่ต้นทางกรอก</span><strong>${om.capital_baht !== null && om.capital_baht !== undefined ? formatNumber(om.capital_baht) : '<span class="metric-na">ยังไม่มีข้อมูล</span>'}</strong><small>บาท · ไม่ใช่งบโครงการ บพท.</small></article>`;
 
   const trend = section.assistance_trend || [];
   document.getElementById("sraAssistanceTrend").innerHTML = trend.length
