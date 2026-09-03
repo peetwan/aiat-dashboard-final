@@ -3228,8 +3228,8 @@
     text-align: left;
     scroll-snap-align: start;
   }
-  .f1-province-tabs button strong { display: block; font-size: 11.5px; line-height: 1.35; }
-  .f1-province-tabs button small { display: block; margin-top: 4px; color: #718078; font-size: 9.5px; line-height: 1.3; }
+  .f1-province-tabs button strong { display: block; font-size: 11.5px; line-height: 1.5; }
+  .f1-province-tabs button small { display: block; margin-top: 2px; color: #718078; font-size: 9.5px; line-height: 1.45; }
   .f1-province-tabs button:hover { border-color: #b85d29; }
   .f1-province-tabs button.active { border-color: #173d2f; background: #173d2f; color: #fff; box-shadow: 0 6px 14px rgba(23, 61, 47, 0.16); }
   .f1-province-tabs button.active small { color: #dce9e2; }
@@ -3373,11 +3373,6 @@
   .f1-empty-state { margin: 4px 0; padding: 24px 18px; border: 1px dashed #c7cbc4; background: #f5f6f2; border-radius: 14px; text-align: center; }
   .f1-empty-state strong { display: block; color: #34483d; font-size: 15px; line-height: 1.45; }
   .f1-empty-state p { margin: 6px 0 0; color: #66736b; font-size: 12px; line-height: 1.55; }
-
-  @media (min-width: 721px) {
-    .f1-province-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; }
-    .f1-province-tabs button { min-width: 0; width: 100%; }
-  }
 
   @media (min-width: 1080px) {
     body.f1-country-open .mode-dock {
@@ -5278,4 +5273,578 @@
   .f4-country-panel .department-kpi-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   F1 readability pass (2026-09-02)
+   Wide screens: the tab cards become a sticky rail on the left of the sheet,
+   the breadcrumb row is the only sticky chrome and the header is shorter.
+   Charts: segmented level bars, column charts and metric rows replace the
+   long stacked bar lists. Kept unlayered so it beats the layered F1 rules.
+   ========================================================================== */
+.f1-province-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 9px;
+}
+
+.f1-province-heading small {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: #67736c;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.f1-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
+  min-width: 0;
+}
+
+.f1-crumbs button,
+.f1-crumbs > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 1px 9px 0;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.f1-crumbs button {
+  border: 1px solid #d8ddd7;
+  background: #fff;
+  color: #263a30;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.f1-crumbs button:hover {
+  border-color: #8d3e14;
+  color: #8d3e14;
+}
+
+.f1-crumbs > span {
+  color: #8d3e14;
+  background: #fff3e8;
+}
+
+.f1-crumbs i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  margin: 0 6px 0 5px;
+  border-right: 1.5px solid #9aa59e;
+  border-bottom: 1.5px solid #9aa59e;
+  transform: rotate(-45deg);
+}
+
+/* Country panel: shorter number cards, the detail card comes into view sooner. */
+.f1-kpi-hint {
+  margin: 0 0 8px;
+  color: #68756e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.f1-country-kpis .department-kpi-card {
+  min-height: 0;
+  padding: 11px 13px;
+}
+
+.f1-country-kpis .department-kpi-card > span {
+  min-height: 0;
+}
+
+.f1-country-kpis .department-kpi-card > strong {
+  margin-top: 6px;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.f1-country-kpis .department-kpi-card > small {
+  margin-top: 5px;
+}
+
+/* Country panel steps are buttons: step 1 takes you back to the country. */
+.f1-flow button {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #68756e;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: default;
+}
+
+.f1-flow button:not(:disabled) {
+  cursor: pointer;
+}
+
+.f1-flow button:disabled {
+  opacity: 1;
+}
+
+.f1-flow button.active {
+  color: var(--department-accent-strong);
+  font-weight: 750;
+}
+
+.f1-flow button.active b {
+  color: #fff;
+  background: var(--department-accent);
+}
+
+.f1-flow button.is-link {
+  color: #263a30;
+  text-decoration: underline;
+  text-decoration-color: #b8beb9;
+  text-underline-offset: 3px;
+}
+
+.f1-flow button.is-link:hover {
+  color: var(--department-accent-strong);
+  text-decoration-color: currentColor;
+}
+
+/* Segmented level bars (well-being levels, gender). */
+.f1-level-list {
+  display: grid;
+  gap: 12px;
+}
+
+.f1-level-bar p {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 6px;
+}
+
+.f1-level-bar p strong,
+.f1-level-bar p span {
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.f1-level-bar p span {
+  color: #5d6b63;
+}
+
+.f1-level-track {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  background: #ece7df;
+  border-radius: 99px;
+}
+
+.f1-level-track i {
+  display: block;
+  height: 100%;
+  background: #b8beb9;
+}
+
+.f1-level-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.f1-level-legend li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: #5d6b63;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.f1-level-legend li::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  align-self: center;
+  background: #b8beb9;
+  border-radius: 2px;
+}
+
+.f1-level-legend b {
+  color: #263a30;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.f1-level-legend small {
+  font-size: 10px;
+}
+
+.f1-level-track .lv1, .f1-level-legend .lv1::before, .f1-indicator-levels .lv1 b { background: #b34b3f; }
+.f1-level-track .lv2, .f1-level-legend .lv2::before, .f1-indicator-levels .lv2 b { background: #c76b34; }
+.f1-level-track .lv3, .f1-level-legend .lv3::before, .f1-indicator-levels .lv3 b { background: #4a7d6a; }
+.f1-level-track .lv4, .f1-level-legend .lv4::before, .f1-indicator-levels .lv4 b { background: #2f7a56; }
+.f1-level-track .is-male, .f1-level-legend .is-male::before { background: #4a6f9c; }
+.f1-level-track .is-female, .f1-level-legend .is-female::before { background: #b0567a; }
+.f1-level-track .is-other, .f1-level-legend .is-other::before { background: #b8beb9; }
+
+.f1-indicator-levels span b {
+  display: inline-block;
+  min-width: 34px;
+  margin-bottom: 3px;
+  padding: 1px 6px;
+  color: #fff;
+  border-radius: 6px;
+}
+
+/* Column charts (values by year). */
+.f1-column-chart {
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid #e1e5df;
+  background: #fafbf8;
+  border-radius: 12px;
+}
+
+.f1-column-chart > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.f1-column-chart > header strong {
+  font-size: 12.5px;
+}
+
+.f1-column-chart > header small {
+  color: #647168;
+  font-size: 10.5px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.f1-columns {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.f1-col-group {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.f1-col-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 104px;
+  padding: 0 2px;
+  border-bottom: 1px solid #d9ded8;
+}
+
+.f1-col-bars i {
+  position: relative;
+  display: block;
+  flex: 1 1 0;
+  max-width: 28px;
+  min-height: 2px;
+  background: #c76b34;
+  border-radius: 3px 3px 0 0;
+}
+
+.f1-col-bars i.is-empty {
+  background: #d9ded8;
+}
+
+.f1-col-bars i b {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  padding-bottom: 2px;
+  transform: translateX(-50%);
+  color: #34483d;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.f1-col-bars i.is-om { background: #c76b34; }
+.f1-col-bars i.is-chain { background: #367858; }
+.f1-col-bars i.is-money { background: #7a5c3a; }
+.f1-col-bars i.is-households { background: #4a7d6a; }
+.f1-chart-legend .is-money::before { background: #7a5c3a; }
+.f1-chart-legend .is-households::before { background: #4a7d6a; }
+
+.f1-col-group > span {
+  color: #5d6b63;
+  font-size: 10.5px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Metric rows: this year, last year, change and target in one line. */
+.f1-metric-list {
+  display: grid;
+  gap: 6px;
+}
+
+.f1-metric-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  border: 1px solid #e3e5df;
+  background: #fafbf8;
+  border-radius: 10px;
+}
+
+.f1-metric-row.is-missing {
+  background: #f0f1ed;
+}
+
+.f1-metric-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.f1-metric-main span {
+  color: #5b6a62;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.f1-metric-main strong {
+  font-size: 18px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.f1-metric-main strong small {
+  color: #5b6a62;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.f1-metric-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.f1-metric-side span {
+  color: #5d6b63;
+  font-size: 10.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.f1-metric-side .is-up { color: #2f7a56; font-weight: 700; }
+.f1-metric-side .is-down { color: #b34b3f; font-weight: 700; }
+.f1-metric-side .is-flat { color: #68756e; }
+
+.f1-metric-target {
+  grid-column: 1 / -1;
+}
+
+.f1-metric-target i {
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  background: #e7eae5;
+  border-radius: 99px;
+}
+
+.f1-metric-target i b {
+  display: block;
+  height: 100%;
+  background: #367858;
+  border-radius: inherit;
+}
+
+.f1-metric-target small {
+  display: block;
+  margin-top: 4px;
+  color: #5d6b63;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.f1-progress-rows div > p strong {
+  color: #5d6b63;
+  font-weight: 600;
+}
+
+/* Other target provinces of the same region, at the end of the sheet. */
+.f1-province-switch {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.f1-province-switch > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #5d6b63;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.f1-province-switch > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.f1-province-switch button {
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid #d8ddd7;
+  background: #fff;
+  color: #263a30;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.f1-province-switch button:hover {
+  border-color: #8d3e14;
+  color: #8d3e14;
+}
+
+/* Wide screens: shorter header, tab rail on the left, content on the right. */
+@media (min-width: 721px) {
+  .province-panel.f1-only .panel-head {
+    padding: 12px 20px 0;
+  }
+
+  .province-panel.f1-only .province-title-block {
+    padding: 2px 20px 12px;
+  }
+
+  .province-panel.f1-only #provinceName {
+    font-size: 30px;
+    line-height: 1.3;
+  }
+
+  .province-panel.f1-only .f1-province-content {
+    display: grid;
+    grid-template-columns: 176px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .province-panel.f1-only .f1-province-toolbar {
+    display: contents;
+  }
+
+  .province-panel.f1-only .f1-province-heading {
+    grid-column: 1 / -1;
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    margin: 0;
+    padding: 8px 20px;
+    border-bottom: 1px solid #d9ded8;
+    background: rgba(247, 248, 244, 0.97);
+    backdrop-filter: blur(16px);
+  }
+
+  .province-panel.f1-only .f1-province-tabs {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    position: sticky;
+    top: 43px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 6px 12px 14px;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .province-panel.f1-only .f1-province-tabs button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    min-height: 54px;
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+
+  .province-panel.f1-only .f1-province-tabs button strong {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .province-panel.f1-only .f1-province-tabs button small {
+    margin-top: 1px;
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+
+  .province-panel.f1-only .f1-province-detail {
+    grid-column: 2;
+    padding: 14px 20px 18px 10px;
+  }
+
+  .province-panel.f1-only .f1-source-note {
+    grid-column: 2;
+    padding: 14px 20px 20px 10px;
+  }
+}
+
+/* Four stat cards beside the rail read better as two by two than three plus one. */
+@media (min-width: 721px) {
+  .province-panel.f1-only .f1-detail-stats:has(> article:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Thai headings and text values in the F1 country panel need the same leading as the rest. */
+.department-panel.f1-country-panel header h2 {
+  line-height: 1.3;
+}
+
+.f1-country-kpis .department-kpi-card strong .metric-na {
+  font-size: 18px;
+  line-height: 1.3;
 }
