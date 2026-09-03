@@ -1591,9 +1591,11 @@ function f1ColumnChart({ title, note = "", categories = [], series = [] }) {
     <header><strong>${escapeHtml(title)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ""}</header>
     ${series.length > 1 ? `<div class="f1-chart-legend">${series.map((item) => `<span class="is-${item.key}">${escapeHtml(item.label)}</span>`).join("")}</div>` : ""}
     <div class="f1-columns">${categories.map((category, index) => `<div class="f1-col-group"><div class="f1-col-bars">${series.map((item) => {
-      const value = Number(item.values?.[index] || 0);
-      const text = value ? (item.format ? item.format(value) : formatNumber(value)) : "";
-      return `<i class="is-${item.key}${value ? "" : " is-empty"}" style="height:${(value / max * 100).toFixed(1)}%"><b>${escapeHtml(text)}</b></i>`;
+      const raw = item.values?.[index];
+      const missing = raw === null || raw === undefined || raw === "";
+      const value = missing ? 0 : Number(raw) || 0;
+      const text = missing ? "" : value ? (item.format ? item.format(value) : formatNumber(value)) : "0";
+      return `<i class="is-${item.key}${missing ? " is-empty" : ""}" style="height:${(value / max * 100).toFixed(1)}%"><b>${escapeHtml(text)}</b></i>`;
     }).join("")}</div><span>${escapeHtml(String(category))}</span></div>`).join("")}</div>
   </section>`;
 }
@@ -1755,7 +1757,7 @@ function renderF1ProvinceDetail(briefing) {
     })).sort((a, b) => Number(a.year) - Number(b.year));
     const years = trend.map((row) => String(row.year));
     const models = province?.poverty_models || [];
-    const activeModels = models.filter((row) => Number(row.households || 0) || Number(row.people || 0) || Number(row.poor_people || 0));
+    const activeModels = models.filter((row) => ["households", "people", "poor_people"].some((field) => row[field] !== null && row[field] !== undefined));
     const modelCards = activeModels.length
       ? `<div class="f1-model-grid">${activeModels.map((row) => `<article><strong>${escapeHtml(F1_MODEL_LABELS[row.key] || row.name || row.key)}</strong><p><span>${f1Number(row.households)} ครัวเรือน</span><span>${f1Number(row.people)} คน</span><span>${f1Number(row.poor_people)} คนจน</span></p>${row.poor_income_baht ? `<small>รายได้คนจนที่บันทึกไว้ ${f1Number(row.poor_income_baht)} บาท</small>` : ""}${row.poor_income_sum_baht ? `<small>รายได้รวมที่บันทึกไว้ ${f1Number(row.poor_income_sum_baht)} บาท</small>` : ""}</article>`).join("")}</div>`
       : `<p class="f1-limit-note">ทั้ง ${formatNumber(models.length)} รูปแบบ (${models.map((row) => F1_MODEL_LABELS[row.key] || row.name || row.key).join(", ")}) ยังไม่มีตัวเลขครัวเรือนในชุดนี้</p>`;
