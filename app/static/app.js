@@ -1520,6 +1520,27 @@ function f1LevelSection(householdGroups, peopleGroups, title, note = "ระด�
   return f1Subsection(title, `<div class="f1-level-list">${bars.join("")}</div>`, note);
 }
 
+function f1PovertyLevelBar(levels, label = "ครัวเรือน", unit = "ครัวเรือน") {
+  if (!levels) return "";
+  const byLevel = Array.isArray(levels)
+    ? Object.fromEntries(levels.map((row) => [`lv${row.level}`, row]))
+    : Object.fromEntries(F1_LEVEL_LABELS.map((_, index) => [`lv${index + 1}`, { households: levels[`lv${index + 1}`] }]));
+  return f1SegmentBar({
+    label,
+    unit,
+    segments: F1_LEVEL_LABELS.map(([, name], index) => {
+      const row = byLevel[`lv${index + 1}`] || {};
+      return { name: `${index + 1} ${row.label || name}`, value: row.households, tone: `lv${index + 1}` };
+    }),
+  });
+}
+
+function f1PovertyLevelSection(levels, title, note = "ชุดข้อมูลพื้นที่ปี 2569 แยกจากผลประเมิน") {
+  const bar = f1PovertyLevelBar(levels);
+  if (!bar) return "";
+  return f1Subsection(title, `<div class="f1-level-list">${bar}</div>`, note);
+}
+
 function f1LevelSummary(levels = {}) {
   return F1_LEVEL_LABELS.map(([, name], index) => `${name} ${f1Number(levels?.[`lv${index + 1}`])}`).join(" ");
 }
@@ -1620,6 +1641,7 @@ function f1DistrictCards(province) {
         ]) : `<p class="f1-limit-note">อำเภอนี้มีอยู่ในรายชื่อพื้นที่ แต่ R2 ยังไม่มีตัวเลขปี 2569</p>`}
         ${scores.length ? f1Subsection("ทุน 5 ด้านของอำเภอ", f1CapitalChart(scores), "คะแนนเต็ม 4") : ""}
         ${f1LevelSection(district.household_groups, district.people_groups, "ระดับความเป็นอยู่ของอำเภอ")}
+        ${f1PovertyLevelSection(district.poverty_levels, "ครัวเรือนตามข้อมูลพื้นที่ปี 2569 ของอำเภอ")}
         ${district.gender ? f1Subsection("สมาชิกแยกตามเพศ", f1GenderBar(district.gender)) : ""}
         <details class="f1-tambon-block"><summary>ดูตำบลทั้งหมด ${formatNumber((district.tambons || []).length)} ตำบล มีตัวเลข ${formatNumber(tambonWithData)} ตำบล</summary>${f1TambonCards(district.tambons || [])}</details>
       </div>
@@ -1710,7 +1732,7 @@ function renderF1ProvinceDetail(briefing) {
       { label: "สมาชิกในครัวเรือน", value: stats.total_members ?? fallbackPeople, note: "คน" },
       { label: "ครัวเรือนยากจน", value: poverty.poor_households_total?.value, note: "ครัวเรือน" },
       { label: "สมาชิกครัวเรือนยากจน", value: poverty.poor_members_total?.value, note: "คน" },
-    ])}${f1LevelSection(people.household_groups, people.people_groups, "ระดับความเป็นอยู่จากผลประเมิน")}${f1Subsection("สมาชิกแยกตามเพศและช่วงอายุ", `${f1GenderBar(people.gender)}${f1CountBars(ageRows)}`)}${f1ColumnChart({
+    ])}${f1LevelSection(people.household_groups, people.people_groups, "ระดับความเป็นอยู่จากผลประเมิน")}${f1PovertyLevelSection(people.poverty_levels, "ครัวเรือนตามข้อมูลพื้นที่ปี 2569")}${f1Subsection("สมาชิกแยกตามเพศและช่วงอายุ", `${f1GenderBar(people.gender)}${f1CountBars(ageRows)}`)}${f1ColumnChart({
       title: "ครัวเรือนที่สำรวจในแต่ละปี",
       note: "จำนวนครัวเรือนตามปีสำรวจ",
       categories: surveyYears.map((row) => row.year),
