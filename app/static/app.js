@@ -1076,10 +1076,20 @@ const F1_PROVINCE_TABS = [
   { key: "capital", label: "ทุน 5 ด้าน" },
   { key: "om", label: "แนวทางแก้จน" },
   { key: "projects", label: "ผลงานโครงการ" },
-  { key: "workforce", label: "คนทำงาน" },
-  { key: "network", label: "เครือข่าย" },
   { key: "assistance", label: "ความช่วยเหลือ" },
-  { key: "plans", label: "แผนจังหวัด" },
+  { key: "plans", label: "แผนจังหวัด", missing: true },
+];
+// "คนทำงาน" and "เครือข่าย" used to be tabs of their own; they are now
+// sections inside "ผลงานโครงการ", so older links still land somewhere useful.
+const F1_LEGACY_TAB_KEYS = { workforce: "projects", network: "projects" };
+
+// Well-being levels named the way the SRA-DSS source names them (ระดับ 1 ถึง 4),
+// so the same words appear in score labels, bars and tambon cards.
+const F1_LEVEL_LABELS = [
+  ["very_hard", "อยู่ลำบาก"],
+  ["hard", "อยู่ยาก"],
+  ["fair", "อยู่พอได้"],
+  ["good", "อยู่ดี"],
 ];
 
 const F1_CAPITAL_LABELS = {
@@ -1144,25 +1154,6 @@ function f1PeopleBars(rows) {
   </section>`;
 }
 
-function f1OmTrendChart(rows) {
-  const visibleRows = rows.filter((row) => Number(row.om_count || 0) || Number(row.chain_count || 0) || Number(row.capital_baht || 0));
-  if (!visibleRows.length) return "";
-  const maxCount = Math.max(1, ...visibleRows.flatMap((row) => [Number(row.om_count || 0), Number(row.chain_count || 0)]));
-  return `<section class="f1-trend-chart" aria-label="แนวโน้มแนวทางแก้จนและห่วงโซ่อาชีพรายปี">
-    <header><strong>แนวโน้มตามปี</strong><small>แท่งเปรียบเทียบเฉพาะจำนวนแนวทางและห่วงโซ่อาชีพ</small></header>
-    <div class="f1-chart-legend"><span class="is-om">แนวทางแก้จน</span><span class="is-chain">ห่วงโซ่อาชีพ</span></div>
-    ${visibleRows.map((row) => {
-      const omCount = Number(row.om_count || 0);
-      const chainCount = Number(row.chain_count || 0);
-      return `<article>
-        <div class="f1-chart-year"><strong>${escapeHtml(row.year)}</strong><small>${f1Number(row.capital_baht)} บาท</small></div>
-        <div class="f1-bar-line is-om"><span>แนวทาง</span><i><b style="width:${(omCount / maxCount * 100).toFixed(1)}%"></b></i><strong>${f1Number(omCount)}</strong></div>
-        <div class="f1-bar-line is-chain"><span>ห่วงโซ่</span><i><b style="width:${(chainCount / maxCount * 100).toFixed(1)}%"></b></i><strong>${f1Number(chainCount)}</strong></div>
-      </article>`;
-    }).join("")}
-  </section>`;
-}
-
 function f1AssistanceChart(rows) {
   if (!rows.length) return "";
   const maxHouseholds = Math.max(1, ...rows.map((row) => Number(row.households || 0)));
@@ -1221,16 +1212,6 @@ function f1CapitalChart(rows) {
     const sd = row.standard_deviation;
     return `<article class="${f1ScoreTone(average)}"><div><span>${escapeHtml(row.label_th || row.label || row.metric_key)}</span><strong>${formatNumber(average, 2)}</strong><small>${f1ScoreLevel(average)}</small></div><i><b style="width:${Math.min(100, Math.max(0, average / 4 * 100)).toFixed(1)}%"></b></i>${sd !== null && sd !== undefined ? `<small>ค่าความกระจาย ${formatNumber(sd, 2)}</small>` : ""}</article>`;
   }).join("")}</div>`;
-}
-
-function f1ProjectCards(project, keys) {
-  const rows = keys.map((key) => project[key]).filter(Boolean);
-  if (!rows.length) return "";
-  return f1StatCards(rows.map((item) => ({
-    label: F1_PROJECT_LABELS[item.metric_key] || item.metric_label || item.metric_key,
-    value: item.value,
-    note: `${item.unit || "รายการ"} ปี ${item.year || "ล่าสุด"}`,
-  })));
 }
 
 function currentF1CountryScope() {
@@ -1400,7 +1381,14 @@ function renderF1CountryOverview() {
   document.getElementById("f1CountryScope").textContent = state.selectedRegion
     ? `${scope.name} ${formatNumber(totals.province_count)} จังหวัดเป้าหมาย`
     : `ภาพรวมประเทศไทย ${formatNumber(totals.province_count)} จังหวัดเป้าหมาย`;
-  document.getElementById("f1RegionStep").classList.toggle("active", Boolean(state.selectedRegion));
+  const countryStep = document.getElementById("f1CountryStep");
+  const regionStep = document.getElementById("f1RegionStep");
+  countryStep.classList.toggle("active", !state.selectedRegion);
+  countryStep.classList.toggle("is-link", Boolean(state.selectedRegion));
+  countryStep.disabled = !state.selectedRegion;
+  regionStep.classList.toggle("active", Boolean(state.selectedRegion));
+  regionStep.disabled = !state.selectedRegion;
+  regionStep.innerHTML = `<b>2</b> ${escapeHtml(state.selectedRegion || "เลือกภาค")}`;
   const kpis = f1CountryKpis(totals, scope.profile);
   const grid = document.getElementById("f1CountryKpis");
   grid.innerHTML = kpis.map((item) => {
@@ -1449,6 +1437,9 @@ async function loadF1Overview() {
     loading.hidden = true;
     content.hidden = false;
     renderF1CountryOverview();
+    // A province sheet opened before the overview arrived can now show the
+    // "other target provinces in this region" switcher.
+    if (state.selectedCode && state.currentBriefing && state.mapMode === "f1") renderF1Province(state.currentBriefing);
   } catch (error) {
     console.error(error);
     loading.textContent = "โหลดข้อมูลฝ่าย 1 ไม่สำเร็จ";
@@ -1502,14 +1493,116 @@ function f1CountBars(rows, title = "") {
   }).join("")}</section>`;
 }
 
-function f1GroupBreakdown(groups, title, unit) {
+function f1SegmentBar({ label, unit, segments, total = null }) {
+  const rows = segments.map((segment) => ({
+    ...segment,
+    missing: segment.value === null || segment.value === undefined || segment.value === "",
+    value: Number(segment.value || 0),
+  }));
+  if (rows.every((row) => row.missing)) return "";
+  const sum = Number(total) || rows.reduce((result, row) => result + row.value, 0);
+  const share = (value) => (sum ? value / sum * 100 : 0);
+  return `<article class="f1-level-bar${sum ? "" : " is-zero"}">
+    <p><strong>${escapeHtml(label)}</strong><span>${formatNumber(sum)} ${escapeHtml(unit)}</span></p>
+    <div class="f1-level-track">${rows.map((row) => `<i class="${row.tone}" style="width:${share(row.value).toFixed(1)}%" title="${escapeHtml(row.name)} ${formatNumber(row.value)}"></i>`).join("")}</div>
+    <ul class="f1-level-legend">${rows.map((row) => `<li class="${row.tone}"><b>${formatNumber(row.value)}</b><span>${escapeHtml(row.name)}</span><small>${formatNumber(share(row.value))}%</small></li>`).join("")}</ul>
+  </article>`;
+}
+
+function f1LevelBar(groups, label, unit) {
   if (!groups) return "";
-  return f1CountBars([
-    { label: "อยู่ลำบากมาก", value: groups.very_hard, note: unit },
-    { label: "อยู่ลำบาก", value: groups.hard, note: unit },
-    { label: "อยู่พอได้", value: groups.fair, note: unit },
-    { label: "อยู่ดี", value: groups.good, note: unit },
-  ], title);
+  return f1SegmentBar({
+    label,
+    unit,
+    total: groups.total,
+    segments: F1_LEVEL_LABELS.map(([key, name], index) => ({ name: `${index + 1} ${name}`, value: groups[key], tone: `lv${index + 1}` })),
+  });
+}
+
+function f1LevelSection(householdGroups, peopleGroups, title, note = "ระดับ 1 อยู่ลำบาก ถึงระดับ 4 อยู่ดี") {
+  const bars = [f1LevelBar(householdGroups, "ครัวเรือน", "ครัวเรือน"), f1LevelBar(peopleGroups, "สมาชิก", "คน")].filter(Boolean);
+  if (!bars.length) return "";
+  return f1Subsection(title, `<div class="f1-level-list">${bars.join("")}</div>`, note);
+}
+
+function f1PovertyLevelBar(levels, label = "ครัวเรือน", unit = "ครัวเรือน") {
+  if (!levels) return "";
+  const byLevel = Array.isArray(levels)
+    ? Object.fromEntries(levels.map((row) => [`lv${row.level}`, row]))
+    : Object.fromEntries(F1_LEVEL_LABELS.map((_, index) => [`lv${index + 1}`, { households: levels[`lv${index + 1}`] }]));
+  return f1SegmentBar({
+    label,
+    unit,
+    segments: F1_LEVEL_LABELS.map(([, name], index) => {
+      const row = byLevel[`lv${index + 1}`] || {};
+      return { name: `${index + 1} ${row.label || name}`, value: row.households, tone: `lv${index + 1}` };
+    }),
+  });
+}
+
+function f1PovertyLevelSection(levels, title, note = "ชุดข้อมูลพื้นที่ปี 2569 แยกจากผลประเมิน") {
+  const bar = f1PovertyLevelBar(levels);
+  if (!bar) return "";
+  return f1Subsection(title, `<div class="f1-level-list">${bar}</div>`, note);
+}
+
+function f1LevelSummary(levels = {}) {
+  return F1_LEVEL_LABELS.map(([, name], index) => `${name} ${f1Number(levels?.[`lv${index + 1}`])}`).join(" ");
+}
+
+function f1GenderBar(gender, label = "สมาชิก") {
+  if (!gender) return "";
+  return f1SegmentBar({
+    label,
+    unit: "คน",
+    total: gender.total,
+    segments: [
+      { name: "ชาย", value: gender.male, tone: "is-male" },
+      { name: "หญิง", value: gender.female, tone: "is-female" },
+      { name: "ไม่ระบุ", value: gender.other, tone: "is-other" },
+    ],
+  });
+}
+
+function f1ProgressRows(rows, title = "", note = "") {
+  const available = rows.filter((row) => Number(row.total) > 0 && row.value !== null && row.value !== undefined);
+  if (!available.length) return "";
+  return `<section class="f1-ratio-chart f1-progress-rows">${title ? `<header><strong>${escapeHtml(title)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ""}</header>` : ""}${available.map((row) => {
+    const percent = Math.max(0, Math.min(100, Number(row.value) / Number(row.total) * 100));
+    return `<div><p><span>${escapeHtml(row.label)}</span><strong>${f1Number(row.value)} จาก ${f1Number(row.total)} ${escapeHtml(row.unit)}</strong></p><i><b style="width:${percent.toFixed(1)}%"></b></i></div>`;
+  }).join("")}</section>`;
+}
+
+function f1CoverageRows(coverage = {}) {
+  return f1ProgressRows([
+    { label: "อำเภอที่มีตัวเลขปี 2569", value: coverage.district_data_count, total: coverage.district_list_count, unit: "อำเภอ" },
+    { label: "ตำบลที่มีตัวเลขครัวเรือน", value: coverage.tambon_data_count, total: coverage.tambon_list_count, unit: "ตำบล" },
+  ], "พื้นที่ที่มีตัวเลขปี 2569", "เทียบกับรายชื่อพื้นที่ทั้งหมดใน R2");
+}
+
+function f1Million(value) {
+  const number = Number(value || 0);
+  if (!number) return "";
+  if (Math.abs(number) >= 1000000) return `${formatNumber(number / 1000000, 1)} ล้าน`;
+  if (Math.abs(number) >= 10000) return `${formatNumber(number / 1000)} พัน`;
+  return formatNumber(number);
+}
+
+function f1ColumnChart({ title, note = "", categories = [], series = [] }) {
+  const values = series.flatMap((item) => (item.values || []).map((value) => Number(value || 0)));
+  if (!categories.length || !values.some((value) => value > 0)) return "";
+  const max = Math.max(1, ...values);
+  return `<section class="f1-column-chart">
+    <header><strong>${escapeHtml(title)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ""}</header>
+    ${series.length > 1 ? `<div class="f1-chart-legend">${series.map((item) => `<span class="is-${item.key}">${escapeHtml(item.label)}</span>`).join("")}</div>` : ""}
+    <div class="f1-columns">${categories.map((category, index) => `<div class="f1-col-group"><div class="f1-col-bars">${series.map((item) => {
+      const raw = item.values?.[index];
+      const missing = raw === null || raw === undefined || raw === "";
+      const value = missing ? 0 : Number(raw) || 0;
+      const text = missing ? "" : value ? (item.format ? item.format(value) : formatNumber(value)) : "0";
+      return `<i class="is-${item.key}${missing ? " is-empty" : ""}" style="height:${(value / max * 100).toFixed(1)}%"><b>${escapeHtml(text)}</b></i>`;
+    }).join("")}</div><span>${escapeHtml(String(category))}</span></div>`).join("")}</div>
+  </section>`;
 }
 
 function f1CapitalRows(scores = {}, spread = {}) {
@@ -1527,7 +1620,7 @@ function f1TambonCards(rows = []) {
     const hasData = row.has_current_data;
     return `<article class="${hasData ? "" : "is-missing"}">
       <header><strong>ตำบล${escapeHtml(row.tambon_name || "ไม่ระบุชื่อ")}</strong><small>${escapeHtml(row.tambon_code || "")}</small></header>
-      ${hasData ? `<p><span>${f1Number(row.households)} ครัวเรือน</span><span>${f1Number(row.people)} คน</span></p><p class="f1-tambon-extra"><span>ชาย ${f1Number(row.gender?.male)}</span><span>หญิง ${f1Number(row.gender?.female)}</span><span>ไม่ระบุ ${f1Number(row.gender?.other)}</span></p><footer><span>คะแนนทุน ${f1Number(row.average_score, 2)}</span><span>อยู่ลำบากมาก ${f1Number(row.poverty_levels?.lv1)} อยู่ลำบาก ${f1Number(row.poverty_levels?.lv2)} อยู่พอได้ ${f1Number(row.poverty_levels?.lv3)} อยู่ดี ${f1Number(row.poverty_levels?.lv4)}</span></footer>` : `<p>มีรายชื่อตำบล แต่ยังไม่มีตัวเลขครัวเรือนปี 2569</p>`}
+      ${hasData ? `<p><span>${f1Number(row.households)} ครัวเรือน</span><span>${f1Number(row.people)} คน</span></p><p class="f1-tambon-extra"><span>ชาย ${f1Number(row.gender?.male)}</span><span>หญิง ${f1Number(row.gender?.female)}</span><span>ไม่ระบุ ${f1Number(row.gender?.other)}</span></p><footer><span>คะแนนทุน ${f1Number(row.average_score, 2)}</span><span>${f1LevelSummary(row.poverty_levels)}</span></footer>` : `<p>มีรายชื่อตำบล แต่ยังไม่มีตัวเลขครัวเรือนปี 2569</p>`}
     </article>`;
   }).join("")}</div>`;
 }
@@ -1538,12 +1631,7 @@ function f1DistrictCards(province) {
   if (!districts.length) return `<p class="f1-limit-note">ยังไม่มีรายชื่ออำเภอของจังหวัดนี้</p>`;
   const missingDistricts = Math.max(0, Number(coverage.district_list_count || 0) - Number(coverage.district_data_count || 0));
   const missingTambons = Math.max(0, Number(coverage.tambon_list_count || 0) - Number(coverage.tambon_data_count || 0));
-  return `${f1StatCards([
-    { label: "รายชื่ออำเภอที่มีใน R2", value: coverage.district_list_count, note: "อำเภอ" },
-    { label: "อำเภอที่มีตัวเลขปี 2569", value: coverage.district_data_count, note: "อำเภอ" },
-    { label: "รายชื่อตำบลที่มีใน R2", value: coverage.tambon_list_count, note: "ตำบล" },
-    { label: "ตำบลที่มีตัวเลขครัวเรือน", value: coverage.tambon_data_count, note: "ตำบล" },
-  ])}<p class="f1-coverage-note">อีก ${f1Number(missingDistricts)} อำเภอ และ ${f1Number(missingTambons)} ตำบล มีรายชื่อแต่ยังไม่มีตัวเลขปี 2569</p><div class="f1-district-list">${districts.map((district) => {
+  return `${f1CoverageRows(coverage)}${missingDistricts || missingTambons ? `<p class="f1-coverage-note">อีก ${f1Number(missingDistricts)} อำเภอ และ ${f1Number(missingTambons)} ตำบล มีรายชื่อแต่ยังไม่มีตัวเลขปี 2569</p>` : ""}<div class="f1-district-list">${districts.map((district) => {
     const scores = f1CapitalRows(district.dimensions || {}).filter((row) => row.average !== null && row.average !== undefined);
     const tambonWithData = (district.tambons || []).filter((row) => row.has_current_data).length;
     return `<details class="f1-district-card">
@@ -1559,19 +1647,9 @@ function f1DistrictCards(province) {
           { label: "คะแนนทุนเฉลี่ย", value: district.average_score, fractionDigits: 2, note: f1ScoreLevel(district.average_score) },
         ]) : `<p class="f1-limit-note">อำเภอนี้มีอยู่ในรายชื่อพื้นที่ แต่ R2 ยังไม่มีตัวเลขปี 2569</p>`}
         ${scores.length ? f1Subsection("ทุน 5 ด้านของอำเภอ", f1CapitalChart(scores), "คะแนนเต็ม 4") : ""}
-        ${f1GroupBreakdown(district.household_groups, "ครัวเรือนแยกตามระดับความเป็นอยู่", "ครัวเรือน")}
-        ${f1GroupBreakdown(district.people_groups, "สมาชิกแยกตามระดับความเป็นอยู่", "คน")}
-        ${f1CountBars([
-          { label: "ชาย", value: district.gender?.male, note: "คน" },
-          { label: "หญิง", value: district.gender?.female, note: "คน" },
-          { label: "ไม่ระบุ", value: district.gender?.other, note: "คน" },
-        ], "สมาชิกแยกตามเพศ")}
-        ${f1CountBars([
-          { label: "อยู่ลำบากมาก", value: district.poverty_levels?.lv1, note: "ครัวเรือน" },
-          { label: "อยู่ลำบาก", value: district.poverty_levels?.lv2, note: "ครัวเรือน" },
-          { label: "อยู่พอได้", value: district.poverty_levels?.lv3, note: "ครัวเรือน" },
-          { label: "อยู่ดี", value: district.poverty_levels?.lv4, note: "ครัวเรือน" },
-        ], "ครัวเรือนตามข้อมูลพื้นที่ปี 2569")}
+        ${f1LevelSection(district.household_groups, district.people_groups, "ระดับความเป็นอยู่ของอำเภอ")}
+        ${f1PovertyLevelSection(district.poverty_levels, "ครัวเรือนตามข้อมูลพื้นที่ปี 2569 ของอำเภอ")}
+        ${district.gender ? f1Subsection("สมาชิกแยกตามเพศ", f1GenderBar(district.gender)) : ""}
         <details class="f1-tambon-block"><summary>ดูตำบลทั้งหมด ${formatNumber((district.tambons || []).length)} ตำบล มีตัวเลข ${formatNumber(tambonWithData)} ตำบล</summary>${f1TambonCards(district.tambons || [])}</details>
       </div>
     </details>`;
@@ -1584,7 +1662,7 @@ function f1DimensionDetails(rows = []) {
     <summary><strong>${escapeHtml(F1_CAPITAL_LABELS[dimension.key] || dimension.label || dimension.key)}</strong><span>${dimension.detail_available === false ? "ยังไม่มีรายละเอียด" : `${formatNumber((dimension.sections || []).length)} หัวข้อ`}</span></summary>
     <div>${dimension.detail_available === false
       ? `<p class="f1-limit-note">ไฟล์ต้นทางปี 2569 ส่งหมวดอื่นซ้ำมา จึงไม่แสดงตัวเลขซ้ำเป็นทุนด้านนี้</p>`
-      : (dimension.sections || []).map((section) => `<details class="f1-indicator-section"><summary><strong>${escapeHtml(section.title || section.key)}</strong><span>${f1Number(section.totals?.total)} ครัวเรือน</span></summary><div class="f1-indicator-items">${(section.items || []).map((item) => `<article><header><span>${escapeHtml(item.label || "ไม่ระบุ")}</span><strong>${f1Number(item.total)} ครัวเรือน</strong></header><div class="f1-indicator-levels"><span><b>${f1Number(item.very_hard)}</b> อยู่ลำบากมาก</span><span><b>${f1Number(item.hard)}</b> อยู่ลำบาก</span><span><b>${f1Number(item.fair)}</b> อยู่พอได้</span><span><b>${f1Number(item.good)}</b> อยู่ดี</span></div></article>`).join("")}</div></details>`).join("")}</div>
+      : (dimension.sections || []).map((section) => `<details class="f1-indicator-section"><summary><strong>${escapeHtml(section.title || section.key)}</strong><span>${f1Number(section.totals?.total)} ครัวเรือน</span></summary><div class="f1-indicator-items">${(section.items || []).map((item) => `<article><header><span>${escapeHtml(item.label || "ไม่ระบุ")}</span><strong>${f1Number(item.total)} ครัวเรือน</strong></header><div class="f1-indicator-levels"><span class="lv1"><b>${f1Number(item.very_hard)}</b>อยู่ลำบาก</span><span class="lv2"><b>${f1Number(item.hard)}</b>อยู่ยาก</span><span class="lv3"><b>${f1Number(item.fair)}</b>อยู่พอได้</span><span class="lv4"><b>${f1Number(item.good)}</b>อยู่ดี</span></div></article>`).join("")}</div></details>`).join("")}</div>
   </details>`).join("")}</div>`;
 }
 
@@ -1596,13 +1674,29 @@ function f1TransitionCards(rows = [], year = "") {
   }).join("")}</section>`;
 }
 
-function f1ProjectCardsFromDetail(project, keys, year = "") {
+function f1MetricRows(project, keys) {
   const rows = keys.map((key) => project[key]).filter(Boolean);
-  return f1StatCards(rows.map((item) => ({
-    label: F1_PROJECT_LABELS[item.key || item.metric_key] || item.key || item.metric_key,
-    value: item.value,
-    note: `${item.unit || "รายการ"}${year ? ` ปี ${year}` : ""}${item.yoy_pct !== null && item.yoy_pct !== undefined ? ` ${item.yoy_direction === "up" ? "เพิ่ม" : item.yoy_direction === "down" ? "ลด" : "เปลี่ยน"} ${f1Number(Math.abs(item.yoy_pct), 1)}% จากปีก่อน` : ""}`,
-  })));
+  if (!rows.length) return "";
+  return `<div class="f1-metric-list">${rows.map((item) => {
+    const key = item.key || item.metric_key;
+    const unit = item.unit || "รายการ";
+    const missing = item.value === null || item.value === undefined;
+    const hasPrev = item.prev_value !== null && item.prev_value !== undefined;
+    const hasYoy = item.yoy_pct !== null && item.yoy_pct !== undefined;
+    const direction = item.yoy_direction === "up" ? "up" : item.yoy_direction === "down" ? "down" : "flat";
+    const yoyText = direction === "up"
+      ? `เพิ่ม ${formatNumber(Math.abs(item.yoy_pct), 1)}%`
+      : direction === "down"
+        ? `ลด ${formatNumber(Math.abs(item.yoy_pct), 1)}%`
+        : "เท่าเดิม";
+    const target = Number(item.target_value);
+    const targetPct = target > 0 && !missing ? Number(item.value || 0) / target * 100 : null;
+    return `<article class="f1-metric-row${missing ? " is-missing" : ""}">
+      <div class="f1-metric-main"><span>${escapeHtml(F1_PROJECT_LABELS[key] || key)}</span><strong>${missing ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : `${formatNumber(item.value)} <small>${escapeHtml(unit)}</small>`}</strong></div>
+      <div class="f1-metric-side">${hasPrev ? `<span>ปีก่อน ${formatNumber(item.prev_value)}</span>` : ""}${hasYoy ? `<span class="is-${direction}">${yoyText}</span>` : ""}</div>
+      ${targetPct !== null ? `<div class="f1-metric-target"><i><b style="width:${Math.min(100, targetPct).toFixed(1)}%"></b></i><small>เป้าหมาย ${formatNumber(target)} ${escapeHtml(unit)} ทำได้ ${formatNumber(targetPct, 1)}%</small></div>` : ""}
+    </article>`;
+  }).join("")}</div>`;
 }
 
 function renderF1ProvinceDetail(briefing) {
@@ -1638,16 +1732,19 @@ function renderF1ProvinceDetail(briefing) {
     const stats = people.stats || {};
     const fallbackHouseholds = poverty.households_total?.value;
     const fallbackPeople = poverty.members_total?.value;
+    const surveyYears = [...(people.survey_years || [])].sort((a, b) => Number(a.year) - Number(b.year));
+    const ageRows = (people.age_groups || []).map((row) => ({ label: row.age_group, value: Number(row.male || 0) + Number(row.female || 0) + Number(row.other || 0), note: "คน" }));
     content = `${f1StatCards([
       { label: "ครัวเรือนในข้อมูล", value: stats.total_households ?? fallbackHouseholds, note: "ครัวเรือน" },
       { label: "สมาชิกในครัวเรือน", value: stats.total_members ?? fallbackPeople, note: "คน" },
       { label: "ครัวเรือนยากจน", value: poverty.poor_households_total?.value, note: "ครัวเรือน" },
       { label: "สมาชิกครัวเรือนยากจน", value: poverty.poor_members_total?.value, note: "คน" },
-    ])}${f1CountBars([
-      { label: "ชาย", value: people.gender?.male, note: "คน" },
-      { label: "หญิง", value: people.gender?.female, note: "คน" },
-      { label: "ไม่ระบุ", value: people.gender?.other, note: "คน" },
-    ], "สมาชิกแยกตามเพศ")}${f1CountBars((people.age_groups || []).map((row) => ({ label: row.age_group, value: Number(row.male || 0) + Number(row.female || 0) + Number(row.other || 0), note: "คน" })), "สมาชิกแยกตามช่วงอายุ")}${f1GroupBreakdown(people.household_groups, "ผลประเมินครัวเรือน", "ครัวเรือน")}${f1GroupBreakdown(people.people_groups, "ผลประเมินสมาชิก", "คน")}${f1CountBars((people.poverty_levels || []).map((row) => ({ label: row.label || `ระดับ ${row.level}`, value: row.households, note: "ครัวเรือน" })), "ครัวเรือนตามข้อมูลพื้นที่ปี 2569")}${f1CountBars((people.survey_years || []).map((row) => ({ label: `ปี ${row.year}`, value: row.households, note: "ครัวเรือน" })), "จำนวนครัวเรือนตามปีสำรวจ")}`;
+    ])}${f1LevelSection(people.household_groups, people.people_groups, "ระดับความเป็นอยู่จากผลประเมิน")}${f1PovertyLevelSection(people.poverty_levels, "ครัวเรือนตามข้อมูลพื้นที่ปี 2569")}${f1Subsection("สมาชิกแยกตามเพศและช่วงอายุ", `${f1GenderBar(people.gender)}${f1CountBars(ageRows)}`)}${f1ColumnChart({
+      title: "ครัวเรือนที่สำรวจในแต่ละปี",
+      note: "จำนวนครัวเรือนตามปีสำรวจ",
+      categories: surveyYears.map((row) => row.year),
+      series: [{ key: "households", label: "ครัวเรือน", values: surveyYears.map((row) => row.households) }],
+    })}`;
   } else if (key === "capital") {
     const capital = province?.livelihood_capitals || {};
     const scoreRows = f1CapitalRows(capital.scores || {}, capital.score_spread || {}).filter((row) => row.average !== null && row.average !== undefined);
@@ -1662,26 +1759,34 @@ function renderF1ProvinceDetail(briefing) {
       om_count: row.methods ?? row.om_count,
       chain_count: row.career_chains ?? row.chain_count,
       capital_baht: row.capital_baht,
-    }));
+    })).sort((a, b) => Number(a.year) - Number(b.year));
+    const years = trend.map((row) => String(row.year));
     const models = province?.poverty_models || [];
+    const activeModels = models.filter((row) => ["households", "people", "poor_people"].some((field) => row[field] !== null && row[field] !== undefined));
+    const modelCards = activeModels.length
+      ? `<div class="f1-model-grid">${activeModels.map((row) => `<article><strong>${escapeHtml(F1_MODEL_LABELS[row.key] || row.name || row.key)}</strong><p><span>${f1Number(row.households)} ครัวเรือน</span><span>${f1Number(row.people)} คน</span><span>${f1Number(row.poor_people)} คนจน</span></p>${row.poor_income_baht ? `<small>รายได้คนจนที่บันทึกไว้ ${f1Number(row.poor_income_baht)} บาท</small>` : ""}${row.poor_income_sum_baht ? `<small>รายได้รวมที่บันทึกไว้ ${f1Number(row.poor_income_sum_baht)} บาท</small>` : ""}</article>`).join("")}</div>`
+      : `<p class="f1-limit-note">ทั้ง ${formatNumber(models.length)} รูปแบบ (${models.map((row) => F1_MODEL_LABELS[row.key] || row.name || row.key).join(", ")}) ยังไม่มีตัวเลขครัวเรือนในชุดนี้</p>`;
     content = `${f1StatCards([
       { label: "แนวทางแก้จน", value: total.methods ?? total.om_count, note: "แนวทาง" },
       { label: "ห่วงโซ่อาชีพ", value: total.career_chains ?? total.chain_count, note: "ห่วงโซ่" },
       { label: "เงินทุนที่บันทึกไว้", value: total.capital_baht, note: "บาท" },
-    ])}<p class="f1-plain-note">แนวทางแก้จนคือวิธีที่โครงการใช้ช่วยครัวเรือน ห่วงโซ่อาชีพคือเส้นทางการผลิตและการขายที่โครงการสนับสนุน</p>${f1OmTrendChart(trend)}${models.length ? f1Subsection("รูปแบบการแก้จน", `<div class="f1-model-grid">${models.map((row) => `<article><strong>${escapeHtml(F1_MODEL_LABELS[row.key] || row.name || row.key)}</strong><p><span>${f1Number(row.households)} ครัวเรือน</span><span>${f1Number(row.people)} คน</span><span>${f1Number(row.poor_people)} คนจน</span></p>${row.poor_income_baht ? `<small>รายได้คนจนที่บันทึกไว้ ${f1Number(row.poor_income_baht)} บาท</small>` : ""}${row.poor_income_sum_baht ? `<small>รายได้รวมที่บันทึกไว้ ${f1Number(row.poor_income_sum_baht)} บาท</small>` : ""}</article>`).join("")}</div>`) : ""}`;
+    ])}<p class="f1-plain-note">แนวทางแก้จนคือวิธีที่โครงการใช้ช่วยครัวเรือน ห่วงโซ่อาชีพคือเส้นทางการผลิตและการขายที่โครงการสนับสนุน</p>${f1ColumnChart({
+      title: "แนวทางและห่วงโซ่อาชีพรายปี",
+      note: "จำนวนที่บันทึกในแต่ละปี",
+      categories: years,
+      series: [
+        { key: "om", label: "แนวทางแก้จน", values: trend.map((row) => row.om_count) },
+        { key: "chain", label: "ห่วงโซ่อาชีพ", values: trend.map((row) => row.chain_count) },
+      ],
+    })}${f1ColumnChart({
+      title: "เงินทุนที่บันทึกไว้รายปี",
+      note: "บาท",
+      categories: years,
+      series: [{ key: "money", label: "บาท", values: trend.map((row) => row.capital_baht), format: f1Million }],
+    })}${models.length ? f1Subsection("รูปแบบการแก้จน", modelCards) : ""}`;
   } else if (key === "projects") {
-    const overviewKeys = ["project_households", "poor_people", "local_people"];
-    const targetRows = overviewKeys.map((itemKey) => ({
-      label: F1_PROJECT_LABELS[itemKey],
-      value: project[itemKey]?.value,
-      target: project[itemKey]?.target_value,
-      unit: project[itemKey]?.unit || "รายการ",
-    }));
-    content = `<p class="f1-data-period">ข้อมูลโครงการล่าสุดปี ${escapeHtml(projectYear || "ไม่ระบุ")}</p>${f1ProjectCardsFromDetail(project, overviewKeys, projectYear)}${f1TargetProgress(targetRows)}${f1CountBars(overviewKeys.map((itemKey) => ({ label: F1_PROJECT_LABELS[itemKey], value: project[itemKey]?.prev_value, note: "ปีก่อนหน้า" })), "ตัวเลขปีก่อนหน้า")}`;
-  } else if (key === "workforce") {
-    content = `${f1ProjectCardsFromDetail(project, ["area_developer", "area_researcher", "freelance_worker", "local_people"], projectYear)}<p class="f1-limit-note">ต้นทางเปิดเผยเฉพาะจำนวนรวม จึงไม่มีรายชื่อบุคคล</p>`;
-  } else if (key === "network") {
-    content = `${f1Subsection("หน่วยงานและผู้ประกอบการ", f1ProjectCardsFromDetail(project, ["support_org", "entrepreneur", "vvn_org"], projectYear))}${f1Subsection("เทคโนโลยีและนวัตกรรม", f1ProjectCardsFromDetail(project, ["apptech_institute", "apptech_rmu", "innovation"], projectYear))}<p class="f1-limit-note">ข้อมูล R2 ชุดนี้มีจำนวนหน่วยงาน แต่ไม่มีรายชื่อหน่วยงาน</p>`;
+    const period = projectYear ? `ข้อมูลโครงการล่าสุดปี ${projectYear} เทียบกับปีก่อนหน้า` : "ข้อมูลโครงการล่าสุด เทียบกับปีก่อนหน้า";
+    content = `<p class="f1-data-period">${escapeHtml(period)}</p>${f1Subsection("ครัวเรือนและคนในโครงการ", f1MetricRows(project, ["project_households", "poor_people", "local_people"]), "แถบสีเขียวคือความคืบหน้าเทียบเป้าหมาย")}${f1Subsection("คนทำงาน", f1MetricRows(project, ["area_developer", "area_researcher", "freelance_worker"]), "ต้นทางเปิดเผยเฉพาะจำนวนรวม ไม่มีรายชื่อบุคคล")}${f1Subsection("เครือข่าย", f1MetricRows(project, ["support_org", "entrepreneur", "vvn_org"]), "จำนวนหน่วยงาน ไม่มีรายชื่อหน่วยงาน")}${f1Subsection("เทคโนโลยีและนวัตกรรม", f1MetricRows(project, ["apptech_institute", "apptech_rmu", "innovation"]))}`;
   } else if (key === "assistance") {
     const assistance = province?.assistance || {};
     const current = assistance.current || {};
@@ -1720,8 +1825,6 @@ function f1ProvinceTabValue(key, province, briefing) {
   if (key === "capital") return province?.livelihood_capitals?.scores?.overall !== null && province?.livelihood_capitals?.scores?.overall !== undefined ? `คะแนน ${f1Number(province.livelihood_capitals.scores.overall, 2)}` : "ยังไม่มีคะแนน";
   if (key === "om") return `${f1Number(province?.om?.total?.methods ?? sra.om_total?.om_count)} แนวทาง`;
   if (key === "projects") return `${f1Number(project.project_households?.value)} ครัวเรือน`;
-  if (key === "workforce") return `${f1Number(Number(project.area_developer?.value || 0) + Number(project.area_researcher?.value || 0))} คน`;
-  if (key === "network") return `${f1Number(project.support_org?.value)} หน่วยงาน`;
   if (key === "assistance") return `${f1Number(province?.assistance?.current?.unique_households)} ครัวเรือน`;
   return "ยังไม่มีข้อมูล";
 }
@@ -1732,6 +1835,10 @@ function renderF1Province(briefing) {
   const province = state.currentF1Detail?.province;
   document.getElementById("f1ProvinceLoading").hidden = true;
   document.getElementById("f1ProvinceContent").hidden = false;
+  const crumbs = document.getElementById("f1Crumbs");
+  crumbs.innerHTML = f1Crumbs();
+  crumbs.querySelector('[data-f1-crumb="country"]')?.addEventListener("click", backToCountry);
+  crumbs.querySelector('[data-f1-crumb="region"]')?.addEventListener("click", () => closePanel());
   document.getElementById("f1ProvinceScope").textContent = inScope
     ? `${province?.province_group ? `${province.province_group} ` : ""}ข้อมูลพื้นที่ปี ${province?.year || sra.scope_as_of || "2569"}`
     : "จังหวัดนี้ไม่อยู่ใน 20 จังหวัดของฝ่าย 1";
@@ -1745,7 +1852,7 @@ function renderF1Province(briefing) {
     renderF1ProvinceDetail(briefing);
     return;
   }
-  tabs.innerHTML = F1_PROVINCE_TABS.map((item) => `<button type="button" class="${state.f1ProvinceMetric === item.key ? "active" : ""}${item.key === "plans" ? " is-missing" : ""}" data-f1-province-kpi="${item.key}" aria-selected="${state.f1ProvinceMetric === item.key}"><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(f1ProvinceTabValue(item.key, province, briefing))}</small></button>`).join("");
+  tabs.innerHTML = F1_PROVINCE_TABS.map((item) => `<button type="button" class="${state.f1ProvinceMetric === item.key ? "active" : ""}${item.missing ? " is-missing" : ""}" data-f1-province-kpi="${item.key}" aria-selected="${state.f1ProvinceMetric === item.key}"><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(f1ProvinceTabValue(item.key, province, briefing))}</small></button>`).join("");
   tabs.querySelectorAll("[data-f1-province-kpi]").forEach((button) => {
     button.addEventListener("click", () => {
       state.f1ProvinceMetric = button.dataset.f1ProvinceKpi;
@@ -1758,15 +1865,52 @@ function renderF1Province(briefing) {
       scrollF1Detail(
         document.getElementById("panelStage"),
         document.getElementById("f1ProvinceDetail"),
-        document.getElementById("f1ProvinceToolbar"),
+        f1StickyHeader(),
       );
       document.querySelector(`[data-f1-province-kpi="${state.f1ProvinceMetric}"]`)?.scrollIntoView({ block: "nearest", inline: "center" });
     });
   });
   const sourceUrl = state.currentF1Detail?.source_url || sra.items?.[0]?.source_url;
   const dashboardUrl = state.currentF1Detail?.dashboard_url;
-  sourceNote.innerHTML = `<h3>ที่มาของข้อมูล</h3><p>ข้อมูลรวมจาก R2 ของ SRA-DSS แต่ละหัวข้อแสดงปีที่มีข้อมูล</p><div>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดเว็บ SRA-DSS</a>` : ""}${dashboardUrl ? `<a href="${escapeHtml(dashboardUrl)}" target="_blank" rel="noreferrer">เปิดหน้าแก้จนต้นทาง</a>` : ""}</div><small>ไม่มีรายชื่อบุคคล ข้อมูลติดต่อ หรือข้อมูลรายครัวเรือน</small>`;
+  sourceNote.innerHTML = `<h3>ที่มาของข้อมูล</h3><p>ข้อมูลรวมจาก R2 ของ SRA-DSS แต่ละหัวข้อแสดงปีที่มีข้อมูล</p><div>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดเว็บ SRA-DSS</a>` : ""}${dashboardUrl ? `<a href="${escapeHtml(dashboardUrl)}" target="_blank" rel="noreferrer">เปิดหน้าแก้จนต้นทาง</a>` : ""}</div><small>ไม่มีรายชื่อบุคคล ข้อมูลติดต่อ หรือข้อมูลรายครัวเรือน</small>${f1ProvinceSwitch()}`;
+  sourceNote.querySelectorAll("[data-f1-switch]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const stage = document.getElementById("panelStage");
+      if (stage) stage.scrollTop = 0;
+      selectProvince(button.dataset.f1Switch, true);
+    });
+  });
   renderF1ProvinceDetail(briefing);
+}
+
+function f1Crumbs() {
+  const meta = provinceByCode(state.selectedCode) || {};
+  const region = state.selectedRegion || meta.region || "";
+  const name = state.currentSummary?.province?.province_name_th || meta.province_name_th || "";
+  const separator = '<i aria-hidden="true"></i>';
+  return [
+    '<button type="button" data-f1-crumb="country" title="กลับไปภาพรวมประเทศ">ประเทศ</button>',
+    region ? `<button type="button" data-f1-crumb="region" title="กลับไปรายชื่อจังหวัดในภาค">${escapeHtml(region)}</button>` : "",
+    name ? `<span>${escapeHtml(name)}</span>` : "",
+  ].filter(Boolean).join(separator);
+}
+
+function f1ProvinceSwitch() {
+  const region = state.selectedRegion;
+  if (!region) return "";
+  const rows = (state.f1Overview?.provinces || [])
+    .filter((row) => row.region === region && row.province_code !== state.selectedCode)
+    .sort((a, b) => String(a.province_name_th).localeCompare(String(b.province_name_th), "th"));
+  if (!rows.length) return "";
+  return `<div class="f1-province-switch"><span>จังหวัดเป้าหมายอื่นใน${escapeHtml(region)}</span><div>${rows.map((row) => `<button type="button" data-f1-switch="${escapeHtml(row.province_code)}">${escapeHtml(row.province_name_th)}</button>`).join("")}</div></div>`;
+}
+
+function f1StickyHeader() {
+  const toolbar = document.getElementById("f1ProvinceToolbar");
+  if (!toolbar) return null;
+  // On wide screens the toolbar is display: contents and only the breadcrumb
+  // row stays sticky; on phones the whole toolbar (crumbs plus pills) does.
+  return getComputedStyle(toolbar).display === "contents" ? toolbar.querySelector(".f1-province-heading") : toolbar;
 }
 
 function isObservedStatus(status) {
@@ -3918,6 +4062,12 @@ function bindEvents() {
   document.getElementById("togglePoints").addEventListener("click", toggleCulturalPoints);
   document.getElementById("closeF1Country").addEventListener("click", () => hideF1CountryPanel(true));
   document.getElementById("showF1Country").addEventListener("click", showF1CountryPanel);
+  document.getElementById("f1CountryStep").addEventListener("click", () => {
+    if (state.selectedRegion) backToCountry();
+  });
+  document.getElementById("f1RegionStep").addEventListener("click", () => {
+    if (state.selectedRegion) fitRegionBounds(state.regions[state.selectedRegion]);
+  });
   document.getElementById("closeWorkspacePanel").addEventListener("click", () => hideWorkspacePanel(true));
   document.getElementById("showWorkspacePanel").addEventListener("click", showWorkspacePanel);
   document.getElementById("closeF4Country").addEventListener("click", collapseF4Board);
@@ -4258,7 +4408,7 @@ async function loadDashboard() {
 
     const initialParams = new URLSearchParams(window.location.search);
     const initialMode = initialParams.get("mode");
-    const initialF1Tab = initialParams.get("f1tab");
+    const initialF1Tab = F1_LEGACY_TAB_KEYS[initialParams.get("f1tab")] || initialParams.get("f1tab");
     if (F1_PROVINCE_TABS.some((item) => item.key === initialF1Tab)) {
       state.f1ProvinceMetric = initialF1Tab;
     }

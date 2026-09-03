@@ -137,6 +137,8 @@ def test_f1_ui_opens_directly_and_keeps_its_tabs_within_reach() -> None:
         "people.household_groups",
         "people.people_groups",
         "district.people_groups",
+        "people.poverty_levels",
+        "district.poverty_levels",
         "row.gender?.male",
         "capital.score_spread",
         "poor_income_sum_baht",

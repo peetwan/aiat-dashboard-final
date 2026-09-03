@@ -256,7 +256,7 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert "left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2)" in styles
     assert "body.workspace-panel-open .map-corner" in styles
     assert "@media (min-width: 721px) and (max-width: 949px)" in styles
-    assert "grid-template-columns: repeat(5, minmax(0, 1fr))" in styles
+    assert "grid-template-columns: 176px minmax(0, 1fr)" in styles
     assert ".department-flow {\n    display: none;" in styles
     assert ".f4-country-tabs {\n    position: static;" in styles
 
@@ -359,7 +359,7 @@ def test_mobile_stylesheet_is_scoped_to_small_screens() -> None:
     script = read("app/static/app.js")
 
     # Loaded after the main stylesheet, and only where it applies.
-    styles_at = template.index('href="/static/styles.css"')
+    styles_at = template.index('href="/static/styles.css')
     mobile_at = template.index('href="/static/mobile.css')
     assert styles_at < mobile_at
     assert 'media="(max-width: 720px)"' in template
@@ -380,7 +380,7 @@ def test_mobile_stylesheet_is_scoped_to_small_screens() -> None:
 
     # Compact header and F1 pills; Thai text keeps zero tracking.
     assert ".atlas-shell .province-panel #provinceName" in mobile
-    assert ".atlas-shell .province-panel .f1-province-heading strong {\n    display: none;" in mobile
+    assert ".atlas-shell .province-panel .f1-crumbs button," in mobile
     assert ".atlas-shell .province-panel .f1-province-tabs button {" in mobile
     assert ".atlas-shell .f4-country-tabs button {" in mobile
     assert "letter-spacing: -0.04" not in mobile
@@ -389,3 +389,41 @@ def test_mobile_stylesheet_is_scoped_to_small_screens() -> None:
     assert '<span class="metric-na">ยังไม่มีข้อมูล</span>' in script
     assert ".province-kpi > strong .metric-na" in mobile
     assert 'document.getElementById("panelStage"),\n        document.getElementById("f1ProvinceDetail")' in script
+
+
+def test_f1_panel_reads_as_one_flow_on_desktop_and_phone() -> None:
+    template = read("app/templates/index.html")
+    script = read("app/static/app.js")
+    styles = read("app/static/styles.css")
+    mobile = read("app/static/mobile.css")
+
+    # Breadcrumbs inside the sheet, clickable steps in the country panel.
+    assert 'class="f1-crumbs" id="f1Crumbs"' in template
+    assert '<button type="button" class="active" id="f1CountryStep" disabled>' in template
+    assert '<button type="button" id="f1RegionStep" disabled>' in template
+    assert 'class="f1-kpi-hint"' in template
+    assert 'data-f1-crumb="country"' in script
+    assert 'data-f1-crumb="region"' in script
+    assert "data-f1-switch=" in script
+    assert 'document.getElementById("f1CountryStep").addEventListener("click"' in script
+
+    # Seven tabs: workforce and network fold into projects, old links still work.
+    tabs = script.split("const F1_PROVINCE_TABS = [", 1)[1].split("];", 1)[0]
+    assert re.findall(r'key: "([a-z]+)"', tabs) == ["area", "people", "capital", "om", "projects", "assistance", "plans"]
+    assert 'const F1_LEGACY_TAB_KEYS = { workforce: "projects", network: "projects" }' in script
+
+    # Charts replace the stacked bar lists; level names follow the source.
+    for helper in ("function f1SegmentBar(", "function f1ColumnChart(", "function f1MetricRows(", "function f1CoverageRows("):
+        assert helper in script
+    assert "function f1OmTrendChart(" not in script
+    assert "อยู่ลำบากมาก" not in script
+
+    # Desktop: rail on the left, only the breadcrumb row sticks.
+    assert ".province-panel.f1-only .f1-province-toolbar {\n    display: contents;" in styles
+    assert "grid-template-columns: 176px minmax(0, 1fr)" in styles
+    assert ".f1-col-bars" in styles
+    assert ".f1-level-track" in styles
+
+    # Phone: crumbs shrink, pills stay, charts tighten.
+    assert ".atlas-shell .province-panel .f1-crumbs button," in mobile
+    assert ".atlas-shell .province-panel .f1-col-bars {" in mobile
