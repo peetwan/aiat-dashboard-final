@@ -1494,13 +1494,18 @@ function f1CountBars(rows, title = "") {
 }
 
 function f1SegmentBar({ label, unit, segments, total = null }) {
-  const rows = segments.map((segment) => ({ ...segment, value: Number(segment.value || 0) }));
+  const rows = segments.map((segment) => ({
+    ...segment,
+    missing: segment.value === null || segment.value === undefined || segment.value === "",
+    value: Number(segment.value || 0),
+  }));
+  if (rows.every((row) => row.missing)) return "";
   const sum = Number(total) || rows.reduce((result, row) => result + row.value, 0);
-  if (!sum) return "";
-  return `<article class="f1-level-bar">
+  const share = (value) => (sum ? value / sum * 100 : 0);
+  return `<article class="f1-level-bar${sum ? "" : " is-zero"}">
     <p><strong>${escapeHtml(label)}</strong><span>${formatNumber(sum)} ${escapeHtml(unit)}</span></p>
-    <div class="f1-level-track">${rows.map((row) => `<i class="${row.tone}" style="width:${(row.value / sum * 100).toFixed(1)}%" title="${escapeHtml(row.name)} ${formatNumber(row.value)}"></i>`).join("")}</div>
-    <ul class="f1-level-legend">${rows.map((row) => `<li class="${row.tone}"><b>${formatNumber(row.value)}</b><span>${escapeHtml(row.name)}</span><small>${formatNumber(row.value / sum * 100)}%</small></li>`).join("")}</ul>
+    <div class="f1-level-track">${rows.map((row) => `<i class="${row.tone}" style="width:${share(row.value).toFixed(1)}%" title="${escapeHtml(row.name)} ${formatNumber(row.value)}"></i>`).join("")}</div>
+    <ul class="f1-level-legend">${rows.map((row) => `<li class="${row.tone}"><b>${formatNumber(row.value)}</b><span>${escapeHtml(row.name)}</span><small>${formatNumber(share(row.value))}%</small></li>`).join("")}</ul>
   </article>`;
 }
 
@@ -1869,7 +1874,11 @@ function renderF1Province(briefing) {
   const dashboardUrl = state.currentF1Detail?.dashboard_url;
   sourceNote.innerHTML = `<h3>ที่มาของข้อมูล</h3><p>ข้อมูลรวมจาก R2 ของ SRA-DSS แต่ละหัวข้อแสดงปีที่มีข้อมูล</p><div>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดเว็บ SRA-DSS</a>` : ""}${dashboardUrl ? `<a href="${escapeHtml(dashboardUrl)}" target="_blank" rel="noreferrer">เปิดหน้าแก้จนต้นทาง</a>` : ""}</div><small>ไม่มีรายชื่อบุคคล ข้อมูลติดต่อ หรือข้อมูลรายครัวเรือน</small>${f1ProvinceSwitch()}`;
   sourceNote.querySelectorAll("[data-f1-switch]").forEach((button) => {
-    button.addEventListener("click", () => selectProvince(button.dataset.f1Switch, true));
+    button.addEventListener("click", () => {
+      const stage = document.getElementById("panelStage");
+      if (stage) stage.scrollTop = 0;
+      selectProvince(button.dataset.f1Switch, true);
+    });
   });
   renderF1ProvinceDetail(briefing);
 }
