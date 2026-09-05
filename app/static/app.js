@@ -691,19 +691,34 @@ function renderF4Card(card, scope = "country") {
 
 function formatBahtMillions(value) {
   const amount = Number(value || 0);
-  return `${(amount / 1000000).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M บาท`;
+  return `${(amount / 1000000).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ล้านบาท`;
 }
 
 function renderF4EconomicImpactTable(overview) {
   const wrap = document.getElementById("f4EconomicImpactWrap");
+  const total = document.getElementById("f4EconomicTotal");
+  const annual = document.getElementById("f4EconomicAnnual");
   const body = document.getElementById("f4EconomicImpactRows");
   const rows = !state.selectedCode && !state.selectedRegion ? (overview.economic_impact_rows || []) : [];
   wrap.hidden = !rows.length;
   if (!rows.length) {
+    total.innerHTML = "";
+    annual.hidden = true;
     body.innerHTML = "";
     return;
   }
-  body.innerHTML = rows
+  const isTotalRow = (row) => row.year_filter === "all" || row.label === "รวมทั้งหมด";
+  const totalRow = rows.find(isTotalRow);
+  const annualRows = rows.filter((row) => !isTotalRow(row));
+  total.innerHTML = totalRow ? `
+    <p class="f4-economic-total-label">รวมทั้งหมด</p>
+    <dl class="f4-economic-total-grid">
+      <div class="f4-economic-total-card is-cost"><dt>ต้นทุนที่ลดลง</dt><dd>${escapeHtml(formatBahtMillions(totalRow.cost_reduced_baht))}</dd></div>
+      <div class="f4-economic-total-card is-income"><dt>รายได้ที่เพิ่มขึ้น</dt><dd>${escapeHtml(formatBahtMillions(totalRow.income_increased_baht))}</dd></div>
+      <div class="f4-economic-total-card is-net"><dt>ผลกระทบสุทธิ</dt><dd>${escapeHtml(formatBahtMillions(totalRow.net_income_increased_baht))}</dd></div>
+    </dl>` : "";
+  annual.hidden = !annualRows.length;
+  body.innerHTML = annualRows
     .map((row) => `
       <tr>
         <th scope="row">${escapeHtml(row.label || row.year_filter || "ไม่ระบุ")}</th>
