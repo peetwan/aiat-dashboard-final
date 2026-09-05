@@ -360,14 +360,14 @@ def _source_sections(
     return [
         {
             "key": "pmua_apptech",
-            "label": "PMUA AppTech",
+            "label": "เทคโนโลยีและนวัตกรรม",
             "source_url": "https://pmua-apptech.com/",
             "province_codes": pmua_codes,
             "province_count": len(pmua_codes),
             "cards": [
                 _coverage_card(
                     "pmua_provinces_covered",
-                    "จังหวัดที่มีข้อมูล PMUA",
+                    "จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม",
                     len(pmua_codes),
                     "explicit_product_province_code",
                 ),
@@ -376,7 +376,7 @@ def _source_sections(
         },
         {
             "key": "clig",
-            "label": "CLIG",
+            "label": "นวัตกรรมเชิงนโยบาย",
             "source_url": "https://clig.oas.psu.ac.th/project/search_project",
             "province_codes": clig_codes,
             "province_count": len(clig_codes),
@@ -384,7 +384,7 @@ def _source_sections(
             "cards": [
                 _coverage_card(
                     "clig_provinces_covered",
-                    "จังหวัดที่พบโครงการ CLIG",
+                    "จังหวัดที่มีโครงการนวัตกรรมเชิงนโยบาย",
                     len(clig_codes),
                     "thai_province_name_text_match",
                 ),
@@ -605,16 +605,16 @@ def f4_overview(province_codes_by_name: dict[str, str] | None = None) -> dict[st
     clig_cards = [card for card in cards if card["key"] == "policy_projects"]
     clig_summary = _policy_project_summary([_project_row(project) for project in snapshot["clig_projects"]])
     evidence_notes = [
-        f"PMUA product parsed list has {product_count:,} rows.",
+        f"Technology and innovation product list has {product_count:,} parsed rows.",
         f"Older R2 /propose snapshot headline was {snapshot['pmua_propose_total']:,}."
         if snapshot["pmua_propose_total"]
         else "Older R2 /propose snapshot headline was not parsed.",
-        f"CLIG province text mapping currently maps {snapshot['clig_mapped_project_count']:,} / {len(snapshot['clig_projects']):,} projects.",
+        f"Policy innovation province text mapping currently maps {snapshot['clig_mapped_project_count']:,} / {len(snapshot['clig_projects']):,} projects.",
     ]
     if innovator_rows:
-        evidence_notes.append("AppTech community innovator counts are province aggregates, not per-innovation counts.")
+        evidence_notes.append("Community innovator counts are province aggregates, not per-innovation counts.")
     if economic_card:
-        evidence_notes.append("AppTech economic impact is available as a national/year aggregate only; it is not allocated to province or region.")
+        evidence_notes.append("Economic impact is available as a national/year aggregate only; it is not allocated to province or region.")
     return {
         "schema_version": "f4-dashboard-v2",
         "quality_label_th": "ข้อมูล evidence drilldown · ยังไม่ใช่ KPI รับรอง",
@@ -831,7 +831,7 @@ def f4_innovations(
     return {
         "total": len(rows),
         "rows": rows,
-        "quality_label_th": "parsed PMUA AppTech R2 evidence list",
+        "quality_label_th": "รายการหลักฐานเทคโนโลยีและนวัตกรรมจากต้นทาง",
         "source_key": PMUA_PRODUCTS_KEY,
         "detail_source_key": PMUA_PRODUCT_DETAILS_KEY,
         "detail_row_count": snapshot["pmua_product_detail_count"],
@@ -862,6 +862,6 @@ def f4_policy_projects(
         "status_summary": summary["status_summary"],
         "budget_baht_total": summary["budget_baht_total"],
         "budget_known_rows": summary["budget_known_rows"],
-        "quality_label_th": "CLIG R2 evidence list; province counts are evidence-matched",
+        "quality_label_th": "รายการหลักฐานนวัตกรรมเชิงนโยบายจากต้นทาง; จำนวนจังหวัดจับคู่จากหลักฐาน",
         "source_key": CLIG_PROJECTS_KEY,
     }

@@ -145,20 +145,20 @@ const MAP_MODES = {
   },
   f4: {
     label: "เสริมพลังท้องถิ่น",
-    legendTitle: "จังหวัดที่มีข้อมูล PMUA หรือ CLIG",
+    legendTitle: "จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม หรือนวัตกรรมเชิงนโยบาย",
     legendNote: "สีแสดงจังหวัดที่มีหลักฐานจากอย่างน้อยหนึ่งแหล่ง",
-    zeroLabel: "ไม่มีข้อมูล PMUA/CLIG",
+    zeroLabel: "ไม่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย",
     value: (province) => province.f4_covered_province ? 1 : null,
-    format: () => "มีข้อมูล PMUA/CLIG",
-    summarize: (summary) => `${formatNumber(summary.withData)} จังหวัดที่มีข้อมูล PMUA/CLIG`,
+    format: () => "มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย",
+    summarize: (summary) => `${formatNumber(summary.withData)} จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย`,
     steps: [
-      { min: 1, color: "#8060b8", label: "มีข้อมูล PMUA/CLIG" },
+      { min: 1, color: "#8060b8", label: "มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย" },
     ],
-    regionLegendTitle: "จังหวัดที่มีข้อมูล PMUA หรือ CLIG รายภาค",
+    regionLegendTitle: "จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม หรือนวัตกรรมเชิงนโยบายรายภาค",
     regionLegendNote: "สีม่วง = มีข้อมูลจากอย่างน้อยหนึ่งแหล่ง · เทา = ไม่มีข้อมูล",
     regionValue: (summary) => (summary.withData ? summary.withData : null),
     regionSteps: [
-      { min: 1, color: "#8060b8", label: "มีข้อมูล PMUA/CLIG" },
+      { min: 1, color: "#8060b8", label: "มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย" },
     ],
   },
   disaster: {
@@ -815,7 +815,7 @@ function renderF4AreaNavigation() {
       ? provinces.filter((row) => row.region === state.selectedRegion).map((row) => ({ name: row.province_name_th, code: row.province_code }))
       : Object.keys(state.regions).map((region) => ({ name: region, count: provinces.filter((row) => row.region === region).length })).filter((row) => row.count);
     rows.sort((a, b) => a.name.localeCompare(b.name, "th"));
-    area.innerHTML = `<header><h3>พื้นที่ที่มีข้อมูล PMUA/CLIG</h3><p>${state.selectedRegion ? "เลือกจังหวัดเพื่อดูข้อมูลในพื้นที่" : "เลือกภาคเพื่อดูจังหวัดที่มีข้อมูล"}</p></header><div class="department-area-list">${rows.map((row) => `<button type="button" ${row.code ? `data-f4-province="${escapeHtml(row.code)}"` : `data-f4-region="${escapeHtml(row.name)}"`}><span>${escapeHtml(row.name)}</span>${row.count == null ? "" : `<strong>${formatNumber(row.count)} จังหวัด</strong>`}</button>`).join("") || '<p class="empty-note">ไม่มีจังหวัดที่มีข้อมูล PMUA/CLIG ในภาคนี้</p>'}</div>`;
+    area.innerHTML = `<header><h3>พื้นที่ที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย</h3><p>${state.selectedRegion ? "เลือกจังหวัดเพื่อดูข้อมูลในพื้นที่" : "เลือกภาคเพื่อดูจังหวัดที่มีข้อมูล"}</p></header><div class="department-area-list">${rows.map((row) => `<button type="button" ${row.code ? `data-f4-province="${escapeHtml(row.code)}"` : `data-f4-region="${escapeHtml(row.name)}"`}><span>${escapeHtml(row.name)}</span>${row.count == null ? "" : `<strong>${formatNumber(row.count)} จังหวัด</strong>`}</button>`).join("") || '<p class="empty-note">ไม่มีจังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบายในภาคนี้</p>'}</div>`;
   }
   const switcher = document.getElementById("f4ProvinceSwitch");
   const siblings = provinces.filter((row) => row.region === state.selectedRegion && row.province_code !== state.selectedCode)
@@ -886,7 +886,7 @@ function renderF4InnovationRow(row) {
       </dl>
       <details class="f4-record-details">
         <summary>ผลลัพธ์/ผลกระทบจากต้นทาง (${formatNumber(row.outcome_count || 0)} / ${formatNumber(row.impact_count || 0)})</summary>
-        <p class="f4-record-source-note">ข้อมูลที่รายงานในหน้า PMUA AppTech</p>
+        <p class="f4-record-source-note">ข้อมูลที่รายงานในหน้าเทคโนโลยีและนวัตกรรม</p>
         ${renderF4MetricDetails("ผลลัพธ์ (Outcomes)", row.outcomes)}
         ${renderF4MetricDetails("ผลกระทบ (Impacts)", row.impacts)}
       </details>
