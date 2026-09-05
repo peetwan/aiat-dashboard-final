@@ -387,3 +387,22 @@ def test_f4_policy_status_summary_strips_trailing_codes():
         {"label": "ปิดโครงการ", "count": 42},
         {"label": "ยุติโครงการ", "count": 6},
     ]
+
+
+def test_province_coverage_excludes_other_provinces_in_shared_records(fake_r2):
+    snapshot = f4_data._snapshot()
+    snapshot["products"][0]["provinces"] = ["90", "50"]
+    snapshot["clig_projects"][0]["project_title"] = "โครงการสงขลาและเชียงใหม่"
+    summary = f4_data.f4_province_summary("90", "สงขลา", {"90": "สงขลา", "50": "เชียงใหม่"})
+    assert summary["covered_province_codes"] == ["90"]
+    assert summary["coverage_province_codes_by_source"] == {"pmua_apptech": ["90"], "clig": ["90"]}
+    assert [section["province_count"] for section in summary["source_sections"]] == [1, 1]
+
+
+def test_overview_source_summaries_preserve_project_totals(fake_r2):
+    overview = f4_data.f4_overview({"สงขลา": "90", "เชียงใหม่": "50"})
+    assert overview["coverage_province_codes_by_source"] == {"pmua_apptech": ["50", "90"], "clig": ["90"]}
+    clig = next(section for section in overview["source_sections"] if section["key"] == "clig")
+    assert clig["project_summary"] == f4_data._policy_project_summary(f4_data.f4_policy_projects()["rows"])
+    assert clig["project_summary"]["total"] == 2
+    assert clig["project_summary"]["budget_baht_total"] == 300

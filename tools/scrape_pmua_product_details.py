@@ -93,6 +93,51 @@ def text_after_label(container: BeautifulSoup, label: str) -> str:
     return clean_text(text.replace(strong.get_text(" ", strip=True), "", 1))
 
 
+def _find_heading(soup: BeautifulSoup, label: str):
+    return next(
+        (
+            heading
+            for heading in soup.find_all(["h5", "h6"])
+            if label in clean_text(heading.get_text(" ", strip=True))
+        ),
+        None,
+    )
+
+
+def _parse_metric_section(soup: BeautifulSoup, heading_label: str) -> list[dict[str, Any]]:
+    heading = _find_heading(soup, heading_label)
+    if not heading:
+        return []
+    metric_list = heading.find_next(["ul", "h5", "h6"])
+    if not metric_list or metric_list.name != "ul":
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for item in metric_list.find_all("li", recursive=False):
+        spans = item.find_all("span", recursive=False)
+        if not spans:
+            continue
+        label = clean_text(spans[0].get_text(" ", strip=True))
+        value_node = spans[-1]
+        unit_node = value_node.find("small")
+        unit = clean_text(unit_node.get_text(" ", strip=True) if unit_node else "")
+        raw_value = clean_text(value_node.get_text(" ", strip=True))
+        value_text = raw_value
+        if unit and raw_value.endswith(unit):
+            value_text = clean_text(raw_value[: -len(unit)])
+        numeric = parse_number(value_text)
+        rows.append(
+            {
+                "label": label,
+                "value": numeric if isinstance(numeric, (int, float)) else None,
+                "value_text": value_text,
+                "unit": unit,
+                "evidence_type": "source_reported",
+            }
+        )
+    return rows
+
+
 def parse_product_detail_html(html: str, product_id: int | str, source_url: str) -> dict[str, Any]:
     soup = BeautifulSoup(html, "html.parser")
     title = ""
@@ -133,6 +178,8 @@ def parse_product_detail_html(html: str, product_id: int | str, source_url: str)
         "trl_status": trl_status,
         "latitude": lat,
         "longitude": lon,
+        "outcomes": _parse_metric_section(soup, "ผลลัพธ์ (Outcomes)"),
+        "impacts": _parse_metric_section(soup, "ผลกระทบ (Impacts)"),
         "raw_html_bytes": len(html_bytes),
         "raw_html_sha256": hashlib.sha256(html_bytes).hexdigest(),
     }
@@ -179,6 +226,8 @@ def missing_product_detail_row(product_id: int, source_url: str, error: Exceptio
         "trl_status": "",
         "latitude": None,
         "longitude": None,
+        "outcomes": [],
+        "impacts": [],
         "raw_html_bytes": 0,
         "raw_html_sha256": "",
         "http_status": None,
@@ -198,10 +247,21 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(
+            {
+                key: json.dumps(value, ensure_ascii=False) if isinstance(value, (list, dict)) else value
+                for key, value in row.items()
+            }
+            for row in rows
+        )
 
 
-def write_manifest_input(run_dir: Path, as_of: str, upstream: list[dict[str, Any]]) -> None:
+def write_manifest_input(
+    run_dir: Path,
+    as_of: str,
+    upstream: list[dict[str, Any]],
+    rows: list[dict[str, Any]],
+) -> None:
     payload = {
         "fetched_by": "codex",
         "fetched_at": as_of,
@@ -211,8 +271,11 @@ def write_manifest_input(run_dir: Path, as_of: str, upstream: list[dict[str, Any
                 "dataset_key": "f4.pmua_product_details",
                 "file": "product_details.jsonl",
                 "as_of": as_of,
-                "grain": "หนึ่งแถว = หนึ่งหน้า product detail สาธารณะจาก PMUA AppTech พร้อม TRL และพิกัดที่ดึงได้",
+                "grain": "หนึ่งแถว = หนึ่งหน้า product detail สาธารณะจาก PMUA AppTech พร้อม TRL พิกัด ผลลัพธ์ และผลกระทบที่ดึงได้",
                 "identity_fields": ["product_id"],
+                "row_count": len(rows),
+                "outcome_row_count": sum(1 for row in rows if row.get("outcomes")),
+                "impact_row_count": sum(1 for row in rows if row.get("impacts")),
             }
         ],
     }
@@ -285,13 +348,20 @@ def main() -> int:
                 "source_url_template": BASE_URL,
                 "from_r2_products": bool(args.from_r2_products),
                 "product_list_key": PRODUCT_LIST_KEY if args.from_r2_products else None,
+                "outcome_row_count": sum(1 for row in rows if row.get("outcomes")),
+                "impact_row_count": sum(1 for row in rows if row.get("impacts")),
             },
             ensure_ascii=False,
             indent=2,
         ),
         encoding="utf-8",
     )
-    write_manifest_input(run_dir, as_of, upstream[:25] + ([{"url": BASE_URL, "note": f"{len(upstream)} product detail pages requested; first 25 concrete URLs listed"}] if len(upstream) > 25 else []))
+    write_manifest_input(
+        run_dir,
+        as_of,
+        upstream[:25] + ([{"url": BASE_URL, "note": f"{len(upstream)} product detail pages requested; first 25 concrete URLs listed"}] if len(upstream) > 25 else []),
+        rows,
+    )
     print(f"wrote {len(rows)} rows to {run_dir}")
 
     if args.push:
