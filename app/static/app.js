@@ -37,6 +37,8 @@ const state = {
   currentF1Detail: null,
   f1DetailLoading: false,
   f4Overview: null,
+  f4Loading: new Set(),
+  f4Errors: new Set(),
   f4RegionOverviews: {},
   f4BoardCollapsed: false,
   f4CountryTab: "overview",
@@ -593,22 +595,35 @@ async function fetchPublicJson(url) {
   return response.json();
 }
 
+async function fetchF4Scope(key, endpoint, accept) {
+  if (state.f4Loading.has(key)) return null;
+  state.f4Loading.add(key);
+  state.f4Errors.delete(key);
+  renderF4CountryPanel();
+  try {
+    const payload = await fetchPublicJson(endpoint);
+    accept(payload);
+    return payload;
+  } catch (error) {
+    state.f4Errors.add(key);
+    console.error("Failed to load F4 overview:", error);
+    return null;
+  } finally {
+    state.f4Loading.delete(key);
+    renderF4CountryPanel();
+  }
+}
+
 async function loadF4Overview() {
   if (state.f4Overview) {
     applyF4TargetProvinceMembership();
     renderF4CountryPanel();
     return state.f4Overview;
   }
-  try {
-    state.f4Overview = await fetchPublicJson("/api/public/v1/f4/overview");
+  return fetchF4Scope("country", "/api/public/v1/f4/overview", (payload) => {
+    state.f4Overview = payload;
     applyF4TargetProvinceMembership();
-    renderF4CountryPanel();
-    return state.f4Overview;
-  } catch (error) {
-    console.error("Failed to load F4 overview:", error);
-    showToast("โหลดข้อมูลเสริมพลังท้องถิ่นไม่สำเร็จ");
-    return null;
-  }
+  });
 }
 
 function applyF4TargetProvinceMembership() {
@@ -640,15 +655,9 @@ function currentF4Overview() {
 async function loadF4RegionOverview(regionName) {
   if (!regionName) return null;
   if (state.f4RegionOverviews[regionName]) return state.f4RegionOverviews[regionName];
-  try {
-    const payload = await fetchPublicJson(`/api/public/v1/f4/regions/${encodeURIComponent(regionName)}`);
+  return fetchF4Scope(`region:${regionName}`, `/api/public/v1/f4/regions/${encodeURIComponent(regionName)}`, (payload) => {
     state.f4RegionOverviews[regionName] = payload;
-    return payload;
-  } catch (error) {
-    console.error("Failed to load F4 region overview:", error);
-    showToast("โหลดข้อมูลเสริมพลังท้องถิ่นระดับภาคไม่สำเร็จ");
-    return null;
-  }
+  });
 }
 
 async function loadF4ProvinceOverview(code) {
@@ -658,21 +667,14 @@ async function loadF4ProvinceOverview(code) {
     renderF4CountryPanel();
     return state.f4Province;
   }
-  try {
-    const payload = await fetchPublicJson(`/api/public/v1/f4/provinces/${normalized}`);
-    if (state.selectedCode !== normalized || state.mapMode !== "f4") return null;
+  return fetchF4Scope(`province:${normalized}`, `/api/public/v1/f4/provinces/${normalized}`, (payload) => {
+    if (state.selectedCode !== normalized || state.mapMode !== "f4") return;
     state.f4Province = payload;
-    renderF4CountryPanel();
-    return payload;
-  } catch (error) {
-    console.error("Failed to load F4 province overview:", error);
-    showToast("โหลดข้อมูลเสริมพลังท้องถิ่นระดับจังหวัดไม่สำเร็จ");
-    return null;
-  }
+  });
 }
 
 function renderF4Card(card, scope = "country") {
-  const clickable = ["innovations", "policy_projects"].includes(card.key);
+  const clickable = ["target_provinces", "innovations", "policy_projects"].includes(card.key);
   const action = clickable ? ` data-f4-${scope}-kind="${card.key}"` : "";
   const value = card.value === null || card.value === undefined ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : formatNumber(card.value);
   const unit = String(card.unit || "")
@@ -680,7 +682,7 @@ function renderF4Card(card, scope = "country") {
     .replace(/\s{2,}/g, " ")
     .trim();
   return `
-    <button type="button" class="department-kpi-card province-kpi f4-kpi"${action}${clickable ? "" : " disabled"}>
+    <button type="button" class="department-kpi-card province-kpi f4-kpi" data-f4-metric="${escapeHtml(card.key)}"${action}${clickable ? "" : " disabled"}>
       <span>${escapeHtml(card.label)}</span>
       <strong>${value}</strong>
       <small>${escapeHtml(unit)}</small>
@@ -713,18 +715,34 @@ function renderF4EconomicImpactTable(overview) {
 }
 
 function renderF4CountryPanel() {
-  if (state.mapMode !== "f4" || !state.f4Overview || state.f4BoardCollapsed) return;
+  if (state.mapMode !== "f4" || state.f4BoardCollapsed) return;
   const panel = document.getElementById("f4CountryPanel");
   panel.hidden = false;
+  panel.classList.toggle("is-province", Boolean(state.selectedCode));
   document.getElementById("showF4Country").hidden = true;
+  const province = provinceByCode(state.selectedCode);
+  document.getElementById("f4PanelKicker").textContent = state.selectedCode ? "ฝ่าย 4 เสริมพลังท้องถิ่น" : "ฝ่าย 4";
+  document.getElementById("f4PanelTitle").textContent = state.selectedCode ? province?.province_name_th || "จังหวัดที่เลือก" : "เสริมพลังท้องถิ่น";
+  const nameEn = document.getElementById("f4ProvinceNameEn");
+  nameEn.hidden = !state.selectedCode;
+  nameEn.textContent = province?.province_name_en || "";
+  document.getElementById("f4PanelSubtitle").textContent = state.selectedCode
+    ? `${province?.region || state.selectedRegion || ""} รหัสจังหวัด ${state.selectedCode}`
+    : state.selectedRegion || "ภาพรวมประเทศไทย";
+  document.querySelector(".f4-flow").hidden = Boolean(state.selectedCode);
+  const crumbs = document.getElementById("f4Crumbs");
+  crumbs.hidden = !state.selectedCode;
+  crumbs.innerHTML = state.selectedCode ? departmentCrumbs("f4", state.selectedRegion, province?.province_name_th) : "";
+  updateF4TabOrientation();
   const countryStep = document.getElementById("f4CountryStep");
   const regionStep = document.getElementById("f4RegionStep");
   const provinceStep = document.getElementById("f4ProvinceStep");
-  countryStep.classList.add("active");
+  countryStep.classList.toggle("active", !state.selectedRegion);
+  countryStep.classList.toggle("is-link", Boolean(state.selectedRegion));
   regionStep.classList.toggle("active", Boolean(state.selectedRegion));
   provinceStep.classList.toggle("active", Boolean(state.selectedCode));
   countryStep.disabled = !state.selectedRegion && !state.selectedCode;
-  regionStep.disabled = !state.selectedRegion || !state.selectedCode;
+  regionStep.disabled = !state.selectedRegion;
   regionStep.querySelector("span").textContent = state.selectedRegion || "เลือกภาค";
   provinceStep.querySelector("span").textContent = state.selectedCode
     ? provinceByCode(state.selectedCode)?.province_name_th || "จังหวัดที่เลือก"
@@ -734,49 +752,32 @@ function renderF4CountryPanel() {
   provinceStep.removeAttribute("aria-current");
   (state.selectedCode ? provinceStep : state.selectedRegion ? regionStep : countryStep).setAttribute("aria-current", "step");
   const overview = currentF4Overview();
-  if (state.selectedCode && !overview) {
-    const province = provinceByCode(state.selectedCode);
-    document.getElementById("f4PanelScopeLabel").textContent = "ข้อมูลจังหวัด";
-    document.getElementById("f4PanelSubtitle").textContent = `จังหวัด${province?.province_name_th || ""}`;
-    document.getElementById("f4OverviewHeading").textContent = "ภาพรวมระดับจังหวัด";
-    document.getElementById("f4CountryCards").innerHTML = `<div class="portfolio-loading"><span></span><span></span><span></span></div>`;
-    loadF4ProvinceOverview(state.selectedCode);
-    return;
-  }
-  if (state.selectedRegion && !overview) {
-    document.getElementById("f4PanelScopeLabel").textContent = "ข้อมูลภาค";
-    document.getElementById("f4PanelSubtitle").textContent = state.selectedRegion;
-    document.getElementById("f4OverviewHeading").textContent = "ภาพรวมระดับภาค";
-    document.getElementById("f4CountryCards").innerHTML = `<div class="portfolio-loading"><span></span><span></span><span></span></div>`;
-    loadF4RegionOverview(state.selectedRegion).then(() => {
-      if (state.mapMode === "f4" && state.selectedRegion && !state.selectedCode) renderF4CountryPanel();
-    });
-    return;
-  }
+  const scopeKey = state.selectedCode ? `province:${state.selectedCode}` : state.selectedRegion ? `region:${state.selectedRegion}` : "country";
+  const failed = state.f4Errors.has(scopeKey);
+  document.getElementById("f4Status").hidden = Boolean(overview);
+  document.getElementById("f4StatusMessage").textContent = failed ? "โหลดข้อมูลพื้นที่นี้ไม่สำเร็จ" : "กำลังโหลดข้อมูลฝ่าย 4";
+  document.getElementById("retryF4Overview").hidden = !failed;
+  document.querySelector(".f4-content").hidden = !overview;
+  panel.setAttribute("aria-busy", String(!overview && !failed));
   if (!overview) return;
-  document.getElementById("f4PanelTitle").textContent = "เสริมพลังท้องถิ่น";
-  document.getElementById("f4PanelScopeLabel").textContent = state.selectedCode
-    ? "ข้อมูลจังหวัด"
-    : state.selectedRegion ? "ข้อมูลภาค" : "ข้อมูลประเทศ";
-  document.getElementById("f4PanelSubtitle").textContent = state.selectedCode
-    ? `จังหวัด${overview.province_name_th || provinceByCode(state.selectedCode)?.province_name_th || ""}`
-    : state.selectedRegion
-      ? state.selectedRegion
-    : "ภาพรวมประเทศไทย";
-  document.getElementById("f4OverviewHeading").textContent = state.selectedCode
-    ? "ภาพรวมระดับจังหวัด"
-    : state.selectedRegion
-      ? "ภาพรวมระดับภาค"
-    : "ภาพรวมระดับประเทศ";
   const cards = state.selectedCode
     ? (overview.cards || []).filter((card) => ["innovations", "policy_projects", "local_innovators", "economic_impact"].includes(card.key))
     : (overview.cards || []);
   document.getElementById("f4CountryCards").innerHTML = cards
     .map((card) => renderF4Card(card, "country"))
     .join("");
+  for (const [key, id] of [["innovations", "f4InnovationTabCount"], ["policy_projects", "f4PolicyTabCount"]]) {
+    const card = cards.find((item) => item.key === key);
+    document.getElementById(id).textContent = card?.value == null ? "ยังไม่มีข้อมูล" : `${formatNumber(card.value)} ${card.unit || ""}`;
+  }
+  renderF4AreaNavigation();
   renderF4EconomicImpactTable(overview);
   document.querySelectorAll("[data-f4-country-kind]").forEach((card) => {
     card.addEventListener("click", () => {
+      if (card.dataset.f4CountryKind === "target_provinces") {
+        scrollF1Detail(document.getElementById("f4PanelStage"), document.getElementById("f4AreaDetail"));
+        return;
+      }
       const tab = card.dataset.f4CountryKind === "policy_projects" ? "policy" : "innovations";
       setF4CountryTab(tab);
     });
@@ -790,6 +791,32 @@ function renderF4CountryPanel() {
       openF4CountryList(state.f4CountryTab === "policy" ? "policy_projects" : "innovations");
     }
   }
+}
+
+function renderF4AreaNavigation() {
+  const provinces = (state.catalog?.provinces || []).filter((row) => state.f4TargetProvinceCodes.has(row.province_code));
+  const area = document.getElementById("f4AreaDetail");
+  area.hidden = Boolean(state.selectedCode);
+  if (!state.selectedCode) {
+    const rows = state.selectedRegion
+      ? provinces.filter((row) => row.region === state.selectedRegion).map((row) => ({ name: row.province_name_th, code: row.province_code }))
+      : Object.keys(state.regions).map((region) => ({ name: region, count: provinces.filter((row) => row.region === region).length })).filter((row) => row.count);
+    rows.sort((a, b) => a.name.localeCompare(b.name, "th"));
+    area.innerHTML = `<header><h3>พื้นที่เป้าหมาย</h3><p>${state.selectedRegion ? "เลือกจังหวัดเพื่อดูข้อมูลในพื้นที่" : "เลือกภาคเพื่อดูจังหวัดเป้าหมาย"}</p></header><div class="department-area-list">${rows.map((row) => `<button type="button" ${row.code ? `data-f4-province="${escapeHtml(row.code)}"` : `data-f4-region="${escapeHtml(row.name)}"`}><span>${escapeHtml(row.name)}</span>${row.count == null ? "" : `<strong>${formatNumber(row.count)} จังหวัด</strong>`}</button>`).join("") || '<p class="empty-note">ไม่มีจังหวัดเป้าหมายในภาคนี้</p>'}</div>`;
+  }
+  const switcher = document.getElementById("f4ProvinceSwitch");
+  const siblings = provinces.filter((row) => row.region === state.selectedRegion && row.province_code !== state.selectedCode)
+    .sort((a, b) => a.province_name_th.localeCompare(b.province_name_th, "th"));
+  switcher.hidden = !state.selectedCode || !siblings.length;
+  switcher.innerHTML = switcher.hidden ? "" : `<div class="department-province-switch"><span>จังหวัดเป้าหมายอื่นใน${escapeHtml(state.selectedRegion)}</span><div>${siblings.map((row) => `<button type="button" data-f4-province="${escapeHtml(row.province_code)}">${escapeHtml(row.province_name_th)}</button>`).join("")}</div></div>`;
+}
+
+function f4TabsAreVertical() {
+  return Boolean(state.selectedCode) && window.matchMedia("(min-width: 721px)").matches;
+}
+
+function updateF4TabOrientation() {
+  document.querySelector(".f4-country-tabs").setAttribute("aria-orientation", f4TabsAreVertical() ? "vertical" : "horizontal");
 }
 
 function f4RowSearchText(row) {
@@ -899,7 +926,7 @@ function setF4CountryTab(tab, load = true) {
     panel.classList.toggle("active", active);
   });
   if (!load) return;
-  document.getElementById("f4CountryPanel").scrollTop = 0;
+  document.getElementById("f4PanelStage").scrollTop = 0;
   document.querySelector(`[data-f4-tab="${tab}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
   if (tab === "innovations") openF4CountryList("innovations");
   if (tab === "policy") openF4CountryList("policy_projects");
@@ -1912,11 +1939,15 @@ function f1Crumbs() {
   const meta = provinceByCode(state.selectedCode) || {};
   const region = state.selectedRegion || meta.region || "";
   const name = state.currentSummary?.province?.province_name_th || meta.province_name_th || "";
+  return departmentCrumbs("f1", region, name);
+}
+
+function departmentCrumbs(department, region, name) {
   const separator = '<i aria-hidden="true"></i>';
   return [
-    '<button type="button" data-f1-crumb="country" title="กลับไปภาพรวมประเทศ">ประเทศ</button>',
-    region ? `<button type="button" data-f1-crumb="region" title="กลับไปรายชื่อจังหวัดในภาค">${escapeHtml(region)}</button>` : "",
-    name ? `<span>${escapeHtml(name)}</span>` : "",
+    `<button type="button" data-${department}-crumb="country" title="กลับไปภาพรวมประเทศ">ประเทศ</button>`,
+    region ? `<button type="button" data-${department}-crumb="region" title="กลับไปรายชื่อจังหวัดในภาค">${escapeHtml(region)}</button>` : "",
+    name ? `<span aria-current="location">${escapeHtml(name)}</span>` : "",
   ].filter(Boolean).join(separator);
 }
 
@@ -3976,6 +4007,7 @@ async function selectProvince(code, moveMap = true) {
     state.f4PolicyQuery = "";
     document.getElementById("f4InnovationSearch").value = "";
     document.getElementById("f4PolicySearch").value = "";
+    document.getElementById("f4PanelStage").scrollTop = 0;
     document.getElementById("provincePanel").classList.remove("is-open");
     document.getElementById("provincePanel").setAttribute("aria-hidden", "true");
     document.body.classList.remove("panel-open");
@@ -4100,20 +4132,42 @@ function bindEvents() {
   document.getElementById("f4CountryStep").addEventListener("click", () => {
     resetF4ToCountryOverview();
     showF4Board();
-    document.getElementById("f4CountryPanel").scrollTop = 0;
+    document.getElementById("f4PanelStage").scrollTop = 0;
   });
   document.getElementById("f4RegionStep").addEventListener("click", () => {
+    if (state.selectedRegion) fitRegionBounds(state.regions[state.selectedRegion]);
+  });
+  document.getElementById("f4Crumbs").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-f4-crumb]");
+    if (!button) return;
+    if (button.dataset.f4Crumb === "country") {
+      document.getElementById("f4CountryStep").click();
+      return;
+    }
     const region = state.selectedRegion;
     if (!region) return;
     closePanel(false);
+    state.f4CountryTab = "overview";
     selectRegion(region);
     showF4Board();
-    document.getElementById("f4CountryPanel").scrollTop = 0;
+    document.getElementById("f4PanelStage").scrollTop = 0;
+  });
+  document.getElementById("f4CountryPanel").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-f4-region], [data-f4-province]");
+    if (!button) return;
+    document.getElementById("f4PanelStage").scrollTop = 0;
+    if (button.dataset.f4Province) selectProvince(button.dataset.f4Province, true);
+    else selectRegion(button.dataset.f4Region);
+  });
+  document.getElementById("retryF4Overview").addEventListener("click", async () => {
+    if (!state.f4Overview) await loadF4Overview();
+    if (state.selectedCode) loadF4ProvinceOverview(state.selectedCode);
+    else if (state.selectedRegion) loadF4RegionOverview(state.selectedRegion);
   });
   document.querySelectorAll("[data-f4-tab]").forEach((button) => {
     button.addEventListener("click", () => setF4CountryTab(button.dataset.f4Tab));
     button.addEventListener("keydown", (event) => {
-      const vertical = window.matchMedia("(min-width: 721px)").matches;
+      const vertical = f4TabsAreVertical();
       const previous = vertical ? "ArrowUp" : "ArrowLeft";
       const next = vertical ? "ArrowDown" : "ArrowRight";
       if (![previous, next, "Home", "End"].includes(event.key)) return;
@@ -4127,8 +4181,6 @@ function bindEvents() {
     });
   });
   const f4TabQuery = window.matchMedia("(min-width: 721px)");
-  const updateF4TabOrientation = () => document.querySelector(".f4-country-tabs")
-    .setAttribute("aria-orientation", f4TabQuery.matches ? "vertical" : "horizontal");
   updateF4TabOrientation();
   if (typeof f4TabQuery.addEventListener === "function") {
     f4TabQuery.addEventListener("change", updateF4TabOrientation);
@@ -4142,7 +4194,7 @@ function bindEvents() {
         .setProperty("--reading-nav-top", `${target.getBoundingClientRect().height}px`);
     });
   });
-  document.querySelectorAll(".f1-province-heading, .f4-flow").forEach((header) => readingHeaders.observe(header));
+  document.querySelectorAll(".f1-province-heading, .f4-crumbs").forEach((header) => readingHeaders.observe(header));
   document.getElementById("f4InnovationSearch").addEventListener("input", (event) => {
     state.f4InnovationQuery = event.target.value;
     rerenderF4InnovationList();
