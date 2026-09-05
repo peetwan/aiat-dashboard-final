@@ -287,3 +287,11 @@ main { width: min(1400px, calc(100% - 40px)); margin: 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.work-directory-controls { display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0; }
+.work-directory-controls label { display: grid; gap: 8px; flex: 1 1 260px; }
+.work-directory-controls select, .work-directory-controls input { padding: 12px; border: 1px solid #cdd8d0; border-radius: 8px; font: inherit; background: #fff; min-width: 0; }
+.work-directory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px; }
+.work-directory-grid .visual-card { min-width: 0; overflow-wrap: anywhere; }
+.work-directory-grid p { line-height: 1.7; }
+#workDirectoryMore { margin-top: 20px; padding: 12px 24px; border: 1px solid #cdd8d0; border-radius: 8px; background: white; font: inherit; cursor: pointer; }

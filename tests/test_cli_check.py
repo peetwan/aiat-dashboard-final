@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from app import cli
+from app.ingestion import PolicyViolation
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,3 +79,23 @@ def test_check_passes_when_every_step_passes(monkeypatch, capsys):
     output = capsys.readouterr().out
     assert '"status": "passed"' in output
     assert "pytest" not in output.split("== public-repo-boundary")[0]
+
+
+def test_candidate_ingest_does_not_require_a_valid_public_release(monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Candidate ingestion must not sync or validate a public release")
+    monkeypatch.setattr(cli, "validate_workspace", forbidden)
+    monkeypatch.setattr(cli, "sync_public_artifacts", forbidden)
+    called = []
+    monkeypatch.setattr(cli.IngestionPipeline, "ingest_source",
+                        lambda self, source_id, strategy: called.append(source_id) or {"status": "ok"})
+    assert cli.command_ingest(argparse.Namespace(source=["clig_projects"], all=False, strategy="http")) == 0
+    assert called == ["clig_projects"]
+
+
+def test_ingest_reports_blocked_policy_with_nonzero_exit_code(monkeypatch):
+    monkeypatch.setattr(cli, "initialize_candidates", lambda: None)
+    def blocked(*args):
+        raise PolicyViolation("fixture source not allowed")
+    monkeypatch.setattr(cli.IngestionPipeline, "ingest_source", blocked)
+    assert cli.command_ingest(argparse.Namespace(source=["fixture"], all=False, strategy="http")) == 1

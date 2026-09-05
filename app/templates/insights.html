@@ -41,7 +41,8 @@
         <a href="#ppp">ครัวเรือน</a>
         <a href="#apptech">นวัตกรรม</a>
         <a href="#city">ทุนเมือง</a>
-        <a href="#rmutdb">ทะเบียนผลงาน</a>
+        <a href="#workDirectory">ค้นหาผลงานและเจ้าของงาน</a>
+        <a href="#rmutdb">สถิติทะเบียนผลงาน</a>
       </nav>
 
       <section class="source-section executive-portfolio" id="executivePortfolio" aria-labelledby="executivePortfolioTitle" hidden>
@@ -102,6 +103,17 @@
       <div id="pageError" class="page-error" hidden>โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</div>
 
       <div id="insightContent" hidden>
+        <section class="source-section" id="workDirectory">
+          <header class="section-head"><div><span>รายละเอียดจากต้นทาง</span><h2>ทะเบียนผลงานและผู้รับผิดชอบ</h2></div><p>ค้นหาชื่อผลงาน เจ้าของงาน และข้อมูลติดต่อที่เผยแพร่ไว้กับผลงาน</p></header>
+          <div class="work-directory-controls">
+            <label>แหล่งข้อมูล <select id="workDirectorySource"><option value="f2_apptech_mtr">AppTech MTR</option><option value="f2_rmutdb">RMUTDB</option><option value="f2_culturalmap_university">Cultural Map: ผลิตภัณฑ์และผู้จัดทำ</option></select></label>
+            <label>ค้นหา <input id="workDirectorySearch" type="search" placeholder="ชื่อผลงาน เจ้าของ หรือหน่วยงาน" /></label>
+          </div>
+          <p id="workDirectoryCount" aria-live="polite"></p>
+          <p id="workDirectoryNote" class="source-note"></p>
+          <div id="workDirectoryItems" class="work-directory-grid"></div>
+          <button id="workDirectoryMore" type="button">แสดงเพิ่ม</button>
+        </section>
         <section class="source-section section-ppp" id="ppp">
           <header class="section-head">
             <div><span>PPPConnext</span><h2>ครัวเรือนและทุนดำรงชีพ</h2></div>

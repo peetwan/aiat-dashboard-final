@@ -10,11 +10,11 @@
 
 - ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
 - ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
-- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 18 แหล่ง
+- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 19 แหล่ง
 - Metadata-only: 8 แหล่ง
 - Restricted local-only: 2 แหล่ง
 
-ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้
+พิจารณาตามบริบทของฟิลด์: เครดิตเจ้าของงาน ผู้วิจัย หน่วยงาน ช่องทางติดต่องานและที่ตั้งสาธารณะเผยแพร่ได้ตาม field_contexts ใน contract ดู [คู่มือบริบทข้อมูล](field-contexts.md)
 
 `f2_learning_dashboard` ถูกจัด publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถวตามสถานะใน source card แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และการจัด scope นี้ไม่เปลี่ยน semantic review ให้เป็น accepted
 
@@ -30,7 +30,7 @@
 | 6 | `f2_rmutdb` | Snapshot | public candidate | 2,001 | 14 | 0 |
 | 7 | `f2_apptech_mtr` | API-first | public candidate | 630 | 6 | 6 |
 | 8 | `f2_apptech_mru` | API-first | public candidate | 503 | 8 | 5 |
-| 9 | `f2_target_household` | API-first | public candidate | 1,160 | 1 | 1 |
+| 9 | `f2_target_household` | API-first | public candidate | 1,160 | 7 | 7 |
 | 10 | `f2_learning_dashboard` | API-first | public candidate | 66 | 1 | 1 |
 | 11 | `f2_learning_area_based` | API-first | public candidate | 1,002 | 1 | 1 |
 | 12 | `f2_wallet_all_realtime` | API-first | public candidate | 2 | 2 | 2 |
@@ -50,6 +50,7 @@
 | 26 | `spu_sukhothai_water` | API-first | public candidate | 0 | 3 | 3 |
 | 27 | `spu_nsn_flood` | API-first | public candidate | 0 | 1 | 1 |
 | 28 | `spu_rawangphai_uru` | API-first | public candidate | 0 | 3 | 3 |
+| 29 | `clig_projects` | API-first | public candidate | 107 | 2 | 2 |
 
 ตัวเลข records เป็น reference count ของ source ไม่ใช่จำนวนที่ต้องแสดงทั้งหมดใน UI และ runtime-safe เป็น technical allowlist ไม่ใช่การรับรองความหมายหรือ freshness
 
@@ -75,9 +76,9 @@
 
 ## Privacy projection
 
-ก่อนเข้า `data/public/` ต้องตัดข้อมูลต่อไปนี้:
+ก่อนเข้า `data/public/` ให้จัด projection ตามชนิดข้อมูล:
 
-- email, phone และชื่อบุคคล
+- ข้อมูลติดต่อส่วนตัว เลขประจำตัว และข้อมูลสุขภาพ/การเงินระดับบุคคล; ชื่อเจ้าของผลงานหรือช่องทางติดต่องานใช้บริบทที่ประกาศใน contract
 - payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม
 
 Artifacts ที่เพื่อนร่วมทีมนำเข้าต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม
@@ -88,11 +89,11 @@ Artifacts ที่เพื่อนร่วมทีมนำเข้าต�
 - signed URL, cookie ของบัญชีส่วนตัว และ secret ที่ไม่ใช่ public client header ของเว็บ
 - SQLite/PostgreSQL dump และ runtime database
 - `data/runtime/`, `data/snapshots/` และ raw payload
-- ชื่อบุคคล เบอร์โทร อีเมล
+- ข้อมูลส่วนบุคคลที่ไม่ได้อยู่ในขอบเขตเผยแพร่ของงาน; ไม่ห้ามเครดิตเจ้าของงานแบบเหมารวม
 
 ## Checklist ก่อน publication/deploy
 
-1. Source อยู่ใน public candidate 18 แหล่งและไม่ใช่ restricted lane
+1. Source อยู่ใน public candidate 19 แหล่งและไม่ใช่ restricted lane
 2. มี publication scope เป็นลายลักษณ์อักษร
 3. ยืนยัน schema, grain, unit, denominator, `as_of` และ freshness เท่าที่หลักฐานรองรับ
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection

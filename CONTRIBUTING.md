@@ -72,7 +72,7 @@ python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --
 python -m pytest -q tests/test_ui_coverage.py tests/test_api.py tests/test_explorer.py
 ```
 
-UI อ่านได้เฉพาะ Public release หรือ safe preview ที่ API เตรียมให้ ห้ามเพิ่ม route ที่ส่ง raw payload, secret หรือข้อมูลระบุตัวบุคคลออกไปยัง browser
+UI อ่าน Public release หรือ safe preview ที่ API เตรียมให้ เครดิตเจ้าของงานและช่องทางติดต่องานใช้ได้ตาม [field_contexts](docs/field-contexts.md); raw payload และ secrets คงอยู่ในระบบหลักฐาน
 
 ## ลองเอาข้อมูลเข้า Candidate database บนเครื่อง
 
@@ -138,7 +138,7 @@ Repository ถูกสร้างเริ่มต้นใต้บัญช
 - `.env`, token, cookie, API key, signed URL หรือ database credentials
 - SQLite/database dump และ runtime manifests
 - Raw response ทั้งชุด
-- ชื่อบุคคล เบอร์โทร อีเมล ที่อยู่ หรือ identifier ส่วนบุคคล
+- ข้อมูลติดต่อส่วนตัว เลขประจำตัว และข้อมูลบุคคลที่อยู่นอกขอบเขตเผยแพร่; เครดิตผลงานและข้อมูลติดต่องานใช้ [field_contexts](docs/field-contexts.md)
 - Household, health หรือ person-level financial values
 
 หากพบข้อมูลดังกล่าวใน commit ให้หยุดและแจ้งทีมผ่านช่องทางใน `SECURITY.md` ห้ามเปิด public issue ที่มีค่าจริง

@@ -198,7 +198,7 @@
         "/backend/ajax/auth/*",
         "/backend/ajax/user/*",
         "write actions",
-        "live HTML detail pages (province/funding/IP/TRL) — parse from reviewed evidence when the list API times out; never copy researcher names"
+        "live HTML detail fetching during list ingest; replay recorded details in the builder and retain work attribution through field_contexts"
       ]
     },
     "f2_target_household": {
@@ -221,7 +221,7 @@
         "/product/show/* live detail GET during serving ingest",
         "EPMS / POST login"
       ],
-      "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; serving เก็บรายการจาก /search และ aggregate dashboard ระดับจังหวัด/ประเทศเท่านั้น ตัดชื่อ เบอร์โทร อีเมล"
+      "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; Candidate เก็บรายการและเครดิตเจ้าของผลงานตาม field_contexts ส่วน public builder เลือกรายละเอียดผลงานและ aggregate ที่มีความหมายยืนยันแล้ว"
     },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",

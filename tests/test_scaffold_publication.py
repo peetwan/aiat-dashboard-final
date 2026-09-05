@@ -14,6 +14,16 @@ from tools.scaffold_publication import (
 )
 
 
+def test_scaffold_can_declare_public_work_contact_columns(tmp_path):
+    _write_catalog(tmp_path)
+    spec = _spec(output_format="csv", output_path="data/public/sample_dataset.csv", records_pointer="$", as_of_pointer=None,
+                 csv_headers=("project_id", "province_code", "as_of", "project_count", "owner_name", "email"),
+                 field_contexts=(("/*/owner_name", "work_attribution"), ("/*/email", "public_contact")))
+    scaffold(spec, project_root=tmp_path)
+    contracts = load_contracts(tmp_path / "config/publication_contracts")
+    assert contracts[0][1]["outputs"][0]["field_contexts"]["/*/email"] == "public_contact"
+
+
 def _write_catalog(root: Path) -> None:
     path = root / "config" / "source_catalog.json"
     path.parent.mkdir(parents=True, exist_ok=True)

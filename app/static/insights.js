@@ -581,6 +581,42 @@ function renderCity(source) {
     <article class="city-group"><header><h3>${escapeHtml(group.label_th)}</h3><span>${number.format(group.metrics.length)} ตัวชี้วัด</span></header>${group.metrics.map(metricLine).join("")}</article>`).join("");
 }
 
+function renderWorkDirectory(sources) {
+  const select = document.getElementById("workDirectorySource");
+  const search = document.getElementById("workDirectorySearch");
+  const more = document.getElementById("workDirectoryMore");
+  let limit = 20;
+  const hasText = (value) => value != null && /[\p{L}\p{N}]/u.test(String(value));
+  // PDF บางเล่มแยกสระอำและเรียงวรรณยุกต์ต่างจากข้อความที่พิมพ์
+  const searchText = (value) => value.normalize("NFKC").replace(/\u0e4d([\u0e48-\u0e4b])/g, "$1\u0e4d").replace(/\s+/g, " ").toLocaleLowerCase("th");
+  const render = () => {
+    const all = sources[select.value]?.public_records || [];
+    const query = searchText(search.value.trim());
+    const rows = all.filter((row) => searchText([row.title, row.owner_name, row.inventor, row.coordinator, row.co_owner, row.recorded_by, row.institute_name, row.owner_affiliation, row.team_name, ...(row.team_members || []).map((item) => item.name)]
+      .filter(Boolean).join(" ")).includes(query));
+    document.getElementById("workDirectoryCount").textContent = `แสดง ${number.format(Math.min(limit, rows.length))} จาก ${number.format(rows.length)} รายการ`;
+    document.getElementById("workDirectoryNote").textContent = select.value === "f2_rmutdb"
+      ? "รายการฉบับละเอียดและฉบับสรุปประจำปีอาจเป็นผลงานเดียวกัน จำนวนรายการนี้จึงไม่ใช่จำนวนผลงานที่ไม่ซ้ำ"
+      : "พื้นที่สังกัดของผู้จัดทำไม่ได้ใช้แทนพื้นที่ใช้งานผลงาน";
+    document.getElementById("workDirectoryItems").innerHTML = rows.slice(0, limit).map((row) => {
+      const details = [
+        ["เจ้าของผลงาน", row.owner_name || row.owner_affiliation], ["ผู้ประดิษฐ์", row.inventor],
+        ["ผู้ประสานงาน", row.coordinator], ["เจ้าของร่วม", row.co_owner], ["สังกัด", row.institute_name], ["ผู้จัดทำ", row.recorded_by],
+        ["ทีม", row.team_name || (row.team_members || []).map((item) => item.name).join(", ")],
+        ["ติดต่อ", [row.phone, row.secondary_phone, row.email, row.work_contact, row.sales_channels].filter(hasText).join(", ")],
+        ["ที่ตั้ง", row.address], ["ราคา", row.price_text],
+      ].filter(([, value]) => hasText(value));
+      const source = /^https?:\/\//i.test(row.source_url || "") ? row.source_url : "";
+      return `<article class="visual-card"><h3>${escapeHtml(row.title || "ไม่ระบุชื่อ")}</h3>${details.map(([label, value]) => `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`).join("")}${source ? `<a href="${escapeHtml(source)}${row.pdf_page ? `#page=${Number(row.pdf_page)}` : ""}" target="_blank" rel="noreferrer">ต้นทาง${row.pdf_page ? ` หน้า ${Number(row.pdf_page)}` : ""}</a>` : ""}</article>`;
+    }).join("") || "<p>ไม่พบรายการที่ตรงกับคำค้น</p>";
+    more.hidden = rows.length <= limit;
+  };
+  select.addEventListener("change", () => { limit = 20; render(); });
+  search.addEventListener("input", () => { limit = 20; render(); });
+  more.addEventListener("click", () => { limit += 20; render(); });
+  render();
+}
+
 function renderRmut(source) {
   const stats = source.statistics;
   document.getElementById("rmutReadout").textContent = plainLanguage(source.readout_th);
@@ -606,6 +642,7 @@ async function loadInsights() {
     renderApptech(payload.sources.f2_apptech_mtr);
     renderCity(payload.sources.f3_city_capital_open_data);
     renderRmut(payload.sources.f2_rmutdb);
+    renderWorkDirectory(payload.sources);
     if (payload.sources.f2_learning_dashboard) renderLearningDashboard(payload.sources.f2_learning_dashboard);
     document.getElementById("pageLoading").hidden = true;
     document.getElementById("insightContent").hidden = false;

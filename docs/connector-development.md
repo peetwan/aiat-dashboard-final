@@ -56,7 +56,7 @@ Connector ห้าม:
 - promote Candidate เป็น Public
 - เก็บ token/cookie ลง config, fixture หรือ log
 - bypass 401/403, login หรือ CAPTCHA
-- นำชื่อบุคคล เบอร์โทร อีเมล หรือที่อยู่เข้า fixture
+- นำข้อมูลส่วนตัวจริงเข้า fixture; ใช้ค่าตัวอย่างสังเคราะห์เพื่อทดสอบชื่อเจ้าของงานหรือช่องทางติดต่องานตาม [field_contexts](field-contexts.md)
 
 ส่วนกลางใน `app/ingestion.py` จะเป็นผู้เก็บ response, SHA-256, manifest, sanitize payload, ป้องกัน record version ซ้ำ และเขียน Candidate เข้า `dashboard_records`
 

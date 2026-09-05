@@ -27,6 +27,9 @@ REQUIRED_SPATIAL_COUNTS = {
 }
 REQUIRED_SPATIAL_TOTAL = sum(REQUIRED_SPATIAL_COUNTS.values())
 INSERT_BATCH_SIZE = 2_000
+# housing_points เป็นทะเบียนสถานที่จาก public place feed มี place_id/type;
+# address เป็นที่ตั้งสถานที่ ไม่ใช่ที่อยู่ผู้ตอบแบบสำรวจ demand.
+HOUSING_POINT_CONTEXTS = {"/address": "public_location"}
 
 
 def load_spatial_manifest(path: Path = SPATIAL_MANIFEST_PATH) -> dict[str, Any]:
@@ -107,7 +110,8 @@ def _mapping(row: dict[str, Any], layer_id: str) -> dict[str, Any]:
     geometry = row.get("geometry")
     if not isinstance(properties, dict) or not isinstance(geometry, dict):
         raise ValueError(f"invalid spatial payload in {layer_id}:{row.get('feature_id')}")
-    if sanitize_payload(properties) != properties:
+    contexts = HOUSING_POINT_CONTEXTS if layer_id == "housing_points" else {}
+    if sanitize_payload(properties, field_contexts=contexts) != properties:
         raise ValueError(
             f"private/contact value leaked into spatial properties: "
             f"{layer_id}:{row.get('feature_id')}"

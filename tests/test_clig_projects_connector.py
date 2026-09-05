@@ -49,7 +49,10 @@ DETAIL_HTML = """
 <html><body>
 <h5 class="card-label">การพัฒนานโยบายท้องถิ่นขององค์กรปกครองส่วนท้องถิ่น</h5>
 <table>
-<tr><th>ชื่อ-นามสกุล (ภาษาไทย)</th><td>ไม่ควรถูกเก็บ</td></tr>
+<tr><th>ชื่อ-นามสกุล (ภาษาไทย)</th><td>ผู้วิจัยตัวอย่าง</td></tr>
+<tr><th>ชื่อ-นามสกุล (ภาษาอังกฤษ)</th><td>Example Researcher</td></tr>
+<tr><th>ตำแหน่ง</th><td>นักวิจัย</td></tr>
+<tr><th>สัญชาติ</th><td>ไทย</td></tr>
 <tr><th>หน่วยงาน</th><td>มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ</td></tr>
 <tr><th>บทคัดย่อ (ภาษาไทย)</th><td>มีมาตรการและกลไกสำหรับ อปท.</td></tr>
 <tr><th>Abstract</th><td>Policy innovation for local government.</td></tr>
@@ -103,6 +106,20 @@ def test_parse_project_list_and_detail_extract_safe_fields() -> None:
     assert detail["detail_budget_baht"] == 2027400.0
     assert detail["file_labels"] == ["finalreport.pdf"]
     assert "ชื่อ-นามสกุล (ภาษาไทย)" not in detail
+    assert detail["researcher_name_th"] == "ผู้วิจัยตัวอย่าง"
+    assert detail["researcher_name_en"] == "Example Researcher"
+    assert detail["researcher_position"] == "นักวิจัย"
+    assert "สัญชาติ" not in detail
+
+
+def test_clig_researcher_attribution_survives_candidate_preparation() -> None:
+    from app.connector_contracts import load_runtime_connector_contract, prepare_contract_records
+
+    recorder = SequenceRecorder([LIST_HTML, DETAIL_HTML, EMPTY_HTML])
+    records = CligProjectsConnector().fetch(context_for(recorder))
+    prepared = prepare_contract_records(load_runtime_connector_contract("clig_projects"), records)
+    assert len(prepared) == 2
+    assert all(row.payload["researcher_name_th"] == "ผู้วิจัยตัวอย่าง" for row in prepared)
 
 
 def test_connector_follows_detail_ids_and_stops_on_empty_page() -> None:

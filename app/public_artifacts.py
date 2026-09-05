@@ -13,8 +13,9 @@ from sqlalchemy.orm import Session
 
 from app.catalog import load_catalog
 from app.models import PublicArtifact, utc_now
-from app.privacy import EMAIL_RE
+from app.privacy import EMAIL_RE, PHONE_RE
 from app.settings import PROJECT_ROOT
+from app.publication import _privacy_problems, bind_outputs, load_contracts
 
 
 PUBLIC_DATA_ROOT = PROJECT_ROOT / "data" / "public"
@@ -27,9 +28,7 @@ MAX_ARTIFACT_GROUP_LENGTH = 60
 SENSITIVE_KEY_RE = re.compile(
     r"(?:^|_)(?:phone|telephone|tel|mobile|email|e_mail|contact|address)(?:_|$)"
 )
-THAI_PHONE_VALUE_RE = re.compile(
-    r"(?<!\d)(?:(?:\+?66)[\s().-]*[1-9]|0[1-9])(?:[\s().-]*\d){7,8}(?!\d)"
-)
+THAI_PHONE_VALUE_RE = PHONE_RE
 LABELLED_CONTACT_VALUE_RE = re.compile(
     r"(?i)(?:\b(?:phone|telephone|mobile|tel|email)\s*(?:no\.?|number)?\s*[:：]|"
     r"(?:โทรศัพท์|เบอร์โทร|อีเมล|อีเมล์)\s*[:：])"
@@ -443,17 +442,40 @@ def _artifact_policy_violations(
 
 def validate_public_artifacts(
     inputs: Iterable[ArtifactInput] | None = None,
+    *,
+    contracts_root: Path | None = None,
 ) -> list[tuple[ArtifactInput, dict, str, int]]:
     """Load every selected artifact and fail closed on public-policy violations."""
 
     selected = list(inputs if inputs is not None else artifact_inputs())
-    _, restricted_source_ids = _approved_and_restricted_source_ids()
+    approved_source_ids, restricted_source_ids = _approved_and_restricted_source_ids()
+    contracts = load_contracts(contracts_root or PROJECT_ROOT / "config/publication_contracts")
+    relative_paths = {
+        item.path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
+        for item in selected if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve())
+    }
+    # Serving validates the selected database artifacts. Publication separately
+    # checks that every support/download output exists in the complete release.
+    bindings = bind_outputs(relative_paths, contracts, require_all=False)
     loaded: list[tuple[ArtifactInput, dict, str, int]] = []
     violations: list[tuple[str, str]] = []
     for item in selected:
         payload, digest, item_count = _load_input(item)
         loaded.append((item, payload, digest, item_count))
-        violations.extend(_artifact_policy_violations(item, payload, restricted_source_ids))
+        relative = item.path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix() if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve()) else None
+        binding = bindings.get(relative)
+        contexts = binding.output.get("field_contexts", {}) if binding else {}
+        if contexts:
+            if not set(binding.contract["source_ids"]).issubset(approved_source_ids):
+                violations.append((item.key, "field context source is not approved"))
+            # ใช้ contract ของไฟล์จริง การผ่าน publication จึงไม่ถูกตัวกรอง
+            # แบบเหมารวมใน startup ปฏิเสธชื่อ/ข้อมูลติดต่องานซ้ำอีกครั้ง
+            violations.extend((item.key, problem) for problem in _privacy_problems(
+                payload, artifact_path=relative, restricted_source_ids=restricted_source_ids,
+                profile=binding.contract["privacy_profile"], field_contexts=contexts,
+            ))
+        else:
+            violations.extend(_artifact_policy_violations(item, payload, restricted_source_ids))
     if violations:
         evidence = "; ".join(f"{path}: {reason}" for path, reason in violations[:20])
         remainder = len(violations) - 20

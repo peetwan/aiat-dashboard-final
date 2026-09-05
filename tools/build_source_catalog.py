@@ -70,6 +70,7 @@ APPROVED_PUBLIC_MODES = {
     "spu_sukhothai_water": "api_first",
     "spu_nsn_flood": "api_first",
     "spu_rawangphai_uru": "api_first",
+    "clig_projects": "api_first",
 }
 
 SPU_DISASTER_SOURCE_IDS = frozenset(
@@ -139,6 +140,24 @@ def as_project_path(path_text: str, merged_root: Path) -> Path:
 
 def source_card_path(ordinal: int, source_id: str) -> Path:
     return AUDIT_ROOT / f"{ordinal:02d}_{source_id}" / "source_card.json"
+
+
+def load_clig_endpoints(plan: dict) -> list[dict]:
+    """Keep the existing reviewed CLIG connector when rebuilding the catalog."""
+    return [
+        {
+            "endpoint_id": endpoint_id("clig_projects", method, plan[field], "call_without_login"),
+            "method": method, "url": plan[field], "kind": kind,
+            "access": "maintainer_reviewed_public_candidate", "team_action": "call_without_login",
+            "restricted": False, "runtime_enabled": True,
+            "request_template": {"query_or_body": query},
+            "notes_th": "หน้ารายการและรายละเอียดโครงการวิจัยสาธารณะ ไม่เรียก login/admin/write endpoints",
+        }
+        for method, field, kind, query in (
+            ("POST", "list_url", "research_project_search", "project_name=<value>&project_year=<value>&page=<value>"),
+            ("GET", "detail_url_template", "research_project_detail", "project_id=<value>"),
+        )
+    ]
 
 
 def is_restricted(cloud_policy: str, access: str, action: str) -> bool:
@@ -419,7 +438,7 @@ def load_target_household_search_endpoint(acquisition_mode: str) -> list[dict]:
         if observed_url != url:
             raise RuntimeError("PMUA AppTech public search URL evidence no longer matches /search")
     action = "call_without_login"
-    return [
+    endpoints = [
         {
             "endpoint_id": endpoint_id("f2_target_household", "GET", url, action),
             "method": "GET",
@@ -436,6 +455,22 @@ def load_target_household_search_endpoint(acquisition_mode: str) -> list[dict]:
             ),
         }
     ]
+    # These public aggregate dashboards already belong to the live connector.
+    # Regeneration must preserve both the base and year-filter request shapes.
+    for suffix, kind in (("", "innovation"), ("/innovatordashboard", "innovator"), ("/familydashboard", "family")):
+        dashboard_url = "https://pmua-apptech.com/dashboard" + suffix
+        for filtered in (False, True):
+            action = "call_without_login_year_filter" if filtered else "call_without_login"
+            endpoints.append({
+                "endpoint_id": endpoint_id("f2_target_household", "GET", dashboard_url, action),
+                "method": "GET", "url": dashboard_url,
+                "kind": f"public_{kind}_dashboard" + ("_year_filter" if filtered else ""),
+                "access": "unauthenticated_get_http_200", "team_action": action,
+                "restricted": False, "runtime_enabled": acquisition_mode == "api_first",
+                "request_template": {"query_or_body": "year_filter=<value>"} if filtered else {},
+                "notes_th": "Dashboard สาธารณะ ใช้เฉพาะ aggregate ไม่แตกเป็นแถวครัวเรือน ไม่เรียก login/EPMS",
+            })
+    return endpoints
 
 
 def load_spu_disaster_endpoints(
@@ -496,6 +531,10 @@ def source_policy(source_id: str) -> tuple[str, str, str, bool]:
 
 def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> str:
     notes = [registry_row.get("notes", "")]
+    if source_id == "f2_target_household":
+        notes = ["ดึงข้อมูลตลาดผลงานสาธารณะ เครดิตเจ้าของงานใช้ได้ตาม field_contexts เมื่อมีฟิลด์และหลักฐาน"]
+    if source_id == "clig_projects":
+        notes.append("ชื่อผู้วิจัยและสังกัดเป็นเครดิตของโครงการตาม field_contexts; คงเลน Candidate และไม่ใช้แทน KPI รับรอง")
     if index_row and index_row.get("notes_th"):
         notes.append(index_row["notes_th"])
     if source_id == "f3_housing_portal":
@@ -515,14 +554,14 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
     if source_id == "f2_culturalmap_university":
         notes.append(
             "ตรวจ public JSON feed และ listing pages ล่าสุด 2026-08-17 แล้ว ID coverage ตรง snapshot "
-            "5,619/5,619; Dashboard เปิด Map details 5,258 และ supporting 361 เป็น counts-only "
-            "ตาม privacy projection. Source as_of/terms/owner acceptance ยังไม่ระบุ."
+            "5,619/5,619; Dashboard เก็บ Map details 5,258 และทะเบียนผลงาน/ผู้จัดทำอีก 361 รายการ "
+            "พร้อมข้อมูลติดต่องานตาม field_contexts. Source as_of ยังไม่ระบุ."
         )
     if source_id == "f2_apptech_mtr":
         notes.append(
             "public list และ API สถิติรอบ 2026-08-17 ตรงกันที่ 630 records; "
             "Silver เดิม 621 ขาด 9 records และ common record 1 รายการเปลี่ยน version. "
-            "Serving ใช้ privacy-projected Silver ใหม่ที่ไม่มีค่า email/phone และยังคง needs_review."
+            "Serving เก็บชื่อเจ้าของผลงานและข้อมูลติดต่องานจาก public listing ตาม field_contexts."
         )
     if source_id == "f2_rmutdb":
         notes.append(
@@ -541,7 +580,7 @@ def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> 
     if source_id == "f2_target_household":
         notes.append(
             "หน้าสาธารณะคือตลาดนวัตกรรม AppTech ไม่ใช่ทะเบียนครัวเรือน; serving ดึง /search pagination "
-            "เป็นรายการสินค้าตัดชื่อ/เบอร์/อีเมล. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ "
+            "เป็นรายการสินค้าสาธารณะ โดยข้อมูลเจ้าของงานใช้ได้เมื่อมีหลักฐาน. จำนวนรายการอ้างอิงล่าสุดที่ตรวจครบคือ 1,160 รายการ "
             "และอาจขยับได้ — completeness คือ pagination ไม่ใช่จำนวนคงที่. "
             "ไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน และไม่ GET หน้ารายละเอียดตอน ingest."
         )
@@ -623,6 +662,9 @@ def build_catalog(merged_root: Path) -> dict:
         acquisition_mode, cloud_policy, value_visibility, production_values_allowed = source_policy(source_id)
         card_path = source_card_path(ordinal, source_id)
         card = read_json(card_path) if card_path.exists() else {}
+        if source_id == "clig_projects" and not card:
+            card_path = DASHBOARD_ROOT / "config/connector_contracts/clig_projects.json"
+            card = {"status": "NEEDS_REVIEW"}
 
         data_location = as_project_path(index_row["data_location"], merged_root) if index_row else None
         endpoints = (
@@ -634,6 +676,8 @@ def build_catalog(merged_root: Path) -> dict:
             endpoints = load_learning_dashboard_endpoint(acquisition_mode)
         if source_id == "f1_pppconnext":
             endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
+        if source_id == "clig_projects":
+            endpoints = load_clig_endpoints(ingestion_plans[source_id])
         if source_id == "f2_target_household":
             endpoints = load_target_household_search_endpoint(acquisition_mode)
         if source_id in SPU_DISASTER_SOURCE_IDS:
@@ -662,7 +706,9 @@ def build_catalog(merged_root: Path) -> dict:
                 raise RuntimeError("AppTech current Silver manifest no longer matches 630-row audit")
             snapshot_files = [provenance_path(APPTECH_CURRENT_RECORDS)]
 
-        if source_id == "f2_learning_dashboard":
+        if source_id == "clig_projects":
+            expected_record_count = 107
+        elif source_id == "f2_learning_dashboard":
             expected_record_count = LEARNING_DASHBOARD_PROVINCE_ROWS
         elif source_id == "f1_pppconnext":
             expected_record_count = PPPCONNEXT_2026_RECORD_COUNT
@@ -771,7 +817,7 @@ def write_governance(catalog: dict, target: Path) -> None:
         f"- Metadata-only: {policy['metadata_only_source_count']} แหล่ง",
         f"- Restricted local-only: {policy['restricted_source_count']} แหล่ง",
         "",
-        "ตัดชื่อ เบอร์โทร อีเมลตอนเขียน public projection; ตัวเลขที่เว็บรัฐโชว์ใช้ได้",
+        "พิจารณาตามบริบทของฟิลด์: เครดิตเจ้าของงาน ผู้วิจัย หน่วยงาน ช่องทางติดต่องานและที่ตั้งสาธารณะเผยแพร่ได้ตาม field_contexts ใน contract ดู [คู่มือบริบทข้อมูล](field-contexts.md)",
         "",
         "`f2_learning_dashboard` ถูกจัด publication scope เฉพาะ candidate aggregate ระดับจังหวัด 66 แถวตามสถานะใน source card แต่ยังขาด source-wide unit/`as_of`, raw manifest และ selected-project scope review สถานะจึงยังเป็น `needs_review` และการจัด scope นี้ไม่เปลี่ยน semantic review ให้เป็น accepted",
         "",
@@ -827,9 +873,9 @@ def write_governance(catalog: dict, target: Path) -> None:
             "",
             "## Privacy projection",
             "",
-            "ก่อนเข้า `data/public/` ต้องตัดข้อมูลต่อไปนี้:",
+            "ก่อนเข้า `data/public/` ให้จัด projection ตามชนิดข้อมูล:",
             "",
-            "- email, phone และชื่อบุคคล",
+            "- ข้อมูลติดต่อส่วนตัว เลขประจำตัว และข้อมูลสุขภาพ/การเงินระดับบุคคล; ชื่อเจ้าของผลงานหรือช่องทางติดต่องานใช้บริบทที่ประกาศใน contract",
             "- payload จาก endpoint ที่ต้อง login, token หรือ permission เพิ่มเติม",
             "",
             "Artifacts ที่เพื่อนร่วมทีมนำเข้าต้องคง source URL, source ID, evidence path และ provenance ของผู้เก็บเดิม",
@@ -840,7 +886,7 @@ def write_governance(catalog: dict, target: Path) -> None:
             "- signed URL, cookie ของบัญชีส่วนตัว และ secret ที่ไม่ใช่ public client header ของเว็บ",
             "- SQLite/PostgreSQL dump และ runtime database",
             "- `data/runtime/`, `data/snapshots/` และ raw payload",
-            "- ชื่อบุคคล เบอร์โทร อีเมล",
+            "- ข้อมูลส่วนบุคคลที่ไม่ได้อยู่ในขอบเขตเผยแพร่ของงาน; ไม่ห้ามเครดิตเจ้าของงานแบบเหมารวม",
             "",
             "## Checklist ก่อน publication/deploy",
             "",

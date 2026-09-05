@@ -38,7 +38,7 @@ Gate ทำงานแบบ fail-closed โดยไม่เรียกเ�
 - JSON, GeoJSON หรือ CSV อ่านได้ ขนาดและ schema ไม่หลุดจากที่ประกาศ
 - identity ไม่ซ้ำ, ชุด identity เปลี่ยนไม่เกิน `max_identity_churn_ratio` และ count/completeness อยู่ในช่วงที่ contract ยอมรับ
 - source ยังมีสิทธิ์เผยแพร่ตาม catalog
-- ไม่พบ secret, field อ่อนไหว, เบอร์โทร, อีเมล หรือที่อยู่จาก heuristic scan; ผู้ตรวจยังต้องดูชื่อบุคคลและความหมายระดับบุคคลใน diff เอง
+- ตรวจ secrets และข้อมูลส่วนตัวตามบริบท; เครดิตเจ้าของผลงาน หน่วยงาน ช่องทางติดต่องาน และที่ตั้งสาธารณะประกาศใน `outputs[].field_contexts` ตาม [คู่มือบริบทข้อมูล](field-contexts.md)
 - hash ของไฟล์และ contract ตรงกับ `publication_receipt.json`
 
 Gate ผ่านหมายถึง revision ตรงตามกติกาที่ทีมเคยอนุมัติ ไม่ได้แปลว่าข้อมูลกลายเป็น KPI ที่รับรองแล้ว

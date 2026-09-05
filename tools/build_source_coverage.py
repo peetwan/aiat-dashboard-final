@@ -31,6 +31,11 @@ SRA_MISSING_SCORE_PROVINCES = [
 ]
 
 SERVING_PROJECTIONS = {
+    "clig_projects": {
+        "count": 107,
+        "grain": "public_project_attribution_records",
+        "evidence": "dashboard_final/data/public/clig_work_attribution.json",
+    },
     "f1_sradss_ppaos": {
         "count": 20,
         "numeric_value_count": 15,
@@ -158,6 +163,11 @@ def current_public_projection() -> tuple[set[str], dict[str, int]]:
         return set(), {}
     payload = read_json(PUBLIC_DASHBOARD_PATH)
     public_sources = {source["source_id"] for source in payload.get("sources", [])}
+    manifest_path = PUBLIC_DASHBOARD_PATH.parent / "serving_manifest.json"
+    if manifest_path.exists():
+        for artifact in read_json(manifest_path).get("artifacts", []):
+            if artifact.get("path") and (manifest_path.parent / artifact["path"]).is_file():
+                public_sources.update(artifact.get("source_ids", []))
     province_counts: dict[str, int] = {}
     for province in payload.get("provinces", []):
         for source_id in province.get("evidence_sources", []):
@@ -278,6 +288,7 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
             "แผนที่ใช้ point records 5,258 แถว; public non-point records อีก 361 แถวต้องแสดงในมุมอื่น ไม่ใช่ marker"
         ),
         "f2_rmutdb": "2,001 records เป็น national technology catalog; affiliation ไม่ใช่พื้นที่ใช้งานหรือผู้รับประโยชน์",
+        "f2_target_household": "เส้นทางที่ใช้งานเป็นตลาดผลงานสาธารณะ ใช้ชื่อเจ้าของงานและข้อมูลติดต่องานตาม field_contexts ได้ ส่วนข้อมูลครัวเรือนระดับบุคคลเป็นคนละ dataset",
         "f2_apptech_mtr": "public list และ statistics รอบ 2026-08-17 ตรงกันที่ 630 records; province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน",
         "f2_learning_dashboard": (
             "นับเฉพาะ province data rows 66 แถว (ไม่รวม header); raw response ยังไม่มี manifest และ "
@@ -328,6 +339,12 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         catalog_row = catalog_by_source_id[source_id]
         index_row = index_by_source_id.get(source_id)
         source_card = card_path(ordinal, source_id)
+        if not source_card.is_file():
+            # Supplemental connectors can cite their tracked contract as the
+            # catalog evidence while a source card is being prepared.
+            reference = catalog_row.get("source_card", "")
+            candidates = [PROJECT_ROOT / reference, DASHBOARD_ROOT / reference]
+            source_card = next((path for path in candidates if reference and path.is_file()), source_card)
         card = read_json(source_card)
         card_hashes.append(sha256_file(source_card))
 
@@ -349,6 +366,8 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
             count_basis = "public_current_month_cluster_snapshots"
         elif source_id == "f2_target_household":
             count_basis = "public_product_search_listing"
+        elif source_id == "clig_projects":
+            count_basis = "verified_public_project_snapshot"
         elif observed_count is not None:
             count_basis = "merged_index_data_row_count"
         elif restricted:
@@ -401,7 +420,7 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                 "source_type": registry_row.get("source_type_guess", ""),
                 "sensitivity_lane": registry_row.get("sensitivity", "public_unknown"),
                 "status": {
-                    "audit": card.get("status", "NOT_AUDITED"),
+                    "audit": card.get("status", catalog_row.get("audit_status", "NOT_AUDITED")),
                     "readiness": catalog_row["readiness_status"],
                     "network_api_export": workflow.get("network_api_export", "NOT_RECORDED"),
                     "data_inventory": workflow.get("data_inventory", "NOT_RECORDED"),

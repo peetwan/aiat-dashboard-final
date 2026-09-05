@@ -7,9 +7,30 @@
     {
       "key_pattern": "^innovations$",
       "grain_th": "นวัตกรรมหนึ่งรายการ",
-      "identity_options": [["id"], ["innovationid"]],
-      "geography_fields": ["province", "provinceName"],
-      "as_of_fields": ["updatedAt", "year"]
+      "identity_options": [
+        [
+          "id"
+        ],
+        [
+          "innovationid"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "provinceName"
+      ],
+      "as_of_fields": [
+        "updatedAt",
+        "year"
+      ],
+      "field_contexts": {
+        "/ownerContact/name": "work_attribution",
+        "/ownerContact/lastname": "work_attribution",
+        "/ownerContact/academicRank": "work_attribution",
+        "/ownerContact/email": "public_contact",
+        "/ownerContact/phone": "public_contact",
+        "/ownerContact/phone1": "public_contact"
+      }
     }
   ],
   "completeness_checks": [
@@ -20,7 +41,18 @@
   "privacy": {
     "candidate_only": true,
     "contact_value_scan": true,
-    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "ownerContact", "citizen"]
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "ownerContact",
+      "citizen"
+    ]
   },
-  "sample_fixture": "tests/fixtures/connectors/f2_apptech_mtr.json"
+  "sample_fixture": "tests/fixtures/connectors/f2_apptech_mtr.json",
+  "notes_th": "ownerContact เป็นผู้รับผิดชอบผลงานตาม public listing ของ MTR เก็บเฉพาะชื่อ ตำแหน่ง และช่องทางติดต่องานที่ประกาศใน field_contexts; ไม่เก็บบัญชีผู้ใช้ใน container"
 }

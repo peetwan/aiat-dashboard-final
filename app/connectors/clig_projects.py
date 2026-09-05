@@ -122,7 +122,13 @@ def _detail_table_values(soup: BeautifulSoup) -> dict[str, Any]:
         label = clean_text(th.get_text(" ", strip=True))
         if not label:
             continue
-        if label == "หน่วยงาน":
+        if label == "ชื่อ-นามสกุล (ภาษาไทย)":
+            values["researcher_name_th"] = clean_text(td.get_text(" ", strip=True))
+        elif label == "ชื่อ-นามสกุล (ภาษาอังกฤษ)":
+            values["researcher_name_en"] = clean_text(td.get_text(" ", strip=True))
+        elif label == "ตำแหน่ง":
+            values["researcher_position"] = clean_text(td.get_text(" ", strip=True))
+        elif label == "หน่วยงาน":
             values["lead_organization"] = clean_text(td.get_text(" ", strip=True))
         elif label == "บทคัดย่อ (ภาษาไทย)":
             values["abstract_th"] = clean_text(td.get_text(" ", strip=True))

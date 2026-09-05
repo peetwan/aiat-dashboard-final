@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from app.field_contexts import (
+    FieldContextError, context_allows_key, context_allows_value_reason,
+    key_kind, pointer_child, validate_field_contexts,
+)
+from app.privacy import PHONE_RE
+
 import argparse
 import csv
 import fnmatch
@@ -43,14 +49,6 @@ EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 # run of digits inside a hash, decimal, or prefixed machine identifier from
 # being mistaken for contact data.  There is deliberately no field-name
 # bypass: an exact phone-shaped value is unsafe even under *_id/*_code/*_hash.
-PHONE_RE = re.compile(
-    r"(?<![\w.])(?:"
-    r"\+66(?:[\s.-]*\(0\))?[\s().-]*"
-    r"(?:(?:[2-5]|7)(?:[\s().-]*\d){7}|[689](?:[\s().-]*\d){8})|"
-    r"66[\s()-]*(?:(?:[2-5]|7)(?:[\s()-]*\d){7}|[689](?:[\s()-]*\d){8})|"
-    r"0(?:[2-5]|7)(?:[\s().-]*\d){7}|0[689](?:[\s().-]*\d){8}"
-    r")(?![\w.])"
-)
 LABELLED_CONTACT_RE = re.compile(
     r"(?i)(?:\b(?:phone|telephone|mobile|tel|email)\s*(?:no\.?|number)?\s*[:：]|"
     r"(?:โทรศัพท์|เบอร์โทร|อีเมล|อีเมล์)\s*[:：])"
@@ -521,7 +519,21 @@ def _url_matches_rule(address: CanonicalUrl, rule: SourceUrlRule) -> bool:
         # A query-bearing canonical landing URL is exact; an ordinary landing
         # path may receive harmless tracking/filter parameters.
         return not registered.query or address.query == registered.query
-    return address.path == registered.path and address.query == registered.query
+    if address.path != registered.path or len(address.query) != len(registered.query):
+        return False
+    # Registered endpoint templates such as ?id={project_id} identify one
+    # public route. Substitute values only; parameter names and fixed filters
+    # must still match, and canonical URL validation rejects credentials.
+    return all(
+        actual_key == expected_key and (
+            actual_value == expected_value or (
+                bool(re.fullmatch(r"\{[a-zA-Z][a-zA-Z0-9_]*\}", expected_value))
+                and bool(actual_value)
+            )
+        )
+        for (actual_key, actual_value), (expected_key, expected_value)
+        in zip(address.query, registered.query)
+    )
 
 
 def _is_negative_audit(key: str, value: Any) -> bool:
@@ -589,8 +601,10 @@ def _privacy_problems(
     artifact_path: str,
     restricted_source_ids: set[str],
     profile: str,
+    field_contexts: dict[str, str] | None = None,
 ) -> list[str]:
     problems: list[str] = []
+    contexts = validate_field_contexts({} if field_contexts is None else field_contexts)
 
     def restricted_allowed(path: str) -> bool:
         return (
@@ -603,9 +617,12 @@ def _privacy_problems(
         if len(problems) < 50:
             problems.append(f"{path}: {reason}")
 
-    def walk(value: Any, path: str) -> None:
+    def walk(value: Any, path: str, pointer: str, protected: bool = False) -> None:
         if len(problems) >= 50:
             return
+        context = contexts.get(pointer)
+        if context and isinstance(value, (dict, list)):
+            append(path, "field context requires a scalar value")
         if isinstance(value, dict):
             has_direct_private_identity = any(
                 (
@@ -617,6 +634,8 @@ def _privacy_problems(
                 for key, child in value.items()
             )
             for key, child in value.items():
+                child_pointer = pointer_child(pointer, key)
+                child_context = contexts.get(child_pointer)
                 provisional_path = _report_key_path(
                     path,
                     key,
@@ -656,11 +675,18 @@ def _privacy_problems(
                     )
                     if not valid_exclusion_audit:
                         append(child_path, "invalid restricted-value exclusion audit")
-                if _sensitive_key(str(key), child):
-                    append(child_path, "private/contact field")
-                if normalized_key == "rights_owner" or (
+                sensitive = _sensitive_key(str(key), child) or normalized_key == "rights_owner" or (
                     normalized_key == "name" and ".research_leads" in child_path
-                ):
+                )
+                allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
+                # Unknown sensitive kinds never acquire an exception merely
+                # because a context exists (e.g. a future private identifier).
+                if sensitive and key_kind(str(key)) is None and normalized_key != "name":
+                    allowed = False
+                descend = isinstance(child, (dict, list)) and key_kind(str(key)) != "private" and any(
+                    p.startswith(child_pointer + "/") for p in contexts
+                )
+                if (sensitive or protected) and not allowed and not descend:
                     append(child_path, "private/contact field")
                 if (
                     has_direct_private_identity
@@ -671,17 +697,17 @@ def _privacy_problems(
                         child_path,
                         "person-level financial/health/household value",
                     )
-                walk(child, child_path)
+                walk(child, child_path, child_pointer, protected or bool(sensitive and not allowed))
             return
         if isinstance(value, list):
             for child in value:
-                walk(child, f"{path}[]")
+                walk(child, f"{path}[]", pointer + "/*", protected)
             return
         if type(value) is int or (
             type(value) is float and math.isfinite(value) and value.is_integer()
         ):
             numeric_text = str(int(value))
-            if PHONE_RE.fullmatch(numeric_text):
+            if PHONE_RE.fullmatch(numeric_text) and not context_allows_value_reason(context, "Thai phone-like numeric value", value):
                 append(path, "Thai phone-like numeric value")
             return
         if not isinstance(value, str):
@@ -691,9 +717,10 @@ def _privacy_problems(
             restricted_source_ids=restricted_source_ids,
             allow_restricted=restricted_allowed(path),
         ):
-            append(path, reason)
+            if not context_allows_value_reason(context, reason, value):
+                append(path, reason)
 
-    walk(payload, artifact_path)
+    walk(payload, artifact_path, "")
     return problems
 
 
@@ -1557,10 +1584,17 @@ def _validate_contract(contract: dict[str, Any], path: Path) -> None:
             "headers",
             "completeness_rules",
             "schema_policy",
+            "field_contexts",
         }
         extra = set(output) - allowed
         if extra:
             raise PublicationError(f"unexpected output fields in {path.name}: {sorted(extra)}")
+        try:
+            validate_field_contexts(output.get("field_contexts", {}), f"{path.name}.outputs[{index}].field_contexts")
+        except FieldContextError as exc:
+            raise PublicationError(str(exc)) from exc
+        if output.get("field_contexts") and contract["source_scope"] != "approved_values":
+            raise PublicationError(f"{path.name}: field contexts require an approved_values source scope")
         selector = output.get("path", output.get("path_glob"))
         if not isinstance(selector, str) or not SAFE_PUBLIC_PATH_RE.fullmatch(selector):
             raise PublicationError(f"unsafe public path selector in {path.name}: {selector}")
@@ -1736,6 +1770,8 @@ def _matches(path: str, selector: str) -> bool:
 def bind_outputs(
     paths: Iterable[str],
     contracts: list[tuple[Path, dict[str, Any]]],
+    *,
+    require_all: bool = True,
 ) -> dict[str, OutputBinding]:
     available = sorted(paths)
     bindings: dict[str, OutputBinding] = {}
@@ -1743,10 +1779,12 @@ def bind_outputs(
         for output in contract["outputs"]:
             selector = output.get("path", output.get("path_glob"))
             matched = [path for path in available if _matches(path, selector)]
+            if not require_all and not matched:
+                continue
             if "path" in output and matched != [selector]:
                 raise PublicationError(f"required publication output is missing: {selector}")
             expected_files = output.get("expected_files")
-            if expected_files is not None and len(matched) != expected_files:
+            if require_all and expected_files is not None and len(matched) != expected_files:
                 raise PublicationError(
                     f"{selector} matched {len(matched)} files; expected {expected_files}"
                 )
@@ -2052,6 +2090,7 @@ def _validate_snapshot(
                     artifact_path=path,
                     restricted_source_ids=restricted,
                     profile=binding.contract["privacy_profile"],
+                    field_contexts=output.get("field_contexts", {}),
                 )
                 problems.extend(privacy)
                 if output["format"] == "geojson":
@@ -2077,6 +2116,7 @@ def _validate_snapshot(
                     artifact_path=path,
                     restricted_source_ids=restricted,
                     profile=binding.contract["privacy_profile"],
+                    field_contexts=output.get("field_contexts", {}),
                 )
                 problems.extend(privacy)
                 record_summary = _record_summary(

@@ -16,6 +16,24 @@ from app.connector_contracts import (
 from app.connectors.registry import ConnectorLoadError, load_connector
 
 
+def test_nonproduction_candidate_connector_does_not_need_public_release_approval():
+    from app.catalog import load_catalog
+    catalog = load_catalog()
+    for source in catalog["sources"]:
+        if source["source_id"] == "clig_projects":
+            source["production_values_allowed"] = False
+    assert validate_connector_contracts(catalog=catalog)["status"] == "valid"
+
+
+def test_apptech_candidate_keeps_declared_work_contact_only():
+    contract = load_runtime_connector_contract("f2_apptech_mtr")
+    row = {"id": "work-1", "ownerContact": {"name": "เจ้าของตัวอย่าง", "email": "office@example.org",
+                                              "phone": "0812345678", "user_id": "private-account"}}
+    prepared = prepare_contract_records(contract, [("innovations", row)])[0]
+    assert prepared.payload["ownerContact"] == {
+        "name": "เจ้าของตัวอย่าง", "email": "office@example.org", "phone": "0812345678"}
+
+
 def test_every_executable_source_has_an_importable_connector_contract():
     report = validate_connector_contracts()
 

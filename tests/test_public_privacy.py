@@ -346,13 +346,15 @@ def test_all_provincial_culture_and_tourism_sections_are_privacy_projected():
         payload = read_json(path)
         sections = payload["sections"]
         assert {"culture", "tourism"} <= sections.keys()
-        for section_name in ("culture", "tourism"):
-            violations.extend(
-                find_privacy_violations(
-                    sections[section_name],
-                    f"provincial_briefings/{path.name}.sections.{section_name}",
-                )
-            )
+        from app.publication import _privacy_problems
+        problems = _privacy_problems(
+            {"sections": {key: sections[key] for key in ("culture", "tourism")}},
+            artifact_path=f"provincial_briefings/{path.name}",
+            restricted_source_ids=RESTRICTED_SOURCE_IDS,
+            profile=contract["privacy_profile"],
+            field_contexts=contract["outputs"][0]["field_contexts"],
+        )
+        violations.extend((path.name, problem) for problem in problems)
     assert_no_privacy_violations(violations)
 
 
@@ -360,10 +362,16 @@ def test_secondary_value_artifacts_do_not_shadow_contact_rows():
     insights = read_json(PUBLIC_ROOT / "source_insights.json")
     cultural_audit = insights["sources"]["f2_culturalmap_university"]
     assert cultural_audit["privacy_projection"] == {
-        "supporting_records_exposed": False,
-        "contact_fields_exposed": False,
-        "aggregate_counts_only": True,
+        "supporting_records_exposed": True,
+        "public_work_details": True,
+        "account_identifiers_exposed": False,
     }
+    from app.publication import _privacy_problems
+    contract = read_json(CONTRACT_ROOT / "source_insights.json")
+    assert not _privacy_problems(insights, artifact_path="source_insights",
+                                restricted_source_ids=RESTRICTED_SOURCE_IDS,
+                                profile=contract["privacy_profile"],
+                                field_contexts=contract["outputs"][0]["field_contexts"])
 
     learning = read_json(PUBLIC_ROOT / "learning_dashboard.json")
     learning_projection = {
