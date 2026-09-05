@@ -722,6 +722,12 @@ function renderF4CountryPanel() {
   countryStep.classList.add("active");
   regionStep.classList.toggle("active", Boolean(state.selectedRegion));
   provinceStep.classList.toggle("active", Boolean(state.selectedCode));
+  countryStep.disabled = !state.selectedRegion && !state.selectedCode;
+  regionStep.disabled = !state.selectedRegion || !state.selectedCode;
+  regionStep.querySelector("span").textContent = state.selectedRegion || "เลือกภาค";
+  provinceStep.querySelector("span").textContent = state.selectedCode
+    ? provinceByCode(state.selectedCode)?.province_name_th || "จังหวัดที่เลือก"
+    : "เลือกจังหวัด";
   countryStep.removeAttribute("aria-current");
   regionStep.removeAttribute("aria-current");
   provinceStep.removeAttribute("aria-current");
@@ -884,6 +890,7 @@ function setF4CountryTab(tab, load = true) {
     const active = button.dataset.f4Tab === tab;
     button.classList.toggle("active", active);
     button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
   });
   document.querySelectorAll("[data-f4-panel]").forEach((panel) => {
     const active = panel.dataset.f4Panel === tab;
@@ -891,6 +898,8 @@ function setF4CountryTab(tab, load = true) {
     panel.classList.toggle("active", active);
   });
   if (!load) return;
+  document.getElementById("f4CountryPanel").scrollTop = 0;
+  document.querySelector(`[data-f4-tab="${tab}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
   if (tab === "innovations") openF4CountryList("innovations");
   if (tab === "policy") openF4CountryList("policy_projects");
 }
@@ -937,10 +946,10 @@ async function openF4CountryList(kind) {
       : (isPolicy ? "/api/public/v1/f4/policy-projects" : "/api/public/v1/f4/innovations");
   const rowsId = isPolicy ? "f4PolicyRows" : "f4InnovationRows";
   const summaryId = isPolicy ? "f4PolicyListSummary" : "f4InnovationListSummary";
-  const query = isPolicy ? state.f4PolicyQuery : state.f4InnovationQuery;
   document.getElementById(rowsId).innerHTML = `<div class="portfolio-loading"><span></span><span></span><span></span></div>`;
   try {
     const payload = await fetchPublicJson(endpoint);
+    const query = isPolicy ? state.f4PolicyQuery : state.f4InnovationQuery;
     if (isPolicy) {
       state.f4PolicyRows = payload.rows || [];
       state.f4PolicyMeta = payload;
@@ -4072,9 +4081,48 @@ function bindEvents() {
   document.getElementById("showWorkspacePanel").addEventListener("click", showWorkspacePanel);
   document.getElementById("closeF4Country").addEventListener("click", collapseF4Board);
   document.getElementById("showF4Country").addEventListener("click", showF4Board);
+  document.getElementById("f4CountryStep").addEventListener("click", () => {
+    resetF4ToCountryOverview();
+    showF4Board();
+    document.getElementById("f4CountryPanel").scrollTop = 0;
+  });
+  document.getElementById("f4RegionStep").addEventListener("click", () => {
+    const region = state.selectedRegion;
+    if (!region) return;
+    closePanel(false);
+    selectRegion(region);
+    showF4Board();
+    document.getElementById("f4CountryPanel").scrollTop = 0;
+  });
   document.querySelectorAll("[data-f4-tab]").forEach((button) => {
     button.addEventListener("click", () => setF4CountryTab(button.dataset.f4Tab));
+    button.addEventListener("keydown", (event) => {
+      const vertical = window.matchMedia("(min-width: 721px)").matches;
+      const previous = vertical ? "ArrowUp" : "ArrowLeft";
+      const next = vertical ? "ArrowDown" : "ArrowRight";
+      if (![previous, next, "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const tabs = [...document.querySelectorAll("[data-f4-tab]")];
+      const index = tabs.indexOf(button);
+      const target = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1
+        : (index + (event.key === next ? 1 : -1) + tabs.length) % tabs.length;
+      tabs[target].focus();
+      setF4CountryTab(tabs[target].dataset.f4Tab);
+    });
   });
+  const f4TabQuery = window.matchMedia("(min-width: 721px)");
+  const updateF4TabOrientation = () => document.querySelector(".f4-country-tabs")
+    .setAttribute("aria-orientation", f4TabQuery.matches ? "vertical" : "horizontal");
+  updateF4TabOrientation();
+  f4TabQuery.addEventListener("change", updateF4TabOrientation);
+  // วัดหัวแผงจริงเพื่อให้แท็บตามหลังข้อความไทยที่ขึ้นหลายบรรทัดได้
+  const readingHeaders = new ResizeObserver((entries) => {
+    entries.forEach(({ target }) => {
+      target.closest(".province-panel, .f4-country-panel").style
+        .setProperty("--reading-nav-top", `${target.getBoundingClientRect().height}px`);
+    });
+  });
+  document.querySelectorAll(".f1-province-heading, .f4-flow").forEach((header) => readingHeaders.observe(header));
   document.getElementById("f4InnovationSearch").addEventListener("input", (event) => {
     state.f4InnovationQuery = event.target.value;
     rerenderF4InnovationList();

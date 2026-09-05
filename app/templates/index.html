@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css" />
     <link rel="stylesheet" href="/static/styles.css?v=f1-20260903-04" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
+    <link rel="stylesheet" href="/static/departments.css?v=20260905-01" />
   </head>
   <body>
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
@@ -120,18 +121,19 @@
           </div>
           <button type="button" id="closeF4Country" aria-label="ซ่อนข้อมูลฝ่าย 4">×</button>
         </header>
-        <div class="department-flow f4-flow" aria-label="ลำดับการดูข้อมูลฝ่าย 4">
-          <span class="active" id="f4CountryStep"><b>1</b> ประเทศ</span>
-          <span id="f4RegionStep"><b>2</b> เลือกภาค</span>
-          <span id="f4ProvinceStep"><b>3</b> เลือกจังหวัด</span>
-        </div>
-        <nav class="f4-country-tabs" aria-label="ข้อมูลฝ่าย 4">
-          <button type="button" class="active" data-f4-tab="overview" aria-selected="true">ภาพรวม</button>
-          <button type="button" data-f4-tab="innovations" aria-selected="false">เทคโนโลยีและนวัตกรรม</button>
-          <button type="button" data-f4-tab="policy" aria-selected="false">นวัตกรรมเชิงนโยบาย</button>
-          <button type="button" data-f4-tab="evidence" aria-selected="false">แหล่งข้อมูล</button>
+        <nav class="department-flow f4-flow" aria-label="เส้นทางการดูข้อมูลฝ่าย 4">
+          <button type="button" class="active" id="f4CountryStep" disabled><b>1</b> ประเทศ</button>
+          <button type="button" id="f4RegionStep" disabled><b>2</b> <span>เลือกภาค</span></button>
+          <span id="f4ProvinceStep"><b>3</b> <span>เลือกจังหวัด</span></span>
         </nav>
-        <section class="f4-tab-panel active" data-f4-panel="overview">
+        <div class="f4-content">
+        <nav class="f4-country-tabs" role="tablist" aria-label="ข้อมูลฝ่าย 4">
+          <button type="button" class="active" id="f4TabOverview" role="tab" data-f4-tab="overview" aria-controls="f4OverviewPanel" aria-selected="true">ภาพรวม</button>
+          <button type="button" id="f4TabInnovations" role="tab" data-f4-tab="innovations" aria-controls="f4InnovationsPanel" aria-selected="false" tabindex="-1">เทคโนโลยีและนวัตกรรม</button>
+          <button type="button" id="f4TabPolicy" role="tab" data-f4-tab="policy" aria-controls="f4PolicyPanel" aria-selected="false" tabindex="-1">นวัตกรรมเชิงนโยบาย</button>
+          <button type="button" id="f4TabEvidence" role="tab" data-f4-tab="evidence" aria-controls="f4EvidencePanel" aria-selected="false" tabindex="-1">แหล่งข้อมูล</button>
+        </nav>
+        <section class="f4-tab-panel active" id="f4OverviewPanel" role="tabpanel" aria-labelledby="f4TabOverview" tabindex="0" data-f4-panel="overview">
           <div class="f4-section-heading">
             <strong id="f4OverviewHeading">ภาพรวมระดับประเทศ</strong>
           </div>
@@ -141,7 +143,7 @@
               <strong>ผลกระทบเศรษฐกิจรวมระดับประเทศ</strong>
               <small>PMUA AppTech แสดงเป็นยอดรวมรายปี ไม่ใช่ before-after รายพื้นที่</small>
             </header>
-            <div class="f4-economic-table-scroll">
+            <div class="f4-economic-table-scroll" role="region" aria-label="ตารางผลกระทบเศรษฐกิจ เลื่อนแนวนอนเพื่อดูครบทุกคอลัมน์" tabindex="0">
               <table class="f4-economic-table">
                 <thead>
                   <tr>
@@ -156,20 +158,20 @@
             </div>
           </section>
         </section>
-        <section class="f4-tab-panel" data-f4-panel="innovations" hidden>
+        <section class="f4-tab-panel" id="f4InnovationsPanel" role="tabpanel" aria-labelledby="f4TabInnovations" tabindex="0" data-f4-panel="innovations" hidden>
           <div class="f4-section-heading">
             <strong>เทคโนโลยีและนวัตกรรม</strong>
           </div>
           <section class="f4-list-panel">
             <header>
               <h3>รายการเทคโนโลยีและนวัตกรรม</h3>
-              <input id="f4InnovationSearch" type="search" placeholder="ค้นหารายการ" autocomplete="off" />
+              <input id="f4InnovationSearch" type="search" aria-label="ค้นหาเทคโนโลยีและนวัตกรรม" placeholder="ค้นหารายการ" autocomplete="off" />
             </header>
             <div class="f4-list-summary" id="f4InnovationListSummary"></div>
             <div class="f4-record-list" id="f4InnovationRows"></div>
           </section>
         </section>
-        <section class="f4-tab-panel" data-f4-panel="policy" hidden>
+        <section class="f4-tab-panel" id="f4PolicyPanel" role="tabpanel" aria-labelledby="f4TabPolicy" tabindex="0" data-f4-panel="policy" hidden>
           <div class="f4-policy-window">
             <div class="f4-policy-main">
               <span>นวัตกรรมเชิงนโยบาย</span>
@@ -188,13 +190,13 @@
           <section class="f4-list-panel">
             <header>
               <h3>รายการนวัตกรรมเชิงนโยบาย</h3>
-              <input id="f4PolicySearch" type="search" placeholder="ค้นหารายการ" autocomplete="off" />
+              <input id="f4PolicySearch" type="search" aria-label="ค้นหานวัตกรรมเชิงนโยบาย" placeholder="ค้นหารายการ" autocomplete="off" />
             </header>
             <div class="f4-list-summary" id="f4PolicyListSummary"></div>
             <div class="f4-record-list" id="f4PolicyRows"></div>
           </section>
         </section>
-        <section class="f4-tab-panel" data-f4-panel="evidence" hidden>
+        <section class="f4-tab-panel" id="f4EvidencePanel" role="tabpanel" aria-labelledby="f4TabEvidence" tabindex="0" data-f4-panel="evidence" hidden>
           <div class="f4-section-heading">
             <strong>แหล่งข้อมูล</strong>
             <small>ที่มาและข้อควรอ่านตัวเลข</small>
@@ -202,6 +204,7 @@
           <div class="f4-notes" id="f4CountryNotes"></div>
           <div class="f4-source-grid" id="f4SourceGrid"></div>
         </section>
+        </div>
       </section>
       <button type="button" class="department-board-toggle f4-board-toggle" id="showF4Country" hidden>ดูภาพรวมฝ่าย 4</button>
 
@@ -421,6 +424,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/app.js?v=f1-20260903-04" defer></script>
+    <script src="/static/app.js?v=departments-20260905-01" defer></script>
   </body>
 </html>
