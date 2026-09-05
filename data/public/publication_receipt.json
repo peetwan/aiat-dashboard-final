@@ -1,6 +1,6 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "570c48a16bc946ca4e67e587b1e3b1c597a7a902f254f6e401bf5d9131262f45",
+  "release_digest": "bc10f6bd8ef1724322c9e4f5ebfc52f05f54113994e2bef160eee19d021b037a",
   "artifact_count": 176,
   "artifacts": [
     {
@@ -830,7 +830,7 @@
       "role": "support",
       "format": "json",
       "bytes": 21993,
-      "sha256": "d0d030666f2d405bc68bbcb770d897555cc0572f15664865a161c82a2edc6bc2",
+      "sha256": "ce557ea2ab352511fd0353388c35f0c1906ab60da8e9ff5b6f0c0637b4291618",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -1690,7 +1690,7 @@
       "role": "support",
       "format": "json",
       "bytes": 24129,
-      "sha256": "bbe7e3ec6f43de78be8a915722ca260f7fae642ae50419814449256860f1c86e",
+      "sha256": "102af7ee1273c2f45515988bde48941e6c2887a006f67827377deea2e9db14d4",
       "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
@@ -1709,8 +1709,8 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 94115,
-      "sha256": "50892269ef32c8de5127adb2674d52dc3d3d303ec044c83e04259105e65a336c",
+      "bytes": 94119,
+      "sha256": "543e1edd8d7d2c9ee17281e50404bac02502a450007028835fd1b3104fc40e46",
       "contract_sha256": "fca31aed78f157e0ba9ab0161daaa93d9fcd74996884315623aa9d071f9e35a7"
     },
     {
@@ -1719,8 +1719,8 @@
       "dataset_key": "source_insights",
       "role": "database",
       "format": "json",
-      "bytes": 2999646,
-      "sha256": "2699429924bd9aa7785251b026e04dcc4d1bb4e32ea491288972be248f79a93e",
+      "bytes": 2991795,
+      "sha256": "96094c9ca9b92fb3d02d780df47ac054d00564171db161a180f324bd0a007b90",
       "contract_sha256": "2248ba13300a99e0ab66aee63e0ba6fa63d5ba41e82c1ea390df007225985b00"
     },
     {
@@ -1730,7 +1730,7 @@
       "role": "provenance",
       "format": "json",
       "bytes": 7371,
-      "sha256": "8750c01832fa696b4ec7d0bd65792c4ca9ba71dc1ae2b48f694b36d52b219b79",
+      "sha256": "cf3e7293ad59ce6a95e510bb75599950592dda0f265a63c6f21df13ae952cf52",
       "contract_sha256": "2248ba13300a99e0ab66aee63e0ba6fa63d5ba41e82c1ea390df007225985b00"
     },
     {

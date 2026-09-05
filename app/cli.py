@@ -86,7 +86,7 @@ def command_ingest(args: argparse.Namespace) -> int:
 
 
 def command_status() -> int:
-    initialize_candidates()
+    initialize()
     with SessionLocal() as session:
         rows = session.execute(
             select(

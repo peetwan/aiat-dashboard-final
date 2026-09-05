@@ -24,6 +24,21 @@ def test_work_projections_keep_owner_and_work_contact_but_omit_account_credentia
     assert "account_identifier" not in cultural and "informants_raw" not in cultural
 
 
+@pytest.mark.parametrize("suffix", [
+    "Face book : กลุ่มตัวอย่าง https://example.org ติดต่อผู้ดูแล เข้าชม : 20 ครั้ง",
+    "ID Line : work-example เข้าชม : 20 ครั้ง",
+    "มือถือ 0812345678 ผู้ประสานงานตัวอย่าง",
+    "เข้าชม : 20 ครั้ง ผลิตภัณฑ์จากวัฒนธรรม รายละเอียดซ้ำ",
+])
+def test_cultural_address_stops_before_contact_and_footer_sections(suffix):
+    address = "123 หมู่ 4 ต.ตัวอย่าง อ.ตัวอย่าง จ.ตัวอย่าง 10000"
+    item = project_cultural_supporting({"external_id": "product-fixture", "title": "ผลิตภัณฑ์ตัวอย่าง", "data": {
+        "address_text": address + " " + suffix, "sales_channels": "office@example.org โทร 0812345678",
+    }}, "products")
+    assert item["address"] == address
+    assert item["sales_channels"] == "office@example.org โทร 0812345678"
+
+
 def test_rmutdb_work_preserves_pdf_contact_and_attribution_without_person_id():
     row = {"source_record_id": "energy:p7", "record_type": "rmutdb_ebook_innovation_detail",
            "normalized_fields": {"inventor": "ผู้ประดิษฐ์ตัวอย่าง", "coordinator": "ผู้ประสานงานตัวอย่าง",

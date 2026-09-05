@@ -24,6 +24,16 @@ def test_scaffold_can_declare_public_work_contact_columns(tmp_path):
     assert contracts[0][1]["outputs"][0]["field_contexts"]["/*/email"] == "public_contact"
 
 
+@pytest.mark.parametrize("pointer,context_pointer", [("$", "/owner_name"), ("/", "/owner_name"), ("$", "/*/owner_name")])
+def test_scaffold_resolves_public_attribution_for_root_objects_and_arrays(tmp_path, pointer, context_pointer):
+    _write_catalog(tmp_path)
+    spec = _spec(records_pointer=pointer, identity_fields=("owner_name",),
+                 field_contexts=((context_pointer, "work_attribution"),))
+    scaffold(spec, project_root=tmp_path)
+    contract = load_contracts(tmp_path / "config/publication_contracts")[0][1]
+    assert contract["outputs"][0]["field_contexts"] == {context_pointer: "work_attribution"}
+
+
 def _write_catalog(root: Path) -> None:
     path = root / "config" / "source_catalog.json"
     path.parent.mkdir(parents=True, exist_ok=True)

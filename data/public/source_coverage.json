@@ -29,7 +29,7 @@
     "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
     "public_candidates_with_observed_count": 19,
-    "current_public_data_artifact_source_count": 17,
+    "current_public_data_artifact_source_count": 13,
     "current_province_projection_source_count": 9,
     "restricted_value_leak_count": 0
   },
@@ -1759,7 +1759,7 @@
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": true,
+        "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
       },
@@ -1824,7 +1824,7 @@
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": true,
+        "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
       },
@@ -1889,7 +1889,7 @@
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": true,
+        "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
       },
@@ -1954,7 +1954,7 @@
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": true,
+        "current_public_data_artifact": false,
         "current_province_projection": false,
         "restricted_values_excluded": false
       },

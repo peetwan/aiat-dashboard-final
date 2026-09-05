@@ -86,6 +86,35 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@pytest.mark.parametrize("has_clig,has_disaster", [(False, False), (True, False), (True, True)])
+def test_current_projection_requires_records_and_attributes_shared_sources(tmp_path, monkeypatch, has_clig, has_disaster):
+    from tools import build_source_coverage as builder
+
+    dashboard = tmp_path / "public_dashboard.json"
+    dashboard.write_text(json.dumps({"sources": [], "provinces": []}), encoding="utf-8")
+    monkeypatch.setattr(builder, "PUBLIC_DASHBOARD_PATH", dashboard)
+    (tmp_path / "serving_manifest.json").write_text(json.dumps({"artifacts": [
+        {"path": "clig_work_attribution.json", "source_ids": ["clig_projects"]},
+        {"path": "disaster_tracking.json", "source_ids": ["spu_sukhothai_care", "spu_rawangphai_uru"]},
+    ]}), encoding="utf-8")
+    (tmp_path / "clig_work_attribution.json").write_text(json.dumps({"items": [{"project_id": "fixture", "budget_baht": 0}] if has_clig else []}), encoding="utf-8")
+    provinces = {"53": {"sources": {"spu_rawangphai_uru": {"source_id": "spu_rawangphai_uru", "count": 1}}}} if has_disaster else {}
+    (tmp_path / "disaster_tracking.json").write_text(json.dumps({"provinces": provinces, "station_samples": {}, "timeseries": {}}), encoding="utf-8")
+    sources, counts = builder.current_public_projection()
+    assert sources == ({"clig_projects"} if has_clig else set()) | ({"spu_rawangphai_uru"} if has_disaster else set())
+    assert counts == {}
+
+
+def test_cultural_directory_metadata_and_address_match_published_grain():
+    payload = read_json(PUBLIC_ROOT / "source_insights.json")
+    cultural = payload["sources"]["f2_culturalmap_university"]
+    assert len(cultural["public_records"]) == 361
+    assert "f2_culturalmap_university" not in payload["audit_summary"]["aggregate_only_projection_source_ids"]
+    product = next(row for row in cultural["public_records"] if row["record_id"] == "PD-44")
+    assert product["address"] == "270 หมู่ที่ 11 ตำบลเขวา อำเภอเมือง จังหวัดมหาสารคาม"
+    assert "Face book" in product["sales_channels"]
+
+
 def test_endpoint_ids_match_the_current_policy_fields():
     catalog = read_json(CATALOG_PATH)
     for source in catalog["sources"]:

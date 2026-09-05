@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -22,6 +23,19 @@ CULTURAL_CONTEXTS = {
 }
 
 
+def cultural_product_address(value: str | None) -> str | None:
+    if not value:
+        return None
+    # Some source pages concatenate contact and footer sections after the address.
+    # Keep those sections in sales_channels, where their public-contact context is declared.
+    address = re.split(
+        r"(?i)\bface\s*book\s*:|\b(?:id\s*)?line\s*:|https?://|"
+        r"(?:โทรศัพท์|มือถือ|ช่องทางติดต่อ)\s*:?|เข้าชม\s*:",
+        value, maxsplit=1,
+    )[0]
+    return address.strip(" \t\r\n,;:") or None
+
+
 def project_cultural_supporting(row: dict, dataset_id: str) -> dict:
     from tools.build_provincial_briefings import sanitize_public_text
     data = row.get("data") or {}
@@ -29,7 +43,7 @@ def project_cultural_supporting(row: dict, dataset_id: str) -> dict:
             "title": sanitize_public_text(row.get("title")), "source_url": row.get("source_url")}
     if dataset_id == "products":
         item.update(category=data.get("product_category"), price_text=data.get("price_text"),
-                    address=data.get("address_text"), sales_channels=data.get("sales_channels"),
+                    address=cultural_product_address(data.get("address_text")), sales_channels=data.get("sales_channels"),
                     related_cultural_record=data.get("related_cultural_record"))
     elif dataset_id == "activities":
         item["date_text"] = data.get("date_text")

@@ -6,12 +6,17 @@ import csv
 import hashlib
 import json
 import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(DASHBOARD_ROOT))
+
+from app.publication import _records, bind_outputs, load_contracts
+
 PROJECT_ROOT = Path(
     os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
 ).expanduser().resolve()
@@ -164,6 +169,21 @@ def evidence_paths(card: dict, source_id: str, restricted: bool) -> list[str]:
     return paths[:12]
 
 
+def record_source_ids(value: Any, declared: set[str]) -> set[str]:
+    found: set[str] = set()
+    if isinstance(value, dict):
+        if isinstance(value.get("source_id"), str) and value["source_id"] in declared:
+            found.add(value["source_id"])
+        for key, child in value.items():
+            if key in declared and isinstance(child, (dict, list)) and child:
+                found.add(key)
+            found.update(record_source_ids(child, declared))
+    elif isinstance(value, list):
+        for child in value:
+            found.update(record_source_ids(child, declared))
+    return found
+
+
 def current_public_projection() -> tuple[set[str], dict[str, int]]:
     if not PUBLIC_DASHBOARD_PATH.exists():
         return set(), {}
@@ -171,9 +191,26 @@ def current_public_projection() -> tuple[set[str], dict[str, int]]:
     public_sources = {source["source_id"] for source in payload.get("sources", [])}
     manifest_path = PUBLIC_DASHBOARD_PATH.parent / "serving_manifest.json"
     if manifest_path.exists():
-        for artifact in read_json(manifest_path).get("artifacts", []):
-            if artifact.get("path") and (manifest_path.parent / artifact["path"]).is_file():
-                public_sources.update(artifact.get("source_ids", []))
+        artifacts = [artifact for artifact in read_json(manifest_path).get("artifacts", [])
+                     if artifact.get("path") and artifact.get("source_ids")]
+        bindings = bind_outputs(
+            {"data/public/" + artifact["path"] for artifact in artifacts},
+            load_contracts(DASHBOARD_ROOT / "config/publication_contracts"), require_all=False,
+        )
+        for artifact in artifacts:
+            path = manifest_path.parent / artifact["path"]
+            binding = bindings.get("data/public/" + artifact["path"])
+            if not path.is_file() or not binding or binding.contract["source_scope"] != "approved_values":
+                continue
+            pointer = binding.output.get("records_pointer")
+            if not pointer:
+                continue
+            records = [row for _, row in _records(read_json(path), pointer) if row not in (None, {}, [])]
+            declared = set(artifact["source_ids"]) & set(binding.contract["source_ids"])
+            if records and len(declared) == 1:
+                public_sources.update(declared)
+            elif records:
+                public_sources.update(record_source_ids(records, declared))
     province_counts: dict[str, int] = {}
     for province in payload.get("provinces", []):
         for source_id in province.get("evidence_sources", []):

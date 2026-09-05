@@ -1041,7 +1041,7 @@ def build(*, generated_at: str | None = None) -> None:
                 "f2_learning_dashboard",
             ],
             "non_geo_source_ids": ["f2_rmutdb"],
-            "aggregate_only_projection_source_ids": ["f2_culturalmap_university"],
+            "aggregate_only_projection_source_ids": [],
             "join_policy": "authoritative_or_source_confirmed_geography_only",
             "unmapped_public_records": {
                 "f2_learning_area_based": {

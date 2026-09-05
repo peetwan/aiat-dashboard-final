@@ -250,9 +250,12 @@ def validate_spec(spec: PublicationSpec) -> PublicationSpec:
         raise ScaffoldError(str(exc)) from exc
     if contexts and spec.source_scope != "approved_values":
         raise ScaffoldError("field contexts require approved_values")
-    prefix = "" if spec.records_pointer == "$" else spec.records_pointer
+    prefix = "" if spec.records_pointer in {"$", "/"} else spec.records_pointer
     def field_context(field: str) -> str | None:
-        return contexts.get(prefix + "/*/" + field.replace(".", "/"))
+        suffix = "/" + field.replace(".", "/")
+        if not prefix and spec.output_format != "csv" and suffix in contexts:
+            return contexts[suffix]
+        return contexts.get(prefix + "/*" + suffix)
     if not DATASET_KEY_RE.fullmatch(spec.dataset_key):
         raise ScaffoldError("dataset_key must match ^[a-z][a-z0-9_]{0,63}$")
     if not spec.source_ids and spec.source_scope != "reference_geography":
@@ -523,8 +526,9 @@ class PublicationMappingRequired(RuntimeError):
 def build(reviewed_records: Sequence[dict[str, Any]]) -> object:
     """Return a deterministic public artifact after explicit field-level review.
 
-    ``reviewed_records`` must already exclude raw payloads, personal/contact values,
-    secrets, and restricted values.  Replace this exception with a source-specific
+    ``reviewed_records`` must use the contract's field contexts for work attribution
+    and public contacts, and exclude credentials and restricted values.
+    Replace this exception with a source-specific
     projection and focused semantic/completeness tests; do not implement a generic copy.
     """
 

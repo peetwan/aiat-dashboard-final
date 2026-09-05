@@ -93,6 +93,32 @@ def test_candidate_ingest_does_not_require_a_valid_public_release(monkeypatch):
     assert called == ["clig_projects"]
 
 
+def test_status_initializes_reviewed_serving_data_on_a_fresh_database(tmp_path, monkeypatch, capsys):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+    from app.models import Base, PublicArtifact
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'status.sqlite'}")
+    monkeypatch.setattr(cli, "init_db", lambda: Base.metadata.create_all(engine))
+    monkeypatch.setattr(cli, "SessionLocal", lambda: Session(engine))
+    monkeypatch.setattr(cli, "validate_workspace", lambda *args: {"status": "valid"})
+    monkeypatch.setattr(cli, "sync_catalog", lambda session: None)
+    monkeypatch.setattr(cli, "sync_spatial_layers", lambda session: None)
+    monkeypatch.setattr(cli, "sync_housing_demand", lambda session: None)
+    def sync_fixture(session):
+        session.merge(PublicArtifact(artifact_key="fixture", artifact_group="source_dataset", content_hash="a" * 64,
+                                     source_path="data/public/fixture.json", item_count=1, payload={"items": [{"count": 1}]}))
+        session.commit()
+    monkeypatch.setattr(cli, "sync_public_artifacts", sync_fixture)
+    try:
+        assert cli.command_status() == 0
+        report = json.loads(capsys.readouterr().out)["serving_database"]
+        assert report["public_artifacts"] == 1
+        assert report["groups"] == {"source_dataset": 1}
+    finally:
+        engine.dispose()
+
+
 def test_ingest_reports_blocked_policy_with_nonzero_exit_code(monkeypatch):
     monkeypatch.setattr(cli, "initialize_candidates", lambda: None)
     def blocked(*args):
