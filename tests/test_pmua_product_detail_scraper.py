@@ -53,3 +53,17 @@ def test_parse_product_detail_omits_roi_placeholders() -> None:
     assert "roi_indicator" not in row
     assert "roi_value" not in row
     assert "roi_unit" not in row
+
+
+def test_metric_sections_do_not_borrow_values_from_the_next_heading() -> None:
+    html = """
+    <h5>ผลลัพธ์ (Outcomes)</h5><p>ยังไม่มีข้อมูล</p>
+    <h5>ผลกระทบ (Impacts)</h5>
+    <ul><li><span>ผลกระทบทดสอบ</span><span>12 <small>หน่วยทดสอบ</small></span></li></ul>
+    """
+    row = parse_product_detail_html(html, 1, "https://pmua-apptech.com/product/show/1")
+    assert row["outcomes"] == []
+    assert row["impacts"] == [{
+        "label": "ผลกระทบทดสอบ", "value": 12, "value_text": "12",
+        "unit": "หน่วยทดสอบ", "evidence_type": "source_reported",
+    }]

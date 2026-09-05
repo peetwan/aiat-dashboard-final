@@ -662,6 +662,8 @@ def f4_province_summary(
     innovator = innovator_by_province.get(province_name_th)
     levels = innovator.get("levels") if isinstance(innovator, dict) and isinstance(innovator.get("levels"), dict) else {}
     pmua_codes, clig_codes = _covered_province_codes(product_rows, project_rows, province_names_by_code)
+    pmua_codes = sorted(set(pmua_codes) & {code})
+    clig_codes = sorted(set(clig_codes) & {code})
     clig_summary = _policy_project_summary([_project_row(project) for project in project_rows])
     cards = [
         {

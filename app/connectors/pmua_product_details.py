@@ -67,8 +67,8 @@ def _parse_metric_section(soup: BeautifulSoup, heading_label: str) -> list[dict[
     heading = _find_heading(soup, heading_label)
     if not heading:
         return []
-    metric_list = heading.find_next("ul")
-    if not metric_list:
+    metric_list = heading.find_next(["ul", "h5", "h6"])
+    if not metric_list or metric_list.name != "ul":
         return []
 
     rows: list[dict[str, Any]] = []

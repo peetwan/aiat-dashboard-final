@@ -51,6 +51,7 @@ def utc_run_id() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
+
 def load_product_ids_from_r2() -> list[int]:
     config = config_from_env()
     client = make_client(config)
