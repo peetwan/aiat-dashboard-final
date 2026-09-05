@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-08-21T01:16:00.504988+00:00",
+  "generated_at": "2026-09-05T02:37:11.018690+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
       "path": "config/source_registry.json",
-      "sha256": "1ac5cb5bf067dc982b3fe69c99d2491fe315903d0b35f2c99e50241dac408685"
+      "sha256": "67678ff880bbc8ca4e33029e4c03b51c449b8f6a1ee990e8f76b433c5e55a7a0"
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "520b500d2f0c896a5ab768d8a9f6ce042f90718568cf1ec2c609835070e1e017"
+      "sha256": "169c2cf97c99ad4cf0d58cc6c806239c23a5b61a4cd71797a96ff83f403e8132"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,7 +18,7 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 29,
-      "aggregate_sha256": "54d249e4f6e1edc6ab6fd829946945771c6e081d7740b3496698856c7d5ef63c"
+      "aggregate_sha256": "30ce94805a6c0ec636c4c155cfc29eb47ecc460f37992d46860676a614dcbcb2"
     }
   },
   "summary": {
@@ -29,8 +29,8 @@
     "restricted_local_only_source_count": 2,
     "sources_with_merged_index_entry": 12,
     "public_candidates_with_observed_count": 19,
-    "current_public_data_artifact_source_count": 11,
-    "current_province_projection_source_count": 10,
+    "current_public_data_artifact_source_count": 13,
+    "current_province_projection_source_count": 9,
     "restricted_value_leak_count": 0
   },
   "sources": [
@@ -57,6 +57,7 @@
         "serving_numeric_value_count": 15,
         "serving_projection_grain": "province_target_registry_rows_20_with_15_numeric_scores",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -143,6 +144,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "approved_aggregate_rows",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -216,7 +218,8 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "geocoded_public_point_records",
         "additional_public_non_map_count": 361,
-        "not_all_raw_rows_are_served": true,
+        "additional_public_non_map_grain": "public_cultural_products_activities_recreation_team_records",
+        "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
       "geo": {
@@ -294,6 +297,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -362,6 +366,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -428,6 +433,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "national_technology_catalog_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -500,8 +506,9 @@
         "serving_projection_count": 77,
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_aggregate_api_rows",
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": true,
+        "additional_public_non_map_count": 630,
+        "additional_public_non_map_grain": "public_innovation_records",
+        "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
       "geo": {
@@ -574,6 +581,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -647,6 +655,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -666,7 +675,7 @@
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": false,
+        "current_public_data_artifact": true,
         "current_province_projection": false,
         "restricted_values_excluded": false
       },
@@ -675,7 +684,7 @@
         "source_card": "data/source_audit/09_f2_target_household/source_card.json",
         "merged_index": null,
         "approval_basis": "source_card_candidate_scope_needs_review",
-        "catalogued_endpoint_count": 1,
+        "catalogued_endpoint_count": 7,
         "primary_paths": [
           "data/raw/firecrawl_map/f2_target_household/20260803T_url_audit_map_01/manifest.json",
           "data/source_audit/09_f2_target_household/evidence/map_observation.json",
@@ -685,7 +694,7 @@
       },
       "notes_th": [
         "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
-        "ดึงตามที่หน้าเว็บโชว์ได้; ตัดชื่อ เบอร์โทร อีเมลตอนเขียน extracted"
+        "เส้นทางที่ใช้งานเป็นตลาดผลงานสาธารณะ ใช้ชื่อเจ้าของงานและข้อมูลติดต่องานตาม field_contexts ได้ ส่วนข้อมูลครัวเรือนระดับบุคคลเป็นคนละ dataset"
       ]
     },
     {
@@ -711,6 +720,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_rows_excluding_header",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -776,6 +786,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -842,6 +853,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -915,6 +927,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -988,6 +1001,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "municipality_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -1057,6 +1071,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": true
       },
@@ -1117,6 +1132,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1188,6 +1204,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1252,6 +1269,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1320,6 +1338,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1384,6 +1403,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": true
       },
@@ -1444,6 +1464,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1508,6 +1529,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1572,6 +1594,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_linked_public_package_rows",
         "additional_public_non_map_count": 306,
+        "additional_public_non_map_grain": "public_package_rows_without_assigned_province",
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -1651,6 +1674,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1715,6 +1739,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1779,6 +1804,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1843,6 +1869,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1907,6 +1934,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1959,60 +1987,57 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "VERIFIED_PUBLIC_PROJECT_SEARCH_AND_DETAIL",
-        "data_inventory": "F4_R2_EVIDENCE_SNAPSHOT",
+        "network_api_export": "RECORDED_PUBLIC_ENDPOINTS",
+        "data_inventory": "MANIFEST_HASH_AND_COUNT_VERIFIED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
         "source_index_present": false,
         "observed_count": 107,
-        "observed_count_basis": "R2 manifest clig.projects.row_count",
+        "observed_count_basis": "verified_public_project_snapshot",
         "serving_projection_count": 107,
         "serving_numeric_value_count": null,
-        "serving_projection_grain": "research_project_rows",
+        "serving_projection_grain": "public_project_attribution_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
       "geo": {
-        "expected_by_registry": false,
-        "grain": "text_matched_province_evidence",
-        "linkability": "province_name_text_candidate",
-        "linked_area_count": 78,
+        "expected_by_registry": true,
+        "grain": "unverified",
+        "linkability": "unverified",
+        "linked_area_count": null,
         "related_area_count": null,
-        "decision": "ใช้ text match สำหรับ province drilldown v1",
-        "current_map_area_count": 78,
+        "decision": null,
+        "current_map_area_count": 0,
         "numeric_value_area_count": null,
-        "known_omissions": [
-          {
-            "kind": "unmapped_project_text",
-            "count": 29,
-            "labels_th": []
-          }
-        ]
+        "known_omissions": []
       },
       "public_visibility": {
         "classification": "public_candidate",
         "metadata_in_catalog": true,
         "production_values_allowed": true,
         "candidate_not_fact": true,
-        "current_public_data_artifact": false,
-        "current_province_projection": true,
+        "current_public_data_artifact": true,
+        "current_province_projection": false,
         "restricted_values_excluded": false
       },
       "evidence": {
         "registry": "config/source_registry.json",
-        "source_card": "dashboard_final/config/connector_contracts/clig_projects.json",
+        "source_card": "data/source_audit/29_clig_projects/source_card.json",
         "merged_index": null,
-        "approval_basis": "current_catalog_policy_and_source_cards",
+        "approval_basis": "none",
         "catalogued_endpoint_count": 2,
         "primary_paths": [
-          "raw/f4/clig_projects/20260823T072251Z/manifest.json",
-          "raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz"
+          "dashboard_final/data/public/clig_work_attribution.json"
         ],
         "local_evidence_paths_withheld": false
       },
-      "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ใช้เป็น evidence drilldown สำหรับ F4 ยังไม่ใช่ KPI รับรอง"
+      "notes_th": [
+        "อนุญาตเผยแพร่ candidate projection แต่ยังไม่ใช่ fact/KPI ที่ผ่านการรับรอง",
+        "ดึงเฉพาะหน้าค้นหาและรายละเอียดสาธารณะ ใช้เป็นข้อมูลประกอบของฝ่าย 4 และยังไม่ใช่ KPI ที่ผ่านการรับรอง"
+      ]
     }
   ]
 }

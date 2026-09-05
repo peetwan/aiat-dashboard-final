@@ -12,7 +12,7 @@
 
 ## ขอบเขตข้อมูล
 
-- [ ] ไม่มี secret, raw/database dump, ชื่อบุคคล, เบอร์โทร หรืออีเมล
+- [ ] ไม่มี secret, raw/database dump หรือข้อมูลส่วนตัวนอกขอบเขตงาน; ชื่อเจ้าของผลงาน ผู้วิจัย ช่องทางติดต่อสาธารณะ และที่ตั้งสถานที่ระบุ `field_contexts` ตาม [คู่มือ](../docs/field-contexts.md)
 - [ ] Connector output ยังเป็น Candidate; ไม่มีทางลัดเข้า `public_artifacts`
 - [ ] ถ้าเป็น routine refresh: diff มีเฉพาะ output ที่ publication contract เดิมประกาศและ `data/public/publication_receipt.json`
 - [ ] ถ้าเปลี่ยน URL/dataset/ความหมาย/contract/builder/`serving_manifest.json`, `data/spatial/` หรือ `data/demand/`: ระบุให้ทีม manual review

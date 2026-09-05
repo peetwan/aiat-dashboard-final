@@ -9,14 +9,22 @@
       "grain_th": "หนึ่งแถว = หนึ่งโครงการวิจัยจาก CLIG พร้อมข้อมูลหน้ารายละเอียด",
       "identity_options": [["contract_no", "project_id"], ["project_id"]],
       "geography_fields": [],
-      "as_of_fields": ["fiscal_year", "fetched_at"]
+      "as_of_fields": ["fiscal_year", "fetched_at"],
+      "field_contexts": {
+        "/researcher_name_th": "work_attribution",
+        "/researcher_name_en": "work_attribution"
+      }
     },
     {
       "key_pattern": "^policy_candidates$",
       "grain_th": "หนึ่งแถว = หนึ่งโครงการวิจัยที่ถูก tag ว่าเกี่ยวข้องกับ อปท./นโยบาย/กลไก/มาตรการ",
       "identity_options": [["contract_no", "project_id"], ["project_id"]],
       "geography_fields": [],
-      "as_of_fields": ["fiscal_year", "fetched_at"]
+      "as_of_fields": ["fiscal_year", "fetched_at"],
+      "field_contexts": {
+        "/researcher_name_th": "work_attribution",
+        "/researcher_name_en": "work_attribution"
+      }
     }
   ],
   "completeness_checks": [
@@ -30,5 +38,5 @@
     "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
   },
   "sample_fixture": "tests/fixtures/connectors/clig_projects.json",
-  "notes_th": "ดึงเฉพาะหน้าค้นหา/รายละเอียดสาธารณะ ไม่ดึงไฟล์ PDF และไม่เก็บชื่อบุคคลใน payload"
+  "notes_th": "ชื่อผู้วิจัยภาษาไทย/อังกฤษและตำแหน่งเป็นเครดิตของโครงการที่ CLIG แสดงในหน้ารายละเอียดสาธารณะ ตรวจ R2 raw/f4/f4_research_dashboard_psu/20260825T033958Z/project_detail_records.jsonl.gz พบฟิลด์ชื่อใน 96 จาก 107 โครงการ เก็บตาม field_contexts; ไม่ดึงไฟล์ PDF หรือข้อมูลประจำตัวส่วนอื่น"
 }

@@ -12,6 +12,54 @@ NODE = shutil.which("node")
 
 
 @pytest.mark.skipif(NODE is None, reason="ต้องมี Node.js สำหรับทดสอบ JavaScript")
+def test_province_research_attribution_keeps_name_and_affiliations():
+    result = subprocess.run(
+        [NODE, "-"], cwd=ROOT, text=True, encoding="utf-8", capture_output=True, timeout=15,
+        input=r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('app/static/province.js', 'utf8');
+const context = vm.createContext({});
+vm.runInContext(source.slice(0, source.lastIndexOf('document.getElementById("retryDetail")')), context);
+const render = leads => vm.runInContext(`humanValue(${JSON.stringify(leads)})`, context);
+for (const lead of [
+  {name: 'ผู้วิจัยตัวอย่าง', faculty: 'คณะวิทยาศาสตร์', institute: 'มหาวิทยาลัยตัวอย่าง'},
+  {faculty: 'คณะวิทยาศาสตร์', institute: 'มหาวิทยาลัยตัวอย่าง'},
+]) {
+  const rendered = render([lead]);
+  for (const value of Object.values(lead)) assert.ok(rendered.includes(value));
+  assert.ok(!rendered.includes('undefined'));
+}
+""",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.skipif(NODE is None, reason="ต้องมี Node.js สำหรับทดสอบ JavaScript")
+def test_tourism_card_renders_hours_separately_from_phone():
+    result = subprocess.run(
+        [NODE, "-"], cwd=ROOT, text=True, encoding="utf-8", capture_output=True, timeout=15,
+        input=r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const elements = {};
+const context = vm.createContext({document: {getElementById: id => elements[id] ||= {}}});
+vm.runInContext(fs.readFileSync('app/static/app.js', 'utf8').replace(/loadDashboard\(\);\s*$/, ''), context);
+vm.runInContext(`renderTourism({status:'available', items:[{page_id:'contact', data:{service_centres:[{
+  name:{TH:'ศูนย์บริการตัวอย่าง'}, opening_hours:'07.30 - 18.00 น.', phones:[{phone:'053-569100'}]
+}]}}]})`, context);
+const html = elements.tourismItems.innerHTML;
+assert.ok(html.includes('<p>053-569100</p>'));
+assert.ok(html.includes('<p>เวลาทำการ: 07.30 - 18.00 น.</p>'));
+assert.equal(html.split('07.30 - 18.00 น.').length - 1, 1);
+""",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.skipif(NODE is None, reason="ต้องมี Node.js สำหรับทดสอบ JavaScript")
 def test_f4_requests_deduplicate_ignore_stale_results_and_allow_retry() -> None:
     result = subprocess.run(
         [NODE, "-"],

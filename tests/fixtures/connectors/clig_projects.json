@@ -13,6 +13,7 @@
         "status": "ปิดโครงการ 18",
         "area_count": 8,
         "lead_organization": "มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ",
+        "researcher_name_th": "ผู้วิจัยตัวอย่าง",
         "fetched_at": "2026-08-23T00:00:00+00:00"
       }
     },
@@ -27,6 +28,7 @@
         "status": "ปิดโครงการ 18",
         "area_count": 8,
         "lead_organization": "มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ",
+        "researcher_name_th": "ผู้วิจัยตัวอย่าง",
         "candidate_keywords": ["องค์กรปกครองส่วนท้องถิ่น"],
         "candidate_basis": "keyword_match_local_government_policy_mechanism_measure",
         "fetched_at": "2026-08-23T00:00:00+00:00"

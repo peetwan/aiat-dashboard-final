@@ -10,9 +10,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Sequence
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.field_contexts import context_allows_key, validate_field_contexts
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -107,6 +111,7 @@ class PublicationSpec:
     expected_count: int | None = None
     as_of_pointer: str | None = None
     csv_headers: tuple[str, ...] = ()
+    field_contexts: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -134,7 +139,7 @@ def _normalise_field_part(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", separated.lower()).strip("_")
 
 
-def _safe_field(value: str, *, label: str, allow_map_key: bool = False) -> str:
+def _safe_field(value: str, *, label: str, allow_map_key: bool = False, context: str | None = None) -> str:
     if allow_map_key and value == "$key":
         return value
     if not FIELD_PATH_RE.fullmatch(value):
@@ -145,7 +150,7 @@ def _safe_field(value: str, *, label: str, allow_map_key: bool = False) -> str:
         blocked = sorted(
             item for item in FORBIDDEN_FIELD_PARTS if f"_{item}_" in padded
         )
-        if blocked:
+        if blocked and not context_allows_key(segment, context):
             raise ScaffoldError(
                 f"{label} contains forbidden personal/contact/secret field: {blocked[0]}"
             )
@@ -153,7 +158,7 @@ def _safe_field(value: str, *, label: str, allow_map_key: bool = False) -> str:
 
 
 def _semantic_fields(
-    values: Sequence[str], *, label: str, allow_map_key: bool = False
+    values: Sequence[str], *, label: str, allow_map_key: bool = False, contexts: dict[str, str] | None = None
 ) -> tuple[str, ...]:
     fields = tuple(values)
     if not fields:
@@ -163,7 +168,7 @@ def _semantic_fields(
             raise ScaffoldError(f"{label}: {UNKNOWN!r} must be the only value")
         return ()
     for field in fields:
-        _safe_field(field, label=label, allow_map_key=allow_map_key)
+        _safe_field(field, label=label, allow_map_key=allow_map_key, context=(contexts or {}).get(field))
     if len(fields) != len(set(fields)):
         raise ScaffoldError(f"{label} contains duplicate fields")
     return fields
@@ -239,6 +244,18 @@ def _validate_map_key_identity_shape(spec: PublicationSpec) -> None:
 
 
 def validate_spec(spec: PublicationSpec) -> PublicationSpec:
+    try:
+        contexts = validate_field_contexts(dict(spec.field_contexts))
+    except ValueError as exc:
+        raise ScaffoldError(str(exc)) from exc
+    if contexts and spec.source_scope != "approved_values":
+        raise ScaffoldError("field contexts require approved_values")
+    prefix = "" if spec.records_pointer in {"$", "/"} else spec.records_pointer
+    def field_context(field: str) -> str | None:
+        suffix = "/" + field.replace(".", "/")
+        if not prefix and spec.output_format != "csv" and suffix in contexts:
+            return contexts[suffix]
+        return contexts.get(prefix + "/*" + suffix)
     if not DATASET_KEY_RE.fullmatch(spec.dataset_key):
         raise ScaffoldError("dataset_key must match ^[a-z][a-z0-9_]{0,63}$")
     if not spec.source_ids and spec.source_scope != "reference_geography":
@@ -272,12 +289,12 @@ def validate_spec(spec: PublicationSpec) -> PublicationSpec:
     if not spec.identity_fields:
         raise ScaffoldError("identity_fields is required and cannot be unknown")
     for field in spec.identity_fields:
-        _safe_field(field, label="identity_fields", allow_map_key=True)
+        _safe_field(field, label="identity_fields", allow_map_key=True, context=field_context(field))
     if len(spec.identity_fields) != len(set(spec.identity_fields)):
         raise ScaffoldError("identity_fields contains duplicate fields")
     for field in (*spec.geography_fields, *spec.as_of_fields):
-        _safe_field(field, label="semantic field")
-    _safe_field(spec.measure_field, label="measure_field")
+        _safe_field(field, label="semantic field", context=field_context(field))
+    _safe_field(spec.measure_field, label="measure_field", context=field_context(spec.measure_field))
     _field_paths_do_not_conflict(
         (*spec.identity_fields, *spec.geography_fields, *spec.as_of_fields, spec.measure_field)
     )
@@ -295,7 +312,7 @@ def validate_spec(spec: PublicationSpec) -> PublicationSpec:
         if not spec.csv_headers:
             raise ScaffoldError("csv_headers is required for CSV output")
         for header in spec.csv_headers:
-            _safe_field(header, label="csv_headers")
+            _safe_field(header, label="csv_headers", context=field_context(header))
             if "." in header:
                 raise ScaffoldError("CSV headers must be simple field names, not dotted paths")
         if len(spec.csv_headers) != len(set(spec.csv_headers)):
@@ -411,6 +428,8 @@ def _contract(spec: PublicationSpec) -> dict[str, object]:
         output["as_of_pointer"] = spec.as_of_pointer
     if spec.csv_headers:
         output["headers"] = list(spec.csv_headers)
+    if spec.field_contexts:
+        output["field_contexts"] = dict(spec.field_contexts)
     return {
         "contract_version": "1.0",
         "contract_id": spec.dataset_key,
@@ -507,8 +526,9 @@ class PublicationMappingRequired(RuntimeError):
 def build(reviewed_records: Sequence[dict[str, Any]]) -> object:
     """Return a deterministic public artifact after explicit field-level review.
 
-    ``reviewed_records`` must already exclude raw payloads, personal/contact values,
-    secrets, and restricted values.  Replace this exception with a source-specific
+    ``reviewed_records`` must use the contract's field contexts for work attribution
+    and public contacts, and exclude credentials and restricted values.
+    Replace this exception with a source-specific
     projection and focused semantic/completeness tests; do not implement a generic copy.
     """
 
@@ -672,19 +692,26 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-identity-churn-ratio", type=float, required=True)
     parser.add_argument("--as-of-pointer")
     parser.add_argument("--csv-headers", nargs="+")
+    parser.add_argument("--field-context", action="append", nargs=2, metavar=("POINTER", "CONTEXT"), default=[],
+                        help="บริบทฟิลด์ เช่น --field-context /items/*/owner_name work_attribution")
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
 
 def _spec_from_namespace(args: argparse.Namespace) -> PublicationSpec:
+    prefix = "" if args.records_pointer == "$" else args.records_pointer
+    contexts = validate_field_contexts(dict(args.field_context))
+    field_contexts = {pointer.removeprefix(prefix + "/*/").replace("/", "."): context
+                      for pointer, context in contexts.items() if pointer.startswith(prefix + "/*/")}
     geography_fields = _semantic_fields(
-        args.geography_fields, label="geography_fields"
+        args.geography_fields, label="geography_fields", contexts=field_contexts
     )
-    as_of_fields = _semantic_fields(args.as_of_fields, label="as_of_fields")
+    as_of_fields = _semantic_fields(args.as_of_fields, label="as_of_fields", contexts=field_contexts)
     identity_fields = _semantic_fields(
         args.identity_fields,
         label="identity_fields",
         allow_map_key=True,
+        contexts=field_contexts,
     )
     return PublicationSpec(
         dataset_key=args.dataset_key,
@@ -714,6 +741,7 @@ def _spec_from_namespace(args: argparse.Namespace) -> PublicationSpec:
         max_identity_churn_ratio=args.max_identity_churn_ratio,
         as_of_pointer=args.as_of_pointer,
         csv_headers=tuple(args.csv_headers or ()),
+        field_contexts=tuple(contexts.items()),
     )
 
 
@@ -730,7 +758,7 @@ def main(
             project_root=project_root,
             dry_run=args.dry_run,
         )
-    except ScaffoldError as exc:
+    except (ScaffoldError, ValueError) as exc:
         parser.error(str(exc))
     mode = "DRY RUN" if result.dry_run else "CREATED"
     print(f"{mode}: publication scaffold for {args.dataset_key}")

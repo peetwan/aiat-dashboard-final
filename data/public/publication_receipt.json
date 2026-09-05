@@ -1,7 +1,7 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "4334caf2057fca2e60e264cff26e7e0580d76e9d5e8f4de0bc0b8069a161e175",
-  "artifact_count": 175,
+  "release_digest": "5e91bdfe12e899d833398e6ee47db61f9e45ceac9dbd6f45cce8a0e5c39f92b7",
+  "artifact_count": 176,
   "artifacts": [
     {
       "path": "data/public/apptech_aggregates.json",
@@ -22,6 +22,16 @@
       "bytes": 1911,
       "sha256": "8707dba5a32cd4c0e3555cfdaf2d0dc355448441bb9fa3ef3a4a5e21796c1db6",
       "contract_sha256": "527a388f285030385f154b4a1bee17934b8428853b61f6094c184ade316fb0ff"
+    },
+    {
+      "path": "data/public/clig_work_attribution.json",
+      "contract_id": "clig_work_attribution",
+      "dataset_key": "clig_work_attribution",
+      "role": "database",
+      "format": "json",
+      "bytes": 108344,
+      "sha256": "3786b1c05db0cf7cdce6dcde91dd3f21a8d42cda8293c247deee4adae9a0310b",
+      "contract_sha256": "2cbb02f3b7ac6fb7ac548e13329abf62c524f50509ef845063d2f38233783cfe"
     },
     {
       "path": "data/public/cultural_points.geojson",
@@ -49,8 +59,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 31093,
-      "sha256": "7c0caca5a62669bb25602d8fa792fa32afb308bde5cbf2111a2e543eb0b1152f",
+      "bytes": 30881,
+      "sha256": "60483aab74ce12ca6076024149d8520482f523bd5b998eb29f222b9a96e3ea0e",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -59,8 +69,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24687,
-      "sha256": "60911ebd136df81f81b9c14bf34dae560f81cdde6c78920ca46efe2b29153ddd",
+      "bytes": 24475,
+      "sha256": "27a25c586359a8a3fa5e8a9d01fed110f14057cf7ed85d61a7b484657bb70af0",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -69,8 +79,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22895,
-      "sha256": "0bc617fce5cf91478520d111480128bfa4606649e83bb9c674dd88b3b1809df3",
+      "bytes": 22683,
+      "sha256": "a4d407bb1ddd27dc305b1ea68502823078d0f48a34f1d811cfa8c08e4eaa21fb",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -79,8 +89,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29164,
-      "sha256": "05a8bbc2dc4fd93d2174e2ce5784009b842bba11c1222c90e871430eca839b49",
+      "bytes": 28952,
+      "sha256": "7be28287698753f2b683a6af3c008454328026b08baf6faf6527cbed3b4057b9",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -89,8 +99,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25739,
-      "sha256": "33e84b2383e4c80797f8ad3291572ae7ee042671949a43a97a2732e986eb6957",
+      "bytes": 25527,
+      "sha256": "ebec2527c9115109a9beedbb27b878aabaa2a8487b4e8ba2d08e530d635a40da",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -99,8 +109,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20270,
-      "sha256": "efd73276bfc9d9d9271a3cd55bb3c0f2a061da795ba382d1dacc9840647f888c",
+      "bytes": 20058,
+      "sha256": "f0f889c797c98f107cb80453acb124ffd3431b748d1b8b272d8be4ce0c148980",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -109,8 +119,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22760,
-      "sha256": "82c8f3d427ced7e862bb36307c0199b11301c7bf543cfe1f9577797d23675963",
+      "bytes": 22548,
+      "sha256": "a7c5f8cf75910d3bed43679e79cd88395b8a893d0e3f0adfdbae9ceb17a39778",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -119,8 +129,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 18915,
-      "sha256": "d244c7c88c721694d0c8e384a449bcde48ddbe0110ad83117174467c2355d27a",
+      "bytes": 18703,
+      "sha256": "c5d687c5d6c9403dee8e93f0107d053e980bb987840c29dd1905489a3d255cbd",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -129,8 +139,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 28833,
-      "sha256": "9e5e761351cceeb8807c075ca0e116f9844986aaf3e49c6190b0ce29ba43aa16",
+      "bytes": 28621,
+      "sha256": "2598d729d4d6188add9fa756008f60c01f6ca87a6e93b1985a6eadeeb41fe795",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -139,8 +149,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23345,
-      "sha256": "47f8481c650a765cc88d3b75c2cc3dd587fe011197368b8f127c75a6bf104257",
+      "bytes": 23133,
+      "sha256": "fedbd4e7279dc9769e287015c1b7592bfb7ea2c231f0ec7ce84940406453645e",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -149,8 +159,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 26391,
-      "sha256": "de3cb9b3a3f19ab92fe4185eba54177ff0b5a95dc4f52472a3844019082b3d22",
+      "bytes": 26179,
+      "sha256": "ffa02aabf51c22f10a77456ac7e8cc795992f0f200c9a4bdb39b286dc0439ccb",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -159,8 +169,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21680,
-      "sha256": "3e03b76573ef8f103642b24ba370db43088b1089fc7cbf0091c58bdddf403def",
+      "bytes": 21468,
+      "sha256": "72086786a858d797fb53705dd3c22af2c4dcba8a33223aa0ec2831346a01be70",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -169,8 +179,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22685,
-      "sha256": "f88d30461c9ef5a66dcb8f34b005d087f6ba05604abb1b8a48902dc114adf67b",
+      "bytes": 22473,
+      "sha256": "249e196299fe822b1dc182d2df89fcf61ca2922567c063293a4cc050e8458e8b",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -179,8 +189,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 18135,
-      "sha256": "e6125e7dffb86c93616b94a82b5e52576bd07d31bc8ac08f7ed9d96ac5a44744",
+      "bytes": 17923,
+      "sha256": "a835d7354f7d03c5d8605404addb0fc0793f2ebf75c0a3b36d8e504837fdc62f",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -189,8 +199,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29885,
-      "sha256": "1530bf71fe80745a40c4ffd570194347f78dac8edd44a05a6aa9655c2aea3076",
+      "bytes": 29673,
+      "sha256": "4cda77afa5f364e05c6b8d43499221e4fe385d6fc59acd893b599924a30e5e4b",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -199,8 +209,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22546,
-      "sha256": "925a572f51c0b2b4b47eec4bec2f6533315488f00669d9dcb4773812f45a8345",
+      "bytes": 22334,
+      "sha256": "92667cc5c005806b76ff7d3a97d10f20497ca4a95370d00ee7d11964ea25a662",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -209,8 +219,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20166,
-      "sha256": "33bcb588701f542a99c98b79399b9d1cb8860a0ed764275b1ebc1616c94d2e69",
+      "bytes": 19954,
+      "sha256": "de9bd783e2208a8d6e7bf595cad0e2e7f02f6a793853cc79cf444e6ec87f8b08",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -219,8 +229,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21762,
-      "sha256": "3064690aadcf93ab112713c3e83b6425c603856669b842d54e5fe46a838861ee",
+      "bytes": 21550,
+      "sha256": "72d867bf6bb2e937d79aed729d81f35c073d6f5cf7c6e230e40b79db6c53d7bf",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -229,8 +239,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 30117,
-      "sha256": "0f89e1773cdcf0bd1050b2529c4b143152cfaa7b4c17b4edada48a1915928072",
+      "bytes": 29905,
+      "sha256": "6f2574c763ad39b705178c24b0dc1adccf7a100cdb5362a6ade0eadfade857fa",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -239,8 +249,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29027,
-      "sha256": "ecb894f8a5934e6946ca761d2909c2f10b02a0d83e59534bb0bc29dffbbaac1f",
+      "bytes": 28815,
+      "sha256": "d5e3e4dcd6311ba5e64801e327b8d5dbae59af1fd8c3097d0fee469f549552f6",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -249,8 +259,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 28463,
-      "sha256": "b724ed278b202f5e594e597d9d47eca0c6a47f70f9b6e4c52158fd8037f66746",
+      "bytes": 28251,
+      "sha256": "7ccf5b8968923c2df872abc1bfc4fe91b487d2d7674604a81ba227919bcf21ad",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -259,8 +269,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 34788,
-      "sha256": "ab5eeeaad250bfa1cdfe61fdb67963728816ec896d24105b92e155249c2be4d4",
+      "bytes": 34576,
+      "sha256": "f6bfc524b4fb5cd82c0be4afd7efe0ef2f2543f5c0141c5060ef800afb1d0a90",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -269,8 +279,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29325,
-      "sha256": "024c1bfdc580589284b5b5e3612e0550b04152db202e2288e3cf2fb08ed27019",
+      "bytes": 29113,
+      "sha256": "b4ebff0f7defd903e326e6bd145537bbc7d89aed02f502ad6bbb6a7b9aee65f9",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -279,8 +289,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25297,
-      "sha256": "e4e70ca3cb0994c1fca66a79def9c36799c2412621c11a533f19bb5fcd4dd659",
+      "bytes": 25085,
+      "sha256": "33deca08fb4b0229d6c10c8d0f0508901732abd561dcdab1f6163e5167bb9d2a",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -289,8 +299,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23820,
-      "sha256": "4609e2ba272b4a5307bde74faa0ee4a868094261274e46813dd3c20e53a92e79",
+      "bytes": 23608,
+      "sha256": "ac1fb3489ed896a0a79bba97ddf90751f439eabe79a4fc4f6ffa584105a29f1a",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -299,8 +309,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24766,
-      "sha256": "60e08db4823f07da51785ff2d0957a83d50a91192b6b28ed70f69e0abbc4fed3",
+      "bytes": 24554,
+      "sha256": "225aebdaf5519af1a0232404acd8dea2769f7387102b7a94bf7e064852d74b80",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -309,8 +319,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20852,
-      "sha256": "aaf37328d2fcf1bd20365450c70f9d8e24c466839376e432c6426e08496048af",
+      "bytes": 20640,
+      "sha256": "a1468ffe9ccd7251726a2f284c5506c0380fd367e3d683fe58f78317729c2405",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -319,8 +329,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20731,
-      "sha256": "ccd6fea41f48e5f3cfe46f3f720fa8f19ea8e8132a2bd5e3f3b0db221d08cf12",
+      "bytes": 20519,
+      "sha256": "5aa98b62e2d174b8b393892ba838e7c2a9c979a1cdef24636618b92dc88690f2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -329,8 +339,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 28471,
-      "sha256": "a5baecda9da90fef24c2709dfddfb4f88540000185d8f77f52d403a8ecc3eb49",
+      "bytes": 28259,
+      "sha256": "46cd675206a12db3873aa98bc8ac78aa9d9197b171ae9cd851072b7047cb013f",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -339,8 +349,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24781,
-      "sha256": "e5fff9ac5b9b42ee9b5bccbd1f2f9db7fb5a61fec67aff2048fa55adf5b38280",
+      "bytes": 24569,
+      "sha256": "a4034d3acc8d8a0bb7046790f7def408e740bb25b6313095bdd8e0c8c224a222",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -349,8 +359,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 27832,
-      "sha256": "ca961cb689eedd0ac8d07a4e21191323dfe684a4257c89572b57d670e65e83f4",
+      "bytes": 27620,
+      "sha256": "63a2886e06e48e145169754390da67ea0dd0e6ca5157d175c78d2637fc3b518c",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -359,8 +369,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 19007,
-      "sha256": "8626dddbc873f195ccbb7565f48f539c94fd2b16be0ca690553553af92ac3715",
+      "bytes": 18795,
+      "sha256": "62d7370ae96f91c676b69c59fccd58a8a66a04c5f938d4c1c15eba5ed242762b",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -369,8 +379,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25391,
-      "sha256": "cead558fdbb86244e34c2ef83c40f3cfa1974bdaeb2f82aa4427373544e8a290",
+      "bytes": 25179,
+      "sha256": "bca8d7f3f26b1bb439065ff2924f8ea32b3e63a7dc3b2c27786241cf70ccb4b2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -379,8 +389,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 36571,
-      "sha256": "ef45473d7a490d30448e1a4605955386adbd87362304b023ee0da8c756762d75",
+      "bytes": 36359,
+      "sha256": "097ff0b04fbe0b9d655c65bf2a93e38970580802126ebc12d044854b1fc31252",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -389,8 +399,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29240,
-      "sha256": "0a80a8818a2444eac4d633e9ec5e969ac0eaddb82a1e4dd13be7da43fbc1c31f",
+      "bytes": 29028,
+      "sha256": "f34a888337f4e195d3d8d4bcb0b7a3699f5ee8dc6fa116b76b93a1bb87c635f8",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -399,8 +409,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 31525,
-      "sha256": "f1391cd0562efb64f4c0c6cb67c38532c24ae4489491ad378e902fd53f350e60",
+      "bytes": 31313,
+      "sha256": "555fa6d73d6ec10eb8a5e21cd6ef347e821204c02bddf9148f2191464dedc5db",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -409,8 +419,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23902,
-      "sha256": "f5e61615f864a62fc65b246f3cc9fe5b9d94c68b4d5deeaa6928375c1e51b217",
+      "bytes": 23690,
+      "sha256": "26ff7c81a88abe03784d3a3ba5ac1dc667c68c479451167de5a41c1022d578fb",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -419,8 +429,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24616,
-      "sha256": "d14e19322a5a41db6c210187b3edb90f35530df379289699a541bb13bd09286c",
+      "bytes": 24404,
+      "sha256": "7b15ea45560d46846189ae7488363369e82068288b33f4778e1f3a7a0a267fed",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -429,8 +439,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 33933,
-      "sha256": "ff6a0d9c6f2447288a90f245215020b7012542f166ea40ccd2de7c65c82cb037",
+      "bytes": 33721,
+      "sha256": "f6482d2bbdc5cb8a71b84aa3d3af95ff40780c2c2f1f9b96c481b81be4773f9e",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -439,8 +449,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 27224,
-      "sha256": "1f845cb15ab95dfb84fc4445e3e1d86ec3d06e04c96747aa649be87b9c9d4e39",
+      "bytes": 27012,
+      "sha256": "6f181e734e310ae22f0133d9e2b11727bf2244f401a66871820a19d4b147267f",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -449,8 +459,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 32116,
-      "sha256": "1b72743706456de458195f1e92c50e8f7e2f320839903aa6c517f7ac5071f8b6",
+      "bytes": 31904,
+      "sha256": "24fda8d5b78c3c5af9792fc9d4b3722747dbad3af554dd7a6b5a4230a088bd0f",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -459,8 +469,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25180,
-      "sha256": "78f930cd0e912b79021beca29adc107c1d4dfcd7a6adcabb0371c7908137a8e9",
+      "bytes": 24968,
+      "sha256": "aff130ac6a9641b155f31e5bcb0cc2434c4f8d612bb4837b301fdf3a37b94727",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -469,8 +479,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25896,
-      "sha256": "cf8130290658dbefbf03500e82a0b3e404f5254db26334779272a62c76bf63c7",
+      "bytes": 25684,
+      "sha256": "8d1d439b533296c875e16cff23f0a935c00101637baa45851d6c53c0322ed08b",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -479,8 +489,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23920,
-      "sha256": "4849728b602de97cbc6296ba6b704a534c315640e6f4e7b0de10b4f974cd24a0",
+      "bytes": 23708,
+      "sha256": "b02a29542e9fc558e22eaf2d5f4d4918ba02609012609812dde425afa44d41fc",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -489,8 +499,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23779,
-      "sha256": "2f8b40d8b3cd1dd78f2abbad43b78effc60e17de499e75b063c174fbbd1c7bc9",
+      "bytes": 23567,
+      "sha256": "dc94e4edab067d1f5edd88bfac8436eb04e50a58eb4fe466eada1ffed602abfe",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -499,8 +509,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29544,
-      "sha256": "b86afa1b294dcd5b5d886ef392d9c55601972c98efd8c70c617d6376fc229c65",
+      "bytes": 29332,
+      "sha256": "9a0e4d84b6371788b44932ff75dc232d35234b01f44a442993c92ac104954d28",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -509,8 +519,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 26250,
-      "sha256": "9170d73495dfdef717465a7484d75cab44df101b827efa33839893fa22077e9a",
+      "bytes": 26038,
+      "sha256": "c6e9d850b756e5f11e97ce7e033c42a27ae700ac2ed94a8e8df3aac2f987575e",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -519,8 +529,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23500,
-      "sha256": "73e06a2a2ea68889e97f1f0e7a6f1e89825a9d56194625a56e2bdd72b7d474c7",
+      "bytes": 23288,
+      "sha256": "6b5a245bf28d6312708745db1b6d14036ee5a596493d5061e8a7d35376c3d608",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -529,8 +539,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 18666,
-      "sha256": "3b3d3f928a8498aa23ebc2be0cfc79345f91c954321454553f3a29a307c91300",
+      "bytes": 18454,
+      "sha256": "1c9e54f1a4af1b99ee761e2f0da48c88eb47bc94e59531d6ac636a9b4dbbb688",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -539,8 +549,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 26059,
-      "sha256": "035183560656520def829ba1ac134c28b2c3a983cd4292cb64adcaf255d73aaa",
+      "bytes": 25847,
+      "sha256": "14caa52ce18ab1e1cf9f927e797393d0238b94681df010d84a2e8e709e9adddd",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -549,8 +559,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21775,
-      "sha256": "19a0cb7caa6fc73d0b42555a3c89cab49c667945ff138afd73a8b76211b40b05",
+      "bytes": 21563,
+      "sha256": "477b3fef733323a468f578cc709efcc7e9fd13ac036d9ced0a2be854a49059c2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -559,8 +569,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20014,
-      "sha256": "57f85a539eae61afd76aebbc4c3b198528c8eebf1f7f317b84aeac05e92ee718",
+      "bytes": 19802,
+      "sha256": "13dfcf577b3e0d2f2296fa248dcc05fac04e2c1a1269aa36678d423be0e05e62",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -569,8 +579,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 31909,
-      "sha256": "64fbeb65098f5c528447334292c10445ebc41d5cd239ffd2e71e0a53f044674b",
+      "bytes": 31697,
+      "sha256": "ac288d38061b739f29663b54e7af6fc8be5315b19d11d95d0045e2e0dd47f3a1",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -579,8 +589,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 18655,
-      "sha256": "8faea673780f9d71ec441e414a880df8cb7308f8b34ab1a8e507b58ae2106005",
+      "bytes": 18443,
+      "sha256": "222cca5c2b97b95113c8d34837470c3703e529ee47f79d7127dcaadb1cebc2c2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -589,8 +599,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23727,
-      "sha256": "874f8488614fe9aa35cb4896a3b57a5a37815f65da431240f6f4ce5b51812561",
+      "bytes": 23515,
+      "sha256": "5979a562aa4bcc01d4b3b16cc8d71a4d5b095e96e7cf133046e0d2a465b655a6",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -599,8 +609,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22442,
-      "sha256": "545c5e42ad59bd9553b79fcd141c85edc0993255ddfecf2b64e78927902f8246",
+      "bytes": 22230,
+      "sha256": "92e255cfa02b55fffd749c0c73265a7d157b502691b60491c39672e3a8a54d24",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -609,8 +619,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24362,
-      "sha256": "e2d5ebf0e614a8284c78a75209e181871b66f5cce004600e8ef8e6ddebcd7b25",
+      "bytes": 24150,
+      "sha256": "6e17c91d60dd84d7f90906d52705066384a37e9be5fadf85771d9e2880573001",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -619,8 +629,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 24107,
-      "sha256": "f12c33564c7583f63ea5015789d45280abd935efff75908dec1d1bad21b61d35",
+      "bytes": 23895,
+      "sha256": "bc4d134a24f6146bc9ff42599797893ddff259ba54b084458c77d525b3c5d091",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -629,8 +639,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25997,
-      "sha256": "43f256ef01f37d248b29eea5f37ab11ac371359711238dddafe72828395b1b99",
+      "bytes": 25785,
+      "sha256": "83f577236c5b7e84d489cdeee2a8e00fa3612c8a5e41ec3d2b09e0a765ca64de",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -639,8 +649,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 22300,
-      "sha256": "c846c53a3d9e856e1f5ea572724d6ac51f41dff3edd442c02579335f1514c4d7",
+      "bytes": 22088,
+      "sha256": "493822a3bb5d67e640397d9fafc90b0bc57fe8dacdaa41dc5dbabee9de24d9f9",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -649,8 +659,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23413,
-      "sha256": "2cfae038851d6b599982d666f8d517e9497ed611e634d9789416f24eb156e212",
+      "bytes": 23201,
+      "sha256": "be37551b8caa28e2bb47e9df232046d51d3519f2b57647bc011a4dd426056545",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -659,8 +669,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25310,
-      "sha256": "32c3072693d6e1cf4812c91a6d18b7b948c424e6152c2789f63890378df444af",
+      "bytes": 25098,
+      "sha256": "7a2ac049bbe959314eca5220935fe13d34e613f2bc7d0a614f4aa08a2362690d",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -669,8 +679,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21428,
-      "sha256": "e8231d89fde7456f0c6aa3ce7855dd36e03629b40f4c51c8fffa5bebb30ba69d",
+      "bytes": 21216,
+      "sha256": "9e5cebc49499ca0517e3220e1e8a49e09f6664c051d980fc3b57dad962d12dcc",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -679,8 +689,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 30439,
-      "sha256": "27a3024b459d8361e4c5ea22e3b946a3309d008c8e5d67e0d1ee9fbda2745fa6",
+      "bytes": 30227,
+      "sha256": "3b25bf7dcf95944cb11f6e414876e20371b09b07d16d3fbaf9b7da499fd3d01d",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -689,8 +699,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21473,
-      "sha256": "2363a1efdfa7aa2d56cd7babcf7bebec8d866663b16d9fcb5445fa4fae624eb3",
+      "bytes": 21261,
+      "sha256": "9d05a81d4c2833f6dfaf846f075d75299abd3d79ac2c695b23effdabe45ac7b5",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -699,8 +709,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20171,
-      "sha256": "ddede4f62695726d476078b8008e43a00b61df10c7aa6b70d633c9b85fb164f1",
+      "bytes": 19959,
+      "sha256": "cfffbfc61cf78c44b21bc0495c1c1cf70c19c8ded09fa4ff6043c613d452c947",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -709,8 +719,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 25578,
-      "sha256": "442bd2b3da794a9d0ebeac8c693fcafddad13101695063ed167cb2253201d8a7",
+      "bytes": 25366,
+      "sha256": "d4b559437ab75de373f6d6036b32def5e13291db898bf68b21e52eac0c81c980",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -719,8 +729,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 26276,
-      "sha256": "552ef259c191ee436209581a8659df8d54891a2e9101a024282084dee86ec218",
+      "bytes": 26064,
+      "sha256": "e7b806d3be71b2b8584a08c8c61d04677ca2ff9a267ea9029ca4a31b465ebba4",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -729,8 +739,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 20409,
-      "sha256": "3f2d31aad9d65c88d6aa2728149fd4cb097ce99c7d3cd67c4c8f6d86a1907a33",
+      "bytes": 20197,
+      "sha256": "fd4808ff6c1368117e9f0185950735a4728afcd30f23a7d02b5d816cae9e4662",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -739,8 +749,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23256,
-      "sha256": "d07ececb6136b86ebb68e3fcdbfdbf95e4df8ad161b4b69dc32e9499f1e200b4",
+      "bytes": 23044,
+      "sha256": "7c05ef6fd54e1474db317880cc97ec7fb3b64a4de99649632a8db7957ee1f184",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -749,8 +759,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 29368,
-      "sha256": "823e385e5c4577fe584e59e097ffb906227752e6c2d3ea3a2cb3ed5b95e27b65",
+      "bytes": 29156,
+      "sha256": "a6b938b1432ae9ab5b090c98b66ac5b0fd1c87cd4e980a7ae40188be1434dbdd",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -759,8 +769,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 21332,
-      "sha256": "1ca4f1ce9dd68918220cb2d59a0832c001bded7c9529546e87d5d3b8b893925d",
+      "bytes": 21120,
+      "sha256": "20f9276f39e143498599bacfc46e6bc059a7c7b041fa75ee3a777ca4c873aaff",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -769,8 +779,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 23601,
-      "sha256": "09a27be7704f7dca78bf85f6a0600c30f8521c915e7aa46bcb8d004e9c3647d2",
+      "bytes": 23389,
+      "sha256": "957dc84e12f04e09d4ebc1e22fdd1a76638d0ee3793a11abe6c8f3421038df9a",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -779,8 +789,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 27202,
-      "sha256": "8c8564af6895bdebc40093ed1bff2ffcaace9e9246b7da4cef2e846bc50f62ce",
+      "bytes": 26990,
+      "sha256": "0c4f8ac45780997cce234f8b0bfa5471fe43d581dc793c7ab4c26271a30ed0c8",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -789,8 +799,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 31613,
-      "sha256": "095308a98827b626b6118e4fb4b0505d7f2d8f0322ae069f56d372df889712c2",
+      "bytes": 31401,
+      "sha256": "699548f7b08972c533fc95bf282c7e62d9cce4a1f0e2b8df55b9a55f9cb6be14",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -799,8 +809,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 35027,
-      "sha256": "eff6f53065f9ede280e1a1a4fa702c80fdfe3a691d98dc7c450ccb443e858c03",
+      "bytes": 34815,
+      "sha256": "25f1231e3d529931b7195a20fb668906ef99939c91acabc8a844d2374bae411e",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -809,8 +819,8 @@
       "dataset_key": "executive_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 28625,
-      "sha256": "cc3c40295df6e14dee80235a6a37ba041ad0c84f33076f51c80dd9250f594ec7",
+      "bytes": 28413,
+      "sha256": "43151a0e10be094f2554eec55983332364197b3717da6e1f804cc548e3c5d0a2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -819,8 +829,8 @@
       "dataset_key": "executive_summaries",
       "role": "support",
       "format": "json",
-      "bytes": 21985,
-      "sha256": "0d30236fffaf6c8a53f6b21063baf5c783afa04dda40607d1b2326a087852289",
+      "bytes": 21993,
+      "sha256": "a5a0394f3e4b0f16e7eea98169ae899f06cf004384d0608c93195d4f01ec7516",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -840,7 +850,7 @@
       "role": "provenance",
       "format": "json",
       "bytes": 749,
-      "sha256": "24d4af11631b0ea69cf322a964565808271b4858f1f5cddf37f959305495f527",
+      "sha256": "952e84d91ae3f074acee3f0040725e2c313e1388dd72a523f6c8863f7329d63f",
       "contract_sha256": "b268600338315469f878acd5f0d8cba28f834fb045a4494d3b8ef7273b0c921b"
     },
     {
@@ -859,8 +869,8 @@
       "dataset_key": "housing_public_summaries",
       "role": "database",
       "format": "json",
-      "bytes": 5195,
-      "sha256": "caebe7f6a96fcd104e4f567f78872fb295943679c69a257cf55f245892d92937",
+      "bytes": 5226,
+      "sha256": "47225ff4191455d6e54e23f515ca2b6f254c2b48c822c3c52fc4533672bdd84f",
       "contract_sha256": "24dcece6e39448448adf8fcac8147060a57226e36f503aefc59a68d9205d4d0b"
     },
     {
@@ -880,7 +890,7 @@
       "role": "provenance",
       "format": "json",
       "bytes": 779,
-      "sha256": "89d92b528ed65a1d3a75225db42ac69a6bacd53536c7b2b410d64fbf7b8ec7e0",
+      "sha256": "4052e321081890efe366f05a1d6817c0a3e165250e3795961340f0641b39d248",
       "contract_sha256": "b3128b14684c4b22e9ce5e35a8e089607a119a900e1e46ccaf15b2d6f2eac739"
     },
     {
@@ -889,8 +899,8 @@
       "dataset_key": "province_dashboard",
       "role": "provenance",
       "format": "json",
-      "bytes": 15304,
-      "sha256": "1b03964d7314f4e829fc1c66ee15c930d2c6ddd5e6630e36af4f07f12b3cae2a",
+      "bytes": 15305,
+      "sha256": "b0e19656c84fd88bc28104de3bc67209531e0fbff5e2237ca63d87f2338abf9f",
       "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
     },
     {
@@ -909,9 +919,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 1463005,
-      "sha256": "c4ee839175343d6fc47818f45d7c8e944c0f666dc0955c51ef48292cb7fc0afd",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 1599574,
+      "sha256": "780905f7f3f49dadf508bd6f178dbdb586557457ec480174d1e2475010030d39",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/11.json",
@@ -919,9 +929,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 203150,
-      "sha256": "e32d1c4998c73be91bcd232ebe232520d9b57813fbe0a03907e0e72717524f10",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 245001,
+      "sha256": "cdff6ef9de24bb7ca74624531e95b5f18afa765d7a1f7e01ef83071211b668db",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/12.json",
@@ -929,9 +939,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 42598,
-      "sha256": "e0e74c8262ff4284509ba78402b693dd0690c8e5ab1e5ff6cb9562cd2dc819ac",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 42715,
+      "sha256": "1d04cd66fc8cc937c6c9fcd508285b65d734227a1fe4a44cf67e461bb3ccf1d9",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/13.json",
@@ -939,9 +949,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 629372,
-      "sha256": "4819644dbcb33e25d9ae9880be0bd62b44981de139be19117ec8528fa65ea780",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 661228,
+      "sha256": "385f2893a0c7833d8a03d787d5a4fad55f035e89d83c639305e6d3572f0fa728",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/14.json",
@@ -949,9 +959,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 181138,
-      "sha256": "6967f900b3d18bb0dc16a6319bfde259decd007340b7c427a599a5b926d8d939",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 212633,
+      "sha256": "fff436e4e634da44fa75f841f53c0c00e6690afd4baf3d5e591a8f99574d632d",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/15.json",
@@ -959,9 +969,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 39434,
-      "sha256": "85a8813583a291f2a4f74c3356cc9efa109eda8dfd9558ba4606d3bb674275c6",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 39785,
+      "sha256": "1fdcfc550f2be5e7f0242ac9f5a4381c81d881294ccbe3962fbf592b3bd94af1",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/16.json",
@@ -969,9 +979,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 99067,
-      "sha256": "7afd2491a278b9bfc641a1edd296c5ef835215d58863a7d1dfb2b9ad0ff2adb0",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 115347,
+      "sha256": "d0455bda266db26b49ae3d0ebb3b3fe708ee6609c6626cfda50e633750b2c26b",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/17.json",
@@ -979,9 +989,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 36772,
-      "sha256": "314183184bf7447551b7d218f9450ef07055babc5cad327be34333c476826914",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 37125,
+      "sha256": "350efbdc67805a2b5eafd52dd4b4ce1029ea11de1cd6a6c8de0e88d370ee3e53",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/18.json",
@@ -989,9 +999,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 180152,
-      "sha256": "5d113a29bc10d61314030fd53814822ea86c814981374414429005d9df2d5401",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 197879,
+      "sha256": "9f7b966cb178d7802e18e54142f7312f8c464fe82235524318b54d073fb6310f",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/19.json",
@@ -999,9 +1009,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 47473,
-      "sha256": "b1808959527c66ee2e7ce95b7afc48c65d913d80727cde33e5d560f4e634d9d9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 47934,
+      "sha256": "ad0300271183de36808cf56f1ff0c3fbed621ec41624859861930ca8537d7fa8",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/20.json",
@@ -1009,9 +1019,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 96634,
-      "sha256": "13c3c662b7be82587cced45c83df40fea499eff4371163449b4459613cad3aca",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 115097,
+      "sha256": "8c50c10e4e7681963f1b86f3fb9c6f4341efd456b496ba22928386be29bd2973",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/21.json",
@@ -1019,9 +1029,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 45347,
-      "sha256": "48d83e28dc020a44b125ecd469545992cc2519a47ad1780e28991ca79834a2ff",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 46186,
+      "sha256": "b6505e51feda2f9c6ee6ba51eeb296523a759019643f138c7a7fecafb2f851c3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/22.json",
@@ -1029,9 +1039,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 103400,
-      "sha256": "382c3c6a644b58ef7acf50fdc87723ee673d0f745d89f7a71c02e29d0eb148b5",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 125810,
+      "sha256": "5a2cf65d3b7ad78888761abff5c8a35bde3f220bc4252d6f3855ae6c6e3a27cd",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/23.json",
@@ -1039,9 +1049,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 32166,
-      "sha256": "7ae4f235f6734f79a3b8b695ca6b0a962c2b6cd14cd54256d9c766fb0c81a580",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 32283,
+      "sha256": "42b5f6fc7301cdc925fbbd40dfb335dbd00a7ef63ed7adeb55a4cf8c72251000",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/24.json",
@@ -1049,9 +1059,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 514511,
-      "sha256": "28b6faae321fd7cc7055fbbfa8b5f2c472547da6f01af3d27ab16b370a9b03b7",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 532675,
+      "sha256": "ead4a0c22a47e62c5c51a8394effdcb88b4ec332ff05fcd3ab108811cf34026f",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/25.json",
@@ -1059,9 +1069,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 111510,
-      "sha256": "eac558ef7af22cbeaebf9916c8df2f673056ae206f3d452de952d6aa019e2cae",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 125729,
+      "sha256": "819b6132e889c2f25cb71e27436099c2ebc5e7fb5138c28abff4bf1536d17a13",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/26.json",
@@ -1069,9 +1079,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 34812,
-      "sha256": "6a8f899bae1607396858056bcb6f6b7ddedd1e28cdd7fa02d315c8ee6b38c7f9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 35701,
+      "sha256": "e6fa2a6033741b7dfd2e609fdc1d912670659a0b0c14894a3be01bc2bd7be71d",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/27.json",
@@ -1079,9 +1089,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 79851,
-      "sha256": "43317559f60201ec0c3a7cc50c45dce5a2ea2fce86e60f1abd5e42c26efad4ff",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 82515,
+      "sha256": "7fa3e04e87150d40e6eaa211b251292893c8e0a1f17823c4cdda72514a68ac82",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/30.json",
@@ -1089,9 +1099,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 260557,
-      "sha256": "f98407d944ea73bbb3d7179b29afa1ecf18e18b7e407548d2421b0bf01e95b55",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 313865,
+      "sha256": "c7afaf5687945dc42e8c329620aab8edeceac277c030bf58fcecb27e9a7020a7",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/31.json",
@@ -1099,9 +1109,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 95919,
-      "sha256": "a5e5c62ce77f0cf8cb90a3d836866d3276096f3a346c9e0128095c6460cfc072",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 98251,
+      "sha256": "561c92732b479489cbb67656d595e5beac125e6b4105425e38cbcc7b6e1cd7d6",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/32.json",
@@ -1109,9 +1119,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 166176,
-      "sha256": "a6b7ed3e6fb51961866ba0dad5ab7c2abc355d7bd5c7f1416420d79a4d84d720",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 194675,
+      "sha256": "5a30086a7e7fa9c1d19994786fa93d6e41075ff1cd86fe60d54c1849fb582c65",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/33.json",
@@ -1119,9 +1129,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 508832,
-      "sha256": "f34ebb97fc633f8e39ab0cb2d39a633e8d5ab0a1ce3f71e72cad9f1b02462af7",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 539530,
+      "sha256": "33fee60841e42c0e19dd580458d6d213f5e94446d94effe551421db303966320",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/34.json",
@@ -1129,9 +1139,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 292519,
-      "sha256": "b89aa31d1d35a9f1691bab876d88d43b1df4e3abd6b42a85086379cedb72bf96",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 354808,
+      "sha256": "9924a730a3f03d0ab9cb0d84fba7436dd2d1e499fba9c0e84136e8759fdbcf09",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/35.json",
@@ -1139,9 +1149,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 53749,
-      "sha256": "aff096629590c41ed35384ad4ceff425feb2bfb012489472ec61bcfcdc027102",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 54267,
+      "sha256": "e69580933dd4cafc8f1a8c36f809b0311da7c15e08253f583bfa477c2f407d5e",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/36.json",
@@ -1149,9 +1159,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 95551,
-      "sha256": "9bf39cd781f6e16d2f07a8d32c767c5b59a1355c165661b01557a338eec0b429",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 114324,
+      "sha256": "3fa425ffc881ba5105576333256b315146dd4ce78425d1696d3fc3c44b10a901",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/37.json",
@@ -1159,9 +1169,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 64932,
-      "sha256": "b2f820197e057e84454bfb0fec3d213a9496598d37f99f6e87682753eaaf86c5",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 65366,
+      "sha256": "856d7b4b369bbe419f8d7432852cc23144e38589c2b249edbf38dbea0ebefa44",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/38.json",
@@ -1169,9 +1179,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 87515,
-      "sha256": "e8cc3e18de5e8603390eee85494e20a18e89b1052a1c28de52fd209a17712692",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 105876,
+      "sha256": "7b9be3a080012fa4861f6c0361e7fa0c368d4ff7e4c31e8571e82de15ccb297c",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/39.json",
@@ -1179,9 +1189,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 38100,
-      "sha256": "4eefb51fd764670ddcea2a09ea2d7d613bcd617d275ae27968cec975a6702f8d",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 38917,
+      "sha256": "c17a9d61a86f6be53b105feae9b9ae9e2055e63b8b6151679d8a02b251da58c3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/40.json",
@@ -1189,9 +1199,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 395527,
-      "sha256": "8393f586779d1c4616259e6347f32f41a52401372adef52854a9e14d9809f257",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 404846,
+      "sha256": "ff2aeb5a433f25c25edfae3cc238e17da0785c9591b30cc0ac3220f7533994d5",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/41.json",
@@ -1199,9 +1209,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 199920,
-      "sha256": "c966b542628b03d21df11569736f6004ddd47d27aae8b6ad1a1ddfb1644a28c0",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 207863,
+      "sha256": "f8b68cf217ef1b663982c6e69639b1cd57ee910da2b3fcdb230b64ca594eaf17",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/42.json",
@@ -1209,9 +1219,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 112116,
-      "sha256": "21045e669fbe3401f94af1ca43c3e241c091fdbf9d97b3803d6a7753a4f6bf27",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 114622,
+      "sha256": "de522fb10bbe706f6e00885d8b21266c0cf0b9dedc8a65e1252164510b1bce2b",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/43.json",
@@ -1219,9 +1229,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 36796,
-      "sha256": "223a6d44bf6ac0da03435823d7ba7191335204fff853c3b6136773faf3d2747a",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 37157,
+      "sha256": "628f3daa393b9cdd22570b9670db2b8b50ac018984c798ef885b4c90ef910610",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/44.json",
@@ -1229,9 +1239,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 399851,
-      "sha256": "0d47cb3ffeebbec60ade4792334af23a434cf82fa74829bb22da80a6c01db5e0",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 488874,
+      "sha256": "361f13a656e9b02cf123d48bcc04a08c5402cac782d13a838e10614348d196e2",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/45.json",
@@ -1239,9 +1249,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 406871,
-      "sha256": "62c29628ca70249b4c754629f9cb9bdb2eae84c011a1de57502813eedd97ae3d",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 426057,
+      "sha256": "78a47c3d8f0007e67908e4633983b67319db09d17505c912bb08d2d659d6ad51",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/46.json",
@@ -1249,9 +1259,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 66332,
-      "sha256": "c494a246ff718739e2f4b1a24a1e5c35dc19e1a5a353e34420ff05d1096ef397",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 67645,
+      "sha256": "ff635a757098531f335fc4d8e9d1c6c1fa9288e4fa7671493debd6bf847c4813",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/47.json",
@@ -1259,9 +1269,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 180100,
-      "sha256": "8db575ffdb416bcf04f97419bb44ddea1b87a2e2fba11a22558adca7d0a72e00",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 197868,
+      "sha256": "4ebdb307580baa95b3ee686c858d05167ae17c6a79803266ed66d16ec06e82fa",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/48.json",
@@ -1269,9 +1279,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 140530,
-      "sha256": "ad7c4b794dba3af38150c49a0c18c24f68d896931995955a4aa4e64f1d438245",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 143785,
+      "sha256": "15e24356173719768ac21f57c20f96dbc6508e3ff44dbd597ae14791d6179271",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/49.json",
@@ -1279,9 +1289,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 61487,
-      "sha256": "70edb8f38fa0e1a748dbeeb0b953bfa6600b6c3d9850f403a3bb5e8798b51b1d",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 61604,
+      "sha256": "89e6e85859df7e2c90e5129aa57682a6ff90a4da2325966fb5954f7177dcaadf",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/50.json",
@@ -1289,9 +1299,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 827044,
-      "sha256": "20b809d9134a559af2b213097a6820eb6db7bc776d92155953bb038068978ad0",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 890994,
+      "sha256": "df2e69f96e9faed8c1dc9b6ecf4f5b29a277fd83e54c403879839276cbce9e28",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/51.json",
@@ -1299,9 +1309,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 98505,
-      "sha256": "7885d249c75b017396103f875b5ecfae82b09d10f0a974c1d62122295cb7a466",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 110395,
+      "sha256": "22e9d5c55f6d10f0702360454020484a767f39de90b89865f395e381bcc67b88",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/52.json",
@@ -1309,9 +1319,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 208082,
-      "sha256": "3a877a77e619154dbc2082f8526b8e86b98d65ea7f42d475d5b810fc0aa60883",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 235123,
+      "sha256": "f92fb922e37f99a557e01b5bc59e225d97e394f969c0677c769c6d83bccd98cb",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/53.json",
@@ -1319,9 +1329,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 129391,
-      "sha256": "2c91f94c562631289b9b879684a751eecb10ec6641d0a20e955029d5fa74b970",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 140932,
+      "sha256": "0b77513f673041a399afbc81a79bc601a92a22e05633ef61082e7439da24c95a",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/54.json",
@@ -1329,9 +1339,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 91788,
-      "sha256": "6df886d113d94dc6ab7eb42663cb97e62a2fdfae57670540c2b8a5182e7643bc",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 107780,
+      "sha256": "414d5ef56ff841f5ef6785dd9f879565d9459377e2bbddbab97d4c461dfb2b33",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/55.json",
@@ -1339,9 +1349,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 96769,
-      "sha256": "667a78557b975527829af68c232ed4e6d8ec4e9ddacc5f2417b8951a44d13be9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 97499,
+      "sha256": "0f193d88906317d7fd57d20d267e3368ca3c462b2f2ad7f9b28656f3b450de6c",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/56.json",
@@ -1349,9 +1359,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 305483,
-      "sha256": "4088403a07cfb758b92b0b23e8de647da680087fc43abf3942c4f5c23f42738f",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 381838,
+      "sha256": "6fe30044894f5f85c4dd204e9d12670272111390b656e5641e4c0735f25360b5",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/57.json",
@@ -1359,9 +1369,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 442390,
-      "sha256": "3cd1872d725e0e15f123b10bea142d0959c0a8e95409f8e40ab2a1dafd4158d3",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 575128,
+      "sha256": "408be846a39d7f08a78e764f6ee300415cac4c9cf3d09dc4020d1f55288d22ed",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/58.json",
@@ -1369,9 +1379,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 118279,
-      "sha256": "9110715bbea4f4bc1bcbd734fb427ab5e6dcc6efd96fcf30a55ea8e827bfbbdd",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 135522,
+      "sha256": "4cb96b567fc84aa21cc2f94e7325ca8863cdcb3106ff4ff00ce49849ea96ff8c",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/60.json",
@@ -1379,9 +1389,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 120610,
-      "sha256": "aa70dfeb74cce18ca7d6569b0b0b54289b10b2de55b887608aec6ac5fa616f46",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 142557,
+      "sha256": "a695ad6de626e5d5484ba7b97d3bec5c94ebd7fb4db7cf212bc52feb02f9e72c",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/61.json",
@@ -1389,9 +1399,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 33542,
-      "sha256": "a8d10c1d144dbfd9d10311cb9a256d97babb62a6cbc85ba8d43f72e9db335601",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 33659,
+      "sha256": "8143bf1948e7c89092db5bf3a583fcde1e9fdb17a34e83e49a9a13e861fb8cb0",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/62.json",
@@ -1399,9 +1409,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 138434,
-      "sha256": "2e2a05668b2e7a8959801861d969f66f3c5755f7c50daf6219caac0c6ec0219a",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 148060,
+      "sha256": "e3c76f35a068e6f634998bd240a0df44a60f4f62c4e0f3ff5c2929e435b5e245",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/63.json",
@@ -1409,9 +1419,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 50816,
-      "sha256": "cb1764eff8280d0729c67a4a47d2a6526b12835491046240b9be8a32216edfad",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 54995,
+      "sha256": "0fb0b182e1bb76b8626c563d76aae0bd499adefd23daaadc0df743f431341c7e",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/64.json",
@@ -1419,9 +1429,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 109060,
-      "sha256": "31b0603ca30bb0c6da56fbf02625be3a432a0c52b96c272d4ae74a7abbfc8bc0",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 131932,
+      "sha256": "04ca7b0875d171d10b89247c2e9725aef68472e8b3ff08952bc68fa2b172b532",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/65.json",
@@ -1429,9 +1439,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 253236,
-      "sha256": "4c2a303003106f1e0fd2325d72551fd26dc51f6b36ddfcd25a8a9a32aeedb66e",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 272725,
+      "sha256": "19e78fcac4c7413327b027189cbabc792bc27a7501c0d96e8071a6a328ff374a",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/66.json",
@@ -1439,9 +1449,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 32988,
-      "sha256": "785b47ce91f56b09898434806a729f1ef12bdbc74c15925945e1b87c014f47db",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 33105,
+      "sha256": "84ae5096711dbbbae4932bfb73179eb1767271922a9640a97abf696428110209",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/67.json",
@@ -1449,9 +1459,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 86321,
-      "sha256": "cb4fcc6b59fd7ad9d8cae93af41aa8de5a419b646799a372331822e97b3704b3",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 87213,
+      "sha256": "c32c3cdaf25b1e51e529dd9ca2eed05d40254d37ce4d6f3493527c09c939c64e",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/70.json",
@@ -1459,9 +1469,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 226432,
-      "sha256": "9120ea681172b7c2560659e525707931daa89ea7b492d8c1f4ed8f82554031cd",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 303041,
+      "sha256": "a99d75423c01a800bec11f5c31ae057890cb72c7e381cd74c208ddb3e7efe3f4",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/71.json",
@@ -1469,9 +1479,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 175573,
-      "sha256": "66f5507d853353854b7db44522ce239b286314003c42f2a7b99785911f69e0a9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 206782,
+      "sha256": "102f6f9008a8a8e6252816ea8061f1e5df407e25f8ccc4a538420234b88603de",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/72.json",
@@ -1479,9 +1489,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 118639,
-      "sha256": "ff620249eb2b83c94545651fba8b97d044aaf1ac4ea16bf8bc96b029a5acd1e4",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 120688,
+      "sha256": "12c2429a9484fc9ad3685267444f106f2e6cea77daed34ee9a10ffc8b6511847",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/73.json",
@@ -1489,9 +1499,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 101097,
-      "sha256": "337c19f285ccdd86b7ba828e35eb9efebcd89ea6347f9621f5caabafb4991afa",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 119571,
+      "sha256": "09a5d140bfc0a3a06b10bb5e6e93d063280c324ff5abf03e9c18d8674de064b4",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/74.json",
@@ -1499,9 +1509,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 188273,
-      "sha256": "fed6746dec8432f848c1a0c128dca1caf1aff6b617c03f32128aea2624fdbf52",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 216482,
+      "sha256": "6bf20b15d83afe25e1f2557a7be28b6711c9e09b091c83976bf28a34d3b44895",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/75.json",
@@ -1509,9 +1519,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 161962,
-      "sha256": "3b8d68a79a916b5aa2cf7210020d2a2bd5e2682745f846a3235f9d20cc7dda4a",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 183410,
+      "sha256": "226f01e973c98443eddbb56dd147fbe1ad37a73ebd962ebaceebc01d8e186ba9",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/76.json",
@@ -1519,9 +1529,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 133171,
-      "sha256": "717e9e876a19245958d309b56d43d77a03752c20b0eb77ba6175b707111a510d",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 150130,
+      "sha256": "f7855c23af425d907914b5118021619018f5f98383106da8f0180590381dc7a3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/77.json",
@@ -1529,9 +1539,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 51246,
-      "sha256": "4b8c9073d22d27341399aaa59c4340933ea93a4c078de318bd7428c49daafff2",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 51363,
+      "sha256": "f0607bc00e5b4c09d67efd71bf5ea53da6995cb8a231439ef98a2fee84b46c70",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/80.json",
@@ -1539,9 +1549,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 583723,
-      "sha256": "86261a91c2cf92ed1e10fe3dca4b24cf1716c0606327f4109db8ab7ea5a76452",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 642196,
+      "sha256": "2ae9f574dd1077c8405ef2bb47844943cb796c19c94945797bc202f46fa7fba3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/81.json",
@@ -1549,9 +1559,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 65823,
-      "sha256": "8cb20eb263b53e782d747836377b8bf56535f2afdf9a3f390f0cf6fa9aefcb74",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 67957,
+      "sha256": "5c8327b037379e70dc3b43af5bad11a196f4de4d6f1e6fd137547667f7953e43",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/82.json",
@@ -1559,9 +1569,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 83171,
-      "sha256": "85c2882abd84088507221407735283c2edc0ef384dd0450d63994fb4ca2bce43",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 85456,
+      "sha256": "6165aa2cf35ae081c4ea48cc85e403b061607e6b9f248c1071a090b130bb1c72",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/83.json",
@@ -1569,9 +1579,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 500404,
-      "sha256": "564bae8ac6f8852d43c72a2253b8bde69bcd88f589cd72d2bd9907c3709a7682",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 503577,
+      "sha256": "4a77c62ccf73d8a03fe7fe7182a0e00b358b9a1a997a782f459eab4ce60f6334",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/84.json",
@@ -1579,9 +1589,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 432444,
-      "sha256": "8c5269e1583b70eb42f81c05c308f69ef09dbe47d1c95e78248066136884335c",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 439912,
+      "sha256": "331d74486b67061bd2df7539b3e9696486cc626ec176ef71321899cef96b0d56",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/85.json",
@@ -1589,9 +1599,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 90610,
-      "sha256": "30f2296dc0c2943f03a65fe038f41b823a14b0f0ff7944c9bc8581c7a69c6eb7",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 93108,
+      "sha256": "eec72d3e20d9afdc8f841b6e90ebd26dd84a819ade5f11f1179d906975aabc32",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/86.json",
@@ -1599,9 +1609,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 58201,
-      "sha256": "bbecf011ca1ece757e3e855ca88f20668f56f38f236a93e7ee5d4b215c37df5a",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 58318,
+      "sha256": "11b3a2bc0362e5a57932b8b631f08c8eeffe91db57093e13e59e29301f8fd02e",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/90.json",
@@ -1609,9 +1619,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 864230,
-      "sha256": "f657d2e4841385a1443a9a517da66fb86a574fc5830efbbaab008be9e7b407f9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 1005078,
+      "sha256": "65d0fd074a00f8d1a9772f9e80f2b2120723fc5f744bfc930a3d44846a4c3ab0",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/91.json",
@@ -1619,9 +1629,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 79443,
-      "sha256": "8a4f26bcee9c1ca70f3e53fd36a8e4df234110d31b22e20536fa59e3f5e7241f",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 92015,
+      "sha256": "054a1652b03977907c5a319b7f452d0d6336dfb4e07a44eb60bb55c54442b4c3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/92.json",
@@ -1629,9 +1639,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 115493,
-      "sha256": "b7ca271898bf0a25adf9536e5866a515bc4250239087adb2ce9e09fc9c7ed002",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 116384,
+      "sha256": "7f43939bbfa0154eb21d7b1f987488979a8e7d143e58ecbec37b84b257ed5622",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/93.json",
@@ -1639,9 +1649,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 95095,
-      "sha256": "f7666bb70801e602398496b3773045aacc792620c370ac7897ca98a49e66a5a2",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 101377,
+      "sha256": "835c6fe4b8478749cc4097070b20b20268e29573aa91818dc45e6b96c43d70dd",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/94.json",
@@ -1649,9 +1659,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 276465,
-      "sha256": "3b6f0684587d06e0ebce127b35e48ec491717b96a7302bc7bac1134737b9464b",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 305308,
+      "sha256": "d39ded12c25bca104f990f0cd1a3d5fde17ad14c24b5799a80dd838994c6efae",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/95.json",
@@ -1659,9 +1669,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 521133,
-      "sha256": "853051e050d52da5813b106cd96886bdeb1d3d354cf8a442950be24d1374f54d",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 533292,
+      "sha256": "c249f2d718ccc8d3bfeba84b80eb3dfe55cb79899d72bf15e0b46832a683aa73",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/96.json",
@@ -1669,9 +1679,9 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 94872,
-      "sha256": "a533b71a3ae887b68aa2dbd596c4a6a9009db1889b7a4b20c76834575ec2e366",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 95407,
+      "sha256": "84133056569b2844f7f2e6986d891dfcf17317b53bce59ce9a18d1db7c8408d3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/provincial_briefings/index.json",
@@ -1679,9 +1689,9 @@
       "dataset_key": "provincial_briefings",
       "role": "support",
       "format": "json",
-      "bytes": 24120,
-      "sha256": "a073ed4953c6bbf626c1a4e8001ff7e2155bd3f7f9ea9d0b58d29d5e1696a0d9",
-      "contract_sha256": "5d3379df837befada558ef48001af4c5b27f744033e09ee8d208a6bc8539e07f"
+      "bytes": 24129,
+      "sha256": "438c117926f05507f1e625fe0ff36b4ae69eda64db9d6e4953d64436ba6d47a3",
+      "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
       "path": "data/public/public_dashboard.json",
@@ -1689,8 +1699,8 @@
       "dataset_key": "province_dashboard",
       "role": "database",
       "format": "json",
-      "bytes": 147304,
-      "sha256": "3ec97ad2144171b2ad702b07586beef43e0ce87656ed70891a717171967e4724",
+      "bytes": 155571,
+      "sha256": "7aef3e6940c6a9a3fb7019adac1a0853983413ebc2ca07bf1e7fdef38e879239",
       "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
     },
     {
@@ -1699,8 +1709,8 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 92464,
-      "sha256": "8b7f66cb67bdc10aebe9559871dae26386754cd7902c92412098be5028368afb",
+      "bytes": 94119,
+      "sha256": "37cc6f5c3f80ae8032366cf36a908d7c5ab2dbc694b247b121c466d41fd35ac5",
       "contract_sha256": "fca31aed78f157e0ba9ab0161daaa93d9fcd74996884315623aa9d071f9e35a7"
     },
     {
@@ -1709,9 +1719,9 @@
       "dataset_key": "source_insights",
       "role": "database",
       "format": "json",
-      "bytes": 405337,
-      "sha256": "0dbb997e7b494b4f913019a8ce9afdca4ebb981ebad0a7de333f10b049c87507",
-      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
+      "bytes": 2991855,
+      "sha256": "f42a0d3ce36d44cb990142817be0f1f76d666fab276b6bfb9023ac2c776effb8",
+      "contract_sha256": "2248ba13300a99e0ab66aee63e0ba6fa63d5ba41e82c1ea390df007225985b00"
     },
     {
       "path": "data/public/source_insights_manifest.json",
@@ -1719,9 +1729,9 @@
       "dataset_key": "source_insights",
       "role": "provenance",
       "format": "json",
-      "bytes": 7370,
-      "sha256": "5cbbeeaa50a07c048a7f14ccccb5176bb727fd2095144bd864d46108c6d971ef",
-      "contract_sha256": "9f8d0722c13eb190773bdbde2ccdc39e240cb149929b76adc5ffde18ef0d85a4"
+      "bytes": 7371,
+      "sha256": "28897a61141133db5b69baa069c8bd14f92e1e1d07a5761978e57f0a197be072",
+      "contract_sha256": "2248ba13300a99e0ab66aee63e0ba6fa63d5ba41e82c1ea390df007225985b00"
     },
     {
       "path": "data/public/source_inventory.csv",
@@ -1739,8 +1749,8 @@
       "dataset_key": "thailand_provinces",
       "role": "database",
       "format": "geojson",
-      "bytes": 1519764,
-      "sha256": "88fa273ccfcbbe7a0c492e7e7281eee8701074cd2a9b2b60f68cd8aab2a8b2e6",
+      "bytes": 1527772,
+      "sha256": "6a81815943f881cdf21a9a0f475a7d399f9a69d547e63095f28d8b3c86749870",
       "contract_sha256": "7e27bb02656f823404cecb8b73598aac9f46696dc30740ad4a25dc85a4c1eb08"
     },
     {
@@ -1750,7 +1760,7 @@
       "role": "database",
       "format": "json",
       "bytes": 449796,
-      "sha256": "9c2d74a7c6d3b19445bf0a6ae4d34e756c355a5232931caa8fabd8a2247cbf2a",
+      "sha256": "00b479c0c08251b77ec2b8f9c33dea1f57baf1336fb7ae4d31567fe72c15e047",
       "contract_sha256": "3950761edbe5fc8b2c06733f8b511ad9341d1be02482ca90efce0026b9b567e6"
     }
   ]

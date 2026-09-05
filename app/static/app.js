@@ -863,6 +863,7 @@ function renderF4InnovationRow(row) {
 }
 
 function renderF4PolicyRow(row) {
+  const position = /[\p{L}\p{N}]/u.test(row.researcher_position || "") ? row.researcher_position : "";
   const budget = row.budget_baht !== null && row.budget_baht !== undefined && row.budget_baht !== ""
     ? `${formatNumber(Math.round(Number(row.budget_baht)))} บาท`
     : "ไม่ระบุงบประมาณ";
@@ -870,6 +871,7 @@ function renderF4PolicyRow(row) {
     <article class="f4-record-card">
       <header><strong>${escapeHtml(row.project_title || "ไม่ระบุชื่อโครงการ")}</strong><span>${escapeHtml(row.fiscal_year || "ไม่ระบุปี")}</span></header>
       <p>${escapeHtml(row.lead_organization || "ไม่ระบุหน่วยงาน")}</p>
+      ${row.researcher_name_th || row.researcher_name_en ? `<p>ผู้วิจัย: ${escapeHtml(row.researcher_name_th || row.researcher_name_en)}${position ? ` (${escapeHtml(position)})` : ""}</p>` : ""}
       <small>${escapeHtml(row.status || "ไม่ระบุสถานะ")}, ${escapeHtml(row.contract_no || "ไม่มีเลขสัญญา")}, ${escapeHtml(budget)}</small>
       ${row.detail_url ? `<a href="${escapeHtml(row.detail_url)}" target="_blank" rel="noreferrer">เปิดรายละเอียด</a>` : ""}
     </article>`;
@@ -3425,10 +3427,10 @@ function renderInnovations(section) {
       ).filter(Boolean).join(" | ");
       const target = (item.target_groups || [])[0];
       const leads = (item.research_leads || []).map((lead) =>
-        [lead.faculty, lead.institute].filter(Boolean).join(" · "),
+        [lead.name, lead.faculty, lead.institute].filter(Boolean).join(", "),
       ).filter(Boolean);
       const ip = item.ip || {};
-      const ipText = [ip.type, ip.asset_name].filter(Boolean).join(" · ");
+      const ipText = [ip.type, ip.asset_name, ip.rights_owner].filter(Boolean).join(", ");
       const roi = item.roi_indicator !== null && item.roi_indicator !== undefined
         ? `${item.roi_indicator}${item.roi_unit ? ` ${item.roi_unit}` : ""}`
         : "ไม่ระบุ";
@@ -3445,7 +3447,8 @@ function renderInnovations(section) {
             <div><dt>ประเภท</dt><dd>${escapeHtml(item.innovation_type || "ไม่ระบุ")}</dd></div>
             <div><dt>เงินทุนที่ต้นทางกรอก</dt><dd>${escapeHtml(funding || "ไม่ระบุ")}</dd></div>
             <div><dt>กลุ่มเป้าหมาย</dt><dd>${escapeHtml(trimText(target || "ไม่ระบุ", 150))}</dd></div>
-            <div><dt>สังกัดนักวิจัย</dt><dd>${escapeHtml(leads.join(" | ") || "ไม่ระบุ")}</dd></div>
+            <div><dt>เจ้าของผลงาน</dt><dd>${escapeHtml(item.owner_name || "ไม่ระบุ")}</dd></div>
+            <div><dt>ผู้วิจัยและสังกัด</dt><dd>${escapeHtml(leads.join(" | ") || "ไม่ระบุ")}</dd></div>
             <div><dt>ทรัพย์สินทางปัญญา</dt><dd>${escapeHtml(ipText || "ไม่ระบุ")}</dd></div>
             <div><dt>ROI / SROI</dt><dd>${escapeHtml(`${roi} / ${sroi}`)}</dd></div>
           </dl>
@@ -3567,12 +3570,25 @@ function renderTourism(section = {}) {
     .map((label) => `<span>${escapeHtml(label)}</span>`)
     .join("");
 
+  const publicContacts = [
+    ...(contact.emergency_numbers || []).map((item) => ({ name: localizedText(item.service), phone: item.phone })),
+    ...(contact.service_centres || []).map((item) => ({
+      name: localizedText(item.name), phone: (item.phones || []).map((entry) => entry.phone).filter(Boolean).join(", "),
+      address: localizedText(item.address),
+      openingHours: item.opening_hours,
+    })),
+    ...(lanternPage.data?.lantern_production_groups || []).map((item) => ({ name: localizedText(item.name), phone: item.phone })),
+    ...otherTransport.filter((item) => item.phone).map((item) => ({ name: localizedText(item.name), phone: item.phone, address: localizedText(item.location) })),
+  ];
+  const contactCards = publicContacts.map((item) => `<article class="data-card"><h3>${escapeHtml(item.name || "บริการท่องเที่ยว")}</h3><p>${escapeHtml(item.phone || "ไม่ระบุหมายเลข")}</p>${item.openingHours ? `<p>เวลาทำการ: ${escapeHtml(item.openingHours)}</p>` : ""}${item.address ? `<p>${escapeHtml(item.address)}</p>` : ""}</article>`).join("");
+
   const sourceUrl = safeExternalUrl(recommendPage.source_url || travelPage.source_url || homePage.source_url);
   document.getElementById("tourismItems").innerHTML = `
     ${recommendationCards ? `<section class="tourism-block"><header><h3>ของดีและจุดแนะนำ</h3><span>${formatNumber(recommendations.length)} รายการ</span></header><div class="tourism-place-grid">${recommendationCards}</div></section>` : ""}
     ${(trainRows || tramRows) ? `<section class="tourism-block"><header><h3>ตารางเดินทาง</h3><span>รถไฟและรถราง</span></header><div class="schedule-list">${trainRows}${tramRows}</div>${transportTags ? `<div class="transport-tags">${transportTags}</div>` : ""}</section>` : ""}
     ${stationRows ? `<section class="tourism-block"><header><h3>จุดตั้งต้นเที่ยวเมือง</h3><span>จำนวนจุดใกล้เคียง</span></header><div class="station-grid">${stationRows}</div></section>` : ""}
     ${serviceTags ? `<section class="tourism-block tourism-service-summary"><header><h3>บริการที่มีในข้อมูลต้นทาง</h3><span>${formatNumber(serviceAvailability.length)} บริการ</span></header><div class="transport-tags">${serviceTags}</div></section>` : ""}
+    ${contactCards ? `<section class="tourism-block"><header><h3>ติดต่อบริการและกลุ่มผู้ผลิต</h3></header><div class="station-grid">${contactCards}</div></section>` : ""}
     ${sourceUrl ? `<a class="tourism-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">เปิดข้อมูลท่องเที่ยวต้นทาง</a>` : ""}`;
 }
 
@@ -3604,6 +3620,9 @@ function renderCulture(section) {
             <div class="record-kicker"><span>${escapeHtml(item.cultural_type || "ทุนวัฒนธรรม")}</span><span>${escapeHtml(item.category || "ไม่ระบุหมวด")}</span></div>
             <h3>${escapeHtml(item.title_th || "ไม่ระบุชื่อ")}</h3>
             <p>${escapeHtml(trimText(item.risk_reason || item.history || "ต้นทางไม่ได้ระบุเหตุผลความเสี่ยง", 180))}</p>
+            ${item.address ? `<p>ที่ตั้ง: ${escapeHtml(item.address)}</p>` : ""}
+            ${item.work_contact ? `<p>ติดต่อ: ${escapeHtml(item.work_contact)}</p>` : ""}
+            ${item.recorder_name ? `<p>ผู้จัดทำ: ${escapeHtml(item.recorder_name)}${item.recorder_institution ? ` (${escapeHtml(item.recorder_institution)})` : ""}</p>` : ""}
             <footer><span>${escapeHtml([item.tambon, item.amphoe].filter(Boolean).join(" · ") || "ไม่ระบุพื้นที่ย่อย")}</span><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">ต้นทาง</a></footer>
           </div>
         </article>`;

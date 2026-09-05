@@ -7,23 +7,60 @@
     {
       "key_pattern": "^innovation$",
       "grain_th": "นวัตกรรมหนึ่งรายการ",
-      "identity_options": [["innovationid"]],
-      "geography_fields": ["province", "provinceid"],
-      "as_of_fields": ["updatedate", "year"]
+      "identity_options": [
+        [
+          "innovationid"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "provinceid"
+      ],
+      "as_of_fields": [
+        "updatedate",
+        "year"
+      ],
+      "field_contexts": {
+        "/userfullname": "work_attribution",
+        "/owner_name": "work_attribution",
+        "/researcher_name": "work_attribution"
+      }
     },
     {
       "key_pattern": "^requirement$",
       "grain_th": "ความต้องการหนึ่งรายการ",
-      "identity_options": [["requirementid"]],
-      "geography_fields": ["province", "provinceid"],
-      "as_of_fields": ["updatedate", "year"]
+      "identity_options": [
+        [
+          "requirementid"
+        ]
+      ],
+      "geography_fields": [
+        "province",
+        "provinceid"
+      ],
+      "as_of_fields": [
+        "updatedate",
+        "year"
+      ],
+      "field_contexts": {
+        "/userfullname": "work_attribution",
+        "/owner_name": "work_attribution",
+        "/researcher_name": "work_attribution"
+      }
     },
     {
       "key_pattern": "^news$",
       "grain_th": "ข่าวสาธารณะหนึ่งรายการ",
-      "identity_options": [["newsid"]],
+      "identity_options": [
+        [
+          "newsid"
+        ]
+      ],
       "geography_fields": [],
-      "as_of_fields": ["newsdate", "updatedate"]
+      "as_of_fields": [
+        "newsdate",
+        "updatedate"
+      ]
     }
   ],
   "completeness_checks": [
@@ -34,8 +71,18 @@
   "privacy": {
     "candidate_only": true,
     "contact_value_scan": true,
-    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
   },
   "sample_fixture": "tests/fixtures/connectors/f2_apptech_mru.json",
-  "notes_th": "Serving ingest ดึง list JSON ให้ unique ID เท่ากับ totaldata ทุกชุด. รายละเอียดหน้า HTML (จังหวัด/ทุน/ทรัพย์สินทางปัญญา/TRL) อยู่เลนหลักฐานเมื่อ list API timeout และห้ามคัดลอกชื่อนักวิจัย"
+  "notes_th": "ดึง list JSON ให้ unique ID เท่ากับ totaldata ทุกชุด เก็บชื่อเจ้าของผลงานตาม field_contexts; รายละเอียด HTML แยกเก็บใน evidence และเผยแพร่ด้วย builder"
 }

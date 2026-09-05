@@ -1,0 +1,190 @@
+"""รายละเอียดผลงานและข้อมูลติดต่อจากหน้าสาธารณะ โดยไม่ดึงบัญชีผู้ใช้มาปน."""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from pathlib import Path
+import sys
+
+from app.privacy import sanitize_payload
+
+
+WORK_CONTEXTS = {
+    "/owner_name": "work_attribution", "/inventor": "work_attribution",
+    "/coordinator": "work_attribution", "/co_owner": "work_attribution",
+    "/address": "public_contact", "/phone": "public_contact", "/email": "public_contact",
+    "/secondary_phone": "public_contact",
+}
+CULTURAL_CONTEXTS = {
+    "/address": "public_location", "/sales_channels": "public_contact",
+    "/work_contact": "public_contact", "/recorded_by": "work_attribution",
+    "/team_members/*/name": "work_attribution",
+}
+
+
+def cultural_product_address(value: str | None) -> str | None:
+    if not value:
+        return None
+    # Some source pages concatenate contact and footer sections after the address.
+    # Keep those sections in sales_channels, where their public-contact context is declared.
+    address = re.split(
+        r"(?i)\bface\s*book\s*:|\b(?:id\s*)?line\s*:|https?://|"
+        r"(?:โทรศัพท์|มือถือ|ช่องทางติดต่อ)\s*:?|เข้าชม\s*:",
+        value, maxsplit=1,
+    )[0]
+    return address.strip(" \t\r\n,;:") or None
+
+
+def project_cultural_supporting(row: dict, dataset_id: str) -> dict:
+    from tools.build_provincial_briefings import sanitize_public_text
+    data = row.get("data") or {}
+    item = {"record_id": row["external_id"], "dataset_id": dataset_id,
+            "title": sanitize_public_text(row.get("title")), "source_url": row.get("source_url")}
+    if dataset_id == "products":
+        item.update(category=data.get("product_category"), price_text=data.get("price_text"),
+                    address=cultural_product_address(data.get("address_text")), sales_channels=data.get("sales_channels"),
+                    related_cultural_record=data.get("related_cultural_record"))
+    elif dataset_id == "activities":
+        item["date_text"] = data.get("date_text")
+    elif dataset_id == "recreation":
+        item.update(category=data.get("recreation_category"), work_contact=data.get("contact_text"),
+                    recorded_by=data.get("recorded_by"), team_name=data.get("team_name"),
+                    team_members=[{"name": name} for name in data.get("team_members") or []])
+    elif dataset_id == "team":
+        item["group"] = data.get("group")
+    else:
+        raise ValueError("unsupported cultural supporting dataset")
+    return sanitize_payload(item, field_contexts=CULTURAL_CONTEXTS)
+
+
+def project_mtr_work(row: dict, contacts: dict | None = None) -> dict:
+    fields = row["normalized_fields"]
+    return sanitize_payload({
+        "record_id": row["source_record_id"], "title": fields.get("innovation_name"),
+        "display_name": fields.get("display_name"), "owner_name": fields.get("owner_name"),
+        "institute_name": fields.get("institute_name"), "category": fields.get("category_name"),
+        "sub_category": fields.get("sub_category_name"), "atl_level": fields.get("atl_level"),
+        "source_url": row.get("provenance", {}).get("source_url"),
+        **(contacts or {}),
+    }, field_contexts=WORK_CONTEXTS)
+
+
+def mtr_public_contacts(evidence_root: Path, rows: list[dict]) -> dict[str, dict]:
+    pages = {}
+    result = {}
+    expected_total = None
+    evidence_ids: set[str] = set()
+    silver_ids: set[str] = set()
+    for row in rows:
+        provenance = row["provenance"]
+        path = (evidence_root / provenance["raw_evidence_uri"]).resolve()
+        if not path.is_relative_to(evidence_root.resolve()):
+            raise ValueError("MTR evidence path escapes workspace")
+        digest = provenance["raw_sha256"]
+        if (path, digest) not in pages:
+            raw = path.read_bytes()
+            if hashlib.sha256(raw).hexdigest() != digest:
+                raise ValueError("MTR evidence hash mismatch")
+            payload = json.loads(raw)
+            total = payload.get("totalCount")
+            if type(total) is not int or total < 0:
+                raise ValueError("MTR evidence totalCount must be a non-negative integer")
+            if expected_total is not None and total != expected_total:
+                raise ValueError("MTR evidence totalCount changed between pages")
+            expected_total = total
+            records = payload["data"]
+            if not isinstance(records, list) or any(
+                not isinstance(item, dict) or type(item.get("id")) not in (str, int)
+                or not str(item["id"]).strip() for item in records
+            ):
+                raise ValueError("MTR evidence contains missing IDs or invalid records")
+            ids = [str(item["id"]) for item in records]
+            if len(ids) != len(set(ids)) or evidence_ids.intersection(ids):
+                raise ValueError("MTR evidence contains duplicate IDs across pages")
+            evidence_ids.update(ids)
+            pages[path, digest] = dict(zip(ids, records))
+        innovation_id = str(row["normalized_fields"]["innovation_id"])
+        if innovation_id in silver_ids or innovation_id not in pages[path, digest]:
+            raise ValueError("MTR Silver innovation IDs must match unique evidence records")
+        silver_ids.add(innovation_id)
+        source = pages[path, digest][innovation_id]
+        contact = source.get("ownerContact") or {}
+        identifier = row.get("source_record_id")
+        if not isinstance(identifier, str) or not identifier.strip():
+            raise ValueError("MTR Silver contains missing record IDs")
+        if identifier in result:
+            raise ValueError("MTR Silver contains duplicate IDs")
+        result[identifier] = {"email": contact.get("email"), "phone": contact.get("phone"),
+                              "secondary_phone": contact.get("phone1"), "source_sha256": digest}
+    if expected_total is None or expected_total != len(evidence_ids) or silver_ids != evidence_ids:
+        raise ValueError("MTR totalCount, complete evidence IDs and Silver IDs must match")
+    return result
+
+
+def rmutdb_public_contacts(evidence_root: Path, silver_rows: list[dict]) -> dict[str, dict]:
+    """Replay the evidence workspace's Thai PDF parser; verify hashes and identities.
+
+    Uses the same glyph/font-aware parser that created Silver. The parser modules
+    stay in the evidence workspace, together with the original PDF run.
+    """
+    scripts = evidence_root / "scripts"
+    if not (scripts / "rmutdb_ebook_silver.py").is_file():
+        raise RuntimeError("RMUTDB build needs the evidence workspace PDF parser; see docs/field-contexts.md")
+    previous_path = list(sys.path)
+    sys.path.insert(0, str(scripts))
+    try:
+        import rmutdb_ebook_silver as parser
+    finally:
+        sys.path[:] = previous_path
+    manifest_path = evidence_root / "data/raw/export/f2_rmutdb/20260805T_ebook_export_01/manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    contacts = {}
+    for book in manifest["files"]:
+        path = (evidence_root / book["path"]).resolve()
+        if not path.is_relative_to(evidence_root.resolve()):
+            raise ValueError("PDF path escapes evidence workspace")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != book["sha256"]:
+            raise ValueError("RMUTDB PDF hash mismatch")
+        document = parser.Document(path.read_bytes())
+        cache = {}
+        for page_number, page in enumerate(document.pages(), 1):
+            lines = parser.pdftext.page_lines(document, page, cache)
+            if book["slug"] == "all":
+                parsed_rows = parser.parse_summary_page(lines)
+                phones = [parser.SUMMARY_PHONE.match(line["text"].strip()) for line in lines]
+                phones = [match.group(1).strip() for match in phones if match]
+                if parsed_rows and len(phones) != len(parsed_rows):
+                    raise ValueError("RMUTDB summary phone-to-work alignment changed")
+                for index, (parsed, phone) in enumerate(zip(parsed_rows, phones), 1):
+                    contacts[f"all:p{page_number}:{index}"] = {"phone": phone, "title": parsed["title"]}
+            else:
+                parsed = parser.parse_page("\n".join(line["text"] for line in lines))
+                if parsed:
+                    fields = parsed["fields"]
+                    contacts[f"{book['slug']}:p{page_number}"] = {
+                        "phone": fields.get("contact_phone"), "email": fields.get("contact_email"),
+                        "title": parsed["title"],
+                    }
+    expected = {row["source_record_id"] for row in silver_rows}
+    if len(expected) != len(silver_rows) or set(contacts) != expected:
+        raise ValueError("RMUTDB PDF and Silver identities must match exactly")
+    for row in silver_rows:
+        source = contacts[row["source_record_id"]]
+        title = parser.redact_contacts(source.pop("title"))[0]
+        if title != row["normalized_fields"]["title"]:
+            raise ValueError("RMUTDB PDF-to-work title mismatch")
+    return contacts
+
+
+def project_rmutdb_work(row: dict, contacts: dict) -> dict:
+    fields = row["normalized_fields"]
+    return sanitize_payload({
+        "record_id": row["source_record_id"], "record_type": row["record_type"],
+        "title": fields.get("title"), "inventor": fields.get("inventor"),
+        "owner_affiliation": fields.get("owner_affiliation"), "co_owner": fields.get("co_owner"),
+        "coordinator": fields.get("coordinator"), "address": fields.get("contact_address"),
+        "technology_group": fields.get("technology_group"), "trl_level": fields.get("trl_level"),
+        **contacts, "pdf_page": row["source_fields"]["pdf_page_index"],
+        "source_url": row["provenance"]["source_url"], "source_sha256": row["provenance"]["raw_sha256"],
+    }, field_contexts=WORK_CONTEXTS)

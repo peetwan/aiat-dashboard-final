@@ -16,6 +16,7 @@ from app.privacy import (
     sanitize_payload,
 )
 from app.settings import PROJECT_ROOT
+from app.field_contexts import FieldContextError, validate_field_contexts
 
 
 CONTRACTS_ROOT = PROJECT_ROOT / "config" / "connector_contracts"
@@ -115,7 +116,7 @@ def _validated_grains(contract: dict, source_id: str) -> list[dict]:
         label = f"{source_id}.dataset_grains[{index}]"
         _reject_unknown_fields(
             grain,
-            {"key_pattern", "grain_th", "identity_options", "geography_fields", "as_of_fields"},
+            {"key_pattern", "grain_th", "identity_options", "geography_fields", "as_of_fields", "field_contexts"},
             label,
         )
         pattern = _require_string(grain.get("key_pattern"), f"{label}.key_pattern")
@@ -141,11 +142,16 @@ def _validated_grains(contract: dict, source_id: str) -> list[dict]:
             allow_empty=True,
         )
         patterns.append(pattern)
+        try:
+            field_contexts = validate_field_contexts(grain.get("field_contexts", {}), f"{label}.field_contexts")
+        except FieldContextError as exc:
+            raise ConnectorContractError(str(exc)) from exc
         validated.append(
             {
                 "pattern": compiled,
                 "identity_options": identity_options,
                 "as_of_fields": as_of_fields,
+                "field_contexts": field_contexts,
             }
         )
     if len(patterns) != len(set(patterns)):
@@ -181,9 +187,9 @@ def prepare_contract_records(
                 f"{source_id}: dataset_key {dataset_key!r} must match exactly one grain; "
                 f"matched={len(matching)}"
             )
-        payload = sanitize_payload(raw_payload)
-        digest = payload_hash(payload)
         grain = matching[0]
+        payload = sanitize_payload(raw_payload, field_contexts=grain["field_contexts"])
+        digest = payload_hash(payload)
         try:
             record_id = contract_record_id(payload, grain["identity_options"], digest)
             as_of = contract_as_of(payload, grain["as_of_fields"])
@@ -260,10 +266,11 @@ def _validate_fixture(contract: dict, source_id: str) -> None:
         payload = record.get("payload")
         if not isinstance(payload, dict):
             raise ConnectorContractError(f"{source_id}: fixture record[{index}].payload must be an object")
-        if sanitize_payload(payload) != payload:
-            raise ConnectorContractError(f"{source_id}: fixture record[{index}] is not redacted")
         batch.append((dataset_key, payload))
-    prepare_contract_records(contract, batch)
+    prepared = prepare_contract_records(contract, batch)
+    for index, (record, (_, payload)) in enumerate(zip(prepared, batch)):
+        if record.payload != payload:
+            raise ConnectorContractError(f"{source_id}: fixture record[{index}] is not redacted")
 
 
 def _validate_contract_document(contract: dict, source_id: str, *, validate_fixture: bool) -> None:
@@ -369,8 +376,9 @@ def validate_connector_contracts(
             raise ConnectorContractError(f"{source_id}: source is missing from source_catalog.json")
         if source.get("cloud_policy") == "restricted_local_only":
             raise ConnectorContractError(f"{source_id}: restricted source cannot have an executable connector")
-        if source.get("production_values_allowed") is not True:
-            raise ConnectorContractError(f"{source_id}: executable connector is not production-approved")
+        # Contract validation supports local Candidate work before publication
+        # approval. The runtime production guard and publication source gate
+        # enforce production_values_allowed at their respective boundaries.
 
         plan = plans[source_id]
         entrypoint = _require_string(contract.get("connector"), f"{source_id}.connector")

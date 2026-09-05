@@ -6,12 +6,17 @@ import csv
 import hashlib
 import json
 import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(DASHBOARD_ROOT))
+
+from app.publication import _records, bind_outputs, load_contracts
+
 PROJECT_ROOT = Path(
     os.environ.get("AIAT_EVIDENCE_ROOT", str(DASHBOARD_ROOT.parent))
 ).expanduser().resolve()
@@ -31,6 +36,11 @@ SRA_MISSING_SCORE_PROVINCES = [
 ]
 
 SERVING_PROJECTIONS = {
+    "clig_projects": {
+        "count": 107,
+        "grain": "public_project_attribution_records",
+        "evidence": "dashboard_final/data/public/clig_work_attribution.json",
+    },
     "f1_sradss_ppaos": {
         "count": 20,
         "numeric_value_count": 15,
@@ -81,6 +91,12 @@ SERVING_PROJECTIONS = {
         "grain": "province_linked_public_package_rows",
         "evidence": "dashboard_final/data/public/province_evidence.csv",
     },
+}
+
+NON_MAP_PROJECTIONS = {
+    "f2_apptech_mtr": {"count": 630, "grain": "public_innovation_records", "covers_observed_rows": True},
+    "f2_culturalmap_university": {"count": 361, "grain": "public_cultural_products_activities_recreation_team_records", "complements_map_rows": True},
+    "f3_housing_portal": {"count": 306, "grain": "public_package_rows_without_assigned_province"},
 }
 
 
@@ -153,11 +169,48 @@ def evidence_paths(card: dict, source_id: str, restricted: bool) -> list[str]:
     return paths[:12]
 
 
+def record_source_ids(value: Any, declared: set[str]) -> set[str]:
+    found: set[str] = set()
+    if isinstance(value, dict):
+        if isinstance(value.get("source_id"), str) and value["source_id"] in declared:
+            found.add(value["source_id"])
+        for key, child in value.items():
+            if key in declared and isinstance(child, (dict, list)) and child:
+                found.add(key)
+            found.update(record_source_ids(child, declared))
+    elif isinstance(value, list):
+        for child in value:
+            found.update(record_source_ids(child, declared))
+    return found
+
+
 def current_public_projection() -> tuple[set[str], dict[str, int]]:
     if not PUBLIC_DASHBOARD_PATH.exists():
         return set(), {}
     payload = read_json(PUBLIC_DASHBOARD_PATH)
     public_sources = {source["source_id"] for source in payload.get("sources", [])}
+    manifest_path = PUBLIC_DASHBOARD_PATH.parent / "serving_manifest.json"
+    if manifest_path.exists():
+        artifacts = [artifact for artifact in read_json(manifest_path).get("artifacts", [])
+                     if artifact.get("path") and artifact.get("source_ids")]
+        bindings = bind_outputs(
+            {"data/public/" + artifact["path"] for artifact in artifacts},
+            load_contracts(DASHBOARD_ROOT / "config/publication_contracts"), require_all=False,
+        )
+        for artifact in artifacts:
+            path = manifest_path.parent / artifact["path"]
+            binding = bindings.get("data/public/" + artifact["path"])
+            if not path.is_file() or not binding or binding.contract["source_scope"] != "approved_values":
+                continue
+            pointer = binding.output.get("records_pointer")
+            if not pointer:
+                continue
+            records = [row for _, row in _records(read_json(path), pointer) if row not in (None, {}, [])]
+            declared = set(artifact["source_ids"]) & set(binding.contract["source_ids"])
+            if records and len(declared) == 1:
+                public_sources.update(declared)
+            elif records:
+                public_sources.update(record_source_ids(records, declared))
     province_counts: dict[str, int] = {}
     for province in payload.get("provinces", []):
         for source_id in province.get("evidence_sources", []):
@@ -278,6 +331,7 @@ def notes_for(source_id: str, visibility: str, registry_row: dict) -> list[str]:
             "แผนที่ใช้ point records 5,258 แถว; public non-point records อีก 361 แถวต้องแสดงในมุมอื่น ไม่ใช่ marker"
         ),
         "f2_rmutdb": "2,001 records เป็น national technology catalog; affiliation ไม่ใช่พื้นที่ใช้งานหรือผู้รับประโยชน์",
+        "f2_target_household": "เส้นทางที่ใช้งานเป็นตลาดผลงานสาธารณะ ใช้ชื่อเจ้าของงานและข้อมูลติดต่องานตาม field_contexts ได้ ส่วนข้อมูลครัวเรือนระดับบุคคลเป็นคนละ dataset",
         "f2_apptech_mtr": "public list และ statistics รอบ 2026-08-17 ตรงกันที่ 630 records; province aggregates, interactions และ innovation records เป็นคนละ population ห้ามบวกเข้าด้วยกัน",
         "f2_learning_dashboard": (
             "นับเฉพาะ province data rows 66 แถว (ไม่รวม header); raw response ยังไม่มี manifest และ "
@@ -328,7 +382,11 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         catalog_row = catalog_by_source_id[source_id]
         index_row = index_by_source_id.get(source_id)
         source_card = card_path(ordinal, source_id)
+        if not source_card.is_file():
+            raise SystemExit(f"ไม่พบ source card: {source_card}; เพิ่มหลักฐานตาม docs/add-new-source.md ขั้น 1 ก่อน regenerate")
         card = read_json(source_card)
+        if card.get("source_id") != source_id or not card.get("status"):
+            raise ValueError(f"Source card must identify {source_id} and its audit status: {source_card}")
         card_hashes.append(sha256_file(source_card))
 
         visibility = catalog_row["value_visibility"]
@@ -349,6 +407,8 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
             count_basis = "public_current_month_cluster_snapshots"
         elif source_id == "f2_target_household":
             count_basis = "public_product_search_listing"
+        elif source_id == "clig_projects":
+            count_basis = "verified_public_project_snapshot"
         elif observed_count is not None:
             count_basis = "merged_index_data_row_count"
         elif restricted:
@@ -358,12 +418,16 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
 
         projection = SERVING_PROJECTIONS.get(source_id, {})
         serving_count = projection.get("count") if values_allowed else None
-        additional_non_map_count = {
-            "f2_culturalmap_university": 361,
-            "f3_housing_portal": 306,
-        }.get(source_id)
+        non_map = NON_MAP_PROJECTIONS.get(source_id, {}) if values_allowed else {}
+        additional_non_map_count = non_map.get("count")
+        observed_rows_covered = (
+            non_map.get("covers_observed_rows") and additional_non_map_count == observed_count
+            or non_map.get("complements_map_rows") and serving_count is not None
+            and serving_count + additional_non_map_count == observed_count
+        )
         not_all_raw_rows_are_served = bool(
             values_allowed
+            and not observed_rows_covered
             and (
                 serving_count is not None
                 and observed_count is not None
@@ -401,7 +465,7 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                 "source_type": registry_row.get("source_type_guess", ""),
                 "sensitivity_lane": registry_row.get("sensitivity", "public_unknown"),
                 "status": {
-                    "audit": card.get("status", "NOT_AUDITED"),
+                    "audit": card.get("status", catalog_row.get("audit_status", "NOT_AUDITED")),
                     "readiness": catalog_row["readiness_status"],
                     "network_api_export": workflow.get("network_api_export", "NOT_RECORDED"),
                     "data_inventory": workflow.get("data_inventory", "NOT_RECORDED"),
@@ -420,7 +484,8 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                     "serving_projection_count": serving_count,
                     "serving_numeric_value_count": projection.get("numeric_value_count"),
                     "serving_projection_grain": projection.get("grain"),
-                    "additional_public_non_map_count": additional_non_map_count,
+                "additional_public_non_map_count": additional_non_map_count,
+                "additional_public_non_map_grain": non_map.get("grain"),
                     "not_all_raw_rows_are_served": not_all_raw_rows_are_served,
                     "local_record_count_withheld": restricted,
                 },
@@ -507,6 +572,7 @@ def main() -> int:
     args.output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(json.dumps(payload["summary"], ensure_ascii=False))
     return 0

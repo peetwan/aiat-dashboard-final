@@ -6,10 +6,14 @@ import json
 import math
 import os
 import re
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.privacy import EMAIL_RE, PHONE_RE as CONTACT_PHONE_RE, sanitize_payload
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +53,7 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(
         json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 
@@ -159,7 +164,6 @@ ADDRESS_CLAUSE_RE = re.compile(
     r"(?i)(?:ที่อยู่|address|เลขที่\s*\d+|หมู่(?:ที่)?\s*\d+|ซอย|ถนน)"
     r"\s*[:：]?\s*[^\n;|]*"
 )
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE_RE = re.compile(
     r"(?<![\dA-Za-z])(?:\+?66|0)\s*\d(?:[\s().-]*\d){7,9}(?!\d)"
 )
@@ -218,13 +222,7 @@ def canonical_json_sha256(value: Any) -> str:
 def project_cultural_record(
     row: dict[str, Any], source_artifact: Path
 ) -> tuple[str | None, dict[str, Any]]:
-    """Create the executive-safe Cultural Map briefing record.
-
-    The map source contains people, free-form histories, stakeholders,
-    addresses, media and assessment narratives. None of those fields are
-    copied to province briefings. The public map retains its independently
-    reviewed coordinate projection; briefing cards do not need coordinates.
-    """
+    """เก็บข้อมูลสถานที่ ผู้จัดทำ และช่องทางติดต่อที่เผยแพร่ในหน้าทุนวัฒนธรรม."""
 
     data = row.get("data") or {}
     location = data.get("location") or {}
@@ -234,6 +232,19 @@ def project_cultural_record(
     tambon = administrative.get("tambon") or {}
     classification = data.get("classification") or {}
     names = data.get("names") or {}
+    people = data.get("people") or {}
+    recorder = people.get("recorder") or {}
+    recorder_name = clean(recorder.get("name"))
+    # Some source rows put an account email in the display-name field.
+    if recorder_name and EMAIL_RE.search(recorder_name):
+        recorder_name = None
+    public_details = sanitize_payload({
+        "address": clean(location.get("address_raw")),
+        "work_contact": clean(people.get("contact_raw")),
+        "recorder_name": recorder_name,
+        "recorder_institution": clean((recorder.get("institution") or {}).get("name_th")),
+    }, field_contexts={"/address": "public_location", "/work_contact": "public_contact",
+                       "/recorder_name": "work_attribution"})
     warnings = row.get("validation_warnings") or []
     code = canonical_code(province.get("code"))
     item = {
@@ -248,6 +259,7 @@ def project_cultural_record(
         "amphoe": clean(amphure.get("name_th")),
         "tambon": clean(tambon.get("name_th")),
         "source_url": clean(row.get("source_url")),
+        **public_details,
         "provenance": {
             "source_artifact": provenance_path(source_artifact),
             "recorded_at": clean((data.get("dates") or {}).get("recorded")),
@@ -269,6 +281,29 @@ def _safe_fare(value: Any) -> dict[str, Any] | None:
     if amount is None and currency is None:
         return None
     return {"amount": amount, "currency": currency}
+
+
+def project_service_centre(row: dict[str, Any]) -> dict[str, Any]:
+    opening_hours = [clean(row.get("opening_hours_raw"))]
+    phones = []
+    for entry in row.get("phones") or []:
+        value = clean(entry.get("phone_display")) or clean(entry.get("phone_normalized"))
+        if not value:
+            continue
+        label = project_localized_text(entry.get("label"), sanitize=True)
+        label_text = " ".join(label.values()) if isinstance(label, dict) else str(label or "")
+        is_hours = re.search(r"เปิดทำการ|เวลาทำการ|เวลาเปิด|opening|hours", label_text, re.I)
+        is_time_range = re.fullmatch(r"\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}(?:\s*น\.?)?", value)
+        if is_hours or is_time_range:
+            opening_hours.append(value)
+        elif CONTACT_PHONE_RE.search(value) or re.fullmatch(r"[1-9]\d{2,3}", value):
+            phones.append({"label": label, "phone": value})
+    return {
+        "name": project_localized_text(row.get("name"), sanitize=True),
+        "address": project_localized_text(row.get("address")) or {},
+        "opening_hours": "; ".join(dict.fromkeys(value for value in opening_hours if value)) or None,
+        "phones": phones,
+    }
 
 
 def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
@@ -306,7 +341,14 @@ def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
         projected = {"map": {"stations": stations}}
     elif page_id == "komepage":
         record_count = len(data.get("lantern_production_groups") or [])
-        projected = {"lantern_group_count": record_count}
+        projected = {
+            "lantern_group_count": record_count,
+            "lantern_production_groups": [
+                {"name": project_localized_text(group.get("name"), sanitize=True),
+                 "phone": clean(group.get("phone_display")) or clean(group.get("phone_normalized"))}
+                for group in data.get("lantern_production_groups") or []
+            ],
+        }
     elif page_id == "travel":
         train = data.get("train") or {}
         tram = data.get("tourism_tram") or {}
@@ -337,6 +379,9 @@ def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
             other_transport.append({
                 "type": clean(service.get("type")),
                 "name": project_localized_text(service.get("name"), sanitize=True),
+                "location": project_localized_text(service.get("location")),
+                "operator": project_localized_text(service.get("operator"), sanitize=True),
+                "phone": clean(service.get("phone_display")) or clean(service.get("phone_normalized")),
             })
         record_count = len(train_services) + len(tram_services) + len(other_transport)
         projected = {
@@ -376,6 +421,15 @@ def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 for label in service_labels
             ],
             "service_availability_label_count": len(service_labels),
+            "emergency_numbers": [
+                {"service": project_localized_text(row.get("service"), sanitize=True),
+                 "phone": clean(row.get("phone_display")) or clean(row.get("phone_normalized"))}
+                for row in emergency_rows
+            ],
+            "service_centres": [
+                project_service_centre(row)
+                for row in data.get("service_contacts") or []
+            ],
         }
     else:
         raise ValueError(f"unsupported tourism page_id: {page_id!r}")
@@ -432,6 +486,8 @@ def project_requirement_record(
     item = {
         "record_id": clean(fields.get("record_id")) or clean(row.get("source_record_id")),
         "record_grain": "one_public_requirement",
+        "owner_name": clean(fields.get("owner_full_name")),
+        "owner_affiliation_name": clean(fields.get("owner_affiliation_name")),
         "title": clean(fields.get("title")),
         "description": clean(fields.get("description")),
         "category": clean(fields.get("category_label")),
@@ -796,7 +852,7 @@ def add_housing_signals(briefing: dict[str, Any]) -> None:
     briefing["executive_signals"] = signals
 
 
-def build() -> None:
+def build(*, generated_at: str | None = None) -> None:
     dashboard = read_json(PROJECT_ROOT / "data/public/public_dashboard.json")
     catalog = read_json(PROJECT_ROOT / "config/source_catalog.json")
     restricted_source_ids = sorted(
@@ -808,7 +864,7 @@ def build() -> None:
         source["source_id"]: source
         for source in dashboard["sources"]
     }
-    generated_at = datetime.now(timezone.utc).isoformat()
+    generated_at = generated_at or datetime.now(timezone.utc).isoformat()
     code_by_name = {
         normalize_text(province["province_name_th"]): province["province_code"]
         for province in dashboard["provinces"]
@@ -1058,6 +1114,7 @@ def build() -> None:
                 "record_id": fields.get("record_id") or row.get("record_id"),
                 "title": fields.get("title"),
                 "owner_affiliation_name": fields.get("owner_affiliation_name"),
+                "owner_name": clean(fields.get("owner_full_name")),
                 "description": fields.get("description"),
                 "knowledge_technology": fields.get("knowledge_technology"),
                 "innovation_type": fields.get("innovation_type_label"),
@@ -1074,6 +1131,7 @@ def build() -> None:
                 "highlights": fields.get("highlights") or [],
                 "research_leads": [
                     {
+                        "name": clean(researcher.get("name")),
                         "faculty": clean(researcher.get("faculty")),
                         "institute": clean(researcher.get("institute")),
                     }
@@ -1081,6 +1139,7 @@ def build() -> None:
                 ],
                 "co_researcher_count": len(fields.get("co_researchers") or []),
                 "ip": {
+                    "rights_owner": clean(fields.get("ip_rights_owner")),
                     "type": clean(fields.get("ip_type")),
                     "asset_name": clean(fields.get("ip_asset_name")),
                     "application_number": clean(fields.get("ip_application_number")),

@@ -98,6 +98,16 @@ def test_real_thai_phones_and_emails_are_redacted_in_values():
     assert clean["intl"] == "[redacted-phone]"
 
 
+def test_hashes_and_prefixed_identifiers_are_not_rewritten_as_phones():
+    payload = {
+        "content_hash": "a" * 20 + "0812345678" + "b" * 34,
+        "record_id": "project-66812345678suffix",
+        "asset_path": "images/a0812345678b.jpg",
+        "value": "0.0812345678",
+    }
+    assert sanitize_payload(payload) == payload
+
+
 def test_forbidden_key_reason_boundaries():
     assert forbidden_key_reason("address_province") is None
     assert forbidden_key_reason("citizen_count") is None

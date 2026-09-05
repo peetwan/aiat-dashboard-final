@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 import pytest
+import httpx
+from urllib.parse import parse_qs
 
 from app.connectors.clig_projects import (
     CligProjectsConnector,
@@ -16,6 +18,8 @@ from app.connectors.clig_projects import (
 )
 from app.connectors.base import ConnectorContext
 from app.settings import Settings
+from app.ingestion import IngestionFetchError, IngestionPipeline, ResponseRecorder, PolicyViolation
+from app.catalog import load_catalog, load_ingestion_plans
 from tools.evidence_store import StoreConfig, push_run
 from tools.scrape_clig_projects import write_jsonl, write_manifest_input
 
@@ -49,7 +53,10 @@ DETAIL_HTML = """
 <html><body>
 <h5 class="card-label">การพัฒนานโยบายท้องถิ่นขององค์กรปกครองส่วนท้องถิ่น</h5>
 <table>
-<tr><th>ชื่อ-นามสกุล (ภาษาไทย)</th><td>ไม่ควรถูกเก็บ</td></tr>
+<tr><th>ชื่อ-นามสกุล (ภาษาไทย)</th><td>ผู้วิจัยตัวอย่าง</td></tr>
+<tr><th>ชื่อ-นามสกุล (ภาษาอังกฤษ)</th><td>Example Researcher</td></tr>
+<tr><th>ตำแหน่ง</th><td>นักวิจัย</td></tr>
+<tr><th>สัญชาติ</th><td>ไทย</td></tr>
 <tr><th>หน่วยงาน</th><td>มหาวิทยาลัยสงขลานครินทร์ คณะวิทยาการจัดการ</td></tr>
 <tr><th>บทคัดย่อ (ภาษาไทย)</th><td>มีมาตรการและกลไกสำหรับ อปท.</td></tr>
 <tr><th>Abstract</th><td>Policy innovation for local government.</td></tr>
@@ -103,6 +110,20 @@ def test_parse_project_list_and_detail_extract_safe_fields() -> None:
     assert detail["detail_budget_baht"] == 2027400.0
     assert detail["file_labels"] == ["finalreport.pdf"]
     assert "ชื่อ-นามสกุล (ภาษาไทย)" not in detail
+    assert detail["researcher_name_th"] == "ผู้วิจัยตัวอย่าง"
+    assert detail["researcher_name_en"] == "Example Researcher"
+    assert detail["researcher_position"] == "นักวิจัย"
+    assert "สัญชาติ" not in detail
+
+
+def test_clig_researcher_attribution_survives_candidate_preparation() -> None:
+    from app.connector_contracts import load_runtime_connector_contract, prepare_contract_records
+
+    recorder = SequenceRecorder([LIST_HTML, DETAIL_HTML, EMPTY_HTML])
+    records = CligProjectsConnector().fetch(context_for(recorder))
+    prepared = prepare_contract_records(load_runtime_connector_contract("clig_projects"), records)
+    assert len(prepared) == 2
+    assert all(row.payload["researcher_name_th"] == "ผู้วิจัยตัวอย่าง" for row in prepared)
 
 
 def test_connector_follows_detail_ids_and_stops_on_empty_page() -> None:
@@ -119,6 +140,56 @@ def test_connector_follows_detail_ids_and_stops_on_empty_page() -> None:
     assert candidate_record(project)["candidate_keywords"]
 
 
+def test_clig_fetch_uses_real_catalog_recorder_without_network(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    source = next(row for row in load_catalog()["sources"] if row["source_id"] == "clig_projects")
+    plan = load_ingestion_plans()["sources"]["clig_projects"]
+    plan = {**plan, "catalog_expected_record_count": 1, "expected_policy_candidate_count": 1}
+    settings = Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0)
+    recorder = ResponseRecorder("clig_projects", "fixture-run", settings, runtime_endpoints=source["endpoints"])
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        if request.method == "POST":
+            form = parse_qs(request.content.decode(), keep_blank_values=True)
+            assert set(form) == {"project_name", "project_year", "page"}
+            body = LIST_HTML if form["page"] == ["1"] else EMPTY_HTML
+        else:
+            assert dict(request.url.params) == {"id": "ZItoamyI"}
+            body = DETAIL_HTML
+        return httpx.Response(200, text=body, headers={"content-type": "text/html"}, request=request)
+
+    recorder.client.close()
+    recorder.client = httpx.Client(transport=httpx.MockTransport(respond))
+    try:
+        records = CligProjectsConnector().fetch(ConnectorContext(source=source, plan=plan, settings=settings, recorder=recorder))
+        assert [row[0] for row in records] == ["projects", "policy_candidates"]
+        assert [request.method for request in calls] == ["POST", "GET", "POST"]
+        assert len(recorder.artifacts) == 3
+        for method, url, kwargs in [
+            ("POST", plan["list_url"], {"json_body": {"project_name": "", "project_year": "", "page": "1"}}),
+            ("POST", plan["list_url"], {"data": {"page": "1", "unapproved": "value"}}),
+            ("GET", plan["detail_url_template"].format(project_id="ZItoamyI") + "&unapproved=value", {}),
+        ]:
+            with pytest.raises(PolicyViolation):
+                recorder.request(method, url, name="blocked", **kwargs)
+        assert len(calls) == 3
+    finally:
+        recorder.close()
+
+
+def test_template_query_values_keep_fixed_filters_and_parameter_names():
+    recorder = object.__new__(ResponseRecorder)
+    recorder.allowed_endpoints = [ResponseRecorder._endpoint_rule({
+        "method": "GET", "url": "https://example.test/detail?id={record_id}&scope=public",
+        "request_template": {"query": "lang=th"},
+    })]
+    assert recorder._request_is_allowed("GET", "https://example.test/detail?id=one&scope=public&lang=th", None)
+    for query in ("id=one&scope=private&lang=th", "id=one&scope=public", "id=one&scope=public&lang=en", "id=one&id=two&scope=public&lang=th"):
+        assert not recorder._request_is_allowed("GET", "https://example.test/detail?" + query, None)
+
+
 def test_connector_rejects_duplicate_project_ids() -> None:
     second_row = LIST_HTML.split("<tr>", 2)[2].split("</table>", 1)[0]
     duplicate_html = LIST_HTML.replace("</table>", "<tr>" + second_row + "</table>")
@@ -126,6 +197,47 @@ def test_connector_rejects_duplicate_project_ids() -> None:
     recorder = SequenceRecorder([duplicate_html, DETAIL_HTML])
     with pytest.raises(RuntimeError, match="duplicate project_id"):
         CligProjectsConnector().fetch(context_for(recorder))
+
+
+@pytest.mark.parametrize("counts,message", [
+    ({"catalog_expected_record_count": 107}, "projects count mismatch: expected 107, got 1"),
+    ({"catalog_expected_record_count": 1, "expected_policy_candidate_count": 2}, "policy_candidates count mismatch"),
+    ({"catalog_expected_record_count": 1, "expected_policy_candidate_count": 0}, "policy_candidates count mismatch"),
+])
+def test_connector_rejects_incomplete_or_changed_counts(counts, message):
+    context = context_for(SequenceRecorder([LIST_HTML, DETAIL_HTML, EMPTY_HTML]))
+    context.plan.update(counts)
+    with pytest.raises(RuntimeError, match=message):
+        CligProjectsConnector().fetch(context)
+
+
+def test_connector_rejects_page_limit_before_completion():
+    context = context_for(SequenceRecorder([LIST_HTML, DETAIL_HTML]))
+    context.plan["max_pages"] = 1
+    with pytest.raises(RuntimeError, match="pagination exceeded max_pages"):
+        CligProjectsConnector().fetch(context)
+
+
+def test_pipeline_keeps_failed_manifest_for_truncated_clig_snapshot(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    real_client = httpx.Client
+    def respond(request):
+        if request.method == "GET":
+            body = DETAIL_HTML
+        else:
+            form = parse_qs(request.content.decode(), keep_blank_values=True)
+            body = LIST_HTML if form["page"] == ["1"] else EMPTY_HTML
+        return httpx.Response(200, text=body, headers={"content-type": "text/html"}, request=request)
+    monkeypatch.setattr("app.ingestion.httpx.Client", lambda **kwargs: real_client(transport=httpx.MockTransport(respond), **kwargs))
+    source = next(row for row in load_catalog()["sources"] if row["source_id"] == "clig_projects")
+    pipeline = IngestionPipeline(None, Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0))
+    with pytest.raises(IngestionFetchError, match="projects count mismatch: expected 107, got 1") as exc:
+        pipeline._fetch_api(source, "truncated-fixture")
+    manifest = json.loads(exc.value.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "failed"
+    assert manifest["records_seen"] == 0
+    assert len(manifest["artifacts"]) == 3
+    assert all(artifact["sha256"] for artifact in manifest["artifacts"])
 
 
 class FakeS3Client:
