@@ -559,6 +559,8 @@ def _sensitive_key(key: str, value: Any) -> bool:
         return False
     if _is_negative_audit(normalized, value):
         return False
+    if key_kind(key) == "name":
+        return True
     if normalized in EXACT_SENSITIVE_KEYS:
         return True
     padded = f"_{normalized}_"

@@ -9,6 +9,7 @@ from app.connector_contracts import load_runtime_connector_contract, prepare_con
 from app.field_contexts import FieldContextError, validate_field_contexts
 from app.privacy import sanitize_payload
 from app.publication import _privacy_problems
+from app.public_artifacts import ArtifactInput, validate_public_artifacts
 from tools.preview_privacy import main, preview_connector
 
 
@@ -46,6 +47,40 @@ def test_context_never_applies_to_sibling_fields_or_another_array():
     assert clean == {"items": [{"owner_name": "เจ้าของผลงาน"}], "participants": [{}]}
     assert any("participants" in p for p in problems(payload, contexts))
     assert any("email" in p for p in problems(payload, contexts))
+
+
+@pytest.mark.parametrize("key", [
+    "inventor", "coordinator", "recorder_name", "recorded_by", "userfullname",
+    "userFullName", "co_owner", "full_name", "inventor_name",
+])
+def test_person_aliases_require_their_exact_declared_context(key, tmp_path):
+    payload = {"items": [{key: "ผู้รับผิดชอบตัวอย่าง"}]}
+    assert sanitize_payload(payload) == {"items": [{}]}
+    assert problems(payload)
+    contexts = {f"/items/*/{key}": "work_attribution"}
+    assert sanitize_payload(payload, field_contexts=contexts) == payload
+    assert problems(payload, contexts) == []
+    assert problems(payload, {f"/other/*/{key}": "work_attribution"})
+    artifact = tmp_path / "undeclared.json"
+    artifact.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="public artifact policy rejected"):
+        validate_public_artifacts([ArtifactInput("candidate", "source_dataset", artifact)])
+
+
+def test_person_role_counts_remain_aggregate_fields():
+    payload = {"inventor_count": 4, "coordinator_count": 2}
+    assert sanitize_payload(payload) == payload
+    assert problems(payload) == []
+
+
+@pytest.mark.parametrize("text", ["โทร0812345678", "0812345678คุณตัวอย่าง", "ติดต่อ+66812345678ได้"])
+def test_phones_adjacent_to_thai_prose_require_public_contact_context(text):
+    payload = {"note": text}
+    assert "[redacted-phone]" in sanitize_payload(payload)["note"]
+    assert problems(payload)
+    contexts = {"/note": "public_contact"}
+    assert sanitize_payload(payload, field_contexts=contexts) == payload
+    assert problems(payload, contexts) == []
 
 
 def test_public_contact_container_only_keeps_declared_leaves():

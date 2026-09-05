@@ -661,10 +661,11 @@ def build_catalog(merged_root: Path) -> dict:
         index_row = index_by_source_id.get(source_id)
         acquisition_mode, cloud_policy, value_visibility, production_values_allowed = source_policy(source_id)
         card_path = source_card_path(ordinal, source_id)
-        card = read_json(card_path) if card_path.exists() else {}
-        if source_id == "clig_projects" and not card:
-            card_path = DASHBOARD_ROOT / "config/connector_contracts/clig_projects.json"
-            card = {"status": "NEEDS_REVIEW"}
+        if not card_path.is_file():
+            raise SystemExit(f"ไม่พบ source card: {card_path}; เพิ่มหลักฐานตาม docs/add-new-source.md ขั้น 1 ก่อน regenerate")
+        card = read_json(card_path)
+        if card.get("source_id") != source_id or not card.get("status"):
+            raise ValueError(f"Source card must identify {source_id} and its audit status: {card_path}")
 
         data_location = as_project_path(index_row["data_location"], merged_root) if index_row else None
         endpoints = (

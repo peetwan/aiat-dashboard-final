@@ -76,13 +76,14 @@ EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 # and mobile/landline prefixes never have 0 as their second digit.  Requiring
 # that shape keeps Buddhist-era-prefixed record codes (e.g. procurement IDs
 # starting with 66/67) and other numeric measures out of the redaction.
+# ASCII identifier boundaries protect hashes/codes while Thai prose may touch a phone.
 PHONE_RE = re.compile(
-    r"(?<![\w.])(?:"
+    r"(?<![A-Za-z0-9_.])(?:"
     r"\+66(?:[\s.-]*\(0\))?[\s().-]*"
     r"(?:(?:[2-5]|7)(?:[\s().-]*\d){7}|[689](?:[\s().-]*\d){8})|"
     r"66[\s()-]*(?:(?:[2-5]|7)(?:[\s()-]*\d){7}|[689](?:[\s()-]*\d){8})|"
     r"0(?:[2-5]|7)(?:[\s().-]*\d){7}|0[689](?:[\s().-]*\d){8}"
-    r")(?![\w.])"
+    r")(?![A-Za-z0-9_.])"
 )
 MAX_RECORD_ID_LENGTH = 200
 
@@ -100,6 +101,8 @@ def forbidden_key_reason(key: object) -> str | None:
     for reason, rule in FORBIDDEN_KEY_RULES:
         if rule.search(normalised):
             return reason
+    if key_kind(str(key)) == "name":
+        return "person name key"
     return None
 
 

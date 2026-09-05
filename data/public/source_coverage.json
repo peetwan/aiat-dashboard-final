@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-05T02:57:31.275800+00:00",
+  "generated_at": "2026-09-05T02:37:11.018690+00:00",
   "coverage_scope": "all_registry_sources_metadata_with_gated_value_visibility",
   "inputs": {
     "registry": {
@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "06ee62bf13f7736c2ba1e1401f4ebeb6b591bf099426b4e70814f2ea3dcee5d6"
+      "sha256": "afe92a59b27e138d9eee7818125bb026fc7c32d9511ad4e97496898b519b3520"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -18,7 +18,7 @@
     "source_cards": {
       "path_pattern": "data/source_audit/<ordinal>_<source_id>/source_card.json",
       "count": 29,
-      "aggregate_sha256": "51347e7e5860c03a19124a9e09efcda1e95b3bc15c446bf4be98c99720848c19"
+      "aggregate_sha256": "30ce94805a6c0ec636c4c155cfc29eb47ecc460f37992d46860676a614dcbcb2"
     }
   },
   "summary": {
@@ -1959,8 +1959,8 @@
       "status": {
         "audit": "NEEDS_REVIEW",
         "readiness": "needs_review",
-        "network_api_export": "NOT_RECORDED",
-        "data_inventory": "NOT_RECORDED",
+        "network_api_export": "RECORDED_PUBLIC_ENDPOINTS",
+        "data_inventory": "MANIFEST_HASH_AND_COUNT_VERIFIED",
         "fact_acceptance": "candidate_needs_review"
       },
       "records": {
@@ -1996,7 +1996,7 @@
       },
       "evidence": {
         "registry": "config/source_registry.json",
-        "source_card": "dashboard_final/config/connector_contracts/clig_projects.json",
+        "source_card": "data/source_audit/29_clig_projects/source_card.json",
         "merged_index": null,
         "approval_basis": "none",
         "catalogued_endpoint_count": 2,

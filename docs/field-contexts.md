@@ -80,6 +80,8 @@ Preview แสดงฟิลด์ที่มีบริบท รายก�
 
 ทีมที่แก้ connector หรือ UI ใช้ไฟล์ public ที่ commit อยู่และ fixture ได้เลย ไม่ต้องมี R2 ทุกคน ผู้ที่ rebuild ข้อมูลต้องตั้ง `AIAT_EVIDENCE_ROOT` ให้ชี้ evidence workspace เดิม
 
+การ regenerate catalog/coverage ต้องมี source card ของแต่ละ source ใน `data/source_audit/` ของ evidence workspace รวม `29_clig_projects/source_card.json` ที่อ้าง hash ของหลักฐาน R2 จริง Connector contract บอกวิธีรับข้อมูล แต่ใช้แทนบันทึกการตรวจแหล่งข้อมูลไม่ได้
+
 ```powershell
 python tools/build_source_catalog.py
 python tools/build_source_coverage.py

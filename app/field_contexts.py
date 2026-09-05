@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 import re
+from functools import lru_cache
 from typing import Any
 
 CONTEXTS = frozenset({
@@ -21,8 +22,9 @@ _HARD_KEY = re.compile(
     r"personal_income|household_debt|home_address|residential_address)(?:_|$)"
 )
 _NAME_KEY = re.compile(
-    r"(?:^|_)(?:(?:first|last|full|person|owner|researcher|contact)_?name|"
-    r"rights_owner|contact_person)(?:_|$)"
+    r"(?:^|_)(?:(?:first|last|full|person|owner|researcher|contact|recorder|inventor|coordinator)_?name|"
+    r"user_?full_?name|rights_owner|co_owner|contact_person|recorded_by)(?:_|$)|"
+    r"^(?:inventor|coordinator)$"
 )
 _CONTACT_KEY = re.compile(
     r"(?:^|_)(?:phone|telephone|tel|mobile|e_?mail|contact|owner_?contact|"
@@ -34,6 +36,7 @@ class FieldContextError(ValueError):
     pass
 
 
+@lru_cache(maxsize=4096)
 def key_kind(key: str) -> str | None:
     text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", key)
     text = re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")

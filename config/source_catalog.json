@@ -3043,7 +3043,7 @@
       "url": "https://clig.oas.psu.ac.th/project/search_project",
       "source_type": "research_project_catalog",
       "sensitivity_lane": "public_unknown",
-      "source_card": "dashboard_final/config/connector_contracts/clig_projects.json",
+      "source_card": "data/source_audit/29_clig_projects/source_card.json",
       "audit_status": "NEEDS_REVIEW",
       "acquisition_mode": "api_first",
       "snapshot_fallback": false,

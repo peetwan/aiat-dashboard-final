@@ -53,6 +53,8 @@
 
 Source ที่ไม่มีข้อมูลใน R2 รอบนี้คงสถานะตามหลักฐานเดิม ไม่อ้างว่าได้ตรวจค่าที่ไม่มีอยู่ แหล่ง Nonthaburi ที่เป็นข้อมูลสุขภาพ/ครัวเรือนระดับบุคคลยังคง restricted ส่วน source metadata อื่นไม่ได้ถูกเปลี่ยนเป็น restricted เพียงเพราะอาจมีชื่อคน
 
+Source card ของ CLIG อยู่ที่ `data/source_audit/29_clig_projects/source_card.json` ใน evidence workspace, SHA-256 `30522aada66715ef567678f0b77eda2762cefb08b18fce7f0f733351242bc66d` อ้าง manifest ของ `raw/f4/clig_projects/20260823T072251Z/` และ `raw/f4/f4_research_dashboard_psu/20260825T033958Z/` พร้อมผลตรวจ hash และการจับคู่ 107 โครงการ Catalog/coverage ต้องอ่าน source card จริง ไม่ใช้ connector contract แทนหลักฐานการตรวจ
+
 ## ทำงานร่วมกันง่ายขึ้น
 
 - ประกาศ `field_contexts` ครั้งเดียวต่อ grain/output ใช้ซ้ำทุกรอบ ไม่ขออนุญาตทีละ record
@@ -69,7 +71,7 @@ Source ที่ไม่มีข้อมูลใน R2 รอบนี้ค
 
 - `python -m app.cli check` ผ่านครบ compile, connector validation, publication validation, public repository boundary และ pytest
 - Publication ตรวจ 178 ไฟล์, 14 contracts และ 176 artifacts ผ่าน
-- pytest ผ่าน 477 ข้อ ข้าม 1 ข้อที่ต้องมีชุด endpoint evidence เต็มนอก public clone
+- pytest รอบก่อน review ผ่าน 477 ข้อ ข้าม 1 ข้อที่ต้องมีชุด endpoint evidence เต็มนอก public clone; หลัง review เพิ่ม regression เรื่อง source card, ชื่อผู้รับผิดชอบ 9 รูปแบบ และเบอร์โทรติดข้อความไทย โดยชุดตรวจเฉพาะส่วนผ่าน 53 ข้อ ผล CI ของ revision ล่าสุดดูที่ PR
 - สร้าง public builders ซ้ำด้วย inputs และ timestamp เดิมได้ bytes เดิม รวมการตรวจ CLIG เพิ่มแยกอีกครั้ง
 - ตรวจหน้า Insights จริง: ค้นหา สลับ MTR/RMUTDB/Cultural Map และแสดงรายการเพิ่มได้ ข้อมูลชื่อและช่องทางติดต่องานปรากฏในการ์ด
 - ตรวจ API และหน้า F4 จริง: ส่ง 107 โครงการ พร้อมชื่อผู้วิจัยไทย 96 และอังกฤษ 92 รายการ และแสดงชื่อในการ์ดโครงการ ไม่มี browser console error ระหว่างตรวจ

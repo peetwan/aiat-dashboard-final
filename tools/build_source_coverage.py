@@ -340,12 +340,10 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         index_row = index_by_source_id.get(source_id)
         source_card = card_path(ordinal, source_id)
         if not source_card.is_file():
-            # Supplemental connectors can cite their tracked contract as the
-            # catalog evidence while a source card is being prepared.
-            reference = catalog_row.get("source_card", "")
-            candidates = [PROJECT_ROOT / reference, DASHBOARD_ROOT / reference]
-            source_card = next((path for path in candidates if reference and path.is_file()), source_card)
+            raise SystemExit(f"ไม่พบ source card: {source_card}; เพิ่มหลักฐานตาม docs/add-new-source.md ขั้น 1 ก่อน regenerate")
         card = read_json(source_card)
+        if card.get("source_id") != source_id or not card.get("status"):
+            raise ValueError(f"Source card must identify {source_id} and its audit status: {source_card}")
         card_hashes.append(sha256_file(source_card))
 
         visibility = catalog_row["value_visibility"]
