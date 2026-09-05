@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 import pytest
+import httpx
+from urllib.parse import parse_qs
 
 from app.connectors.clig_projects import (
     CligProjectsConnector,
@@ -16,6 +18,8 @@ from app.connectors.clig_projects import (
 )
 from app.connectors.base import ConnectorContext
 from app.settings import Settings
+from app.ingestion import ResponseRecorder, PolicyViolation
+from app.catalog import load_catalog, load_ingestion_plans
 from tools.evidence_store import StoreConfig, push_run
 from tools.scrape_clig_projects import write_jsonl, write_manifest_input
 
@@ -134,6 +138,55 @@ def test_connector_follows_detail_ids_and_stops_on_empty_page() -> None:
     assert project["project_id"] == "ZItoamyI"
     assert is_policy_candidate(project)
     assert candidate_record(project)["candidate_keywords"]
+
+
+def test_clig_fetch_uses_real_catalog_recorder_without_network(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    source = next(row for row in load_catalog()["sources"] if row["source_id"] == "clig_projects")
+    plan = load_ingestion_plans()["sources"]["clig_projects"]
+    settings = Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0)
+    recorder = ResponseRecorder("clig_projects", "fixture-run", settings, runtime_endpoints=source["endpoints"])
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        if request.method == "POST":
+            form = parse_qs(request.content.decode(), keep_blank_values=True)
+            assert set(form) == {"project_name", "project_year", "page"}
+            body = LIST_HTML if form["page"] == ["1"] else EMPTY_HTML
+        else:
+            assert dict(request.url.params) == {"id": "ZItoamyI"}
+            body = DETAIL_HTML
+        return httpx.Response(200, text=body, headers={"content-type": "text/html"}, request=request)
+
+    recorder.client.close()
+    recorder.client = httpx.Client(transport=httpx.MockTransport(respond))
+    try:
+        records = CligProjectsConnector().fetch(ConnectorContext(source=source, plan=plan, settings=settings, recorder=recorder))
+        assert [row[0] for row in records] == ["projects", "policy_candidates"]
+        assert [request.method for request in calls] == ["POST", "GET", "POST"]
+        assert len(recorder.artifacts) == 3
+        for method, url, kwargs in [
+            ("POST", plan["list_url"], {"json_body": {"project_name": "", "project_year": "", "page": "1"}}),
+            ("POST", plan["list_url"], {"data": {"page": "1", "unapproved": "value"}}),
+            ("GET", plan["detail_url_template"].format(project_id="ZItoamyI") + "&unapproved=value", {}),
+        ]:
+            with pytest.raises(PolicyViolation):
+                recorder.request(method, url, name="blocked", **kwargs)
+        assert len(calls) == 3
+    finally:
+        recorder.close()
+
+
+def test_template_query_values_keep_fixed_filters_and_parameter_names():
+    recorder = object.__new__(ResponseRecorder)
+    recorder.allowed_endpoints = [ResponseRecorder._endpoint_rule({
+        "method": "GET", "url": "https://example.test/detail?id={record_id}&scope=public",
+        "request_template": {"query": "lang=th"},
+    })]
+    assert recorder._request_is_allowed("GET", "https://example.test/detail?id=one&scope=public&lang=th", None)
+    for query in ("id=one&scope=private&lang=th", "id=one&scope=public", "id=one&scope=public&lang=en", "id=one&id=two&scope=public&lang=th"):
+        assert not recorder._request_is_allowed("GET", "https://example.test/detail?" + query, None)
 
 
 def test_connector_rejects_duplicate_project_ids() -> None:

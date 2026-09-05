@@ -7,6 +7,21 @@
       "connector": "app.connectors.clig_projects:CligProjectsConnector",
       "list_url": "https://clig.oas.psu.ac.th/api/project/search_project",
       "detail_url_template": "https://clig.oas.psu.ac.th/iframe/project/project_info?id={project_id}",
+      "catalog_expected_record_count": 107,
+      "catalog_endpoints": [
+        {
+          "method": "POST", "url_key": "list_url", "kind": "research_project_search",
+          "access": "maintainer_reviewed_public_candidate", "team_action": "call_without_login",
+          "request_template": {"form_body": {"project_name": "<value>", "project_year": "<value>", "page": "<value>"}},
+          "notes_th": "หน้าค้นหาโครงการวิจัยสาธารณะ ส่ง form ตาม connector และตรวจ pagination ครบ"
+        },
+        {
+          "method": "GET", "url_key": "detail_url_template", "kind": "research_project_detail",
+          "access": "maintainer_reviewed_public_candidate", "team_action": "call_without_login",
+          "request_template": {},
+          "notes_th": "รายละเอียดโครงการสาธารณะ รับเฉพาะ query id ที่ประกาศ ไม่เรียก login/admin/write endpoints"
+        }
+      ],
       "project_name": "",
       "project_year": "",
       "max_pages": 500,

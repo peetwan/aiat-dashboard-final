@@ -68,9 +68,29 @@ def test_person_aliases_require_their_exact_declared_context(key, tmp_path):
 
 
 def test_person_role_counts_remain_aggregate_fields():
-    payload = {"inventor_count": 4, "coordinator_count": 2}
+    payload = {"inventor_count": 4, "coordinator_count": 2,
+               "scores": {"social": 7.5, "social_sd": 1.2},
+               "expenses": {"exp_pct_medical": 10, "pct_medical": 5}}
     assert sanitize_payload(payload) == payload
     assert problems(payload) == []
+
+
+@pytest.mark.parametrize("key", ["diagnosis", "birthdate", "medical", "medical_history", "medical_condition", "patient_id", "user_id", "line_id", "facebook", "instagram", "social_account"])
+def test_private_and_contact_aliases_are_enforced_at_all_boundaries(key, tmp_path):
+    payload = {key: "example-value"}
+    assert sanitize_payload(payload) == {}
+    assert problems(payload)
+    artifact = tmp_path / "undeclared.json"
+    artifact.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="public artifact policy rejected"):
+        validate_public_artifacts([ArtifactInput("candidate", "source_dataset", artifact)])
+    if key in {"line_id", "facebook", "instagram", "social_account"}:
+        contexts = {f"/{key}": "public_contact"}
+        assert sanitize_payload(payload, field_contexts=contexts) == payload
+        assert problems(payload, contexts) == []
+    else:
+        with pytest.raises(FieldContextError):
+            validate_field_contexts({f"/{key}": "public_contact"})
 
 
 @pytest.mark.parametrize("text", ["โทร0812345678", "0812345678คุณตัวอย่าง", "ติดต่อ+66812345678ได้"])

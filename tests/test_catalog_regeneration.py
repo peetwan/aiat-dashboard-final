@@ -5,7 +5,7 @@ import pytest
 
 from app.settings import PROJECT_ROOT
 from tools.build_source_catalog import (
-    load_clig_endpoints, load_target_household_search_endpoint, source_policy,
+    load_plan_endpoints, load_target_household_search_endpoint, source_policy,
 )
 from tools import build_source_catalog as catalog_builder, build_source_coverage as coverage_builder
 
@@ -62,10 +62,15 @@ def test_catalog_uses_real_source_card_and_coverage_cannot_fall_back_to_contract
 def test_clig_remains_an_executable_public_candidate_after_regeneration():
     plan = json.loads((PROJECT_ROOT / "config/ingestion_plans.json").read_text(encoding="utf-8"))["sources"]["clig_projects"]
     assert source_policy("clig_projects") == ("api_first", "team_approved_public", "public_candidate", True)
-    endpoints = load_clig_endpoints(plan)
+    endpoints = load_plan_endpoints("clig_projects", plan, "team_approved_public", "api_first")
     assert {(row["method"], row["url"]) for row in endpoints} == {
         ("POST", plan["list_url"]), ("GET", plan["detail_url_template"])}
     assert all(row["runtime_enabled"] and not row["restricted"] for row in endpoints)
+    assert endpoints[0]["request_template"]["form_body"] == {
+        "project_name": "<value>", "project_year": "<value>", "page": "<value>"}
+    other = load_plan_endpoints("another_source", plan, "restricted_local_only", "api_first")
+    assert all(row["restricted"] and not row["runtime_enabled"] for row in other)
+    assert {row["endpoint_id"] for row in other}.isdisjoint({row["endpoint_id"] for row in endpoints})
 
 
 def test_target_public_dashboard_requests_survive_catalog_regeneration():

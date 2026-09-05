@@ -9,7 +9,7 @@
     },
     "source_catalog": {
       "path": "dashboard_final/config/source_catalog.json",
-      "sha256": "afe92a59b27e138d9eee7818125bb026fc7c32d9511ad4e97496898b519b3520"
+      "sha256": "c1d29f26687f2528942c90465b3b2c7f90ffe7a46fd51a753576c47c703e0c77"
     },
     "merged_index": {
       "path": "data/qa/web_profile_team_drive_simple/20260816T_team_repo_merge_01/00_INDEX.csv",
@@ -57,6 +57,7 @@
         "serving_numeric_value_count": 15,
         "serving_projection_grain": "province_target_registry_rows_20_with_15_numeric_scores",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -143,6 +144,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "approved_aggregate_rows",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -216,7 +218,8 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "geocoded_public_point_records",
         "additional_public_non_map_count": 361,
-        "not_all_raw_rows_are_served": true,
+        "additional_public_non_map_grain": "public_cultural_products_activities_recreation_team_records",
+        "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
       "geo": {
@@ -294,6 +297,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -362,6 +366,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -428,6 +433,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "national_technology_catalog_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -500,8 +506,9 @@
         "serving_projection_count": 77,
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_aggregate_api_rows",
-        "additional_public_non_map_count": null,
-        "not_all_raw_rows_are_served": true,
+        "additional_public_non_map_count": 630,
+        "additional_public_non_map_grain": "public_innovation_records",
+        "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
       "geo": {
@@ -574,6 +581,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -647,6 +655,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -711,6 +720,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_rows_excluding_header",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -776,6 +786,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -842,6 +853,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -915,6 +927,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -988,6 +1001,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "municipality_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -1057,6 +1071,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": true
       },
@@ -1117,6 +1132,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1188,6 +1204,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1252,6 +1269,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1320,6 +1338,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1384,6 +1403,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": true
       },
@@ -1444,6 +1464,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1508,6 +1529,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1572,6 +1594,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "province_linked_public_package_rows",
         "additional_public_non_map_count": 306,
+        "additional_public_non_map_grain": "public_package_rows_without_assigned_province",
         "not_all_raw_rows_are_served": true,
         "local_record_count_withheld": false
       },
@@ -1651,6 +1674,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1715,6 +1739,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1779,6 +1804,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1843,6 +1869,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1907,6 +1934,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": null,
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },
@@ -1971,6 +1999,7 @@
         "serving_numeric_value_count": null,
         "serving_projection_grain": "public_project_attribution_records",
         "additional_public_non_map_count": null,
+        "additional_public_non_map_grain": null,
         "not_all_raw_rows_are_served": false,
         "local_record_count_withheld": false
       },

@@ -18,7 +18,7 @@ _HARD_KEY = re.compile(
     r"(?:^|_)(?:password|passwd|secret|token|cookie|authorization|credential|api_?key|"
     r"citizen_?id|national_?id|id_?card|person_?id|patient_?id|household_?id|"
     r"respondent_?id|member_?id|student_?id|user_?id|social_security|"
-    r"birth|birthdate|birthday|date_of_birth|dob|medical|diagnosis|"
+    r"birth|birthdate|birthday|date_of_birth|dob|medical_(?:condition|history|record|diagnosis)|diagnosis|"
     r"personal_income|household_debt|home_address|residential_address)(?:_|$)"
 )
 _NAME_KEY = re.compile(
@@ -28,7 +28,7 @@ _NAME_KEY = re.compile(
 )
 _CONTACT_KEY = re.compile(
     r"(?:^|_)(?:phone|telephone|tel|mobile|e_?mail|contact|owner_?contact|"
-    r"line_id|line_oa|line_account|facebook|instagram|social)(?:_|$)"
+    r"line_id|line_oa|line_account|facebook|instagram|social_(?:url|handle|account|profile))(?:_|$)"
 )
 
 
@@ -40,7 +40,7 @@ class FieldContextError(ValueError):
 def key_kind(key: str) -> str | None:
     text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", key)
     text = re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
-    if _HARD_KEY.search(text) or any(x in text for x in (
+    if text == "medical" or _HARD_KEY.search(text) or any(x in text for x in (
         "เลขบัตร", "วันเกิด", "วันเดือนปีเกิด", "ที่อยู่บ้าน", "โรคประจำตัว",
     )):
         return "private"

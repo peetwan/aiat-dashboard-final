@@ -142,22 +142,25 @@ def source_card_path(ordinal: int, source_id: str) -> Path:
     return AUDIT_ROOT / f"{ordinal:02d}_{source_id}" / "source_card.json"
 
 
-def load_clig_endpoints(plan: dict) -> list[dict]:
-    """Keep the existing reviewed CLIG connector when rebuilding the catalog."""
-    return [
-        {
-            "endpoint_id": endpoint_id("clig_projects", method, plan[field], "call_without_login"),
-            "method": method, "url": plan[field], "kind": kind,
-            "access": "maintainer_reviewed_public_candidate", "team_action": "call_without_login",
-            "restricted": False, "runtime_enabled": True,
-            "request_template": {"query_or_body": query},
-            "notes_th": "หน้ารายการและรายละเอียดโครงการวิจัยสาธารณะ ไม่เรียก login/admin/write endpoints",
-        }
-        for method, field, kind, query in (
-            ("POST", "list_url", "research_project_search", "project_name=<value>&project_year=<value>&page=<value>"),
-            ("GET", "detail_url_template", "research_project_detail", "project_id=<value>"),
-        )
-    ]
+def load_plan_endpoints(source_id: str, plan: dict, cloud_policy: str, acquisition_mode: str) -> list[dict]:
+    """Load source-owned endpoint metadata without source-specific generator branches."""
+    endpoints = []
+    for declared in plan.get("catalog_endpoints", []):
+        method = declared.get("method", "GET").upper()
+        url = declared.get("url") or plan[declared["url_key"]]
+        action = declared["team_action"]
+        access = declared["access"]
+        restricted = is_restricted(cloud_policy, access, action)
+        endpoints.append({
+            "endpoint_id": endpoint_id(source_id, method, url, action),
+            "method": method, "url": url, "kind": declared["kind"],
+            "access": access, "team_action": action,
+            "restricted": restricted,
+            "runtime_enabled": acquisition_mode == "api_first" and action == "call_without_login" and not restricted,
+            "request_template": declared.get("request_template", {}),
+            "notes_th": declared.get("notes_th", ""),
+        })
+    return endpoints
 
 
 def is_restricted(cloud_policy: str, access: str, action: str) -> bool:
@@ -677,8 +680,8 @@ def build_catalog(merged_root: Path) -> dict:
             endpoints = load_learning_dashboard_endpoint(acquisition_mode)
         if source_id == "f1_pppconnext":
             endpoints = load_pppconnext_2026_endpoints(acquisition_mode)
-        if source_id == "clig_projects":
-            endpoints = load_clig_endpoints(ingestion_plans[source_id])
+        if ingestion_plans.get(source_id, {}).get("catalog_endpoints"):
+            endpoints = load_plan_endpoints(source_id, ingestion_plans[source_id], cloud_policy, acquisition_mode)
         if source_id == "f2_target_household":
             endpoints = load_target_household_search_endpoint(acquisition_mode)
         if source_id in SPU_DISASTER_SOURCE_IDS:
@@ -707,8 +710,8 @@ def build_catalog(merged_root: Path) -> dict:
                 raise RuntimeError("AppTech current Silver manifest no longer matches 630-row audit")
             snapshot_files = [provenance_path(APPTECH_CURRENT_RECORDS)]
 
-        if source_id == "clig_projects":
-            expected_record_count = 107
+        if "catalog_expected_record_count" in ingestion_plans.get(source_id, {}):
+            expected_record_count = int(ingestion_plans[source_id]["catalog_expected_record_count"])
         elif source_id == "f2_learning_dashboard":
             expected_record_count = LEARNING_DASHBOARD_PROVINCE_ROWS
         elif source_id == "f1_pppconnext":

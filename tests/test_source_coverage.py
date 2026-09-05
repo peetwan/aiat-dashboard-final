@@ -349,6 +349,15 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     assert sum(
         omission["count"] for omission in culture["geo"]["known_omissions"]
     ) == culture["records"]["additional_public_non_map_count"]
+    assert culture["records"]["not_all_raw_rows_are_served"] is False
+
+    mtr = sources["f2_apptech_mtr"]["records"]
+    mtr_directory = read_json(PUBLIC_ROOT / "source_insights.json")["sources"]["f2_apptech_mtr"]["public_records"]
+    assert mtr["serving_projection_count"] == 77
+    assert mtr["serving_projection_grain"] == "province_aggregate_api_rows"
+    assert mtr["additional_public_non_map_count"] == len(mtr_directory) == 630
+    assert mtr["additional_public_non_map_grain"] == "public_innovation_records"
+    assert mtr["not_all_raw_rows_are_served"] is False
 
     learning = sources["f2_learning_dashboard"]
     learning_dashboard = read_json(PUBLIC_ROOT / "learning_dashboard.json")

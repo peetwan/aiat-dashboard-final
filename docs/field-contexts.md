@@ -82,6 +82,8 @@ Preview แสดงฟิลด์ที่มีบริบท รายก�
 
 การ regenerate catalog/coverage ต้องมี source card ของแต่ละ source ใน `data/source_audit/` ของ evidence workspace รวม `29_clig_projects/source_card.json` ที่อ้าง hash ของหลักฐาน R2 จริง Connector contract บอกวิธีรับข้อมูล แต่ใช้แทนบันทึกการตรวจแหล่งข้อมูลไม่ได้
 
+Source ที่ประกาศ endpoint จาก plan ใช้ `catalog_endpoints` ระบุ method, `url_key` ที่อ้าง URL ใน plan, kind, access, team_action และ request_template ได้โดยไม่เพิ่มเงื่อนไขราย source ใน catalog generator สำหรับ POST ระบุ `form_body` หรือ `json_body` ให้ตรง connector; query template เช่น `id={project_id}` รองรับค่าระเบียนที่เปลี่ยน แต่ต้องคงชื่อ parameter และ fixed filter ที่ประกาศไว้
+
 ```powershell
 python tools/build_source_catalog.py
 python tools/build_source_coverage.py

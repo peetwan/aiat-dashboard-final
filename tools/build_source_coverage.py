@@ -88,6 +88,12 @@ SERVING_PROJECTIONS = {
     },
 }
 
+NON_MAP_PROJECTIONS = {
+    "f2_apptech_mtr": {"count": 630, "grain": "public_innovation_records", "covers_observed_rows": True},
+    "f2_culturalmap_university": {"count": 361, "grain": "public_cultural_products_activities_recreation_team_records", "complements_map_rows": True},
+    "f3_housing_portal": {"count": 306, "grain": "public_package_rows_without_assigned_province"},
+}
+
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -375,12 +381,16 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
 
         projection = SERVING_PROJECTIONS.get(source_id, {})
         serving_count = projection.get("count") if values_allowed else None
-        additional_non_map_count = {
-            "f2_culturalmap_university": 361,
-            "f3_housing_portal": 306,
-        }.get(source_id)
+        non_map = NON_MAP_PROJECTIONS.get(source_id, {}) if values_allowed else {}
+        additional_non_map_count = non_map.get("count")
+        observed_rows_covered = (
+            non_map.get("covers_observed_rows") and additional_non_map_count == observed_count
+            or non_map.get("complements_map_rows") and serving_count is not None
+            and serving_count + additional_non_map_count == observed_count
+        )
         not_all_raw_rows_are_served = bool(
             values_allowed
+            and not observed_rows_covered
             and (
                 serving_count is not None
                 and observed_count is not None
@@ -437,7 +447,8 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                     "serving_projection_count": serving_count,
                     "serving_numeric_value_count": projection.get("numeric_value_count"),
                     "serving_projection_grain": projection.get("grain"),
-                    "additional_public_non_map_count": additional_non_map_count,
+                "additional_public_non_map_count": additional_non_map_count,
+                "additional_public_non_map_grain": non_map.get("grain"),
                     "not_all_raw_rows_are_served": not_all_raw_rows_are_served,
                     "local_record_count_withheld": restricted,
                 },

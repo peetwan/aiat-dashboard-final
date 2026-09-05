@@ -409,7 +409,7 @@ def _artifact_policy_violations(
                 child_path = f"{path}.{key}"
                 sensitive_key = normalized not in NON_CONTACT_KEY_ALLOWLIST and (
                     bool(SENSITIVE_KEY_RE.search(normalized))
-                    or key_kind(str(key)) == "name"
+                    or key_kind(str(key)) in {"private", "name", "contact"}
                     or any(marker in str(key) for marker in SENSITIVE_THAI_KEY_PARTS)
                 )
                 if sensitive_key and not _negative_privacy_audit_value(normalized, child):

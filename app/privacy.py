@@ -101,8 +101,9 @@ def forbidden_key_reason(key: object) -> str | None:
     for reason, rule in FORBIDDEN_KEY_RULES:
         if rule.search(normalised):
             return reason
-    if key_kind(str(key)) == "name":
-        return "person name key"
+    kind = key_kind(str(key))
+    if kind in {"private", "name", "contact"}:
+        return {"private": "private key", "name": "person name key", "contact": "contact key"}[kind]
     return None
 
 

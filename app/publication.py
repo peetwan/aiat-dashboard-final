@@ -559,7 +559,7 @@ def _sensitive_key(key: str, value: Any) -> bool:
         return False
     if _is_negative_audit(normalized, value):
         return False
-    if key_kind(key) == "name":
+    if key_kind(key) in {"private", "name", "contact"}:
         return True
     if normalized in EXACT_SENSITIVE_KEYS:
         return True

@@ -3065,9 +3065,13 @@
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {
-            "query_or_body": "project_name=<value>&project_year=<value>&page=<value>"
+            "form_body": {
+              "project_name": "<value>",
+              "project_year": "<value>",
+              "page": "<value>"
+            }
           },
-          "notes_th": "หน้ารายการและรายละเอียดโครงการวิจัยสาธารณะ ไม่เรียก login/admin/write endpoints"
+          "notes_th": "หน้าค้นหาโครงการวิจัยสาธารณะ ส่ง form ตาม connector และตรวจ pagination ครบ"
         },
         {
           "endpoint_id": "59bb7ca9cd4716b1ff653f2cab86eb975edd8e58ec0bb2c937f7262a07e1d4b9",
@@ -3078,10 +3082,8 @@
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
-          "request_template": {
-            "query_or_body": "project_id=<value>"
-          },
-          "notes_th": "หน้ารายการและรายละเอียดโครงการวิจัยสาธารณะ ไม่เรียก login/admin/write endpoints"
+          "request_template": {},
+          "notes_th": "รายละเอียดโครงการสาธารณะ รับเฉพาะ query id ที่ประกาศ ไม่เรียก login/admin/write endpoints"
         }
       ]
     }
