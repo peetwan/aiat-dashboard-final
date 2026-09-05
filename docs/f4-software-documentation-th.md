@@ -116,6 +116,38 @@ app/static/app.js + app/templates/index.html
 | นวัตกรรมเชิงนโยบาย | รายการโครงการ | `raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz` | หนึ่งแถวต่อหนึ่งโครงการวิจัย |
 | นวัตกร/เศรษฐกิจ | aggregate ที่ผ่านการ review | `data/public/apptech_aggregates.json` | ตัวเลข aggregate ระดับจังหวัด/ประเทศตามที่ contract อนุญาต |
 
+### 6.1 เส้นทางข้อมูลตั้งแต่ต้นทางถึงหน้าจอ
+
+| ขั้นตอน | แหล่ง/ไฟล์ที่ใช้ | สิ่งที่ระบบทำ | ที่จัดเก็บหรือผลลัพธ์ |
+|---|---|---|---|
+| 1. เก็บข้อมูลต้นทาง | PMUA `/search` และ `/product/show/{numeric_product_id}`; CLIG `POST /api/project/search_project` และหน้า detail | connector เรียกเฉพาะ endpoint สาธารณะที่อยู่ใน allowlist และบันทึกเวลาที่ดึงข้อมูล | run folder ชั่วคราวและ manifest ก่อน publish |
+| 2. ตรวจและทำข้อมูล | `f2_target_household`, `f4_pmua_product_details`, `clig_projects` | ตรวจ schema, จำนวนแถว, ID ซ้ำ, fetch error, ความครบถ้วน และ privacy; PMUA parser เก็บ ROI/SROI/Outcomes/Impacts เป็นข้อความ | snapshot ที่ผ่าน review ใน Cloudflare R2 |
+| 3. รวมข้อมูล PMUA | `products_redacted.jsonl.gz` + `product_details.jsonl.gz` | join ด้วย `product_id`; ใช้รหัสจังหวัดจาก catalogue และใช้ lookup จังหวัด/อำเภอ/ตำบลสำหรับชื่อที่แสดง | `app/f4_data.py` สร้างรายการ innovation พร้อม `detail_source_key` และ `evidence_status` |
+| 4. รวมข้อมูล CLIG | `manifest.json` + `projects.jsonl.gz` | ใช้สถานะ ปีงบประมาณ หน่วยงาน งบประมาณ และจับคู่จังหวัดจากข้อความในชื่อ/รายละเอียด/บทคัดย่อ/หน่วยงาน | `f4_policy_projects()` และ `source_sections` ของ CLIG |
+| 5. รวม KPI ที่ review แล้ว | `data/public/apptech_aggregates.json` และ R2 snapshot | ใช้ aggregate ที่อนุญาตสำหรับนวัตกรและเศรษฐกิจ; ไม่กระจายผลกระทบเศรษฐกิจระดับประเทศลงจังหวัดหรือภาค | `/api/public/v1/f4/overview` |
+| 6. ให้บริการและแสดงผล | `app/f4_data.py` → `app/main.py` → `app/static/app.js` | โหลด snapshot, cache ผลลัพธ์ 300 วินาที, ส่ง JSON ให้ UI และแสดงแผนที่ KPI รายการ และรายละเอียด | Dashboard F4; หน้าเว็บไม่เรียก PMUA/CLIG โดยตรง |
+
+### 6.2 ที่จัดเก็บและวิธีอ่านข้อมูล
+
+- Evidence ที่ใช้กับ F4 อยู่ใน Cloudflare R2 bucket ตามตัวแปร `AIAT_S3_ENDPOINT`, `AIAT_S3_BUCKET`, `AIAT_S3_ACCESS_KEY_ID` และ `AIAT_S3_SECRET_ACCESS_KEY`; ตอนรัน Dashboard ใช้ read-only key
+- R2 ใช้ prefix แบบ immutable `raw/<department>/<source_id>/<run_id>/`; `manifest.json` ถูกเขียนเป็นไฟล์สุดท้าย และการอ่านต้องตรวจ hash ตาม manifest ก่อนใช้
+- `app/f4_data.py` อ่าน JSON/JSONL จาก R2 แล้ว cache snapshot ในหน่วยความจำ 300 วินาทีต่อ process เมื่อ API ถูกเรียก ถ้าอ่าน R2 ไม่ได้ API F4 ตอบ HTTP 503 แทนการใช้ข้อมูลบางส่วน
+- `data/public/apptech_aggregates.json` เป็น reviewed public artifact ใน repository/serving database สำหรับ aggregate AppTech ไม่ใช่ข้อมูลราย product detail และมี fallback เป็นไฟล์เมื่อฐานข้อมูล serving ยังไม่พร้อม
+- หลัง refresh ต้องตรวจ row count, product-ID set, `fetch_error`, `evidence_status` และ manifest ก่อน publish; ปัจจุบัน scheduler production ยังปิดอยู่และการ publish ต้องผ่าน manual approval
+
+### 6.3 ข้อมูลที่ใช้และข้อมูลที่ไม่ควรตีความเกินจริง
+
+- ใช้: ข้อมูลสาธารณะของ PMUA และ CLIG, รายการผลิตภัณฑ์/โครงการ, TRL, ROI/SROI, Outcomes, Impacts, สถานะ, งบประมาณ และการเชื่อมโยงพื้นที่ตามกติกาข้างต้น
+- ไม่ใช้: endpoint login/admin/write, credential, ข้อมูลบุคคลหรือครัวเรือนที่ไม่จำเป็น, Candidate ที่ยังไม่ผ่าน review และการ scrape เว็บไซต์ระหว่าง page load
+- `product_id` เป็นตัวเชื่อม catalogue กับรายละเอียด PMUA ส่วน CLIG ใช้ `project_id` และข้อความจังหวัด จึงไม่ใช่การจับคู่เชิงพิกัดที่รับรองได้ทุกโครงการ
+- ROI/SROI, Outcomes และ Impacts เป็นข้อความหรือหลักฐานที่ต้นทางรายงาน; ระบบไม่คำนวณ before-after และไม่รวมค่า ROI/SROI ข้ามผลิตภัณฑ์
+
+### 6.4 Checklist สถานะข้อมูล
+
+**มีแล้วในระบบและเอกสาร:** แหล่งเว็บไซต์และ endpoint, dataset ที่ใช้, R2 object key, รูปแบบ record, กติกา parser, การ join PMUA, การ match CLIG, API ที่ส่งข้อมูล, cache, error behavior และข้อจำกัดการตีความ
+
+**ยังต้องทำเมื่อเปิดใช้งานจริง:** เปิด scheduler production หลังมี retention/failed-run manifest/alerting, เพิ่ม published-at และ approval owner ใน serving metadata หากต้องการ audit ระดับ release, และตรวจ snapshot ใหม่ก่อนเปลี่ยน key ที่ `app/f4_data.py` ใช้อ่าน
+
 ## 7. Public API
 
 ทุก endpoint อยู่ใต้ `/api/public/v1` และคืน HTTP 503 เมื่อ evidence ของ F4 ใช้งานไม่ได้
