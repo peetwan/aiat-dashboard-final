@@ -1,0 +1,25 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "clig_work_attribution",
+  "dataset_key": "clig_work_attribution",
+  "source_scope": "approved_values",
+  "source_ids": ["clig_projects"],
+  "builder": "tools.build_clig_work_attribution:main",
+  "grain_th": "หนึ่งรายการต่อโครงการ CLIG พร้อมเครดิตผู้วิจัยจากหน้ารายละเอียดสาธารณะ",
+  "identity": {"project": ["project_id"]},
+  "geography": {"level": "not_joined", "fields": []},
+  "as_of": {"status": "not_provided_by_source", "fields": ["as_of"], "note": "fetched_at เป็นเวลาบันทึกหลักฐาน"},
+  "measures": [{"name": "ทะเบียนเครดิตโครงการ", "unit": "รายการ", "denominator": "ไม่ใช่อัตราส่วน"}],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [{
+    "path": "data/public/clig_work_attribution.json", "format": "json",
+    "role": "database", "downloadable": true, "max_bytes": 1048576,
+    "records_pointer": "/items", "identity_fields": ["project_id"], "expected_count": 107,
+    "max_identity_churn_ratio": 0, "schema_policy": "stable",
+    "field_contexts": {
+      "/items/*/researcher_name_th": "work_attribution",
+      "/items/*/researcher_name_en": "work_attribution"
+    }
+  }]
+}

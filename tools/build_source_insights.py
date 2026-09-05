@@ -6,11 +6,17 @@ import json
 import math
 import os
 import re
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
 from typing import Any, Iterable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.public_work_details import (
+    project_cultural_supporting, project_mtr_work, project_rmutdb_work, rmutdb_public_contacts, mtr_public_contacts,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -139,6 +145,7 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 
@@ -327,6 +334,7 @@ def build_apptech() -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
         for row in jsonl_rows(APPTECH_RECORD_PATH)
     ]
     institute_map_path = APPTECH_RAW_ROOT / "responses/institute_map.json"
+    public_contacts = mtr_public_contacts(WORKSPACE_ROOT, records)
     innovator_map_path = APPTECH_RAW_ROOT / "responses/innovator_map.json"
     interaction_map_path = APPTECH_RAW_ROOT / "responses/interaction_map.json"
     statistics_path = APPTECH_CURRENT_ROOT / "profiles/custom_statistics.profile.json"
@@ -357,6 +365,7 @@ def build_apptech() -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
     return {
         "source_id": "f2_apptech_mtr",
         "name_th": "AppTech MTR",
+        "public_records": [project_mtr_work(row, public_contacts[row["source_record_id"]]) for row in records],
         "source_url": "https://rinmp.com/",
         "acquisition": "public_api",
         "freshness_status": "records_and_statistics_observed_2026_08_17_geo_aggregates_observed_2026_08_16",
@@ -408,6 +417,8 @@ def build_rmutdb() -> dict[str, Any]:
     rows = list(csv_rows(BASE_RUN / "06_f2_rmutdb/data.csv"))
     detailed = [row for row in rows if row.get("record_type") == "rmutdb_ebook_innovation_detail"]
     summaries = [row for row in rows if row.get("record_type") != "rmutdb_ebook_innovation_detail"]
+    silver = list(jsonl_rows(WORKSPACE_ROOT / "data/staged/silver/f2_rmutdb/20260805T_ebook_silver_01/rmutdb_ebook_innovation.jsonl"))
+    contacts = rmutdb_public_contacts(WORKSPACE_ROOT, silver)
     trl_counter: Counter[str] = Counter()
     for row in detailed:
         value = clean(row.get("normalized_fields__trl_level"))
@@ -417,6 +428,7 @@ def build_rmutdb() -> dict[str, Any]:
     return {
         "source_id": "f2_rmutdb",
         "name_th": "RMUTDB Innovation",
+        "public_records": [project_rmutdb_work(row, contacts[row["source_record_id"]]) for row in silver],
         "source_url": "https://rmutdb.net/",
         "acquisition": "public_pdf_snapshot",
         "freshness_status": "all_11_ebook_files_verified_unchanged_2026_08_17_last_modified_2023_03_05",
@@ -455,6 +467,7 @@ def build_rmutdb() -> dict[str, Any]:
 
 def build_cultural_supporting_coverage() -> dict[str, Any]:
     datasets: list[dict[str, Any]] = []
+    public_records: list[dict[str, Any]] = []
     supporting_records = 0
     total_records = 0
     for dataset_id, (filename, expected_count, geography_status) in CULTURAL_DATASETS.items():
@@ -467,9 +480,15 @@ def build_cultural_supporting_coverage() -> dict[str, Any]:
             raise RuntimeError(
                 f"cultural dataset {dataset_id} expected {expected_count} records, found {len(records)}"
             )
+        identities = [row.get("external_id") if isinstance(row, dict) else None for row in records]
+        if any(not isinstance(identifier, str) or not identifier.strip() for identifier in identities):
+            raise RuntimeError(f"cultural dataset {dataset_id} has missing external_id values")
+        if len(set(identities)) != len(identities):
+            raise RuntimeError(f"cultural dataset {dataset_id} has duplicate external_id values")
         total_records += len(records)
         if dataset_id != "map_inspiration":
             supporting_records += len(records)
+            public_records.extend(project_cultural_supporting(row, dataset_id) for row in records)
         datasets.append({
             "dataset_id": dataset_id,
             "record_count": len(records),
@@ -485,7 +504,8 @@ def build_cultural_supporting_coverage() -> dict[str, Any]:
         "freshness_status": "id_sets_verified_2026_08_17_source_as_of_unknown",
         "quality_status": "candidate_needs_review",
         "grain_th": "นับแยกตาม dataset ต้นทาง; 361 supporting records ไม่ถูกบวกเป็นจุดแผนที่หรือผูกจังหวัด",
-        "readout_th": "ตรวจ ID กับ public feed/listings ล่าสุดแล้วครบ 5,619/5,619; เปิดเผยรายละเอียดเฉพาะ Map และยอดรวมของ Products, Activities, Re-Creation, Team ตาม privacy approval เดิม โดยไม่ส่ง contact หรือข้อมูลสมาชิกทีม",
+        "readout_th": "ทะเบียน Map 5,258 รายการ และ Products, Activities, Re-Creation, Team อีก 361 รายการ เก็บชื่อผู้จัดทำและข้อมูลติดต่องานตามหน้าสาธารณะ ไม่ผูกจังหวัดเมื่อไม่มีข้อมูลพื้นที่ยืนยัน",
+        "public_records": public_records,
         "coverage": {
             "map_records": 5_258,
             "supporting_records": supporting_records,
@@ -493,9 +513,11 @@ def build_cultural_supporting_coverage() -> dict[str, Any]:
             "datasets": datasets,
         },
         "privacy_projection": {
-            "supporting_records_exposed": False,
-            "contact_fields_exposed": False,
-            "aggregate_counts_only": True,
+            "supporting_records_exposed": True,
+            "contact_fields_exposed": True,
+            "aggregate_counts_only": False,
+            "public_work_details": True,
+            "account_identifiers_exposed": False,
         },
         "evidence": [
             "data/raw/network/f2_culturalmap_university/20260817T_current_surface_03/manifest.json",
@@ -676,7 +698,7 @@ def build_executive_portfolio(
             "label_th": "Cultural Map",
             "status": "complete",
             "status_th": "ครบตามหน้าเว็บ",
-            "summary_th": "public records ครบ 5,619 รายการ โดยรายละเอียด supporting data แสดงเป็นยอดรวม",
+            "summary_th": "public records ครบ 5,619 รายการ พร้อมรายละเอียดผลงานและช่องทางติดต่องาน",
             "dashboard_tabs": ["ภาพรวม", "คนและพื้นที่", "ที่มา/อัปเดต"],
         },
         {
@@ -930,7 +952,7 @@ def build_executive_portfolio(
     }
 
 
-def build() -> None:
+def build(*, generated_at: str | None = None) -> None:
     province_reference = read_json(APPTECH_RAW_ROOT / "responses/innovator_map.json")["data"]["mapData"]
     code_by_name = {
         normalize_province(row["province"]): str(row["code"]).zfill(2)
@@ -1006,7 +1028,7 @@ def build() -> None:
     executive_portfolio = build_executive_portfolio(
         ppp, apptech, city, rmutdb, cultural, area_based
     )
-    generated_at = datetime.now(timezone.utc).isoformat()
+    generated_at = generated_at or datetime.now(timezone.utc).isoformat()
     payload = {
         "schema_version": "1.0.0",
         "generated_at": generated_at,
@@ -1027,7 +1049,7 @@ def build() -> None:
                 "f2_learning_dashboard",
             ],
             "non_geo_source_ids": ["f2_rmutdb"],
-            "aggregate_only_projection_source_ids": ["f2_culturalmap_university"],
+            "aggregate_only_projection_source_ids": [],
             "join_policy": "authoritative_or_source_confirmed_geography_only",
             "unmapped_public_records": {
                 "f2_learning_area_based": {
@@ -1059,7 +1081,7 @@ def build() -> None:
             "apptech_mtr": "source API province code and label; aggregate grains kept separate",
             "city_capital": "exact municipality type+name match against official DLA registry",
             "rmutdb": "not joined; owner affiliation is not innovation location",
-            "culturalmap": "map records retain their own province points; four supporting datasets are aggregate counts only and expose no contact fields",
+            "culturalmap": "map records retain their own province points; supporting work records retain public attribution and contacts without an unverified province join",
             "learning_dashboard": "exact Thai province name against the official 77-province boundary; non-province tables remain separate",
         },
     }

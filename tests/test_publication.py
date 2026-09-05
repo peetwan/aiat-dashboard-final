@@ -164,6 +164,38 @@ def _declare_source_b(contracts_root: Path, catalog_path: Path) -> None:
     _write_json(contract_path, contract)
 
 
+def test_public_work_contexts_survive_json_csv_and_serving_validation(tmp_path, monkeypatch):
+    from app import public_artifacts
+    root, contracts_root, catalog_path = _fixture(tmp_path, include_csv=True)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["field_contexts"] = {"/items/*/owner_name": "work_attribution"}
+    contract["outputs"][1]["field_contexts"] = {"/*/email": "public_contact"}
+    contract["outputs"][1]["headers"] = ["id", "count", "email"]
+    _write_json(contract_path, contract)
+    artifact_path = root / "data/public/artifact.json"
+    payload = json.loads(artifact_path.read_text())
+    payload["items"][0]["owner_name"] = "เจ้าของผลงานตัวอย่าง"
+    _write_json(artifact_path, payload)
+    (root / "data/public/rows.csv").write_text("id,count,email\none,2,office@example.org\n", encoding="utf-8")
+    write_receipt(root, contracts_root, catalog_path)
+    report = validate_workspace(root, contracts_root, catalog_path)
+    assert report["status"] == "valid", report["problems"]
+    monkeypatch.setattr(public_artifacts, "PROJECT_ROOT", root)
+    monkeypatch.setattr(public_artifacts, "_approved_and_restricted_source_ids", lambda: ({"source_a"}, set()))
+    inputs = public_artifacts.artifact_inputs(root / "data/public", enforce_core=False)
+    assert public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)[0][1] == payload
+    # The CSV exception does not apply to an undeclared JSON sibling.
+    payload["items"][0]["email"] = "private@example.org"
+    _write_json(artifact_path, payload)
+    write_receipt(root, contracts_root, catalog_path)
+    report = validate_workspace(root, contracts_root, catalog_path)
+    assert report["status"] == "invalid"
+    assert any("private/contact field" in p for p in report["problems"])
+    with pytest.raises(RuntimeError, match="private/contact"):
+        public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)
+
+
 def _geojson_payload(
     geometries: list[dict[str, object]],
     *,
@@ -1802,6 +1834,9 @@ def test_source_insights_contract_enforces_complete_nested_snapshots():
         "/sources/f2_apptech_mtr/province_activity": 77,
         "/sources/f3_city_capital_open_data/cities": 18,
         "/sources/f2_learning_dashboard/provinces": 66,
+        "/sources/f2_apptech_mtr/public_records": 630,
+        "/sources/f2_rmutdb/public_records": 2001,
+        "/sources/f2_culturalmap_university/public_records": 361,
     }
 
 

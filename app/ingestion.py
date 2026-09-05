@@ -167,6 +167,20 @@ class ResponseRecorder:
                 raise PolicyViolation(f"runtime endpoint declares duplicate query key: {key}")
             required_query[key] = None if value == "<value>" else value
 
+        # Endpoint URLs can declare a dynamic value such as id={project_id}.
+        # Keep every query key and every non-template filter exact.
+        dynamic_url_query = any(re.fullmatch(r"\{[A-Za-z][A-Za-z0-9_]*\}", value) for _, value in url_query)
+        if dynamic_url_query:
+            if len({key for key, _ in url_query}) != len(url_query):
+                raise PolicyViolation("runtime endpoint declares duplicate URL query keys")
+            url_required_query = {
+                key: None if re.fullmatch(r"\{[A-Za-z][A-Za-z0-9_]*\}", value) else value
+                for key, value in url_query
+            }
+            if any(key in required_query and required_query[key] != value for key, value in url_required_query.items()):
+                raise PolicyViolation("runtime endpoint declares conflicting query templates")
+            required_query.update(url_required_query)
+
         body_mode = "none"
         body_template: Any = None
         if method != "GET":
@@ -184,7 +198,7 @@ class ResponseRecorder:
             "base": base,
             "authority": base[:4],
             "path_pattern": path_pattern,
-            "exact_query": url_query or None,
+            "exact_query": None if dynamic_url_query else url_query or None,
             "required_query": required_query,
             "body_mode": body_mode,
             "body_template": body_template,

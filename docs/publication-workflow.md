@@ -38,7 +38,7 @@ Gate ทำงานแบบ fail-closed โดยไม่เรียกเ�
 - JSON, GeoJSON หรือ CSV อ่านได้ ขนาดและ schema ไม่หลุดจากที่ประกาศ
 - identity ไม่ซ้ำ, ชุด identity เปลี่ยนไม่เกิน `max_identity_churn_ratio` และ count/completeness อยู่ในช่วงที่ contract ยอมรับ
 - source ยังมีสิทธิ์เผยแพร่ตาม catalog
-- ไม่พบ secret, field อ่อนไหว, เบอร์โทร, อีเมล หรือที่อยู่จาก heuristic scan; ผู้ตรวจยังต้องดูชื่อบุคคลและความหมายระดับบุคคลใน diff เอง
+- ตรวจ secrets และข้อมูลส่วนตัวตามบริบท; เครดิตเจ้าของผลงาน หน่วยงาน ช่องทางติดต่องาน และที่ตั้งสาธารณะประกาศใน `outputs[].field_contexts` ตาม [คู่มือบริบทข้อมูล](field-contexts.md)
 - hash ของไฟล์และ contract ตรงกับ `publication_receipt.json`
 
 Gate ผ่านหมายถึง revision ตรงตามกติกาที่ทีมเคยอนุมัติ ไม่ได้แปลว่าข้อมูลกลายเป็น KPI ที่รับรองแล้ว
@@ -80,6 +80,8 @@ python tools/scaffold_publication.py rmutdb_summary `
 เมื่อตัด `--dry-run` เครื่องมือจะสร้าง contract, builder ที่ยัง fail-closed, fixture สังเคราะห์แบบ redacted และ focused test เท่านั้น โดยตั้งใจไม่สร้างไฟล์ใต้ `data/public/` ขั้นต่อไปคือให้ทีมตรวจและเขียน mapping ใน builder, สร้าง output จริง, เพิ่ม `serving_manifest.json` เมื่อ role เป็น `database`, สร้าง receipt ใหม่ แล้วรัน `publication validate`; PR รอบแรกทั้งหมดอยู่เลน manual review
 
 ## Manifest กับ receipt ต่างกันอย่างไร
+
+ไฟล์ JSON, GeoJSON และ CSV ที่สร้างใต้ `data/public/` ใช้ LF ทั้งตอนเขียนและตอน checkout ตาม `.gitattributes` เพื่อให้ SHA-256/ขนาดใน build manifest ตรงกับ Git บน Windows และ Linux ตัวสร้าง CSV ต้องกำหนด `lineterminator="\n"` ด้วย ไม่เปลี่ยน line endings ของ raw evidence เพราะ manifest ของต้นทางตรวจจาก byte เดิม
 
 | ไฟล์ | หน้าที่ | แก้ใน routine refresh ได้ไหม |
 |---|---|---|

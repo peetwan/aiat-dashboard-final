@@ -3,16 +3,49 @@
   "contract_id": "provincial_briefings",
   "dataset_key": "provincial_briefings",
   "source_scope": "approved_values",
-  "source_ids": ["f1_sradss_ppaos", "f1_pppconnext", "f2_culturalmap_university", "f2_rmutdb", "f2_apptech_mtr", "f2_apptech_mru", "f2_learning_dashboard", "f2_learning_area_based", "f3_city_capital_open_data", "f3_ruamthiao_lamphun", "f3_housing_portal"],
+  "source_ids": [
+    "f1_sradss_ppaos",
+    "f1_pppconnext",
+    "f2_culturalmap_university",
+    "f2_rmutdb",
+    "f2_apptech_mtr",
+    "f2_apptech_mru",
+    "f2_learning_dashboard",
+    "f2_learning_area_based",
+    "f3_city_capital_open_data",
+    "f3_ruamthiao_lamphun",
+    "f3_housing_portal"
+  ],
   "builder": "tools.build_provincial_briefings:main",
   "grain_th": "หนึ่งไฟล์ต่อหนึ่งจังหวัด",
-  "identity": {"province": ["province.province_code"]},
-  "geography": {"level": "province", "fields": ["province.province_code"]},
-  "as_of": {"status": "mixed", "fields": ["generated_at", "sections.*.as_of"]},
+  "identity": {
+    "province": [
+      "province.province_code"
+    ]
+  },
+  "geography": {
+    "level": "province",
+    "fields": [
+      "province.province_code"
+    ]
+  },
+  "as_of": {
+    "status": "mixed",
+    "fields": [
+      "generated_at",
+      "sections.*.as_of"
+    ]
+  },
   "measures": [
-    {"name": "province briefing measures", "unit": "ระบุในแต่ละ section", "denominator": "ระบุในแต่ละ section หรือไม่ระบุ"}
+    {
+      "name": "province briefing measures",
+      "unit": "ระบุในแต่ละ section",
+      "denominator": "ระบุในแต่ละ section หรือไม่ระบุ"
+    }
   ],
-  "completeness": {"policy": "output_contracts"},
+  "completeness": {
+    "policy": "output_contracts"
+  },
   "privacy_profile": "aggregate_public",
   "outputs": [
     {
@@ -23,11 +56,38 @@
       "downloadable": true,
       "max_bytes": 3145728,
       "records_pointer": "$",
-      "identity_fields": ["province.province_code"],
+      "identity_fields": [
+        "province.province_code"
+      ],
       "max_identity_churn_ratio": 0,
       "expected_count": 1,
       "as_of_pointer": "/generated_at",
-      "schema_policy": "stable"
+      "schema_policy": "stable",
+      "field_contexts": {
+        "/sections/innovation/items/*/owner_name": "work_attribution",
+        "/sections/innovation/items/*/research_leads/*/name": "work_attribution",
+        "/sections/innovation/items/*/ip/rights_owner": "work_attribution",
+        "/sections/tourism/items/*/data/emergency_numbers/*/phone": "public_contact",
+        "/sections/tourism/items/*/data/service_centres/*/phones/*/phone": "public_contact",
+        "/sections/tourism/items/*/data/lantern_production_groups/*/phone": "public_contact",
+        "/sections/tourism/items/*/data/other_transport/*/phone": "public_contact",
+        "/sections/tourism/items/*/data/service_centres/*/address/TH": "public_location",
+        "/sections/tourism/items/*/data/service_centres/*/address/EN": "public_location",
+        "/sections/tourism/items/*/data/service_centres/*/address/CN": "public_location",
+        "/sections/tourism/items/*/data/service_centres/*/address/th": "public_location",
+        "/sections/tourism/items/*/data/service_centres/*/address/en": "public_location",
+        "/sections/tourism/items/*/data/service_centres/*/address/cn": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/TH": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/EN": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/CN": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/th": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/en": "public_location",
+        "/sections/tourism/items/*/data/other_transport/*/location/cn": "public_location",
+        "/sections/culture/items/*/address": "public_location",
+        "/sections/culture/items/*/work_contact": "public_contact",
+        "/sections/culture/items/*/recorder_name": "work_attribution",
+        "/sections/requirements/items/*/owner_name": "work_attribution"
+      }
     },
     {
       "path": "data/public/provincial_briefings/index.json",

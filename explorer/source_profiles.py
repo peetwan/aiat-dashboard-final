@@ -21,7 +21,7 @@ SOURCE_PROFILES: dict[str, dict[str, object]] = {
     "f2_culturalmap_university": {
         "what_we_use_th": "ทุนวัฒนธรรมบนแผนที่, Inspiration, ผลิตภัณฑ์, กิจกรรม, Re-Creation และจำนวนข้อมูลสนับสนุนจาก public feed/listing",
         "grain_th": "หนึ่งระเบียนทุนวัฒนธรรม สถานที่ ผลิตภัณฑ์ หรือกิจกรรม ตามชุดข้อมูล",
-        "dashboard_use_th": "จุดวัฒนธรรมบนแผนที่และจำนวนผลงานสนับสนุน; รายละเอียด public map 5,258 และ supporting 361 แบบ counts-only",
+        "dashboard_use_th": "จุดวัฒนธรรมบนแผนที่ 5,258 รายการ และทะเบียนผลงาน/ผู้จัดทำอีก 361 รายการ พร้อมช่องทางติดต่องานตามบริบทต้นทาง",
         "excluded_th": "ไม่เผยแพร่ข้อมูลติดต่อส่วนบุคคล และไม่เดาจังหวัดเมื่อพิกัด/ชื่อพื้นที่ไม่ยืนยัน",
         "database_targets": ["sources", "endpoints", "public_artifacts"],
     },
@@ -61,7 +61,7 @@ SOURCE_PROFILES: dict[str, dict[str, object]] = {
         "database_targets": ["sources", "endpoints", "dashboard_records", "public_artifacts"],
     },
     "f2_target_household": {
-        "what_we_use_th": "รายการนวัตกรรมสาธารณะจากหน้ารวม /search ของ pmua-apptech.com ตัดชื่อ เบอร์โทร อีเมล",
+        "what_we_use_th": "รายการนวัตกรรมสาธารณะจากหน้ารวม /search ของ pmua-apptech.com; เก็บเครดิตเจ้าของงานเมื่อมีฟิลด์และหลักฐานยืนยัน",
         "grain_th": "หนึ่งนวัตกรรมต่อหนึ่ง product_id จากหน้ารวม ไม่ใช่ครัวเรือนหรือบุคคลหนึ่งราย",
         "dashboard_use_th": "Candidate รายการสินค้า/เทคโนโลยีพร้อมใช้; ยังไม่ใช่ KPI และยังไม่แตกแผนที่ครัวเรือน",
         "excluded_th": "ไม่ใช้ login/EPMS, ไม่ GET หน้ารายละเอียดตอน ingest และไม่แตก /dashboard/familydashboard เป็นแถวครัวเรือน",
@@ -113,7 +113,7 @@ SOURCE_PROFILES: dict[str, dict[str, object]] = {
         "what_we_use_th": "ข้อมูลสาธารณะ 5 หน้า ได้แก่ homepage, สถานที่แนะนำ, การเดินทาง, กลุ่มโคม และ contact รวม 54 primary records/157 content items",
         "grain_th": "หนึ่งสถานี/สถานที่/คำแนะนำ/เส้นทาง/กลุ่มโคม หรือ content item ตามหน้าต้นทาง",
         "dashboard_use_th": "ข้อมูลการท่องเที่ยวและวัฒนธรรมของลำพูนใน Source Insights/หน้าจังหวัด",
-        "excluded_th": "ไม่รวม contact fields ที่ระบุตัวบุคคล และไม่สร้าง as_of หากต้นทางไม่ระบุ",
+        "excluded_th": "เก็บข้อมูลติดต่อบริการและกลุ่มผู้ผลิตที่ต้นทางประกาศไว้กับงาน โดยไม่สร้าง as_of หากต้นทางไม่ระบุ",
         "database_targets": ["sources", "endpoints", "public_artifacts"],
     },
     "f3_ruamrian": {

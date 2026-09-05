@@ -18,13 +18,34 @@
   ],
   "builder": "tools.build_source_insights:main",
   "grain_th": "หนึ่ง block ต่อหนึ่งแหล่งข้อมูล และรายการเชื่อมจังหวัดตามชุดข้อมูลนั้น",
-  "identity": {"source": ["source_id"]},
-  "geography": {"level": "province_or_national", "fields": ["province_code"]},
-  "as_of": {"status": "mixed", "fields": ["generated_at", "sources.*.as_of"]},
+  "identity": {
+    "source": [
+      "source_id"
+    ]
+  },
+  "geography": {
+    "level": "province_or_national",
+    "fields": [
+      "province_code"
+    ]
+  },
+  "as_of": {
+    "status": "mixed",
+    "fields": [
+      "generated_at",
+      "sources.*.as_of"
+    ]
+  },
   "measures": [
-    {"name": "source-specific public summaries", "unit": "ระบุในแต่ละ metric", "denominator": "ระบุในแต่ละ metric หรือไม่ระบุ"}
+    {
+      "name": "source-specific public summaries",
+      "unit": "ระบุในแต่ละ metric",
+      "denominator": "ระบุในแต่ละ metric หรือไม่ระบุ"
+    }
   ],
-  "completeness": {"policy": "output_contracts"},
+  "completeness": {
+    "policy": "output_contracts"
+  },
   "privacy_profile": "aggregate_public",
   "outputs": [
     {
@@ -32,9 +53,11 @@
       "format": "json",
       "role": "database",
       "downloadable": true,
-      "max_bytes": 2097152,
+      "max_bytes": 5242880,
       "records_pointer": "/sources",
-      "identity_fields": ["$key"],
+      "identity_fields": [
+        "$key"
+      ],
       "max_identity_churn_ratio": 0,
       "expected_count": 7,
       "completeness_rules": [
@@ -49,10 +72,40 @@
         {
           "pointer": "/sources/f2_learning_dashboard/provinces",
           "expected_count": 66
+        },
+        {
+          "pointer": "/sources/f2_culturalmap_university/public_records",
+          "expected_count": 361
+        },
+        {
+          "pointer": "/sources/f2_apptech_mtr/public_records",
+          "expected_count": 630
+        },
+        {
+          "pointer": "/sources/f2_rmutdb/public_records",
+          "expected_count": 2001
         }
       ],
       "as_of_pointer": "/generated_at",
-      "schema_policy": "stable"
+      "schema_policy": "stable",
+      "field_contexts": {
+        "/sources/f2_culturalmap_university/public_records/*/address": "public_location",
+        "/sources/f2_culturalmap_university/public_records/*/sales_channels": "public_contact",
+        "/sources/f2_culturalmap_university/public_records/*/work_contact": "public_contact",
+        "/sources/f2_culturalmap_university/public_records/*/recorded_by": "work_attribution",
+        "/sources/f2_culturalmap_university/public_records/*/team_members/*/name": "work_attribution",
+        "/sources/f2_apptech_mtr/public_records/*/owner_name": "work_attribution",
+        "/sources/f2_rmutdb/public_records/*/owner_name": "work_attribution",
+        "/sources/f2_rmutdb/public_records/*/inventor": "work_attribution",
+        "/sources/f2_rmutdb/public_records/*/coordinator": "work_attribution",
+        "/sources/f2_rmutdb/public_records/*/co_owner": "work_attribution",
+        "/sources/f2_rmutdb/public_records/*/address": "public_contact",
+        "/sources/f2_rmutdb/public_records/*/phone": "public_contact",
+        "/sources/f2_rmutdb/public_records/*/email": "public_contact",
+        "/sources/f2_apptech_mtr/public_records/*/email": "public_contact",
+        "/sources/f2_apptech_mtr/public_records/*/phone": "public_contact",
+        "/sources/f2_apptech_mtr/public_records/*/secondary_phone": "public_contact"
+      }
     },
     {
       "path": "data/public/source_insights_manifest.json",

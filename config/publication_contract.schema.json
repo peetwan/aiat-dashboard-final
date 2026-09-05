@@ -113,7 +113,12 @@
           "type": "array",
           "items": {"$ref": "#/$defs/completeness_rule"}
         },
-        "schema_policy": {"const": "stable"}
+        "schema_policy": {"const": "stable"},
+        "field_contexts": {
+          "type": "object",
+          "propertyNames": {"pattern": "^/"},
+          "additionalProperties": {"enum": ["work_attribution", "organization", "public_contact", "public_location", "record_identifier", "public_measure"]}
+        }
       }
     },
     "completeness_rule": {
