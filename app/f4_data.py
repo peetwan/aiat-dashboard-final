@@ -190,8 +190,8 @@ def _project_matches_province(project: dict[str, Any], province_name_th: str) ->
     return province_name_th in _project_province_names(project)
 
 
-def _project_row(project: dict[str, Any]) -> dict[str, Any]:
-    return {
+def _project_row(project: dict[str, Any], attribution: dict[str, Any] | None = None) -> dict[str, Any]:
+    row = {
         "project_title": project.get("project_title") or project.get("detail_title") or "",
         "project_id": project.get("project_id") or "",
         "contract_no": project.get("contract_no") or "",
@@ -202,6 +202,11 @@ def _project_row(project: dict[str, Any]) -> dict[str, Any]:
         "detail_url": project.get("detail_url") or "",
         "matched_provinces": _project_province_names(project),
     }
+    if attribution and attribution.get("project_id") == row["project_id"] and attribution.get("source_url") == row["detail_url"]:
+        row["project_title"] = attribution.get("project_title") or row["project_title"]
+        for field in ("researcher_name_th", "researcher_name_en", "researcher_position"):
+            row[field] = attribution.get(field)
+    return row
 
 
 def _policy_status_label(status: Any) -> str:
@@ -854,7 +859,11 @@ def f4_policy_projects(
     elif province_names_th:
         names = {str(name).strip() for name in province_names_th if str(name).strip()}
         projects = [project for project in projects if _project_matches_any_province(project, names)]
-    rows = [_project_row(project) for project in projects]
+    # เครดิตผู้วิจัยมาจาก public artifact ที่ผ่าน publication checks แล้ว
+    # ไม่เลือกชื่อหรือช่องทางติดต่อจาก raw/Candidate มาแสดงโดยตรง
+    attribution_payload = load_public_artifact("f4/clig-attribution", "clig_work_attribution.json")
+    attributions = {row["project_id"]: row for row in attribution_payload.get("items", [])}
+    rows = [_project_row(project, attributions.get(project.get("project_id"))) for project in projects]
     summary = _policy_project_summary(rows)
     return {
         "total": len(rows),

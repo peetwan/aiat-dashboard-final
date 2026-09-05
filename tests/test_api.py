@@ -146,7 +146,8 @@ def test_dashboard_and_endpoint_inventory():
         assert "AIAT ภาพรวมข้อมูล" in insights_page.text
         assert "โดยไม่ต้องไล่เปิด" in insights_page.text
         assert "ทีละชุด" in insights_page.text
-        assert "select" not in insights_page.text.lower()
+        assert 'id="workDirectorySource"' in insights_page.text
+        assert 'id="workDirectorySearch"' in insights_page.text
         assert "→" not in insights_page.text
 
         sources = client.get("/api/sources").json()
@@ -959,7 +960,9 @@ def test_public_projection_and_downloads_are_available():
             cultural_insight["coverage"]["map_records"]
             + cultural_insight["coverage"]["supporting_records"]
         )
-        assert cultural_insight["privacy_projection"]["contact_fields_exposed"] is False
+        assert cultural_insight["privacy_projection"]["public_work_details"] is True
+        assert cultural_insight["privacy_projection"]["account_identifiers_exposed"] is False
+        assert len(cultural_insight["public_records"]) == cultural_insight["coverage"]["supporting_records"]
         portfolio = insight_payload["executive_portfolio"]
         assert portfolio["audit"]["source_count"] == len(
             portfolio["audit"]["status_rows"]

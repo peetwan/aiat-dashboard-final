@@ -1,0 +1,5 @@
+# Keep generated public text identical in Windows checkouts and Git blobs.
+/data/public/**/*.json text eol=lf
+/data/public/**/*.geojson text eol=lf
+/data/public/**/*.csv text eol=lf
+/config/**/*.json text eol=lf

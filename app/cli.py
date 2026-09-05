@@ -18,11 +18,18 @@ from app.demand_artifacts import sync_housing_demand
 from app.public_artifacts import database_artifact_counts, sync_public_artifacts
 from app.publication import validate_git_revision, validate_workspace, write_receipt
 from app.spatial_artifacts import database_spatial_counts, sync_spatial_layers
-from app.settings import PROJECT_ROOT
+from app.settings import PROJECT_ROOT, get_settings
 
 
 PUBLICATION_CONTRACTS_ROOT = PROJECT_ROOT / "config" / "publication_contracts"
 SOURCE_CATALOG_PATH = PROJECT_ROOT / "config" / "source_catalog.json"
+
+
+def initialize_candidates() -> None:
+    """เตรียมฐาน Candidate โดยไม่ผูกกับสถานะของ public release."""
+    init_db()
+    with SessionLocal() as session:
+        sync_catalog(session)
 
 
 def initialize() -> None:
@@ -45,14 +52,14 @@ def initialize() -> None:
 
 
 def command_ingest(args: argparse.Namespace) -> int:
-    initialize()
+    initialize_candidates()
     source_ids = args.source
     if args.all:
         executable = set(load_ingestion_plans().get("sources", {}))
         source_ids = [
             item["source_id"]
             for item in load_catalog()["sources"]
-            if item.get("production_values_allowed")
+            if (not get_settings().is_production or item.get("production_values_allowed"))
             and item["cloud_policy"] != "restricted_local_only"
             and item["source_id"] in executable
         ]
@@ -65,6 +72,7 @@ def command_ingest(args: argparse.Namespace) -> int:
             try:
                 print(json.dumps(pipeline.ingest_source(source_id, args.strategy), ensure_ascii=False))
             except PolicyViolation as exc:
+                failed += 1
                 print(json.dumps({"source_id": source_id, "status": "blocked", "reason": str(exc)}, ensure_ascii=False))
             except Exception as exc:
                 failed += 1
@@ -128,7 +136,7 @@ def command_status() -> int:
 
 
 def command_import_flood_snapshots(args: argparse.Namespace) -> int:
-    initialize()
+    initialize_candidates()
     with SessionLocal() as session:
         result = import_flood_snapshots(
             session,

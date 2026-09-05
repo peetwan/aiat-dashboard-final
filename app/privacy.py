@@ -5,16 +5,19 @@ import json
 import re
 from typing import Any
 
+from app.field_contexts import (
+    FieldContextError, context_allows_key, context_allows_value_reason,
+    is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
+)
+
 
 # Ingestion-side privacy projection.
 #
-# Policy (mirrors the canonical workspace rule): drop person-level contact and
-# identity fields, redact phone/email values, and keep every public measure the
-# source publishes — household/financial aggregates, geography, and record codes
-# included.  Matching is token-bounded (after camelCase -> snake_case
-# normalisation), not substring-based, so public fields whose names merely
-# contain a sensitive word — `address_province` (geography), `citizen_count`
-# (aggregate), `secretariat_name` (organisation) — are not silently lost.
+# field_contexts ใน contract ระบุชื่อเจ้าของงานและข้อมูลติดต่องานที่เก็บได้
+# ช่องส่วนตัวที่ไม่ได้ระบุบริบทยังถูกตัดหรือปิดค่า โดยคง aggregate พื้นที่
+# และรหัสระเบียนไว้ การจับชื่อ key ใช้ขอบเขตคำหลังแปลง camelCase เป็น
+# snake_case จึงไม่ตัด address_province, citizen_count หรือ secretariat_name
+# เพียงเพราะมีคำบางส่วนคล้ายชื่อฟิลด์ส่วนตัว
 _CAMEL_BOUNDARY = re.compile(r"([a-z0-9])([A-Z])")
 
 
@@ -68,15 +71,39 @@ FORBIDDEN_KEY_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
     ),
 )
 
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+EMAIL_RE = re.compile(r"(?i)(?<![A-Z0-9._%+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}(?![A-Z0-9-])")
 # Thai phone numbers are 9-10 digits domestically (or 8-9 digits after +66),
 # and mobile/landline prefixes never have 0 as their second digit.  Requiring
 # that shape keeps Buddhist-era-prefixed record codes (e.g. procurement IDs
 # starting with 66/67) and other numeric measures out of the redaction.
+# ASCII identifier boundaries protect hashes/codes while Thai prose may touch a phone.
 PHONE_RE = re.compile(
-    r"(?<!\d)(?:(?:\+?66)[\s().-]*[1-9]|0[1-9])(?:[\s().-]*\d){7,8}(?!\d)"
+    r"(?<![A-Za-z0-9_.])(?:"
+    r"\+66(?:[\s.-]*\(0\))?[\s().-]*"
+    r"(?:(?:[2-5]|7)(?:[\s().-]*\d){7}|[689](?:[\s().-]*\d){8})|"
+    r"66[\s()-]*(?:(?:[2-5]|7)(?:[\s()-]*\d){7}|[689](?:[\s()-]*\d){8})|"
+    r"0(?:[2-5]|7)(?:[\s().-]*\d){7}|0[689](?:[\s().-]*\d){8}"
+    r")(?![A-Za-z0-9_.])"
 )
 MAX_RECORD_ID_LENGTH = 200
+
+# Explicit platform labels distinguish contacts from ordinary transit/graph lines.
+# Unlabelled URLs remain provenance; a public contact still needs an exact context.
+_SOCIAL_HANDLE = r"@?[A-Za-z0-9_ก-๙][^\s<>\"'{};,|]*"
+_SOCIAL_NAMED_PLATFORM = (
+    r"(?:ไลน์|face\s*book|fb|เฟ[ซส]บุ๊?[กค]|instagram|ig|ไอจี|อินสตาแกรม|"
+    r"tiktok|ติ๊กต็อก|ติ๊กต๊อก|twitter|ทวิตเตอร์)"
+)
+_SOCIAL_PLATFORM = rf"(?:line|{_SOCIAL_NAMED_PLATFORM})"
+_SOCIAL_ROLE = r"(?:id|oa|handle|account|ไอดี|บัญชี)"
+SOCIAL_CONTACT_RE = re.compile(
+    rf"(?i)(?:"
+    rf"(?<![A-Za-z0-9_])(?:{_SOCIAL_PLATFORM}\s*{_SOCIAL_ROLE}|{_SOCIAL_ROLE}\s*{_SOCIAL_PLATFORM})"
+    rf"(?![A-Za-z0-9_])(?:\s*[:：=]\s*|\s+)" + _SOCIAL_HANDLE + r"|"
+    rf"(?<![A-Za-z0-9_]){_SOCIAL_NAMED_PLATFORM}\s*[:：=]\s*" + _SOCIAL_HANDLE + r"|"
+    rf"(?<![A-Za-z0-9_]){_SOCIAL_PLATFORM}\s+@" + _SOCIAL_HANDLE + r"|"
+    r"(?:^|(?<=[\n;,|])|(?<=contact )|(?<=ติดต่อ))\s*line\s*[:：=]\s*" + _SOCIAL_HANDLE + r")"
+)
 
 
 class RecordIdentityError(ValueError):
@@ -92,6 +119,9 @@ def forbidden_key_reason(key: object) -> str | None:
     for reason, rule in FORBIDDEN_KEY_RULES:
         if rule.search(normalised):
             return reason
+    kind = key_kind(str(key))
+    if kind in {"private", "name", "contact"}:
+        return {"private": "private key", "name": "person name key", "contact": "contact key"}[kind]
     return None
 
 
@@ -99,30 +129,62 @@ def sanitize_payload(
     value: Any,
     *,
     dropped: list[tuple[str, str]] | None = None,
+    field_contexts: dict[str, str] | None = None,
+    changes: list[tuple[str, str]] | None = None,
 ) -> Any:
-    """Drop forbidden keys and redact contact values.
+    """Project a record using optional, exact field contexts from its contract.
 
-    Pass a list as ``dropped`` to record ``(key, reason)`` for every removed
-    field — dropping is otherwise silent, and "why did my field disappear?" is
-    the first question a connector author asks.
+    ``changes`` reports paths and reasons without logging values. ``dropped``
+    retains the existing key/reason interface for connector authors.
     """
+    contexts = validate_field_contexts({} if field_contexts is None else field_contexts)
 
-    if isinstance(value, dict):
-        clean: dict[str, Any] = {}
-        for key, item in value.items():
-            reason = forbidden_key_reason(key)
-            if reason is not None:
-                if dropped is not None:
-                    dropped.append((str(key), reason))
-                continue
-            clean[str(key)] = sanitize_payload(item, dropped=dropped)
-        return clean
-    if isinstance(value, list):
-        return [sanitize_payload(item, dropped=dropped) for item in value]
-    if isinstance(value, str):
-        value = EMAIL_RE.sub("[redacted-email]", value)
-        return PHONE_RE.sub("[redacted-phone]", value)
-    return value
+    def report_pointer(pointer: str) -> str:
+        # Object-map keys can themselves contain contact values.
+        return "/".join(
+            "{key}" if EMAIL_RE.search(part) or PHONE_RE.search(part) or SOCIAL_CONTACT_RE.search(part) else part
+            for part in pointer.split("/")
+        )
+
+    def walk(item: Any, pointer: str, protected: bool = False) -> Any:
+        context = contexts.get(pointer)
+        if context and isinstance(item, (dict, list)):
+            raise FieldContextError("field_contexts must target scalar values, not containers")
+        if isinstance(item, dict):
+            clean = {}
+            for key, child in item.items():
+                child_pointer = pointer_child(pointer, key)
+                child_context = contexts.get(child_pointer)
+                reason = forbidden_key_reason(key)
+                allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
+                allowed = allowed or is_contact_exposure_metadata(pointer.rsplit("/", 1)[-1], str(key), child)
+                descend = isinstance(child, (dict, list)) and key_kind(str(key)) != "private" and any(
+                    p.startswith(child_pointer + "/") for p in contexts
+                )
+                if (reason or protected) and not allowed and not descend:
+                    reason = reason or "undeclared field in private/contact container"
+                    if dropped is not None:
+                        dropped.append((str(key), reason))
+                    if changes is not None:
+                        changes.append((report_pointer(child_pointer), reason))
+                    continue
+                clean[str(key)] = walk(child, child_pointer, protected or bool(reason and not allowed))
+            return clean
+        if isinstance(item, list):
+            return [walk(child, pointer + "/*", protected) for child in item]
+        if isinstance(item, str):
+            for regex, reason, replacement in (
+                (EMAIL_RE, "email-like value", "[redacted-email]"),
+                (PHONE_RE, "Thai phone-like value", "[redacted-phone]"),
+                (SOCIAL_CONTACT_RE, "social contact value", "[redacted-social-contact]"),
+            ):
+                if regex.search(item) and not context_allows_value_reason(context, reason, item):
+                    item = regex.sub(replacement, item)
+                    if changes is not None:
+                        changes.append((report_pointer(pointer), reason))
+        return item
+
+    return walk(value, "")
 
 
 def payload_hash(payload: dict) -> str:

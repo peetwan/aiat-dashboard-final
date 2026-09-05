@@ -39,7 +39,12 @@
             }
           },
           "geography_fields": {"type": "array", "items": {"type": "string"}},
-          "as_of_fields": {"type": "array", "items": {"type": "string"}}
+          "as_of_fields": {"type": "array", "items": {"type": "string"}},
+          "field_contexts": {
+            "type": "object",
+            "propertyNames": {"pattern": "^/"},
+            "additionalProperties": {"enum": ["work_attribution", "organization", "public_contact", "public_location", "record_identifier", "public_measure"]}
+          }
         }
       }
     },

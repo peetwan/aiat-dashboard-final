@@ -144,6 +144,7 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 
@@ -1094,7 +1095,6 @@ def build_research_portfolio(briefing: dict[str, Any]) -> dict[str, Any]:
         "latest_update": latest_update,
         "data_gaps_th": [
             "ยังไม่มี Project ID ทางการสำหรับเชื่อม Area-Based กับระบบโครงการหลัก",
-            "ชื่อบุคคลถูกตัดออกจาก public projection; คงไว้เฉพาะสังกัดนักวิจัยจากทะเบียนนวัตกรรม",
             "สถานะดำเนินงานรายโครงการ (อยู่ระหว่าง/เสร็จสิ้น) ต้นทางไม่ระบุ",
             "งบประมาณจัดสรรและสถานะเบิกจ่ายรายกรอบ/รายฝ่าย ต้องใช้ระบบภายในของ บพท.",
         ],
@@ -1442,12 +1442,12 @@ def build_summary(
     }
 
 
-def build() -> None:
+def build(*, generated_at: str | None = None) -> None:
     briefings = load_briefings()
     if len(briefings) != 77:
         raise RuntimeError(f"expected 77 provincial briefings, found {len(briefings)}")
     benchmarks = build_benchmarks(briefings)
-    generated_at = datetime.now(timezone.utc).isoformat()
+    generated_at = generated_at or datetime.now(timezone.utc).isoformat()
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     written = []
     for code, briefing in briefings.items():

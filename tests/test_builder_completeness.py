@@ -48,7 +48,7 @@ TOURISM_DIR = MERGE_RUN / "16_f3_ruamthiao_lamphun/data"
     not all((CULTURAL_DIR / filename).is_file() for filename in CULTURAL_FILES),
     reason=EVIDENCE_WORKSPACE_REASON,
 )
-def test_cultural_supporting_projection_is_aggregate_only_and_complete():
+def test_cultural_supporting_projection_keeps_work_details_and_complete_counts():
     projection = build_cultural_supporting_coverage()
 
     assert projection["coverage"]["map_records"] == 5_258
@@ -65,11 +65,15 @@ def test_cultural_supporting_projection_is_aggregate_only_and_complete():
         "team": 12,
     }
     assert projection["privacy_projection"] == {
-        "supporting_records_exposed": False,
-        "contact_fields_exposed": False,
-        "aggregate_counts_only": True,
+        "supporting_records_exposed": True,
+        "contact_fields_exposed": True,
+        "aggregate_counts_only": False,
+        "public_work_details": True,
+        "account_identifiers_exposed": False,
     }
-    assert "records" not in projection
+    assert len(projection["public_records"]) == 361
+    assert len({(r["dataset_id"], r["record_id"]) for r in projection["public_records"]}) == 361
+    assert not {"account_identifier", "informants_raw"}.intersection(recursive_keys(projection))
 
 
 @pytest.mark.skipif(
@@ -95,6 +99,8 @@ def test_two_public_requirements_are_sanitized_and_exactly_province_linked():
         assert set(item) == {
             "record_id",
             "record_grain",
+            "owner_name",
+            "owner_affiliation_name",
             "title",
             "description",
             "category",
@@ -203,7 +209,7 @@ def recursive_keys(value):
     not (CULTURAL_DIR / "map_inspiration.json").is_file(),
     reason=EVIDENCE_WORKSPACE_REASON,
 )
-def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
+def test_cultural_briefing_projection_preserves_work_attribution_without_account_ids():
     cultural_path = CULTURAL_DIR / "map_inspiration.json"
     source = json.loads(cultural_path.read_text(encoding="utf-8"))
     code, item = project_cultural_record(source["data"]["records"][0], cultural_path)
@@ -221,6 +227,10 @@ def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
         "amphoe",
         "tambon",
         "source_url",
+        "address",
+        "work_contact",
+        "recorder_name",
+        "recorder_institution",
         "provenance",
         "quality",
     }
@@ -238,7 +248,7 @@ def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
         "people",
         "phone",
         "email",
-        "address",
+        "account_identifier",
         "birth",
         "income",
         "social",
@@ -250,7 +260,7 @@ def test_cultural_briefing_projection_is_a_strict_executive_whitelist():
     not any(TOURISM_DIR.glob("*.json")),
     reason=EVIDENCE_WORKSPACE_REASON,
 )
-def test_tourism_projection_keeps_counts_but_no_contact_or_address_fields():
+def test_tourism_projection_keeps_public_service_contacts_and_counts():
     projections = {
         item["page_id"]: item
         for item in (
@@ -267,7 +277,13 @@ def test_tourism_projection_keeps_counts_but_no_contact_or_address_fields():
         "travel": 13,
     }
     assert projections["contact"]["data"]["service_availability_label_count"] == 9
-    assert projections["komepage"]["data"] == {"lantern_group_count": 10}
+    assert projections["komepage"]["data"]["lantern_group_count"] == 10
+    assert len(projections["komepage"]["data"]["lantern_production_groups"]) == 10
+    assert len(projections["contact"]["data"]["emergency_numbers"]) == 6
+    assert len(projections["contact"]["data"]["service_centres"]) == 3
+    centres = projections["contact"]["data"]["service_centres"]
+    assert sum(len(centre["phones"]) for centre in centres) == 7
+    assert centres[0]["opening_hours"] == "07.30 - 18.00 น."
     stations = projections["homepage"]["data"]["map"]["stations"]
     assert all(set(station) == {"name", "nearby_count"} for station in stations)
     recommendation_items = [
@@ -276,24 +292,11 @@ def test_tourism_projection_keeps_counts_but_no_contact_or_address_fields():
         for item in category["items"]
     ]
     assert all(set(item) == {"record_id", "title", "description"} for item in recommendation_items)
-    forbidden_markers = (
-        "phone",
-        "email",
-        "address",
-        "social",
-        "lantern_production_groups",
-        "venues",
-        "image",
-        "operator",
-        "location",
-        "service_contacts",
-        "emergency_numbers",
-    )
-    keys = set(recursive_keys(projections))
-    assert not any(marker in key for key in keys for marker in forbidden_markers)
-    serialized = json.dumps(projections, ensure_ascii=False)
-    assert not re.search(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", serialized)
-    assert not re.search(r"(?<![\dA-Za-z])(?:\+?66|0)\s*\d(?:[\s().-]*\d){7,9}(?!\d)", serialized)
+    from app.publication import _privacy_problems
+    contract = json.loads((PROJECT_ROOT / "config/publication_contracts/provincial_briefings.json").read_text(encoding="utf-8"))
+    payload = {"sections": {"tourism": {"items": list(projections.values())}}}
+    assert _privacy_problems(payload, artifact_path="tourism", restricted_source_ids=set(),
+                             profile="aggregate_public", field_contexts=contract["outputs"][0]["field_contexts"]) == []
 
 
 def test_public_description_sanitizer_removes_contact_fragments():

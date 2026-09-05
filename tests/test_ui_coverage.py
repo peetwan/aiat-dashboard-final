@@ -158,7 +158,7 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     assert ".f4-record-card" in styles
 
 
-def test_insights_exposes_all_source_coverage_without_controls() -> None:
+def test_insights_exposes_source_coverage_and_searchable_work_directory() -> None:
     template = read("app/templates/insights.html")
     script = read("app/static/insights.js")
 
@@ -188,7 +188,10 @@ def test_insights_exposes_all_source_coverage_without_controls() -> None:
     assert "known_omissions" in script
     assert "not.province" in script
     assert "ยังไม่มีรายชื่อแหล่งข้อมูลในระบบนี้" in script
-    assert "<select" not in template.lower()
+    assert 'id="workDirectory"' in template
+    assert 'id="workDirectorySource"' in template
+    assert 'id="workDirectorySearch"' in template
+    assert 'href="#workDirectory"' in template
     assert "<table" not in template.lower()
     assert "→" not in template
     assert "→" not in script

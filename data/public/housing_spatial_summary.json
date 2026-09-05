@@ -191,9 +191,10 @@
       "wellness_center": 1,
       "ไม่ระบุ": 146
     },
-    "excluded_fields": [
-      "address",
+    "excluded_fields": [],
+    "public_place_fields": [
       "name",
+      "address",
       "rating",
       "user_ratings_total"
     ]

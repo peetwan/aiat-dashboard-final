@@ -41,7 +41,8 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 - Canonical raw บน team bucket (`raw/<department>/<source_id>/<run_id>/`) ห้าม overwrite และห้ามลบ ดึงใหม่คือ run ใหม่
 - ข้อยกเว้น: ลบ legacy R2 key รูปแบบ `raw/<source_id>/<run_id>/<file>` ได้เมื่อตรวจคู่สำเนากับ canonical key แล้วว่า `Content-Length` และ `ETag` ตรงกันทุกไฟล์ ห้ามลบ canonical object ห้าม overwrite และห้ามขยายข้อยกเว้นนี้ไปยัง run ที่ไม่มีสำเนาคู่
 - ห้ามเดา grain, unit, geography, `as_of`, denominator หรือความหมาย field
-- ห้าม commit `.env`, token, cookie, database dump, raw response, ชื่อบุคคล เบอร์โทร อีเมล หรือที่อยู่
+- ห้าม commit `.env`, token, cookie, database dump และ raw response; ชื่อเจ้าของผลงาน ผู้วิจัย หน่วยงาน ช่องทางติดต่อสาธารณะ และที่ตั้งสถานที่เผยแพร่ได้ตาม `field_contexts` ใน contract ดู [docs/field-contexts.md](docs/field-contexts.md)
+- แยกการเก็บหลักฐาน การเข้า Candidate และการเผยแพร่: การพบชื่อ/ข้อมูลติดต่อใน raw ไม่ใช่เหตุให้ปฏิเสธทั้ง dataset ให้จัด projection ตามบริบทของแต่ละฟิลด์
 - Restricted source ห้ามมี executable connector ใน public application
 - Public revision เปลี่ยนได้หลัง deterministic build, privacy/semantic tests และ review เท่านั้น
 
@@ -65,7 +66,7 @@ CI ต้องไม่เรียก upstream network ใช้ fixture ห�
 
 ### Public data safety
 
-- Flag tracked raw payloads, credentials, personal contact values, person-level financial/health/household values, or changes that weaken forbidden-field/contact scans. Keep fixtures small and redacted; public output must remain a reviewed projection.
+- Flag tracked raw payloads, credentials, private contact values and person-level financial/health/household disclosures. Public work attribution, organization names, published work/business contacts and public locations are supported through scoped `field_contexts`; do not flag them merely for containing a name, email, phone or address. Check the source context and the declared leaf fields. Keep fixtures small and synthetic; public output remains a reviewed projection.
 
 ### Evidence storage
 

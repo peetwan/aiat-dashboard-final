@@ -23,16 +23,31 @@
       "unique_feature_id_count": 159126
     },
     "housing_points": {
-      "artifact_bytes": 1241522,
+      "artifact_bytes": 2246889,
       "artifact_path": "data/spatial/housing_points.ndjson.gz",
-      "artifact_sha256": "1a801c9bcf85952cb9b8e07a0099e685258b65d667ffc41b570ff2f2565066a4",
+      "artifact_sha256": "06ae7c31536e3224b767a668b82e95fb413bbec36eaa0c247fa895d222e6760d",
+      "detail_projection": {
+        "field_contexts": {
+          "/address": "public_contact",
+          "/name": "public_contact"
+        },
+        "fields": [
+          "name",
+          "address",
+          "rating",
+          "user_ratings_total"
+        ],
+        "source_file": "housing_points_rows.jsonl.gz",
+        "source_run_id": "20260817T045556Z",
+        "source_sha256": "2ea1acba7a1b180e21dc619fdb0ba07c4b35ad2a5b23466061fa6e05e07db385"
+      },
       "feature_count": 28694,
       "unique_feature_id_count": 28694
     },
     "housing_spatial_summary": {
-      "artifact_bytes": 5195,
+      "artifact_bytes": 5226,
       "artifact_path": "data/public/housing_spatial_summary.json",
-      "artifact_sha256": "caebe7f6a96fcd104e4f567f78872fb295943679c69a257cf55f245892d92937",
+      "artifact_sha256": "47225ff4191455d6e54e23f515ca2b6f254c2b48c822c3c52fc4533672bdd84f",
       "feature_count": 1
     },
     "subdistrict_boundaries": {
@@ -45,14 +60,9 @@
   },
   "manifest_version": "0.1.0",
   "privacy_projection": {
-    "contact_fields_included": 0,
+    "contact_fields_included": 2,
     "demand_respondent_rows_included": 0,
-    "point_fields_excluded": [
-      "address",
-      "name",
-      "rating",
-      "user_ratings_total"
-    ]
+    "point_fields_excluded": []
   },
   "raw_manifest_path": "data/raw/network/f3_housing_portal/20260817T_housing_spatial_full_23/manifest.json",
   "raw_manifest_sha256": "f5584d64273b3692cde68fb719338e827f8def0d9d205d341dd4354532a3a705",

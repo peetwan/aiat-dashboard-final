@@ -48,24 +48,21 @@ python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --
 ได้ connector + contract + fixture (redacted) + offline test ตั้งต้น จากนั้นแก้
 parser และ completeness ให้ตรงต้นทางจริง
 
-Field ภูมิศาสตร์อย่าง `address_province`, `address_district` ประกาศได้ตามปกติ —
-กติกา privacy ตัดเฉพาะข้อมูลติดต่อ/ระบุตัวบุคคล (ชื่อบุคคล เบอร์โทร อีเมล ที่อยู่บ้าน
-เลขบัตร) ไม่ตัดภูมิศาสตร์ ตัวเลขรวม หรือรหัสโครงการ ถ้าสงสัยว่า field ไหนถูกตัดเพราะอะไร:
+Field ภูมิศาสตร์ ตัวเลขรวม และรหัสโครงการประกาศได้ตามปกติ ชื่อเจ้าของงาน
+ผู้วิจัย ช่องทางติดต่องาน และสถานที่สาธารณะใช้ `field_contexts` ตาม
+[คู่มือบริบทข้อมูล](field-contexts.md) ลองก่อนนำเข้าด้วย:
 
-```python
-from app.privacy import sanitize_payload
-dropped = []
-sanitize_payload(payload, dropped=dropped)
-print(dropped)   # [(field, เหตุผล), ...]
+```powershell
+python tools/preview_privacy.py path/to/records.jsonl --source <source_id> --dataset-key <key>
 ```
 
-## ขั้น 5 — เพิ่ม ingestion plan (เมื่อมี public endpoint ที่ดึงได้)
+## ขั้น 5 เพิ่ม ingestion plan เมื่อมี public endpoint ที่ดึงได้
 
-ก่อนเพิ่ม plan ต้องผ่านการอนุมัติ policy ก่อนหนึ่งจังหวะ: source ใหม่เริ่มต้นเป็น
-`metadata_only` เสมอ ทีมต้อง review แล้วเพิ่ม `source_id` เข้า `APPROVED_PUBLIC_MODES`
-ใน `tools/build_source_catalog.py` และ regenerate catalog (ขั้น 2) — ถ้าเพิ่ม plan
-โดย source ยังไม่ถูกอนุมัติเป็น public candidate, `validate-pipeline` จะปฏิเสธว่า
-source นั้นไม่ใช่ production-approved
+เพิ่ม connector และตรวจ Candidate บนเครื่องได้ก่อนอนุมัติ publication
+`validate-pipeline` ตรวจ registry, contract, fixture และความครบของ connector
+ส่วน `production_values_allowed` ใช้ควบคุม production และ publication
+เมื่อพร้อมเผยแพร่จึงให้ทีม review source scope และ regenerate catalog
+endpoint ที่ connector เรียกต้องอยู่ใน runtime allowlist ของ source และไม่ใช่ restricted route
 
 จากนั้นเติม entry ใต้ `sources` ใน `config/ingestion_plans.json` — โครงด้านล่างตรงกับ
 connector ที่ scaffold สร้างให้ (ขั้น 4) ซึ่งอ่าน `plan["url"]` เป็น GET หน้าแรก:
@@ -110,9 +107,6 @@ public-repo boundary, pytest) เปิด PR ตาม [CONTRIBUTING.md](../CON
 - **เพิ่ม source แล้ว test จำนวนแหล่งจะพังไหม?** ไม่ — tests นับจาก catalog จริง
   มีแค่ 2 อย่างที่ต้องทำเพิ่ม: โปรไฟล์ Explorer (ขั้น 3) และ (ถ้าเป็นเลน restricted)
   อัปเดตรายการ restricted ใน tests อย่างตั้งใจ
-- **รหัสโครงการขึ้นต้นด้วยปี พ.ศ. เช่น `66079123456` โดน redact เป็นเบอร์โทรไหม?**
-  ไม่ — รูปแบบ `66` ตามด้วยเลขศูนย์ไม่ตรงรูปเบอร์ไทย และรหัสขึ้นต้น `67` ขึ้นไป
-  ไม่โดนอยู่แล้ว แต่ตัวเลขล้วน 10-11 หลักที่ขึ้นต้น `66` แล้วตามด้วยเลข 1-9
-  (เช่น `6681234567`) แยกไม่ออกจากเบอร์รูปแบบสากลและยังถูก redact —
-  ถ้ารหัสของ source เป็นทรงนั้น อย่าใช้เป็น identity field ให้ใช้ field
-  ที่ไม่ใช่ตัวเลขล้วนหรือรหัสที่มีตัวคั่นแทน
+- **รหัสหรือ hash โดนมองเป็นเบอร์โทรได้ไหม?** ตัวตรวจแยก hash และรหัสที่อยู่ในข้อความแล้ว
+  หากรหัสตัวเลขล้วนมีรูปเหมือนเบอร์โทรจริง ใช้ `record_identifier` กับ path ของฟิลด์นั้น
+  ตามหลักฐานต้นทางได้ ไม่ต้องเปลี่ยน identity หรือแต่งรหัสใหม่
