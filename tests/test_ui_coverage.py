@@ -108,8 +108,12 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     assert "เสริมพลังท้องถิ่น" in template
     for element_id in (
         "f4CountryPanel",
-        "f4PanelScopeLabel",
-        "f4OverviewHeading",
+        "f4PanelStage",
+        "f4Crumbs",
+        "f4Status",
+        "retryF4Overview",
+        "f4AreaDetail",
+        "f4ProvinceSwitch",
         "showF4Country",
         "f4CountryCards",
         "f4EconomicImpactWrap",

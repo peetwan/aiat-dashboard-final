@@ -3126,11 +3126,11 @@
     font: inherit;
     font-size: 21px;
   }
-  .f1-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px 20px 6px; }
-  .f1-flow span { display: flex; align-items: center; gap: 6px; color: #66736b; font-size: 11.5px; line-height: 1.35; }
-  .f1-flow b { width: 22px; height: 22px; display: grid; place-items: center; flex: 0 0 auto; background: #e8e9e3; border-radius: 50%; font-size: 9px; }
-  .f1-flow span.active { color: #8f441a; font-weight: 750; }
-  .f1-flow span.active b { color: #fff; background: #b4551d; }
+  :is(.f1-flow, .f4-flow) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px 20px 6px; }
+  :is(.f1-flow, .f4-flow) span { display: flex; align-items: center; gap: 6px; color: #66736b; font-size: 11.5px; line-height: 1.35; }
+  :is(.f1-flow, .f4-flow) b { width: 22px; height: 22px; display: grid; place-items: center; flex: 0 0 auto; background: #e8e9e3; border-radius: 50%; font-size: 9px; }
+  :is(.f1-flow, .f4-flow) span.active { color: #8f441a; font-weight: 750; }
+  :is(.f1-flow, .f4-flow) span.active b { color: #fff; background: #b4551d; }
   .f1-country-loading { margin: 18px 22px; padding: 18px; color: var(--ink-soft); background: #fff; border: 1px solid var(--hairline); border-radius: 14px; font-size: 12px; text-align: center; }
   .f1-country-content { padding: 6px 20px 20px; }
   .f1-country-kpis, .f1-province-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -3387,7 +3387,7 @@
     .f1-country-panel { top: auto; right: 7px; bottom: 72px; left: 7px; width: auto; height: min(68dvh, 720px); border-radius: 18px; }
     .f1-country-head { padding: 16px 16px 12px; }
     .f1-country-head h2 { font-size: 24px; }
-    .f1-flow { padding: 10px 16px 6px; }
+    :is(.f1-flow, .f4-flow) { padding: 10px 16px 6px; }
     .f1-country-content { padding: 6px 16px 18px; }
     .f1-country-kpis button, .f1-province-kpis button { min-height: 100px; padding: 9px; }
     .f1-country-kpis button > strong, .f1-province-kpis button > strong { font-size: 19px; }
@@ -5299,7 +5299,7 @@
   text-align: right;
 }
 
-.f1-crumbs {
+:is(.f1-crumbs, .department-crumbs) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -5307,8 +5307,8 @@
   min-width: 0;
 }
 
-.f1-crumbs button,
-.f1-crumbs > span {
+:is(.f1-crumbs, .department-crumbs) button,
+:is(.f1-crumbs, .department-crumbs) > span {
   display: inline-flex;
   align-items: center;
   min-height: 26px;
@@ -5319,7 +5319,7 @@
   line-height: 1.3;
 }
 
-.f1-crumbs button {
+:is(.f1-crumbs, .department-crumbs) button {
   border: 1px solid #d8ddd7;
   background: #fff;
   color: #263a30;
@@ -5329,17 +5329,17 @@
   font-weight: 700;
 }
 
-.f1-crumbs button:hover {
+:is(.f1-crumbs, .department-crumbs) button:hover {
   border-color: #8d3e14;
   color: #8d3e14;
 }
 
-.f1-crumbs > span {
+:is(.f1-crumbs, .department-crumbs) > span {
   color: #8d3e14;
   background: #fff3e8;
 }
 
-.f1-crumbs i {
+:is(.f1-crumbs, .department-crumbs) i {
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
@@ -5378,7 +5378,7 @@
 }
 
 /* Country panel steps are buttons: step 1 takes you back to the country. */
-.f1-flow button {
+:is(.f1-flow, .f4-flow) button {
   min-width: 0;
   display: flex;
   align-items: center;
@@ -5394,32 +5394,32 @@
   cursor: default;
 }
 
-.f1-flow button:not(:disabled) {
+:is(.f1-flow, .f4-flow) button:not(:disabled) {
   cursor: pointer;
 }
 
-.f1-flow button:disabled {
+:is(.f1-flow, .f4-flow) button:disabled {
   opacity: 1;
 }
 
-.f1-flow button.active {
+:is(.f1-flow, .f4-flow) button.active {
   color: var(--department-accent-strong);
   font-weight: 750;
 }
 
-.f1-flow button.active b {
+:is(.f1-flow, .f4-flow) button.active b {
   color: #fff;
   background: var(--department-accent);
 }
 
-.f1-flow button.is-link {
+:is(.f1-flow, .f4-flow) button.is-link {
   color: #263a30;
   text-decoration: underline;
   text-decoration-color: #b8beb9;
   text-underline-offset: 3px;
 }
 
-.f1-flow button.is-link:hover {
+:is(.f1-flow, .f4-flow) button.is-link:hover {
   color: var(--department-accent-strong);
   text-decoration-color: currentColor;
 }
@@ -5709,13 +5709,13 @@
 }
 
 /* Other target provinces of the same region, at the end of the sheet. */
-.f1-province-switch {
+:is(.f1-province-switch, .department-province-switch) {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--hairline);
 }
 
-.f1-province-switch > span {
+:is(.f1-province-switch, .department-province-switch) > span {
   display: block;
   margin-bottom: 7px;
   color: #5d6b63;
@@ -5723,13 +5723,13 @@
   line-height: 1.4;
 }
 
-.f1-province-switch > div {
+:is(.f1-province-switch, .department-province-switch) > div {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.f1-province-switch button {
+:is(.f1-province-switch, .department-province-switch) button {
   min-height: 30px;
   padding: 0 11px;
   border: 1px solid #d8ddd7;
@@ -5742,7 +5742,7 @@
   font-weight: 700;
 }
 
-.f1-province-switch button:hover {
+:is(.f1-province-switch, .department-province-switch) button:hover {
   border-color: #8d3e14;
   color: #8d3e14;
 }
@@ -5858,7 +5858,7 @@
 }
 
 /* The switcher lives inside the source note, whose direct div children are laid out as chip rows. */
-.f1-source-note > .f1-province-switch {
+.f1-source-note > :is(.f1-province-switch, .department-province-switch) {
   display: grid;
   flex-wrap: nowrap;
 }
