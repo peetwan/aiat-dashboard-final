@@ -1,12 +1,78 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
+import json
 
 import pytest
 
 from tools.build_housing_place_details import merge_place_details
 from tools.build_provincial_briefings import project_tourism_payload, sanitize_public_text
 from tools.public_work_details import project_cultural_supporting, project_mtr_work, project_rmutdb_work
+from tools.public_work_details import mtr_public_contacts
+
+
+def mtr_evidence(tmp_path, pages):
+    rows = []
+    for index, payload in enumerate(pages):
+        raw = json.dumps(payload).encode()
+        path = tmp_path / f"page-{index}.json"
+        path.write_bytes(raw)
+        rows.append({"source_record_id": f"work-{index + 1}",
+                     "normalized_fields": {"innovation_id": index + 1},
+                     "provenance": {"raw_evidence_uri": path.name, "raw_sha256": hashlib.sha256(raw).hexdigest()}})
+    return rows
+
+
+def test_mtr_directory_requires_complete_stable_totals_and_matching_id_sets(tmp_path):
+    pages = [{"totalCount": 2, "data": [{"id": identifier, "ownerContact": {"email": "office@example.org"}}]}
+             for identifier in (1, 2)]
+    rows = mtr_evidence(tmp_path, pages)
+    contacts = mtr_public_contacts(tmp_path, rows)
+    assert set(contacts) == {"work-1", "work-2"}
+    assert contacts["work-1"]["email"] == "office@example.org"
+
+
+@pytest.mark.parametrize("drift", [
+    "larger_total", "changing_total", "missing_total", "invalid_total", "boolean_total",
+    "duplicate_across_pages", "duplicate_within_page", "missing_id", "omitted_silver_id",
+    "duplicate_silver_id", "missing_record_id", "duplicate_record_id", "missing_page", "empty_silver",
+])
+def test_mtr_directory_rejects_partial_or_inconsistent_snapshots(tmp_path, drift):
+    pages = [{"totalCount": 2, "data": [{"id": identifier}]} for identifier in (1, 2)]
+    if drift == "larger_total":
+        for page in pages: page["totalCount"] = 3
+    elif drift == "changing_total": pages[1]["totalCount"] = 3
+    elif drift == "missing_total": pages[1].pop("totalCount")
+    elif drift == "invalid_total": pages[1]["totalCount"] = "2"
+    elif drift == "boolean_total": pages[1]["totalCount"] = True
+    elif drift == "duplicate_across_pages": pages[1]["data"] = [{"id": 1}]
+    elif drift == "duplicate_within_page": pages[1]["data"] = [{"id": 2}, {"id": 2}]
+    elif drift == "missing_id": pages[1]["data"] = [{"id": None}]
+    elif drift == "omitted_silver_id":
+        for page in pages: page["totalCount"] = 3
+        pages[1]["data"].append({"id": 3})
+    rows = mtr_evidence(tmp_path, pages)
+    if drift == "duplicate_silver_id": rows[1]["normalized_fields"]["innovation_id"] = 1
+    elif drift == "missing_record_id": rows[1].pop("source_record_id")
+    elif drift == "duplicate_record_id": rows[1]["source_record_id"] = rows[0]["source_record_id"]
+    elif drift == "missing_page": rows.pop()
+    elif drift == "empty_silver": rows.clear()
+    with pytest.raises(ValueError, match="MTR"):
+        mtr_public_contacts(tmp_path, rows)
+
+
+@pytest.mark.parametrize("dataset_id", ["map_inspiration", "products", "activities", "recreation", "team"])
+@pytest.mark.parametrize("identities", [["same", "same"], ["one", None], ["one", ""], ["one", " "]])
+def test_cultural_dataset_rejects_missing_or_duplicate_identities(monkeypatch, dataset_id, identities):
+    from tools import build_source_insights as builder
+
+    monkeypatch.setattr(builder, "CULTURAL_DATASETS", {dataset_id: ("fixture.json", 2, "test")})
+    monkeypatch.setattr(builder, "read_json", lambda path: {"data": {"records": [
+        {"external_id": identifier} for identifier in identities
+    ]}})
+    with pytest.raises(RuntimeError, match="external_id"):
+        builder.build_cultural_supporting_coverage()
 
 
 def test_work_projections_keep_owner_and_work_contact_but_omit_account_credentials():

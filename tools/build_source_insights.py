@@ -480,6 +480,11 @@ def build_cultural_supporting_coverage() -> dict[str, Any]:
             raise RuntimeError(
                 f"cultural dataset {dataset_id} expected {expected_count} records, found {len(records)}"
             )
+        identities = [row.get("external_id") if isinstance(row, dict) else None for row in records]
+        if any(not isinstance(identifier, str) or not identifier.strip() for identifier in identities):
+            raise RuntimeError(f"cultural dataset {dataset_id} has missing external_id values")
+        if len(set(identities)) != len(identities):
+            raise RuntimeError(f"cultural dataset {dataset_id} has duplicate external_id values")
         total_records += len(records)
         if dataset_id != "map_inspiration":
             supporting_records += len(records)

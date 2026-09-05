@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.catalog import load_catalog
 from app.models import PublicArtifact, utc_now
-from app.privacy import EMAIL_RE, PHONE_RE
+from app.privacy import EMAIL_RE, PHONE_RE, SOCIAL_CONTACT_RE
 from app.field_contexts import is_contact_exposure_metadata, key_kind
 from app.settings import PROJECT_ROOT
 from app.publication import _privacy_problems, bind_outputs, load_contracts
@@ -431,6 +431,8 @@ def _artifact_policy_violations(
             violations.append((path, "email value"))
         if LABELLED_CONTACT_VALUE_RE.search(value):
             violations.append((path, "labelled contact value"))
+        if SOCIAL_CONTACT_RE.search(value):
+            violations.append((path, "social contact value"))
         if ADDRESS_VALUE_RE.search(value):
             violations.append((path, "home address value"))
         if (

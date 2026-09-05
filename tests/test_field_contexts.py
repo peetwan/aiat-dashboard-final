@@ -19,6 +19,46 @@ def problems(payload, contexts=None):
                              profile="aggregate_public", field_contexts=contexts)
 
 
+@pytest.mark.parametrize("text", [
+    "LINE ID: private_person", "ID Line: private_person", "LINE OA: @private_person",
+    "ไลน์: private_person", "ไอดีไลน์ private_person", "LINE: private_person",
+    "ติดต่อ LINE: private_person", "Facebook: @private_person", "Facebook handle: private_person",
+    "Face book: https://facebook.com/private_person", "Instagram: private_person",
+    "IG: private_person", "TikTok @private_person", "Twitter: private_person",
+])
+def test_social_contact_values_require_exact_public_contact_context(text, tmp_path):
+    payload = {"description": text}
+    changes = []
+    assert "private_person" not in sanitize_payload(payload, changes=changes)["description"]
+    assert changes == [("/description", "social contact value")]
+    assert any("social contact value" in reason for reason in problems(payload))
+    for context in ("work_attribution", "public_location", "organization"):
+        assert problems(payload, {"/description": context})
+    contexts = {"/description": "public_contact"}
+    assert sanitize_payload(payload, field_contexts=contexts) == payload
+    assert problems(payload, contexts) == []
+    assert problems(payload, {"/other": "public_contact"})
+    artifact = tmp_path / "undeclared.json"
+    artifact.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="social contact value"):
+        validate_public_artifacts([ArtifactInput("candidate", "source_dataset", artifact)])
+
+
+@pytest.mark.parametrize("text", [
+    "BTS Green Line: Khu Khot to Kheha", "bus line 515", "production line: assembly",
+    "line graph of quarterly totals", "linear regression", "The LINE API documentation",
+    "https://facebook.com/public-source/posts/123", "https://line.me/R/ti/p/@public-office",
+])
+def test_ordinary_lines_and_provenance_urls_are_preserved(text, tmp_path):
+    from app.public_artifacts import _artifact_policy_violations
+
+    payload = {"description": text}
+    assert sanitize_payload(payload) == payload
+    assert problems(payload) == []
+    item = ArtifactInput("candidate", "source_dataset", tmp_path / "candidate.json")
+    assert _artifact_policy_violations(item, payload, set()) == []
+
+
 def test_work_attribution_organization_contacts_and_location_can_be_published():
     payload = {
         "research_leads": [{"name": "ผู้วิจัยตัวอย่าง", "researcher_name": "ผู้วิจัยตัวอย่าง"}],

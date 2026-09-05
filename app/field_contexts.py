@@ -102,7 +102,7 @@ def context_allows_key(key: str, context: str | None) -> bool:
 
 def context_allows_value_reason(context: str | None, reason: str, value: Any) -> bool:
     if context == "public_contact":
-        return reason in {"email-like value", "labelled contact value", "Thai phone-like value", "Thai phone-like numeric value", "home-address-like value"}
+        return reason in {"email-like value", "labelled contact value", "social contact value", "Thai phone-like value", "Thai phone-like numeric value", "home-address-like value"}
     if context == "public_location":
         return reason == "home-address-like value"
     if context in {"record_identifier", "public_measure"}:

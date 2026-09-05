@@ -87,6 +87,19 @@ PHONE_RE = re.compile(
 )
 MAX_RECORD_ID_LENGTH = 200
 
+# Explicit platform labels distinguish contacts from ordinary transit/graph lines.
+# Unlabelled URLs remain provenance; a public contact still needs an exact context.
+_SOCIAL_HANDLE = r"@?[A-Za-z0-9_ก-๙][^\s<>\"'{};,|]*"
+SOCIAL_CONTACT_RE = re.compile(
+    r"(?i)(?:"
+    r"(?<![A-Za-z0-9_])(?:line\s*(?:id|oa)|id\s*line|ไอดี\s*ไลน์)(?![A-Za-z0-9_])\s*[:：=]?\s*"
+    + _SOCIAL_HANDLE + r"|"
+    r"(?<![A-Za-z0-9_])(?:ไลน์|face\s*book|เฟซบุ๊ก|เฟสบุ๊ค|instagram|ig|tiktok|twitter|อินสตาแกรม|ติ๊กต็อก)"
+    r"\s*(?:(?:id|handle|account|บัญชี)\s*)?[:：=]\s*" + _SOCIAL_HANDLE + r"|"
+    r"(?<![A-Za-z0-9_])(?:line|facebook|instagram|tiktok|twitter)\s+@" + _SOCIAL_HANDLE + r"|"
+    r"(?:^|(?<=[\n;,|])|(?<=contact )|(?<=ติดต่อ))\s*line\s*[:：=]\s*" + _SOCIAL_HANDLE + r")"
+)
+
 
 class RecordIdentityError(ValueError):
     """A connector record cannot produce a safe, stable database identity."""
@@ -124,7 +137,7 @@ def sanitize_payload(
     def report_pointer(pointer: str) -> str:
         # Object-map keys can themselves contain contact values.
         return "/".join(
-            "{key}" if EMAIL_RE.search(part) or PHONE_RE.search(part) else part
+            "{key}" if EMAIL_RE.search(part) or PHONE_RE.search(part) or SOCIAL_CONTACT_RE.search(part) else part
             for part in pointer.split("/")
         )
 
@@ -158,6 +171,7 @@ def sanitize_payload(
             for regex, reason, replacement in (
                 (EMAIL_RE, "email-like value", "[redacted-email]"),
                 (PHONE_RE, "Thai phone-like value", "[redacted-phone]"),
+                (SOCIAL_CONTACT_RE, "social contact value", "[redacted-social-contact]"),
             ):
                 if regex.search(item) and not context_allows_value_reason(context, reason, item):
                     item = regex.sub(replacement, item)

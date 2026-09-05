@@ -4,7 +4,7 @@ from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
     is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
 )
-from app.privacy import EMAIL_RE, PHONE_RE
+from app.privacy import EMAIL_RE, PHONE_RE, SOCIAL_CONTACT_RE
 
 import argparse
 import csv
@@ -371,6 +371,7 @@ def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
         text in restricted_source_ids
         or EMAIL_RE.search(text) is not None
         or PHONE_RE.search(text) is not None
+        or SOCIAL_CONTACT_RE.search(text) is not None
         or LABELLED_CONTACT_RE.search(text) is not None
         or ADDRESS_VALUE_RE.search(text) is not None
         or SIGNED_URL_RE.search(text) is not None
@@ -581,6 +582,8 @@ def _privacy_reasons_for_text(
         reasons.append("email-like value")
     if LABELLED_CONTACT_RE.search(value):
         reasons.append("labelled contact value")
+    if SOCIAL_CONTACT_RE.search(value):
+        reasons.append("social contact value")
     if ADDRESS_VALUE_RE.search(value):
         reasons.append("home-address-like value")
     if SIGNED_URL_RE.search(value):

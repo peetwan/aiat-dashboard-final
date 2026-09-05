@@ -73,6 +73,9 @@ def project_mtr_work(row: dict, contacts: dict | None = None) -> dict:
 def mtr_public_contacts(evidence_root: Path, rows: list[dict]) -> dict[str, dict]:
     pages = {}
     result = {}
+    expected_total = None
+    evidence_ids: set[str] = set()
+    silver_ids: set[str] = set()
     for row in rows:
         provenance = row["provenance"]
         path = (evidence_root / provenance["raw_evidence_uri"]).resolve()
@@ -84,18 +87,38 @@ def mtr_public_contacts(evidence_root: Path, rows: list[dict]) -> dict[str, dict
             if hashlib.sha256(raw).hexdigest() != digest:
                 raise ValueError("MTR evidence hash mismatch")
             payload = json.loads(raw)
+            total = payload.get("totalCount")
+            if type(total) is not int or total < 0:
+                raise ValueError("MTR evidence totalCount must be a non-negative integer")
+            if expected_total is not None and total != expected_total:
+                raise ValueError("MTR evidence totalCount changed between pages")
+            expected_total = total
             records = payload["data"]
+            if not isinstance(records, list) or any(
+                not isinstance(item, dict) or type(item.get("id")) not in (str, int)
+                or not str(item["id"]).strip() for item in records
+            ):
+                raise ValueError("MTR evidence contains missing IDs or invalid records")
             ids = [str(item["id"]) for item in records]
-            if len(ids) != len(set(ids)):
-                raise ValueError("MTR evidence contains duplicate IDs")
+            if len(ids) != len(set(ids)) or evidence_ids.intersection(ids):
+                raise ValueError("MTR evidence contains duplicate IDs across pages")
+            evidence_ids.update(ids)
             pages[path, digest] = dict(zip(ids, records))
-        source = pages[path, digest][str(row["normalized_fields"]["innovation_id"])]
+        innovation_id = str(row["normalized_fields"]["innovation_id"])
+        if innovation_id in silver_ids or innovation_id not in pages[path, digest]:
+            raise ValueError("MTR Silver innovation IDs must match unique evidence records")
+        silver_ids.add(innovation_id)
+        source = pages[path, digest][innovation_id]
         contact = source.get("ownerContact") or {}
-        identifier = row["source_record_id"]
+        identifier = row.get("source_record_id")
+        if not isinstance(identifier, str) or not identifier.strip():
+            raise ValueError("MTR Silver contains missing record IDs")
         if identifier in result:
             raise ValueError("MTR Silver contains duplicate IDs")
         result[identifier] = {"email": contact.get("email"), "phone": contact.get("phone"),
                               "secondary_phone": contact.get("phone1"), "source_sha256": digest}
+    if expected_total is None or expected_total != len(evidence_ids) or silver_ids != evidence_ids:
+        raise ValueError("MTR totalCount, complete evidence IDs and Silver IDs must match")
     return result
 
 
