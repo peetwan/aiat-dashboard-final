@@ -5,9 +5,9 @@
     {
       "dataset_key": "public_product_detail",
       "payload": {
-        "product_id": 3719,
-        "source_url": "https://pmua-apptech.com/product/show/3719",
-        "title": "เตาชีวมวลแบบก่อด้วยอิฐมอญ",
+        "product_id": 10001,
+        "source_url": "https://pmua-apptech.com/product/show/10001",
+        "title": "นวัตกรรมตัวอย่างสำหรับทดสอบ",
         "trl_level": 7,
         "empirical_evidence": [
           {
@@ -28,7 +28,8 @@
         "outcomes": [],
         "impacts": [],
         "evidence_status": "partial",
-        "fetched_at": "2026-09-05T00:00:00+00:00"
+        "fetched_at": "2026-09-05T00:00:00+00:00",
+        "as_of": null
       }
     }
   ]

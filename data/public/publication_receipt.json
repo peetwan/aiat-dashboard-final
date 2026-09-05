@@ -1,7 +1,7 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "5e91bdfe12e899d833398e6ee47db61f9e45ceac9dbd6f45cce8a0e5c39f92b7",
-  "artifact_count": 176,
+  "release_digest": "4e365f9ad112721c3767ebfb794ec93074d1df86f61af00aceb74bdc7fb0b1d4",
+  "artifact_count": 177,
   "artifacts": [
     {
       "path": "data/public/apptech_aggregates.json",
@@ -904,6 +904,16 @@
       "contract_sha256": "f65e3ab03b028eda85252190388d992dfbb33ea099f8ba104af72aa09018b087"
     },
     {
+      "path": "data/public/pmua_product_details.json",
+      "contract_id": "pmua_product_details",
+      "dataset_key": "pmua_product_details",
+      "role": "database",
+      "format": "json",
+      "bytes": 2047909,
+      "sha256": "d5879f22b00edc445fd1f952680cd5eab4c9930b3744a8076d01cbcdcbace403",
+      "contract_sha256": "34e0c8e02562a3f18349ba88d237f12b49f7aa06df285d438178313e9cc67904"
+    },
+    {
       "path": "data/public/province_evidence.csv",
       "contract_id": "dashboard_core",
       "dataset_key": "province_dashboard",
@@ -1709,9 +1719,9 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 94119,
-      "sha256": "37cc6f5c3f80ae8032366cf36a908d7c5ab2dbc694b247b121c466d41fd35ac5",
-      "contract_sha256": "fca31aed78f157e0ba9ab0161daaa93d9fcd74996884315623aa9d071f9e35a7"
+      "bytes": 96646,
+      "sha256": "5c2431ce5194c5f4a2e81464932ae0c1300f92d29082b7b6cbba00b9c0366682",
+      "contract_sha256": "c30b35602b01ac347cdf677bd256422c5fa30c1a3cbf659b701541e6246e2433"
     },
     {
       "path": "data/public/source_insights.json",

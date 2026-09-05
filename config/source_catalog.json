@@ -3104,33 +3104,38 @@
       "value_visibility": "public_candidate",
       "production_values_allowed": true,
       "expected_record_count": 1160,
-      "notes_th": "หน้ารายละเอียดผลิตภัณฑ์สาธารณะสำหรับ evidence ของ ROI/SROI ผลลัพธ์ ผลกระทบ และ TRL; ไม่เก็บข้อมูลติดต่อหรือข้อมูลบุคคล",
+      "notes_th": "หน้ารายละเอียดนวัตกรรมสาธารณะสำหรับ TRL, ROI/SROI, Outcomes และ Impacts; เป็น evidence ไม่ใช่ KPI รับรอง",
       "snapshot_origin_files": [],
       "endpoints": [
         {
-          "endpoint_id": "c4b9e9084a690685091c11ec3eaa5cbf8faff626444f59e3ab037ba86d5bb2b3",
+          "endpoint_id": "f1b19efa3997b84d86597ba8403ee1c3a3f4867e3e97223888bab8e799e61f39",
           "method": "GET",
           "url": "https://pmua-apptech.com/search",
           "kind": "public_product_search_for_detail_ids",
-          "access": "unauthenticated_get_http_200",
+          "access": "maintainer_reviewed_public_candidate",
           "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
-          "request_template": {"query_or_body": "page=<value>"},
-          "notes_th": "ใช้ค้นหา product_id ครบตาม pagination ก่อนเรียกหน้ารายละเอียด"
+          "request_template": {
+            "query_or_body": "page=<value>"
+          },
+          "notes_th": ""
         },
         {
-          "endpoint_id": "bf0dc7003be0bbfd535c2147a6bc9a277843fcb28828f5ed2cf84d665899210f",
+          "endpoint_id": "de9f84363b1c1864a495985a96d6bd63fa9bf96069cfe402acbe0e8f4b1b8636",
           "method": "GET",
           "url": "https://pmua-apptech.com/product/show/{product_id}",
-          "path_template": "/product/show/{product_id}",
           "kind": "public_product_detail",
-          "access": "unauthenticated_get_http_200",
-          "team_action": "call_without_login_numeric_product_id_only",
+          "access": "maintainer_reviewed_public_candidate",
+          "team_action": "call_without_login",
           "restricted": false,
           "runtime_enabled": true,
           "request_template": {},
-          "notes_th": "อนุญาตเฉพาะ product_id ตัวเลข; ไม่ตาม redirect และไม่เรียก path อื่น"
+          "path_template": "/product/show/{product_id}",
+          "path_parameters": {
+            "product_id": "integer"
+          },
+          "notes_th": ""
         }
       ]
     }

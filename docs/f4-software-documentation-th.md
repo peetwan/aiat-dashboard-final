@@ -2,6 +2,8 @@
 
 เอกสารนี้อธิบายขอบเขต การทำงาน ข้อมูล แหล่งที่มา และวิธีดูแลส่วน F4 ของ AIAT Dashboard
 
+ปรับปรุงหลังตรวจ PR #47: รายละเอียด PMUA เผยแพร่ผ่าน `data/public/pmua_product_details.json` และ serving artifact `f4/pmua-product-details` คู่มือนี้เป็นขั้นตอนปัจจุบัน ส่วนไฟล์ Word เก็บภาพและคำอธิบายต้นฉบับก่อนปรับเส้นทางเผยแพร่
+
 ## 1. วัตถุประสงค์
 
 F4 แสดงหลักฐานด้านพื้นที่จาก 2 กลุ่มข้อมูลในหน้าจอเดียวกัน แต่แยกความหมายออกจากกัน:
@@ -38,7 +40,7 @@ AIAT_S3_SECRET_ACCESS_KEY=<read-only-secret>
 ```text
 R2 evidence store
         │
-        ├── PMUA product catalogue + product details
+        ├── PMUA product catalogue (R2) + reviewed product details (data/public)
         └── CLIG manifest + project list
         │
         ▼
@@ -54,7 +56,7 @@ app/static/app.js + app/templates/index.html
   แผนที่ → ประเทศ → ภาค → จังหวัด → รายการรายละเอียด
 ```
 
-หลักการสำคัญคือ Dashboard อ่าน reviewed evidence จาก R2 ไม่ดึงเว็บไซต์ต้นทางโดยตรงตอนผู้ใช้เปิดหน้าเว็บ
+Dashboard อ่านรายการและ lookup เดิมจาก R2 ส่วนรายละเอียด PMUA อ่าน reviewed public artifact ที่ตรวจ hash และสร้างแบบ offline แล้ว ไม่ดึงเว็บไซต์ต้นทางโดยตรงตอนผู้ใช้เปิดหน้าเว็บ
 
 ## 4. หน้าจอ F4
 
@@ -122,7 +124,7 @@ app/static/app.js + app/templates/index.html
 |---|---|---|---|
 | 1. เก็บข้อมูลต้นทาง | PMUA `/search` และ `/product/show/{numeric_product_id}`; CLIG `POST /api/project/search_project` และหน้า detail | connector เรียกเฉพาะ endpoint สาธารณะที่อยู่ใน allowlist และบันทึกเวลาที่ดึงข้อมูล | run folder ชั่วคราวและ manifest ก่อน publish |
 | 2. ตรวจและทำข้อมูล | `f2_target_household`, `f4_pmua_product_details`, `clig_projects` | ตรวจ schema, จำนวนแถว, ID ซ้ำ, fetch error, ความครบถ้วน และ privacy; PMUA parser เก็บ ROI/SROI/Outcomes/Impacts เป็นข้อความ | snapshot ที่ผ่าน review ใน Cloudflare R2 |
-| 3. รวมข้อมูล PMUA | `products_redacted.jsonl.gz` + `product_details.jsonl.gz` | join ด้วย `product_id`; ใช้รหัสจังหวัดจาก catalogue และใช้ lookup จังหวัด/อำเภอ/ตำบลสำหรับชื่อที่แสดง | `app/f4_data.py` สร้างรายการ innovation พร้อม `detail_source_key` และ `evidence_status` |
+| 3. รวมข้อมูล PMUA | `products_redacted.jsonl.gz` + `data/public/pmua_product_details.json` | join ด้วย `product_id`; ใช้รหัสจังหวัดจาก catalogue และใช้ lookup จังหวัด/อำเภอ/ตำบลสำหรับชื่อที่แสดง | `app/f4_data.py` สร้างรายการ innovation พร้อม `detail_source_key` และ `evidence_status` |
 | 4. รวมข้อมูล CLIG | `manifest.json` + `projects.jsonl.gz` | ใช้สถานะ ปีงบประมาณ หน่วยงาน งบประมาณ และจับคู่จังหวัดจากข้อความในชื่อ/รายละเอียด/บทคัดย่อ/หน่วยงาน | `f4_policy_projects()` และ `source_sections` ของ CLIG |
 | 5. รวม KPI ที่ review แล้ว | `data/public/apptech_aggregates.json` และ R2 snapshot | ใช้ aggregate ที่อนุญาตสำหรับนวัตกรและเศรษฐกิจ; ไม่กระจายผลกระทบเศรษฐกิจระดับประเทศลงจังหวัดหรือภาค | `/api/public/v1/f4/overview` |
 | 6. ให้บริการและแสดงผล | `app/f4_data.py` → `app/main.py` → `app/static/app.js` | โหลด snapshot, cache ผลลัพธ์ 300 วินาที, ส่ง JSON ให้ UI และแสดงแผนที่ KPI รายการ และรายละเอียด | Dashboard F4; หน้าเว็บไม่เรียก PMUA/CLIG โดยตรง |
@@ -190,7 +192,7 @@ app/static/app.js + app/templates/index.html
 
 connector `f4_pmua_product_details` อ่าน pagination จากหน้า `/search` แล้วเปิดเฉพาะ `/product/show/{numeric_product_id}` ทีละรายการ หากหน้ารายละเอียดใดล้มเหลวหลัง retry 3 ครั้ง ระบบจะล้มทั้ง refresh และไม่ publish snapshot ที่ไม่ครบ parser กลางเก็บ ROI/SROI เป็นข้อความและกรอง Outcomes/Impacts เฉพาะแถวที่ว่างทั้ง label และ value
 
-สคริปต์ `tools/scrape_pmua_product_details.py` ใช้ parser เดียวกันสำหรับ review และ publish ในเครื่อง โดยจะปฏิเสธการ publish หากพบ `fetch_error`
+สคริปต์ `tools/scrape_pmua_product_details.py` ใช้ parser เดียวกันสำหรับเก็บและ review evidence ในเครื่อง โดยปฏิเสธการ push evidence หากพบ `fetch_error` การ push ขึ้น R2 ยังไม่เปลี่ยน public release
 
 ทดลองจำนวนน้อยก่อน:
 
@@ -210,6 +212,16 @@ python tools/scrape_pmua_product_details.py \
 ```
 
 การ push ขึ้น R2 ต้องทำหลังตรวจ row count, `fetch_error`, `empirical_evidence`, `evidence_status`, `outcomes`, `impacts` และ manifest แล้วเท่านั้น จึงค่อยเพิ่ม `--push`
+
+หลังตรวจ evidence run ครบ ให้สร้าง reviewed projection และ receipt ก่อนเปิด PR:
+
+```bash
+python -m tools.build_pmua_product_details <verified_run_directory>
+python -m app.cli publication receipt
+python -m app.cli check
+```
+
+Builder ตรวจ SHA-256, จำนวนและ product_id, URL, fetch error และ privacy ก่อนเขียน public artifact โดยคงค่า TRL, ROI/SROI, Outcomes และ Impacts เดิมทั้งหมด `as_of` เป็น null เพราะต้นทางไม่ระบุ ส่วน `fetched_at` คือเวลาบันทึกหลักฐาน เมื่อ PR ผ่าน review และ merge แล้ว startup จึง sync artifact ที่ commit ไว้เข้า serving database
 
 ## 10. การติดตั้งและรัน local
 
@@ -231,7 +243,7 @@ python -m app.server
 
 ขั้นต่ำที่ควรตรวจเมื่อแก้ F4:
 
-1. `git diff --check`
+1. `git diff --check` และ `python -m app.cli check` ต้องผ่านครบ
 2. เปิดหน้า F4 ระดับประเทศ ภาค และจังหวัด
 3. ตรวจว่า Overview แยก 2 กลุ่มข้อมูลและตัวเลขไม่ปนกัน
 4. ตรวจ API overview และ endpoint รายการทั้งสองประเภท

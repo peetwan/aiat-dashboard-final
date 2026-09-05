@@ -151,9 +151,19 @@ class ResponseRecorder:
         if path_template is not None:
             parsed_url = urlsplit(url)
             template = str(path_template)
-            if method != "GET" or parsed_url.path != template or template != "/product/show/{product_id}":
-                raise PolicyViolation("path-template endpoints must be numeric PMUA product detail GETs")
-            path_pattern = re.compile(r"^/product/show/[0-9]+$")
+            parameters = endpoint.get("path_parameters", {})
+            placeholders = re.findall(r"\{([A-Za-z][A-Za-z0-9_]*)\}", template)
+            if (
+                method != "GET" or parsed_url.path != template or not placeholders
+                or len(placeholders) != len(set(placeholders))
+                or not isinstance(parameters, dict) or set(parameters) != set(placeholders)
+                or any(kind != "integer" for kind in parameters.values())
+            ):
+                raise PolicyViolation("path-template endpoints require explicit integer parameters on GET paths")
+            pattern = re.escape(template)
+            for parameter in placeholders:
+                pattern = pattern.replace(re.escape("{" + parameter + "}"), r"[0-9]+")
+            path_pattern = re.compile(pattern)
         url_query = tuple(sorted(parse_qsl(urlsplit(url).query, keep_blank_values=True)))
         required_query: dict[str, str | None] = {}
         request_template = endpoint.get("request_template")

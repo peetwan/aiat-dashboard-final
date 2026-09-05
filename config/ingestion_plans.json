@@ -253,7 +253,32 @@
         "all non-numeric /product/show paths",
         "write actions"
       ],
-      "notes_th": "เก็บเฉพาะหน้ารายละเอียดนวัตกรรมสาธารณะเพื่อ ROI/SROI ผลลัพธ์ ผลกระทบ และ TRL; ไม่เก็บข้อมูลติดต่อหรือข้อมูลบุคคล"
+      "notes_th": "เก็บเฉพาะหน้ารายละเอียดนวัตกรรมสาธารณะเพื่อ ROI/SROI ผลลัพธ์ ผลกระทบ และ TRL; ไม่เก็บข้อมูลติดต่อหรือข้อมูลบุคคล",
+      "catalog_expected_record_count": 1160,
+      "catalog_endpoints": [
+        {
+          "method": "GET",
+          "url_key": "list_url",
+          "kind": "public_product_search_for_detail_ids",
+          "access": "maintainer_reviewed_public_candidate",
+          "team_action": "call_without_login",
+          "request_template": {
+            "query_or_body": "page=<value>"
+          }
+        },
+        {
+          "method": "GET",
+          "url_key": "detail_url_template",
+          "kind": "public_product_detail",
+          "access": "maintainer_reviewed_public_candidate",
+          "team_action": "call_without_login",
+          "path_template": "/product/show/{product_id}",
+          "path_parameters": {
+            "product_id": "integer"
+          },
+          "request_template": {}
+        }
+      ]
     },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",

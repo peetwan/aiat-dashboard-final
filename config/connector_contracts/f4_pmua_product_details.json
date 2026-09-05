@@ -7,9 +7,15 @@
     {
       "key_pattern": "^public_product_detail$",
       "grain_th": "หนึ่งแถว = หนึ่งหน้ารายละเอียดนวัตกรรมสาธารณะจาก PMUA AppTech ต่อ product_id",
-      "identity_options": [["product_id"]],
+      "identity_options": [
+        [
+          "product_id"
+        ]
+      ],
       "geography_fields": [],
-      "as_of_fields": ["fetched_at"]
+      "as_of_fields": [
+        "as_of"
+      ]
     }
   ],
   "completeness_checks": [
@@ -22,7 +28,17 @@
   "privacy": {
     "candidate_only": true,
     "contact_value_scan": true,
-    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+    "forbidden_public_fields": [
+      "email",
+      "phone",
+      "address",
+      "token",
+      "password",
+      "cookie",
+      "authorization",
+      "citizen",
+      "national_id"
+    ]
   },
   "sample_fixture": "tests/fixtures/connectors/f4_pmua_product_details.json",
   "notes_th": "ข้อมูลนี้เป็น evidence รายละเอียดสินค้าเพื่อ F4 ไม่ใช่ทะเบียนครัวเรือน"

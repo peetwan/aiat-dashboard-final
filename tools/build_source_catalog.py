@@ -71,6 +71,7 @@ APPROVED_PUBLIC_MODES = {
     "spu_nsn_flood": "api_first",
     "spu_rawangphai_uru": "api_first",
     "clig_projects": "api_first",
+    "f4_pmua_product_details": "api_first",
 }
 
 SPU_DISASTER_SOURCE_IDS = frozenset(
@@ -158,6 +159,8 @@ def load_plan_endpoints(source_id: str, plan: dict, cloud_policy: str, acquisiti
             "restricted": restricted,
             "runtime_enabled": acquisition_mode == "api_first" and action == "call_without_login" and not restricted,
             "request_template": declared.get("request_template", {}),
+            **({"path_template": declared["path_template"], "path_parameters": declared["path_parameters"]}
+               if "path_template" in declared else {}),
             "notes_th": declared.get("notes_th", ""),
         })
     return endpoints

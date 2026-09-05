@@ -215,16 +215,19 @@ def parse_product_detail_html(html: str, product_id: int | str, source_url: str)
 
 
 def _fetch_detail_with_retry(context: ConnectorContext, url: str, name: str):
-    for attempt in range(3):
+    attempts = int(context.plan.get("detail_retries", 3))
+    if not 1 <= attempts <= 5:
+        raise ValueError("detail_retries must be between 1 and 5")
+    for attempt in range(attempts):
         try:
             response, _ = context.recorder.request("GET", url, name=name)
             return response
         except httpx.HTTPStatusError as error:
             status = error.response.status_code if error.response is not None else None
-            if status not in {429, 500, 502, 503, 504} or attempt == 2:
+            if status not in {429, 500, 502, 503, 504} or attempt == attempts - 1:
                 raise
         except httpx.RequestError:
-            if attempt == 2:
+            if attempt == attempts - 1:
                 raise
         time.sleep(min(2**attempt, 6))
     raise RuntimeError(f"failed to fetch PMUA detail page: {url}")
@@ -268,9 +271,16 @@ class PmuaProductDetailsConnector:
                 source_url,
                 f"pmua_product_detail_{index:04d}_{product_id}",
             )
+            soup = BeautifulSoup(response.text, "html.parser")
+            if not (_find_heading(soup, "ระดับความพร้อม (TRL)") or _find_heading(soup, "ผลลัพธ์ (Outcomes)")):
+                raise RuntimeError(f"PMUA detail schema missing for product_id={product_id}")
+            canonical = soup.find("meta", attrs={"property": "og:url"})
+            if canonical and canonical.get("content") != source_url:
+                raise RuntimeError(f"PMUA detail identity mismatch for product_id={product_id}")
             row = parse_product_detail_html(response.text, product_id, source_url)
             if not row["title"]:
-                row["title"] = catalogue_row.get("title") or ""
+                raise RuntimeError(f"PMUA detail title missing for product_id={product_id}")
+            row["as_of"] = None
             row["http_status"] = response.status_code
             row["fetched_at"] = fetched_at
             details.append(("public_product_detail", row))
