@@ -279,6 +279,9 @@ def test_tourism_projection_keeps_public_service_contacts_and_counts():
     assert len(projections["komepage"]["data"]["lantern_production_groups"]) == 10
     assert len(projections["contact"]["data"]["emergency_numbers"]) == 6
     assert len(projections["contact"]["data"]["service_centres"]) == 3
+    centres = projections["contact"]["data"]["service_centres"]
+    assert sum(len(centre["phones"]) for centre in centres) == 7
+    assert centres[0]["opening_hours"] == "07.30 - 18.00 น."
     stations = projections["homepage"]["data"]["map"]["stations"]
     assert all(set(station) == {"name", "nearby_count"} for station in stations)
     recommendation_items = [

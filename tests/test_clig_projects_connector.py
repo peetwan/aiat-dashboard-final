@@ -18,7 +18,7 @@ from app.connectors.clig_projects import (
 )
 from app.connectors.base import ConnectorContext
 from app.settings import Settings
-from app.ingestion import ResponseRecorder, PolicyViolation
+from app.ingestion import IngestionFetchError, IngestionPipeline, ResponseRecorder, PolicyViolation
 from app.catalog import load_catalog, load_ingestion_plans
 from tools.evidence_store import StoreConfig, push_run
 from tools.scrape_clig_projects import write_jsonl, write_manifest_input
@@ -144,6 +144,7 @@ def test_clig_fetch_uses_real_catalog_recorder_without_network(tmp_path, monkeyp
     monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
     source = next(row for row in load_catalog()["sources"] if row["source_id"] == "clig_projects")
     plan = load_ingestion_plans()["sources"]["clig_projects"]
+    plan = {**plan, "catalog_expected_record_count": 1, "expected_policy_candidate_count": 1}
     settings = Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0)
     recorder = ResponseRecorder("clig_projects", "fixture-run", settings, runtime_endpoints=source["endpoints"])
     calls = []
@@ -196,6 +197,47 @@ def test_connector_rejects_duplicate_project_ids() -> None:
     recorder = SequenceRecorder([duplicate_html, DETAIL_HTML])
     with pytest.raises(RuntimeError, match="duplicate project_id"):
         CligProjectsConnector().fetch(context_for(recorder))
+
+
+@pytest.mark.parametrize("counts,message", [
+    ({"catalog_expected_record_count": 107}, "projects count mismatch: expected 107, got 1"),
+    ({"catalog_expected_record_count": 1, "expected_policy_candidate_count": 2}, "policy_candidates count mismatch"),
+    ({"catalog_expected_record_count": 1, "expected_policy_candidate_count": 0}, "policy_candidates count mismatch"),
+])
+def test_connector_rejects_incomplete_or_changed_counts(counts, message):
+    context = context_for(SequenceRecorder([LIST_HTML, DETAIL_HTML, EMPTY_HTML]))
+    context.plan.update(counts)
+    with pytest.raises(RuntimeError, match=message):
+        CligProjectsConnector().fetch(context)
+
+
+def test_connector_rejects_page_limit_before_completion():
+    context = context_for(SequenceRecorder([LIST_HTML, DETAIL_HTML]))
+    context.plan["max_pages"] = 1
+    with pytest.raises(RuntimeError, match="pagination exceeded max_pages"):
+        CligProjectsConnector().fetch(context)
+
+
+def test_pipeline_keeps_failed_manifest_for_truncated_clig_snapshot(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.settings.PROJECT_ROOT", tmp_path)
+    real_client = httpx.Client
+    def respond(request):
+        if request.method == "GET":
+            body = DETAIL_HTML
+        else:
+            form = parse_qs(request.content.decode(), keep_blank_values=True)
+            body = LIST_HTML if form["page"] == ["1"] else EMPTY_HTML
+        return httpx.Response(200, text=body, headers={"content-type": "text/html"}, request=request)
+    monkeypatch.setattr("app.ingestion.httpx.Client", lambda **kwargs: real_client(transport=httpx.MockTransport(respond), **kwargs))
+    source = next(row for row in load_catalog()["sources"] if row["source_id"] == "clig_projects")
+    pipeline = IngestionPipeline(None, Settings(database_url="sqlite:///unused.sqlite", http_delay_seconds=0))
+    with pytest.raises(IngestionFetchError, match="projects count mismatch: expected 107, got 1") as exc:
+        pipeline._fetch_api(source, "truncated-fixture")
+    manifest = json.loads(exc.value.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "failed"
+    assert manifest["records_seen"] == 0
+    assert len(manifest["artifacts"]) == 3
+    assert all(artifact["sha256"] for artifact in manifest["artifacts"])
 
 
 class FakeS3Client:

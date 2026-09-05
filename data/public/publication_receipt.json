@@ -1,6 +1,6 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "c17b4d452e2e2cff4e56412f7ab9d6a08e892426964ac892fe9a598b46f26420",
+  "release_digest": "570c48a16bc946ca4e67e587b1e3b1c597a7a902f254f6e401bf5d9131262f45",
   "artifact_count": 176,
   "artifacts": [
     {
@@ -830,7 +830,7 @@
       "role": "support",
       "format": "json",
       "bytes": 21993,
-      "sha256": "ea83ce76518d49ffbcc697626394d86d0150881f1e69478a9c7f5f2261774a14",
+      "sha256": "d0d030666f2d405bc68bbcb770d897555cc0572f15664865a161c82a2edc6bc2",
       "contract_sha256": "fec717f10ab8fee01c78be08973b5b76b314798f5ebbfaa7723b9e728d37a14e"
     },
     {
@@ -1309,8 +1309,8 @@
       "dataset_key": "provincial_briefings",
       "role": "database",
       "format": "json",
-      "bytes": 110354,
-      "sha256": "8e670bb4e5af8ac5da33bbe609d36def9b7f9756479bdd2088c92e45a0cf02b8",
+      "bytes": 110278,
+      "sha256": "54df1e9580c16610c135faa40be7a12cab0df403ba230abc706782d65a5eb708",
       "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {
@@ -1690,7 +1690,7 @@
       "role": "support",
       "format": "json",
       "bytes": 24129,
-      "sha256": "9a47a90e67f5a9838878f383942465d4c28e1f72a75d4bbcda479c1f28b2ace0",
+      "sha256": "bbe7e3ec6f43de78be8a915722ca260f7fae642ae50419814449256860f1c86e",
       "contract_sha256": "f08fe67a6b0bf15d877cfad7d855409f5e4ce056db4dda4565aa4b6db7d72d83"
     },
     {

@@ -3575,11 +3575,12 @@ function renderTourism(section = {}) {
     ...(contact.service_centres || []).map((item) => ({
       name: localizedText(item.name), phone: (item.phones || []).map((entry) => entry.phone).filter(Boolean).join(", "),
       address: localizedText(item.address),
+      openingHours: item.opening_hours,
     })),
     ...(lanternPage.data?.lantern_production_groups || []).map((item) => ({ name: localizedText(item.name), phone: item.phone })),
     ...otherTransport.filter((item) => item.phone).map((item) => ({ name: localizedText(item.name), phone: item.phone, address: localizedText(item.location) })),
   ];
-  const contactCards = publicContacts.map((item) => `<article class="data-card"><h3>${escapeHtml(item.name || "บริการท่องเที่ยว")}</h3><p>${escapeHtml(item.phone || "ไม่ระบุหมายเลข")}</p>${item.address ? `<p>${escapeHtml(item.address)}</p>` : ""}</article>`).join("");
+  const contactCards = publicContacts.map((item) => `<article class="data-card"><h3>${escapeHtml(item.name || "บริการท่องเที่ยว")}</h3><p>${escapeHtml(item.phone || "ไม่ระบุหมายเลข")}</p>${item.openingHours ? `<p>เวลาทำการ: ${escapeHtml(item.openingHours)}</p>` : ""}${item.address ? `<p>${escapeHtml(item.address)}</p>` : ""}</article>`).join("");
 
   const sourceUrl = safeExternalUrl(recommendPage.source_url || travelPage.source_url || homePage.source_url);
   document.getElementById("tourismItems").innerHTML = `

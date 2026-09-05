@@ -200,6 +200,11 @@ class CligProjectsConnector:
         keyword = context.plan.get("project_name", DEFAULT_KEYWORD)
         year = context.plan.get("project_year", DEFAULT_YEAR)
         max_pages = int(context.plan.get("max_pages", DEFAULT_MAX_PAGES))
+        expected_projects = context.plan.get("catalog_expected_record_count")
+        expected_candidates = context.plan.get("expected_policy_candidate_count")
+        for label, expected, minimum in (("projects", expected_projects, 1), ("policy_candidates", expected_candidates, 0)):
+            if expected is not None and (type(expected) is not int or expected < minimum):
+                raise ValueError(f"CLIG {label} expected count must be an integer >= {minimum}")
 
         projects: list[dict[str, Any]] = []
         seen_ids: set[str] = set()
@@ -239,12 +244,15 @@ class CligProjectsConnector:
                 break
             page += 1
 
+        if page > max_pages:
+            raise RuntimeError("CLIG pagination exceeded max_pages before completion")
         if not projects:
             raise RuntimeError("CLIG project connector fetched zero projects")
+        if expected_projects is not None and len(seen_ids) != expected_projects:
+            raise RuntimeError(f"CLIG projects count mismatch: expected {expected_projects}, got {len(seen_ids)}")
+        candidates = [candidate_record(row) for row in projects if is_policy_candidate(row)]
+        if expected_candidates is not None and len(candidates) != expected_candidates:
+            raise RuntimeError(f"CLIG policy_candidates count mismatch: expected {expected_candidates}, got {len(candidates)}")
         records: list[DatasetRecord] = [("projects", row) for row in projects]
-        records.extend(
-            ("policy_candidates", candidate_record(row))
-            for row in projects
-            if is_policy_candidate(row)
-        )
+        records.extend(("policy_candidates", row) for row in candidates)
         return records

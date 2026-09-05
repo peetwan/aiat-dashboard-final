@@ -110,6 +110,25 @@ def test_public_contact_container_only_keeps_declared_leaves():
     assert any(".note" in p for p in problems(payload, contexts))
 
 
+@pytest.mark.parametrize("text", ["ผู้จัดทำfoo@example.org", "foo@example.orgผู้จัดทำ", "ผู้จัดทำfoo@example.orgติดต่อ"])
+def test_emails_adjacent_to_thai_prose_require_public_contact_context(text, tmp_path):
+    from app.demand_artifacts import _assert_public_fields
+
+    payload = {"owner_name": text}
+    attribution = {"/owner_name": "work_attribution"}
+    assert "[redacted-email]" in sanitize_payload(payload, field_contexts=attribution)["owner_name"]
+    assert any("email" in problem for problem in problems(payload, attribution))
+    contact = {"/owner_name": "public_contact"}
+    assert sanitize_payload(payload, field_contexts=contact) == payload
+    assert problems(payload, contact) == []
+    artifact = tmp_path / "undeclared.json"
+    artifact.write_text(json.dumps({"note": text}), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="email"):
+        validate_public_artifacts([ArtifactInput("candidate", "source_dataset", artifact)])
+    with pytest.raises(ValueError, match="contact value"):
+        _assert_public_fields({"note": text}, 1)
+
+
 def test_public_contact_can_include_a_postal_contact_address():
     payload = {"address": "ที่อยู่ 123 Example Road โทรศัพท์ 0812345678", "home_address": "ที่อยู่บ้านส่วนตัว"}
     contexts = {"/address": "public_contact"}

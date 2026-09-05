@@ -5,6 +5,7 @@ from copy import deepcopy
 import pytest
 
 from tools.build_housing_place_details import merge_place_details
+from tools.build_provincial_briefings import project_tourism_payload, sanitize_public_text
 from tools.public_work_details import project_cultural_supporting, project_mtr_work, project_rmutdb_work
 
 
@@ -33,6 +34,28 @@ def test_rmutdb_work_preserves_pdf_contact_and_attribution_without_person_id():
     assert item["inventor"] == "ผู้ประดิษฐ์ตัวอย่าง"
     assert item["phone"] == "0812345678" and item["email"] == "office@example.org"
     assert item["pdf_page"] == 7 and "citizen_id" not in item
+
+
+def test_service_projection_separates_hours_and_preserves_work_phone_extensions():
+    projected = project_tourism_payload({"page_id": "contact", "data": {
+        "service_contacts": [{"name": {"TH": "ศูนย์บริการตัวอย่าง"}, "opening_hours_raw": "07.30 - 18.00 น.", "phones": [
+            {"label": {"TH": "เปิดทำการ"}, "phone_display": "07.30 - 18.00 น."},
+            {"phone_display": "053-569100"},
+            {"label": "สำนักงาน", "phone_display": "053 - 511013 ต่อ 109"},
+            {"phone_display": "1111"},
+            {"phone_display": "ไม่ระบุ"},
+            {"phone_display": "08:00 - 17:00"},
+        ]}],
+    }})
+    centre = projected["data"]["service_centres"][0]
+    assert centre["opening_hours"] == "07.30 - 18.00 น.; 08:00 - 17:00"
+    assert [entry["phone"] for entry in centre["phones"]] == ["053-569100", "053 - 511013 ต่อ 109", "1111"]
+    assert centre["phones"][1]["label"] == "สำนักงาน"
+
+
+@pytest.mark.parametrize("text", ["ผู้จัดทำfoo@example.org", "foo@example.orgผู้จัดทำ", "ผู้จัดทำfoo@example.orgติดต่อ"])
+def test_descriptive_projection_removes_emails_adjacent_to_thai(text):
+    assert "foo@example.org" not in (sanitize_public_text(text) or "")
 
 
 def place_pair():

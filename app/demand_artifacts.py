@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.models import HousingDemandRecord, HousingDemandSnapshot, utc_now
 from app.settings import PROJECT_ROOT
+from app.privacy import EMAIL_RE
 
 
 DEMAND_ROOT = PROJECT_ROOT / "data" / "demand"
@@ -25,7 +26,6 @@ FORBIDDEN_FIELD_RE = re.compile(
     r"(?i)(?:^|_)(?:first_name|last_name|full_name|person_name|name|"
     r"phone|telephone|tel|mobile|email|e_mail|contact)(?:_|$)"
 )
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE_RE = re.compile(
     r"(?<![\dA-Za-z])(?:\+?66|0)\s*\d(?:[\s().-]*\d){7,9}(?!\d)"
 )

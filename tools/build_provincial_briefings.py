@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.privacy import EMAIL_RE, sanitize_payload
+from app.privacy import EMAIL_RE, PHONE_RE as CONTACT_PHONE_RE, sanitize_payload
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -163,7 +163,6 @@ ADDRESS_CLAUSE_RE = re.compile(
     r"(?i)(?:ที่อยู่|address|เลขที่\s*\d+|หมู่(?:ที่)?\s*\d+|ซอย|ถนน)"
     r"\s*[:：]?\s*[^\n;|]*"
 )
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE_RE = re.compile(
     r"(?<![\dA-Za-z])(?:\+?66|0)\s*\d(?:[\s().-]*\d){7,9}(?!\d)"
 )
@@ -281,6 +280,29 @@ def _safe_fare(value: Any) -> dict[str, Any] | None:
     if amount is None and currency is None:
         return None
     return {"amount": amount, "currency": currency}
+
+
+def project_service_centre(row: dict[str, Any]) -> dict[str, Any]:
+    opening_hours = [clean(row.get("opening_hours_raw"))]
+    phones = []
+    for entry in row.get("phones") or []:
+        value = clean(entry.get("phone_display")) or clean(entry.get("phone_normalized"))
+        if not value:
+            continue
+        label = project_localized_text(entry.get("label"), sanitize=True)
+        label_text = " ".join(label.values()) if isinstance(label, dict) else str(label or "")
+        is_hours = re.search(r"เปิดทำการ|เวลาทำการ|เวลาเปิด|opening|hours", label_text, re.I)
+        is_time_range = re.fullmatch(r"\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}(?:\s*น\.?)?", value)
+        if is_hours or is_time_range:
+            opening_hours.append(value)
+        elif CONTACT_PHONE_RE.search(value) or re.fullmatch(r"[1-9]\d{2,3}", value):
+            phones.append({"label": label, "phone": value})
+    return {
+        "name": project_localized_text(row.get("name"), sanitize=True),
+        "address": project_localized_text(row.get("address")) or {},
+        "opening_hours": "; ".join(dict.fromkeys(value for value in opening_hours if value)) or None,
+        "phones": phones,
+    }
 
 
 def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
@@ -404,14 +426,7 @@ def project_tourism_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 for row in emergency_rows
             ],
             "service_centres": [
-                {"name": project_localized_text(row.get("name"), sanitize=True),
-                 "address": project_localized_text(row.get("address")) or {},
-                 "opening_hours": clean(row.get("opening_hours_raw")),
-                 "phones": [
-                     {"label": project_localized_text(phone.get("label"), sanitize=True),
-                      "phone": clean(phone.get("phone_display")) or clean(phone.get("phone_normalized"))}
-                     for phone in row.get("phones") or []
-                 ]}
+                project_service_centre(row)
                 for row in data.get("service_contacts") or []
             ],
         }

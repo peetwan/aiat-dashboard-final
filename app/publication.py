@@ -4,7 +4,7 @@ from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
     key_kind, pointer_child, validate_field_contexts,
 )
-from app.privacy import PHONE_RE
+from app.privacy import EMAIL_RE, PHONE_RE
 
 import argparse
 import csv
@@ -43,7 +43,6 @@ SAFE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 SAFE_SOURCE_ID_RE = re.compile(r"^[a-z0-9_]+$")
 SAFE_PUBLIC_PATH_RE = re.compile(r"^data/public/[A-Za-z0-9_./\[\]*?-]+$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 # High-confidence Thai telephone tokens.  Requiring either +66 or a local 0
 # prefix, realistic fixed/mobile lengths, and non-word boundaries prevents a
 # run of digits inside a hash, decimal, or prefixed machine identifier from

@@ -71,7 +71,7 @@ FORBIDDEN_KEY_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
     ),
 )
 
-EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+EMAIL_RE = re.compile(r"(?i)(?<![A-Z0-9._%+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}(?![A-Z0-9-])")
 # Thai phone numbers are 9-10 digits domestically (or 8-9 digits after +66),
 # and mobile/landline prefixes never have 0 as their second digit.  Requiring
 # that shape keeps Buddhist-era-prefixed record codes (e.g. procurement IDs

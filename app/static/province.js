@@ -194,6 +194,8 @@ function preferredObjectText(value) {
     value.label_th,
     value.name_th,
     value.name,
+    value.faculty,
+    value.institute,
     value.title_th,
     value.title,
     value.business_name,
