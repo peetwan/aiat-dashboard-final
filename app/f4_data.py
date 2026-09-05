@@ -22,7 +22,7 @@ PMUA_PRODUCTS_KEY = "raw/f2/f2_target_household/20260818T163603Z/products_redact
 PMUA_PROPOSE_KEY = "raw/f2/f2_target_household/20260820T134640Z/public_pages/propose.html"
 PMUA_AREA_DISTRICTS_KEY = "raw/f4/pmua_area_lookup/20260826T145433Z/districts.jsonl.gz"
 PMUA_AREA_SUBDISTRICTS_KEY = "raw/f4/pmua_area_lookup/20260826T145433Z/subdistricts.jsonl.gz"
-PMUA_PRODUCT_DETAILS_KEY = "raw/f4/pmua_product_details/20260827T051354Z/product_details.jsonl.gz"
+PMUA_PRODUCT_DETAILS_KEY = "data/public/pmua_product_details.json"
 CLIG_MANIFEST_KEY = "raw/f4/clig_projects/20260823T072251Z/manifest.json"
 CLIG_PROJECTS_KEY = "raw/f4/clig_projects/20260823T072251Z/projects.jsonl.gz"
 APPTECH_CONNECTOR_SOURCE = "data/public/apptech_aggregates.json"
@@ -284,8 +284,13 @@ def _innovation_row(
         "trl_status": detail.get("trl_status") or row.get("trl_status") or row.get("trl_label"),
         "latitude": detail.get("latitude"),
         "longitude": detail.get("longitude"),
+        "empirical_evidence": detail.get("empirical_evidence") or [],
+        "evidence_status": detail.get("evidence_status") or "not_reported",
         "outcomes": detail.get("outcomes") or [],
         "impacts": detail.get("impacts") or [],
+        "empirical_evidence_count": sum(
+            1 for item in detail.get("empirical_evidence") or [] if item.get("status") == "reported"
+        ),
         "outcome_count": len(detail.get("outcomes") or []),
         "impact_count": len(detail.get("impacts") or []),
     }
@@ -493,7 +498,7 @@ def _load_snapshot_from_r2() -> dict[str, Any]:
         propose_html = _read_r2_object(client, bucket, PMUA_PROPOSE_KEY).decode("utf-8", errors="replace")
         area_districts = _read_jsonl_gz(client, bucket, PMUA_AREA_DISTRICTS_KEY)
         area_subdistricts = _read_jsonl_gz(client, bucket, PMUA_AREA_SUBDISTRICTS_KEY)
-        product_details = _read_jsonl_gz(client, bucket, PMUA_PRODUCT_DETAILS_KEY)
+        product_details = load_public_artifact("f4/pmua-product-details", "pmua_product_details.json").get("items", [])
         clig_manifest = _read_json(client, bucket, CLIG_MANIFEST_KEY)
         clig_projects = _read_jsonl_gz(client, bucket, CLIG_PROJECTS_KEY)
     except Exception as exc:  # pragma: no cover - exact boto errors vary by environment

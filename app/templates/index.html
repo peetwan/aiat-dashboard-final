@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css" />
     <link rel="stylesheet" href="/static/styles.css?v=departments-20260905-02" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
-    <link rel="stylesheet" href="/static/departments.css?v=20260905-04" />
+    <link rel="stylesheet" href="/static/departments.css?v=20260905-06" />
   </head>
   <body>
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
@@ -147,20 +147,24 @@
               <section class="f4-economic-table-wrap" id="f4EconomicImpactWrap" hidden>
                 <header>
                   <strong>ผลกระทบเศรษฐกิจรวมระดับประเทศ</strong>
-                  <small>ข้อมูลเศรษฐกิจแสดงเป็นยอดรวมรายปี ไม่ใช่ before-after รายพื้นที่</small>
+                  <small>ข้อมูลจากต้นทางเป็นยอดรวมระดับประเทศรายปี ไม่ใช่การเปรียบเทียบก่อน–หลังรายพื้นที่</small>
                 </header>
-                <div class="f4-economic-table-scroll" role="region" aria-label="ตารางผลกระทบเศรษฐกิจ เลื่อนแนวนอนเพื่อดูครบทุกคอลัมน์" tabindex="0">
-                  <table class="f4-economic-table">
-                    <thead>
-                      <tr>
-                        <th>ปี</th>
-                        <th>ต้นทุนที่ลดลง</th>
-                        <th>รายได้ที่เพิ่มขึ้น</th>
-                        <th>ผลกระทบสุทธิ</th>
-                      </tr>
-                    </thead>
-                    <tbody id="f4EconomicImpactRows"></tbody>
-                  </table>
+                <div class="f4-economic-total" id="f4EconomicTotal" aria-label="ยอดรวมผลกระทบเศรษฐกิจ"></div>
+                <div class="f4-economic-annual" id="f4EconomicAnnual">
+                  <h4>ผลกระทบรายปี</h4>
+                  <div class="f4-economic-table-scroll" role="region" aria-label="ตารางผลกระทบเศรษฐกิจรายปี เลื่อนแนวนอนเพื่อดูครบทุกคอลัมน์" tabindex="0">
+                    <table class="f4-economic-table">
+                      <thead>
+                        <tr>
+                          <th>ปี</th>
+                          <th>ต้นทุนที่ลดลง</th>
+                          <th>รายได้ที่เพิ่มขึ้น</th>
+                          <th>ผลกระทบสุทธิ</th>
+                        </tr>
+                      </thead>
+                      <tbody id="f4EconomicImpactRows"></tbody>
+                    </table>
+                  </div>
                 </div>
               </section>
             </section>
@@ -451,6 +455,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/app.js?v=departments-20260905-05" defer></script>
+    <script src="/static/app.js?v=departments-20260905-08" defer></script>
   </body>
 </html>

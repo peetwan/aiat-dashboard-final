@@ -38,6 +38,7 @@ SEPARATE_ENDPOINT_EVIDENCE_SOURCE_IDS = {
     "f1_pppconnext",
     "f2_learning_dashboard",
     "f2_target_household",
+    "f4_pmua_product_details",
 }
 HAS_EVIDENCE_WORKSPACE = (
     REGISTRY_PATH.is_file()
@@ -63,6 +64,7 @@ PUBLIC_CANDIDATES = {
     "f2_apptech_mtr",
     "f2_apptech_mru",
     "f2_target_household",
+    "f4_pmua_product_details",
     "f2_learning_dashboard",
     "f2_learning_area_based",
     "f2_wallet_all_realtime",
