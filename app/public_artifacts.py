@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.catalog import load_catalog
 from app.models import PublicArtifact, utc_now
 from app.privacy import EMAIL_RE, PHONE_RE
-from app.field_contexts import key_kind
+from app.field_contexts import is_contact_exposure_metadata, key_kind
 from app.settings import PROJECT_ROOT
 from app.publication import _privacy_problems, bind_outputs, load_contracts
 
@@ -412,7 +412,8 @@ def _artifact_policy_violations(
                     or key_kind(str(key)) in {"private", "name", "contact"}
                     or any(marker in str(key) for marker in SENSITIVE_THAI_KEY_PARTS)
                 )
-                if sensitive_key and not _negative_privacy_audit_value(normalized, child):
+                contact_audit_flag = is_contact_exposure_metadata(path.rsplit(".", 1)[-1], str(key), child)
+                if sensitive_key and not contact_audit_flag and not _negative_privacy_audit_value(normalized, child):
                     violations.append((child_path, "contact/private field"))
                 if str(key) in restricted_source_ids and not restricted_id_allowed(child_path):
                     violations.append((child_path, "restricted source identifier"))

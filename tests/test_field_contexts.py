@@ -110,6 +110,23 @@ def test_public_contact_container_only_keeps_declared_leaves():
     assert any(".note" in p for p in problems(payload, contexts))
 
 
+def test_catalog_contact_exposure_metadata_is_boolean_and_path_scoped(tmp_path):
+    from app.public_artifacts import _artifact_policy_violations
+
+    item = ArtifactInput("catalog", "catalog", tmp_path / "catalog.json")
+    def report(value):
+        return _artifact_policy_violations(item, {"sources": [{"privacy_projection": {"contact_fields_exposed": value}}]}, set())
+    assert report(True) == []
+    assert report(False) == []
+    metadata = {"privacy_projection": {"contact_fields_exposed": True}}
+    assert sanitize_payload(metadata) == metadata
+    assert problems(metadata) == []
+    assert problems({"privacy_projection": {"contact_fields_exposed": "office@example.org"}})
+    assert report("office@example.org")
+    assert report("true")
+    assert _artifact_policy_violations(item, {"contact_fields_exposed": True}, set())
+
+
 @pytest.mark.parametrize("text", ["ผู้จัดทำfoo@example.org", "foo@example.orgผู้จัดทำ", "ผู้จัดทำfoo@example.orgติดต่อ"])
 def test_emails_adjacent_to_thai_prose_require_public_contact_context(text, tmp_path):
     from app.demand_artifacts import _assert_public_fields

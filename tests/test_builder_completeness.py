@@ -66,6 +66,8 @@ def test_cultural_supporting_projection_keeps_work_details_and_complete_counts()
     }
     assert projection["privacy_projection"] == {
         "supporting_records_exposed": True,
+        "contact_fields_exposed": True,
+        "aggregate_counts_only": False,
         "public_work_details": True,
         "account_identifiers_exposed": False,
     }

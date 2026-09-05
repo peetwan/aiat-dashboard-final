@@ -36,6 +36,11 @@ class FieldContextError(ValueError):
     pass
 
 
+def is_contact_exposure_metadata(parent_key: str, key: str, value: Any) -> bool:
+    """ธง boolean ใน metadata ไม่ใช่เบอร์หรืออีเมลที่เผยแพร่."""
+    return parent_key == "privacy_projection" and key == "contact_fields_exposed" and type(value) is bool
+
+
 @lru_cache(maxsize=4096)
 def key_kind(key: str) -> str | None:
     text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", key)

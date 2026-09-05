@@ -86,8 +86,9 @@ Source ที่ประกาศ endpoint จาก plan ใช้ `catalog_en
 
 ```powershell
 python tools/build_source_catalog.py
-python tools/build_source_coverage.py
 python tools/build_source_insights.py
+python tools/build_public_data.py
+python tools/build_source_coverage.py
 python tools/build_provincial_briefings.py
 python tools/build_executive_summaries.py
 python -m app.cli publication receipt
@@ -98,6 +99,8 @@ RMUTDB ใช้ PDF เดิมและ parser ภาษาไทยใน `s
 
 หลังสร้าง housing spatial seed ด้วยเครื่องมือเดิม ให้เติมรายละเอียดสถานที่ด้วย `python tools/build_housing_place_details.py <run_dir>` โดย run_dir มี `manifest.json` และ `housing_points_rows.jsonl.gz` ที่ดึงจาก R2 โปรแกรมตรวจ hash, จำนวน, ID และ geometry ก่อนเขียน ไม่เขียนทับหลักฐาน
 
-ฟังก์ชัน `build(generated_at=...)` ของ source insights, briefings และ executive summaries รับ timestamp เดียวกันได้สำหรับตรวจ byte-for-byte deterministic build
+ฟังก์ชัน `build(generated_at=...)` ของ source insights, briefings และ executive summaries รวมถึง `build_public_data(refresh_boundaries=False, generated_at=...)` รับ timestamp เดียวกันได้สำหรับตรวจ byte-for-byte deterministic build ตัว public data builder รับ `--generated-at` ผ่าน CLI ได้ด้วย
+
+หลังแก้ source insights ต้องรัน `build_public_data.py` ก่อน coverage และ briefings เพื่อให้ catalog ที่ API ใช้มี projection coverage และ privacy metadata ตรงกับ Insights ชุดเดียวกัน
 
 CLIG ใช้ `python tools/build_clig_work_attribution.py <clig_project_run> <psu_detail_run>` โดยโฟลเดอร์แรกมี manifest และ projects.jsonl.gz ส่วนโฟลเดอร์ที่สองมี manifest และ project_detail_records.jsonl.gz โปรแกรมตรวจ hash, จำนวน, ID และ URL ทั้งชุด แล้วสร้าง clig_work_attribution.json สำหรับ API และ download ใส่ `--generated-at` เมื่อต้องการสร้างซ้ำให้ได้ timestamp เดิม ขั้นตอนนี้ทำเมื่ออัปเดตหลักฐาน CLIG โดยไม่ต้องรันซ้ำเมื่อแก้ UI หรือ source อื่น

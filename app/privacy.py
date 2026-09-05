@@ -7,7 +7,7 @@ from typing import Any
 
 from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
-    key_kind, pointer_child, validate_field_contexts,
+    is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
 )
 
 
@@ -139,6 +139,7 @@ def sanitize_payload(
                 child_context = contexts.get(child_pointer)
                 reason = forbidden_key_reason(key)
                 allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
+                allowed = allowed or is_contact_exposure_metadata(pointer.rsplit("/", 1)[-1], str(key), child)
                 descend = isinstance(child, (dict, list)) and key_kind(str(key)) != "private" and any(
                     p.startswith(child_pointer + "/") for p in contexts
                 )

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
-    key_kind, pointer_child, validate_field_contexts,
+    is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
 )
 from app.privacy import EMAIL_RE, PHONE_RE
 
@@ -680,6 +680,7 @@ def _privacy_problems(
                     normalized_key == "name" and ".research_leads" in child_path
                 )
                 allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
+                allowed = allowed or is_contact_exposure_metadata(pointer.rsplit("/", 1)[-1], str(key), child)
                 # Unknown sensitive kinds never acquire an exception merely
                 # because a context exists (e.g. a future private identifier).
                 if sensitive and key_kind(str(key)) is None and normalized_key != "name":

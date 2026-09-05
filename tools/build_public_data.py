@@ -146,7 +146,7 @@ def housing_unmapped_reason(
     return "source_geography_not_in_exact_crosswalk"
 
 
-def build_public_data(refresh_boundaries: bool) -> None:
+def build_public_data(refresh_boundaries: bool, *, generated_at: str | None = None) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     catalog_path = PROJECT_ROOT / "config/source_catalog.json"
     catalog = read_json(catalog_path)
@@ -503,7 +503,7 @@ def build_public_data(refresh_boundaries: bool) -> None:
     evidence_province_count = sum(
         1 for profile in profiles.values() if profile["evidence_source_count"] > 0
     )
-    generated_at = datetime.now(timezone.utc).isoformat()
+    generated_at = generated_at or datetime.now(timezone.utc).isoformat()
     learning_unmatched_count = learning_payload["coverage"]["unmatched_province_rows"]
     unmapped_public_records = (
         sum(area_unmapped_reason_counts.values())
@@ -774,5 +774,6 @@ if __name__ == "__main__":
         action="store_true",
         help="Refresh the 77-province GeoJSON from the official DDPM ArcGIS layer",
     )
+    parser.add_argument("--generated-at", help="Use a fixed ISO timestamp for a reproducible build")
     args = parser.parse_args()
-    build_public_data(refresh_boundaries=args.refresh_boundaries)
+    build_public_data(refresh_boundaries=args.refresh_boundaries, generated_at=args.generated_at)

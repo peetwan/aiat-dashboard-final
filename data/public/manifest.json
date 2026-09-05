@@ -1,12 +1,12 @@
 {
   "manifest_version": "1.0.0",
-  "generated_at": "2026-08-17T05:56:38.281480+00:00",
+  "generated_at": "2026-09-05T02:37:11.018690+00:00",
   "publication_status": "public_candidate_projection",
   "inputs": [
     {
       "path": "dashboard_final/config/source_catalog.json",
-      "bytes": 143037,
-      "sha256": "673da171bbd49a8559f8e2599ae181041841a2da4c3cc75bc94d91595d7553fb"
+      "bytes": 163414,
+      "sha256": "c1d29f26687f2528942c90465b3b2c7f90ffe7a46fd51a753576c47c703e0c77"
     },
     {
       "path": "dashboard_final/data/public/learning_dashboard.json",
@@ -245,15 +245,15 @@
     },
     {
       "path": "dashboard_final/data/public/source_insights.json",
-      "bytes": 405338,
-      "sha256": "0d06e0c46b2f44eb57a4fc6e2b5df93773e769a58176dec88e27b4986c3c41c0"
+      "bytes": 2991856,
+      "sha256": "ecd955be8b88fe8380cc3640a4803c538260f6d9ae400d638db461dce64cad3b"
     }
   ],
   "outputs": [
     {
       "path": "data/public/public_dashboard.json",
-      "bytes": 151402,
-      "sha256": "a02b93f4002ada878c5fbae7cc3507110d900898d2948ed9f4104b41052b58c1"
+      "bytes": 159912,
+      "sha256": "74447a0c72cc638db4a26c001cc0f3bac2d57d407a2c76afff8fda97b510eff0"
     },
     {
       "path": "data/public/province_evidence.csv",
@@ -272,8 +272,8 @@
     },
     {
       "path": "data/public/thailand_provinces.geojson",
-      "bytes": 1595216,
-      "sha256": "2717cc7ddc6f07bd3669c8e91b952274629dbf521283726d0ab455e5f1abb44b"
+      "bytes": 1603455,
+      "sha256": "6f009a0f2f298c76b86a69eb087432544b031afa919e0d0b4fea199a8739b1c3"
     }
   ],
   "excluded_source_ids": [

@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from app.field_contexts import is_contact_exposure_metadata
 
 DASHBOARD_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = DASHBOARD_ROOT / "data/public"
@@ -226,10 +227,12 @@ def find_privacy_violations(
                 is_negative_audit_flag = (
                     normalised_key in NEGATIVE_AUDIT_FLAG_KEYS and child is False
                 )
+                is_contact_audit_flag = is_contact_exposure_metadata(path.rsplit(".", 1)[-1], str(key), child)
                 if (
                     reason is not None
                     and normalised_key not in allowed_keys
                     and not is_negative_audit_flag
+                    and not is_contact_audit_flag
                 ):
                     violations.append((child_path, reason))
                 walk(child, child_path, normalised_key)
@@ -363,6 +366,8 @@ def test_secondary_value_artifacts_do_not_shadow_contact_rows():
     cultural_audit = insights["sources"]["f2_culturalmap_university"]
     assert cultural_audit["privacy_projection"] == {
         "supporting_records_exposed": True,
+        "contact_fields_exposed": True,
+        "aggregate_counts_only": False,
         "public_work_details": True,
         "account_identifiers_exposed": False,
     }

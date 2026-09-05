@@ -109,10 +109,16 @@ def test_cultural_directory_metadata_and_address_match_published_grain():
     payload = read_json(PUBLIC_ROOT / "source_insights.json")
     cultural = payload["sources"]["f2_culturalmap_university"]
     assert len(cultural["public_records"]) == 361
+    assert cultural["privacy_projection"]["contact_fields_exposed"] is True
+    assert cultural["privacy_projection"]["aggregate_counts_only"] is False
     assert "f2_culturalmap_university" not in payload["audit_summary"]["aggregate_only_projection_source_ids"]
     product = next(row for row in cultural["public_records"] if row["record_id"] == "PD-44")
     assert product["address"] == "270 หมู่ที่ 11 ตำบลเขวา อำเภอเมือง จังหวัดมหาสารคาม"
     assert "Face book" in product["sales_channels"]
+    catalog = read_json(PUBLIC_ROOT / "public_dashboard.json")
+    source = next(row for row in catalog["sources"] if row["source_id"] == "f2_culturalmap_university")
+    assert source["privacy_projection"] == cultural["privacy_projection"]
+    assert source["projection_coverage"] == cultural["coverage"]
 
 
 def test_endpoint_ids_match_the_current_policy_fields():
