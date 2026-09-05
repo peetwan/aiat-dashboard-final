@@ -4130,7 +4130,11 @@ function bindEvents() {
   const updateF4TabOrientation = () => document.querySelector(".f4-country-tabs")
     .setAttribute("aria-orientation", f4TabQuery.matches ? "vertical" : "horizontal");
   updateF4TabOrientation();
-  f4TabQuery.addEventListener("change", updateF4TabOrientation);
+  if (typeof f4TabQuery.addEventListener === "function") {
+    f4TabQuery.addEventListener("change", updateF4TabOrientation);
+  } else {
+    f4TabQuery.addListener(updateF4TabOrientation);
+  }
   // วัดหัวแผงจริงเพื่อให้แท็บตามหลังข้อความไทยที่ขึ้นหลายบรรทัดได้
   const readingHeaders = new ResizeObserver((entries) => {
     entries.forEach(({ target }) => {
