@@ -46,6 +46,7 @@ const state = {
   f4PolicyQuery: "",
   f4PolicyMeta: null,
   f4ListContextKey: "",
+  f4ListRequestTokens: {},
   f4TargetProvinceCodes: new Set(),
   f4Province: null,
 };
@@ -937,18 +938,31 @@ function renderF4PolicySummary(payload, ids = {}) {
     .join("");
 }
 
-async function openF4CountryList(kind) {
+function f4ListEndpoint(kind) {
   const isPolicy = kind === "policy_projects";
-  const endpoint = state.selectedCode
+  return state.selectedCode
     ? f4ProvinceEndpoint(isPolicy ? "/policy-projects" : "/innovations")
     : state.selectedRegion
       ? f4RegionEndpoint(isPolicy ? "/policy-projects" : "/innovations")
       : (isPolicy ? "/api/public/v1/f4/policy-projects" : "/api/public/v1/f4/innovations");
+}
+
+async function openF4CountryList(kind) {
+  const isPolicy = kind === "policy_projects";
+  const endpoint = f4ListEndpoint(kind);
+  const token = (state.f4ListRequestTokens[kind] || 0) + 1;
+  state.f4ListRequestTokens[kind] = token;
+  const isCurrent = () => state.mapMode === "f4"
+    && f4ListEndpoint(kind) === endpoint && state.f4ListRequestTokens[kind] === token;
   const rowsId = isPolicy ? "f4PolicyRows" : "f4InnovationRows";
   const summaryId = isPolicy ? "f4PolicyListSummary" : "f4InnovationListSummary";
+  if (isPolicy) state.f4PolicyRows = [];
+  else state.f4InnovationRows = [];
+  document.getElementById(summaryId).textContent = "กำลังโหลดรายการ";
   document.getElementById(rowsId).innerHTML = `<div class="portfolio-loading"><span></span><span></span><span></span></div>`;
   try {
     const payload = await fetchPublicJson(endpoint);
+    if (!isCurrent()) return;
     const query = isPolicy ? state.f4PolicyQuery : state.f4InnovationQuery;
     if (isPolicy) {
       state.f4PolicyRows = payload.rows || [];
@@ -964,7 +978,9 @@ async function openF4CountryList(kind) {
       if (innovationSummary) innovationSummary.textContent = "";
     }
   } catch (error) {
+    if (!isCurrent()) return;
     console.error(error);
+    document.getElementById(summaryId).textContent = "";
     document.getElementById(rowsId).innerHTML = `<div class="portfolio-empty">โหลดรายการไม่สำเร็จ</div>`;
   }
 }
