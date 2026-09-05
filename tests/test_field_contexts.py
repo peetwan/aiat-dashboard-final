@@ -25,6 +25,12 @@ def problems(payload, contexts=None):
     "ติดต่อ LINE: private_person", "Facebook: @private_person", "Facebook handle: private_person",
     "Face book: https://facebook.com/private_person", "Instagram: private_person",
     "IG: private_person", "TikTok @private_person", "Twitter: private_person",
+    "ไลน์ @private_person", "ไลน์ไอดี private_person", "ทวิตเตอร์: private_person",
+    "ไอดีไลน์: private_person", "ไลน์ ไอดี: private_person", "ไลน์ OA @private_person",
+    "เฟซบุ๊ก: private_person", "เฟซบุ๊ค @private_person", "เฟสบุ๊กไอดี private_person",
+    "เฟสบุ๊ค: private_person", "FB: private_person", "Facebook handle private_person",
+    "ไอจี: private_person", "อินสตาแกรม @private_person", "TikTok ID private_person",
+    "ติ๊กต็อก: private_person", "ติ๊กต๊อก @private_person", "ทวิตเตอร์ไอดี private_person",
 ])
 def test_social_contact_values_require_exact_public_contact_context(text, tmp_path):
     payload = {"description": text}

@@ -99,6 +99,8 @@ RMUTDB ใช้ PDF เดิมและ parser ภาษาไทยใน `s
 
 หลังสร้าง housing spatial seed ด้วยเครื่องมือเดิม ให้เติมรายละเอียดสถานที่ด้วย `python tools/build_housing_place_details.py <run_dir>` โดย run_dir มี `manifest.json` และ `housing_points_rows.jsonl.gz` ที่ดึงจาก R2 โปรแกรมตรวจ hash, จำนวน, ID และ geometry ก่อนเขียน ไม่เขียนทับหลักฐาน
 
+ชื่อและที่อยู่ของสถานที่ใน Housing เป็น `public_contact` เพราะบางรายการใส่ LINE จองห้องหรือเบอร์ติดต่องานไว้ในข้อความเดียวกัน ขอบเขตนี้ใช้เฉพาะสองฟิลด์ของสถานที่สาธารณะ ส่วนข้อมูลผู้ตอบแบบสำรวจ demand แยกจากกัน Builder ตรวจชื่อที่ไม่ว่างและ schema ของรายละเอียดก่อนเขียน โดย rating ที่ต้นทางระบุ null ยังเก็บเป็น null ได้
+
 ฟังก์ชัน `build(generated_at=...)` ของ source insights, briefings และ executive summaries รวมถึง `build_public_data(refresh_boundaries=False, generated_at=...)` รับ timestamp เดียวกันได้สำหรับตรวจ byte-for-byte deterministic build ตัว public data builder รับ `--generated-at` ผ่าน CLI ได้ด้วย
 
 หลังแก้ source insights ต้องรัน `build_public_data.py` ก่อน coverage และ briefings เพื่อให้ catalog ที่ API ใช้มี projection coverage และ privacy metadata ตรงกับ Insights ชุดเดียวกัน

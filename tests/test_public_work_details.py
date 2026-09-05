@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
+import gzip
 
 import pytest
 
@@ -161,6 +162,70 @@ def test_housing_place_projection_keeps_places_and_preserves_evidence_identity()
     assert "contact_email" not in result["properties"]
     assert result["evidence_sha256"] == seed["evidence_sha256"]
     assert "name" not in seed["properties"]
+
+
+@pytest.mark.parametrize("field", ["name", "address", "rating", "user_ratings_total"])
+def test_housing_schema_loss_does_not_overwrite_reviewed_artifacts(tmp_path, monkeypatch, field):
+    from tools import build_housing_place_details as builder
+
+    seed, source = place_pair()
+    seed["properties"].update({"name": "ที่พักเดิม", "address": "123 Example Road", "rating": 4.1, "user_ratings_total": 20})
+    source["properties"].pop(field)
+    run = tmp_path / "evidence"
+    run.mkdir()
+    raw = gzip.compress((json.dumps(source) + "\n").encode())
+    (run / "records.jsonl.gz").write_bytes(raw)
+    (run / "manifest.json").write_text(json.dumps({"source_id": "f3_housing_portal", "datasets": [{
+        "dataset_key": "housing.housing_points", "file": "records.jsonl.gz", "row_count": 1,
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }]}))
+    root = tmp_path / "repo"
+    seed_path = root / "data/spatial/housing.jsonl.gz"
+    seed_path.parent.mkdir(parents=True)
+    seed_path.write_bytes(gzip.compress((json.dumps(seed) + "\n").encode()))
+    manifest_path = seed_path.parent / "manifest.json"
+    manifest_path.write_text(json.dumps({"layers": {"housing_points": {"artifact_path": "data/spatial/housing.jsonl.gz"}}}))
+    summary_path = root / "data/public/housing_spatial_summary.json"
+    summary_path.parent.mkdir(parents=True)
+    summary_path.write_text(json.dumps({"housing_points": {"public_place_fields": list(builder.DETAIL_FIELDS)}}))
+    before = {path: path.read_bytes() for path in (seed_path, manifest_path, summary_path)}
+    monkeypatch.setattr(builder, "load_spatial_manifest", lambda path: json.loads(path.read_bytes()))
+    with pytest.raises(ValueError, match="place detail schema"):
+        builder.build(run, root=root)
+    assert {path: path.read_bytes() for path in before} == before
+
+
+@pytest.mark.parametrize("field,value", [
+    ("name", None), ("name", ""), ("name", " "), ("name", []), ("address", 123),
+    ("rating", "4.1"), ("rating", True), ("rating", float("inf")), ("rating", -1),
+    ("user_ratings_total", 1.5), ("user_ratings_total", True), ("user_ratings_total", -1),
+])
+def test_housing_detail_schema_rejects_invalid_values(field, value):
+    seed, source = place_pair()
+    source["properties"][field] = value
+    with pytest.raises(ValueError, match="place"):
+        merge_place_details([seed], [source])
+
+
+def test_housing_details_preserve_explicit_unknowns_and_zero_metrics():
+    for rating, count in [(None, None), (0.0, 0)]:
+        seed, source = place_pair()
+        source["properties"].update(address=None, rating=rating, user_ratings_total=count)
+        result = merge_place_details([seed], [source])[0]["properties"]
+        assert result["name"] == source["properties"]["name"]
+        assert result["address"] is None
+        assert result["rating"] == rating and result["user_ratings_total"] == count
+
+
+def test_housing_place_booking_contacts_remain_in_reviewed_name_and_address_fields():
+    seed, source = place_pair()
+    source["properties"].update(name="ที่พักตัวอย่าง ไลน์ @work_account",
+                                address="123 Example Road, LINE ID: work_account โทร 0812345678")
+    source["properties"]["contact_email"] = "private@example.org"
+    result = merge_place_details([seed], [source])[0]["properties"]
+    assert result["name"] == source["properties"]["name"]
+    assert result["address"] == source["properties"]["address"]
+    assert "contact_email" not in result
 
 
 @pytest.mark.parametrize("drift", ["missing", "duplicate", "geometry"])

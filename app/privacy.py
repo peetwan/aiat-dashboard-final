@@ -90,13 +90,18 @@ MAX_RECORD_ID_LENGTH = 200
 # Explicit platform labels distinguish contacts from ordinary transit/graph lines.
 # Unlabelled URLs remain provenance; a public contact still needs an exact context.
 _SOCIAL_HANDLE = r"@?[A-Za-z0-9_ก-๙][^\s<>\"'{};,|]*"
+_SOCIAL_NAMED_PLATFORM = (
+    r"(?:ไลน์|face\s*book|fb|เฟ[ซส]บุ๊?[กค]|instagram|ig|ไอจี|อินสตาแกรม|"
+    r"tiktok|ติ๊กต็อก|ติ๊กต๊อก|twitter|ทวิตเตอร์)"
+)
+_SOCIAL_PLATFORM = rf"(?:line|{_SOCIAL_NAMED_PLATFORM})"
+_SOCIAL_ROLE = r"(?:id|oa|handle|account|ไอดี|บัญชี)"
 SOCIAL_CONTACT_RE = re.compile(
-    r"(?i)(?:"
-    r"(?<![A-Za-z0-9_])(?:line\s*(?:id|oa)|id\s*line|ไอดี\s*ไลน์)(?![A-Za-z0-9_])\s*[:：=]?\s*"
-    + _SOCIAL_HANDLE + r"|"
-    r"(?<![A-Za-z0-9_])(?:ไลน์|face\s*book|เฟซบุ๊ก|เฟสบุ๊ค|instagram|ig|tiktok|twitter|อินสตาแกรม|ติ๊กต็อก)"
-    r"\s*(?:(?:id|handle|account|บัญชี)\s*)?[:：=]\s*" + _SOCIAL_HANDLE + r"|"
-    r"(?<![A-Za-z0-9_])(?:line|facebook|instagram|tiktok|twitter)\s+@" + _SOCIAL_HANDLE + r"|"
+    rf"(?i)(?:"
+    rf"(?<![A-Za-z0-9_])(?:{_SOCIAL_PLATFORM}\s*{_SOCIAL_ROLE}|{_SOCIAL_ROLE}\s*{_SOCIAL_PLATFORM})"
+    rf"(?![A-Za-z0-9_])(?:\s*[:：=]\s*|\s+)" + _SOCIAL_HANDLE + r"|"
+    rf"(?<![A-Za-z0-9_]){_SOCIAL_NAMED_PLATFORM}\s*[:：=]\s*" + _SOCIAL_HANDLE + r"|"
+    rf"(?<![A-Za-z0-9_]){_SOCIAL_PLATFORM}\s+@" + _SOCIAL_HANDLE + r"|"
     r"(?:^|(?<=[\n;,|])|(?<=contact )|(?<=ติดต่อ))\s*line\s*[:：=]\s*" + _SOCIAL_HANDLE + r")"
 )
 

@@ -10,6 +10,7 @@ import gzip
 import hashlib
 import io
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -31,6 +32,18 @@ def merge_place_details(seed: list[dict], features: list[dict]) -> list[dict]:
     source = {}
     for feature in features:
         properties = feature.get("properties", {})
+        if not isinstance(properties, dict) or any(key not in properties for key in DETAIL_FIELDS):
+            raise ValueError("place detail schema is missing required fields")
+        if not isinstance(properties["name"], str) or not properties["name"].strip():
+            raise ValueError("place name must be non-empty text")
+        if properties["address"] is not None and not isinstance(properties["address"], str):
+            raise ValueError("place address must be text or null")
+        rating = properties["rating"]
+        if rating is not None and (type(rating) not in (int, float) or not math.isfinite(rating) or rating < 0):
+            raise ValueError("place rating must be a non-negative finite number or null")
+        reviews = properties["user_ratings_total"]
+        if reviews is not None and (type(reviews) is not int or reviews < 0):
+            raise ValueError("place review count must be a non-negative integer or null")
         identifier = properties.get("place_id")
         if not isinstance(identifier, str) or not identifier or identifier in source:
             raise ValueError("source place_id must be present and unique")
@@ -45,7 +58,7 @@ def merge_place_details(seed: list[dict], features: list[dict]) -> list[dict]:
         feature = source[row["feature_id"]]
         if feature["geometry"] != row["geometry"]:
             raise ValueError("place geometry changed; rebuild the spatial layer before adding details")
-        details = {key: feature["properties"].get(key) for key in DETAIL_FIELDS}
+        details = {key: feature["properties"][key] for key in DETAIL_FIELDS}
         details = sanitize_payload(details, field_contexts=HOUSING_POINT_CONTEXTS)
         merged = {**row, "properties": {**row["properties"], **details}}
         _mapping(merged, "housing_points")
@@ -86,6 +99,7 @@ def build(run_dir: Path, *, root: Path = ROOT) -> dict:
         "field_contexts": HOUSING_POINT_CONTEXTS,
     }
     manifest["privacy_projection"]["point_fields_excluded"] = []
+    manifest["privacy_projection"]["contact_fields_included"] = len(HOUSING_POINT_CONTEXTS)
     summary_path = root / "data/public/housing_spatial_summary.json"
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     summary["housing_points"]["excluded_fields"] = []

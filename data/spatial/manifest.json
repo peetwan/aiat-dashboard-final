@@ -23,12 +23,13 @@
       "unique_feature_id_count": 159126
     },
     "housing_points": {
-      "artifact_bytes": 2246906,
+      "artifact_bytes": 2246889,
       "artifact_path": "data/spatial/housing_points.ndjson.gz",
-      "artifact_sha256": "bc494e147fc9addc47a490df24912061b9d776da307a5fc34b4bb951ddf3184f",
+      "artifact_sha256": "06ae7c31536e3224b767a668b82e95fb413bbec36eaa0c247fa895d222e6760d",
       "detail_projection": {
         "field_contexts": {
-          "/address": "public_location"
+          "/address": "public_contact",
+          "/name": "public_contact"
         },
         "fields": [
           "name",
@@ -59,7 +60,7 @@
   },
   "manifest_version": "0.1.0",
   "privacy_projection": {
-    "contact_fields_included": 0,
+    "contact_fields_included": 2,
     "demand_respondent_rows_included": 0,
     "point_fields_excluded": []
   },

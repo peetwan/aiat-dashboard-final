@@ -28,8 +28,9 @@ REQUIRED_SPATIAL_COUNTS = {
 REQUIRED_SPATIAL_TOTAL = sum(REQUIRED_SPATIAL_COUNTS.values())
 INSERT_BATCH_SIZE = 2_000
 # housing_points เป็นทะเบียนสถานที่จาก public place feed มี place_id/type;
-# address เป็นที่ตั้งสถานที่ ไม่ใช่ที่อยู่ผู้ตอบแบบสำรวจ demand.
-HOUSING_POINT_CONTEXTS = {"/address": "public_location"}
+# Public place listings embed booking contacts in their name/address text.
+# Contexts apply only to these two place fields, never demand respondent data.
+HOUSING_POINT_CONTEXTS = {"/name": "public_contact", "/address": "public_contact"}
 
 
 def load_spatial_manifest(path: Path = SPATIAL_MANIFEST_PATH) -> dict[str, Any]:
@@ -50,8 +51,12 @@ def load_spatial_manifest(path: Path = SPATIAL_MANIFEST_PATH) -> dict[str, Any]:
     privacy = payload.get("privacy_projection") or {}
     if privacy.get("demand_respondent_rows_included") != 0:
         raise RuntimeError("respondent-level demand rows must not enter Railway")
-    if privacy.get("contact_fields_included") != 0:
-        raise RuntimeError("contact fields must not enter Railway")
+    details = payload["layers"]["housing_points"].get("detail_projection")
+    expected_contacts = len(HOUSING_POINT_CONTEXTS) if details else 0
+    if privacy.get("contact_fields_included") != expected_contacts:
+        raise RuntimeError("public place contact fields do not match the reviewed projection")
+    if details and details.get("field_contexts") != HOUSING_POINT_CONTEXTS:
+        raise RuntimeError("public place field contexts do not match the reviewed projection")
     root = path.parent.resolve()
     for layer_id in REQUIRED_SPATIAL_COUNTS:
         layer = payload["layers"][layer_id]
