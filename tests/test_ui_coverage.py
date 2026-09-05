@@ -115,7 +115,13 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
         "f4AreaDetail",
         "f4ProvinceSwitch",
         "showF4Country",
-        "f4CountryCards",
+        "f4SourceOverview",
+        "f4PmuaCards",
+        "f4CligCards",
+        "f4OverviewPolicyTotal",
+        "f4OverviewPolicyBudget",
+        "f4OverviewPolicyDonut",
+        "f4OverviewPolicyStatusLegend",
         "f4EconomicImpactWrap",
         "f4EconomicImpactRows",
         "f4CountryNotes",
@@ -135,7 +141,7 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     ):
         assert endpoint in script
     for function_name in (
-        "applyF4TargetProvinceMembership",
+        "applyF4CoverageMembership",
         "renderF4CountryPanel",
         "renderF4EconomicImpactTable",
         "renderF4PolicySummary",
@@ -146,7 +152,7 @@ def test_f4_workspace_preserves_r2_data_and_uses_department_navigation() -> None
     ):
         assert function_name in script
     assert 'return ["f2", "f3"].includes(mode)' in script
-    assert "f4_target_province" in script
+    assert "f4_covered_province" in script
     assert "trl_level" in script
     assert "budget_baht" in script
     assert "status_summary" in script
