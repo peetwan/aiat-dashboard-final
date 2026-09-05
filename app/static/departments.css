@@ -221,6 +221,21 @@
 .atlas-shell .f4-record-evidence ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .atlas-shell .f4-record-evidence li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--hairline); font-size: 12px; }
 .atlas-shell .f4-record-evidence li strong { color: var(--ink-strong); font-weight: 700; text-align: right; }
+.atlas-shell .f4-empirical-evidence { display: grid; gap: 8px; margin-top: 10px; }
+.atlas-shell .f4-empirical-evidence > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.atlas-shell .f4-empirical-evidence > header h4 { margin: 0; }
+.atlas-shell .f4-evidence-status { padding: 3px 8px; border: 1px solid #ddcf9a; border-radius: 999px; color: #80631b; background: #fffaf0; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.atlas-shell .f4-evidence-status-complete { border-color: #b9d9c4; color: #22633e; background: #f0faf3; }
+.atlas-shell .f4-evidence-status-not_reported { border-color: #dfe6df; color: #68766d; background: #f8faf8; }
+.atlas-shell .f4-empirical-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.atlas-shell .f4-empirical-card { min-width: 0; padding: 10px; border: 1px solid #e2e9e3; border-radius: 10px; background: #fff; overflow-wrap: anywhere; }
+.atlas-shell .f4-empirical-card.is-empty { background: #f8faf8; }
+.atlas-shell .f4-empirical-card h4 { margin: 0 0 8px; color: var(--ink-strong); font-size: 12px; }
+.atlas-shell .f4-empirical-card dl { display: grid; gap: 8px; margin: 0; }
+.atlas-shell .f4-empirical-card dl div { padding-top: 7px; border-top: 1px dashed var(--hairline); }
+.atlas-shell .f4-empirical-card dt { margin-bottom: 3px; color: var(--reading-note); font-size: 10px; font-weight: 800; }
+.atlas-shell .f4-empirical-card dd { margin: 0; color: var(--ink-strong); font-size: 12px; line-height: 1.55; }
+.atlas-shell .f4-evidence-empty { margin: 0; color: var(--reading-note); font-size: 11px; line-height: 1.5; }
 
 .atlas-shell .f4-policy-window { grid-template-columns: 1fr; padding: 18px; }
 .atlas-shell .f4-policy-main { min-height: 0; }
@@ -317,6 +332,9 @@
   .atlas-shell :is(.f1-province-tabs, .f4-country-tabs) button { border-radius: 999px; }
   .atlas-shell .f4-country-panel.is-province .f4-country-tabs { position: sticky; top: var(--reading-nav-top, 54px); z-index: 5; background: #f7f8f4; }
   .atlas-shell .f4-area-detail { padding: 16px; }
+  .atlas-shell .f4-empirical-grid { grid-template-columns: 1fr; }
+  .atlas-shell .f4-empirical-card dd { font-size: 12px; line-height: 1.65; }
+  .atlas-shell .f4-evidence-status { font-size: 11px; }
 }
 
 @media (max-width: 380px) {

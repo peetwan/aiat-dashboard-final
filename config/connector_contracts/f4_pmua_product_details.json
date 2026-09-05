@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.1",
+  "source_id": "f4_pmua_product_details",
+  "connector": "app.connectors.pmua_product_details:PmuaProductDetailsConnector",
+  "transport": "http_html",
+  "dataset_grains": [
+    {
+      "key_pattern": "^public_product_detail$",
+      "grain_th": "หนึ่งแถว = หนึ่งหน้ารายละเอียดนวัตกรรมสาธารณะจาก PMUA AppTech ต่อ product_id",
+      "identity_options": [["product_id"]],
+      "geography_fields": [],
+      "as_of_fields": ["fetched_at"]
+    }
+  ],
+  "completeness_checks": [
+    "ดึงทุกหน้าตาม pagination ของ /search และ product_id ต้องไม่ซ้ำ",
+    "ต้องได้ detail record ครบทุก product_id ที่พบจาก catalogue ก่อน commit",
+    "ROI/SROI เก็บเป็นข้อความต้นทางและไม่แทนค่าที่หายด้วยศูนย์",
+    "กรองเฉพาะแถว Outcomes/Impacts ที่ว่างทั้ง label และ value ออก",
+    "ไม่เรียก login, EPMS, write routes หรือ path ที่ไม่ใช่ /product/show/{ตัวเลข}"
+  ],
+  "privacy": {
+    "candidate_only": true,
+    "contact_value_scan": true,
+    "forbidden_public_fields": ["email", "phone", "address", "token", "password", "cookie", "authorization", "citizen", "national_id"]
+  },
+  "sample_fixture": "tests/fixtures/connectors/f4_pmua_product_details.json",
+  "notes_th": "ข้อมูลนี้เป็น evidence รายละเอียดสินค้าเพื่อ F4 ไม่ใช่ทะเบียนครัวเรือน"
+}

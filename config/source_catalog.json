@@ -14,8 +14,8 @@
   "policy": {
     "approval_basis": "current_catalog_policy_and_source_cards",
     "current_stewardship": "repository_co_maintainers",
-    "registry_source_count": 29,
-    "approved_public_source_count": 19,
+    "registry_source_count": 30,
+    "approved_public_source_count": 20,
     "metadata_only_source_count": 8,
     "restricted_source_count": 2,
     "restricted_sources_are_never_deployed": true,
@@ -3082,6 +3082,53 @@
             "query_or_body": "project_id=<value>"
           },
           "notes_th": "รายละเอียดโครงการวิจัยสาธารณะ; ไม่ดาวน์โหลดเอกสารแนบ"
+        }
+      ]
+    },
+    {
+      "ordinal": 30,
+      "source_id": "f4_pmua_product_details",
+      "group": "ฝ่าย 4",
+      "name_th": "รายละเอียดผลิตภัณฑ์และนวัตกรรม PMUA AppTech",
+      "url": "https://pmua-apptech.com/",
+      "source_type": "public_product_detail",
+      "sensitivity_lane": "public_unknown",
+      "source_card": "data/source_audit/30_f4_pmua_product_details/source_card.json",
+      "audit_status": "NEEDS_REVIEW",
+      "acquisition_mode": "api_first",
+      "snapshot_fallback": false,
+      "readiness_status": "needs_review",
+      "cloud_policy": "team_approved_public",
+      "value_visibility": "public_candidate",
+      "production_values_allowed": true,
+      "expected_record_count": 1160,
+      "notes_th": "หน้ารายละเอียดผลิตภัณฑ์สาธารณะสำหรับ evidence ของ ROI/SROI ผลลัพธ์ ผลกระทบ และ TRL; ไม่เก็บข้อมูลติดต่อหรือข้อมูลบุคคล",
+      "snapshot_origin_files": [],
+      "endpoints": [
+        {
+          "endpoint_id": "c4b9e9084a690685091c11ec3eaa5cbf8faff626444f59e3ab037ba86d5bb2b3",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/search",
+          "kind": "public_product_search_for_detail_ids",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {"query_or_body": "page=<value>"},
+          "notes_th": "ใช้ค้นหา product_id ครบตาม pagination ก่อนเรียกหน้ารายละเอียด"
+        },
+        {
+          "endpoint_id": "bf0dc7003be0bbfd535c2147a6bc9a277843fcb28828f5ed2cf84d665899210f",
+          "method": "GET",
+          "url": "https://pmua-apptech.com/product/show/{product_id}",
+          "path_template": "/product/show/{product_id}",
+          "kind": "public_product_detail",
+          "access": "unauthenticated_get_http_200",
+          "team_action": "call_without_login_numeric_product_id_only",
+          "restricted": false,
+          "runtime_enabled": true,
+          "request_template": {},
+          "notes_th": "อนุญาตเฉพาะ product_id ตัวเลข; ไม่ตาม redirect และไม่เรียก path อื่น"
         }
       ]
     }

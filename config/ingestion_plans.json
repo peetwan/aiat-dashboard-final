@@ -223,6 +223,23 @@
       ],
       "notes_th": "หน้าสาธารณะเป็นตลาดนวัตกรรม AppTech; serving เก็บรายการจาก /search และ aggregate dashboard ระดับจังหวัด/ประเทศเท่านั้น ตัดชื่อ เบอร์โทร อีเมล"
     },
+    "f4_pmua_product_details": {
+      "driver": "f4_pmua_product_details",
+      "connector": "app.connectors.pmua_product_details:PmuaProductDetailsConnector",
+      "list_url": "https://pmua-apptech.com/search",
+      "detail_url_template": "https://pmua-apptech.com/product/show/{product_id}",
+      "detail_retries": 3,
+      "completeness_gate": "ดึงทุกหน้าตาม pagination และต้องได้ product detail ครบหนึ่งแถวต่อหนึ่ง product_id; หาก detail ใดล้มเหลวให้ล้มทั้งรันและไม่ commit",
+      "explicit_exclusions": [
+        "/login",
+        "/userlogin",
+        "/dashboard/familydashboard as household-row extract",
+        "EPMS / POST login",
+        "all non-numeric /product/show paths",
+        "write actions"
+      ],
+      "notes_th": "เก็บเฉพาะหน้ารายละเอียดนวัตกรรมสาธารณะเพื่อ ROI/SROI ผลลัพธ์ ผลกระทบ และ TRL; ไม่เก็บข้อมูลติดต่อหรือข้อมูลบุคคล"
+    },
     "f2_learning_dashboard": {
       "driver": "learning_dashboard",
       "connector": "app.connectors.learning_dashboard:LearningDashboardConnector",

@@ -146,6 +146,14 @@ class ResponseRecorder:
         method = str(endpoint.get("method", "GET")).upper()
         url = str(endpoint.get("url", ""))
         base = cls._endpoint_key(method, url)
+        path_template = endpoint.get("path_template")
+        path_pattern = None
+        if path_template is not None:
+            parsed_url = urlsplit(url)
+            template = str(path_template)
+            if method != "GET" or parsed_url.path != template or template != "/product/show/{product_id}":
+                raise PolicyViolation("path-template endpoints must be numeric PMUA product detail GETs")
+            path_pattern = re.compile(r"^/product/show/[0-9]+$")
         url_query = tuple(sorted(parse_qsl(urlsplit(url).query, keep_blank_values=True)))
         required_query: dict[str, str | None] = {}
         request_template = endpoint.get("request_template")
@@ -174,6 +182,8 @@ class ResponseRecorder:
                 body_mode = "unapproved"
         return {
             "base": base,
+            "authority": base[:4],
+            "path_pattern": path_pattern,
             "exact_query": url_query or None,
             "required_query": required_query,
             "body_mode": body_mode,
@@ -223,7 +233,10 @@ class ResponseRecorder:
             return False
         query = dict(query_pairs)
         for rule in self.allowed_endpoints:
-            if rule["base"] != base:
+            if rule.get("path_pattern") is not None:
+                if rule["authority"] != base[:4] or not rule["path_pattern"].fullmatch(base[4]):
+                    continue
+            elif rule["base"] != base:
                 continue
             exact_query = rule["exact_query"]
             if exact_query is not None:
@@ -299,6 +312,10 @@ class ResponseRecorder:
                 "content_type": response.headers.get("content-type", ""),
             }
         )
+        if 300 <= response.status_code < 400:
+            raise PolicyViolation(
+                f"{self.root.parent.name}: redirects are not allowed for runtime ingestion endpoints"
+            )
         # Persist the response before raising so a 4xx/5xx boundary remains
         # auditable instead of leaving an empty raw run directory.
         response.raise_for_status()

@@ -868,7 +868,31 @@ function renderF4MetricDetails(title, items) {
     const unit = item.unit ? ` ${item.unit}` : "";
     return `<li><span>${escapeHtml(item.label || "ไม่ระบุรายการ")}</span><strong>${escapeHtml(`${value}${unit}`)}</strong></li>`;
   }).join("");
-  return `<section class="f4-record-evidence"><h4>${escapeHtml(title)}</h4>${rows ? `<ul>${rows}</ul>` : '<p>ต้นทางยังไม่ระบุข้อมูลในหมวดนี้</p>'}</section>`;
+  return `<section class="f4-record-evidence"><h4>${escapeHtml(title)}</h4>${rows ? `<ul>${rows}</ul>` : '<p class="f4-evidence-empty">ยังไม่ระบุข้อมูลจากต้นทาง</p>'}</section>`;
+}
+
+function f4EvidenceStatusLabel(status) {
+  return {
+    complete: "ข้อมูลครบ",
+    partial: "ข้อมูลบางส่วน",
+    not_reported: "ยังไม่รายงาน",
+  }[status] || "ยังไม่รายงาน";
+}
+
+function renderF4EmpiricalCard(metric, evidence) {
+  const item = (evidence || []).find((entry) => entry.metric === metric);
+  const reported = item && item.status === "reported";
+  if (!reported) {
+    return `<section class="f4-empirical-card is-empty"><h4>${escapeHtml(metric)} ${metric === "ROI" ? "(Economic)" : "(Social)"}</h4><p class="f4-evidence-empty">ยังไม่ระบุข้อมูลจากต้นทาง</p></section>`;
+  }
+  const indicator = f4ValueOrFallback(item.indicator_text);
+  const quantity = f4ValueOrFallback(item.quantity_text);
+  return `<section class="f4-empirical-card"><h4>${escapeHtml(metric)} ${metric === "ROI" ? "(Economic)" : "(Social)"}</h4><dl><div><dt>ตัวชี้วัด (Indicator)</dt><dd>${escapeHtml(indicator)}</dd></div><div><dt>ปริมาณ (Quantity)</dt><dd>${escapeHtml(quantity)}</dd></div></dl></section>`;
+}
+
+function renderF4EmpiricalEvidence(row) {
+  const status = row.evidence_status || "not_reported";
+  return `<section class="f4-empirical-evidence"><header><h4>ผลลัพธ์และผลกระทบเชิงประจักษ์</h4><span class="f4-evidence-status f4-evidence-status-${escapeHtml(status)}">${escapeHtml(f4EvidenceStatusLabel(status))}</span></header><p class="f4-record-source-note">แสดงข้อมูลตามต้นทางโดยไม่แปลงรูปแบบ</p><div class="f4-empirical-grid">${renderF4EmpiricalCard("ROI", row.empirical_evidence)}${renderF4EmpiricalCard("SROI", row.empirical_evidence)}</div></section>`;
 }
 
 function renderF4InnovationRow(row) {
@@ -885,8 +909,9 @@ function renderF4InnovationRow(row) {
         <div><dt>ระดับความพร้อม (TRL)</dt><dd>${escapeHtml(f4ReadinessLabel(row))}</dd></div>
       </dl>
       <details class="f4-record-details">
-        <summary>ผลลัพธ์/ผลกระทบจากต้นทาง (${formatNumber(row.outcome_count || 0)} / ${formatNumber(row.impact_count || 0)})</summary>
+        <summary>แสดง ผลลัพธ์/ผลกระทบจากต้นทาง.</summary>
         <p class="f4-record-source-note">ข้อมูลที่รายงานในหน้าเทคโนโลยีและนวัตกรรม</p>
+        ${renderF4EmpiricalEvidence(row)}
         ${renderF4MetricDetails("ผลลัพธ์ (Outcomes)", row.outcomes)}
         ${renderF4MetricDetails("ผลกระทบ (Impacts)", row.impacts)}
       </details>

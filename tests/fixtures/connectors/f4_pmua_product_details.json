@@ -1,0 +1,35 @@
+{
+  "fixture_version": "1.0",
+  "source_id": "f4_pmua_product_details",
+  "records": [
+    {
+      "dataset_key": "public_product_detail",
+      "payload": {
+        "product_id": 3719,
+        "source_url": "https://pmua-apptech.com/product/show/3719",
+        "title": "เตาชีวมวลแบบก่อด้วยอิฐมอญ",
+        "trl_level": 7,
+        "empirical_evidence": [
+          {
+            "metric": "ROI",
+            "domain": "Economic",
+            "indicator_text": "20.35",
+            "quantity_text": "เปอร์เซ็นต์",
+            "status": "reported"
+          },
+          {
+            "metric": "SROI",
+            "domain": "Social",
+            "indicator_text": "ครัวเรือนมีรายได้สุทธิเพิ่มขึ้นเฉลี่ย...",
+            "quantity_text": "ไม่น้อยกว่า 5,000 บาท/เดือน หรือ 60,000 บาท/ปี",
+            "status": "reported"
+          }
+        ],
+        "outcomes": [],
+        "impacts": [],
+        "evidence_status": "partial",
+        "fetched_at": "2026-09-05T00:00:00+00:00"
+      }
+    }
+  ]
+}
