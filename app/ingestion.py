@@ -336,11 +336,7 @@ class ResponseRecorder:
                 "content_type": response.headers.get("content-type", ""),
             }
         )
-        if 300 <= response.status_code < 400:
-            raise PolicyViolation(
-                f"{self.root.parent.name}: redirects are not allowed for runtime ingestion endpoints"
-            )
-        # Persist the response before raising so a 4xx/5xx boundary remains
+        # Persist the response before raising so a 3xx/4xx/5xx boundary remains
         # auditable instead of leaving an empty raw run directory.
         response.raise_for_status()
         return response, path
