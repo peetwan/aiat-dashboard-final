@@ -279,6 +279,10 @@ def _innovation_row(
         "trl_status": detail.get("trl_status") or row.get("trl_status") or row.get("trl_label"),
         "latitude": detail.get("latitude"),
         "longitude": detail.get("longitude"),
+        "outcomes": detail.get("outcomes") or [],
+        "impacts": detail.get("impacts") or [],
+        "outcome_count": len(detail.get("outcomes") or []),
+        "impact_count": len(detail.get("impacts") or []),
     }
 
 
@@ -289,6 +293,105 @@ def _product_matches_any_code(row: dict[str, Any], province_codes: set[str]) -> 
 
 def _project_matches_any_province(project: dict[str, Any], province_names_th: set[str]) -> bool:
     return bool(set(_project_province_names(project)) & province_names_th)
+
+
+def _covered_province_codes(
+    products: list[dict[str, Any]],
+    projects: list[dict[str, Any]],
+    province_codes_by_name: dict[str, str],
+) -> tuple[list[str], list[str]]:
+    pmua_codes = sorted(
+        {
+            str(code).zfill(2)
+            for row in products
+            for code in row.get("provinces") or []
+            if str(code).strip()
+        }
+    )
+    codes_by_name: dict[str, str] = {}
+    for left, right in province_codes_by_name.items():
+        if re.fullmatch(r"\d{1,2}", str(left)):
+            code, name = left, right
+        else:
+            name, code = left, right
+        if str(name).strip() and str(code).strip():
+            codes_by_name[str(name).strip()] = str(code).zfill(2)
+    clig_codes = sorted(
+        {
+            codes_by_name[name]
+            for project in projects
+            for name in _project_province_names(project)
+            if name in codes_by_name
+        }
+    )
+    return pmua_codes, clig_codes
+
+
+def _coverage_card(key: str, label: str, value: int, source_behavior: str) -> dict[str, Any]:
+    return {
+        "key": key,
+        "label": label,
+        "value": value,
+        "unit": "จังหวัด",
+        "source_behavior": source_behavior,
+    }
+
+
+def _source_sections(
+    pmua_cards: list[dict[str, Any]],
+    clig_cards: list[dict[str, Any]],
+    pmua_codes: list[str],
+    clig_codes: list[str],
+    clig_summary: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    clig_cards = list(clig_cards)
+    if clig_summary:
+        clig_cards.append(
+            {
+                "key": "clig_budget",
+                "label": "งบประมาณรวมที่มีข้อมูล",
+                "value": clig_summary["budget_baht_total"],
+                "unit": "บาท",
+                "source_behavior": "clig_project_budget_sum",
+                "budget_known_rows": clig_summary["budget_known_rows"],
+                "project_count": clig_summary["total"],
+            }
+        )
+    return [
+        {
+            "key": "pmua_apptech",
+            "label": "PMUA AppTech",
+            "source_url": "https://pmua-apptech.com/",
+            "province_codes": pmua_codes,
+            "province_count": len(pmua_codes),
+            "cards": [
+                _coverage_card(
+                    "pmua_provinces_covered",
+                    "จังหวัดที่มีข้อมูล PMUA",
+                    len(pmua_codes),
+                    "explicit_product_province_code",
+                ),
+                *pmua_cards,
+            ],
+        },
+        {
+            "key": "clig",
+            "label": "CLIG",
+            "source_url": "https://clig.oas.psu.ac.th/project/search_project",
+            "province_codes": clig_codes,
+            "province_count": len(clig_codes),
+            "project_summary": clig_summary,
+            "cards": [
+                _coverage_card(
+                    "clig_provinces_covered",
+                    "จังหวัดที่พบโครงการ CLIG",
+                    len(clig_codes),
+                    "thai_province_name_text_match",
+                ),
+                *clig_cards,
+            ],
+        },
+    ]
 
 
 def _target_codes(province_names_by_code: dict[str, str]) -> set[str]:
@@ -445,6 +548,9 @@ def f4_overview(province_codes_by_name: dict[str, str] | None = None) -> dict[st
     province_codes_by_name = province_codes_by_name or {}
     product_count = len(snapshot["products"])
     clig_count = snapshot["clig_project_count"]
+    pmua_codes, clig_codes = _covered_province_codes(
+        snapshot["products"], snapshot["clig_projects"], province_codes_by_name
+    )
     target_names = snapshot["target_province_names"]
     target_codes = sorted(
         {
@@ -495,8 +601,10 @@ def f4_overview(province_codes_by_name: dict[str, str] | None = None) -> dict[st
     ]
     if economic_card:
         cards.append(economic_card)
+    pmua_cards = [card for card in cards if card["key"] in {"innovations", "local_innovators", "economic_impact"}]
+    clig_cards = [card for card in cards if card["key"] == "policy_projects"]
+    clig_summary = _policy_project_summary([_project_row(project) for project in snapshot["clig_projects"]])
     evidence_notes = [
-        target_membership_note,
         f"PMUA product parsed list has {product_count:,} rows.",
         f"Older R2 /propose snapshot headline was {snapshot['pmua_propose_total']:,}."
         if snapshot["pmua_propose_total"]
@@ -508,7 +616,7 @@ def f4_overview(province_codes_by_name: dict[str, str] | None = None) -> dict[st
     if economic_card:
         evidence_notes.append("AppTech economic impact is available as a national/year aggregate only; it is not allocated to province or region.")
     return {
-        "schema_version": "f4-dashboard-v1",
+        "schema_version": "f4-dashboard-v2",
         "quality_label_th": "ข้อมูล evidence drilldown · ยังไม่ใช่ KPI รับรอง",
         "cache_ttl_seconds": CACHE_TTL_SECONDS,
         "target_province_codes": target_codes,
@@ -517,6 +625,9 @@ def f4_overview(province_codes_by_name: dict[str, str] | None = None) -> dict[st
         "target_province_headline_count": target_headline_count,
         "target_province_membership_note": target_membership_note,
         "cards": cards,
+        "source_sections": _source_sections(pmua_cards, clig_cards, pmua_codes, clig_codes, clig_summary),
+        "covered_province_codes": sorted(set(pmua_codes) | set(clig_codes)),
+        "coverage_province_codes_by_source": {"pmua_apptech": pmua_codes, "clig": clig_codes},
         "economic_impact_rows": economic_rows,
         "evidence_notes": evidence_notes,
         "source_keys": {**snapshot["source_keys"], "apptech_connector": APPTECH_CONNECTOR_SOURCE},
@@ -540,53 +651,64 @@ def f4_province_summary(
     innovator_by_province = _latest_apptech_records_by_province("innovator_dashboard_province")
     innovator = innovator_by_province.get(province_name_th)
     levels = innovator.get("levels") if isinstance(innovator, dict) and isinstance(innovator.get("levels"), dict) else {}
+    pmua_codes, clig_codes = _covered_province_codes(product_rows, project_rows, province_names_by_code)
+    clig_summary = _policy_project_summary([_project_row(project) for project in project_rows])
+    cards = [
+        {
+            "key": "target_membership",
+            "label": "พื้นที่เป้าหมาย 67 จังหวัด",
+            "value": 1 if code in target_codes else 0,
+            "unit": "อยู่ในพื้นที่เป้าหมาย" if code in target_codes else "ไม่อยู่ในชุดเป้าหมาย",
+            "source_behavior": "target_membership_r2",
+        },
+        {
+            "key": "innovations",
+            "label": "เทคโนโลยี/นวัตกรรม",
+            "value": len(product_rows),
+            "unit": "นวัตกรรม",
+            "match_type": "province_code",
+        },
+        {
+            "key": "policy_projects",
+            "label": "นวัตกรรมเชิงนโยบาย",
+            "value": len(project_rows),
+            "unit": "โครงการวิจัย",
+            "match_type": "thai_province_name_text",
+        },
+        {
+            "key": "local_innovators",
+            "label": "นวัตกรชุมชน",
+            "value": int(innovator.get("total_inno") or 0) if innovator else None,
+            "unit": "คน" if innovator else "ยังไม่มีข้อมูลจาก AppTech connector",
+            "source_behavior": "apptech_connector_aggregate" if innovator else "not_available",
+            "level_counts": levels,
+            "gen_users": int(innovator.get("gen_users") or 0) if innovator else None,
+        },
+        {
+            "key": "economic_impact",
+            "label": "ผลกระทบเศรษฐกิจ",
+            "value": None,
+            "unit": "ไม่มีข้อมูลระดับจังหวัด",
+            "source_behavior": "not_available_by_province",
+        },
+    ]
     return {
         "province_code": code,
         "province_name_th": province_name_th,
         "quality_label_th": "ข้อมูล evidence-matched · ยังไม่ใช่ KPI รับรอง",
         "is_target_province": code in target_codes,
         "target_membership_source": LEARNING_DASHBOARD_KEY,
-        "cards": [
-            {
-                "key": "target_membership",
-                "label": "พื้นที่เป้าหมาย 67 จังหวัด",
-                "value": 1 if code in target_codes else 0,
-                "unit": "อยู่ในพื้นที่เป้าหมาย" if code in target_codes else "ไม่อยู่ในชุดเป้าหมาย",
-                "source_behavior": "target_membership_r2",
-            },
-            {
-                "key": "innovations",
-                "label": "เทคโนโลยี/นวัตกรรม",
-                "value": len(product_rows),
-                "unit": "นวัตกรรม",
-                "match_type": "province_code",
-            },
-            {
-                "key": "policy_projects",
-                "label": "นวัตกรรมเชิงนโยบาย",
-                "value": len(project_rows),
-                "unit": "โครงการวิจัย",
-                "match_type": "thai_province_name_text",
-            },
-            {
-                "key": "local_innovators",
-                "label": "นวัตกรชุมชน",
-                "value": int(innovator.get("total_inno") or 0) if innovator else None,
-                "unit": "คน" if innovator else "ยังไม่มีข้อมูลจาก AppTech connector",
-                "source_behavior": "apptech_connector_aggregate" if innovator else "not_available",
-                "level_counts": levels,
-                "gen_users": int(innovator.get("gen_users") or 0) if innovator else None,
-            },
-            {
-                "key": "economic_impact",
-                "label": "ผลกระทบเศรษฐกิจ",
-                "value": None,
-                "unit": "ไม่มีข้อมูลระดับจังหวัด",
-                "source_behavior": "not_available_by_province",
-            },
-        ],
+        "cards": cards,
+        "source_sections": _source_sections(
+            [card for card in cards if card["key"] in {"innovations", "local_innovators", "economic_impact"}],
+            [card for card in cards if card["key"] == "policy_projects"],
+            pmua_codes,
+            clig_codes,
+            clig_summary,
+        ),
+        "covered_province_codes": sorted(set(pmua_codes) | set(clig_codes)),
+        "coverage_province_codes_by_source": {"pmua_apptech": pmua_codes, "clig": clig_codes},
         "notes": [
-            "พื้นที่เป้าหมายอ่านจาก R2 target membership ไม่ได้อนุมานจากจำนวน PMUA/CLIG.",
             "PMUA rows filter by explicit province code in the R2 product list.",
             "CLIG rows filter by Thai province-name text match and may miss projects without province text.",
             "นวัตกรชุมชนเป็น aggregate รายจังหวัดจาก AppTech ไม่ได้ผูกกับนวัตกรรมรายรายการ.",
@@ -613,49 +735,63 @@ def f4_region_summary(
     innovator_by_province = _latest_apptech_records_by_province("innovator_dashboard_province")
     innovator_rows = [innovator_by_province[name] for name in names if name in innovator_by_province]
     innovator_summary = _sum_innovator_rows(innovator_rows)
+    pmua_codes, clig_codes = _covered_province_codes(product_rows, project_rows, province_names_by_code)
+    pmua_codes = sorted(set(pmua_codes) & codes)
+    clig_codes = sorted(set(clig_codes) & codes)
+    clig_summary = _policy_project_summary([_project_row(project) for project in project_rows])
+    cards = [
+        {
+            "key": "target_provinces",
+            "label": "พื้นที่เป้าหมาย",
+            "value": target_count,
+            "unit": "จังหวัด",
+            "source_behavior": "target_membership_r2",
+        },
+        {
+            "key": "innovations",
+            "label": "เทคโนโลยี/นวัตกรรม",
+            "value": len(product_rows),
+            "unit": "นวัตกรรม",
+            "match_type": "region_province_code",
+        },
+        {
+            "key": "policy_projects",
+            "label": "นวัตกรรมเชิงนโยบาย",
+            "value": len(project_rows),
+            "unit": "โครงการวิจัย",
+            "match_type": "region_thai_province_name_text",
+        },
+        {
+            "key": "local_innovators",
+            "label": "นวัตกรชุมชน",
+            "value": innovator_summary["total_inno"] if innovator_rows else None,
+            "unit": "คน" if innovator_rows else "ยังไม่มีข้อมูลจาก AppTech connector",
+            "source_behavior": "apptech_connector_aggregate" if innovator_rows else "not_available",
+            "level_counts": innovator_summary["levels"] if innovator_rows else {},
+            "gen_users": innovator_summary["gen_users"] if innovator_rows else None,
+        },
+        {
+            "key": "economic_impact",
+            "label": "ผลกระทบเศรษฐกิจ",
+            "value": None,
+            "unit": "ไม่มีข้อมูลระดับภาค",
+            "source_behavior": "not_available_by_region",
+        },
+    ]
     return {
         "region_name_th": region_name_th,
         "province_codes": sorted(codes),
         "quality_label_th": "ข้อมูล evidence-matched ระดับภาค · ยังไม่ใช่ KPI รับรอง",
-        "cards": [
-            {
-                "key": "target_provinces",
-                "label": "พื้นที่เป้าหมาย",
-                "value": target_count,
-                "unit": "จังหวัด",
-                "source_behavior": "target_membership_r2",
-            },
-            {
-                "key": "innovations",
-                "label": "เทคโนโลยี/นวัตกรรม",
-                "value": len(product_rows),
-                "unit": "นวัตกรรม",
-                "match_type": "region_province_code",
-            },
-            {
-                "key": "policy_projects",
-                "label": "นวัตกรรมเชิงนโยบาย",
-                "value": len(project_rows),
-                "unit": "โครงการวิจัย",
-                "match_type": "region_thai_province_name_text",
-            },
-            {
-                "key": "local_innovators",
-                "label": "นวัตกรชุมชน",
-                "value": innovator_summary["total_inno"] if innovator_rows else None,
-                "unit": "คน" if innovator_rows else "ยังไม่มีข้อมูลจาก AppTech connector",
-                "source_behavior": "apptech_connector_aggregate" if innovator_rows else "not_available",
-                "level_counts": innovator_summary["levels"] if innovator_rows else {},
-                "gen_users": innovator_summary["gen_users"] if innovator_rows else None,
-            },
-            {
-                "key": "economic_impact",
-                "label": "ผลกระทบเศรษฐกิจ",
-                "value": None,
-                "unit": "ไม่มีข้อมูลระดับภาค",
-                "source_behavior": "not_available_by_region",
-            },
-        ],
+        "cards": cards,
+        "source_sections": _source_sections(
+            [card for card in cards if card["key"] in {"innovations", "local_innovators", "economic_impact"}],
+            [card for card in cards if card["key"] == "policy_projects"],
+            pmua_codes,
+            clig_codes,
+            clig_summary,
+        ),
+        "covered_province_codes": sorted(set(pmua_codes) | set(clig_codes)),
+        "coverage_province_codes_by_source": {"pmua_apptech": pmua_codes, "clig": clig_codes},
         "notes": [
             "PMUA region rows filter by explicit province codes in the R2 product list.",
             "CLIG region rows filter by Thai province-name text match across provinces in the selected region.",
@@ -700,6 +836,8 @@ def f4_innovations(
         "detail_source_key": PMUA_PRODUCT_DETAILS_KEY,
         "detail_row_count": snapshot["pmua_product_detail_count"],
         "trl_known_rows": snapshot["pmua_trl_count"],
+        "outcome_known_rows": sum(1 for row in rows if row.get("outcomes")),
+        "impact_known_rows": sum(1 for row in rows if row.get("impacts")),
     }
 
 

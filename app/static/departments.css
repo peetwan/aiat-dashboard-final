@@ -151,6 +151,13 @@
 .atlas-shell .f4-flow > :is(button, span) > span { display: block; color: inherit; font: inherit; }
 .atlas-shell .department-kpi-hint { margin: 0 0 8px; }
 .atlas-shell .f4-country-panel:not(.is-province) [data-f4-metric="economic_impact"] { grid-column: 1 / -1; }
+.atlas-shell .f4-source-overview { display: grid; gap: 16px; }
+.atlas-shell .f4-source-section { padding: 16px; border: 1px solid var(--hairline); border-radius: 14px; background: #fff; }
+.atlas-shell .f4-source-section > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.atlas-shell .f4-source-section > header strong { display: block; color: var(--ink-strong); font-size: 16px; line-height: 1.5; }
+.atlas-shell .f4-source-section > header small { display: block; margin-top: 3px; color: var(--reading-note); font-size: 12px; line-height: 1.6; }
+.atlas-shell .f4-source-section > header a { color: var(--department-accent-strong); font-size: 12px; white-space: nowrap; }
+.atlas-shell .f4-source-section .f4-economic-table-wrap { margin-top: 16px; border-top: 1px solid var(--hairline); border-radius: 0; }
 .atlas-shell .f4-country-tabs { position: static; padding: 12px var(--reading-gutter); gap: 6px; scrollbar-width: thin; }
 .atlas-shell .f4-country-tabs button { min-height: 44px; padding: 8px 12px; border-radius: 10px; }
 .atlas-shell .f4-country-tabs button strong { font-size: 13px; font-weight: 700; }
@@ -206,6 +213,14 @@
 .atlas-shell .f4-record-card a { display: inline-flex; align-items: center; min-height: 40px; font-size: 13px; }
 .atlas-shell .f4-record-metrics { grid-template-columns: 1fr; }
 .atlas-shell .f4-source-grid { grid-template-columns: 1fr; overflow-wrap: anywhere; }
+.atlas-shell .f4-record-details { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+.atlas-shell .f4-record-details summary { color: var(--department-accent-strong); font-size: 12px; cursor: pointer; }
+.atlas-shell .f4-record-source-note { margin: 6px 0; color: var(--reading-note); font-size: 11px; }
+.atlas-shell .f4-record-evidence + .f4-record-evidence { margin-top: 8px; }
+.atlas-shell .f4-record-evidence h4 { margin: 0 0 4px; font-size: 12px; }
+.atlas-shell .f4-record-evidence ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.atlas-shell .f4-record-evidence li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--hairline); font-size: 12px; }
+.atlas-shell .f4-record-evidence li strong { color: var(--ink-strong); font-weight: 700; text-align: right; }
 
 .atlas-shell .f4-policy-window { grid-template-columns: 1fr; padding: 18px; }
 .atlas-shell .f4-policy-main { min-height: 0; }
