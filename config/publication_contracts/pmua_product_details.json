@@ -1,0 +1,21 @@
+{
+  "contract_version": "1.0",
+  "contract_id": "pmua_product_details",
+  "dataset_key": "pmua_product_details",
+  "source_scope": "approved_values",
+  "source_ids": ["f4_pmua_product_details"],
+  "builder": "tools.build_pmua_product_details:main",
+  "grain_th": "หนึ่งรายการต่อหน้ารายละเอียดนวัตกรรม PMUA สาธารณะ ระบุด้วย product_id",
+  "identity": {"product": ["product_id"]},
+  "geography": {"level": "source_point", "fields": ["latitude", "longitude"]},
+  "as_of": {"status": "not_provided_by_source", "fields": ["as_of"], "note": "fetched_at คือเวลาบันทึกหลักฐาน"},
+  "measures": [{"name": "หลักฐาน TRL, ROI/SROI, Outcomes และ Impacts", "unit": "คงข้อความและหน่วยตามต้นทางแต่ละรายการ", "denominator": "ต้นทางไม่ระบุฐานร่วมระหว่างรายการ"}],
+  "completeness": {"policy": "output_contracts"},
+  "privacy_profile": "aggregate_public",
+  "outputs": [{
+    "path": "data/public/pmua_product_details.json", "format": "json",
+    "role": "database", "downloadable": true, "max_bytes": 8388608,
+    "records_pointer": "/items", "identity_fields": ["product_id"], "expected_count": 1160,
+    "max_identity_churn_ratio": 0, "schema_policy": "stable"
+  }]
+}

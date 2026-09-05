@@ -170,7 +170,7 @@ def test_insights_exposes_source_coverage_and_searchable_work_directory() -> Non
 
     assert 'id="coverage"' in template
     assert 'id="sourceCoverageGrid"' in template
-    assert "ทะเบียน 29 แหล่งข้อมูล" in template
+    assert "ทะเบียน 30 แหล่งข้อมูล" in template
     assert 'id="unmapped"' in template
     assert 'id="learningSummary"' in template
     assert 'id="executivePortfolio"' in template

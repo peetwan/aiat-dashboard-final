@@ -35,7 +35,7 @@ def gz_jsonl(rows: list[dict]) -> bytes:
 @pytest.fixture()
 def fake_r2(monkeypatch):
     # These fixtures cover R2-only behavior before an AppTech release is available.
-    monkeypatch.setattr(f4_data, "load_public_artifact", lambda *_args: {})
+    monkeypatch.setattr(f4_data, "load_public_artifact", lambda key, *_args: {"items": product_details} if key == "f4/pmua-product-details" else {})
     products = [
         {
             "title": "เทคโนโลยี A",
@@ -136,7 +136,6 @@ def fake_r2(monkeypatch):
         f4_data.PMUA_PROPOSE_KEY: "พบข้อมูลทั้งหมด <b>1,161</b> รายการ".encode(),
         f4_data.PMUA_AREA_DISTRICTS_KEY: gz_jsonl(districts),
         f4_data.PMUA_AREA_SUBDISTRICTS_KEY: gz_jsonl(subdistricts),
-        f4_data.PMUA_PRODUCT_DETAILS_KEY: gz_jsonl(product_details),
         f4_data.CLIG_MANIFEST_KEY: json.dumps(
             {"datasets": [{"dataset_key": "clig.projects", "row_count": 107}]}
         ).encode(),

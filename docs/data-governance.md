@@ -10,7 +10,7 @@
 
 - ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
 - ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
-- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 19 แหล่ง
+- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 20 แหล่ง
 - Metadata-only: 8 แหล่ง
 - Restricted local-only: 2 แหล่ง
 
@@ -51,6 +51,7 @@
 | 27 | `spu_nsn_flood` | API-first | public candidate | 0 | 1 | 1 |
 | 28 | `spu_rawangphai_uru` | API-first | public candidate | 0 | 3 | 3 |
 | 29 | `clig_projects` | API-first | public candidate | 107 | 2 | 2 |
+| 30 | `f4_pmua_product_details` | API-first | public candidate | 1,160 | 2 | 2 |
 
 ตัวเลข records เป็น reference count ของ source ไม่ใช่จำนวนที่ต้องแสดงทั้งหมดใน UI และ runtime-safe เป็น technical allowlist ไม่ใช่การรับรองความหมายหรือ freshness
 
@@ -93,7 +94,7 @@ Artifacts ที่เพื่อนร่วมทีมนำเข้าต�
 
 ## Checklist ก่อน publication/deploy
 
-1. Source อยู่ใน public candidate 19 แหล่งและไม่ใช่ restricted lane
+1. Source อยู่ใน public candidate 20 แหล่งและไม่ใช่ restricted lane
 2. มี publication scope เป็นลายลักษณ์อักษร
 3. ยืนยัน schema, grain, unit, denominator, `as_of` และ freshness เท่าที่หลักฐานรองรับ
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection

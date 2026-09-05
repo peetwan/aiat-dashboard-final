@@ -172,6 +172,13 @@ SOURCE_PROFILES: dict[str, dict[str, object]] = {
         "excluded_th": "ยังไม่เผยแพร่ค่าข้อมูลหรือสร้าง KPI",
         "database_targets": ["sources"],
     },
+    "f4_pmua_product_details": {
+        "what_we_use_th": "รายละเอียดนวัตกรรม PMUA AppTech: TRL, ROI/SROI, Outcomes และ Impacts ตามข้อความต้นทาง",
+        "grain_th": "หนึ่งแถวต่อหน้ารายละเอียดนวัตกรรม public product_id",
+        "dashboard_use_th": "F4 อ่านเฉพาะ reviewed product-detail projection เพื่อแสดงหลักฐานรายนวัตกรรม",
+        "excluded_th": "ไม่เรียก login/write routes และไม่เผยแพร่ข้อมูลส่วนตัวหรือ raw response",
+        "database_targets": ["sources", "endpoints", "dashboard_records", "public_artifacts"],
+    },
     "clig_projects": {
         "what_we_use_th": "ข้อมูลโครงการวิจัยเสริมพลังท้องถิ่นจาก CLIG 107 โครงการ พร้อมรายละเอียด สถานะ ปีงบประมาณ เลขสัญญา หน่วยงานหลัก และงบประมาณเมื่อพบในหน้ารายละเอียด",
         "grain_th": "หนึ่งแถว = หนึ่งโครงการวิจัยจาก CLIG; policy_candidates เป็น subset ที่ tag จากคำเกี่ยวกับ อปท./นโยบาย/กลไก/มาตรการ",
