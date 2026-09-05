@@ -81,6 +81,8 @@ python tools/scaffold_publication.py rmutdb_summary `
 
 ## Manifest กับ receipt ต่างกันอย่างไร
 
+ไฟล์ JSON, GeoJSON และ CSV ที่สร้างใต้ `data/public/` ใช้ LF ทั้งตอนเขียนและตอน checkout ตาม `.gitattributes` เพื่อให้ SHA-256/ขนาดใน build manifest ตรงกับ Git บน Windows และ Linux ตัวสร้าง CSV ต้องกำหนด `lineterminator="\n"` ด้วย ไม่เปลี่ยน line endings ของ raw evidence เพราะ manifest ของต้นทางตรวจจาก byte เดิม
+
 | ไฟล์ | หน้าที่ | แก้ใน routine refresh ได้ไหม |
 |---|---|---|
 | Build/source manifest เช่น `data/public/manifest.json` หรือ `*_manifest.json` | บอก provenance และผลจาก builder ของ dataset | ได้ เมื่อ contract ประกาศไฟล์นั้นเป็น output |

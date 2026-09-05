@@ -77,7 +77,7 @@ def build(project_run: Path, detail_run: Path, *, generated_at: str, output: Pat
         "items": items,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     return {"records": len(items), "thai_names": sum(bool(r["researcher_name_th"]) for r in items),
             "english_names": sum(bool(r["researcher_name_en"]) for r in items)}
 

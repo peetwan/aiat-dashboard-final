@@ -47,6 +47,7 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 
@@ -708,7 +709,7 @@ def build_public_data(refresh_boundaries: bool, *, generated_at: str | None = No
         "quality_status",
     ]
     with province_csv.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=province_fields)
+        writer = csv.DictWriter(handle, fieldnames=province_fields, lineterminator="\n")
         writer.writeheader()
         for profile in public_catalog["provinces"]:
             writer.writerow({field: profile.get(field) for field in province_fields})
@@ -724,7 +725,7 @@ def build_public_data(refresh_boundaries: bool, *, generated_at: str | None = No
         "quality_label_th",
     ]
     with source_csv.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=source_fields)
+        writer = csv.DictWriter(handle, fieldnames=source_fields, lineterminator="\n")
         writer.writeheader()
         for source in source_inventory:
             writer.writerow({field: source.get(field) for field in source_fields})

@@ -910,7 +910,7 @@ def write_governance(catalog: dict, target: Path) -> None:
         ]
     )
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text("\n".join(lines), encoding="utf-8")
+    target.write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
 def main() -> int:
@@ -925,7 +925,7 @@ def main() -> int:
     args = parser.parse_args()
     catalog = build_catalog(args.merged_root.resolve())
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     write_governance(catalog, args.governance_output)
     print(
         json.dumps(
