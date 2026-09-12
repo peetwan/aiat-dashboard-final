@@ -60,6 +60,8 @@ PUBLIC_CANDIDATES = {
     "f1_sradss_ppaos",
     "f1_pppconnext",
     "f2_culturalmap_university",
+    "f2_cultural_market_civil",
+    "f2_icommunity",
     "f2_rmutdb",
     "f2_apptech_mtr",
     "f2_apptech_mru",
@@ -409,8 +411,23 @@ def test_public_coverage_reports_counts_geo_gaps_and_zero_restricted_leaks():
     assert learning["status"]["fact_acceptance"] == "candidate_needs_review"
     assert learning["evidence"]["approval_basis"] == "source_card_candidate_scope_needs_review"
 
-    assert sources["f2_cultural_market_civil"]["public_visibility"]["classification"] == "metadata_only"
-    assert sources["f2_icommunity"]["public_visibility"]["classification"] == "metadata_only"
+    for source_id in ("f2_cultural_market_civil", "f2_icommunity"):
+        source = sources[source_id]
+        catalog_source = catalog_by_id[source_id]
+        assert catalog_source["acquisition_mode"] == "snapshot_only"
+        assert catalog_source["snapshot_fallback"] is True
+        assert catalog_source["snapshot_origin_files"]
+        assert catalog_source["endpoints"] == []
+        assert source["status"]["audit"] == catalog_source["audit_status"] == "NEEDS_REVIEW"
+        assert source["status"]["readiness"] == "needs_review"
+        assert source["status"]["fact_acceptance"] == "candidate_needs_review"
+        assert source["public_visibility"]["classification"] == "public_candidate"
+        assert source["public_visibility"]["current_public_data_artifact"] is False
+        assert source["public_visibility"]["current_province_projection"] is False
+        assert source["records"]["observed_count"] is None
+        assert source["records"]["observed_count_basis"] == "snapshot_evidence_only_no_reviewed_record_count"
+        assert source["records"]["not_all_raw_rows_are_served"] is True
+        assert source["evidence"]["primary_paths"][0] == catalog_source["snapshot_evidence"]["manifest"]
     household = sources["f2_target_household"]
     assert household["public_visibility"]["classification"] == "public_candidate"
     assert household["records"]["observed_count"] == 1160

@@ -1,6 +1,6 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "4e365f9ad112721c3767ebfb794ec93074d1df86f61af00aceb74bdc7fb0b1d4",
+  "release_digest": "c718bded3d86f1b32523290ce888df22c645774f62087cfa7dad56050b61ddeb",
   "artifact_count": 177,
   "artifacts": [
     {
@@ -1719,8 +1719,8 @@
       "dataset_key": "source_coverage",
       "role": "database",
       "format": "json",
-      "bytes": 96646,
-      "sha256": "5c2431ce5194c5f4a2e81464932ae0c1300f92d29082b7b6cbba00b9c0366682",
+      "bytes": 98455,
+      "sha256": "72f38afb5b34a06c60b6bb40e71f475e89c49cb8603f8b6b6eb85227cfc9ac45",
       "contract_sha256": "c30b35602b01ac347cdf677bd256422c5fa30c1a3cbf659b701541e6246e2433"
     },
     {

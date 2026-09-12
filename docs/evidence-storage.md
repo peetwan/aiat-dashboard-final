@@ -106,6 +106,32 @@ python tools/evidence_pull.py <source_id> --list          # ดู run ทั้
 pull ตรวจ sha256 ทุกไฟล์เทียบ manifest — ไม่ตรงคือ exit code 2 ไม่ใช่คำเตือน
 `latest` = run_id ที่มากที่สุดตามลำดับตัวอักษร (timestamp UTC เรียงได้ตรงตัว)
 
+### Snapshot ที่ยังไม่มีใน merged index
+
+`f2_cultural_market_civil` และ `f2_icommunity` ใช้ `snapshot_only` โดย pin run ใน
+`EVIDENCE_SNAPSHOT_RUNS` ของ `tools/build_source_catalog.py` ก่อน regenerate ให้ pull
+run ที่ระบุไว้ลง evidence workspace:
+
+```bash
+python tools/evidence_pull.py f2_cultural_market_civil --run 20260825T070510Z
+python tools/evidence_pull.py f2_icommunity --run 20260825T143637Z
+python tools/build_source_catalog.py
+python tools/build_source_coverage.py
+python -m app.cli publication receipt
+python -m app.cli check
+```
+
+Builder ตรวจ source/run identity และ SHA-256 ของทุก dataset/extra file แล้วสร้าง
+เฉพาะ provenance ใน catalog/coverage โดยคง `audit_status=NEEDS_REVIEW` จาก source card
+และยังไม่มี executable connector หรือ public record projection สำหรับสอง source นี้
+การเปลี่ยน run ต้องแก้ pin และตรวจผ่าน PR ใหม่ ไม่เลือก `latest` อัตโนมัติระหว่าง build
+
+Manifest รอบนี้มี JSON envelope ที่ `row_count=1` หมายถึงหนึ่งไฟล์ snapshot ซึ่ง
+รายการจริงอยู่ใน `data[]` และแต่ละ dataset มี grain ต่างกัน จึงไม่บวกเป็นจำนวนคน
+ชุมชน หรือสินค้าเดียวกัน ค่า `expected_record_count=0` ใน catalog เป็นค่าเดิมสำหรับ
+จำนวนที่ยังไม่กำหนด ส่วน coverage ใช้ `observed_count=null` พร้อมเหตุผล และแสดงว่า
+ยังไม่ได้ serving raw rows เหล่านี้ การเผยแพร่ค่าต้องผ่าน reviewed projection ตามเดิม
+
 ## อัปโหลด run ใหม่ (คนดูแล source)
 
 1. จัดไฟล์ที่ดึงมาไว้ในโฟลเดอร์เดียว แล้วเขียน `manifest_input.json` ในโฟลเดอร์นั้น —

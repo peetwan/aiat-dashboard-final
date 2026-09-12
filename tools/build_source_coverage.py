@@ -392,12 +392,15 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         visibility = catalog_row["value_visibility"]
         restricted = visibility == "restricted_local_only"
         values_allowed = bool(catalog_row["production_values_allowed"])
+        snapshot_evidence = catalog_row.get("snapshot_evidence") if values_allowed else None
         observed_count = (
             catalog_row["expected_record_count"]
-            if values_allowed
+            if values_allowed and not snapshot_evidence
             else None
         )
-        if source_id == "f2_learning_dashboard":
+        if snapshot_evidence:
+            count_basis = "snapshot_evidence_only_no_reviewed_record_count"
+        elif source_id == "f2_learning_dashboard":
             count_basis = "verified_province_rows_excluding_header"
         elif source_id == "f2_apptech_mtr":
             count_basis = "validated_current_public_api_silver_2026_08_17"
@@ -433,11 +436,14 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                 and observed_count is not None
                 and serving_count != observed_count
                 or source_id in {"f2_learning_dashboard", "f2_apptech_mtr"}
+                or snapshot_evidence and source_id not in public_source_ids
             )
         )
 
         approval = card.get("dashboard_publication_approval_2026_08_16") or {}
-        if source_id == "f2_learning_dashboard":
+        if snapshot_evidence:
+            approval_basis = "catalog_snapshot_candidate_scope_needs_review"
+        elif source_id == "f2_learning_dashboard":
             approval_basis = "source_card_candidate_scope_needs_review"
         elif source_id in {
             "f2_target_household",
@@ -454,6 +460,10 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
         current_map_count = province_projection_counts.get(source_id, 0)
         geo = geo_profile(source_id, registry_row, card, current_map_count)
         primary_paths = evidence_paths(card, source_id, restricted)
+        source_notes = notes_for(source_id, visibility, registry_row)
+        if snapshot_evidence:
+            primary_paths = [snapshot_evidence["manifest"], *primary_paths][:12]
+            source_notes.append(catalog_row["notes_th"])
 
         sources.append(
             {
@@ -508,7 +518,7 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                     "primary_paths": primary_paths,
                     "local_evidence_paths_withheld": restricted,
                 },
-                "notes_th": notes_for(source_id, visibility, registry_row),
+                "notes_th": source_notes,
             }
         )
 
