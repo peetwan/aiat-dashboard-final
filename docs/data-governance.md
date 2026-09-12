@@ -10,8 +10,8 @@
 
 - ฐานการจัดหมวดปัจจุบัน: `current_catalog_policy_and_source_cards`
 - ผู้ดูแล policy ปัจจุบัน: `repository_co_maintainers`
-- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 20 แหล่ง
-- Metadata-only: 8 แหล่ง
+- Public candidate ที่อนุญาตให้ใช้ใน Dashboard: 22 แหล่ง
+- Metadata-only: 6 แหล่ง
 - Restricted local-only: 2 แหล่ง
 
 พิจารณาตามบริบทของฟิลด์: เครดิตเจ้าของงาน ผู้วิจัย หน่วยงาน ช่องทางติดต่องานและที่ตั้งสาธารณะเผยแพร่ได้ตาม field_contexts ใน contract ดู [คู่มือบริบทข้อมูล](field-contexts.md)
@@ -25,8 +25,8 @@
 | 1 | `f1_sradss_ppaos` | API-first | public candidate | 1,083,458 | 44 | 28 |
 | 2 | `f1_pppconnext` | API-first | public candidate | 47 | 4 | 4 |
 | 3 | `f2_culturalmap_university` | Snapshot | public candidate | 5,619 | 6 | 0 |
-| 4 | `f2_cultural_market_civil` | Metadata | metadata-only | 0 | 0 | 0 |
-| 5 | `f2_icommunity` | Metadata | metadata-only | 0 | 0 | 0 |
+| 4 | `f2_cultural_market_civil` | Snapshot | public candidate | ยังไม่ระบุ | 0 | 0 |
+| 5 | `f2_icommunity` | Snapshot | public candidate | ยังไม่ระบุ | 0 | 0 |
 | 6 | `f2_rmutdb` | Snapshot | public candidate | 2,001 | 14 | 0 |
 | 7 | `f2_apptech_mtr` | API-first | public candidate | 630 | 6 | 6 |
 | 8 | `f2_apptech_mru` | API-first | public candidate | 503 | 8 | 5 |
@@ -94,7 +94,7 @@ Artifacts ที่เพื่อนร่วมทีมนำเข้าต�
 
 ## Checklist ก่อน publication/deploy
 
-1. Source อยู่ใน public candidate 20 แหล่งและไม่ใช่ restricted lane
+1. Source อยู่ใน public candidate 22 แหล่งและไม่ใช่ restricted lane
 2. มี publication scope เป็นลายลักษณ์อักษร
 3. ยืนยัน schema, grain, unit, denominator, `as_of` และ freshness เท่าที่หลักฐานรองรับ
 4. PII/secret scan ผ่านและ field allowlist ตรงกับ projection

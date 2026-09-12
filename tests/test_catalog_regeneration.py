@@ -1,4 +1,6 @@
 """Regeneration must keep the connectors and public request shapes already in use."""
+import gzip
+import hashlib
 import json
 
 import pytest
@@ -8,6 +10,88 @@ from tools.build_source_catalog import (
     load_plan_endpoints, load_target_household_search_endpoint, source_policy,
 )
 from tools import build_source_catalog as catalog_builder, build_source_coverage as coverage_builder
+
+
+@pytest.fixture
+def evidence_snapshot(tmp_path, monkeypatch):
+    source_id = "f2_cultural_market_civil"
+    run_id = catalog_builder.EVIDENCE_SNAPSHOT_RUNS[source_id]
+    run_root = tmp_path / "data/raw" / source_id / run_id
+    run_root.mkdir(parents=True)
+    content = gzip.compress(json.dumps({"data": [{"id": "fixture-a"}, {"id": "fixture-b"}]}).encode())
+    (run_root / "records.json.gz").write_bytes(content)
+    manifest = {
+        "source_id": source_id, "run_id": run_id,
+        "datasets": [{"dataset_key": "fixture.records", "file": "records.json.gz",
+                      "sha256": hashlib.sha256(content).hexdigest(), "row_count": 1}],
+    }
+    path = run_root / "manifest.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    monkeypatch.setattr(catalog_builder, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(catalog_builder, "provenance_path", lambda path: path.as_posix())
+    return source_id, run_id, path, manifest
+
+
+@pytest.mark.parametrize("has_projection", [False, True])
+def test_snapshot_promotion_keeps_unreviewed_counts_and_values_out_of_coverage(
+    clig_evidence, evidence_snapshot, monkeypatch, has_projection,
+):
+    root, _ = clig_evidence
+    source_id, run_id, _, _ = evidence_snapshot
+    catalog_builder.REGISTRY_PATH.write_text(json.dumps({"total_records": 1, "sources": [{
+        "source_id": source_id, "name_th": "Fixture", "normalized_url": "https://example.test/",
+    }]}), encoding="utf-8")
+    card = catalog_builder.AUDIT_ROOT / f"01_{source_id}/source_card.json"
+    card.parent.mkdir(parents=True)
+    card.write_text(json.dumps({"source_id": source_id, "status": "NEEDS_REVIEW"}), encoding="utf-8")
+    catalog = catalog_builder.build_catalog(root)
+    source = catalog["sources"][0]
+    assert source["acquisition_mode"] == "snapshot_only"
+    assert source["audit_status"] == "NEEDS_REVIEW"
+    assert source["snapshot_evidence"]["run_id"] == run_id
+    assert source["snapshot_evidence"]["dataset_count"] == 1
+    assert len(source["snapshot_origin_files"]) == 1
+    assert source["expected_record_count"] == 0  # Neither the envelope count nor its data[] length.
+    assert source["endpoints"] == []
+    catalog_path = root / "catalog.json"
+    catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+    monkeypatch.setattr(
+        coverage_builder, "current_public_projection",
+        lambda: ({source_id} if has_projection else set(), {}),
+    )
+    coverage = coverage_builder.build_coverage(catalog_path, root)["sources"][0]
+    assert coverage["records"]["observed_count"] is None
+    assert coverage["records"]["observed_count_basis"] == "snapshot_evidence_only_no_reviewed_record_count"
+    assert coverage["public_visibility"]["current_public_data_artifact"] is has_projection
+    assert coverage["records"]["not_all_raw_rows_are_served"] is True
+    assert coverage["evidence"]["primary_paths"][0] == source["snapshot_evidence"]["manifest"]
+
+
+@pytest.mark.parametrize("fault", ["identity", "missing_file", "hash", "traversal", "duplicate_dataset", "extra_file"])
+def test_snapshot_promotion_rejects_invalid_evidence(evidence_snapshot, fault):
+    source_id, run_id, path, manifest = evidence_snapshot
+    if fault == "identity":
+        manifest["source_id"] = "another_source"
+    elif fault == "missing_file":
+        (path.parent / "records.json.gz").unlink()
+    elif fault == "hash":
+        (path.parent / "records.json.gz").write_bytes(b"corrupted")
+    elif fault == "traversal":
+        manifest["datasets"][0]["file"] = "../outside.json.gz"
+    elif fault == "duplicate_dataset":
+        manifest["datasets"].append(dict(manifest["datasets"][0]))
+    elif fault == "extra_file":
+        manifest["extra_files"] = [{"file": "missing.json", "sha256": "0" * 64}]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(ValueError):
+        catalog_builder.load_evidence_snapshot(source_id, run_id)
+
+
+def test_snapshot_promotion_requires_a_pinned_manifest(evidence_snapshot):
+    source_id, run_id, path, _ = evidence_snapshot
+    path.unlink()
+    with pytest.raises(SystemExit, match=f"evidence_pull.py {source_id} --run {run_id}"):
+        catalog_builder.load_evidence_snapshot(source_id, run_id)
 
 
 @pytest.fixture

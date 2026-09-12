@@ -49,12 +49,19 @@ APPTECH_CURRENT_OBSERVATION = (
 )
 INGESTION_PLANS_PATH = DASHBOARD_ROOT / "config/ingestion_plans.json"
 
+# Pin immutable evidence runs; rebuilding must never silently select a newer run.
+EVIDENCE_SNAPSHOT_RUNS = {
+    "f2_cultural_market_civil": "20260825T070510Z",
+    "f2_icommunity": "20260825T143637Z",
+}
+
 # Publication permission is deliberately separate from semantic acceptance. Every
 # source in this map remains candidate/needs_review until its fact gates pass.
 APPROVED_PUBLIC_MODES = {
     "f1_sradss_ppaos": "api_first",
     "f1_pppconnext": "api_first",
     "f2_culturalmap_university": "snapshot_only",
+    **{source_id: "snapshot_only" for source_id in EVIDENCE_SNAPSHOT_RUNS},
     "f2_rmutdb": "snapshot_only",
     "f2_apptech_mtr": "api_first",
     "f2_apptech_mru": "api_first",
@@ -387,6 +394,48 @@ def load_snapshot_files(data_location: Path) -> list[str]:
     )
 
 
+def load_evidence_snapshot(source_id: str, run_id: str) -> tuple[list[str], dict]:
+    """Verify local R2 evidence and expose provenance, without publishing raw rows."""
+    run_root = PROJECT_ROOT / "data/raw" / source_id / run_id
+    manifest_path = run_root / "manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit(
+            f"ไม่พบ snapshot manifest: {manifest_path}; รัน "
+            f"python tools/evidence_pull.py {source_id} --run {run_id} ก่อน regenerate"
+        )
+    manifest = read_json(manifest_path)
+    if manifest.get("source_id") != source_id or manifest.get("run_id") != run_id:
+        raise ValueError(f"Snapshot manifest identity mismatch: {manifest_path}")
+    datasets = manifest.get("datasets", [])
+    dataset_keys = [item.get("dataset_key") for item in datasets]
+    if not datasets or not all(dataset_keys) or len(set(dataset_keys)) != len(dataset_keys):
+        raise ValueError(f"Snapshot manifest requires unique datasets: {manifest_path}")
+    seen_files: set[str] = set()
+    for item in [*datasets, *manifest.get("extra_files", [])]:
+        name = item.get("file", "")
+        relative = Path(name)
+        if (
+            not name or relative.is_absolute() or ".." in relative.parts
+            or "\\" in name or ":" in name or name in seen_files
+            or not (run_root / relative).resolve().is_relative_to(run_root.resolve())
+        ):
+            raise ValueError(f"Invalid or duplicate snapshot file: {name}")
+        seen_files.add(name)
+        path = run_root / relative
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != item.get("sha256"):
+            raise ValueError(f"Snapshot SHA-256 mismatch or missing file: {path}")
+    return (
+        [provenance_path(run_root / item["file"]) for item in datasets],
+        {
+            "run_id": run_id,
+            "manifest": provenance_path(manifest_path),
+            "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+            "dataset_count": len(datasets),
+            "record_count_status": "not_reviewed_mixed_grains",
+        },
+    )
+
+
 def load_learning_dashboard_endpoint(acquisition_mode: str) -> list[dict]:
     observation = read_json(LEARNING_DASHBOARD_OBSERVATION)
     network = observation["network"]
@@ -537,6 +586,13 @@ def source_policy(source_id: str) -> tuple[str, str, str, bool]:
 
 def source_notes(registry_row: dict, index_row: dict | None, source_id: str) -> str:
     notes = [registry_row.get("notes", "")]
+    if source_id in EVIDENCE_SNAPSHOT_RUNS:
+        notes.append(
+            f"มี snapshot บน R2 run {EVIDENCE_SNAPSHOT_RUNS[source_id]} ตรวจ SHA-256 ตาม manifest แล้ว; "
+            "หลาย dataset เป็น JSON envelope ที่ row_count นับไฟล์ ไม่ใช่จำนวนรายการใน data[]. "
+            "ยังไม่กำหนด reference record count รวมข้าม grain (ค่า 0 ใน catalog หมายถึงยังไม่กำหนด); "
+            "คง NEEDS_REVIEW และเผยแพร่เฉพาะสถานะ/หลักฐานอ้างอิงจนกว่าจะมี reviewed projection"
+        )
     if source_id == "f2_target_household":
         notes = ["ดึงข้อมูลตลาดผลงานสาธารณะ เครดิตเจ้าของงานใช้ได้ตาม field_contexts เมื่อมีฟิลด์และหลักฐาน"]
     if source_id == "clig_projects":
@@ -703,6 +759,11 @@ def build_catalog(merged_root: Path) -> dict:
             if data_location and production_values_allowed
             else []
         )
+        snapshot_evidence = None
+        if source_id in EVIDENCE_SNAPSHOT_RUNS:
+            snapshot_files, snapshot_evidence = load_evidence_snapshot(
+                source_id, EVIDENCE_SNAPSHOT_RUNS[source_id]
+            )
         if source_id in {"f2_wallet_all_realtime", "f2_wallet_cluster_realtime"}:
             # INDEX row counts are historical monthly dumps, not the current-month
             # serving grain.
@@ -713,7 +774,10 @@ def build_catalog(merged_root: Path) -> dict:
                 raise RuntimeError("AppTech current Silver manifest no longer matches 630-row audit")
             snapshot_files = [provenance_path(APPTECH_CURRENT_RECORDS)]
 
-        if "catalog_expected_record_count" in ingestion_plans.get(source_id, {}):
+        if snapshot_evidence:
+            # No reviewed primary grain yet; never sum envelope rows or unlike datasets.
+            expected_record_count = 0
+        elif "catalog_expected_record_count" in ingestion_plans.get(source_id, {}):
             expected_record_count = int(ingestion_plans[source_id]["catalog_expected_record_count"])
         elif source_id == "f2_learning_dashboard":
             expected_record_count = LEARNING_DASHBOARD_PROVINCE_ROWS
@@ -763,6 +827,7 @@ def build_catalog(merged_root: Path) -> dict:
                 "expected_record_count": expected_record_count,
                 "notes_th": source_notes(registry_row, index_row, source_id),
                 "snapshot_origin_files": snapshot_files,
+                **({"snapshot_evidence": snapshot_evidence} if snapshot_evidence else {}),
                 "endpoints": endpoints,
             }
         )
@@ -846,11 +911,15 @@ def write_governance(catalog: dict, target: Path) -> None:
     }
     for source in catalog["sources"]:
         safe = sum(endpoint["runtime_enabled"] for endpoint in source["endpoints"])
+        reference_count = (
+            "ยังไม่ระบุ" if source.get("snapshot_evidence")
+            else f"{source['expected_record_count']:,}"
+        )
         lines.append(
             f"| {source['ordinal']} | `{source['source_id']}` | "
             f"{mode_labels.get(source['acquisition_mode'], source['acquisition_mode'])} | "
             f"{visibility_labels.get(source['value_visibility'], source['value_visibility'])} | "
-            f"{source['expected_record_count']:,} | "
+            f"{reference_count} | "
             f"{len(source['endpoints'])} | {safe} |"
         )
     lines.extend(
