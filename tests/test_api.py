@@ -1125,6 +1125,10 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
     from app.main import settings
     from app.models import DashboardRecord
 
+    metadata_source_id = next(
+        source["source_id"] for source in reviewed_catalog()["sources"]
+        if source["value_visibility"] == "metadata_only"
+    )
     with TestClient(app) as client:
         with SessionLocal() as session:
             session.add_all(
@@ -1137,7 +1141,7 @@ def test_operational_records_always_filter_non_public_sources(monkeypatch):
                         payload={"value": "public"},
                     ),
                     DashboardRecord(
-                        source_id="f2_cultural_market_civil",
+                        source_id=metadata_source_id,
                         dataset_key="metadata-only",
                         source_record_id="metadata-1",
                         record_hash="b" * 64,
