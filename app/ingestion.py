@@ -666,6 +666,12 @@ class IngestionPipeline:
         )
 
     def _load_snapshot(self, source: dict, run_id: str) -> tuple[list[tuple[str, dict]], Path]:
+        evidence = source.get("snapshot_evidence") or {}
+        if evidence.get("record_count_status") == "not_reviewed_mixed_grains":
+            raise PolicyViolation(
+                f"{source['source_id']}: evidence snapshot has no reviewed replay contract; "
+                "ต้องกำหนด dataset/grain และ completeness ของทุกไฟล์ก่อนนำเข้า Candidate"
+            )
         root = self.settings.resolved_snapshot_root / source["source_id"]
         if not root.exists():
             raise FileNotFoundError(

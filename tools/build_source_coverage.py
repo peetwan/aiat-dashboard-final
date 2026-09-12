@@ -436,7 +436,7 @@ def build_coverage(catalog_path: Path, merged_root: Path) -> dict:
                 and observed_count is not None
                 and serving_count != observed_count
                 or source_id in {"f2_learning_dashboard", "f2_apptech_mtr"}
-                or snapshot_evidence and source_id not in public_source_ids
+                or snapshot_evidence
             )
         )
 

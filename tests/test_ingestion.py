@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import gzip
 import json
 from collections import Counter
 from pathlib import Path
@@ -47,6 +48,29 @@ class SequenceRecorder:
     def request(self, method, url, **kwargs):
         self.calls.append((method, url, kwargs))
         return StubJsonResponse(next(self.payloads)), None
+
+
+@pytest.mark.parametrize("source_id", ["f2_cultural_market_civil", "f2_icommunity"])
+@pytest.mark.parametrize("strategy", ["auto", "snapshot"])
+def test_evidence_only_snapshot_cannot_commit_a_partial_replay(tmp_path, source_id, strategy):
+    root = tmp_path / source_id
+    root.mkdir()
+    (root / "records.json.gz").write_bytes(
+        gzip.compress(json.dumps({"data": [{"id": "fixture-envelope"}]}).encode())
+    )
+    # The legacy loader can read this file while ignoring the gzip JSON envelope.
+    (root / "location_assertions.jsonl.gz").write_bytes(
+        gzip.compress(b'{"id":"fixture-location"}\n')
+    )
+    settings = Settings(app_env="local", snapshot_root=tmp_path)
+    with SessionLocal() as session:
+        sync_catalog(session)
+        with pytest.raises(PolicyViolation, match="no reviewed replay contract"):
+            IngestionPipeline(session, settings).ingest_source(source_id, strategy=strategy)
+        assert session.scalar(select(DashboardRecord)) is None
+        run = session.scalar(select(IngestionRun))
+        assert run.status == "failed"
+        assert "no reviewed replay contract" in run.error_message
 
 
 def test_snapshot_ingestion_sanitizes_contact_fields(tmp_path):

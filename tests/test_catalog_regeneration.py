@@ -32,7 +32,10 @@ def evidence_snapshot(tmp_path, monkeypatch):
     return source_id, run_id, path, manifest
 
 
-def test_snapshot_promotion_keeps_unreviewed_counts_and_values_out_of_coverage(clig_evidence, evidence_snapshot):
+@pytest.mark.parametrize("has_projection", [False, True])
+def test_snapshot_promotion_keeps_unreviewed_counts_and_values_out_of_coverage(
+    clig_evidence, evidence_snapshot, monkeypatch, has_projection,
+):
     root, _ = clig_evidence
     source_id, run_id, _, _ = evidence_snapshot
     catalog_builder.REGISTRY_PATH.write_text(json.dumps({"total_records": 1, "sources": [{
@@ -52,10 +55,15 @@ def test_snapshot_promotion_keeps_unreviewed_counts_and_values_out_of_coverage(c
     assert source["endpoints"] == []
     catalog_path = root / "catalog.json"
     catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+    monkeypatch.setattr(
+        coverage_builder, "current_public_projection",
+        lambda: ({source_id} if has_projection else set(), {}),
+    )
     coverage = coverage_builder.build_coverage(catalog_path, root)["sources"][0]
     assert coverage["records"]["observed_count"] is None
     assert coverage["records"]["observed_count_basis"] == "snapshot_evidence_only_no_reviewed_record_count"
-    assert coverage["public_visibility"]["current_public_data_artifact"] is False
+    assert coverage["public_visibility"]["current_public_data_artifact"] is has_projection
+    assert coverage["records"]["not_all_raw_rows_are_served"] is True
     assert coverage["evidence"]["primary_paths"][0] == source["snapshot_evidence"]["manifest"]
 
 

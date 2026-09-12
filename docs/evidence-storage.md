@@ -124,6 +124,10 @@ python -m app.cli check
 Builder ตรวจ source/run identity และ SHA-256 ของทุก dataset/extra file แล้วสร้าง
 เฉพาะ provenance ใน catalog/coverage โดยคง `audit_status=NEEDS_REVIEW` จาก source card
 และยังไม่มี executable connector หรือ public record projection สำหรับสอง source นี้
+การ replay ผ่าน `ingest-source` ทั้ง `auto` และ `snapshot` จะถูกปฏิเสธจนกว่าจะมี
+reviewed replay contract ที่กำหนด dataset/grain และ completeness ครบทุกไฟล์ เพื่อกัน
+legacy loader อ่านเฉพาะ JSONL แล้วข้าม JSON gzip จน commit ได้เพียงบางชุด
+coverage ยังคงเตือนว่าข้อมูลยังไม่ครบ แม้ต่อมาจะมี public projection บาง dataset แล้ว
 การเปลี่ยน run ต้องแก้ pin และตรวจผ่าน PR ใหม่ ไม่เลือก `latest` อัตโนมัติระหว่าง build
 
 Manifest รอบนี้มี JSON envelope ที่ `row_count=1` หมายถึงหนึ่งไฟล์ snapshot ซึ่ง
