@@ -1,7 +1,7 @@
 {
   "receipt_version": "1.0",
-  "release_digest": "c718bded3d86f1b32523290ce888df22c645774f62087cfa7dad56050b61ddeb",
-  "artifact_count": 177,
+  "release_digest": "412b90d9f66e90bb33de66817d77bac16a6b0aae22bdc73297236b0260859416",
+  "artifact_count": 217,
   "artifacts": [
     {
       "path": "data/public/apptech_aggregates.json",
@@ -852,6 +852,406 @@
       "bytes": 749,
       "sha256": "952e84d91ae3f074acee3f0040725e2c313e1388dd72a523f6c8863f7329d63f",
       "contract_sha256": "b268600338315469f878acd5f0d8cba28f834fb045a4494d3b8ef7273b0c921b"
+    },
+    {
+      "path": "data/public/f2/details/k02-000.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4192200,
+      "sha256": "1b134cdb997805d3ea938f1d711de82fcbc6a6d5fefcf1a5b167e04ada0c4b68",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k02-001.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4194244,
+      "sha256": "0245d28306dee860e7d012827570f9f38bb6b784322d20d106eee74a6c1bab03",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k02-002.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4192479,
+      "sha256": "d878aec36f3aacc33b138ad748c56f1124d4c9986f2ffcfa034d1b9f108899ab",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k02-003.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 750730,
+      "sha256": "8ba5500afdd3a8d2e5c5beff8e3ebd67b62361332d9c809b0eb3925a738f34d9",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-000.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4188467,
+      "sha256": "a8881cfc264260f7cc0f0e1761d44d4daad9523572a5134c98936a7778f41325",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-001.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4191904,
+      "sha256": "b33403c9498b2fef12c170cd4b342c9aed596a27e0278956893ef29378792abb",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-002.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4185702,
+      "sha256": "1221c2c844aca106133cc82541e97c13ddb58f590c715e703fdb710944864742",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-003.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193096,
+      "sha256": "b6dfd6f61b25c92a0853a735b4f5416f300e3d20679d7ddb2d0104017230d911",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-004.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4184269,
+      "sha256": "6368da00a0fb07195331e3592f0b9ec0319947e98c78bfcdf5e4668dd07a145f",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k04-005.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1714624,
+      "sha256": "a2fc76ed45424385e3e7fff7d3b3944601c90f7279f0f6b237d9d6ca65f20a39",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k05-000.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193827,
+      "sha256": "dd69c9101b4cc225b091920410102884d72f233c4ccf3dc9831a2f9945a9f442",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k05-001.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193413,
+      "sha256": "91d6c6380dff7e223245efca98c80f081857b9d113b6fffa2a01223f797f88f8",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k05-002.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4044920,
+      "sha256": "250909bcae6fe964f3770a27aee8d3dfe10a1cc99dba7b0e49686469282e1c1f",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k07-000.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193943,
+      "sha256": "98d198b3b8d66315be71eebf6028bd33dfbae3db244b1fb4dcec9315a00f28b5",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k07-001.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193254,
+      "sha256": "85295a18c5ba4fdf8187f391e14a022101ccea67a38d33fb7335d782ffe458b1",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k07-002.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 2970409,
+      "sha256": "db6c446876b3d94112c6c1c9821f36097293d1226ddb9a8332aadd1055379c66",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-000.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4191594,
+      "sha256": "feb2f862a2d2ac5c46789f7d9b1615bed04b7c9ed8c9b84a721408eb1fb96fc7",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-001.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193338,
+      "sha256": "9ca1a7c71a65bb430147e6486be0583b98d46398a45ce0338001a620b79a2b3c",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-002.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4191612,
+      "sha256": "fd07f961c71beafee8aad758419215d9df9db92e1c8d85aa97906bd886999843",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-003.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193822,
+      "sha256": "f968369cc48a72d38307b5d536521638332085a8846b93cc083c6a2db044cc48",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-004.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4188872,
+      "sha256": "3306e316a33a0415b2ea64de3ad39cb7a4407f6ff038a5e6f8f264592709633a",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-005.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 4193490,
+      "sha256": "c83422717c74926bc5ed797d693507f3491ba1ecaff3d8754b72e38ff47c5029",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/details/k12-006.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 2672615,
+      "sha256": "911b6769cddfe44a9f4e5d4060410c5fb72b58c1b643d0ff449fe1d6582e6067",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/geography.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 2776185,
+      "sha256": "512378e6abd191d80d4583fb0b299c2decf30d81736ab76cf051f509cf62e7eb",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/manifest.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "provenance",
+      "format": "json",
+      "bytes": 16950,
+      "sha256": "6b8afc539708cc97cacebd77c5feda306b350e005f4973c705a864f6d21af149",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/overview.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 33357,
+      "sha256": "2bd8b2ec7b2ee121881f96cc4404dbf7c2d03832dc36f5ff1d1491ce37b37640",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k01a.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1473512,
+      "sha256": "9d9cb26bebd1e44fcb59630a4753dada8c6445499bcd4d5ac7e98cdec9e72c7e",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k01b.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 3006456,
+      "sha256": "9a81295adbeb2da22b1e78f8ca7574acb280c3b83c8cc70b23ff50d047f77d32",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k02.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 3607222,
+      "sha256": "244a4e66627608591d6a2889ac71b7fb2e23c11b6d736ca5139032678a1dc73c",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k03.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 959126,
+      "sha256": "1be5a00b2cbcc1142ffc33c410056dfce9095de1c8fbad9a8975a532c5c0379e",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k04.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1719646,
+      "sha256": "93029b1547828b5dfb04e39afa509c5f43fd50d79e93e71de0bd8c69755d865c",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k05.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1960323,
+      "sha256": "8603ed5891e1cf5aa1ffc17e4ed61eff18a2bb7a97dd1d3e3abcd2d6e4dbdc0b",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k06.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 124549,
+      "sha256": "843f75b83ca3e6575095fc6d9f5d2c208dbf9280fa7e042ee1b48dd098bc4241",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k07.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1947480,
+      "sha256": "79d98a9ab89ce64a686021c6478e25b20db2bac7aa4e8076747e262578d6b479",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k08.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 3500499,
+      "sha256": "06243e271db5ce3d8f86e872ca271417aa4676f4de6a17d2adf98056173bc39a",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k09.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 574113,
+      "sha256": "6713d3c41ec65ebb07b28bf1fa54f1cd765fdf09edd55c6fff22e737b6418179",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k10.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 1478290,
+      "sha256": "0ffb492042cc916c2018e98d04ee4e79971b7b390cdb9ea271026dd8ac84e4de",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k11a.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 126254,
+      "sha256": "838650275d3386edd3d5d1fc49cedc2e813e7f3d5ff7193d4c6d7674beaaa95f",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k11b.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 126416,
+      "sha256": "a76d1985a66195f52f603e7da7a69f7d8a951fd14be4d16a4cdb2b26112aa67a",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
+    },
+    {
+      "path": "data/public/f2/topics/k12.json",
+      "contract_id": "f2_dashboard",
+      "dataset_key": "f2_dashboard",
+      "role": "database",
+      "format": "json",
+      "bytes": 7074419,
+      "sha256": "c9e43e72df1a781a75068fef5561daf43a31aedfaa888522d5cfee5505c64f18",
+      "contract_sha256": "6d4da57d76cf1beb9e0f08794f0ee605bbba304f6c7b35a1a0b4bbbb00335509"
     },
     {
       "path": "data/public/housing_demand_summary.json",

@@ -1,0 +1,107 @@
+{
+  "complete": false,
+  "config_files": [
+    {
+      "path": "geography/dashboard_provinces.json",
+      "role": "dashboard_provinces",
+      "sha256": "8fa7334ff5ac1dfe5a56a13ff867db87637cecbc4dbdc0b1951eba82c18fd9b8"
+    },
+    {
+      "path": "geography/districts.json",
+      "role": null,
+      "sha256": "e79d617f35ca4099b43856b8b7634ed44b079fb7f0b024b0942604eb5d540c03"
+    },
+    {
+      "path": "geography/provinces.json",
+      "role": null,
+      "sha256": "bf46bb07e3e1a58552504a557cbd070e12ec794ef0319990294d456d3466339a"
+    },
+    {
+      "path": "geography/subdistricts.json",
+      "role": null,
+      "sha256": "c7f0e62ab7ccaf135a11a48105e62f846c633103ce21e933d5e5227b143a2916"
+    },
+    {
+      "path": "geography/thailand_geography_manifest.json",
+      "role": null,
+      "sha256": "3ddfdab53ed14c3813deff6050fbb3e4c9edf5b0edb296dafd90418ee3c52492"
+    },
+    {
+      "path": "inputs.identity.json",
+      "role": "input_lock",
+      "sha256": "13435fdd55486705988a92a10fc98fd5b37493a8158e082d98c80888f07dc24a"
+    },
+    {
+      "path": "k12_projection_policy.json",
+      "role": "projection_policy",
+      "sha256": "4f641e0f05fbeded39b9359495671c0738a7e5e9767c31b921e79ce5871b3929"
+    },
+    {
+      "path": "measures.json",
+      "role": "measures",
+      "sha256": "de06e29f3905b0b9ec5bbb8d6524adb473b2249d4a3ac2d34050d54973ebaa78"
+    },
+    {
+      "path": "migration.phase6.json",
+      "role": "migration_inventory",
+      "sha256": "a1b55b5616996e928fe991659f4902a4765945db50e64ec7f1095ec62db7eae4"
+    },
+    {
+      "path": "reviews/cultural_map.json",
+      "role": "reviews",
+      "sha256": "7dfa91afbbb1f4f918d65c170ba394d017f5c56e255bdfd9795d0ab43db3ebf5"
+    },
+    {
+      "path": "reviews/phase5_resolution.lock.json",
+      "role": "source_resolution_lock",
+      "sha256": "3b038a2014b703d20d969d8760efebcb857c81108999983d5aea03f0d4296c46"
+    },
+    {
+      "path": "source_permissions.json",
+      "role": "source_permissions",
+      "sha256": "aa77975bd8cfbbb6c9a549fee16172b1d90045bf01dff6a18ee7f77ef507c86b"
+    }
+  ],
+  "enabled_measures": [
+    "K01A",
+    "K01B",
+    "K02",
+    "K03",
+    "K04",
+    "K05",
+    "K06",
+    "K07",
+    "K08",
+    "K09",
+    "K10",
+    "K11A",
+    "K11B",
+    "K12",
+    "C02_COMMUNITY",
+    "C02_BROADER",
+    "C04_LISTED",
+    "C08_PARTICIPATING",
+    "C08_REPORTED_BUSINESSES",
+    "C08_ASSESSED_PEOPLE",
+    "C08_INCREASED_PEOPLE",
+    "C10_ALTERNATIVE"
+  ],
+  "enabled_sources": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_learning_dashboard",
+    "f2_target_household"
+  ],
+  "expected_province_count": 77,
+  "geography_directory": "geography",
+  "profile": "phase6",
+  "publication_status": "development_only",
+  "release_date": "2026-09-12",
+  "release_id": "f2-dashboard-phase6-checkpoint-v1",
+  "schema_version": 1,
+  "target_release_id": "f2-dashboard-snapshot-v3"
+}

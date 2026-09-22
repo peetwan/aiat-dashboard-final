@@ -1,0 +1,967 @@
+{
+  "additional_rebased_decisions": [
+    "cultural_map/details_reviewed_cases.json",
+    "apptech_mru/prior_person_decisions.json",
+    "learning_area_based/geography_review.json"
+  ],
+  "concrete_blockers": [
+    {
+      "id": "full_comparison_review",
+      "status": "pending_review",
+      "detail": "Phase7 comparison evidence is generated separately; acceptance dispositions are owned by the checkpoint review evidence."
+    },
+    {
+      "id": "full_projection_policy",
+      "status": "pending_main_policy",
+      "detail": "The retained checkpoint projection policy is not a full-release projection policy; Main must add and pin the full projection policy before Phase8."
+    }
+  ],
+  "input_lock_contract": {
+    "expected_sources": [
+      {
+        "run_id": "20260823T094536Z",
+        "source_id": "f2_apptech_mru"
+      },
+      {
+        "run_id": "20260825T070510Z",
+        "source_id": "f2_cultural_market_civil"
+      },
+      {
+        "run_id": "20260825T143637Z",
+        "source_id": "f2_icommunity"
+      },
+      {
+        "run_id": "20260901T062445Z",
+        "source_id": "f2_target_household"
+      },
+      {
+        "run_id": "20260822T214437Z",
+        "source_id": "f2_apptech_mtr"
+      },
+      {
+        "run_id": "20260820T142533Z",
+        "source_id": "f2_culturalmap_university"
+      },
+      {
+        "run_id": "20260820T134610Z",
+        "source_id": "f2_learning_area_based"
+      },
+      {
+        "run_id": "20260820T134600Z",
+        "source_id": "f2_learning_dashboard"
+      }
+    ],
+    "path": "config/f2_pipeline/inputs.v3.json",
+    "required_role": "all immutable source captures are selected and hash-locked there; this inventory contains no raw payload.",
+    "source_count": 8,
+    "status": "owned_by_main"
+  },
+  "inventory_id": "f2-dashboard-snapshot-v3-migration-inventory",
+  "k12_slice": {
+    "decision_config": "config/f2_pipeline/reviews/cultural_map.json",
+    "decision_config_sha256": "7dfa91afbbb1f4f918d65c170ba394d017f5c56e255bdfd9795d0ab43db3ebf5",
+    "producer": "tools/f2_pipeline/sources/cultural_map.py",
+    "required_tables": [
+      "mapped_subjects",
+      "mapped_listing_observations",
+      "mapped_locations",
+      "category_assertions",
+      "mapped_narrative_evidence",
+      "mapped_media",
+      "source_observations",
+      "identity_decisions",
+      "review_cases"
+    ],
+    "source": "f2_culturalmap_university",
+    "status": "ready_for_source-module consumption"
+  },
+  "normalized_producer_declarations": [
+    "normalized://cross_source/activities-coverage-v1",
+    "normalized://cross_source/activities-coverage-v1/coverage_assertions.csv",
+    "normalized://cross_source/activities-coverage-v1/measure_contributions.csv",
+    "normalized://cross_source/activities-coverage-v1/measure_results.csv",
+    "normalized://cross_source/activities-coverage-v1/province_evidence_index.csv",
+    "normalized://cross_source/cultural-areas-v1",
+    "normalized://cross_source/innovations-v1",
+    "normalized://cross_source/innovations-v1/innovation_crosswalk.csv",
+    "normalized://cross_source/offerings-v1",
+    "normalized://cross_source/offerings-v1/candidate_pairs.csv",
+    "normalized://cross_source/offerings-v1/channels.csv",
+    "normalized://cross_source/offerings-v1/global_offerings.csv",
+    "normalized://cross_source/offerings-v1/global_operators.csv",
+    "normalized://cross_source/offerings-v1/identity_decisions.csv",
+    "normalized://cross_source/offerings-v1/listing_evidence.csv",
+    "normalized://cross_source/offerings-v1/locations.csv",
+    "normalized://cross_source/offerings-v1/measure_contributions.csv",
+    "normalized://cross_source/offerings-v1/measure_results.csv",
+    "normalized://cross_source/offerings-v1/media.csv",
+    "normalized://cross_source/offerings-v1/offering_crosswalk.csv",
+    "normalized://cross_source/offerings-v1/operator_crosswalk.csv",
+    "normalized://cross_source/offerings-v1/operator_offering_edges.csv",
+    "normalized://cross_source/offerings-v1/person_operator_links.csv",
+    "normalized://cross_source/offerings-v1/prices.csv",
+    "normalized://cross_source/offerings-v1/seller_evidence.csv",
+    "normalized://cross_source/offerings-v1/source_files.csv",
+    "normalized://cross_source/offerings-v1/source_local_boundaries.csv",
+    "normalized://cross_source/offerings-v2",
+    "normalized://cross_source/offerings-v2/candidate_pairs.csv",
+    "normalized://cross_source/offerings-v2/channels.csv",
+    "normalized://cross_source/offerings-v2/global_offerings.csv",
+    "normalized://cross_source/offerings-v2/global_operators.csv",
+    "normalized://cross_source/offerings-v2/identity_decisions.csv",
+    "normalized://cross_source/offerings-v2/listing_evidence.csv",
+    "normalized://cross_source/offerings-v2/locations.csv",
+    "normalized://cross_source/offerings-v2/measure_contributions.csv",
+    "normalized://cross_source/offerings-v2/measure_results.csv",
+    "normalized://cross_source/offerings-v2/media.csv",
+    "normalized://cross_source/offerings-v2/offering_crosswalk.csv",
+    "normalized://cross_source/offerings-v2/offering_families.csv",
+    "normalized://cross_source/offerings-v2/offering_family_decisions.csv",
+    "normalized://cross_source/offerings-v2/offering_family_members.csv",
+    "normalized://cross_source/offerings-v2/operator_crosswalk.csv",
+    "normalized://cross_source/offerings-v2/operator_offering_edges.csv",
+    "normalized://cross_source/offerings-v2/person_operator_links.csv",
+    "normalized://cross_source/offerings-v2/prices.csv",
+    "normalized://cross_source/offerings-v2/reported_product_totals.csv",
+    "normalized://cross_source/offerings-v2/review_coverage.csv",
+    "normalized://cross_source/offerings-v2/reviewed_evidence.csv",
+    "normalized://cross_source/offerings-v2/reviewed_identity_decisions.csv",
+    "normalized://cross_source/offerings-v2/reviewed_relationships.csv",
+    "normalized://cross_source/offerings-v2/seller_evidence.csv",
+    "normalized://cross_source/offerings-v2/source_files.csv",
+    "normalized://cross_source/offerings-v2/source_local_boundaries.csv",
+    "normalized://cross_source/people-v1",
+    "normalized://cross_source/people-v1/person_crosswalk.csv",
+    "normalized://cross_source/phase6-aggregates",
+    "normalized://cross_source/phase6-aggregates/aggregate_breakdowns.csv",
+    "normalized://cross_source/phase6-aggregates/aggregate_results.csv",
+    "normalized://cross_source/phase6-aggregates/eligibility_evidence.csv",
+    "normalized://cross_source/phase6-aggregates/entity_contributions.csv",
+    "normalized://cross_source/phase6-aggregates/evidence_links.csv",
+    "normalized://cross_source/phase6-aggregates/province_memberships.csv",
+    "normalized://source_local/apptech-mru-v1",
+    "normalized://source_local/apptech-mru-v1/description_sections.csv",
+    "normalized://source_local/apptech-mru-v1/economic_claims.csv",
+    "normalized://source_local/apptech-mru-v1/entity_observations.csv",
+    "normalized://source_local/apptech-mru-v1/funding_assertions.csv",
+    "normalized://source_local/apptech-mru-v1/highlights.csv",
+    "normalized://source_local/apptech-mru-v1/identity_decisions.csv",
+    "normalized://source_local/apptech-mru-v1/innovation_identity_candidates.csv",
+    "normalized://source_local/apptech-mru-v1/innovation_observations.csv",
+    "normalized://source_local/apptech-mru-v1/innovations.csv",
+    "normalized://source_local/apptech-mru-v1/inventor_parsing.csv",
+    "normalized://source_local/apptech-mru-v1/ip_assertions.csv",
+    "normalized://source_local/apptech-mru-v1/manifest.json",
+    "normalized://source_local/apptech-mru-v1/measure_contributions.csv",
+    "normalized://source_local/apptech-mru-v1/measure_results.csv",
+    "normalized://source_local/apptech-mru-v1/organisations.csv",
+    "normalized://source_local/apptech-mru-v1/pending_cross_source_decisions.csv",
+    "normalized://source_local/apptech-mru-v1/people.csv",
+    "normalized://source_local/apptech-mru-v1/person_identity_decisions.csv",
+    "normalized://source_local/apptech-mru-v1/person_identity_reviews.csv",
+    "normalized://source_local/apptech-mru-v1/readiness_assessments.csv",
+    "normalized://source_local/apptech-mru-v1/requirement_expertise.csv",
+    "normalized://source_local/apptech-mru-v1/requirement_impacts.csv",
+    "normalized://source_local/apptech-mru-v1/requirement_tags.csv",
+    "normalized://source_local/apptech-mru-v1/requirements.csv",
+    "normalized://source_local/apptech-mru-v1/review_cases.csv",
+    "normalized://source_local/apptech-mru-v1/review_coverage.csv",
+    "normalized://source_local/apptech-mru-v1/role_assertions.csv",
+    "normalized://source_local/apptech-mru-v1/source_files.csv",
+    "normalized://source_local/apptech-mru-v1/source_observations.csv",
+    "normalized://source_local/apptech-mru-v1/target_groups.csv",
+    "normalized://source_local/atlocal-v1/activities.csv",
+    "normalized://source_local/atlocal-v1/activity_sections.csv",
+    "normalized://source_local/atlocal-v1/areas.csv",
+    "normalized://source_local/atlocal-v1/entity_observations.csv",
+    "normalized://source_local/atlocal-v1/identity_decisions.csv",
+    "normalized://source_local/atlocal-v1/images.csv",
+    "normalized://source_local/atlocal-v1/listing_channels.csv",
+    "normalized://source_local/atlocal-v1/listing_observations.csv",
+    "normalized://source_local/atlocal-v1/locations.csv",
+    "normalized://source_local/atlocal-v1/manifest.json",
+    "normalized://source_local/atlocal-v1/measure_contributions.csv",
+    "normalized://source_local/atlocal-v1/measure_results.csv",
+    "normalized://source_local/atlocal-v1/people.csv",
+    "normalized://source_local/atlocal-v1/person_evidence.csv",
+    "normalized://source_local/atlocal-v1/person_sellers.csv",
+    "normalized://source_local/atlocal-v1/prior_component_comparison.csv",
+    "normalized://source_local/atlocal-v1/product_prices.csv",
+    "normalized://source_local/atlocal-v1/product_sellers.csv",
+    "normalized://source_local/atlocal-v1/products.csv",
+    "normalized://source_local/atlocal-v1/publications.csv",
+    "normalized://source_local/atlocal-v1/review_cases.csv",
+    "normalized://source_local/atlocal-v1/seller_evidence.csv",
+    "normalized://source_local/atlocal-v1/sellers.csv",
+    "normalized://source_local/atlocal-v1/source_files.csv",
+    "normalized://source_local/atlocal-v1/source_observations.csv",
+    "normalized://source_local/cultural-map-v1/activity_dates.csv",
+    "normalized://source_local/cultural-map-v1/activity_locations.csv",
+    "normalized://source_local/cultural-map-v1/activity_media.csv",
+    "normalized://source_local/cultural-map-v1/activity_narrative_evidence.csv",
+    "normalized://source_local/cultural-map-v1/activity_occurrences.csv",
+    "normalized://source_local/cultural-map-v1/activity_publications.csv",
+    "normalized://source_local/cultural-map-v1/activity_sessions.csv",
+    "normalized://source_local/cultural-map-v1/category_assertions.csv",
+    "normalized://source_local/cultural-map-v1/category_counts.csv",
+    "normalized://source_local/cultural-map-v1/cultural_record_references.csv",
+    "normalized://source_local/cultural-map-v1/date_assertions.csv",
+    "normalized://source_local/cultural-map-v1/identity_decisions.csv",
+    "normalized://source_local/cultural-map-v1/manifest.json",
+    "normalized://source_local/cultural-map-v1/mapped_listing_observations.csv",
+    "normalized://source_local/cultural-map-v1/mapped_locations.csv",
+    "normalized://source_local/cultural-map-v1/mapped_media.csv",
+    "normalized://source_local/cultural-map-v1/mapped_narrative_evidence.csv",
+    "normalized://source_local/cultural-map-v1/mapped_person_role_evidence.csv",
+    "normalized://source_local/cultural-map-v1/mapped_subjects.csv",
+    "normalized://source_local/cultural-map-v1/measure_contributions.csv",
+    "normalized://source_local/cultural-map-v1/measure_results.csv",
+    "normalized://source_local/cultural-map-v1/offering_listing_observations.csv",
+    "normalized://source_local/cultural-map-v1/offering_locations.csv",
+    "normalized://source_local/cultural-map-v1/offering_media.csv",
+    "normalized://source_local/cultural-map-v1/offering_prices.csv",
+    "normalized://source_local/cultural-map-v1/offerings.csv",
+    "normalized://source_local/cultural-map-v1/people.csv",
+    "normalized://source_local/cultural-map-v1/person_role_evidence.csv",
+    "normalized://source_local/cultural-map-v1/product_sellers.csv",
+    "normalized://source_local/cultural-map-v1/recreation_evidence.csv",
+    "normalized://source_local/cultural-map-v1/recreation_media.csv",
+    "normalized://source_local/cultural-map-v1/recreation_projects.csv",
+    "normalized://source_local/cultural-map-v1/recreation_team_members.csv",
+    "normalized://source_local/cultural-map-v1/review_cases.csv",
+    "normalized://source_local/cultural-map-v1/seller_evidence.csv",
+    "normalized://source_local/cultural-map-v1/sellers.csv",
+    "normalized://source_local/cultural-map-v1/source_files.csv",
+    "normalized://source_local/cultural-map-v1/source_observations.csv",
+    "normalized://source_local/cultural-map-v1/target_province_evidence.csv",
+    "normalized://source_local/cultural-map-v1/target_provinces.csv",
+    "normalized://source_local/cultural-map-v1/team_profiles.csv",
+    "normalized://source_local/icommunity-v1",
+    "normalized://source_local/icommunity-v1/activities.csv",
+    "normalized://source_local/icommunity-v1/activity_venue_evidence.csv",
+    "normalized://source_local/icommunity-v1/aggregate_geography.csv",
+    "normalized://source_local/icommunity-v1/aggregate_summaries.csv",
+    "normalized://source_local/icommunity-v1/assessment_observations.csv",
+    "normalized://source_local/icommunity-v1/business_role_reviews.csv",
+    "normalized://source_local/icommunity-v1/development_assessments.csv",
+    "normalized://source_local/icommunity-v1/development_scores.csv",
+    "normalized://source_local/icommunity-v1/entity_observations.csv",
+    "normalized://source_local/icommunity-v1/entrepreneur_evidence.csv",
+    "normalized://source_local/icommunity-v1/group_catalog.csv",
+    "normalized://source_local/icommunity-v1/identity_decisions.csv",
+    "normalized://source_local/icommunity-v1/innovation_context_splits.csv",
+    "normalized://source_local/icommunity-v1/innovation_details.csv",
+    "normalized://source_local/icommunity-v1/innovations.csv",
+    "normalized://source_local/icommunity-v1/institution_assertions.csv",
+    "normalized://source_local/icommunity-v1/locations.csv",
+    "normalized://source_local/icommunity-v1/manifest.json",
+    "normalized://source_local/icommunity-v1/measure_contributions.csv",
+    "normalized://source_local/icommunity-v1/measure_results.csv",
+    "normalized://source_local/icommunity-v1/narrative_evidence.csv",
+    "normalized://source_local/icommunity-v1/non_person_subjects.csv",
+    "normalized://source_local/icommunity-v1/participations.csv",
+    "normalized://source_local/icommunity-v1/people.csv",
+    "normalized://source_local/icommunity-v1/person_roles.csv",
+    "normalized://source_local/icommunity-v1/prior_decision_mapping.csv",
+    "normalized://source_local/icommunity-v1/product_prices.csv",
+    "normalized://source_local/icommunity-v1/product_sellers.csv",
+    "normalized://source_local/icommunity-v1/products.csv",
+    "normalized://source_local/icommunity-v1/project_assertions.csv",
+    "normalized://source_local/icommunity-v1/publications.csv",
+    "normalized://source_local/icommunity-v1/readiness.csv",
+    "normalized://source_local/icommunity-v1/researcher_assertions.csv",
+    "normalized://source_local/icommunity-v1/reused_innovation_id_audit.csv",
+    "normalized://source_local/icommunity-v1/review_cases.csv",
+    "normalized://source_local/icommunity-v1/role_review.csv",
+    "normalized://source_local/icommunity-v1/sellers.csv",
+    "normalized://source_local/icommunity-v1/source_files.csv",
+    "normalized://source_local/icommunity-v1/source_observations.csv",
+    "normalized://source_local/icommunity-v1/supplemental_location_lineage.csv",
+    "normalized://source_local/icommunity-v1/work_mentions.csv",
+    "normalized://source_local/learning-area-based-v1/business_observation_links.csv",
+    "normalized://source_local/learning-area-based-v1/businesses.csv",
+    "normalized://source_local/learning-area-based-v1/identity_decisions.csv",
+    "normalized://source_local/learning-area-based-v1/locations.csv",
+    "normalized://source_local/learning-area-based-v1/manifest.json",
+    "normalized://source_local/learning-area-based-v1/measure_contributions.csv",
+    "normalized://source_local/learning-area-based-v1/measure_results.csv",
+    "normalized://source_local/learning-area-based-v1/participations.csv",
+    "normalized://source_local/learning-area-based-v1/project_assertions.csv",
+    "normalized://source_local/learning-area-based-v1/research_unit_assertions.csv",
+    "normalized://source_local/learning-area-based-v1/review_cases.csv",
+    "normalized://source_local/learning-area-based-v1/review_coverage.csv",
+    "normalized://source_local/learning-area-based-v1/source_files.csv",
+    "normalized://source_local/learning-area-based-v1/source_observations.csv",
+    "normalized://source_local/learning-area-based-v1/source_statistics.csv",
+    "normalized://source_local/learning-dashboard-v1/count_dimension_headers.csv",
+    "normalized://source_local/learning-dashboard-v1/count_members.csv",
+    "normalized://source_local/learning-dashboard-v1/coverage_assertions.csv",
+    "normalized://source_local/learning-dashboard-v1/excluded_amounts.csv",
+    "normalized://source_local/learning-dashboard-v1/impact_components.csv",
+    "normalized://source_local/learning-dashboard-v1/impact_summary_metrics.csv",
+    "normalized://source_local/learning-dashboard-v1/integrity_reviews.csv",
+    "normalized://source_local/learning-dashboard-v1/manifest.json",
+    "normalized://source_local/learning-dashboard-v1/measure_contributions.csv",
+    "normalized://source_local/learning-dashboard-v1/measure_results.csv",
+    "normalized://source_local/learning-dashboard-v1/reconciliation_links.csv",
+    "normalized://source_local/learning-dashboard-v1/regional_impacts.csv",
+    "normalized://source_local/learning-dashboard-v1/review_coverage.csv",
+    "normalized://source_local/learning-dashboard-v1/source_files.csv",
+    "normalized://source_local/learning-dashboard-v1/source_observations.csv",
+    "normalized://source_local/pmua-apptech-v1",
+    "normalized://source_local/pmua-apptech-v1/aggregate_components.csv",
+    "normalized://source_local/pmua-apptech-v1/aggregate_metrics.csv",
+    "normalized://source_local/pmua-apptech-v1/aggregate_summaries.csv",
+    "normalized://source_local/pmua-apptech-v1/description_sections.csv",
+    "normalized://source_local/pmua-apptech-v1/entity_observations.csv",
+    "normalized://source_local/pmua-apptech-v1/funding_assertions.csv",
+    "normalized://source_local/pmua-apptech-v1/identity_decisions.csv",
+    "normalized://source_local/pmua-apptech-v1/innovation_area_assertions.csv",
+    "normalized://source_local/pmua-apptech-v1/innovation_details.csv",
+    "normalized://source_local/pmua-apptech-v1/innovation_identity_candidates.csv",
+    "normalized://source_local/pmua-apptech-v1/innovations.csv",
+    "normalized://source_local/pmua-apptech-v1/ip_assertions.csv",
+    "normalized://source_local/pmua-apptech-v1/manifest.json",
+    "normalized://source_local/pmua-apptech-v1/map_area_items.csv",
+    "normalized://source_local/pmua-apptech-v1/measure_contributions.csv",
+    "normalized://source_local/pmua-apptech-v1/measure_results.csv",
+    "normalized://source_local/pmua-apptech-v1/narrative_evidence.csv",
+    "normalized://source_local/pmua-apptech-v1/pending_cross_source_decisions.csv",
+    "normalized://source_local/pmua-apptech-v1/person_identity_decisions.csv",
+    "normalized://source_local/pmua-apptech-v1/readiness_assessments.csv",
+    "normalized://source_local/pmua-apptech-v1/readiness_conflicts.csv",
+    "normalized://source_local/pmua-apptech-v1/researcher_assertions.csv",
+    "normalized://source_local/pmua-apptech-v1/researcher_identity_reviews.csv",
+    "normalized://source_local/pmua-apptech-v1/researcher_profiles.csv",
+    "normalized://source_local/pmua-apptech-v1/researchers.csv",
+    "normalized://source_local/pmua-apptech-v1/review_cases.csv",
+    "normalized://source_local/pmua-apptech-v1/review_coverage.csv",
+    "normalized://source_local/pmua-apptech-v1/source_files.csv",
+    "normalized://source_local/pmua-apptech-v1/source_observations.csv",
+    "normalized://source_local/pmua-apptech-v1/station_links.csv",
+    "normalized://source_local/pmua-apptech-v1/stations.csv",
+    "normalized://source_local/pmua-apptech-v1/universities.csv",
+    "normalized://source_local/pmua-apptech-v1/university_assertions.csv",
+    "normalized://source_local/rinmp-v1",
+    "normalized://source_local/rinmp-v1/aggregate_components.csv",
+    "normalized://source_local/rinmp-v1/aggregate_metrics.csv",
+    "normalized://source_local/rinmp-v1/certificate_assertions.csv",
+    "normalized://source_local/rinmp-v1/commercial_assertions.csv",
+    "normalized://source_local/rinmp-v1/description_sections.csv",
+    "normalized://source_local/rinmp-v1/identity_decisions.csv",
+    "normalized://source_local/rinmp-v1/innovation_profiles.csv",
+    "normalized://source_local/rinmp-v1/innovations.csv",
+    "normalized://source_local/rinmp-v1/institute_assertions.csv",
+    "normalized://source_local/rinmp-v1/institutes.csv",
+    "normalized://source_local/rinmp-v1/ip_assertions.csv",
+    "normalized://source_local/rinmp-v1/location_assertions.csv",
+    "normalized://source_local/rinmp-v1/manifest.json",
+    "normalized://source_local/rinmp-v1/matrix_scores.csv",
+    "normalized://source_local/rinmp-v1/measure_contributions.csv",
+    "normalized://source_local/rinmp-v1/measure_results.csv",
+    "normalized://source_local/rinmp-v1/media_references.csv",
+    "normalized://source_local/rinmp-v1/narrative_role_mentions.csv",
+    "normalized://source_local/rinmp-v1/owner_groups.csv",
+    "normalized://source_local/rinmp-v1/owner_name_claims.csv",
+    "normalized://source_local/rinmp-v1/owner_name_disagreements.csv",
+    "normalized://source_local/rinmp-v1/owner_technology_links.csv",
+    "normalized://source_local/rinmp-v1/owner_title_claims.csv",
+    "normalized://source_local/rinmp-v1/pending_cross_source_decisions.csv",
+    "normalized://source_local/rinmp-v1/people.csv",
+    "normalized://source_local/rinmp-v1/person_role_assertions.csv",
+    "normalized://source_local/rinmp-v1/readiness_assertions.csv",
+    "normalized://source_local/rinmp-v1/review_cases.csv",
+    "normalized://source_local/rinmp-v1/review_coverage.csv",
+    "normalized://source_local/rinmp-v1/source_files.csv",
+    "normalized://source_local/rinmp-v1/source_observations.csv"
+  ],
+  "phase6_aggregate_assembly": {
+    "captured_K02_geography": {
+      "mapped_provinces": 75,
+      "source_groups": 76,
+      "unavailable_province_codes": [
+        "22",
+        "26"
+      ],
+      "unspecified_people": 7
+    },
+    "input_contract": "Fresh injected normalized tables, locked raw evidence and source decisions only; no prior output or external runtime dependency.",
+    "migration_status": "implemented_for_phase6_checkpoint",
+    "producer": "tools/f2_pipeline/domains/aggregates.py",
+    "source_dependencies": [
+      "pmua-apptech-v1",
+      "learning-dashboard-v1",
+      "learning-area-based-v1"
+    ]
+  },
+  "production_safe_inputs": [
+    {
+      "path": "config/f2_pipeline/reviews/cultural_map.json",
+      "role": "accepted K12 subject identity and location-policy decisions",
+      "sha256": "7dfa91afbbb1f4f918d65c170ba394d017f5c56e255bdfd9795d0ab43db3ebf5"
+    },
+    {
+      "path": "config/f2_pipeline/geography/thailand_geography_manifest.json",
+      "role": "pinned Thai administrative hierarchy manifest",
+      "sha256": "3ddfdab53ed14c3813deff6050fbb3e4c9edf5b0edb296dafd90418ee3c52492"
+    },
+    {
+      "path": "config/f2_pipeline/geography/dashboard_provinces.json",
+      "role": "canonical dashboard province codes/names/regions",
+      "sha256": "8fa7334ff5ac1dfe5a56a13ff867db87637cecbc4dbdc0b1951eba82c18fd9b8"
+    },
+    {
+      "path": "config/f2_pipeline/reviews/reviewed_commerce.lock.json",
+      "role": "integrity lock for private rebased commerce decision ledgers",
+      "sha256": "49c235ceb900dc1356b353d8e82f478f815dad4199af9d8fd4b1c10c510b5de2"
+    },
+    {
+      "path": "config/f2_pipeline/reviews/source_resolution.lock.json",
+      "role": "integrity lock for private source-cleaner and resolver decision ledgers",
+      "sha256": "12b0350622acc4d7355cea717d8da65b3dca68b2beb4b0e777ea389a307612d6"
+    }
+  ],
+  "prohibited_dependencies": [
+    "external Build F2 Data workspace",
+    "legacy derived/ folders",
+    "legacy deliverables/ folders",
+    ".scratch/ paths",
+    "data/public as a raw evidence source"
+  ],
+  "release_assembler": {
+    "checkpoint_profile": "phase6",
+    "complete": false,
+    "depends_on": [
+      "cross_source_activities_coverage",
+      "cross_source_cultural_areas",
+      "cross_source_innovations",
+      "cross_source_people",
+      "cross_source_offerings",
+      "reviewed_commerce",
+      "phase6_aggregate_assembly"
+    ],
+    "implemented_measures": [
+      "K01A",
+      "K01B",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10",
+      "K11A",
+      "K11B",
+      "K12",
+      "C02_COMMUNITY",
+      "C02_BROADER",
+      "C04_LISTED",
+      "C08_PARTICIPATING",
+      "C08_REPORTED_BUSINESSES",
+      "C08_ASSESSED_PEOPLE",
+      "C08_INCREASED_PEOPLE",
+      "C10_ALTERNATIVE"
+    ],
+    "legacy_config": {
+      "path": "config/dashboard_release/v1.json",
+      "sha256": "ee155f1df27c0aeb6354d5b1e6fe6207ea3a82577d06263aeb1408dae25ad04f"
+    },
+    "legacy_producer": {
+      "path": "scripts/kpi/build_dashboard_release.py",
+      "sha256": "241ddb34a686fc28568b0cb35ab8811218748d7a0b10e2e9d6f4a3e47e09abff"
+    },
+    "producers": [
+      "tools/f2_pipeline/identity_release.py",
+      "tools/f2_pipeline/phase5_release.py",
+      "tools/f2_pipeline/phase6_release.py",
+      "tools/f2_pipeline/domains/aggregates.py",
+      "tools/f2_pipeline/measure_query.py"
+    ],
+    "reason": "All22 measure results are assembled for aggregate owner review, but full-release acceptance and publication remain separate.",
+    "v3_status": "replaced_by_main_owned_release_builder"
+  },
+  "resolvers": [
+    {
+      "decision_lock": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "legacy_producer": {
+        "path": "scripts/entity_resolution/build_cross_source_innovations.py",
+        "sha256": "860264d59c6b8b77df1e9fb7edda65812b24fa97c5bf4a56ca49273787811c77"
+      },
+      "legacy_runtime_config": {
+        "path": "config/cross_source_innovations/runtime.json",
+        "sha256": "dfca578d037b8c8cbec5e52cb409c278b3f71db1b3596d4c24bad092dc4beb8f"
+      },
+      "migration_status": "implemented_for_identity_checkpoint",
+      "node": "cross_source_innovations",
+      "producer": "tools/f2_pipeline/domains/innovations.py",
+      "reason": null,
+      "requires_rebuilt_source_local_outputs": [
+        "apptech-mru-v1",
+        "pmua-apptech-v1",
+        "rinmp-v1",
+        "icommunity-v1"
+      ]
+    },
+    {
+      "decision_lock": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "legacy_producer": {
+        "path": "scripts/entity_resolution/build_cross_source_people.py",
+        "sha256": "01234e4c642ec2e837c3266a4955af01440d7bca159ab31da7e192c8e4570d40"
+      },
+      "legacy_runtime_config": {
+        "path": "config/cross_source_people/runtime.json",
+        "sha256": "8a1d298a95fffb19cdf5b8145e15f1d7cbaa078712d64675e7ecb57c3338fc66"
+      },
+      "migration_status": "implemented_for_identity_checkpoint",
+      "node": "cross_source_people",
+      "producer": "tools/f2_pipeline/domains/people.py",
+      "reason": null,
+      "requires_rebuilt_source_local_outputs": [
+        "apptech-mru-v1",
+        "pmua-apptech-v1",
+        "rinmp-v1",
+        "icommunity-v1",
+        "cultural-map-v1",
+        "atlocal-v1"
+      ]
+    },
+    {
+      "decision_lock": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "legacy_producer": {
+        "path": "scripts/entity_resolution/build_cross_source_offerings.py",
+        "sha256": "e4c7237a6e9ce6095263f374fd802701d53ee28eb1a74df31cbaa0e1a9529387"
+      },
+      "legacy_runtime_config": {
+        "path": "config/cross_source_offerings/runtime.json",
+        "sha256": "46d037e1bc78ca486e0798605080c4ddc8bd6164dd06c32fd0685decef4bec04"
+      },
+      "migration_status": "implemented_for_phase5_checkpoint",
+      "node": "cross_source_offerings",
+      "producer": "tools/f2_pipeline/domains/commerce.py",
+      "reason": null,
+      "requires_rebuilt_domain_outputs": [
+        "people"
+      ],
+      "requires_rebuilt_source_local_outputs": [
+        "atlocal-v1",
+        "cultural-map-v1",
+        "icommunity-v1"
+      ]
+    },
+    {
+      "decision_lock": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "legacy_producer": {
+        "path": "scripts/entity_resolution/build_cross_source_cultural_areas.py",
+        "sha256": "d5672dfc4edcb638a21245c1bf2a47638c1bf7b633dcc8b3cb6bd5c5b24fa298"
+      },
+      "legacy_runtime_config": {
+        "path": "config/cross_source_cultural_areas/runtime.json",
+        "sha256": "b5b85d564722535a89d9b410de1b64c1bdf4cd3499b986da0860de0cc410069c"
+      },
+      "migration_status": "implemented_for_identity_checkpoint",
+      "node": "cross_source_cultural_areas",
+      "producer": "tools/f2_pipeline/domains/cultural_areas.py",
+      "reason": null,
+      "requires_rebuilt_source_local_outputs": [
+        "atlocal-v1",
+        "cultural-map-v1"
+      ]
+    },
+    {
+      "additional_producers": [
+        "tools/f2_pipeline/domains/programme_coverage.py"
+      ],
+      "decision_lock": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "legacy_producer": {
+        "path": "scripts/entity_resolution/build_cross_source_activities_coverage.py",
+        "sha256": "c36be83e3c408bda03a305892d820dd074e01c91cd58cbc407eafe0081e9818b"
+      },
+      "legacy_runtime_config": {
+        "path": "config/cross_source_activities_coverage/runtime.json",
+        "sha256": "ba510b22d836f30b818ae6c3b297a27ce1e633529c9ae39a18f224ddb6239b0b"
+      },
+      "migration_status": "implemented_for_phase5_checkpoint",
+      "node": "cross_source_activities_coverage",
+      "producer": "tools/f2_pipeline/domains/activities.py",
+      "reason": null,
+      "requires_rebuilt_domain_outputs": [
+        "innovations"
+      ],
+      "requires_rebuilt_source_local_outputs": [
+        "apptech-mru-v1",
+        "atlocal-v1",
+        "cultural-map-v1",
+        "icommunity-v1",
+        "learning-area-based-v1",
+        "learning-dashboard-v1",
+        "pmua-apptech-v1",
+        "rinmp-v1"
+      ]
+    }
+  ],
+  "reviewed_commerce": {
+    "citation_origin_rebase": {
+      "annotation_count": 3,
+      "citation_origin_field": "citation_source_record_id",
+      "context_field": "source_record_id",
+      "derivation": "Unique actual source observation matching each canonical raw citation; raw/source identity fields are not inferred from text.",
+      "identity_and_status_decisions_unchanged": true,
+      "old_private_ledgers_unchanged": true,
+      "private_copy_count": 2
+    },
+    "decision_lock": {
+      "path": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "sha256": "3b038a2014b703d20d969d8760efebcb857c81108999983d5aea03f0d4296c46"
+    },
+    "innovation_context_rebase": {
+      "candidate_count": 1,
+      "cause": "Legacy source-ID-only lookup overwrote an AppTech context with another iCommunity dataset context sharing the same raw ID. Corrected by exact injected source-record locator, never by merging innovations.",
+      "citation_count": 2,
+      "distinct_innovation_identities_preserved": true,
+      "historical_field": "legacy_global_innovation_id",
+      "identity_decisions_unchanged": true
+    },
+    "legacy_configuration_hashes": [
+      {
+        "filename": "atlocal_outputs.json",
+        "sha256": "b9da7e1b8ee65c7a49012a77f4aab0a05eaa743add07be578caa8914862f87d4"
+      },
+      {
+        "filename": "baseline.json",
+        "sha256": "97f8036135ffd13a064acf64f045ef5591078b864f0a9ab27bbe833bf302ae61"
+      },
+      {
+        "filename": "business_identity_followup.json",
+        "sha256": "1c3ed3ae2bfa1c626f6c80171576fbc0c4b88dab962a3ce22719e93d3a35e0ab"
+      },
+      {
+        "filename": "business_roster_supplements.json",
+        "sha256": "9eb840463f4271334e86160836d185cc36df22e792173ed98cd505ca36052113"
+      },
+      {
+        "filename": "cultural_early_outputs.json",
+        "sha256": "aafd71bf4de1c04a50c1ea2288d20673fdc6d210efa73c9343cb8b17cef683ba"
+      },
+      {
+        "filename": "cultural_map.json",
+        "sha256": "79236e217eaa45ca976e05786f5aa69ef13889dad74b9624a5329074b61dd19d"
+      },
+      {
+        "filename": "cultural_output_identity_reviews.json",
+        "sha256": "c6e9bb5e4ea8561415b938deac693c24f6e49d6579dd39c7912633d9e9d6bdbf"
+      },
+      {
+        "filename": "cultural_outputs.json",
+        "sha256": "dbbed28e18ef4bfc8a1f6e25147ad59a86abbb7c8a94df3a52ac87605092c8aa"
+      },
+      {
+        "filename": "cultural_supplements.json",
+        "sha256": "8223778ed63b4c9b3865a480051c2d0912d8cacd146e8d99e65f0a4591000cfb"
+      },
+      {
+        "filename": "icommunity.json",
+        "sha256": "256fee7f419e1f2e4399b111db2a0155a284528284d0e78d9c9d89aae1d3c9db"
+      },
+      {
+        "filename": "icommunity_outputs.json",
+        "sha256": "b73aa21e4bdcae6936fa84b8600bfff5a715e720caa25f6793768472e44db271"
+      },
+      {
+        "filename": "innovation_business_rosters.json",
+        "sha256": "0cecec1bebf2eedc4a34d44d377bf3e0c1ecd6e6e55720caae985075eeaf0996"
+      },
+      {
+        "filename": "innovation_outputs.json",
+        "sha256": "fb91dbfc7c0a0374f0fa3fde8f0e2ce2c3e56516b1f0436cedf1dd6e6a35c62c"
+      },
+      {
+        "filename": "learning.json",
+        "sha256": "ae11cee9050f0453b09901cad65dbd0bcf0a6f457334ac2c9a05b57fa60756dd"
+      },
+      {
+        "filename": "learning_output_scope.json",
+        "sha256": "083b92bfbc18fb093a1df4a250acce8dde4c18c9e6322398ad140387afa16b74"
+      },
+      {
+        "filename": "output_context_identity_reviews.json",
+        "sha256": "99f5e381607396e27c7591ca1cc8273b5bb80484983950f38085a09015add5d9"
+      },
+      {
+        "filename": "output_identity_reviews.json",
+        "sha256": "5d4015438a267f1445fba67b571b7fe43785aec170f45dae490d2227a6ed0fd6"
+      },
+      {
+        "filename": "product_families.json",
+        "sha256": "06782adc6ff6712b1e7dbc2ca4313b56be37619597ad76328d020a06975fde8b"
+      },
+      {
+        "filename": "rinmp_businesses.json",
+        "sha256": "d9d41d53ba559bd2c609c28fd84885c03a2ddb48a8bf5fac8bb35fa51899adc2"
+      }
+    ],
+    "legacy_producer": {
+      "path": "scripts/cleaning/clean_reviewed_commerce.py",
+      "sha256": "97895f24227392c712d3b4d5852a319b33b2207cabe44f2827081743b6064ac9"
+    },
+    "migration_status": "implemented_for_phase5_checkpoint",
+    "migration_summary": {
+      "aggregate_claim_count": 6,
+      "audit_only_pin_removals": 60,
+      "candidate_count": 4686,
+      "candidate_kind_counts": {
+        "offering": 2123,
+        "operator": 2563
+      },
+      "candidate_status_counts": {
+        "not_established": 476,
+        "supported": 3725,
+        "unresolved": 485
+      },
+      "identity_decision_count": 829,
+      "ledger_count": 19,
+      "relationship_count": 16,
+      "runtime_evidence_locator_count": 14730,
+      "scratch_audit_pin_removals": 30,
+      "scratch_evidence_locator_count": 0
+    },
+    "producer": "tools/f2_pipeline/domains/reviewed_commerce.py",
+    "required_final_decisions": [
+      "operator identity and separate/cannot-link decisions",
+      "offering identity and family grouping decisions",
+      "supported, unresolved, and not_established commerce candidates",
+      "reviewed business/output relationships and aggregate claims"
+    ],
+    "requires_rebuilt_domain_outputs": [
+      "commerce_baseline",
+      "people",
+      "innovations"
+    ],
+    "runtime_contract": "The 50-entry Phase 5 lock supplies 31 existing source/identity decisions and 19 reviewed-commerce ledgers. Three metadata-only private copies preserve all original ledgers and decisions while distinguishing citation origin and correcting a proven reused-ID context lookup. The pure consumer validates actual injected source, people, baseline commerce and innovation endpoints against locked evidence:// bytes; no prior derived files or external workspace are runtime inputs."
+  },
+  "schema_version": 1,
+  "scope": "Eight source cleaners, seven accepted Phase5 domains, and Phase6 aggregate/participating/null measure assembly; still an internal checkpoint before Phase7 full-release acceptance and Phase8 public projection.",
+  "source_local_producers": [
+    {
+      "expected_input_lock": {
+        "run_id": "20260823T094536Z",
+        "source_id": "f2_apptech_mru"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/apptech_mru/reviewed_cases.json",
+        "sha256": "305b38370301115c1c24e5ae17dd6812b53b1d2f124f4eb19f3ecc84d8205fd9"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_apptech_mru.py",
+        "sha256": "e741ce21a194d402353616818768b45a040c9da22e7e019f395a56edcda95aa2"
+      },
+      "legacy_normalized_producer": "apptech-mru-v1",
+      "legacy_source_aliases": [
+        "apptech_mru",
+        "apptech-mru"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/apptech_mru.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_apptech_mru"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260825T070510Z",
+        "source_id": "f2_cultural_market_civil"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/atlocal/reviewed_cases.json",
+        "sha256": "671a4282395ec50d815336ed0cb5f1feccec72b74066a0834b7d71e2324125ed"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_atlocal.py",
+        "sha256": "827f1219897a65f99862579c06c0901e5ce8beb2ef9d31b425de2a78baec2ae2"
+      },
+      "legacy_normalized_producer": "atlocal-v1",
+      "legacy_source_aliases": [
+        "atlocal"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/atlocal.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_cultural_market_civil"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260825T143637Z",
+        "source_id": "f2_icommunity"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/icommunity/reviewed_cases.json",
+        "sha256": "f11a1993eef4f0663fb48a702f52317a86e85067bb137bad81c5927b3f85e88a"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_icommunity.py",
+        "sha256": "3d7cf5de8c115185932fd41001bb5154267eb8f476b8361dd61d6cb6a89194cd"
+      },
+      "legacy_normalized_producer": "icommunity-v1",
+      "legacy_source_aliases": [
+        "icommunity"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/icommunity.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_icommunity"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260901T062445Z",
+        "source_id": "f2_target_household"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/pmua_apptech/reviewed_cases.json",
+        "sha256": "cd6279dbe8e68388c29e277b7f7a98279aa4ead477b33d630226664a3f751492"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_pmua_apptech.py",
+        "sha256": "680f63a5df671d2e52984bd5378ade82cd0ef472b4a0df7e9f28c268890d486a"
+      },
+      "legacy_normalized_producer": "pmua-apptech-v1",
+      "legacy_source_aliases": [
+        "pmua_apptech",
+        "pmua-apptech"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/pmua_apptech.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_target_household"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260822T214437Z",
+        "source_id": "f2_apptech_mtr"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/rinmp/reviewed_cases.json",
+        "sha256": "c15eb74e232e8069b9d5e73cacb42b071c7ade5f23977491d6ee52df46ed2f5f"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_rinmp.py",
+        "sha256": "fcd4498a8d51f24c0c9390eab30fdd778a9af5228d5967dc59aaeef700cc2a5e"
+      },
+      "legacy_normalized_producer": "rinmp-v1",
+      "legacy_source_aliases": [
+        "rinmp"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/rinmp.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_apptech_mtr"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260820T142533Z",
+        "source_id": "f2_culturalmap_university"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/cultural_map/reviewed_cases.json",
+        "sha256": "ef57d4855fadc6b9281558605ec59184b182afeea2410fa7bcd3f358667289a4"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_cultural_map.py",
+        "sha256": "2e7af49bdb3cf3975bf7b66219c6d8f6daf339fdda4e570a72fa7b093d144cdc"
+      },
+      "legacy_normalized_producer": "cultural-map-v1",
+      "legacy_source_aliases": [
+        "cultural_map",
+        "cultural-map"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/cultural_map_details.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_culturalmap_university"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260820T134610Z",
+        "source_id": "f2_learning_area_based"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/learning_area_based/reviewed_cases.json",
+        "sha256": "45598e23b7855be4d6d5f1084301026243fdeb898f5fafaf8be614b835060060"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_learning_area_based.py",
+        "sha256": "10dc3bf0ad288591a81cd7e60e3e02424b5c096f30669f73c43b8118cde493bc"
+      },
+      "legacy_normalized_producer": "learning-area-based-v1",
+      "legacy_source_aliases": [
+        "learning_area_based",
+        "learning-area-based"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/learning_area_based.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_learning_area_based"
+    },
+    {
+      "expected_input_lock": {
+        "run_id": "20260820T134600Z",
+        "source_id": "f2_learning_dashboard"
+      },
+      "legacy_accepted_decisions": {
+        "path": "config/learning_dashboard/reviewed_cases.json",
+        "sha256": "cf63eb4c0e45040710e780202a9d3e301acbf298302e3f5dcc6572e62ae7bf24"
+      },
+      "legacy_cleaner": {
+        "path": "scripts/cleaning/clean_learning_dashboard.py",
+        "sha256": "1a9808578388f95675348178c42c2e647b83077a67a639f77c905a3325b0ea4f"
+      },
+      "legacy_normalized_producer": "learning-dashboard-v1",
+      "legacy_source_aliases": [
+        "learning_dashboard",
+        "learning-dashboard"
+      ],
+      "migration": {
+        "decision_lock": "config/f2_pipeline/reviews/identity_resolution.lock.json",
+        "producer": "tools/f2_pipeline/sources/learning_dashboard.py",
+        "status": "implemented_for_identity_checkpoint",
+        "verification": "A release is accepted only after this producer executes and validates; this declaration is not execution evidence."
+      },
+      "source_id": "f2_learning_dashboard"
+    }
+  ],
+  "source_resolution_decisions": {
+    "decision_lock": {
+      "path": "config/f2_pipeline/reviews/phase5_resolution.lock.json",
+      "sha256": "3b038a2014b703d20d969d8760efebcb857c81108999983d5aea03f0d4296c46"
+    },
+    "migration_summary": {
+      "config_count": 28,
+      "data_locator_count": 7999,
+      "derived_locator_count": 90,
+      "scratch_provenance_removals": 614,
+      "unresolved_data_reference_count": 2,
+      "unresolved_data_reference_disposition": "The two data/<index>/content_html strings are record-internal JSON-pointer fragments, not filesystem dependencies."
+    },
+    "runtime_contract": "Existing source/identity decision bytes remain unchanged and are included in the combined Phase5 review lock; producers consume only the validated injected source and review objects."
+  }
+}

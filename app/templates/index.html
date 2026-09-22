@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/static/styles.css?v=departments-20260905-02" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
     <link rel="stylesheet" href="/static/departments.css?v=20260905-06" />
+    <link rel="stylesheet" href="/static/f2.css?v=20260921-ui-audit-02" />
   </head>
   <body>
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
@@ -54,7 +55,7 @@
           <span><strong>ฝ่าย 1</strong><small>ขจัดความยากจน</small></span>
         </button>
         <button type="button" data-map-mode="f2" role="tab" aria-selected="false">
-          <span><strong>ฝ่าย 2</strong><small>พื้นที่เฉพาะฝ่าย</small></span>
+          <span><strong>ฝ่าย 2</strong><small>การยกระดับเศรษฐกิจฐานราก</small></span>
         </button>
         <button type="button" data-map-mode="f3" role="tab" aria-selected="false">
           <span><strong>ฝ่าย 3</strong><small>พื้นที่เฉพาะฝ่าย</small></span>
@@ -242,14 +243,43 @@
       <aside class="department-panel workspace-panel" id="workspacePanel" aria-hidden="true" hidden>
         <header class="department-panel-head workspace-panel-head">
           <div>
-            <span id="workspaceKicker">ฝ่าย 2</span>
-            <h2 id="workspaceTitle">พื้นที่ข้อมูลฝ่าย 2</h2>
+            <span id="workspaceKicker">ฝ่าย 3</span>
+            <h2 id="workspaceTitle">พื้นที่ข้อมูลฝ่าย 3</h2>
             <p id="workspaceScope">ภาพรวมประเทศไทย</p>
           </div>
           <button id="closeWorkspacePanel" type="button" aria-label="ปิดแผงข้อมูล">×</button>
         </header>
         <div class="workspace-panel-body" id="workspacePanelBody"></div>
       </aside>
+      <aside class="department-panel f2-dashboard" id="f2DashboardPanel" aria-hidden="true" hidden aria-label="ฝ่าย 2 การยกระดับเศรษฐกิจฐานราก">
+        <header class="department-panel-head f2-head">
+          <div>
+            <span>ฝ่าย 2</span>
+            <h2>การยกระดับเศรษฐกิจฐานราก</h2>
+            <nav class="f2-breadcrumbs" id="f2Breadcrumbs" aria-label="ขอบเขตข้อมูล"></nav>
+          </div>
+          <button type="button" data-f2-close aria-label="ปิดแผงข้อมูล">×</button>
+        </header>
+        <button class="f2-filters-toggle" id="f2FiltersToggle" type="button" aria-expanded="false" aria-controls="f2Controls">ตัวชี้วัด ตัวกรอง และค้นหา</button>
+        <div class="f2-controls" id="f2Controls"></div>
+        <div class="f2-tabs" role="tablist" aria-label="ส่วนข้อมูลฝ่าย 2">
+          <button type="button" role="tab" id="f2-tab-overview" aria-controls="f2-view-overview" aria-selected="true" data-f2-tab="overview">ภาพรวม</button>
+          <button type="button" role="tab" id="f2-tab-list" aria-controls="f2-view-list" aria-selected="false" data-f2-tab="list">รายการ</button>
+          <button type="button" role="tab" id="f2-tab-sources" aria-controls="f2-view-sources" aria-selected="false" data-f2-tab="sources">ที่มาและข้อจำกัด</button>
+        </div>
+        <div class="f2-stage">
+          <section id="f2-view-overview" role="tabpanel" aria-labelledby="f2-tab-overview" data-f2-view="overview"></section>
+          <section id="f2-view-list" role="tabpanel" aria-labelledby="f2-tab-list" data-f2-view="list" hidden></section>
+          <section id="f2-view-sources" role="tabpanel" aria-labelledby="f2-tab-sources" data-f2-view="sources" hidden></section>
+        </div>
+      </aside>
+      <section class="f2-detail-sheet" id="f2DetailSheet" role="dialog" aria-modal="true" aria-labelledby="f2DetailTitle" hidden>
+        <div class="f2-detail-backdrop" data-f2-detail-close></div>
+        <article class="f2-detail-card">
+          <header><h2 id="f2DetailTitle">รายละเอียด</h2><button type="button" data-f2-detail-close aria-label="ปิดรายละเอียด">×</button></header>
+          <div id="f2DetailBody"></div>
+        </article>
+      </section>
       <button type="button" class="department-board-toggle workspace-board-toggle" id="showWorkspacePanel" hidden>ดูภาพรวมฝ่าย 2</button>
 
       <aside class="province-panel" id="provincePanel" aria-hidden="true" aria-live="polite">
@@ -455,6 +485,8 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/app.js?v=departments-20260905-08" defer></script>
+    <script src="/static/f2-detail.js?v=20260921-ui-audit-02" defer></script>
+    <script src="/static/f2.js?v=20260921-ui-audit-03" defer></script>
+    <script src="/static/app.js?v=departments-20260920-f2-map-03" defer></script>
   </body>
 </html>

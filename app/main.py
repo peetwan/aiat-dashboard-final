@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, func, select, text
@@ -27,6 +27,10 @@ from app.api_schemas import (
     F1OverviewResponse,
     F1ProvinceDetailResponse,
     HealthResponse,
+    F2DetailResponse,
+    F2MapResponse,
+    F2OverviewResponse,
+    F2TopicResponse,
     HousingDemandSummaryResponse,
     HousingSpatialFeatureCollectionResponse,
     HousingSpatialSummaryResponse,
@@ -89,6 +93,14 @@ from app.f4_data import (
     f4_policy_projects,
     f4_province_summary,
     f4_region_summary,
+)
+from app.f2_data import (
+    F2DataError,
+    get_detail as f2_detail,
+    get_map as f2_map,
+    get_overview as f2_overview,
+    get_topic as f2_topic,
+    variant_etag as f2_variant_etag,
 )
 
 
@@ -1053,6 +1065,206 @@ def public_f1_province_details(province_code: str):
         return f1_province_details(province_code)
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลฝ่าย 1 ของจังหวัด") from error
+
+
+F2_CACHE_CONTROL = "public, max-age=0, must-revalidate"
+
+
+def _validate_f2_query(request: Request, allowed: set[str]) -> None:
+    unknown = sorted(set(request.query_params) - allowed)
+    repeated = sorted(
+        key for key in allowed if len(request.query_params.getlist(key)) > 1
+    )
+    if unknown or repeated:
+        problems = []
+        if unknown:
+            problems.append(f"unknown query parameters: {', '.join(unknown)}")
+        if repeated:
+            problems.append(f"repeated query parameters: {', '.join(repeated)}")
+        raise HTTPException(status_code=422, detail="; ".join(problems))
+
+
+def _f2_call(loader):
+    try:
+        return loader()
+    except F2DataError as error:
+        raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+
+
+def _f2_http_response(
+    request: Request,
+    payload: dict,
+    route: str,
+    parameters: dict,
+) -> Response:
+    etag = f2_variant_etag(payload["revision"], route, parameters)
+    headers = {"Cache-Control": F2_CACHE_CONTROL, "ETag": etag}
+    candidates = {
+        value.strip()
+        for value in request.headers.get("if-none-match", "").split(",")
+        if value.strip()
+    }
+    if etag in candidates or "*" in candidates:
+        return Response(status_code=304, headers=headers)
+    return JSONResponse(payload, headers=headers)
+
+
+@app.get(
+    "/api/public/v1/f2/overview",
+    tags=["Public data"],
+    response_model=F2OverviewResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_overview(
+    request: Request,
+    province: str | None = Query(None),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    _validate_f2_query(request, {"province", "revision"})
+    payload = _f2_call(lambda: f2_overview(province=province, revision=revision))
+    return _f2_http_response(
+        request, payload, "overview", {"province": province, "revision": revision}
+    )
+
+
+@app.get(
+    "/api/public/v1/f2/map",
+    tags=["Public data"],
+    response_model=F2MapResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_map(
+    request: Request,
+    measure: str = Query(..., min_length=1),
+    category: str | None = Query(None),
+    source_level: str | None = Query(None),
+    component: str | None = Query(None),
+    source_dimension: str | None = Query(None),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    parameters = {
+        "measure": measure,
+        "category": category,
+        "source_level": source_level,
+        "component": component,
+        "source_dimension": source_dimension,
+        "revision": revision,
+    }
+    _validate_f2_query(request, set(parameters))
+    payload = _f2_call(
+        lambda: f2_map(
+            measure_id=measure,
+            category=category,
+            source_level=source_level,
+            component=component,
+            source_dimension=source_dimension,
+            revision=revision,
+        )
+    )
+    return _f2_http_response(request, payload, "map", parameters)
+
+
+@app.get(
+    "/api/public/v1/f2/topics/{topic_id}",
+    tags=["Public data"],
+    response_model=F2TopicResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_topic(
+    topic_id: str,
+    request: Request,
+    measure: str | None = Query(None),
+    province: str | None = Query(None),
+    category: str | None = Query(None),
+    source_level: str | None = Query(None),
+    source_region: str | None = Query(None),
+    component: str | None = Query(None),
+    source_dimension: str | None = Query(None),
+    q: str | None = Query(None, max_length=200),
+    limit: int = Query(25, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    parameters = {
+        "measure": measure,
+        "province": province,
+        "category": category,
+        "source_level": source_level,
+        "source_region": source_region,
+        "component": component,
+        "source_dimension": source_dimension,
+        "q": q,
+        "limit": limit,
+        "offset": offset,
+        "revision": revision,
+    }
+    _validate_f2_query(request, set(parameters))
+    payload = _f2_call(
+        lambda: f2_topic(
+            topic_id,
+            measure_id=measure,
+            province=province,
+            category=category,
+            source_level=source_level,
+            source_region=source_region,
+            component=component,
+            source_dimension=source_dimension,
+            q=q,
+            limit=limit,
+            offset=offset,
+            revision=revision,
+        )
+    )
+    return _f2_http_response(request, payload, f"topics/{topic_id}", parameters)
+
+
+@app.get(
+    "/api/public/v1/f2/topics/{topic_id}/details/{entity_id}",
+    tags=["Public data"],
+    response_model=F2DetailResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_detail(
+    topic_id: str,
+    entity_id: str,
+    request: Request,
+    measure: str = Query(..., min_length=1),
+    province: str | None = Query(None),
+    category: str | None = Query(None),
+    source_level: str | None = Query(None),
+    source_region: str | None = Query(None),
+    component: str | None = Query(None),
+    source_dimension: str | None = Query(None),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    parameters = {
+        "measure": measure,
+        "province": province,
+        "category": category,
+        "source_level": source_level,
+        "source_region": source_region,
+        "component": component,
+        "source_dimension": source_dimension,
+        "revision": revision,
+    }
+    _validate_f2_query(request, set(parameters))
+    payload = _f2_call(
+        lambda: f2_detail(
+            topic_id,
+            entity_id,
+            measure_id=measure,
+            province=province,
+            category=category,
+            source_level=source_level,
+            source_region=source_region,
+            component=component,
+            source_dimension=source_dimension,
+            revision=revision,
+        )
+    )
+    return _f2_http_response(
+        request, payload, f"topics/{topic_id}/details/{entity_id}", parameters
+    )
 
 
 @app.get(

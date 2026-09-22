@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "source_catalog_sha256": "96d08508479842cc7131f8f86e5f176be63156e6a67f29129dce59bb59c92da1",
+  "sources": [
+    {
+      "acquisition_mode": "api_first",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_apptech_mru"
+    },
+    {
+      "acquisition_mode": "snapshot_only",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_cultural_market_civil"
+    },
+    {
+      "acquisition_mode": "snapshot_only",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_icommunity"
+    },
+    {
+      "acquisition_mode": "api_first",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_target_household"
+    },
+    {
+      "acquisition_mode": "api_first",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_apptech_mtr"
+    },
+    {
+      "acquisition_mode": "snapshot_only",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_culturalmap_university"
+    },
+    {
+      "acquisition_mode": "api_first",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_learning_area_based"
+    },
+    {
+      "acquisition_mode": "api_first",
+      "audit_status": "NEEDS_REVIEW",
+      "cloud_policy": "team_approved_public",
+      "production_values_allowed": true,
+      "source_id": "f2_learning_dashboard"
+    }
+  ]
+}

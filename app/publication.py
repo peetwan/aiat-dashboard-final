@@ -159,7 +159,9 @@ NEGATIVE_AUDIT_KEY_SUFFIXES = (
     "_values_redacted",
 )
 MAX_DEFAULT_FILE_BYTES = 25 * 1024 * 1024
-MAX_DEFAULT_TOTAL_BYTES = 40 * 1024 * 1024
+# Reviewed C02 plus existing artifacts measures 146,119,182 bytes (139.35 MiB).
+# Per-file and reviewed per-output limits remain independently enforced.
+MAX_DEFAULT_TOTAL_BYTES = 160 * 1024 * 1024
 MAX_DEFAULT_DEPTH = 40
 MAX_DEFAULT_NODES = 2_000_000
 
@@ -536,6 +538,57 @@ def _url_matches_rule(address: CanonicalUrl, rule: SourceUrlRule) -> bool:
     )
 
 
+def _media_source_rules(
+    value: Any,
+    *,
+    declared_source_ids: set[str],
+    label: str,
+) -> dict[str, tuple[SourceUrlRule, ...]]:
+    """Validate output-scoped HTTPS media prefixes and compile boundary rules."""
+    if value is None:
+        return {}
+    if not isinstance(value, dict) or not value:
+        raise PublicationError(f"{label} must be a non-empty object")
+    unknown = set(value) - declared_source_ids
+    if unknown:
+        raise PublicationError(f"{label} contains undeclared source ids")
+    result = {}
+    for source_id, prefixes in value.items():
+        if not isinstance(prefixes, list) or not prefixes:
+            raise PublicationError(f"{label}.{source_id} must be a non-empty array")
+        rules = []
+        seen: set[CanonicalUrl] = set()
+        for prefix in prefixes:
+            if not isinstance(prefix, str) or not prefix.endswith("/"):
+                raise PublicationError(
+                    f"{label}.{source_id} prefixes must end at a path boundary"
+                )
+            try:
+                parsed = urlsplit(prefix)
+                address = _canonical_url(prefix, catalog=True)
+            except (PublicationError, ValueError) as exc:
+                raise PublicationError(
+                    f"{label}.{source_id} contains an invalid media source prefix"
+                ) from exc
+            if (
+                address.scheme != "https"
+                or "?" in prefix
+                or "#" in prefix
+                or parsed.username is not None
+                or parsed.password is not None
+            ):
+                raise PublicationError(
+                    f"{label}.{source_id} prefixes must be uncredentialed HTTPS "
+                    "URLs without query or fragment"
+                )
+            if address in seen:
+                raise PublicationError(f"{label}.{source_id} contains duplicate prefixes")
+            seen.add(address)
+            rules.append(SourceUrlRule(address, True))
+        result[source_id] = tuple(rules)
+    return result
+
+
 def _is_negative_audit(key: str, value: Any) -> bool:
     if key.endswith("_exposed") and value is False:
         return True
@@ -856,6 +909,7 @@ def _provenance_rule_signature(
     *,
     declared_source_ids: set[str],
     source_url_rules: dict[str, tuple[SourceUrlRule, ...]],
+    media_source_rules: dict[str, tuple[SourceUrlRule, ...]],
     source_scope: str,
 ) -> str:
     """Hash registered rule bindings, never the refreshable descendant URL itself."""
@@ -891,10 +945,16 @@ def _provenance_rule_signature(
             raise PublicationError(
                 "restricted catalog endpoint cannot be value provenance"
             )
+        media_path = reference.path.endswith(".media[].url")
+        eligible_rules = {
+            source_id: source_url_rules.get(source_id, ())
+            + (media_source_rules.get(source_id, ()) if media_path else ())
+            for source_id in contextual_source_ids
+        }
         matches: list[tuple[str, SourceUrlRule]] = [
             (source_id, rule)
             for source_id in contextual_source_ids
-            for rule in source_url_rules.get(source_id, ())
+            for rule in eligible_rules[source_id]
             if _url_matches_rule(reference.address, rule)
         ]
         if not contextual_source_ids or not matches:
@@ -1587,6 +1647,7 @@ def _validate_contract(contract: dict[str, Any], path: Path) -> None:
             "max_identity_churn_ratio",
             "as_of_pointer",
             "headers",
+            "media_source_prefixes",
             "completeness_rules",
             "schema_policy",
             "field_contexts",
@@ -1594,8 +1655,16 @@ def _validate_contract(contract: dict[str, Any], path: Path) -> None:
         extra = set(output) - allowed
         if extra:
             raise PublicationError(f"unexpected output fields in {path.name}: {sorted(extra)}")
+        _media_source_rules(
+            output.get("media_source_prefixes"),
+            declared_source_ids=set(source_ids),
+            label=f"{path.name}.outputs[{index}].media_source_prefixes",
+        )
         try:
-            validate_field_contexts(output.get("field_contexts", {}), f"{path.name}.outputs[{index}].field_contexts")
+            validate_field_contexts(
+                output.get("field_contexts", {}),
+                f"{path.name}.outputs[{index}].field_contexts",
+            )
         except FieldContextError as exc:
             raise PublicationError(str(exc)) from exc
         if output.get("field_contexts") and contract["source_scope"] != "approved_values":
@@ -2134,6 +2203,11 @@ def _validate_snapshot(
             completeness_counts = _completeness_summary(payload, output)
             semantic_hash = _semantic_signature(payload)
             declared_source_ids = set(binding.contract["source_ids"])
+            media_source_rules = _media_source_rules(
+                output.get("media_source_prefixes"),
+                declared_source_ids=declared_source_ids,
+                label=f"{binding.contract_path.name}.media_source_prefixes",
+            )
             embedded_source_ids, source_urls = _embedded_source_provenance(
                 payload,
                 artifact_path=path,
@@ -2148,6 +2222,7 @@ def _validate_snapshot(
                 source_urls,
                 declared_source_ids=declared_source_ids,
                 source_url_rules=source_url_rules,
+                media_source_rules=media_source_rules,
                 source_scope=binding.contract["source_scope"],
             )
             canonical = _canonical_text_bytes(entry.data)

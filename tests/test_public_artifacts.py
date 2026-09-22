@@ -50,12 +50,13 @@ def test_public_artifact_sync_is_complete_and_idempotent():
             for source in catalog_sources
             for endpoint in source["endpoints"]
         )
-        assert payload["province_briefings"] == REQUIRED_GROUP_COUNTS[
-            "provincial_briefing"
-        ]
-        assert payload["executive_summaries"] == REQUIRED_GROUP_COUNTS[
-            "executive_summary"
-        ]
+        assert (
+            payload["province_briefings"]
+            == REQUIRED_GROUP_COUNTS["provincial_briefing"]
+        )
+        assert (
+            payload["executive_summaries"] == REQUIRED_GROUP_COUNTS["executive_summary"]
+        )
         assert payload["restricted_values_published"] == 0
 
 
@@ -118,6 +119,68 @@ def test_public_artifact_manifest_can_add_a_reviewed_source_dataset(tmp_path):
         artifact_inputs(tmp_path)
 
 
+def test_source_less_methodology_requires_a_database_publication_contract(tmp_path):
+    _write_manifest(
+        tmp_path,
+        {
+            "key": "f2/topic/k06",
+            "group": "methodology",
+            "path": "example.json",
+            "source_ids": [],
+        },
+    )
+    contracts = tmp_path / "contracts"
+    contracts.mkdir()
+    contract = {
+        "contract_version": "1.0",
+        "contract_id": "f2_methodology",
+        "dataset_key": "f2_methodology",
+        "source_scope": "approved_values",
+        "source_ids": ["f2_learning_dashboard"],
+        "builder": "tests.fixture:build",
+        "grain_th": "หนึ่งไฟล์ต่อระเบียบวิธีตัวชี้วัด",
+        "identity": {"fields": ["measure_id"]},
+        "geography": {"level": "none", "fields": []},
+        "as_of": {"status": "not_applicable", "fields": []},
+        "measures": [
+            {"name": "K06", "unit": "person", "denominator": "not calculated"}
+        ],
+        "completeness": {"policy": "output_contracts"},
+        "privacy_profile": "aggregate_public",
+        "outputs": [
+            {
+                "path": "data/public/example.json",
+                "format": "json",
+                "role": "provenance",
+                "downloadable": False,
+                "max_bytes": 100_000,
+                "schema_policy": "stable",
+            }
+        ],
+    }
+    (contracts / "f2_methodology.json").write_text(
+        json.dumps(contract), encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match="database publication contract"):
+        artifact_inputs(tmp_path, enforce_core=False, contracts_root=contracts)
+    contract["outputs"][0].update(
+        role="database",
+        downloadable=True,
+        records_pointer="/items",
+        identity_fields=["id"],
+        expected_count=0,
+        minimum_count=0,
+        max_identity_churn_ratio=0,
+    )
+    (contracts / "f2_methodology.json").write_text(
+        json.dumps(contract), encoding="utf-8"
+    )
+    inputs = artifact_inputs(tmp_path, enforce_core=False, contracts_root=contracts)
+    assert [(item.key, item.group, item.source_ids) for item in inputs] == [
+        ("f2/topic/k06", "methodology", ())
+    ]
+
+
 def test_public_artifact_manifest_rejects_path_traversal(tmp_path):
     (tmp_path / "serving_manifest.json").write_text(
         json.dumps(
@@ -152,7 +215,12 @@ def _write_manifest(tmp_path, entry):
     ("entry", "message"),
     [
         (
-            {"key": "example", "group": "catalog", "path": "example.json", "typo": True},
+            {
+                "key": "example",
+                "group": "catalog",
+                "path": "example.json",
+                "typo": True,
+            },
             "unexpected fields",
         ),
         (

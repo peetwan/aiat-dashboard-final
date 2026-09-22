@@ -1,0 +1,479 @@
+{
+  "provinces": [
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "10",
+      "province_name_en": "Bangkok",
+      "province_name_th": "กรุงเทพมหานคร"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "11",
+      "province_name_en": "Samut Prakan",
+      "province_name_th": "สมุทรปราการ"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "12",
+      "province_name_en": "Nonthaburi",
+      "province_name_th": "นนทบุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "13",
+      "province_name_en": "Pathum Thani",
+      "province_name_th": "ปทุมธานี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "14",
+      "province_name_en": "Phra Nakhon Si Ayutthaya",
+      "province_name_th": "พระนครศรีอยุธยา"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "15",
+      "province_name_en": "Ang Thong",
+      "province_name_th": "อ่างทอง"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "16",
+      "province_name_en": "Lop Buri",
+      "province_name_th": "ลพบุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "17",
+      "province_name_en": "Sing Buri",
+      "province_name_th": "สิงห์บุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "18",
+      "province_name_en": "Chai Nat",
+      "province_name_th": "ชัยนาท"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "19",
+      "province_name_en": "Saraburi",
+      "province_name_th": "สระบุรี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "20",
+      "province_name_en": "Chon Buri",
+      "province_name_th": "ชลบุรี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "21",
+      "province_name_en": "Rayong",
+      "province_name_th": "ระยอง"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "22",
+      "province_name_en": "Chanthaburi",
+      "province_name_th": "จันทบุรี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "23",
+      "province_name_en": "Trat",
+      "province_name_th": "ตราด"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "24",
+      "province_name_en": "Chachoengsao",
+      "province_name_th": "ฉะเชิงเทรา"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "25",
+      "province_name_en": "Prachin Buri",
+      "province_name_th": "ปราจีนบุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "26",
+      "province_name_en": "Nakhon Nayok",
+      "province_name_th": "นครนายก"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออก",
+      "province_code": "27",
+      "province_name_en": "Sa Kaeo",
+      "province_name_th": "สระแก้ว"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "30",
+      "province_name_en": "Nakhon Ratchasima",
+      "province_name_th": "นครราชสีมา"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "31",
+      "province_name_en": "Buri Ram",
+      "province_name_th": "บุรีรัมย์"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "32",
+      "province_name_en": "Surin",
+      "province_name_th": "สุรินทร์"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "33",
+      "province_name_en": "Si Sa Ket",
+      "province_name_th": "ศรีสะเกษ"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "34",
+      "province_name_en": "Ubon Ratchathani",
+      "province_name_th": "อุบลราชธานี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "35",
+      "province_name_en": "Yasothon",
+      "province_name_th": "ยโสธร"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "36",
+      "province_name_en": "Chaiyaphum",
+      "province_name_th": "ชัยภูมิ"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "37",
+      "province_name_en": "Amnat Charoen",
+      "province_name_th": "อำนาจเจริญ"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "38",
+      "province_name_en": "Bueng Kan",
+      "province_name_th": "บึงกาฬ"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "39",
+      "province_name_en": "Nong Bua Lam Phu",
+      "province_name_th": "หนองบัวลำภู"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "40",
+      "province_name_en": "Khon Kaen",
+      "province_name_th": "ขอนแก่น"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "41",
+      "province_name_en": "Udon Thani",
+      "province_name_th": "อุดรธานี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "42",
+      "province_name_en": "Loei",
+      "province_name_th": "เลย"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "43",
+      "province_name_en": "Nong Khai",
+      "province_name_th": "หนองคาย"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "44",
+      "province_name_en": "Maha Sarakham",
+      "province_name_th": "มหาสารคาม"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "45",
+      "province_name_en": "Roi Et",
+      "province_name_th": "ร้อยเอ็ด"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "46",
+      "province_name_en": "Kalasin",
+      "province_name_th": "กาฬสินธุ์"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "47",
+      "province_name_en": "Sakon Nakhon",
+      "province_name_th": "สกลนคร"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "48",
+      "province_name_en": "Nakhon Phanom",
+      "province_name_th": "นครพนม"
+    },
+    {
+      "dashboard_region": "ภาคตะวันออกเฉียงเหนือ",
+      "province_code": "49",
+      "province_name_en": "Mukdahan",
+      "province_name_th": "มุกดาหาร"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "50",
+      "province_name_en": "Chiang Mai",
+      "province_name_th": "เชียงใหม่"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "51",
+      "province_name_en": "Lamphun",
+      "province_name_th": "ลำพูน"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "52",
+      "province_name_en": "Lampang",
+      "province_name_th": "ลำปาง"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "53",
+      "province_name_en": "Uttaradit",
+      "province_name_th": "อุตรดิตถ์"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "54",
+      "province_name_en": "Phrae",
+      "province_name_th": "แพร่"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "55",
+      "province_name_en": "Nan",
+      "province_name_th": "น่าน"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "56",
+      "province_name_en": "Phayao",
+      "province_name_th": "พะเยา"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "57",
+      "province_name_en": "Chiang Rai",
+      "province_name_th": "เชียงราย"
+    },
+    {
+      "dashboard_region": "ภาคเหนือ",
+      "province_code": "58",
+      "province_name_en": "Mae Hong Son",
+      "province_name_th": "แม่ฮ่องสอน"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "60",
+      "province_name_en": "Nakhon Sawan",
+      "province_name_th": "นครสวรรค์"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "61",
+      "province_name_en": "Uthai Thani",
+      "province_name_th": "อุทัยธานี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "62",
+      "province_name_en": "Kamphaeng Phet",
+      "province_name_th": "กำแพงเพชร"
+    },
+    {
+      "dashboard_region": "ภาคตะวันตก",
+      "province_code": "63",
+      "province_name_en": "Tak",
+      "province_name_th": "ตาก"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "64",
+      "province_name_en": "Sukhothai",
+      "province_name_th": "สุโขทัย"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "65",
+      "province_name_en": "Phitsanulok",
+      "province_name_th": "พิษณุโลก"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "66",
+      "province_name_en": "Phichit",
+      "province_name_th": "พิจิตร"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "67",
+      "province_name_en": "Phetchabun",
+      "province_name_th": "เพชรบูรณ์"
+    },
+    {
+      "dashboard_region": "ภาคตะวันตก",
+      "province_code": "70",
+      "province_name_en": "Ratchaburi",
+      "province_name_th": "ราชบุรี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันตก",
+      "province_code": "71",
+      "province_name_en": "Kanchanaburi",
+      "province_name_th": "กาญจนบุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "72",
+      "province_name_en": "Suphan Buri",
+      "province_name_th": "สุพรรณบุรี"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "73",
+      "province_name_en": "Nakhon Pathom",
+      "province_name_th": "นครปฐม"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "74",
+      "province_name_en": "Samut Sakhon",
+      "province_name_th": "สมุทรสาคร"
+    },
+    {
+      "dashboard_region": "ภาคกลาง",
+      "province_code": "75",
+      "province_name_en": "Samut Songkhram",
+      "province_name_th": "สมุทรสงคราม"
+    },
+    {
+      "dashboard_region": "ภาคตะวันตก",
+      "province_code": "76",
+      "province_name_en": "Phetchaburi",
+      "province_name_th": "เพชรบุรี"
+    },
+    {
+      "dashboard_region": "ภาคตะวันตก",
+      "province_code": "77",
+      "province_name_en": "Prachuap Khiri Khan",
+      "province_name_th": "ประจวบคีรีขันธ์"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "80",
+      "province_name_en": "Nakhon Si Thammarat",
+      "province_name_th": "นครศรีธรรมราช"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "81",
+      "province_name_en": "Krabi",
+      "province_name_th": "กระบี่"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "82",
+      "province_name_en": "Phangnga",
+      "province_name_th": "พังงา"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "83",
+      "province_name_en": "Phuket",
+      "province_name_th": "ภูเก็ต"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "84",
+      "province_name_en": "Surat Thani",
+      "province_name_th": "สุราษฎร์ธานี"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "85",
+      "province_name_en": "Ranong",
+      "province_name_th": "ระนอง"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "86",
+      "province_name_en": "Chumphon",
+      "province_name_th": "ชุมพร"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "90",
+      "province_name_en": "Songkhla",
+      "province_name_th": "สงขลา"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "91",
+      "province_name_en": "Satun",
+      "province_name_th": "สตูล"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "92",
+      "province_name_en": "Trang",
+      "province_name_th": "ตรัง"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "93",
+      "province_name_en": "Phatthalung",
+      "province_name_th": "พัทลุง"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "94",
+      "province_name_en": "Pattani",
+      "province_name_th": "ปัตตานี"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "95",
+      "province_name_en": "Yala",
+      "province_name_th": "ยะลา"
+    },
+    {
+      "dashboard_region": "ภาคใต้",
+      "province_code": "96",
+      "province_name_en": "Narathiwat",
+      "province_name_th": "นราธิวาส"
+    }
+  ],
+  "reference_kind": "dashboard_province_catalog",
+  "region_scheme": {
+    "compatibility": "Source-reported region labels are not mapped or inferred by this reference.",
+    "id": "dashboard_catalog_region",
+    "scope": "dashboard navigation only"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "data/public/public_dashboard.json",
+    "provenance": "existing dashboard catalog; copied as a compact canonical province/code/region reference",
+    "selector": "/provinces",
+    "sha256": "7aef3e6940c6a9a3fb7019adac1a0853983413ebc2ca07bf1e7fdef38e879239"
+  }
+}
