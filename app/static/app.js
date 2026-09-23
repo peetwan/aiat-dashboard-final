@@ -51,6 +51,10 @@ const state = {
   f4ListRequestTokens: {},
   f4CoveredProvinceCodes: new Set(),
   f4Province: null,
+  f2MapCells: new Map(),
+  f2MapMeasure: "",
+  f2MapUnit: "",
+  f2MapAvailable: true,
 };
 
 const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
@@ -228,23 +232,48 @@ MAP_MODES.executive = {
   regionLegendNote: "สีเข้มหมายถึงมีกลุ่มโครงการมากกว่า",
 };
 
-["f2", "f3"].forEach((mode, index) => {
-  const departmentNumber = index + 2;
-  MAP_MODES[mode] = {
-    label: `ฝ่าย ${departmentNumber}`,
-    legendTitle: `ข้อมูลฝ่าย ${departmentNumber}`,
-    legendNote: "ยังไม่มีข้อมูลสำหรับแสดงบนแผนที่",
-    zeroLabel: "ยังไม่มีข้อมูล",
-    value: () => null,
-    format: () => "ยังไม่มีข้อมูล",
-    summarize: () => "ยังไม่มีข้อมูลของฝ่ายนี้",
-    steps: [{ min: 1, color: "#a9b2ac", label: "มีข้อมูล" }],
-    regionLegendTitle: `ข้อมูลฝ่าย ${departmentNumber} รายภาค`,
-    regionLegendNote: "แต่ละฝ่ายใช้พื้นที่ข้อมูลแยกจากกัน",
-    regionValue: () => null,
-    regionSteps: [{ min: 1, color: "#a9b2ac", label: "มีข้อมูล" }],
-  };
-});
+MAP_MODES.f2 = {
+  label: "ฝ่าย 2",
+  legendTitle: "ข้อมูลฝ่าย 2 รายจังหวัด",
+  legendNote: "เลือกตัวชี้วัดเพื่อดูค่าที่เผยแพร่ของแต่ละจังหวัด",
+  zeroLabel: "ไม่มีค่าที่รองรับ",
+  value: (province) => {
+    const result = state.f2MapCells.get(province.province_code)?.result;
+    if (result?.availability !== "available" || result.value === null || result.value === undefined) return null;
+    const value = Number(result.value);
+    return Number.isFinite(value) ? value : null;
+  },
+  format: (value, province) => {
+    const result = state.f2MapCells.get(province?.province_code)?.result;
+    if (state.f2MapMeasure === "C02_COMMUNITY" && value === 0) {
+      return "0 คนในทะเบียนฉบับนี้";
+    }
+    return result?.display_value
+      ? `${result.display_value}${result.unit ? ` ${result.unit}` : ""}`
+      : `${formatNumber(value)}${state.f2MapUnit ? ` ${state.f2MapUnit}` : ""}`;
+  },
+  summarize: (summary) => `${formatNumber(summary.withData)} จังหวัดที่มีค่ารองรับ`,
+  steps: [{ min: 0, color: "#a9d3b8", label: "มีข้อมูล" }],
+  regionLegendTitle: "ข้อมูลฝ่าย 2 รายจังหวัด",
+  regionLegendNote: "ฝ่าย 2 ใช้ขอบเขตประเทศหรือจังหวัดโดยตรง ไม่รวมค่าตามภาคของแดชบอร์ด",
+  regionValue: () => null,
+  regionSteps: [{ min: 0, color: "#a9d3b8", label: "มีข้อมูล" }],
+};
+
+MAP_MODES.f3 = {
+  label: "ฝ่าย 3",
+  legendTitle: "ข้อมูลฝ่าย 3",
+  legendNote: "ยังไม่มีข้อมูลสำหรับแสดงบนแผนที่",
+  zeroLabel: "ยังไม่มีข้อมูล",
+  value: () => null,
+  format: () => "ยังไม่มีข้อมูล",
+  summarize: () => "ยังไม่มีข้อมูลของฝ่ายนี้",
+  steps: [{ min: 1, color: "#a9b2ac", label: "มีข้อมูล" }],
+  regionLegendTitle: "ข้อมูลฝ่าย 3 รายภาค",
+  regionLegendNote: "แต่ละฝ่ายใช้พื้นที่ข้อมูลแยกจากกัน",
+  regionValue: () => null,
+  regionSteps: [{ min: 1, color: "#a9b2ac", label: "มีข้อมูล" }],
+};
 
 function isDepartmentMode(mode = state.mapMode) {
   return ["f2", "f3"].includes(mode);
@@ -275,6 +304,13 @@ function syncResponsiveWorkspace() {
     if (!mobileMapFirst) {
       if (state.f4Overview) renderF4CountryPanel();
       else loadF4Overview();
+    }
+  } else if (state.mapMode === "f2") {
+    if (mobileMapFirst) {
+      window.F2Dashboard?.close();
+      hideWorkspacePanel(true);
+    } else {
+      showWorkspacePanel();
     }
   } else {
     if (mobileMapFirst) hideWorkspacePanel(true);
@@ -317,7 +353,7 @@ function buildFillExpression(mode) {
   // provinces get their own colors. Selection is drawn as an ink outline so
   // the mode color stays truthful.
   const expression = ["match", ["get", "province_code"]];
-  if (!state.selectedRegion) {
+  if (!state.selectedRegion && mode !== "f2") {
     const colorByRegion = {};
     Object.keys(state.regions).forEach((name) => {
       colorByRegion[name] = regionColor(mode, name);
@@ -337,6 +373,56 @@ function buildFillExpression(mode) {
   return expression;
 }
 
+function applyF2MapData(payload) {
+  state.f2MapAvailable = payload?.map_available !== false;
+  document.body.classList.toggle("f2-map-unavailable", !state.f2MapAvailable);
+  state.f2MapCells = new Map(
+    (payload?.cells || []).map((cell) => [cell.province_code, cell]),
+  );
+  state.f2MapMeasure = payload?.measure_id || "";
+  state.f2MapUnit = payload?.unit || "";
+  MAP_MODES.f2.legendTitle = payload?.legend?.label_th || "ข้อมูลฝ่าย 2 รายจังหวัด";
+  const coverage = payload?.coverage || {};
+  const coverageNote = state.f2MapMeasure === "C02_COMMUNITY" && Number.isFinite(Number(coverage.with_province))
+    ? ` แผนที่ครอบคลุม ${formatNumber(coverage.with_province)} คน; ${formatNumber(coverage.without_province || 0)} คนที่ไม่มีจังหวัดคงอยู่เฉพาะยอดประเทศ และยอดรายจังหวัดบวกกันไม่ได้`
+    : "";
+  MAP_MODES.f2.legendNote = `${payload?.legend?.meaning_th || MAP_MODES.f2.legendNote}${coverageNote}`;
+  if (!state.f2MapAvailable) {
+    MAP_MODES.f2.steps = [{ min: 0, color: NO_DATA_COLOR, label: "ไม่มีแผนที่รายจังหวัด" }];
+  } else {
+    const positiveValues = [...state.f2MapCells.values()]
+      .map((cell) => cell.result)
+      .filter((result) => result?.availability === "available" && Number(result.value) > 0)
+      .map((result) => Number(result.value))
+      .sort((a, b) => a - b);
+    const quantile = (fraction) => positiveValues[
+      Math.min(positiveValues.length - 1, Math.max(0, Math.ceil(fraction * positiveValues.length) - 1))
+    ];
+    const thresholds = positiveValues.length
+      ? [...new Set([quantile(0.75), quantile(0.5), quantile(0.25), positiveValues[0]])].sort((a, b) => b - a)
+      : [];
+    const palette = ["#14532e", "#2e7d51", "#63ac79", "#a9d3b8"];
+    MAP_MODES.f2.steps = thresholds.map((minimum, index) => ({
+      min: minimum,
+      color: palette[Math.min(index, palette.length - 1)],
+      label: index === 0
+        ? `ตั้งแต่ ${formatNumber(minimum)} ${state.f2MapUnit}`.trim()
+        : `${formatNumber(minimum)} ถึงต่ำกว่า ${formatNumber(thresholds[index - 1])} ${state.f2MapUnit}`.trim(),
+    }));
+    MAP_MODES.f2.steps.push({
+      min: 0,
+      color: "#eef2ee",
+      label: state.f2MapMeasure === "C02_COMMUNITY"
+        ? "0 คน — ไม่มีระเบียนที่ผ่านเกณฑ์ในฉบับนี้"
+        : `0 ${state.f2MapUnit}`.trim(),
+    });
+  }
+  if (state.mapMode === "f2") {
+    renderLegend();
+    applyFillForLevel();
+  }
+}
+
 function applyFillForLevel() {
   if (!state.mapLoaded) return;
   state.map.setPaintProperty("province-base", "fill-color", buildFillExpression(state.mapMode));
@@ -344,6 +430,7 @@ function applyFillForLevel() {
 
 function updateRegionMarkerColors() {
   state.regionMarkers.forEach(({ element, name }) => {
+    element.hidden = state.mapMode === "f2";
     const dot = element.querySelector("i");
     if (dot) dot.style.background = regionColor(state.mapMode, name);
     const count = element.querySelector("span");
@@ -382,7 +469,7 @@ function regionSummary(mode, regionName) {
 
 function renderLegend() {
   const config = MAP_MODES[state.mapMode];
-  const atCountry = !state.selectedRegion;
+  const atCountry = !state.selectedRegion && state.mapMode !== "f2";
   const steps = atCountry ? config.regionSteps : config.steps;
   document.getElementById("legendTitle").textContent = atCountry
     ? config.regionLegendTitle
@@ -390,7 +477,7 @@ function renderLegend() {
   document.getElementById("legendNote").textContent = atCountry
     ? config.regionLegendNote
     : config.legendNote;
-  if (isDepartmentMode()) {
+  if (state.mapMode === "f3") {
     document.getElementById("legendItems").innerHTML = `<li><i style="background:${NO_DATA_COLOR}"></i><span>ยังไม่มีข้อมูล</span></li>`;
     return;
   }
@@ -405,6 +492,15 @@ function renderLegend() {
 function setMapMode(mode) {
   if (!WORKSPACE_MODES.includes(mode)) return;
   state.mapMode = mode;
+  if (mode !== "f2") window.F2Dashboard?.close();
+  if (mode !== "f2") document.body.classList.remove("f2-map-unavailable");
+  if (mode === "f2") {
+    state.selectedRegion = null;
+    setHoveredRegion(null);
+    document.getElementById("backToCountry").hidden = true;
+    applyRegionFocus();
+  }
+
   document.body.classList.toggle("f1-province-open", mode === "f1" && Boolean(state.selectedCode));
   const provincePanel = document.getElementById("provincePanel");
   provincePanel?.classList.toggle("f1-only", mode === "f1");
@@ -469,6 +565,20 @@ function setMapMode(mode) {
       else if (state.selectedRegion) loadF4RegionOverview(state.selectedRegion).then(renderF4CountryPanel);
       else renderF4CountryPanel();
     });
+  } else if (mode === "f2") {
+    hideF1CountryPanel();
+    hideWorkspacePanel();
+    provincePanel.classList.remove("is-open");
+    provincePanel.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("panel-open");
+    document.getElementById("showWorkspacePanel").hidden = true;
+    setPrompt(
+      state.selectedCode
+        ? `ฝ่าย 2: จังหวัด${provinceByCode(state.selectedCode)?.province_name_th || ""}`
+        : "ฝ่าย 2: ภาพรวมประเทศไทย",
+      "เลือกจังหวัดจากช่องค้นหาหรือคลิกแผนที่เพื่อดูขอบเขตพื้นที่",
+    );
+    window.F2Dashboard?.open({ provinceCode: state.selectedCode || "" });
   } else {
     hideF1CountryPanel();
     setPrompt(
@@ -514,7 +624,7 @@ function workspaceProvinces() {
 
 function renderWorkspacePanel() {
   const panel = document.getElementById("workspacePanel");
-  if (!panel || state.selectedCode || ["f1", "f4"].includes(state.mapMode)) return;
+  if (!panel || state.selectedCode || ["f1", "f2", "f4"].includes(state.mapMode)) return;
   panel.classList.remove("department-panel--f2", "department-panel--f3", "department-panel--executive");
   panel.classList.add(
     state.mapMode === "f2"
@@ -568,6 +678,11 @@ function updateWorkspaceToggle() {
 }
 
 function showWorkspacePanel() {
+  if (state.mapMode === "f2") {
+    document.getElementById("showWorkspacePanel").hidden = true;
+    window.F2Dashboard?.open({ provinceCode: state.selectedCode || "" });
+    return;
+  }
   if (state.selectedCode || ["f1", "f4"].includes(state.mapMode)) return;
   const panel = document.getElementById("workspacePanel");
   document.getElementById("showWorkspacePanel").hidden = true;
@@ -4059,14 +4174,14 @@ function renderPanelError() {
   document.getElementById("panelError").hidden = false;
 }
 
-async function selectProvince(code, moveMap = true) {
+async function selectProvince(code, moveMap = true, notifyF2 = true) {
   const normalized = String(code ?? "").padStart(2, "0");
   const provinceMeta = provinceByCode(normalized);
   if (!provinceMeta) return;
   hideF1CountryPanel();
   hideWorkspacePanel();
   state.hoverPopup?.remove();
-  if (provinceMeta.region && state.selectedRegion !== provinceMeta.region) {
+  if (state.mapMode !== "f2" && provinceMeta.region && state.selectedRegion !== provinceMeta.region) {
     state.selectedRegion = provinceMeta.region;
     document.getElementById("backToCountry").hidden = false;
     setPrompt(`${provinceMeta.region}: คลิกจังหวัดเพื่อเปิดข้อมูล`, "หรือกด ทุกภาค เพื่อกลับมุมมองประเทศ");
@@ -4084,6 +4199,16 @@ async function selectProvince(code, moveMap = true) {
     state.map.setFeatureState({ source: "provinces", id: normalized }, { selected: true });
   }
   updateLabelVisibility();
+  if (state.mapMode === "f2") {
+    document.getElementById("provincePanel").classList.remove("is-open");
+    document.getElementById("provincePanel").setAttribute("aria-hidden", "true");
+    document.body.classList.remove("panel-open");
+    document.querySelector(".picker-copy strong").textContent = provinceMeta.province_name_th;
+    document.getElementById("provinceSelect").value = normalized;
+    if (moveMap) fitProvince(provinceMeta);
+    if (notifyF2) window.F2Dashboard?.handleProvince(normalized);
+    return;
+  }
   if (state.mapMode === "f4") {
     state.f4Province = null;
     state.f4BoardCollapsed = false;
@@ -4137,7 +4262,7 @@ async function selectProvince(code, moveMap = true) {
   }
 }
 
-function closePanel(refitMap = true) {
+function closePanel(refitMap = true, notifyF2 = true) {
   state.requestToken += 1;
   closeStationHistoryModal();
   destroyDisasterCharts();
@@ -4159,10 +4284,12 @@ function closePanel(refitMap = true) {
   document.getElementById("provinceSelect").value = "";
   document.querySelector(".picker-copy strong").textContent = "คลิกจังหวัด หรือค้นหาที่นี่";
   document.getElementById("mapPrompt").classList.remove("is-hidden");
-  const url = new URL(window.location.href);
-  url.searchParams.delete("province");
-  url.searchParams.delete("view");
-  window.history.replaceState({}, "", url);
+  if (!(state.mapMode === "f2" && notifyF2)) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("province");
+    url.searchParams.delete("view");
+    window.history.replaceState({}, "", url);
+  }
   if (state.mapMode === "f1") {
     if (usesMobileMapFirst()) {
       hideF1CountryPanel(true);
@@ -4179,12 +4306,19 @@ function closePanel(refitMap = true) {
     } else {
       renderF4CountryPanel();
     }
+  } else if (state.mapMode === "f2") {
+    if (notifyF2) {
+      window.F2Dashboard?.handleProvince("");
+      window.F2Dashboard?.open({ provinceCode: "" });
+    }
   } else if (usesMobileMapFirst()) hideWorkspacePanel(true);
   else showWorkspacePanel();
   // Ease back to the region overview so opening and closing a province always
   // lands on the same stable view instead of wherever the last fit left off.
   if (refitMap && state.selectedRegion) {
     fitRegionBounds(state.regions[state.selectedRegion], 600);
+  } else if (refitMap && state.mapMode === "f2") {
+    lockCountryView(true);
   }
 }
 
@@ -4199,6 +4333,7 @@ function toggleCulturalPoints() {
 function bindEvents() {
   document.getElementById("provinceSelect").addEventListener("change", (event) => {
     if (event.target.value) selectProvince(event.target.value, true);
+    else closePanel(true);
   });
   document.getElementById("closePanel").addEventListener("click", () => closePanel());
   document.getElementById("backToCountry").addEventListener("click", backToCountry);
@@ -4476,7 +4611,7 @@ function initMap() {
       const province = code ? provinceByCode(code) : null;
       if (!province) return;
 
-      if (!state.selectedRegion) {
+      if (state.mapMode !== "f2" && !state.selectedRegion) {
         // Country view is region-only: no per-province hover or popup.
         if (state.hoveredCode) {
           map.setFeatureState({ source: "provinces", id: state.hoveredCode }, { hover: false });
@@ -4505,8 +4640,9 @@ function initMap() {
       const value = config.value(province);
       const valueLine = value === null
         ? (config.noDataLabel ? config.noDataLabel(province) : config.zeroLabel)
-        : config.format(value);
-      const inActiveRegion = province.region === state.selectedRegion;
+        : config.format(value, province);
+      const directProvince = state.mapMode === "f2";
+      const inActiveRegion = directProvince || province.region === state.selectedRegion;
       const hint = inActiveRegion
         ? (code === state.selectedCode ? "คลิกอีกครั้งเพื่อยกเลิก" : "คลิกเพื่อเปิดข้อมูล")
         : `คลิกเพื่อไป${escapeHtml(province.region)}`;
@@ -4537,7 +4673,7 @@ function initMap() {
       const code = features[0]?.properties?.province_code;
       const province = code ? provinceByCode(code) : null;
       if (!province) return;
-      if (!state.selectedRegion || state.selectedRegion !== province.region) {
+      if (state.mapMode !== "f2" && (!state.selectedRegion || state.selectedRegion !== province.region)) {
         selectRegion(province.region);
         return;
       }
@@ -4610,6 +4746,24 @@ async function loadDashboard() {
     computeRegions();
     renderLegend();
     bindEvents();
+    window.F2Dashboard?.init({
+      getProvinces: () => state.catalog?.provinces || [],
+      onProvinceSelect: (code) => {
+        if (code) selectProvince(code, true);
+        else closePanel(true);
+      },
+      onProvinceRestore: (code) => {
+        if (code) selectProvince(code, true, false);
+        else closePanel(true, false);
+      },
+      onMapData: applyF2MapData,
+      onClose: () => {
+        if (state.mapMode !== "f2") return;
+        const toggle = document.getElementById("showWorkspacePanel");
+        toggle.textContent = "ดูภาพรวมฝ่าย 2";
+        toggle.hidden = false;
+      },
+    });
     initMap();
 
     const initialParams = new URLSearchParams(window.location.search);

@@ -60,6 +60,10 @@ Gate ผ่านหมายถึง revision ตรงตามกติก�
 
 Contract ใช้ได้กับทุก URL เพราะกำหนดกติกากลาง แต่ไม่บังคับให้ทุกเว็บมี schema เหมือนกัน หากหลักฐานยังไม่บอกหน่วย, denominator, เวลา หรือพื้นที่ ให้คงค่าเป็น `ไม่ระบุ`/`needs_review`; ห้ามเดาเพื่อให้ gate ผ่าน การแก้ความหมายเหล่านี้คือการแก้ contract และต้องเข้าเลนตรวจเอง
 
+รูปหรือสื่อที่เผยแพร่อยู่บน hostname แยกจากหน้าแหล่งข้อมูล สามารถประกาศ `outputs[].media_source_prefixes` เป็น object จาก canonical source ID ไปยังรายการ HTTPS prefix ที่ลงท้ายด้วย `/` ได้ ต้องระบุ source ที่อยู่ใน contract และห้ามมี query, fragment หรือ credentials กติกานี้ใช้เฉพาะ field `media[].url` เท่านั้น ไม่ขยายสิทธิ์ให้ `source_url` หรือลิงก์อื่น และไม่ยกเว้น restricted endpoint การเพิ่ม prefix เป็นการเปลี่ยน trusted contract ที่ต้องเข้าเลนตรวจเอง ไม่ใช่การอนุมัติอัตโนมัติจากการพบ URL ใน raw
+
+เพดานรวมของ publication workspace คือ 160 MiB ชุดตรวจรับ C02 v2 ใช้ replacement overlay 145,584,410 bytes และ successor ที่ยอมรับแล้วใช้ active workspace 145,510,848 bytes เพดานนี้ได้รับอนุญาตเพื่อรักษารายละเอียดที่ผ่านการคัดเลือก โดยยังบังคับ `max_bytes` ราย output และเพดานรายไฟล์แยกกัน F2 ใช้ overview ไม่เกิน 512 KiB, geography/detail child ไม่เกิน 4 MiB และ topic entry ไม่เกิน 8 MiB; ไม่โหลด detail children ทั้งชุดเพื่อแสดงหน้าแรก การเพิ่มเพดานไม่ใช่สิทธิ์ให้ขยายฟิลด์บุคคลหรือ deploy ข้อมูล
+
 เริ่ม dataset ใหม่แบบไม่เขียน public output ได้ด้วย scaffold (คำสั่งตัวอย่างเป็น dry run):
 
 ```powershell
@@ -104,6 +108,24 @@ python -m app.cli check
 Builder ตรวจ SHA-256/ขนาดของ response และบังคับให้มีสอง dashboard ครบทุก `dashboard_year_filters` ใน plan ก่อนเขียน `apptech_aggregates.json` กับ provenance manifest ถ้า schema หรือยอดเงินขาดจะหยุด ไม่แทนค่าที่หายด้วยศูนย์ `generated_at` คือเวลาบันทึกหลักฐาน ส่วน `as_of` เป็น null เพราะต้นทางไม่ได้ระบุวันที่อ้างอิงชุดข้อมูล ยอดเศรษฐกิจคงเป็นค่าที่ต้นทางแสดง ไม่คำนวณใหม่หรือกระจายลงจังหวัด
 
 ไฟล์ raw อยู่ใน runtime/evidence เท่านั้น PR เผยแพร่ได้เฉพาะ projection กับ manifest/receipt ตาม contract และต้องผ่าน review ก่อน merge
+
+## F2 local promotion
+
+See the [F2 guide](f2.md) for the complete build, review, staged-validation and refresh workflow, data semantics, and API/UI contract.
+
+Local promotion is a separate owner-authorized action after all staged detail fields are accepted. It does not authorize commit, push, deployment, upstream fetching or image hosting.
+
+`python -m tools.f2_pipeline promote-local` takes the approved `--stage`, reviewed internal `--release`, `--comparison`, `--comparison-review`, explicit `--decision` and a new `--output` directory. The decision must bind the exact stage-manifest SHA-256 and explicitly permit `local_publication_only` with deployment disabled. It is a trusted local workflow record, not a cryptographic identity check or an endpoint for untrusted callers. Repository review and owner authorization remain required; neither field approval nor a publication receipt grants promotion.
+
+The builder rederives the approved stage, verifies its policy/review bindings, and creates a separate activation bundle. `verify-local-promotion` accepts the same inputs with `--bundle` instead of `--output` and independently reproduces every bundle byte. Neither command activates files or writes a receipt.
+
+The bundle contains `data/public/f2/`, `config/publication_contracts/f2_dashboard.json`, `serving-entries.json` and a promotion attestation. Before activation, validate these alongside all existing public files/contracts in a disposable workspace. Then replace the F2 directory and contract, replace only serving entries whose path starts with `f2/`, and regenerate the receipt with `python -m app.cli publication receipt`. Preserve all prior source artifacts and existing non-F2 data. Run `python -m app.cli check` after local activation.
+
+Publication-ready F2 roots use `publication_status=approved_local_publication`, `staged_for_review=false`, `owner_checkpoint_required=false` and `publication_approval_claimed=true`. Historical field/internal approval blocks remain unchanged and non-promotional; a separate `local_promotion` manifest binding records the actual promotion decision. Prices, locations, identities, uncertainty, withheld fields and media references do not change.
+
+The active C02 aggregate-map successor is `f2-dashboard-snapshot-v3-c02-map-accepted-v1`. Its acceptance is bound to the exact immutable pending candidate `f2-dashboard-snapshot-v3-c02-map-review-v1`, separately from the historical person-field and province-membership acceptances. Evidence is under `data/runtime/f2/checkpoints/c02-map-review-v1/` and `c02-map-local-promotion-v1/`. The verified active workspace retains 39 F2 serving entries and the 4,640-person national population, with 4,418 nonadditive province memberships for 4,415 people and 225 people remaining national-only. The map publishes aggregate distinct-person counts over 77 canonical province scopes only; it publishes no person points, coordinates, lower-level geography, residence, or workplace inference. The active F2 manifest SHA-256 is `cb454f3b8afb5665450e09d79a835a767f69b52fb6de1ebeb5859f5fa80fe0d5`; the receipt release digest is `bd51c9c0eff4c73051119d99b255e5d21afee160b74c8004940e59585b775475`. Deployment remains disabled.
+
+Unavailable methodology-only topics may have no source IDs. They are admitted to serving only through an exact database-output contract binding, not invented source provenance. Complete receipt/publication/privacy checks still apply.
 
 ## หลัง merge
 

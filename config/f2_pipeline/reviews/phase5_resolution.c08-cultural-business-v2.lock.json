@@ -1,0 +1,932 @@
+{
+  "canonical_evidence_policy": "evidence:// references identify canonical manifest evidence (.json.gz where the lock labels an expanded local JSON copy as support).",
+  "entries": [
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 1,
+      "derived_locator_count": 0,
+      "legacy_path": "apptech_mru/reviewed_cases.json",
+      "legacy_sha256": "305b38370301115c1c24e5ae17dd6812b53b1d2f124f4eb19f3ecc84d8205fd9",
+      "review_key_count": 1,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/apptech_mru/reviewed_cases.json",
+      "runtime_sha256": "270056281e46f31f806f0d490c5fb70f69e091bc30e42b91f5f1f906ed5731a0",
+      "runtime_size": 26572,
+      "scratch_provenance_removals": 1
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 0,
+      "derived_locator_count": 0,
+      "legacy_path": "atlocal/prior_product_components.json",
+      "legacy_sha256": "0e00fe42230da009eb0a417c12be84a64282f4b1a14505425f06b956dceccc85",
+      "review_key_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/atlocal/prior_product_components.json",
+      "runtime_sha256": "482d01a6634cb347097f1d01750b0995174826047fb3c41ab19b3ef569694bce",
+      "runtime_size": 249084,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 0,
+      "derived_locator_count": 0,
+      "legacy_path": "atlocal/reviewed_cases.json",
+      "legacy_sha256": "671a4282395ec50d815336ed0cb5f1feccec72b74066a0834b7d71e2324125ed",
+      "review_key_count": 1,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/atlocal/reviewed_cases.json",
+      "runtime_sha256": "0f958a942beedad05f30cfdadb7cd3094d69660ead3e78659375a94793b329d1",
+      "runtime_size": 5759,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 4,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_activities_coverage/reviewed_evidence.json",
+      "legacy_sha256": "3027a8fcc4447fa2f8f02a8847eece21bd977da056738ce7507213993fb57b2d",
+      "review_key_count": 4,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_activities_coverage/reviewed_evidence.json",
+      "runtime_sha256": "7c8ce2e9430474a82ab8d916a800688e67bd7363e2a7e5060ff627135fa5e545",
+      "runtime_size": 4801,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 0,
+      "derived_locator_count": 1,
+      "legacy_path": "cross_source_activities_coverage/runtime.json",
+      "legacy_sha256": "ba510b22d836f30b818ae6c3b297a27ce1e633529c9ae39a18f224ddb6239b0b",
+      "review_key_count": 2,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_activities_coverage/runtime.json",
+      "runtime_sha256": "f286ea097fbf66d20a7a47f16ee2ce8d00b3663baae4517eddf7aa45c5c06db7",
+      "runtime_size": 1377,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 6,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_cultural_areas/reviews.json",
+      "legacy_sha256": "f6b38753e176f3ed4972cc230d996431f53ce971af60ab5581f878e05df415f0",
+      "review_key_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_cultural_areas/reviews.json",
+      "runtime_sha256": "783cca1a546166f3e08fb0a6fa82041545b1dffa8a16f1542ce5f4bcc0915b90",
+      "runtime_size": 1047,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 2,
+      "decision_key_count": 0,
+      "derived_locator_count": 6,
+      "legacy_path": "cross_source_cultural_areas/runtime.json",
+      "legacy_sha256": "b5b85d564722535a89d9b410de1b64c1bdf4cd3499b986da0860de0cc410069c",
+      "review_key_count": 2,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_cultural_areas/runtime.json",
+      "runtime_sha256": "e7e97359cddc0e536a1fecbb55b981e5179992294d2e22426a3a45c556b08f61",
+      "runtime_size": 1848,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 13,
+      "decision_key_count": 6,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/00_sample_decisions.json",
+      "legacy_sha256": "c0837ec8883535d0ecaf152e1a69cd1d5790b464a1fd0b33401db0869bca8f19",
+      "review_key_count": 6,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/00_sample_decisions.json",
+      "runtime_sha256": "6ad705a2903c4d2a12080603ed363f70db5ba35b3e7e21f810ee78f4f2fe7531",
+      "runtime_size": 6929,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 108,
+      "decision_key_count": 47,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/icom_pmua_gap_links.json",
+      "legacy_sha256": "afff86ad104013a8aa94ef81dfc5f06a53945812c621656f3817bc5993d78e60",
+      "review_key_count": 47,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/icom_pmua_gap_links.json",
+      "runtime_sha256": "c4d3801092f994648c9003cea63dda65e10bcea3583846ee7a6a50030f5e2b93",
+      "runtime_size": 103198,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 118,
+      "decision_key_count": 39,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/icom_pmua_late_gaps.json",
+      "legacy_sha256": "88722050edd9d3349a4f878191c6412149d766cb0fee27f57b285768533dbefd",
+      "review_key_count": 39,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/icom_pmua_late_gaps.json",
+      "runtime_sha256": "9bde9becc3d908200922ee1c8394d19acc473fb749d6f43d209641320ff2e9d2",
+      "runtime_size": 111555,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 200,
+      "decision_key_count": 91,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/icom_pmua_links.json",
+      "legacy_sha256": "4c4eaae98c771fe8dc94a95478d99424f5108a69d057a406da839f3530f303b2",
+      "review_key_count": 91,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/icom_pmua_links.json",
+      "runtime_sha256": "53e098fd69e43298760949261edb614619fb498cf908777c49a536249c66b624",
+      "runtime_size": 192162,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 162,
+      "decision_key_count": 66,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/icom_rinmp_links.json",
+      "legacy_sha256": "7d45dc2a21429f5dca7993469b9761fdc6b1baf1be5e74c94e86b2d653232cda",
+      "review_key_count": 66,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/icom_rinmp_links.json",
+      "runtime_sha256": "8d630de125b1aeae276cbc8395e642e9d9d72315f29f0dbd329b7a3a76d4974e",
+      "runtime_size": 116122,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 340,
+      "decision_key_count": 156,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/mru_links.json",
+      "legacy_sha256": "90d6977773c094160a21c4b82e3d9de737d3062a6385d76995521c7d78fd34f5",
+      "review_key_count": 156,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/mru_links.json",
+      "runtime_sha256": "60d0f4d80cf81747b718e9293e6f3589704b21cec39168b35c0f149cadebf76d",
+      "runtime_size": 457043,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 897,
+      "decision_key_count": 329,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/rinmp_links.json",
+      "legacy_sha256": "db97849c0685db8e304914e4415051b2edc4c1507dd903207d63fa6bb3683f38",
+      "review_key_count": 329,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/rinmp_links.json",
+      "runtime_sha256": "31bcc60d0e11dad5428c67f1b7ac1b127533ddcfe8b249267d3910bf78e2dd4a",
+      "runtime_size": 610503,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 6,
+      "decision_key_count": 3,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_innovations/reviews/solar_local_boundaries.json",
+      "legacy_sha256": "1a4925a014aaf2974c4f317e9de7dda13d0004b6c931c62c827e9205ee1331e4",
+      "review_key_count": 3,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/reviews/solar_local_boundaries.json",
+      "runtime_sha256": "2326af666bac02224614b48db5a02b52c82753034ce760250875cc64fbf1008f",
+      "runtime_size": 4469,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 0,
+      "derived_locator_count": 5,
+      "legacy_path": "cross_source_innovations/runtime.json",
+      "legacy_sha256": "dfca578d037b8c8cbec5e52cb409c278b3f71db1b3596d4c24bad092dc4beb8f",
+      "review_key_count": 2,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_innovations/runtime.json",
+      "runtime_sha256": "f4922936985ccf1a184bae31294f9b2f94d0388410caf23fd7c8a7dab613b7a1",
+      "runtime_size": 1628,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 178,
+      "decision_key_count": 140,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_offerings/reviews/reviewed_evidence.json",
+      "legacy_sha256": "7cac09dd5c2d2dc90771454057a453b625527a449b53910c17a0471b8d986d95",
+      "review_key_count": 202,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_offerings/reviews/reviewed_evidence.json",
+      "runtime_sha256": "370ffed0cfcf2c3a9f40d907e3e9727ba0bd431656d37b4a53773ab8b774347d",
+      "runtime_size": 446849,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 5,
+      "decision_key_count": 0,
+      "derived_locator_count": 34,
+      "legacy_path": "cross_source_offerings/runtime.json",
+      "legacy_sha256": "46d037e1bc78ca486e0798605080c4ddc8bd6164dd06c32fd0685decef4bec04",
+      "review_key_count": 3,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_offerings/runtime.json",
+      "runtime_sha256": "d2b5787e9565c4c454ebec07d5491ac43c46d6ce2dd2166be2249751c0ccafd5",
+      "runtime_size": 6952,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 5690,
+      "decision_key_count": 0,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_people/reviews/anchor_evidence.json",
+      "legacy_sha256": "f88602e29c0810aaeb25695ff01985f8d3dcbeaeeae94b81c05c488e3bf47519",
+      "review_key_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_people/reviews/anchor_evidence.json",
+      "runtime_sha256": "d97aa090119c0271715fef8a2b4167f5fbbe9b2a18d3442e704d04dd227c90d8",
+      "runtime_size": 3286788,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 28,
+      "decision_key_count": 782,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_people/reviews/reviewed_candidates.json",
+      "legacy_sha256": "b754676fd3a3f6ea44bd9dc066ae2da6865f68501d016291ad9199ea6223667f",
+      "review_key_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_people/reviews/reviewed_candidates.json",
+      "runtime_sha256": "a3e9ea9108afa563d797f00dbc7301af2d5baf2c8a8c562ca2b8b55b083f49ec",
+      "runtime_size": 1246217,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 15,
+      "decision_key_count": 0,
+      "derived_locator_count": 44,
+      "legacy_path": "cross_source_people/runtime.json",
+      "legacy_sha256": "8a1d298a95fffb19cdf5b8145e15f1d7cbaa078712d64675e7ecb57c3338fc66",
+      "review_key_count": 1,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_people/runtime.json",
+      "runtime_sha256": "20fae718d1f876352bd54597975c4571c8a81be12c2d284707b598f86d003dde",
+      "runtime_size": 10934,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 2,
+      "derived_locator_count": 0,
+      "legacy_path": "cross_source_people/source_cultural_map.json",
+      "legacy_sha256": "77ddd340843624ae99161c399ed54820ff7ecd1c8e994b546bda267cdf1ff4ae",
+      "review_key_count": 1,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/cross_source_people/source_cultural_map.json",
+      "runtime_sha256": "ff9099006529a588069e20da17b1370acc26dddd0a51d66d4ef49ee0da251041",
+      "runtime_size": 890,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 235,
+      "decision_key_count": 0,
+      "derived_locator_count": 0,
+      "legacy_path": "icommunity/business_role_reviews.json",
+      "legacy_sha256": "481339e875b46479658ab2f439822344a96a8dc88622cd92b8552531b0a00428",
+      "review_key_count": 1618,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/icommunity/business_role_reviews.json",
+      "runtime_sha256": "b1efd9fb65b390431081fa58bd80f22281a10f7fa25102da4d6c06c602f255e2",
+      "runtime_size": 519415,
+      "scratch_provenance_removals": 613
+    },
+    {
+      "data_locator_count": 2,
+      "decision_key_count": 21,
+      "derived_locator_count": 0,
+      "legacy_path": "icommunity/reviewed_cases.json",
+      "legacy_sha256": "f11a1993eef4f0663fb48a702f52317a86e85067bb137bad81c5927b3f85e88a",
+      "review_key_count": 11,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/icommunity/reviewed_cases.json",
+      "runtime_sha256": "4585b55b6a7363102366f08c13f98bb7ff2aeba96e2f3cb80df751646d33d7b8",
+      "runtime_size": 45206,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 1,
+      "derived_locator_count": 0,
+      "legacy_path": "learning_area_based/reviewed_cases.json",
+      "legacy_sha256": "45598e23b7855be4d6d5f1084301026243fdeb898f5fafaf8be614b835060060",
+      "review_key_count": 1,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/learning_area_based/reviewed_cases.json",
+      "runtime_sha256": "b5324caf18a9556113f496f24c83297afa76f248a8f050ab2f294c5133598981",
+      "runtime_size": 77368,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 0,
+      "derived_locator_count": 0,
+      "legacy_path": "learning_dashboard/reviewed_cases.json",
+      "legacy_sha256": "cf63eb4c0e45040710e780202a9d3e301acbf298302e3f5dcc6572e62ae7bf24",
+      "review_key_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/learning_dashboard/reviewed_cases.json",
+      "runtime_sha256": "62f318ebef56f7c801b101fac9cd32f7dd0f7b4f88bd809686125f2efdbf1cd7",
+      "runtime_size": 2249,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 19,
+      "derived_locator_count": 0,
+      "legacy_path": "pmua_apptech/reviewed_cases.json",
+      "legacy_sha256": "cd6279dbe8e68388c29e277b7f7a98279aa4ead477b33d630226664a3f751492",
+      "review_key_count": 69,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/pmua_apptech/reviewed_cases.json",
+      "runtime_sha256": "df15a0ec723f371e292a7ba11cf94f164d868690cbbfe1dd16b40906151326d6",
+      "runtime_size": 84968,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "data_locator_count": 0,
+      "decision_key_count": 14,
+      "derived_locator_count": 0,
+      "legacy_path": "rinmp/reviewed_cases.json",
+      "legacy_sha256": "c15eb74e232e8069b9d5e73cacb42b071c7ade5f23977491d6ee52df46ed2f5f",
+      "review_key_count": 11,
+      "runtime_path": "data/runtime/f2/reviews/source_resolution/rinmp/reviewed_cases.json",
+      "runtime_sha256": "b2c6ae41aaf56e1d4ade0c4486f07f6bd2c3aae17c1b89ccec65a5dfe1daf998",
+      "runtime_size": 7635,
+      "scratch_provenance_removals": 0
+    },
+    {
+      "legacy_path": "cultural_map/details_reviewed_cases.json",
+      "legacy_sha256": "ef57d4855fadc6b9281558605ec59184b182afeea2410fa7bcd3f358667289a4",
+      "runtime_path": "data/runtime/f2/reviews/identity_checkpoint/cultural_map/details_reviewed_cases.json",
+      "runtime_sha256": "0fc59564dca73b3a2b0492ff7a6d7a97bca59ce640e8aae6101f58015bf0251e",
+      "runtime_size": 62280
+    },
+    {
+      "legacy_path": "apptech_mru/prior_person_decisions.json",
+      "legacy_sha256": "3466989e0d388e18da01d239ecf17aa4ce95de88ebc61ef537e832bfe3d7d05f",
+      "runtime_path": "data/runtime/f2/reviews/identity_checkpoint/apptech_mru/prior_person_decisions.json",
+      "runtime_sha256": "ed37f54dddb416661f5b82ebb77b34d3852c4d80aa8ddc02d208b0128553b85b",
+      "runtime_size": 57367
+    },
+    {
+      "legacy_path": "learning_area_based/geography_review.json",
+      "legacy_sha256": "5421dc6ce25028b100b9d4d83cd66dfeb1448fe211482e9f7115bd6452e29ae2",
+      "runtime_path": "data/runtime/f2/reviews/identity_checkpoint/learning_area_based/geography_review.json",
+      "runtime_sha256": "8c35aad75cb30826d89e683d6624210c44b8826da7bfad4ab453cfa1b33a6149",
+      "runtime_size": 10658
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 8,
+      "candidate_kind_counts": {
+        "offering": 8
+      },
+      "candidate_status_counts": {
+        "supported": 7,
+        "unresolved": 1
+      },
+      "identity_decision_count": 2,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "articles",
+          "relative_path": "f2_cultural_market_civil/20260825T070510Z/articles.json.gz",
+          "run_id": "20260825T070510Z",
+          "sha256": "b754e005eeaf7d59058d7dd137ce45ab98f99c57735ee08ce930bbb1ff6b4263",
+          "source_id": "f2_cultural_market_civil"
+        },
+        {
+          "dataset_key": "cultures",
+          "relative_path": "f2_cultural_market_civil/20260825T070510Z/cultures.json.gz",
+          "run_id": "20260825T070510Z",
+          "sha256": "b5f21cf46a7baa3046179fe5f99c7b36c0ce9616118675bcf4be16a86ec39c00",
+          "source_id": "f2_cultural_market_civil"
+        }
+      ],
+      "legacy_config_sha256": "b9da7e1b8ee65c7a49012a77f4aab0a05eaa743add07be578caa8914862f87d4",
+      "legacy_path": "reviewed_commerce/atlocal_outputs.json",
+      "relationship_count": 6,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/atlocal_outputs.json",
+      "runtime_sha256": "30702a8312cd1820f649810bb72cefb52c8a748183ef0394bfcc907267d983a8",
+      "runtime_size": 80143,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 18,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "97f8036135ffd13a064acf64f045ef5591078b864f0a9ab27bbe833bf302ae61",
+      "legacy_path": "reviewed_commerce/baseline.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/baseline.json",
+      "runtime_sha256": "23807fb80301bd497ba83892c53abe65108f0ec1669d95e012b968dbc410628c",
+      "runtime_size": 514,
+      "scratch_audit_pin_removals": 0
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 11,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "1c3ed3ae2bfa1c626f6c80171576fbc0c4b88dab962a3ce22719e93d3a35e0ab",
+      "legacy_path": "reviewed_commerce/business_identity_followup.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/business_identity_followup.json",
+      "runtime_sha256": "72358e81b12587b56c8df3fa8ce4fed2e4417374f7f2dad44a964ad399ecf4e5",
+      "runtime_size": 7907,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 0,
+      "candidate_count": 7,
+      "candidate_kind_counts": {
+        "operator": 7
+      },
+      "candidate_status_counts": {
+        "supported": 7
+      },
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "products",
+          "relative_path": "f2_target_household/20260901T062445Z/products.json.gz",
+          "run_id": "20260901T062445Z",
+          "sha256": "6ea975effd2550f236225cc3ec05c551785d225ee62923fe9a231a5e16d6d31c",
+          "source_id": "f2_target_household"
+        },
+        {
+          "dataset_key": "app_tech",
+          "relative_path": "f2_apptech_mtr/20260822T214437Z/app_tech.json.gz",
+          "run_id": "20260822T214437Z",
+          "sha256": "fe53bfc38be109220a501f36f85b9e4d739d6d0a8d58f94386441f05c9599eaf",
+          "source_id": "f2_apptech_mtr"
+        }
+      ],
+      "legacy_config_sha256": "9eb840463f4271334e86160836d185cc36df22e792173ed98cd505ca36052113",
+      "legacy_path": "reviewed_commerce/business_roster_supplements.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/business_roster_supplements.json",
+      "runtime_sha256": "8538016a1cc2aa587d260073d9845a4878cba315340fd3937e576f450c12147e",
+      "runtime_size": 17496,
+      "scratch_audit_pin_removals": 0
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 51,
+      "candidate_kind_counts": {
+        "offering": 51
+      },
+      "candidate_status_counts": {
+        "supported": 49,
+        "unresolved": 2
+      },
+      "identity_decision_count": 1,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "map_inspiration",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/map_inspiration.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+          "source_id": "f2_culturalmap_university"
+        }
+      ],
+      "legacy_config_sha256": "aafd71bf4de1c04a50c1ea2288d20673fdc6d210efa73c9343cb8b17cef683ba",
+      "legacy_path": "reviewed_commerce/cultural_early_outputs.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/cultural_early_outputs.json",
+      "runtime_sha256": "2b3f320f9d11d7abbdd6315ad2d14bd3569ab47344f8d52ba8ba9d129aaf4265",
+      "runtime_size": 230360,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 9,
+      "candidate_count": 740,
+      "candidate_kind_counts": {
+        "operator": 740
+      },
+      "candidate_status_counts": {
+        "not_established": 80,
+        "supported": 590,
+        "unresolved": 70
+      },
+      "citation_origin_annotations": 2,
+      "identity_decision_count": 84,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "activities",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/activities.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "79675cbc65bee81295ae83694d9494e0cd7fa77ed025b93c58bd73fa27a19c6b",
+          "source_id": "f2_culturalmap_university"
+        },
+        {
+          "dataset_key": "map_inspiration",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/map_inspiration.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+          "source_id": "f2_culturalmap_university"
+        }
+      ],
+      "legacy_config_sha256": "79236e217eaa45ca976e05786f5aa69ef13889dad74b9624a5329074b61dd19d",
+      "legacy_path": "reviewed_commerce/cultural_map.json",
+      "relationship_count": 0,
+      "review_origin_runtime_path": "data/runtime/f2/reviews/reviewed_commerce/cultural_map.json",
+      "review_origin_runtime_sha256": "95d7721d9152fd1bba2d6f5a77a5efa4aa976bd1ba718cdf8a7d65f75761ed35",
+      "runtime_path": "data/runtime/f2/reviews/phase5_commerce/cultural_map.json",
+      "runtime_sha256": "18bb96dccd30410148cdeb18146b92264430ef36fcc2872d2e7b6b38fc2f5208",
+      "runtime_size": 4925844,
+      "scratch_audit_pin_removals": 5
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 26,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "c6e9bb5e4ea8561415b938deac693c24f6e49d6579dd39c7912633d9e9d6bdbf",
+      "legacy_path": "reviewed_commerce/cultural_output_identity_reviews.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/cultural_output_identity_reviews.json",
+      "runtime_sha256": "7a75c1e973c9cf7f1518b00a3491d3308d24a289f5c3317094041f01c7a69b97",
+      "runtime_size": 16431,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 2,
+      "candidate_count": 1341,
+      "candidate_kind_counts": {
+        "offering": 1341
+      },
+      "candidate_status_counts": {
+        "not_established": 11,
+        "supported": 1241,
+        "unresolved": 89
+      },
+      "citation_origin_annotations": 1,
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "map_inspiration",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/map_inspiration.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+          "source_id": "f2_culturalmap_university"
+        }
+      ],
+      "legacy_config_sha256": "dbbed28e18ef4bfc8a1f6e25147ad59a86abbb7c8a94df3a52ac87605092c8aa",
+      "legacy_path": "reviewed_commerce/cultural_outputs.json",
+      "relationship_count": 0,
+      "review_origin_runtime_path": "data/runtime/f2/reviews/reviewed_commerce/cultural_outputs.json",
+      "review_origin_runtime_sha256": "e5148f72c88ed98e8a662e87e5c1a767a1905f41c0eb535e997c9401735c9d49",
+      "runtime_path": "data/runtime/f2/reviews/phase5_commerce/cultural_outputs.json",
+      "runtime_sha256": "36dc9aaa1ef7d25d169ba8d46fc1666ddb410900c5bb521a6d17195494ec647c",
+      "runtime_size": 9218981,
+      "scratch_audit_pin_removals": 2
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 4,
+      "candidate_count": 26,
+      "candidate_kind_counts": {
+        "offering": 8,
+        "operator": 18
+      },
+      "candidate_status_counts": {
+        "supported": 24,
+        "unresolved": 2
+      },
+      "identity_decision_count": 16,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "cultures",
+          "relative_path": "f2_cultural_market_civil/20260825T070510Z/cultures.json.gz",
+          "run_id": "20260825T070510Z",
+          "sha256": "b5f21cf46a7baa3046179fe5f99c7b36c0ce9616118675bcf4be16a86ec39c00",
+          "source_id": "f2_cultural_market_civil"
+        },
+        {
+          "dataset_key": "activities",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/activities.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "79675cbc65bee81295ae83694d9494e0cd7fa77ed025b93c58bd73fa27a19c6b",
+          "source_id": "f2_culturalmap_university"
+        },
+        {
+          "dataset_key": "map_inspiration",
+          "relative_path": "f2_culturalmap_university/20260820T142533Z/map_inspiration.json.gz",
+          "run_id": "20260820T142533Z",
+          "sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+          "source_id": "f2_culturalmap_university"
+        }
+      ],
+      "legacy_config_sha256": "8223778ed63b4c9b3865a480051c2d0912d8cacd146e8d99e65f0a4591000cfb",
+      "legacy_path": "reviewed_commerce/cultural_supplements.json",
+      "relationship_count": 8,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/cultural_supplements.json",
+      "runtime_sha256": "c796788af36cd53a248d41a17ccd7e19c171fa2d6b87039a56a9bf438c067b42",
+      "runtime_size": 115350,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 1,
+      "candidate_kind_counts": {
+        "operator": 1
+      },
+      "candidate_status_counts": {
+        "supported": 1
+      },
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "community_products",
+          "relative_path": "f2_icommunity/20260825T143637Z/community_products.json.gz",
+          "run_id": "20260825T143637Z",
+          "sha256": "ef8c7c5ae248e622ebc567dcb3810ce024f3ceeb936feb39c27ce968d3f286b0",
+          "source_id": "f2_icommunity"
+        }
+      ],
+      "legacy_config_sha256": "256fee7f419e1f2e4399b111db2a0155a284528284d0e78d9c9d89aae1d3c9db",
+      "legacy_path": "reviewed_commerce/icommunity.json",
+      "relationship_count": 2,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/icommunity.json",
+      "runtime_sha256": "ea3f7f8417c9b0a940253aede14efd9857c21a300cccd3e40b4b8242ee5495d7",
+      "runtime_size": 3726,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 2,
+      "candidate_count": 436,
+      "candidate_kind_counts": {
+        "offering": 436
+      },
+      "candidate_status_counts": {
+        "not_established": 292,
+        "supported": 92,
+        "unresolved": 52
+      },
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "apptech_innovations",
+          "relative_path": "f2_icommunity/20260825T143637Z/apptech_innovations.json.gz",
+          "run_id": "20260825T143637Z",
+          "sha256": "99c09d8d7b8eab7ede705d0e21f86fbf46cad9f7c6fb8a150016e33ef555be80",
+          "source_id": "f2_icommunity"
+        }
+      ],
+      "innovation_context_corrections": 2,
+      "legacy_config_sha256": "b73aa21e4bdcae6936fa84b8600bfff5a715e720caa25f6793768472e44db271",
+      "legacy_path": "reviewed_commerce/icommunity_outputs.json",
+      "relationship_count": 0,
+      "review_origin_runtime_path": "data/runtime/f2/reviews/reviewed_commerce/icommunity_outputs.json",
+      "review_origin_runtime_sha256": "80d0c49b1c8f9076567f7e5b7cbd2a8b04223ffbd93b56268e39fbf157fd7297",
+      "runtime_path": "data/runtime/f2/reviews/phase5_commerce/icommunity_outputs.json",
+      "runtime_sha256": "7502f723ada573f8631c49641df6fd7494539690e98eba5e8290be61de347100",
+      "runtime_size": 1223175,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 4,
+      "candidate_count": 461,
+      "candidate_kind_counts": {
+        "operator": 461
+      },
+      "candidate_status_counts": {
+        "not_established": 2,
+        "supported": 411,
+        "unresolved": 48
+      },
+      "identity_decision_count": 275,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "innovations",
+          "relative_path": "f2_apptech_mru/20260823T094536Z/innovations.json.gz",
+          "run_id": "20260823T094536Z",
+          "sha256": "8f0465e3f324ef2db1b4a6fa60de410549114c7f4438b74d7ab91a0522bf2630",
+          "source_id": "f2_apptech_mru"
+        },
+        {
+          "dataset_key": "products",
+          "relative_path": "f2_target_household/20260901T062445Z/products.json.gz",
+          "run_id": "20260901T062445Z",
+          "sha256": "6ea975effd2550f236225cc3ec05c551785d225ee62923fe9a231a5e16d6d31c",
+          "source_id": "f2_target_household"
+        },
+        {
+          "dataset_key": "app_tech",
+          "relative_path": "f2_apptech_mtr/20260822T214437Z/app_tech.json.gz",
+          "run_id": "20260822T214437Z",
+          "sha256": "fe53bfc38be109220a501f36f85b9e4d739d6d0a8d58f94386441f05c9599eaf",
+          "source_id": "f2_apptech_mtr"
+        }
+      ],
+      "legacy_config_sha256": "0cecec1bebf2eedc4a34d44d377bf3e0c1ecd6e6e55720caae985075eeaf0996",
+      "legacy_path": "reviewed_commerce/innovation_business_rosters.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/innovation_business_rosters.json",
+      "runtime_sha256": "9d464d8582851946338bdec60c2d416bc25e730ad6c7eca3af43d66ce47d4227",
+      "runtime_size": 1192165,
+      "scratch_audit_pin_removals": 3
+    },
+    {
+      "aggregate_claim_count": 6,
+      "audit_only_pin_removals": 3,
+      "candidate_count": 218,
+      "candidate_kind_counts": {
+        "offering": 218
+      },
+      "candidate_status_counts": {
+        "not_established": 13,
+        "supported": 181,
+        "unresolved": 24
+      },
+      "identity_decision_count": 12,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "innovations",
+          "relative_path": "f2_apptech_mru/20260823T094536Z/innovations.json.gz",
+          "run_id": "20260823T094536Z",
+          "sha256": "8f0465e3f324ef2db1b4a6fa60de410549114c7f4438b74d7ab91a0522bf2630",
+          "source_id": "f2_apptech_mru"
+        },
+        {
+          "dataset_key": "products",
+          "relative_path": "f2_target_household/20260901T062445Z/products.json.gz",
+          "run_id": "20260901T062445Z",
+          "sha256": "6ea975effd2550f236225cc3ec05c551785d225ee62923fe9a231a5e16d6d31c",
+          "source_id": "f2_target_household"
+        },
+        {
+          "dataset_key": "app_tech",
+          "relative_path": "f2_apptech_mtr/20260822T214437Z/app_tech.json.gz",
+          "run_id": "20260822T214437Z",
+          "sha256": "fe53bfc38be109220a501f36f85b9e4d739d6d0a8d58f94386441f05c9599eaf",
+          "source_id": "f2_apptech_mtr"
+        }
+      ],
+      "legacy_config_sha256": "fb91dbfc7c0a0374f0fa3fde8f0e2ce2c3e56516b1f0436cedf1dd6e6a35c62c",
+      "legacy_path": "reviewed_commerce/innovation_outputs.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/innovation_outputs.json",
+      "runtime_sha256": "9268843161499779769585ba1e09d65105e2391ae1aee5e7b78094a7d957f9e6",
+      "runtime_size": 1383180,
+      "scratch_audit_pin_removals": 2
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 5,
+      "candidate_count": 984,
+      "candidate_kind_counts": {
+        "operator": 984
+      },
+      "candidate_status_counts": {
+        "supported": 984
+      },
+      "identity_decision_count": 291,
+      "identity_review_additions": {
+        "keep_separate": 58,
+        "match": 4,
+        "unresolved": 2
+      },
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "area_based_response",
+          "relative_path": "f2_learning_area_based/20260820T134610Z/area_based.json",
+          "run_id": "20260820T134610Z",
+          "sha256": "71fd37d9687add74a6c57e0996cc89b8c10b9b0fea40851e0c302df719f01853",
+          "source_id": "f2_learning_area_based"
+        }
+      ],
+      "legacy_config_sha256": "ae11cee9050f0453b09901cad65dbd0bcf0a6f457334ac2c9a05b57fa60756dd",
+      "legacy_path": "reviewed_commerce/learning.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/learning.c08-cultural-business-v2.json",
+      "runtime_sha256": "73f9daa79b3296dec29fdafe8ff9043d2abc979ed190df50c24f2ad1df8cd731",
+      "runtime_size": 2849384,
+      "scratch_audit_pin_removals": 3,
+      "successor_policy": "learning_area_based_all_rows_v1"
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 61,
+      "candidate_kind_counts": {
+        "offering": 61
+      },
+      "candidate_status_counts": {
+        "not_established": 61
+      },
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "area_based_response",
+          "relative_path": "f2_learning_area_based/20260820T134610Z/area_based.json",
+          "run_id": "20260820T134610Z",
+          "sha256": "71fd37d9687add74a6c57e0996cc89b8c10b9b0fea40851e0c302df719f01853",
+          "source_id": "f2_learning_area_based"
+        }
+      ],
+      "legacy_config_sha256": "083b92bfbc18fb093a1df4a250acce8dde4c18c9e6322398ad140387afa16b74",
+      "legacy_path": "reviewed_commerce/learning_output_scope.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/learning_output_scope.json",
+      "runtime_sha256": "e8febbbaceb99eb22048222b3f910b0cb424e6bb65dcab64f034c5e87a992aa5",
+      "runtime_size": 81643,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 45,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "99f5e381607396e27c7591ca1cc8273b5bb80484983950f38085a09015add5d9",
+      "legacy_path": "reviewed_commerce/output_context_identity_reviews.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/output_context_identity_reviews.json",
+      "runtime_sha256": "665f7daac76face4f5eea973319c51fbcea52642ab1eead5baaf8ad41be280f6",
+      "runtime_size": 29401,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 33,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "5d4015438a267f1445fba67b571b7fe43785aec170f45dae490d2227a6ed0fd6",
+      "legacy_path": "reviewed_commerce/output_identity_reviews.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/output_identity_reviews.json",
+      "runtime_sha256": "8e680b562089c923991bc36fa155e8b55f3b7402e1f19fe4e2bb814e5554fc0a",
+      "runtime_size": 20570,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 1,
+      "candidate_count": 0,
+      "candidate_kind_counts": {},
+      "candidate_status_counts": {},
+      "identity_decision_count": 0,
+      "immutable_evidence_files": [],
+      "legacy_config_sha256": "06782adc6ff6712b1e7dbc2ca4313b56be37619597ad76328d020a06975fde8b",
+      "legacy_path": "reviewed_commerce/product_families.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/product_families.json",
+      "runtime_sha256": "7318ba4fe62211c9bc7fe15a3fc986a8936eb2524a8f65c0f313e26fb9f88d89",
+      "runtime_size": 79050,
+      "scratch_audit_pin_removals": 1
+    },
+    {
+      "aggregate_claim_count": 0,
+      "audit_only_pin_removals": 4,
+      "candidate_count": 352,
+      "candidate_kind_counts": {
+        "operator": 352
+      },
+      "candidate_status_counts": {
+        "not_established": 17,
+        "supported": 295,
+        "unresolved": 40
+      },
+      "identity_decision_count": 97,
+      "immutable_evidence_files": [
+        {
+          "dataset_key": "app_tech",
+          "relative_path": "f2_apptech_mtr/20260822T214437Z/app_tech.json.gz",
+          "run_id": "20260822T214437Z",
+          "sha256": "fe53bfc38be109220a501f36f85b9e4d739d6d0a8d58f94386441f05c9599eaf",
+          "source_id": "f2_apptech_mtr"
+        }
+      ],
+      "legacy_config_sha256": "d9d41d53ba559bd2c609c28fd84885c03a2ddb48a8bf5fac8bb35fa51899adc2",
+      "legacy_path": "reviewed_commerce/rinmp_businesses.json",
+      "relationship_count": 0,
+      "runtime_path": "data/runtime/f2/reviews/reviewed_commerce/rinmp_businesses.json",
+      "runtime_sha256": "cdc7d754e9ab39e53a347e59e1c23198dce0d6380c0341cfbc0e4409c14122bd",
+      "runtime_size": 563820,
+      "scratch_audit_pin_removals": 4
+    }
+  ],
+  "integrity_rule": "A future source or resolver consumer must verify every runtime_sha256 and resolve evidence:// values through inputs.v3.json; normalized:// values must be produced during this build and never read from legacy derived folders.",
+  "migration_summary": {
+    "c08_identity_review_decisions_added": 64,
+    "citation_origin_annotations": 3,
+    "context_semantics": "Legacy source_record_id remains reviewed candidate context; explicit citation_source_record_id identifies the actual quoted source observation.",
+    "existing_private_bytes_preserved": true,
+    "identity_and_source_files": 31,
+    "innovation_context_corrections": 2,
+    "metadata_only_private_copies": 3,
+    "reviewed_commerce_files": 19,
+    "runtime_consumers": "fresh source/domain outputs; no prior derived tables or scratch inputs"
+  },
+  "review_family": "phase5_identity_and_commerce",
+  "runtime_root": "data/runtime/f2/reviews/source_resolution",
+  "schema_version": 1,
+  "visibility": "private_runtime_input"
+}

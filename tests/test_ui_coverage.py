@@ -440,3 +440,69 @@ def test_f1_panel_reads_as_one_flow_on_desktop_and_phone() -> None:
     # Phone: crumbs shrink, pills stay, charts tighten.
     assert ".atlas-shell .province-panel .f1-crumbs button," in mobile
     assert ".atlas-shell .province-panel .f1-col-bars {" in mobile
+
+
+def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
+    template = read("app/templates/index.html")
+    integration = read("app/static/app.js")
+    script = read("app/static/f2.js")
+    styles = read("app/static/f2.css")
+    base_styles = read("app/static/styles.css")
+    soup = BeautifulSoup(template, "html.parser")
+
+    panel = soup.select_one("#f2DashboardPanel")
+    assert panel is not None
+    assert [tab.get_text(strip=True) for tab in panel.select("[data-f2-tab]")] == [
+        "ภาพรวม",
+        "รายการ",
+        "ที่มาและข้อจำกัด",
+    ]
+    assert soup.select_one("#f2DetailSheet[aria-modal='true']") is not None
+    assert 'const API = "/api/public/v1/f2"' in script
+    assert "limit: 25" in script
+    assert "entity_id" in script
+    assert "source_region_results" in script
+    assert "createElement(\"img\")" not in script
+    assert "new Image" not in script
+    assert "prefetch" not in script
+    assert "onMapData: applyF2MapData" in integration
+    assert 'state.mapMode !== "f2" && !state.selectedRegion' in integration
+    assert "height: 100dvh" in styles
+    assert 'map_available: false' in script
+    assert "ข้อมูลจังหวัดในทะเบียน" in script
+    assert "จังหวัดที่แสดงเป็นจังหวัดที่แหล่งข้อมูลระบุไว้ในทะเบียน" in script
+    assert "ส่วนอีก ${withoutProvince} คนจะแสดงเฉพาะในยอดรวมประเทศ" in script
+    assert "บางคนมีข้อมูลมากกว่าหนึ่งจังหวัด" in script
+    assert "ข้อมูลชุดนี้มีนิยามต่างจาก K02" in script
+    assert "f2-metric-description" not in script
+    assert "coverage.national_total" in script
+    assert 'role: "status", "aria-live": "polite"' in script
+    assert "definition?.label_th || data.measure_id" in script
+    assert ".f2-map-unavailable" in styles
+    assert "#mapFallback" in styles
+    assert 'state.mapMode === "f2" && !state.f2MapAvailable) return' not in integration
+    assert 'document.body.classList.toggle("f2-map-unavailable"' in integration
+    assert 'id: "f2Province"' in script
+    assert "getProvinces" in script
+    assert "onProvinceRestore" in integration
+    assert "quantile(0.75)" in integration
+    assert "ไม่มีระเบียนที่ผ่านเกณฑ์ในฉบับนี้" in integration
+    assert ":is(.province-picker" not in styles
+    assert "body.f2-dashboard-open .region-label[hidden] { display: none; }" in styles
+    assert "if (!state.f2MapAvailable)" in integration
+    assert "node.getClientRects().length" in script
+    assert 'parent.matches("details:not([open])")' in script
+    assert 'data-f2-detail-id' in script
+    assert "state.pendingListFocus = closedDetailId" in script
+    assert "captureSearchFocus()" in script
+    assert "state.searchDraft = input.value" in script
+    assert "restoreSearchFocus(searchSelection)" in script
+    assert "changeMeasure(select.value)" in script
+    assert "!supportsProvince(definition)" in script
+    assert "ไม่มีข้อมูลระดับจังหวัด ระบบจึงเปลี่ยน" in script
+    assert "ตัวชี้วัดนี้มีเฉพาะยอดรวม ไม่มีรายการรายชื่อให้ค้นหา" in script
+    assert "สูตร รหัส และรายละเอียดทางเทคนิค" in script
+    assert "วันที่นี้เป็นวันที่จัดเตรียมฉบับข้อมูล ไม่ใช่ช่วงเวลาที่ตัวเลขวัด" in script
+    assert 'id="f2FiltersToggle"' in template
+    assert '.f2-filters-toggle:not([aria-expanded="true"]) + .f2-controls' in styles
+    assert ".atlas-shell .f2-dashboard { top: 68px;" in styles

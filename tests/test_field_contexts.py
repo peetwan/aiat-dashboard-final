@@ -277,3 +277,47 @@ def test_preview_reports_changes_without_contact_values(capsys, tmp_path):
     path.write_text(json.dumps([row]), encoding="utf-8")
     assert main([str(path), "--source", "clig_projects", "--dataset-key", "projects"]) == 0
     assert private not in capsys.readouterr().out
+
+
+def test_repeated_schema_keys_still_check_each_value_and_path(monkeypatch):
+    from app import publication
+
+    original = publication._privacy_reasons_for_text
+    key_scans = 0
+
+    def scan(value, **kwargs):
+        nonlocal key_scans
+        if value == "description":
+            key_scans += 1
+        return original(value, **kwargs)
+
+    monkeypatch.setattr(publication, "_privacy_reasons_for_text", scan)
+    payload = {
+        "public": [{"description": "office@example.org"}] * 100,
+        "private": [{"description": "private@example.org"}],
+    }
+    result = problems(payload, {"/public/*/description": "public_contact"})
+    assert result == ["data/public/example.json.private[].description: email-like value"]
+    assert key_scans == 1
+
+
+def test_repeated_audit_keys_do_not_reuse_a_safe_value_decision():
+    payload = {"items": [
+        {"email_values_redacted": 0},
+        {"email_values_redacted": -1},
+        {"privacy_projection": {"contact_fields_exposed": True}},
+        {"contact_fields_exposed": True},
+    ]}
+    assert problems(payload) == [
+        "data/public/example.json.items[].email_values_redacted: private/contact field",
+        "data/public/example.json.items[].contact_fields_exposed: private/contact field",
+    ]
+
+
+def test_key_analysis_keeps_restricted_source_policy_local_to_each_audit():
+    payload = {"source_example": {"count": 1}}
+    kwargs = {"artifact_path": "data/public/example.json", "profile": "aggregate_public"}
+    assert _privacy_problems(payload, restricted_source_ids=set(), **kwargs) == []
+    assert _privacy_problems(payload, restricted_source_ids={"source_example"}, **kwargs) == [
+        "data/public/example.json.<map-key>: restricted source identifier in object key",
+    ]

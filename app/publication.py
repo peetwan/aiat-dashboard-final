@@ -159,7 +159,9 @@ NEGATIVE_AUDIT_KEY_SUFFIXES = (
     "_values_redacted",
 )
 MAX_DEFAULT_FILE_BYTES = 25 * 1024 * 1024
-MAX_DEFAULT_TOTAL_BYTES = 40 * 1024 * 1024
+# Reviewed C02 plus existing artifacts measures 146,119,182 bytes (139.35 MiB).
+# Per-file and reviewed per-output limits remain independently enforced.
+MAX_DEFAULT_TOTAL_BYTES = 160 * 1024 * 1024
 MAX_DEFAULT_DEPTH = 40
 MAX_DEFAULT_NODES = 2_000_000
 
@@ -347,7 +349,12 @@ def _read_json_file(path: Path) -> dict[str, Any]:
 
 
 def _normalise_key(value: object) -> str:
-    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(value))
+    return _normalise_text_key(str(value))
+
+
+@lru_cache(maxsize=4096)
+def _normalise_text_key(value: str) -> str:
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
     return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
 
 
@@ -367,9 +374,13 @@ def _has_person_level_private_value(value: str) -> bool:
 
 
 def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
+    return text in restricted_source_ids or _private_report_key(text)
+
+
+@lru_cache(maxsize=4096)
+def _private_report_key(text: str) -> bool:
     return (
-        text in restricted_source_ids
-        or EMAIL_RE.search(text) is not None
+        EMAIL_RE.search(text) is not None
         or PHONE_RE.search(text) is not None
         or SOCIAL_CONTACT_RE.search(text) is not None
         or LABELLED_CONTACT_RE.search(text) is not None
@@ -536,6 +547,57 @@ def _url_matches_rule(address: CanonicalUrl, rule: SourceUrlRule) -> bool:
     )
 
 
+def _media_source_rules(
+    value: Any,
+    *,
+    declared_source_ids: set[str],
+    label: str,
+) -> dict[str, tuple[SourceUrlRule, ...]]:
+    """Validate output-scoped HTTPS media prefixes and compile boundary rules."""
+    if value is None:
+        return {}
+    if not isinstance(value, dict) or not value:
+        raise PublicationError(f"{label} must be a non-empty object")
+    unknown = set(value) - declared_source_ids
+    if unknown:
+        raise PublicationError(f"{label} contains undeclared source ids")
+    result = {}
+    for source_id, prefixes in value.items():
+        if not isinstance(prefixes, list) or not prefixes:
+            raise PublicationError(f"{label}.{source_id} must be a non-empty array")
+        rules = []
+        seen: set[CanonicalUrl] = set()
+        for prefix in prefixes:
+            if not isinstance(prefix, str) or not prefix.endswith("/"):
+                raise PublicationError(
+                    f"{label}.{source_id} prefixes must end at a path boundary"
+                )
+            try:
+                parsed = urlsplit(prefix)
+                address = _canonical_url(prefix, catalog=True)
+            except (PublicationError, ValueError) as exc:
+                raise PublicationError(
+                    f"{label}.{source_id} contains an invalid media source prefix"
+                ) from exc
+            if (
+                address.scheme != "https"
+                or "?" in prefix
+                or "#" in prefix
+                or parsed.username is not None
+                or parsed.password is not None
+            ):
+                raise PublicationError(
+                    f"{label}.{source_id} prefixes must be uncredentialed HTTPS "
+                    "URLs without query or fragment"
+                )
+            if address in seen:
+                raise PublicationError(f"{label}.{source_id} contains duplicate prefixes")
+            seen.add(address)
+            rules.append(SourceUrlRule(address, True))
+        result[source_id] = tuple(rules)
+    return result
+
+
 def _is_negative_audit(key: str, value: Any) -> bool:
     if key.endswith("_exposed") and value is False:
         return True
@@ -609,6 +671,30 @@ def _privacy_problems(
 ) -> list[str]:
     problems: list[str] = []
     contexts = validate_field_contexts({} if field_contexts is None else field_contexts)
+    context_containers = {
+        pointer[:index]
+        for pointer in contexts
+        for index, character in enumerate(pointer)
+        if character == "/" and index
+    }
+
+    @lru_cache(maxsize=4096)
+    def key_metadata(key: str) -> tuple[str, str | None, bool, str, tuple[str, ...]]:
+        # Repeated schema keys need the same scans in every record. Cache only
+        # path/value-independent facts, for this audit and its source policy.
+        return (
+            _normalise_key(key),
+            key_kind(key),
+            _sensitive_key(key, object()),
+            _report_key_path("", key, restricted_source_ids=restricted_source_ids),
+            tuple(
+                _privacy_reasons_for_text(
+                    key,
+                    restricted_source_ids=restricted_source_ids,
+                    allow_restricted=True,
+                )
+            ),
+        )
 
     def restricted_allowed(path: str) -> bool:
         return (
@@ -630,8 +716,8 @@ def _privacy_problems(
         if isinstance(value, dict):
             has_direct_private_identity = any(
                 (
-                    _normalise_key(key) in {"id", "case_id", "record_id"}
-                    or _normalise_key(key).endswith(("_id", "_key"))
+                    key_metadata(str(key))[0] in {"id", "case_id", "record_id"}
+                    or key_metadata(str(key))[0].endswith(("_id", "_key"))
                 )
                 and child not in (None, "")
                 and not isinstance(child, (bool, dict, list))
@@ -640,25 +726,18 @@ def _privacy_problems(
             for key, child in value.items():
                 child_pointer = pointer_child(pointer, key)
                 child_context = contexts.get(child_pointer)
-                provisional_path = _report_key_path(
-                    path,
-                    key,
-                    restricted_source_ids=restricted_source_ids,
+                normalized_key, kind, sensitive_key, report_suffix, text_reasons = (
+                    key_metadata(str(key))
                 )
-                normalized_key = _normalise_key(key)
-                key_reasons = _privacy_reasons_for_text(
-                    str(key),
-                    restricted_source_ids=restricted_source_ids,
-                    allow_restricted=restricted_allowed(provisional_path),
-                )
+                provisional_path = path + report_suffix
+                key_reasons = list(text_reasons)
+                if str(key) in restricted_source_ids and not restricted_allowed(
+                    provisional_path
+                ):
+                    key_reasons.insert(0, "restricted source identifier")
                 # A suspicious map key is data, not a safe field label.  Never
                 # include it in the diagnostic path or in a later child error.
-                child_path = _report_key_path(
-                    path,
-                    key,
-                    redact=bool(key_reasons),
-                    restricted_source_ids=restricted_source_ids,
-                )
+                child_path = f"{path}.<map-key>" if key_reasons else provisional_path
                 for reason in key_reasons:
                     append(child_path, f"{reason} in object key")
                 if normalized_key in APPROVED_EXCLUDED_AUDIT_KEYS:
@@ -679,17 +758,21 @@ def _privacy_problems(
                     )
                     if not valid_exclusion_audit:
                         append(child_path, "invalid restricted-value exclusion audit")
-                sensitive = _sensitive_key(str(key), child) or normalized_key == "rights_owner" or (
+                sensitive = (
+                    sensitive_key and not _is_negative_audit(normalized_key, child)
+                ) or normalized_key == "rights_owner" or (
                     normalized_key == "name" and ".research_leads" in child_path
                 )
                 allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
                 allowed = allowed or is_contact_exposure_metadata(pointer.rsplit("/", 1)[-1], str(key), child)
                 # Unknown sensitive kinds never acquire an exception merely
                 # because a context exists (e.g. a future private identifier).
-                if sensitive and key_kind(str(key)) is None and normalized_key != "name":
+                if sensitive and kind is None and normalized_key != "name":
                     allowed = False
-                descend = isinstance(child, (dict, list)) and key_kind(str(key)) != "private" and any(
-                    p.startswith(child_pointer + "/") for p in contexts
+                descend = (
+                    isinstance(child, (dict, list))
+                    and kind != "private"
+                    and child_pointer in context_containers
                 )
                 if (sensitive or protected) and not allowed and not descend:
                     append(child_path, "private/contact field")
@@ -856,6 +939,7 @@ def _provenance_rule_signature(
     *,
     declared_source_ids: set[str],
     source_url_rules: dict[str, tuple[SourceUrlRule, ...]],
+    media_source_rules: dict[str, tuple[SourceUrlRule, ...]],
     source_scope: str,
 ) -> str:
     """Hash registered rule bindings, never the refreshable descendant URL itself."""
@@ -891,10 +975,16 @@ def _provenance_rule_signature(
             raise PublicationError(
                 "restricted catalog endpoint cannot be value provenance"
             )
+        media_path = reference.path.endswith(".media[].url")
+        eligible_rules = {
+            source_id: source_url_rules.get(source_id, ())
+            + (media_source_rules.get(source_id, ()) if media_path else ())
+            for source_id in contextual_source_ids
+        }
         matches: list[tuple[str, SourceUrlRule]] = [
             (source_id, rule)
             for source_id in contextual_source_ids
-            for rule in source_url_rules.get(source_id, ())
+            for rule in eligible_rules[source_id]
             if _url_matches_rule(reference.address, rule)
         ]
         if not contextual_source_ids or not matches:
@@ -1587,6 +1677,7 @@ def _validate_contract(contract: dict[str, Any], path: Path) -> None:
             "max_identity_churn_ratio",
             "as_of_pointer",
             "headers",
+            "media_source_prefixes",
             "completeness_rules",
             "schema_policy",
             "field_contexts",
@@ -1594,8 +1685,16 @@ def _validate_contract(contract: dict[str, Any], path: Path) -> None:
         extra = set(output) - allowed
         if extra:
             raise PublicationError(f"unexpected output fields in {path.name}: {sorted(extra)}")
+        _media_source_rules(
+            output.get("media_source_prefixes"),
+            declared_source_ids=set(source_ids),
+            label=f"{path.name}.outputs[{index}].media_source_prefixes",
+        )
         try:
-            validate_field_contexts(output.get("field_contexts", {}), f"{path.name}.outputs[{index}].field_contexts")
+            validate_field_contexts(
+                output.get("field_contexts", {}),
+                f"{path.name}.outputs[{index}].field_contexts",
+            )
         except FieldContextError as exc:
             raise PublicationError(str(exc)) from exc
         if output.get("field_contexts") and contract["source_scope"] != "approved_values":
@@ -2134,6 +2233,11 @@ def _validate_snapshot(
             completeness_counts = _completeness_summary(payload, output)
             semantic_hash = _semantic_signature(payload)
             declared_source_ids = set(binding.contract["source_ids"])
+            media_source_rules = _media_source_rules(
+                output.get("media_source_prefixes"),
+                declared_source_ids=declared_source_ids,
+                label=f"{binding.contract_path.name}.media_source_prefixes",
+            )
             embedded_source_ids, source_urls = _embedded_source_provenance(
                 payload,
                 artifact_path=path,
@@ -2148,6 +2252,7 @@ def _validate_snapshot(
                 source_urls,
                 declared_source_ids=declared_source_ids,
                 source_url_rules=source_url_rules,
+                media_source_rules=media_source_rules,
                 source_scope=binding.contract["source_scope"],
             )
             canonical = _canonical_text_bytes(entry.data)

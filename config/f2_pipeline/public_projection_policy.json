@@ -1,0 +1,1410 @@
+{
+  "additional_field_review_status": "all_fields_owner_field_approval",
+  "aggregate_only_measures": {
+    "C08_ASSESSED_PEOPLE": "individual_development_assessments_are_aggregate_only",
+    "C08_INCREASED_PEOPLE": "individual_development_scores_are_aggregate_only",
+    "K02": "person_roster_not_approved_for_aggregate_headline"
+  },
+  "detail_field_contexts": {
+    "/children/organizations/*/organization": "organization",
+    "/children/participations/*/research_unit": "organization",
+    "/children/sections/*/attribution": "work_attribution",
+    "/children/work_attributions/*/attribution": "work_attribution"
+  },
+  "detail_owner_approval": {
+    "approval_id": "f2-public-fields-owner-approval-v2",
+    "status": "accepted",
+    "approved_measures": [
+      "C04_LISTED",
+      "C08_PARTICIPATING",
+      "K01B",
+      "K03",
+      "K04",
+      "K05",
+      "K07",
+      "K12"
+    ],
+    "conditions": {
+      "core_fields": "source_scoped_matrix_with_exclusions_and_uncertainty",
+      "location_precision": "source_supported_province_district_subdistrict",
+      "location_roles": "subject_owned_no_substitution",
+      "product_prices": "source_reported_per_offering_with_unit_and_snapshot",
+      "zero_price_label": "price unspecified/source reports 0",
+      "media": "source_attributed_references_only",
+      "participation": "not_proven_improvement",
+      "time": "snapshot_based_no_year_filter",
+      "cultural_title": "CD-5342_title_withheld_pending_review",
+      "counts": "existing_measure_counts_unchanged",
+      "identity_uncertainty": "preserve_provisional_and_unresolved_identities",
+      "privacy_exclusions": "existing_field_level_exclusions_remain"
+    },
+    "scope_sha256": "855c05b406f2deca53de68542f4c335bfe725de3f84b9ddd59c503668a33ab11",
+    "public_promotion_approved": false
+  },
+  "detail_policies": {
+    "C04_LISTED": {
+      "adapter": "innovations_shared_with_K04",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "apptech_mru": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        },
+        "icommunity": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "pmua_apptech": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        },
+        "rinmp": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        }
+      }
+    },
+    "C08_PARTICIPATING": {
+      "adapter": "participating_businesses",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "learning_area_based": {
+          "attribution": [],
+          "label": [
+            "businesses.display_name",
+            "project_assertions.project_name_raw",
+            "research_unit_assertions.research_unit_raw"
+          ],
+          "location": [
+            "business_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "participation",
+            "project",
+            "research_unit"
+          ],
+          "source_link": [],
+          "structured_excerpt": []
+        }
+      }
+    },
+    "K01B": {
+      "adapter": "cultural_areas",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "atlocal": {
+          "attribution": [],
+          "label": [
+            "areas.name"
+          ],
+          "location": [],
+          "media": [
+            "images_json"
+          ],
+          "price": [],
+          "relationships": [
+            "area_source_member"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "cultural_map": {
+          "attribution": [],
+          "label": [
+            "mapped_subjects.display_title",
+            "mapped_listing_observations.title_normalized"
+          ],
+          "location": [
+            "mapped_subject_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "media_query_parameters": [],
+          "media_url_hosts": [
+            "dp.culturalmapthailand.info"
+          ],
+          "price": [],
+          "public_query_parameters": [],
+          "public_url_hosts": [
+            "www.culturalmapthailand.info",
+            "culturalmapthailand.info"
+          ],
+          "public_url_path_patterns": [
+            "^/CD-[0-9]+/?$"
+          ],
+          "relationships": [
+            "area_source_member"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "history",
+            "identity"
+          ]
+        }
+      }
+    },
+    "K03": {
+      "adapter": "activities",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "atlocal": {
+          "attribution": [
+            "attribution"
+          ],
+          "label": [
+            "global_activities.name",
+            "publications.title",
+            "activity_sessions.session_label"
+          ],
+          "location": [
+            "activity_venue"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "publication",
+            "date",
+            "venue",
+            "session"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "text",
+            "section_text"
+          ]
+        },
+        "cultural_map": {
+          "attribution": [
+            "attribution"
+          ],
+          "label": [
+            "global_activities.name",
+            "publications.title",
+            "activity_sessions.session_label"
+          ],
+          "location": [
+            "activity_venue"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [],
+          "relationships": [
+            "publication",
+            "date",
+            "venue",
+            "session"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "text",
+            "description",
+            "section_text"
+          ]
+        },
+        "icommunity": {
+          "attribution": [],
+          "label": [
+            "global_activities.name",
+            "publications.title"
+          ],
+          "location": [
+            "activity_venue"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "publication",
+            "date",
+            "venue",
+            "session"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "text"
+          ]
+        }
+      }
+    },
+    "K04": {
+      "adapter": "innovations_shared_with_C04_LISTED",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "apptech_mru": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        },
+        "icommunity": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "pmua_apptech": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        },
+        "rinmp": {
+          "attribution": [
+            "work_attribution"
+          ],
+          "label": [
+            "innovations.display_name"
+          ],
+          "location": [
+            "innovation_use_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "source_identity",
+            "readiness",
+            "use"
+          ],
+          "source_link": [
+            "detail_url"
+          ],
+          "structured_excerpt": [
+            "text_readable"
+          ]
+        }
+      }
+    },
+    "K05": {
+      "adapter": "operators",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "apptech_mru": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "atlocal": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "cultural_map": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "icommunity": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "learning_area_based": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "pmua_apptech": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        },
+        "rinmp": {
+          "attribution": [],
+          "label": [
+            "operator_crosswalk.display_name"
+          ],
+          "location": [
+            "operator_location"
+          ],
+          "media": [],
+          "price": [],
+          "relationships": [
+            "operator_offering"
+          ],
+          "source_link": [],
+          "structured_excerpt": [
+            "reviewed_evidence"
+          ]
+        }
+      }
+    },
+    "K07": {
+      "adapter": "offering_families",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "apptech_mru": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "atlocal": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name",
+            "listing_evidence.title_normalized"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [
+            "amounts_json"
+          ],
+          "price_currencies": [
+            "THB"
+          ],
+          "price_parse_statuses": [
+            "source_reported_price",
+            "zero_meaning_unestablished"
+          ],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "cultural_map": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name",
+            "listing_evidence.title_normalized"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [
+            "amounts_json"
+          ],
+          "price_currencies": [
+            "THB"
+          ],
+          "price_parse_statuses": [
+            "parsed",
+            "parsed_explicit_display_notation",
+            "parsed_with_qualifier"
+          ],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "icommunity": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name",
+            "listing_evidence.title_normalized"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [
+            "amounts_json"
+          ],
+          "price_currencies": [
+            "THB"
+          ],
+          "price_parse_statuses": [
+            "source_minor_units"
+          ],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "learning_area_based": {
+          "attribution": [],
+          "label": [],
+          "location": [],
+          "media": [],
+          "price": [],
+          "relationships": [],
+          "source_link": [],
+          "structured_excerpt": []
+        },
+        "pmua_apptech": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        },
+        "rinmp": {
+          "attribution": [],
+          "label": [
+            "offering_crosswalk.display_name"
+          ],
+          "location": [
+            "offering_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "price": [],
+          "relationships": [
+            "listing",
+            "operator_offering",
+            "innovation_context"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "description"
+          ]
+        }
+      }
+    },
+    "K12": {
+      "adapter": "mapped_subjects",
+      "detail_fields": [
+        "entity_id",
+        "label",
+        "identity_status",
+        "province_codes",
+        "category_codes",
+        "descriptions",
+        "listings",
+        "locations",
+        "media",
+        "relationships",
+        "children",
+        "flags",
+        "source_ids",
+        "originating_systems",
+        "detail_availability"
+      ],
+      "review_status": "owner_accepted_field_scope_pending_promotion",
+      "source_allowlists": {
+        "cultural_map": {
+          "attribution": [],
+          "label": [
+            "mapped_subjects.display_title",
+            "mapped_listing_observations.title_normalized"
+          ],
+          "location": [
+            "mapped_subject_location"
+          ],
+          "media": [
+            "url_or_value"
+          ],
+          "media_query_parameters": [],
+          "media_url_hosts": [
+            "dp.culturalmapthailand.info"
+          ],
+          "price": [],
+          "public_query_parameters": [],
+          "public_url_hosts": [
+            "www.culturalmapthailand.info",
+            "culturalmapthailand.info"
+          ],
+          "public_url_path_patterns": [
+            "^/CD-[0-9]+/?$"
+          ],
+          "relationships": [
+            "listing",
+            "category",
+            "location"
+          ],
+          "source_link": [
+            "source_url"
+          ],
+          "structured_excerpt": [
+            "history",
+            "identity"
+          ]
+        }
+      }
+    }
+  },
+  "excluded_fields": [
+    "raw_file",
+    "row_locator",
+    "raw_locator",
+    "source_locator",
+    "raw_record_json",
+    "source_local_record_json",
+    "source_details_json",
+    "raw_location_json",
+    "raw_html",
+    "profile_token",
+    "account_user_id",
+    "platform_shop_id",
+    "sales_accounts_json",
+    "contact",
+    "email",
+    "phone",
+    "address_raw",
+    "address_text_raw",
+    "latitude",
+    "longitude",
+    "funding_json",
+    "assessment_json",
+    "metrics_json",
+    "development_assessments",
+    "development_scores",
+    "matrix_scores",
+    "private_contacts",
+    "authentication_urls"
+  ],
+  "limitations": [
+    "This is a local staged-for-review projection. Owner acceptance is required before publication and no prior approval of additional AtLocal/iCommunity item fields is claimed.",
+    "K12 includes every deduplicated map_inspiration subject, including named people and cultural knowledge holders. Reviewed possible duplicates retain separate provisional identities and their uncertainty. Names, aliases and informant matches do not exclude a K12 subject; private contacts, informant fields and sensitive personal details remain field-level exclusions.",
+    "K03 publications, dates, venues and sessions remain children of an occurrence and never add entities; source-reported occurrence does not prove completion.",
+    "Innovation readiness rows are source assertions, not individual development assessments and not claims of current verified readiness. Innovation geography uses only attached use locations.",
+    "Operator geography uses only operator-owned location rows. Offering geography is retained with the offering and is never borrowed by an operator.",
+    "K07 counts families. Every preserved offering, variant and range-evidence member remains a child; source-reported price does not prove a free, current or available offering.",
+    "C08_PARTICIPATING lists source-supported business units and their own participations, projects, research units and locations. Participation is not improvement; person assessment companions remain aggregate-only.",
+    "Text is plain-text excerpted and contact/access values are removed or the field is withheld. Links are HTTPS references constrained by source/host/path/query allowlists; no media availability or reuse rights are inferred.",
+    "Measured staging budgets cap overview at 512 KiB, geography and each detail-child file at 4 MiB, topic entries at 8 MiB, and every file at 25 MiB."
+  ],
+  "max_description_chars": 1000,
+  "max_detail_child_bytes": 4194304,
+  "max_file_bytes": 26214400,
+  "max_geography_bytes": 4194304,
+  "max_overview_bytes": 524288,
+  "max_topic_bytes": 8388608,
+  "owner_checkpoint_required": true,
+  "owner_review_boundary": "The owner accepted the existing source-scoped field matrix for all eight staged detail measures, including K01B cultural areas and K12 mapped subjects. Preserve CD-5342's withheld title, original location roles, identity uncertainty, reference-only media, and all listed privacy exclusions. This approval does not authorize public promotion, deployment, media fetching/copying/hosting, identities, counts, locations, filters, or fields outside the approved measures.",
+  "policy_id": "f2-owner-field-approval-v2",
+  "preview_count": 8,
+  "publication_approval_claimed": false,
+  "publication_field_contexts": {
+    "/details_by_id/global_innovation_bc5b2da7f70b28ebb057/label": "public_contact",
+    "/details_by_id/global_innovation_bc5b2da7f70b28ebb057/relationships/*/label": "public_contact",
+    "/details_by_id/global_innovation_bc5b2da7f70b28ebb057/children/source_records/*/label": "public_contact",
+    "/details_by_id/global_innovation_bc5b2da7f70b28ebb057/listings/*/label": "public_contact",
+    "/items_by_id/global_innovation_bc5b2da7f70b28ebb057/label": "public_contact",
+    "/details_by_id/*/children/organizations/*/organization": "organization",
+    "/details_by_id/*/children/participations/*/research_unit": "organization",
+    "/details_by_id/*/children/sections/*/attribution": "work_attribution",
+    "/details_by_id/*/children/work_attributions/*/attribution": "work_attribution",
+    "/details_by_id/cultural_map_subject_1c2761aa796634deed14/label": "public_location",
+    "/details_by_id/cultural_map_subject_1c2761aa796634deed14/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_30232993c907c9233c63/label": "public_location",
+    "/details_by_id/cultural_map_subject_30232993c907c9233c63/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_683dfa9308c6093506c7/label": "public_location",
+    "/details_by_id/cultural_map_subject_683dfa9308c6093506c7/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_85502f3e6742e4c5fd40/label": "public_location",
+    "/details_by_id/cultural_map_subject_85502f3e6742e4c5fd40/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_a32789452e7913fa585e/label": "public_location",
+    "/details_by_id/cultural_map_subject_a32789452e7913fa585e/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_a50b3f5296f669985b90/label": "public_location",
+    "/details_by_id/cultural_map_subject_a50b3f5296f669985b90/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_b36fccf0870a3277be8c/label": "public_location",
+    "/details_by_id/cultural_map_subject_b36fccf0870a3277be8c/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_b577c4f238b4757d44a8/label": "public_location",
+    "/details_by_id/cultural_map_subject_b577c4f238b4757d44a8/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_e61297b5bab0f0ea48b9/label": "public_location",
+    "/details_by_id/cultural_map_subject_e61297b5bab0f0ea48b9/listings/*/label": "public_location",
+    "/details_by_id/cultural_map_subject_e7f077f3a12f8d6d14d0/label": "public_location",
+    "/details_by_id/cultural_map_subject_e7f077f3a12f8d6d14d0/listings/*/label": "public_location",
+    "/items_by_id/cultural_map_subject_1c2761aa796634deed14/label": "public_location",
+    "/items_by_id/cultural_map_subject_30232993c907c9233c63/label": "public_location",
+    "/items_by_id/cultural_map_subject_683dfa9308c6093506c7/label": "public_location",
+    "/items_by_id/cultural_map_subject_85502f3e6742e4c5fd40/label": "public_location",
+    "/items_by_id/cultural_map_subject_a32789452e7913fa585e/label": "public_location",
+    "/items_by_id/cultural_map_subject_a50b3f5296f669985b90/label": "public_location",
+    "/items_by_id/cultural_map_subject_b36fccf0870a3277be8c/label": "public_location",
+    "/items_by_id/cultural_map_subject_b577c4f238b4757d44a8/label": "public_location",
+    "/items_by_id/cultural_map_subject_e61297b5bab0f0ea48b9/label": "public_location",
+    "/items_by_id/cultural_map_subject_e7f077f3a12f8d6d14d0/label": "public_location"
+  },
+  "publication_media_source_prefixes": {
+    "f2_culturalmap_university": [
+      "https://dp.culturalmapthailand.info/file-upload/",
+      "https://dp.culturalmapthailand.info/gallery/"
+    ]
+  },
+  "publication_status": "staged_for_review",
+  "review_references": [
+    "docs/f2-dashboard-implementation-plan.md#public-detail-rows",
+    "docs/data-context-audit.md",
+    "docs/field-contexts.md",
+    "docs/f2-snapshot-publication-review.md"
+  ],
+  "reviewed_label_contexts": {
+    "C04_LISTED": {
+      "global_innovation_bc5b2da7f70b28ebb057": {
+        "context": "public_title",
+        "label_sha256": "1735f563d0e0a4172f3142681ba222629321ce0f88c74be0feb1242f3d011f0e",
+        "source_keys": [
+          "2:NzUycG9pdXl0cmVlZGZnaGprbGtqaGdmZHJ0eWlva21uYnZjeHN3ZXJmZHZnaHl1aWs="
+        ]
+      }
+    },
+    "K12": {
+      "cultural_map_subject_1c2761aa796634deed14": {
+        "context": "public_location",
+        "label_sha256": "a0d11b148ca19b1bacfc18de45f8762bdc3a52e431bf61f7bc78d6f4189484d8",
+        "source_keys": [
+          "map_inspiration:CD-1601"
+        ]
+      },
+      "cultural_map_subject_30232993c907c9233c63": {
+        "context": "public_location",
+        "label_sha256": "281570be1359bfe1561b85cfd6cf290e0efcc07a36d14c92391b07f7fa6308cc",
+        "source_keys": [
+          "map_inspiration:CD-1599"
+        ]
+      },
+      "cultural_map_subject_683dfa9308c6093506c7": {
+        "context": "public_location",
+        "label_sha256": "f3e60ae4a41c2b20483bd1fc9b1890b1d2093cf407a42de42c5dfc8a1e6f7b1f",
+        "source_keys": [
+          "map_inspiration:CD-2073"
+        ]
+      },
+      "cultural_map_subject_85502f3e6742e4c5fd40": {
+        "context": "public_location",
+        "label_sha256": "58762e064c2177e6bb40bb3704cefde7d27e9bd5d78bb452026742d087226841",
+        "source_keys": [
+          "map_inspiration:CD-1911"
+        ]
+      },
+      "cultural_map_subject_a32789452e7913fa585e": {
+        "context": "public_location",
+        "label_sha256": "d14d7d4e1c4213f3dda3d5c9c96a0c595375464714f3ad1d3ee1d6e353734ed1",
+        "source_keys": [
+          "map_inspiration:CD-1642"
+        ]
+      },
+      "cultural_map_subject_a50b3f5296f669985b90": {
+        "context": "public_location",
+        "label_sha256": "832a291502aa92725a2620db4463ef7edad041c85227655674b0aa39846128a3",
+        "source_keys": [
+          "map_inspiration:CD-1645"
+        ]
+      },
+      "cultural_map_subject_b36fccf0870a3277be8c": {
+        "context": "public_location",
+        "label_sha256": "55ec95a7f8423cfe1badc1b67eb6396f14e66931a01061ff20375df759a668f3",
+        "source_keys": [
+          "map_inspiration:CD-1640"
+        ]
+      },
+      "cultural_map_subject_b577c4f238b4757d44a8": {
+        "context": "public_location",
+        "label_sha256": "f61031d35effd831e5cbebbdbc283f7a53ea5b48101b9ed0054548546560dd6f",
+        "source_keys": [
+          "map_inspiration:CD-1913"
+        ]
+      },
+      "cultural_map_subject_e61297b5bab0f0ea48b9": {
+        "context": "public_location",
+        "label_sha256": "48f143fa524e711c785d0a694153e12ea49d86f36c1aff44a1161f198e4a086a",
+        "source_keys": [
+          "map_inspiration:CD-5800"
+        ]
+      },
+      "cultural_map_subject_e7f077f3a12f8d6d14d0": {
+        "context": "public_location",
+        "label_sha256": "d53822a7d9c459a5f5071ff6ffd7e56aacf9d4f46f4879fbdb8eee614d315566",
+        "source_keys": [
+          "map_inspiration:CD-473"
+        ]
+      }
+    }
+  },
+  "schema_version": 1,
+  "sources": {
+    "apptech_mru": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "38rat.nstru.ac.th"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "38RAT public innovation API",
+      "public_query_parameters": [
+        "id",
+        "innovation_id"
+      ],
+      "public_url": "https://38rat.nstru.ac.th/",
+      "public_url_hosts": [
+        "38rat.nstru.ac.th"
+      ],
+      "public_url_path_patterns": [
+        "^/page/innovationdetail\\.php$"
+      ],
+      "source_context_review": {
+        "rationale": "The public innovation API and detail pages support innovation labels, reviewed sections, readiness and the audited inventor/researcher/rights-holder attribution fields attached to the work.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "auth and password-reset endpoints",
+          "account user IDs",
+          "raw HTML",
+          "private contacts",
+          "funding and economic claims",
+          "unparsed person text"
+        ]
+      },
+      "source_id": "f2_apptech_mru"
+    },
+    "atlocal": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "atlocalthailand.com",
+        "www.atlocalthailand.com"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "AtLocal Thailand public cultural marketplace snapshot",
+      "public_query_parameters": [
+        "id",
+        "product_id",
+        "culture_id",
+        "festival_id",
+        "article_id"
+      ],
+      "public_url": "https://atlocalthailand.com/",
+      "public_url_hosts": [
+        "atlocalthailand.com",
+        "www.atlocalthailand.com"
+      ],
+      "public_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]*$"
+      ],
+      "source_context_review": {
+        "rationale": "The snapshot is from public cultural marketplace surfaces. The owner separately accepted the source-scoped business, product and activity field matrix, including safe excerpts, contextual prices and media references, under detail_owner_approval. Other uses are not implicitly approved; source-specific exclusions and non-current/zero-price caveats remain.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "platform shop IDs",
+          "zero-price-as-free inference",
+          "stock or active fields as current availability",
+          "raw image filenames",
+          "person links and contacts"
+        ]
+      },
+      "source_id": "f2_cultural_market_civil"
+    },
+    "cultural_map": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "dp.culturalmapthailand.info",
+        "www.culturalmapthailand.info",
+        "culturalmapthailand.info"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "Cultural Map Thailand, Kanchanaburi Rajabhat University",
+      "public_query_parameters": [
+        "id",
+        "ID",
+        "key"
+      ],
+      "public_url": "https://www.culturalmapthailand.info/",
+      "public_url_hosts": [
+        "www.culturalmapthailand.info",
+        "culturalmapthailand.info"
+      ],
+      "public_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]*$"
+      ],
+      "record_admission": {
+        "allowed_identity_statuses": [
+          "source_listing_identity",
+          "supported_reviewed_merge",
+          "unresolved_possible_duplicate"
+        ],
+        "population_basis": "All deduplicated map_inspiration subjects under original KPI_SCOPE, including people and cultural knowledge holders.",
+        "provisional_identity_rule": "Preserve reviewed unresolved candidates as separate provisional identities; do not withhold detail or require a new identity decision solely for this status.",
+        "publication_boundary": "Review individual field concerns separately from K12 membership. A person name is not a publication defect.",
+        "required_record_fields": [
+          "k12_eligible",
+          "identity_status",
+          "source_keys_json",
+          "aliases_json"
+        ],
+        "withheld_subject_ids": {}
+      },
+      "source_context_review": {
+        "rationale": "Original K12 scope includes all deduplicated map_inspiration subjects, including named people and cultural knowledge holders. Accepted separate provisional identities remain usable with explicit uncertainty. Public subject titles, attached listings, administrative geography and selected history/identity excerpts are projected without turning unrelated informant/contact fields into a directory.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "account identifiers",
+          "interviewee/contact passages",
+          "unrelated informant and private contact directory fields",
+          "coordinates",
+          "addresses containing contacts",
+          "funding, assessment and metrics blobs",
+          "media rights or availability inference"
+        ]
+      },
+      "source_id": "f2_culturalmap_university"
+    },
+    "icommunity": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "www.icommunity.in.th",
+        "icommunity.in.th",
+        "apptechpmua.com",
+        "www.apptechpmua.com"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "iCommunity portal with AppTech PMUA supporting system",
+      "public_query_parameters": [
+        "id",
+        "post",
+        "p",
+        "product"
+      ],
+      "public_url": "https://www.icommunity.in.th/",
+      "public_url_hosts": [
+        "www.icommunity.in.th",
+        "icommunity.in.th",
+        "apptechpmua.com",
+        "www.apptechpmua.com"
+      ],
+      "public_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]*$"
+      ],
+      "source_context_review": {
+        "rationale": "The canonical iCommunity source includes a public portal and AppTech supporting system. The owner separately accepted the business, product, activity and innovation field matrix under detail_owner_approval. Work attribution requires an explicit innovation association; price snapshot context is not an effective date, and media approval covers references only.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "community/person directory",
+          "author IDs",
+          "names inferred from prose",
+          "meeting access details",
+          "profile tokens",
+          "person coordinates",
+          "individual assessment records and scores",
+          "row geography borrowed between subjects"
+        ]
+      },
+      "source_id": "f2_icommunity"
+    },
+    "learning_area_based": {
+      "media_query_parameters": [],
+      "media_url_hosts": [],
+      "media_url_path_patterns": [],
+      "originating_system": "LE Super PMUA area-based dashboard API",
+      "public_query_parameters": [],
+      "public_url": "https://lesuper.app/opendata/pmua/area-based",
+      "public_url_hosts": [
+        "lesuper.app",
+        "www.lesuper.app"
+      ],
+      "public_url_path_patterns": [
+        "^/opendata/pmua/area-based/?$",
+        "^/api/opendata/pmua/area-based/?$"
+      ],
+      "source_context_review": {
+        "rationale": "The audited public area-based listing supports business/unit labels, project names, research-unit names, fiscal years and business-owned administrative geography. It does not establish improvement or a person roster.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "person assessment links",
+          "individual scores",
+          "private contacts",
+          "unresolved person-like business labels",
+          "geography borrowed from projects or researchers"
+        ]
+      },
+      "source_id": "f2_learning_area_based"
+    },
+    "learning_dashboard": {
+      "media_query_parameters": [],
+      "media_url_hosts": [],
+      "media_url_path_patterns": [],
+      "originating_system": "LE Super PMUA public aggregate dashboard",
+      "public_query_parameters": [],
+      "public_url": "https://lesuper.app/opendata/pmua/dashboard",
+      "public_url_hosts": [
+        "lesuper.app"
+      ],
+      "public_url_path_patterns": [
+        "^/opendata/pmua/dashboard/?$"
+      ],
+      "source_context_review": {
+        "rationale": "Pinned public dashboard source supports aggregate employment/payment components and four independent business marginals only; no person or business roster is inferred. Public URL is taken from the canonical source catalog.",
+        "status": "aggregate_only_existing_scope"
+      },
+      "source_id": "f2_learning_dashboard"
+    },
+    "pmua_apptech": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "pmua-apptech.com",
+        "www.pmua-apptech.com"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "PMUA AppTech public innovation catalogue and dashboards",
+      "public_query_parameters": [
+        "id",
+        "product_id",
+        "innovation_id"
+      ],
+      "public_url": "https://pmua-apptech.com/",
+      "public_url_hosts": [
+        "pmua-apptech.com",
+        "www.pmua-apptech.com"
+      ],
+      "public_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]*$"
+      ],
+      "source_context_review": {
+        "rationale": "The active path is the public innovation catalogue. Work attribution is restricted to source fields attached to a listed innovation; the source name does not authorize household or person-level disclosure.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "household records",
+          "researcher directory profiles",
+          "private contacts",
+          "funding history",
+          "raw impact prose without field review",
+          "profile tokens"
+        ]
+      },
+      "source_id": "f2_target_household"
+    },
+    "rinmp": {
+      "media_query_parameters": [],
+      "media_url_hosts": [
+        "rinmp.com",
+        "www.rinmp.com",
+        "app.rinmp.com"
+      ],
+      "media_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]+$"
+      ],
+      "originating_system": "RinMP AppTech public API snapshot",
+      "public_query_parameters": [
+        "id",
+        "appTechId",
+        "innovation_id"
+      ],
+      "public_url": "https://rinmp.com/",
+      "public_url_hosts": [
+        "rinmp.com",
+        "www.rinmp.com",
+        "app.rinmp.com"
+      ],
+      "public_url_path_patterns": [
+        "^/(?!.*(?:login|auth|reset|password|token))[^\\s]*$"
+      ],
+      "source_context_review": {
+        "rationale": "Public innovation profiles support profile labels, reviewed description sections, readiness assertions, innovation-use geography and explicit owner/institute work attribution.",
+        "status": "measure_scoped_owner_field_approval",
+        "unsafe_or_unsupported": [
+          "matrix and commercial scores",
+          "owner directory use",
+          "private contacts",
+          "funding fields",
+          "readiness-as-current claim"
+        ]
+      },
+      "source_id": "f2_apptech_mtr"
+    }
+  },
+  "staged_for_review": true
+}

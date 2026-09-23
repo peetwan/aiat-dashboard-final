@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections import Counter
+import threading
+from collections import Counter, OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -26,6 +27,7 @@ SAFE_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_/-]*$")
 SOURCE_ID_RE = re.compile(r"^[a-z0-9_]+$")
 MAX_ARTIFACT_KEY_LENGTH = 200
 MAX_ARTIFACT_GROUP_LENGTH = 60
+_POLICY_CACHE_LIMIT = 512
 SENSITIVE_KEY_RE = re.compile(
     r"(?:^|_)(?:phone|telephone|tel|mobile|email|e_mail|contact|address)(?:_|$)"
 )
@@ -108,6 +110,10 @@ class ArtifactInput:
     source_ids: tuple[str, ...] = ()
 
 
+_policy_cache: OrderedDict[tuple[ArtifactInput, str, str], None] = OrderedDict()
+_policy_cache_lock = threading.RLock()
+
+
 def _approved_and_restricted_source_ids() -> tuple[set[str], set[str]]:
     catalog = load_catalog()
     sources = catalog.get("sources", [])
@@ -125,10 +131,24 @@ def _approved_and_restricted_source_ids() -> tuple[set[str], set[str]]:
     return approved, restricted
 
 
+def _is_contract_bound_database_path(
+    relative_path: str, contracts_root: Path | None
+) -> bool:
+    contracts = load_contracts(
+        contracts_root or PROJECT_ROOT / "config/publication_contracts"
+    )
+    repository_path = f"data/public/{relative_path}"
+    binding = bind_outputs({repository_path}, contracts, require_all=False).get(
+        repository_path
+    )
+    return binding is not None and binding.output.get("role") == "database"
+
+
 def artifact_inputs(
     root: Path = PUBLIC_DATA_ROOT,
     *,
     enforce_core: bool = True,
+    contracts_root: Path | None = None,
 ) -> list[ArtifactInput]:
     """Expand the reviewed, data-driven serving manifest shipped with the app."""
 
@@ -137,8 +157,13 @@ def artifact_inputs(
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"cannot read public serving manifest: {exc}") from exc
-    if not isinstance(manifest, dict) or manifest.get("manifest_version") != MANIFEST_VERSION:
-        raise RuntimeError(f"public serving manifest must use version {MANIFEST_VERSION}")
+    if (
+        not isinstance(manifest, dict)
+        or manifest.get("manifest_version") != MANIFEST_VERSION
+    ):
+        raise RuntimeError(
+            f"public serving manifest must use version {MANIFEST_VERSION}"
+        )
     unknown_manifest_fields = sorted(set(manifest) - {"manifest_version", "artifacts"})
     if unknown_manifest_fields:
         raise RuntimeError(
@@ -147,7 +172,9 @@ def artifact_inputs(
         )
     entries = manifest.get("artifacts")
     if not isinstance(entries, list) or not entries:
-        raise RuntimeError("public serving manifest must contain a non-empty artifacts array")
+        raise RuntimeError(
+            "public serving manifest must contain a non-empty artifacts array"
+        )
 
     root_resolved = root.resolve()
 
@@ -205,17 +232,30 @@ def artifact_inputs(
             not isinstance(source_id, str) or SOURCE_ID_RE.fullmatch(source_id) is None
             for source_id in raw_source_ids
         ):
-            raise RuntimeError(f"{label}.source_ids must be a lower_snake_case string array")
+            raise RuntimeError(
+                f"{label}.source_ids must be a lower_snake_case string array"
+            )
         if len(raw_source_ids) != len(set(raw_source_ids)):
             raise RuntimeError(f"{label}.source_ids contains duplicates")
         source_ids = tuple(raw_source_ids)
-        is_core_entry = (
-            has_path and entry.get("key") in REQUIRED_CORE_ARTIFACTS
-        ) or (
+        is_core_entry = (has_path and entry.get("key") in REQUIRED_CORE_ARTIFACTS) or (
             has_glob and entry.get("key_template") == REQUIRED_CORE_GLOBS.get(group)
         )
         if not is_core_entry and not source_ids:
-            raise RuntimeError(f"{label}.source_ids is required for a non-core artifact")
+            if group != "methodology":
+                raise RuntimeError(
+                    f"{label}.source_ids is required for a non-core artifact"
+                )
+            relative_path = (
+                safe_relative(entry.get("path"), f"{label}.path") if has_path else None
+            )
+            if relative_path is None or not _is_contract_bound_database_path(
+                relative_path, contracts_root
+            ):
+                raise RuntimeError(
+                    f"{label} source-less methodology artifact requires a "
+                    "database publication contract"
+                )
         if group == "source_dataset" and not source_ids:
             raise RuntimeError(f"{label}.source_ids is required for source_dataset")
         disallowed_source_ids = sorted(set(source_ids) - approved_source_ids)
@@ -236,7 +276,9 @@ def artifact_inputs(
             if not path.is_file():
                 raise RuntimeError(f"public serving artifact is missing: {path.name}")
             province_code = entry.get("province_code")
-            if province_code is not None and not re.fullmatch(r"[0-9]{2}", str(province_code)):
+            if province_code is not None and not re.fullmatch(
+                r"[0-9]{2}", str(province_code)
+            ):
                 raise RuntimeError(f"{label}.province_code must contain two digits")
             inputs.append(ArtifactInput(key, group, path, province_code, source_ids))
             continue
@@ -244,36 +286,49 @@ def artifact_inputs(
         pattern = safe_relative(entry.get("path_glob"), f"{label}.path_glob")
         key_template = entry.get("key_template")
         if not isinstance(key_template, str) or key_template.count("{stem}") != 1:
-            raise RuntimeError(f"{label}.key_template must contain one {{stem}} placeholder")
+            raise RuntimeError(
+                f"{label}.key_template must contain one {{stem}} placeholder"
+            )
         expected_count = entry.get("expected_count")
         if type(expected_count) is not int or expected_count < 1:
             raise RuntimeError(f"{label}.expected_count must be a positive integer")
         province_code_from = entry.get("province_code_from")
         if province_code_from not in (None, "stem"):
             raise RuntimeError(f"{label}.province_code_from must be stem when present")
-        if group in {"provincial_briefing", "executive_summary"} and province_code_from != "stem":
+        if (
+            group in {"provincial_briefing", "executive_summary"}
+            and province_code_from != "stem"
+        ):
             raise RuntimeError(
                 f"{label}.province_code_from must be stem for the province serving core"
             )
         paths = sorted(root.glob(pattern))
         if len(paths) != expected_count:
-            raise RuntimeError(f"{label} matched {len(paths)} files; expected {expected_count}")
+            raise RuntimeError(
+                f"{label} matched {len(paths)} files; expected {expected_count}"
+            )
         for path in paths:
             resolved = path.resolve()
             if root_resolved not in resolved.parents or not resolved.is_file():
                 raise RuntimeError(f"{label}.path_glob resolved outside data/public")
             key = key_template.replace("{stem}", path.stem)
             if not SAFE_NAME_RE.fullmatch(key):
-                raise RuntimeError(f"{label}.key_template produced an invalid key: {key}")
+                raise RuntimeError(
+                    f"{label}.key_template produced an invalid key: {key}"
+                )
             if len(key) > MAX_ARTIFACT_KEY_LENGTH:
                 raise RuntimeError(
                     f"{label}.key_template produced a key over "
                     f"{MAX_ARTIFACT_KEY_LENGTH} characters"
                 )
             province_code = path.stem if province_code_from == "stem" else None
-            if province_code is not None and not re.fullmatch(r"[0-9]{2}", province_code):
+            if province_code is not None and not re.fullmatch(
+                r"[0-9]{2}", province_code
+            ):
                 raise RuntimeError(f"{label} produced an invalid province code")
-            inputs.append(ArtifactInput(key, group, resolved, province_code, source_ids))
+            inputs.append(
+                ArtifactInput(key, group, resolved, province_code, source_ids)
+            )
 
     keys = [item.key for item in inputs]
     if len(keys) != len(set(keys)):
@@ -318,7 +373,9 @@ def required_group_counts(
     *,
     enforce_core: bool = True,
 ) -> dict[str, int]:
-    return dict(Counter(item.group for item in artifact_inputs(root, enforce_core=enforce_core)))
+    return dict(
+        Counter(item.group for item in artifact_inputs(root, enforce_core=enforce_core))
+    )
 
 
 REQUIRED_GROUP_COUNTS = required_group_counts()
@@ -355,7 +412,11 @@ def _negative_privacy_audit_value(key: str, value: Any) -> bool:
         return True
     if key in {"email_values_redacted", "phone_values_redacted"}:
         return type(value) is int and value >= 0
-    if key.endswith(("_fields_in_source_schema", "_field_count")) and value in (0, False, None):
+    if key.endswith(("_fields_in_source_schema", "_field_count")) and value in (
+        0,
+        False,
+        None,
+    ):
         return True
     return False
 
@@ -412,10 +473,18 @@ def _artifact_policy_violations(
                     or key_kind(str(key)) in {"private", "name", "contact"}
                     or any(marker in str(key) for marker in SENSITIVE_THAI_KEY_PARTS)
                 )
-                contact_audit_flag = is_contact_exposure_metadata(path.rsplit(".", 1)[-1], str(key), child)
-                if sensitive_key and not contact_audit_flag and not _negative_privacy_audit_value(normalized, child):
+                contact_audit_flag = is_contact_exposure_metadata(
+                    path.rsplit(".", 1)[-1], str(key), child
+                )
+                if (
+                    sensitive_key
+                    and not contact_audit_flag
+                    and not _negative_privacy_audit_value(normalized, child)
+                ):
                     violations.append((child_path, "contact/private field"))
-                if str(key) in restricted_source_ids and not restricted_id_allowed(child_path):
+                if str(key) in restricted_source_ids and not restricted_id_allowed(
+                    child_path
+                ):
                     violations.append((child_path, "restricted source identifier"))
                 walk(child, child_path, normalized)
             return
@@ -435,9 +504,8 @@ def _artifact_policy_violations(
             violations.append((path, "social contact value"))
         if ADDRESS_VALUE_RE.search(value):
             violations.append((path, "home address value"))
-        if (
-            not _opaque_phone_value_key(item, leaf_key)
-            and THAI_PHONE_VALUE_RE.search(value)
+        if not _opaque_phone_value_key(item, leaf_key) and THAI_PHONE_VALUE_RE.search(
+            value
         ):
             violations.append((path, "Thai phone-like value"))
 
@@ -454,10 +522,13 @@ def validate_public_artifacts(
 
     selected = list(inputs if inputs is not None else artifact_inputs())
     approved_source_ids, restricted_source_ids = _approved_and_restricted_source_ids()
-    contracts = load_contracts(contracts_root or PROJECT_ROOT / "config/publication_contracts")
+    contracts = load_contracts(
+        contracts_root or PROJECT_ROOT / "config/publication_contracts"
+    )
     relative_paths = {
         item.path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
-        for item in selected if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve())
+        for item in selected
+        if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve())
     }
     # Serving validates the selected database artifacts. Publication separately
     # checks that every support/download output exists in the complete release.
@@ -467,20 +538,57 @@ def validate_public_artifacts(
     for item in selected:
         payload, digest, item_count = _load_input(item)
         loaded.append((item, payload, digest, item_count))
-        relative = item.path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix() if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve()) else None
+        relative = (
+            item.path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
+            if item.path.resolve().is_relative_to(PROJECT_ROOT.resolve())
+            else None
+        )
         binding = bindings.get(relative)
         contexts = binding.output.get("field_contexts", {}) if binding else {}
+        # Always reload and hash the file. Only successful privacy scans can be
+        # reused, bound to the exact bytes, artifact identity and current policy.
+        # Keep hashes only: callers receive a fresh payload on every validation.
+        policy_digest = hashlib.sha256(json.dumps(
+            {
+                "relative_path": relative,
+                "contract": binding.contract if binding else None,
+                "output": binding.output if binding else None,
+                "approved_source_ids": sorted(approved_source_ids),
+                "restricted_source_ids": sorted(restricted_source_ids),
+            },
+            sort_keys=True,
+        ).encode("utf-8")).hexdigest()
+        cache_key = (item, digest, policy_digest)
+        with _policy_cache_lock:
+            if cache_key in _policy_cache:
+                _policy_cache.move_to_end(cache_key)
+                continue
+        previous_violations = len(violations)
         if contexts:
             if not set(binding.contract["source_ids"]).issubset(approved_source_ids):
                 violations.append((item.key, "field context source is not approved"))
             # ใช้ contract ของไฟล์จริง การผ่าน publication จึงไม่ถูกตัวกรอง
             # แบบเหมารวมใน startup ปฏิเสธชื่อ/ข้อมูลติดต่องานซ้ำอีกครั้ง
-            violations.extend((item.key, problem) for problem in _privacy_problems(
-                payload, artifact_path=relative, restricted_source_ids=restricted_source_ids,
-                profile=binding.contract["privacy_profile"], field_contexts=contexts,
-            ))
+            violations.extend(
+                (item.key, problem)
+                for problem in _privacy_problems(
+                    payload,
+                    artifact_path=relative,
+                    restricted_source_ids=restricted_source_ids,
+                    profile=binding.contract["privacy_profile"],
+                    field_contexts=contexts,
+                )
+            )
         else:
-            violations.extend(_artifact_policy_violations(item, payload, restricted_source_ids))
+            violations.extend(
+                _artifact_policy_violations(item, payload, restricted_source_ids)
+            )
+        if len(violations) == previous_violations:
+            with _policy_cache_lock:
+                _policy_cache[cache_key] = None
+                _policy_cache.move_to_end(cache_key)
+                while len(_policy_cache) > _POLICY_CACHE_LIMIT:
+                    _policy_cache.popitem(last=False)
     if violations:
         evidence = "; ".join(f"{path}: {reason}" for path, reason in violations[:20])
         remainder = len(violations) - 20
@@ -541,7 +649,9 @@ def sync_public_artifacts(
 
     if expected_keys:
         session.execute(
-            delete(PublicArtifact).where(PublicArtifact.artifact_key.not_in(expected_keys))
+            delete(PublicArtifact).where(
+                PublicArtifact.artifact_key.not_in(expected_keys)
+            )
         )
     else:
         session.execute(delete(PublicArtifact))
@@ -556,7 +666,9 @@ def sync_public_artifacts(
 
 def artifact_payload(session: Session, artifact_key: str) -> dict | None:
     return session.scalar(
-        select(PublicArtifact.payload).where(PublicArtifact.artifact_key == artifact_key)
+        select(PublicArtifact.payload).where(
+            PublicArtifact.artifact_key == artifact_key
+        )
     )
 
 

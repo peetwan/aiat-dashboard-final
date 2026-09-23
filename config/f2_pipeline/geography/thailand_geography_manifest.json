@@ -1,0 +1,18 @@
+{
+  "commit_sha": "b8b3fb91c7df1129ff5b43cb46f7fcffadd2156b",
+  "retrieved_at": "2026-08-31T14:28:52.971Z",
+  "files": {
+    "provinces.json": {
+      "url": "https://raw.githubusercontent.com/thailand-geography-data/thailand-geography-json/b8b3fb91c7df1129ff5b43cb46f7fcffadd2156b/src/provinces.json",
+      "sha256": "bf46bb07e3e1a58552504a557cbd070e12ec794ef0319990294d456d3466339a"
+    },
+    "districts.json": {
+      "url": "https://raw.githubusercontent.com/thailand-geography-data/thailand-geography-json/b8b3fb91c7df1129ff5b43cb46f7fcffadd2156b/src/districts.json",
+      "sha256": "e79d617f35ca4099b43856b8b7634ed44b079fb7f0b024b0942604eb5d540c03"
+    },
+    "subdistricts.json": {
+      "url": "https://raw.githubusercontent.com/thailand-geography-data/thailand-geography-json/b8b3fb91c7df1129ff5b43cb46f7fcffadd2156b/src/subdistricts.json",
+      "sha256": "c7f0e62ab7ccaf135a11a48105e62f846c633103ce21e933d5e5227b143a2916"
+    }
+  }
+}

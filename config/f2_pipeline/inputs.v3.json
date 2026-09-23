@@ -1,0 +1,1178 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "source_id": "f2_apptech_mru",
+      "run_id": "20260823T094536Z",
+      "relative_dir": "f2_apptech_mru/20260823T094536Z",
+      "originating_system": "38RAT public innovation API",
+      "files": [
+        {
+          "path": "innovations.json",
+          "sha256": "bfa6775e6235c70b14eeb45a8da23474b1ff526efc537d565aafd9f8327eb1f7",
+          "size": 3207928,
+          "dataset_key": "innovations",
+          "kind": "support",
+          "captured_at": "2026-08-23T09:55:34.490845+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "innovations.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "requirements.json",
+          "sha256": "6eaf179981f46052551534137772488bc5f790b53fb203a7e96b7b29ebfba27f",
+          "size": 10266,
+          "dataset_key": "requirements",
+          "kind": "support",
+          "captured_at": "2026-08-23T09:55:36.685296+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "requirements.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "README.md",
+          "sha256": "851ef318f6b2f7216b14b84c854cba6a9642bc8cedacd302df1d9c8e5681cf4b",
+          "size": 6565,
+          "dataset_key": "source_readme",
+          "kind": "support",
+          "captured_at": null,
+          "grain": "source_documentation",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "innovations.json.gz",
+          "sha256": "8f0465e3f324ef2db1b4a6fa60de410549114c7f4438b74d7ab91a0522bf2630",
+          "size": 304999,
+          "dataset_key": "innovations",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T09:55:34.490845+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของหน้ารายละเอียดนวัตกรรมสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "requirements.json.gz",
+          "sha256": "20b0a0483a06beddf933f5772f6ab7c5f79ebec56d06295636fb5c0ac4123ef0",
+          "size": 2347,
+          "dataset_key": "requirements",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T09:55:36.685296+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของหน้ารายละเอียดความต้องการสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "568dd5382a4c15d93f1169ae0d3cac9b7c8635e340ff9eb297a69eeeddbbe8b1",
+          "size": 1541,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-23T09:55:34.490845+00:00",
+          "grain": "canonical_capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "568dd5382a4c15d93f1169ae0d3cac9b7c8635e340ff9eb297a69eeeddbbe8b1",
+        "source_id": "f2_apptech_mru",
+        "run_id": "20260823T094536Z",
+        "fetched_at": "2026-08-23T09:55:34.490845+00:00",
+        "declared_dataset_count": 2,
+        "declared_extra_file_count": 1,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_cultural_market_civil",
+      "run_id": "20260825T070510Z",
+      "relative_dir": "f2_cultural_market_civil/20260825T070510Z",
+      "originating_system": "AtLocal Thailand public cultural marketplace snapshot",
+      "files": [
+        {
+          "path": "areas_16.json",
+          "sha256": "74228afdaa97948f9f57933a79a86285eda233e3dc790267d3cbd2747ac20fd6",
+          "size": 13159,
+          "dataset_key": "areas",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "areas_16.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "articles.json",
+          "sha256": "5fb40e75f761d297ddefa438fa460acfc56ca50000432238f562aac691f983bf",
+          "size": 57029,
+          "dataset_key": "articles",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "articles.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "cultures.json",
+          "sha256": "26ed238fcb8e0aa8c3bf52a6e89d96ba57e41b1f45ab3a76d1bbaa7a5799d8f3",
+          "size": 221716,
+          "dataset_key": "cultures",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "cultures.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "entrepreneurs.json",
+          "sha256": "17a966f99bcf2744d40268bc6c51bdae9b801d9313758dfdf786e844e2962e91",
+          "size": 2050,
+          "dataset_key": "entrepreneurs",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "entrepreneurs.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "festivals.json",
+          "sha256": "cf3073d833d881e4f882ed8283230604e76c5af9a25b91096c67ba423e1a17c9",
+          "size": 409250,
+          "dataset_key": "festivals",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "festivals.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "marketplace_products.json",
+          "sha256": "9bd5031dd3c87823c9195154bbdec0a47b826545be7174402fb00023f35383f8",
+          "size": 969106,
+          "dataset_key": "marketplace_products",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "marketplace_products.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "product_map.json",
+          "sha256": "b5bd3e89f074f8a6dd8dd1df8975893d701ff16c388c96211066a2732501f4c4",
+          "size": 1908450,
+          "dataset_key": "product_map",
+          "kind": "support",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "product_map.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "areas_16.json.gz",
+          "sha256": "97f538855fa0ded11f549ede785a225a7debabd01f99a06a0c53699f40b1d57f",
+          "size": 2566,
+          "dataset_key": "areas",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของพื้นที่วัฒนธรรม; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "articles.json.gz",
+          "sha256": "b754e005eeaf7d59058d7dd137ce45ab98f99c57735ee08ce930bbb1ff6b4263",
+          "size": 6508,
+          "dataset_key": "articles",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของบทความสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "cultures.json.gz",
+          "sha256": "b5f21cf46a7baa3046179fe5f99c7b36c0ce9616118675bcf4be16a86ec39c00",
+          "size": 29261,
+          "dataset_key": "cultures",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของเรื่องวัฒนธรรมสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "entrepreneurs.json.gz",
+          "sha256": "a0092704586395d0b6799ec6567cd0d2866cd970677115ca092eb679f042640d",
+          "size": 658,
+          "dataset_key": "entrepreneurs",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของผู้ดำเนินการที่ต้นทางเผยแพร่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "festivals.json.gz",
+          "sha256": "222dad65ff4ada5a1e549cc78523d58a936b28f22c0392f8faf83a67f8b4543f",
+          "size": 46187,
+          "dataset_key": "festivals",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของกิจกรรมหรือเทศกาลที่ต้นทางเผยแพร่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "marketplace_products.json.gz",
+          "sha256": "48e3a92c03984a5612f065178baaeaf2cfb4db81a0c1d715bac8768439a5c345",
+          "size": 138525,
+          "dataset_key": "marketplace_products",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการสินค้าใน marketplace; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "product_map.json.gz",
+          "sha256": "bf14cb6d9425fa4806b3ccd6c493d82cb3cee391bbf81fbad70b8f1a7a601c5d",
+          "size": 83184,
+          "dataset_key": "product_map",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการสินค้าในแผนที่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "442a43c9c2825bf5ef7a4418620848f75e18646238f14f72acb4834458105bbc",
+          "size": 4563,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-25T07:05:10.401066+00:00",
+          "grain": "canonical_capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "442a43c9c2825bf5ef7a4418620848f75e18646238f14f72acb4834458105bbc",
+        "source_id": "f2_cultural_market_civil",
+        "run_id": "20260825T070510Z",
+        "fetched_at": "2026-08-25T07:05:10.401066+00:00",
+        "declared_dataset_count": 7,
+        "declared_extra_file_count": 0,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_icommunity",
+      "run_id": "20260825T143637Z",
+      "relative_dir": "f2_icommunity/20260825T143637Z",
+      "originating_system": "iCommunity portal with AppTech PMUA supporting system",
+      "files": [
+        {
+          "path": "activity_posts.json",
+          "sha256": "58b3fed1064425666e6fd1c669d536233f74082b898c9537327fede8c922a14b",
+          "size": 255478,
+          "dataset_key": "activity_posts",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:36:37.045428+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "activity_posts.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "apptech_dashboard_summaries.json",
+          "sha256": "63e1a7e7aa6e4a6c969397ac1f2941c167ef17e2f42a07c94ca30be4b8ff1b80",
+          "size": 741168,
+          "dataset_key": "apptech_dashboard_summaries",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "apptech_dashboard_summaries.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "apptech_group_catalog.json",
+          "sha256": "3b3209efcc0f09a99cfbaa632bb6fde1dfb67c7d79ee3ee931308e4d8e22ec42",
+          "size": 7328,
+          "dataset_key": "apptech_group_catalog",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:17:01.476123+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "apptech_group_catalog.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "apptech_innovations.json",
+          "sha256": "7dd33e6a44c0cd541d108ec06732990ee683ebccfd00e2931c39330b27d4c387",
+          "size": 1846287,
+          "dataset_key": "apptech_innovations",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:35:24.813029+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "apptech_innovations.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "apptech_innovators.json",
+          "sha256": "c845a643f0fae787b0a2beb525feeac86f7a1b2e6361cef6b951e506209b047d",
+          "size": 10859876,
+          "dataset_key": "apptech_innovators",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:26:38.843958+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "apptech_innovators.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "community_products.json",
+          "sha256": "4bf3491a2291f3f587c696f0150270e63393e18e20a3b2c5f28a1e9ddf9b1a56",
+          "size": 489874,
+          "dataset_key": "community_products",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:36:35.279319+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "community_products.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "programme_background.json",
+          "sha256": "d27de461634ef78ada1e32296c234407753da0c1d73a98d3e203cabe45b5b7b4",
+          "size": 22126,
+          "dataset_key": "programme_background",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:36:33.302556+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "programme_background.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "location_assertions.jsonl",
+          "sha256": "6aba30f942dfa746c5a5b98251f833dec5bbdaaf34f283f99feef405c4d9931e",
+          "size": 419,
+          "dataset_key": "location_assertions",
+          "kind": "support",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "originating_capture": {
+            "source_id": "icommunity",
+            "run_id": "20260825T143630Z",
+            "captured_at": "2026-08-25T14:36:30.522017+00:00",
+            "evidence_path": "location_assertions.manifest.json",
+            "mapping_reason": "The source-local location-assertion wrapper is retained under the composite f2_icommunity run without relabelling its independent capture."
+          },
+          "canonical_evidence_path": "location_assertions.jsonl.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "location_assertions.manifest.json",
+          "sha256": "c4673cca660ab10908343459d23481a3e36a042ad66edd4f1a114371a73c6c23",
+          "size": 1483,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "capture_manifest",
+          "originating_capture": {
+            "source_id": "icommunity",
+            "run_id": "20260825T143630Z",
+            "captured_at": "2026-08-25T14:36:30.522017+00:00",
+            "evidence_path": "location_assertions.manifest.json",
+            "mapping_reason": "The source-local location-assertion wrapper is retained under the composite f2_icommunity run without relabelling its independent capture."
+          },
+          "provenance_class": "canonical_manifest"
+        },
+        {
+          "path": "activity_posts.json.gz",
+          "sha256": "297ddc4c6ff0b62cf0f969d338a7b9e2660209700aea8f9d9e79235675dee304",
+          "size": 25065,
+          "dataset_key": "activity_posts",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:36:37.045428+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของโพสต์กิจกรรมสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "apptech_dashboard_summaries.json.gz",
+          "sha256": "d0308350c958083a56af11b3ef19b68f7ac710800d2b68c92e48350614ec3549",
+          "size": 82517,
+          "dataset_key": "apptech_dashboard_summaries",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของยอดรวม dashboard ตามขอบเขตที่ต้นทางตอบ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "apptech_group_catalog.json.gz",
+          "sha256": "d9b9dcddb7cee840ecc51c060a4dd7575e97985e7202697909f82986e4988768",
+          "size": 1120,
+          "dataset_key": "apptech_group_catalog",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:17:01.476123+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของกลุ่มตัวกรอง dashboard; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "apptech_innovations.json.gz",
+          "sha256": "99c09d8d7b8eab7ede705d0e21f86fbf46cad9f7c6fb8a150016e33ef555be80",
+          "size": 147286,
+          "dataset_key": "apptech_innovations",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:35:24.813029+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการนวัตกรรมตามขอบเขต export; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "apptech_innovators.json.gz",
+          "sha256": "2d605136f6f92c03f905c38f86088bcb3c87d540a2fe6d081f86d300b7c5a45a",
+          "size": 574715,
+          "dataset_key": "apptech_innovators",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:26:38.843958+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการนวัตกรตามขอบเขต export; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "community_products.json.gz",
+          "sha256": "ef8c7c5ae248e622ebc567dcb3810ce024f3ceeb936feb39c27ce968d3f286b0",
+          "size": 31092,
+          "dataset_key": "community_products",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:36:35.279319+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการสินค้าชุมชนสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "programme_background.json.gz",
+          "sha256": "bfee0d98f97aee08206e3068be96f643e2a2b8ce9beedb8b96a030802100b5cb",
+          "size": 3488,
+          "dataset_key": "programme_background",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:36:33.302556+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของหน้าข้อมูลโครงการสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "location_assertions.jsonl.gz",
+          "sha256": "68d066f3f08652625dbd11369226b253d2dd8bd01dc5a11ab3d53858d32fa1aa",
+          "size": 271,
+          "dataset_key": "location_assertions",
+          "kind": "evidence",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "หนึ่งแถว = หนึ่ง location assertion ที่คงป้ายพื้นที่ รหัสตำบล และพิกัดจาก dashboard snapshot",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "89a8800b47af4e4aecf5f13f99195e0fcc9e1720216138e0cbcd02c295e7c1bd",
+          "size": 5711,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-25T14:36:37.045428+00:00",
+          "grain": "canonical_capture_manifest",
+          "provenance_class": "canonical_manifest"
+        },
+        {
+          "path": "geography_location_snapshot_20260825/manifest.json",
+          "sha256": "c4673cca660ab10908343459d23481a3e36a042ad66edd4f1a114371a73c6c23",
+          "size": 1483,
+          "dataset_key": "location_assertions_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-25T14:36:30.522017+00:00",
+          "grain": "source_local_capture_manifest",
+          "provenance_class": "canonical_manifest_support",
+          "originating_capture": {
+            "source_id": "icommunity",
+            "run_id": "20260825T143630Z",
+            "captured_at": "2026-08-25T14:36:30.522017+00:00",
+            "mapping_reason": "Canonical iCommunity bundle preserves this independently captured location-assertion manifest at its original relative path."
+          }
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "89a8800b47af4e4aecf5f13f99195e0fcc9e1720216138e0cbcd02c295e7c1bd",
+        "source_id": "f2_icommunity",
+        "run_id": "20260825T143637Z",
+        "fetched_at": "2026-08-25T14:36:37.045428+00:00",
+        "declared_dataset_count": 8,
+        "declared_extra_file_count": 1,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_target_household",
+      "run_id": "20260901T062445Z",
+      "relative_dir": "f2_target_household/20260901T062445Z",
+      "originating_system": "PMUA AppTech public innovation catalogue and dashboards",
+      "files": [
+        {
+          "path": "products.json",
+          "sha256": "b6538eca050bfdb01fb6f137c7474745fcf7dcc1266f4ad39a036c36f04adbe8",
+          "size": 12519877,
+          "dataset_key": "products",
+          "kind": "support",
+          "captured_at": "2026-08-23T13:11:23.435729+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "products.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "stations.json",
+          "sha256": "aa620507bd87715b9eef92f5bb690792567649a241b8434248fc39c8dfa67f02",
+          "size": 131285,
+          "dataset_key": "stations",
+          "kind": "support",
+          "captured_at": "2026-08-23T12:54:57.525249+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "stations.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "researchers.json",
+          "sha256": "79edb4ef0a7b48c8c42170a8869867f2ce016f7874db17b6a9c68d40948bd260",
+          "size": 236467,
+          "dataset_key": "researchers",
+          "kind": "support",
+          "captured_at": "2026-08-23T12:54:22.049623+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "researchers.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "universities.json",
+          "sha256": "256596bb61f822403b4a642aa1981cc1b1116513f56e9714c35751b30c9efb15",
+          "size": 24959,
+          "dataset_key": "universities",
+          "kind": "support",
+          "captured_at": "2026-08-23T12:17:01.171553+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "universities.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/innovators_all.json",
+          "sha256": "cebbafbf9616846a21df839440a7b1259ac639e00fbaac29f85fda9cfca7bc2f",
+          "size": 14291,
+          "dataset_key": "innovators_all",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "innovators_all.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/innovators_2026.json",
+          "sha256": "9ddc91143406d46fc6447407c9f9cefa3041c0e50af31b250a6babfa7b32c754",
+          "size": 13084,
+          "dataset_key": "innovators_2026",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "innovators_2026.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/innovators_2025.json",
+          "sha256": "df7e2013f595a219d76e3087b03e8f415956fd7ff71930360641ad2e1ec79507",
+          "size": 13505,
+          "dataset_key": "innovators_2025",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "innovators_2025.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/innovation_map_all.json",
+          "sha256": "b1d0ea7eaa44cc87fbb9bc9410fe814446e413bfc642a41e723c588e2ae8de35",
+          "size": 743790,
+          "dataset_key": "innovation_map_all",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "innovation_map_all.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/family_all.json",
+          "sha256": "3319136a1fcadf89f5b8d0d5b27302749a4164230cdac970e62975fc753c43f0",
+          "size": 155164,
+          "dataset_key": "family_all",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "family_all.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/family_2026.json",
+          "sha256": "38622fe3c323bab2d863ddc56f645dd204078fb549f93ec0e50fb37b1bc5a7e0",
+          "size": 77482,
+          "dataset_key": "family_2026",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "family_2026.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "dashboards/family_2025.json",
+          "sha256": "013f967946c0135ca74253449085c579172835eaacfc74eb518050a2a3ccfab2",
+          "size": 110680,
+          "dataset_key": "family_2025",
+          "kind": "support",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "family_2025.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "products.json.gz",
+          "sha256": "6ea975effd2550f236225cc3ec05c551785d225ee62923fe9a231a5e16d6d31c",
+          "size": 1300562,
+          "dataset_key": "products",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T13:11:23.435729+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของหน้ารายละเอียดผลิตภัณฑ์หรือนวัตกรรมสาธารณะ; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "stations.json.gz",
+          "sha256": "5326ec56f40558ac276c126d0bdf8a941a6c44eeaf0ed27a65a68cb3f32f9190",
+          "size": 18997,
+          "dataset_key": "stations",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T12:54:57.525249+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของสถานีหรือหน่วยงานที่ต้นทางเผยแพร่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "researchers.json.gz",
+          "sha256": "99fc3871cf822dcccb6e867074e959dfeca0da46c6d55475c5749aace3d1dbe4",
+          "size": 17015,
+          "dataset_key": "researchers",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T12:54:22.049623+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของโปรไฟล์นักวิจัยที่ต้นทางเผยแพร่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "universities.json.gz",
+          "sha256": "b9dddbd9d4a0cb483c1494fc7a8215cbde1c9b4cdaa928d02a59bb9a4478b559",
+          "size": 1906,
+          "dataset_key": "universities",
+          "kind": "evidence",
+          "captured_at": "2026-08-23T12:17:01.171553+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของหน่วยงานหรือมหาวิทยาลัยที่ต้นทางเผยแพร่; รายการอยู่ใน data[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "innovators_all.json.gz",
+          "sha256": "af4292b8233f1dfef01abe879ace22a360e2eb68d9c24083c3f2a6beb523eeea",
+          "size": 2338,
+          "dataset_key": "innovators_all",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ innovator dashboard สำหรับตัวกรองรวมทั้งหมด; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "innovators_2026.json.gz",
+          "sha256": "b032b7641064971e5a28f23a41e0c855eea7e2cd5051abc98cfd2165ee91cb09",
+          "size": 1952,
+          "dataset_key": "innovators_2026",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ innovator dashboard สำหรับตัวกรองปี 2026; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "innovators_2025.json.gz",
+          "sha256": "455fa143c87578018675e23a83a15f8f707a22e7107357fc720e54c6cc6b893f",
+          "size": 2138,
+          "dataset_key": "innovators_2025",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ innovator dashboard สำหรับตัวกรองปี 2025; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "innovation_map_all.json.gz",
+          "sha256": "dfe2b384c05b6383576ad4e05d3f884fd585a1141219ea9c85312771ae3d66aa",
+          "size": 67374,
+          "dataset_key": "innovation_map_all",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ innovation map dashboard สำหรับตัวกรองรวมทั้งหมด; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "family_all.json.gz",
+          "sha256": "cc061093b2449bbaa7f96f123cbbc6afb3997b734afdd3eddc997d8ac1a9fdc5",
+          "size": 22413,
+          "dataset_key": "family_all",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ family dashboard สำหรับตัวกรองรวมทั้งหมด; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "family_2026.json.gz",
+          "sha256": "441582669496ab49cf9008632a892dddbf2f683de49fae8bc6b29d1457145c59",
+          "size": 11712,
+          "dataset_key": "family_2026",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ family dashboard สำหรับตัวกรองปี 2026; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "family_2025.json.gz",
+          "sha256": "fab892897740c7893dfe2197e15b57d5a0ffc2f6a6975c43c1cd63576d7d6129",
+          "size": 16103,
+          "dataset_key": "family_2025",
+          "kind": "evidence",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ family dashboard สำหรับตัวกรองปี 2025; จังหวัดอยู่ใน prov_data",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "76fbdb0fbe2ab2b5fadc4d0128401ec86f30191d86c4074de8bfe123b031cb4a",
+          "size": 7245,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-09-01T06:24:45.299284+00:00",
+          "grain": "canonical_capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "76fbdb0fbe2ab2b5fadc4d0128401ec86f30191d86c4074de8bfe123b031cb4a",
+        "source_id": "f2_target_household",
+        "run_id": "20260901T062445Z",
+        "fetched_at": "2026-09-01T06:24:45.299284+00:00",
+        "declared_dataset_count": 11,
+        "declared_extra_file_count": 0,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_apptech_mtr",
+      "run_id": "20260822T214437Z",
+      "relative_dir": "f2_apptech_mtr/20260822T214437Z",
+      "originating_system": "RinMP AppTech public API snapshot",
+      "files": [
+        {
+          "path": "app_tech.json",
+          "sha256": "876fa9cf57b811e8f79d67c9f40fce37015c798d6d61a8c10578aa24d1f31a76",
+          "size": 3442958,
+          "dataset_key": "app_tech",
+          "kind": "support",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "app_tech.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "owner_profiles.json",
+          "sha256": "b64e9a5eca7c59006fe8ca42a20e4fd68b142027044d886de4725278ace94020",
+          "size": 174170,
+          "dataset_key": "owner_profiles",
+          "kind": "support",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "owner_profiles.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "statistics.json",
+          "sha256": "a654a4472935698f68b5cc20716f02fe692f8439d5e5f3ff48c18a883b92d101",
+          "size": 1507,
+          "dataset_key": "statistics",
+          "kind": "support",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "canonical_evidence_path": "statistics.json.gz",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence"
+        },
+        {
+          "path": "README.md",
+          "sha256": "25a8bb4568f10b7cba2a7425d1f503f7079e256ca32afa6a3eabc6aa4803bf79",
+          "size": 6515,
+          "dataset_key": "source_readme",
+          "kind": "support",
+          "captured_at": null,
+          "grain": "source_documentation",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "app_tech.json.gz",
+          "sha256": "fe53bfc38be109220a501f36f85b9e4d739d6d0a8d58f94386441f05c9599eaf",
+          "size": 480191,
+          "dataset_key": "app_tech",
+          "kind": "evidence",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ AppTech profile สาธารณะ; รายการอยู่ใน data.records[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "owner_profiles.json.gz",
+          "sha256": "a46b703fe5e63f7bc3595fa0ba19007a1413ba6c5d1a81534f905b868675b0cf",
+          "size": 29229,
+          "dataset_key": "owner_profiles",
+          "kind": "evidence",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของกลุ่มเจ้าของที่ collector จัดจากชื่อ; รายการอยู่ใน data.records[]",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "statistics.json.gz",
+          "sha256": "d1ef2020faa7c38748b9567ea1136c0e8a9367cf237b2fa9770d383bcdc27e6f",
+          "size": 563,
+          "dataset_key": "statistics",
+          "kind": "evidence",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของยอดสถิติรวมที่ต้นทางเผยแพร่",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "01ae10ae8f5117cdabced72050e83248a872e157cecf689cf5d9400ac73167f3",
+          "size": 2071,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-22T21:44:40.282528+00:00",
+          "grain": "canonical_capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "01ae10ae8f5117cdabced72050e83248a872e157cecf689cf5d9400ac73167f3",
+        "source_id": "f2_apptech_mtr",
+        "run_id": "20260822T214437Z",
+        "fetched_at": "2026-08-22T21:44:40.282528+00:00",
+        "declared_dataset_count": 3,
+        "declared_extra_file_count": 1,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_culturalmap_university",
+      "run_id": "20260820T142533Z",
+      "relative_dir": "f2_culturalmap_university/20260820T142533Z",
+      "originating_system": "Cultural Map Thailand, Kanchanaburi Rajabhat University",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "2e6626d1240855e5cc6a94d4e8ffadd9b27b4c7ee216a99d9cd30b33e3ce8c89",
+          "size": 13863,
+          "dataset_key": "source_readme",
+          "kind": "support",
+          "captured_at": "2026-08-20T14:25:33Z",
+          "grain": "source_documentation",
+          "provenance_class": "local_bundle_support_not_canonical_manifest_member"
+        },
+        {
+          "path": "activities.json",
+          "sha256": "6d6640246154ca517d13e48ca2a34d87a43e736b27b3ea4f624262f30ec9e68a",
+          "size": 273047,
+          "dataset_key": "activities",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:34:12.415916+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "activities.json.gz"
+        },
+        {
+          "path": "activities.json.gz",
+          "sha256": "79675cbc65bee81295ae83694d9494e0cd7fa77ed025b93c58bd73fa27a19c6b",
+          "size": 48772,
+          "dataset_key": "activities",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:34:12.415916+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการกิจกรรมวัฒนธรรม; รายการอยู่ใน data.records",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "map_inspiration.json",
+          "sha256": "4df55ca0e4f1976c7958621e433c6bf82c176682e4311cb504138ebc0bf53fd0",
+          "size": 45781118,
+          "dataset_key": "map_inspiration",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:25:37.658613+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "map_inspiration.json.gz"
+        },
+        {
+          "path": "map_inspiration.json.gz",
+          "sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+          "size": 4568988,
+          "dataset_key": "map_inspiration",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:25:37.658613+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของ Map/Inspiration; รายการทุนวัฒนธรรมอยู่ใน data.records",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "products.json",
+          "sha256": "cc127090b4e4a5ce25d4148074d35bfe45403ddd67246c76933dfa5932d90a03",
+          "size": 457507,
+          "dataset_key": "products",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:32:52.774837+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "products.json.gz"
+        },
+        {
+          "path": "products.json.gz",
+          "sha256": "83a9af1ca44438b000c42527cd7f4faea9d234be8de665511c647ac1e797c47a",
+          "size": 59066,
+          "dataset_key": "products",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:32:52.774837+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการผลิตภัณฑ์วัฒนธรรม; รายการอยู่ใน data.records",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "recreation.json",
+          "sha256": "115d0858fe2de872ab61107e2c07b7cdcf427eec8f53c89b6de8650d090d4566",
+          "size": 427666,
+          "dataset_key": "recreation",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:36:42.639294+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "recreation.json.gz"
+        },
+        {
+          "path": "recreation.json.gz",
+          "sha256": "e29a75b464df332ce4cc5a15b8fc42bf1303061cdc1a83b29ca3c919bb82afa0",
+          "size": 69326,
+          "dataset_key": "recreation",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:36:42.639294+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของรายการนันทนาการ; รายการอยู่ใน data.records",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "team.json",
+          "sha256": "a34a2774ad5defb0ebd0361ab58d240f8e62f6cd9102d536724b164024875c79",
+          "size": 6420,
+          "dataset_key": "team",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:36:43.535113+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "team.json.gz"
+        },
+        {
+          "path": "team.json.gz",
+          "sha256": "b04c0ce988b996e49d630f37d30aec605860a745d252da1a1611ad3758e963a9",
+          "size": 1012,
+          "dataset_key": "team",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T14:36:43.535113+00:00",
+          "grain": "หนึ่งไฟล์ snapshot ของข้อมูลทีมจากต้นทาง; รายการอยู่ใน data.records",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "cd507db3d392b037cd4066ea66b262270c6414fc887538a116dd533331bf73c0",
+          "size": 2745,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-20T14:25:33Z",
+          "grain": "capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "cd507db3d392b037cd4066ea66b262270c6414fc887538a116dd533331bf73c0",
+        "source_id": "f2_culturalmap_university",
+        "run_id": "20260820T142533Z",
+        "fetched_at": "2026-08-20T14:25:33+00:00",
+        "declared_dataset_count": 5,
+        "declared_extra_file_count": 0,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_learning_area_based",
+      "run_id": "20260820T134610Z",
+      "relative_dir": "f2_learning_area_based/20260820T134610Z",
+      "originating_system": "LE Super PMUA area-based dashboard API",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "6ef2bfa023f985bcaa895846324d47a2149a584809d0d818154c86f8e2df3be8",
+          "size": 8831,
+          "dataset_key": "source_readme",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "source_documentation",
+          "provenance_class": "local_bundle_support_not_canonical_manifest_member"
+        },
+        {
+          "path": "area_based.json",
+          "sha256": "71fd37d9687add74a6c57e0996cc89b8c10b9b0fea40851e0c302df719f01853",
+          "size": 590569,
+          "dataset_key": "area_based_response",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "one_area_based_dashboard_response_envelope; participating-business rows in data array",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "area_based_rows.jsonl",
+          "sha256": "b6dbfb2a27dd2a374c8985bbc5fc43c8f61ed8922de4cc33fe30ee1400d65a83",
+          "size": 587790,
+          "dataset_key": "area_based_rows",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "area_based_rows.jsonl.gz"
+        },
+        {
+          "path": "area_based_rows.jsonl.gz",
+          "sha256": "eb0bcc330968519a21eb5b7c77a6105a1161f4b9d623186da94ef4e3de378921",
+          "size": 78182,
+          "dataset_key": "area_based_rows",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T13:03:39+00:00",
+          "grain": "หนึ่งแถว = หนึ่งธุรกิจผู้เข้าร่วมโครงการตาม data array ของต้นทาง",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "area_based_stats.json",
+          "sha256": "238280e869a39c9f4a80c4d543a130a14e1bce8f6c8701276e53f6b5c8e34d65",
+          "size": 33025,
+          "dataset_key": "area_based_stats",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "one_area_based_stats_capture_envelope",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "complete_refresh_summary.json",
+          "sha256": "990cf72163ca5eea6d5c6d623f66a31394600173a0aa6aa03ad6b1659a2c3f25",
+          "size": 35008,
+          "dataset_key": "refresh_summary",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "one_refresh_summary_capture_envelope",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "be3bc959e0c7860625b99eb23049230987a168cb3ca466d3bcbd8beb78561cbb",
+          "size": 1255,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "be3bc959e0c7860625b99eb23049230987a168cb3ca466d3bcbd8beb78561cbb",
+        "source_id": "f2_learning_area_based",
+        "run_id": "20260820T134610Z",
+        "fetched_at": "2026-08-20T13:03:39+00:00",
+        "declared_dataset_count": 1,
+        "declared_extra_file_count": 3,
+        "status": "canonical_manifest_declared_hashes_reconciled"
+      }
+    },
+    {
+      "source_id": "f2_learning_dashboard",
+      "run_id": "20260820T134600Z",
+      "relative_dir": "f2_learning_dashboard/20260820T134600Z",
+      "originating_system": "LE Super PMUA dashboard API",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "d8751c1619834ae5f4175c7cd7cebdc75ca795bb0257d2c72f3b1bfa19d2648f",
+          "size": 8906,
+          "dataset_key": "source_readme",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "source_documentation",
+          "provenance_class": "local_bundle_support_not_canonical_manifest_member"
+        },
+        {
+          "path": "dashboard_keys.jsonl",
+          "sha256": "b43ba17ad73a3303691be1728d670aa97cfb952c3b7518a5483ec0a01b49f01c",
+          "size": 335,
+          "dataset_key": "dashboard_keys",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39+00:00",
+          "grain": "expanded_local_copy_of_canonical_evidence",
+          "provenance_class": "local_expanded_copy_of_canonical_evidence",
+          "canonical_evidence_path": "dashboard_keys.jsonl.gz"
+        },
+        {
+          "path": "dashboard_keys.jsonl.gz",
+          "sha256": "79fa503b30c182c8ef1eb99b27a9c4513e3084d23499e701573fac045b547f4e",
+          "size": 147,
+          "dataset_key": "dashboard_keys",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T13:03:39+00:00",
+          "grain": "หนึ่งแถว = หนึ่งคีย์บนสุดของ public dashboard aggregate response",
+          "provenance_class": "canonical_manifest_dataset"
+        },
+        {
+          "path": "learning_dashboard.json",
+          "sha256": "a4cd0b44e1e99009b267945b753d0d35283698edeb65b38e0c1acebe119e39ca",
+          "size": 4858,
+          "dataset_key": "learning_dashboard_response",
+          "kind": "evidence",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "one_learning_dashboard_aggregate_response_envelope; top-level aggregate dimensions",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "complete_refresh_summary.json",
+          "sha256": "b126dfb5ce66ccda37370b61a145905d95d120815f9f6096df6af83708431b70",
+          "size": 304,
+          "dataset_key": "refresh_summary",
+          "kind": "support",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "one_refresh_summary_capture_envelope",
+          "provenance_class": "canonical_manifest_support"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "dc8340d461565e5e86b05abc934b1ff6a215b22d351e3c7cd86869d418f6c04c",
+          "size": 1225,
+          "dataset_key": "capture_manifest",
+          "kind": "manifest",
+          "captured_at": "2026-08-20T13:03:39Z",
+          "grain": "capture_manifest",
+          "provenance_class": "canonical_manifest"
+        }
+      ],
+      "manifest_validation": {
+        "path": "manifest.json",
+        "sha256": "dc8340d461565e5e86b05abc934b1ff6a215b22d351e3c7cd86869d418f6c04c",
+        "source_id": "f2_learning_dashboard",
+        "run_id": "20260820T134600Z",
+        "fetched_at": "2026-08-20T13:03:39+00:00",
+        "declared_dataset_count": 1,
+        "declared_extra_file_count": 2,
+        "status": "canonical_manifest_declared_hashes_reconciled_except_documented_learning_response_exception"
+      }
+    }
+  ],
+  "integrity_exceptions": [
+    {
+      "source_id": "f2_learning_dashboard",
+      "run_id": "20260820T134600Z",
+      "path": "learning_dashboard.json",
+      "original_declared_sha256": "b6c57283f16e410bebce8c31643a163f2809f3c985ad7858d92bc4478cf10598",
+      "actual_pinned_sha256": "a4cd0b44e1e99009b267945b753d0d35283698edeb65b38e0c1acebe119e39ca",
+      "reason": "The supplied parseable response has this documented mismatch; its cause is unknown. Validation accepts only this exact declared-to-actual pair.",
+      "acceptance_reference": "derived/pilots/learning-dashboard-v1/integrity_reviews.csv: learning_dashboard_integrity_review_4d661a19283b458fb7b0"
+    }
+  ]
+}
