@@ -234,6 +234,60 @@ def test_public_work_contexts_survive_json_csv_and_serving_validation(tmp_path, 
         public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)
 
 
+@pytest.mark.parametrize("change", ["bytes", "contexts", "approval", "restricted"])
+def test_serving_policy_cache_rechecks_changed_bytes_or_policy(tmp_path, monkeypatch, change):
+    import os
+    from app import public_artifacts
+
+    root, contracts_root, _ = _fixture(tmp_path)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["field_contexts"] = {"/items/*/owner_name": "work_attribution"}
+    _write_json(contract_path, contract)
+    artifact_path = root / "data/public/artifact.json"
+    payload = {"items": [{
+        "id": "one", "source_id": "source_a", "owner_name": "Synthetic author",
+        "note": "x" * len("private@example.org"),
+    }]}
+    _write_json(artifact_path, payload)
+    permissions = ({"source_a"}, set())
+    monkeypatch.setattr(public_artifacts, "PROJECT_ROOT", root)
+    monkeypatch.setattr(public_artifacts, "_approved_and_restricted_source_ids", lambda: permissions)
+    inputs = public_artifacts.artifact_inputs(root / "data/public", enforce_core=False)
+    original = public_artifacts._privacy_problems
+    scans = []
+
+    def scan(*args, **kwargs):
+        scans.append(True)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(public_artifacts, "_privacy_problems", scan)
+    def validate():
+        return public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)
+
+    # An unchanged scan is reused, but mutable payloads are never reused.
+    first = validate()[0][1]
+    first["items"][0]["note"] = "caller mutation"
+    assert validate()[0][1] == payload
+    assert len(scans) == 1
+
+    if change == "bytes":
+        before = artifact_path.stat()
+        payload["items"][0]["note"] = "private@example.org"
+        _write_json(artifact_path, payload)
+        os.utime(artifact_path, ns=(before.st_atime_ns, before.st_mtime_ns))
+        assert artifact_path.stat().st_size == before.st_size
+    elif change == "contexts":
+        contract["outputs"][0]["field_contexts"] = {}
+        _write_json(contract_path, contract)
+    elif change == "approval":
+        permissions[0].clear()
+    else:
+        permissions[1].add("source_a")
+    with pytest.raises(RuntimeError, match="public artifact policy rejected"):
+        validate()
+
+
 def _geojson_payload(
     geometries: list[dict[str, object]],
     *,

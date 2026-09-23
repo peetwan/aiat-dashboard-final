@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections import Counter
+import threading
+from collections import Counter, OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -26,6 +27,7 @@ SAFE_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_/-]*$")
 SOURCE_ID_RE = re.compile(r"^[a-z0-9_]+$")
 MAX_ARTIFACT_KEY_LENGTH = 200
 MAX_ARTIFACT_GROUP_LENGTH = 60
+_POLICY_CACHE_LIMIT = 512
 SENSITIVE_KEY_RE = re.compile(
     r"(?:^|_)(?:phone|telephone|tel|mobile|email|e_mail|contact|address)(?:_|$)"
 )
@@ -106,6 +108,10 @@ class ArtifactInput:
     path: Path
     province_code: str | None = None
     source_ids: tuple[str, ...] = ()
+
+
+_policy_cache: OrderedDict[tuple[ArtifactInput, str, str], None] = OrderedDict()
+_policy_cache_lock = threading.RLock()
 
 
 def _approved_and_restricted_source_ids() -> tuple[set[str], set[str]]:
@@ -539,6 +545,25 @@ def validate_public_artifacts(
         )
         binding = bindings.get(relative)
         contexts = binding.output.get("field_contexts", {}) if binding else {}
+        # Always reload and hash the file. Only successful privacy scans can be
+        # reused, bound to the exact bytes, artifact identity and current policy.
+        # Keep hashes only: callers receive a fresh payload on every validation.
+        policy_digest = hashlib.sha256(json.dumps(
+            {
+                "relative_path": relative,
+                "contract": binding.contract if binding else None,
+                "output": binding.output if binding else None,
+                "approved_source_ids": sorted(approved_source_ids),
+                "restricted_source_ids": sorted(restricted_source_ids),
+            },
+            sort_keys=True,
+        ).encode("utf-8")).hexdigest()
+        cache_key = (item, digest, policy_digest)
+        with _policy_cache_lock:
+            if cache_key in _policy_cache:
+                _policy_cache.move_to_end(cache_key)
+                continue
+        previous_violations = len(violations)
         if contexts:
             if not set(binding.contract["source_ids"]).issubset(approved_source_ids):
                 violations.append((item.key, "field context source is not approved"))
@@ -558,6 +583,12 @@ def validate_public_artifacts(
             violations.extend(
                 _artifact_policy_violations(item, payload, restricted_source_ids)
             )
+        if len(violations) == previous_violations:
+            with _policy_cache_lock:
+                _policy_cache[cache_key] = None
+                _policy_cache.move_to_end(cache_key)
+                while len(_policy_cache) > _POLICY_CACHE_LIMIT:
+                    _policy_cache.popitem(last=False)
     if violations:
         evidence = "; ".join(f"{path}: {reason}" for path, reason in violations[:20])
         remainder = len(violations) - 20

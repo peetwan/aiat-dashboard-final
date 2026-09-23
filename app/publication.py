@@ -349,7 +349,12 @@ def _read_json_file(path: Path) -> dict[str, Any]:
 
 
 def _normalise_key(value: object) -> str:
-    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(value))
+    return _normalise_text_key(str(value))
+
+
+@lru_cache(maxsize=4096)
+def _normalise_text_key(value: str) -> str:
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
     return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
 
 
@@ -369,9 +374,13 @@ def _has_person_level_private_value(value: str) -> bool:
 
 
 def _tainted_report_key(text: str, restricted_source_ids: set[str]) -> bool:
+    return text in restricted_source_ids or _private_report_key(text)
+
+
+@lru_cache(maxsize=4096)
+def _private_report_key(text: str) -> bool:
     return (
-        text in restricted_source_ids
-        or EMAIL_RE.search(text) is not None
+        EMAIL_RE.search(text) is not None
         or PHONE_RE.search(text) is not None
         or SOCIAL_CONTACT_RE.search(text) is not None
         or LABELLED_CONTACT_RE.search(text) is not None
@@ -662,6 +671,30 @@ def _privacy_problems(
 ) -> list[str]:
     problems: list[str] = []
     contexts = validate_field_contexts({} if field_contexts is None else field_contexts)
+    context_containers = {
+        pointer[:index]
+        for pointer in contexts
+        for index, character in enumerate(pointer)
+        if character == "/" and index
+    }
+
+    @lru_cache(maxsize=4096)
+    def key_metadata(key: str) -> tuple[str, str | None, bool, str, tuple[str, ...]]:
+        # Repeated schema keys need the same scans in every record. Cache only
+        # path/value-independent facts, for this audit and its source policy.
+        return (
+            _normalise_key(key),
+            key_kind(key),
+            _sensitive_key(key, object()),
+            _report_key_path("", key, restricted_source_ids=restricted_source_ids),
+            tuple(
+                _privacy_reasons_for_text(
+                    key,
+                    restricted_source_ids=restricted_source_ids,
+                    allow_restricted=True,
+                )
+            ),
+        )
 
     def restricted_allowed(path: str) -> bool:
         return (
@@ -683,8 +716,8 @@ def _privacy_problems(
         if isinstance(value, dict):
             has_direct_private_identity = any(
                 (
-                    _normalise_key(key) in {"id", "case_id", "record_id"}
-                    or _normalise_key(key).endswith(("_id", "_key"))
+                    key_metadata(str(key))[0] in {"id", "case_id", "record_id"}
+                    or key_metadata(str(key))[0].endswith(("_id", "_key"))
                 )
                 and child not in (None, "")
                 and not isinstance(child, (bool, dict, list))
@@ -693,25 +726,18 @@ def _privacy_problems(
             for key, child in value.items():
                 child_pointer = pointer_child(pointer, key)
                 child_context = contexts.get(child_pointer)
-                provisional_path = _report_key_path(
-                    path,
-                    key,
-                    restricted_source_ids=restricted_source_ids,
+                normalized_key, kind, sensitive_key, report_suffix, text_reasons = (
+                    key_metadata(str(key))
                 )
-                normalized_key = _normalise_key(key)
-                key_reasons = _privacy_reasons_for_text(
-                    str(key),
-                    restricted_source_ids=restricted_source_ids,
-                    allow_restricted=restricted_allowed(provisional_path),
-                )
+                provisional_path = path + report_suffix
+                key_reasons = list(text_reasons)
+                if str(key) in restricted_source_ids and not restricted_allowed(
+                    provisional_path
+                ):
+                    key_reasons.insert(0, "restricted source identifier")
                 # A suspicious map key is data, not a safe field label.  Never
                 # include it in the diagnostic path or in a later child error.
-                child_path = _report_key_path(
-                    path,
-                    key,
-                    redact=bool(key_reasons),
-                    restricted_source_ids=restricted_source_ids,
-                )
+                child_path = f"{path}.<map-key>" if key_reasons else provisional_path
                 for reason in key_reasons:
                     append(child_path, f"{reason} in object key")
                 if normalized_key in APPROVED_EXCLUDED_AUDIT_KEYS:
@@ -732,17 +758,21 @@ def _privacy_problems(
                     )
                     if not valid_exclusion_audit:
                         append(child_path, "invalid restricted-value exclusion audit")
-                sensitive = _sensitive_key(str(key), child) or normalized_key == "rights_owner" or (
+                sensitive = (
+                    sensitive_key and not _is_negative_audit(normalized_key, child)
+                ) or normalized_key == "rights_owner" or (
                     normalized_key == "name" and ".research_leads" in child_path
                 )
                 allowed = not isinstance(child, (dict, list)) and context_allows_key(str(key), child_context)
                 allowed = allowed or is_contact_exposure_metadata(pointer.rsplit("/", 1)[-1], str(key), child)
                 # Unknown sensitive kinds never acquire an exception merely
                 # because a context exists (e.g. a future private identifier).
-                if sensitive and key_kind(str(key)) is None and normalized_key != "name":
+                if sensitive and kind is None and normalized_key != "name":
                     allowed = False
-                descend = isinstance(child, (dict, list)) and key_kind(str(key)) != "private" and any(
-                    p.startswith(child_pointer + "/") for p in contexts
+                descend = (
+                    isinstance(child, (dict, list))
+                    and kind != "private"
+                    and child_pointer in context_containers
                 )
                 if (sensitive or protected) and not allowed and not descend:
                     append(child_path, "private/contact field")
