@@ -4,6 +4,16 @@ import pytest
 from tools.f2_pipeline.common import output_directory, rename_new_directory
 
 
+def test_native_commit_preserves_the_complete_staged_directory(tmp_path):
+    source, destination = tmp_path / "source", tmp_path / "destination"
+    nested = source / "nested"
+    nested.mkdir(parents=True)
+    (nested / "built.json").write_bytes(b'{"count": 7}\n')
+    rename_new_directory(source, destination)
+    assert not source.exists()
+    assert (destination / "nested/built.json").read_bytes() == b'{"count": 7}\n'
+
+
 
 
 def test_native_commit_never_replaces_existing_empty_directory(tmp_path):

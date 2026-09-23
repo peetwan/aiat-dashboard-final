@@ -294,6 +294,11 @@ def ensure_new_output(output: Path, protected: tuple[Path, ...]) -> Path:
 
 def rename_new_directory(source: Path, destination: Path) -> None:
     """Commit atomically without replacing a concurrently created destination."""
+    if sys.platform == "win32":
+        # Windows rename fails if the destination exists, including empty dirs.
+        # Do not use os.replace: the no-overwrite guarantee is part of the build.
+        os.rename(source, destination)
+        return
     libc = ctypes.CDLL(None, use_errno=True)
     if sys.platform == "darwin":
         rename = libc.renamex_np

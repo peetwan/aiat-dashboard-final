@@ -40,9 +40,14 @@ def test_input_contract_rejects_incomplete_or_misattributed_bundle(build_inputs,
     elif mode == "wrong_source":
         source["source_id"] = "another_source"
     else:
-        (fixture["source_dir"] / "linked.json").symlink_to(
-            fixture["source_dir"] / "team.json"
-        )
+        try:
+            (fixture["source_dir"] / "linked.json").symlink_to(
+                fixture["source_dir"] / "team.json"
+            )
+        except OSError as error:
+            if getattr(error, "winerror", None) == 1314:
+                pytest.skip("Windows requires permission to create the symlink fixture")
+            raise
     with pytest.raises(PipelineError):
         validate_sources(lock, fixture["evidence_root"])
 
