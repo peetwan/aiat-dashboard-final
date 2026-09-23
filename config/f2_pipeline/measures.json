@@ -1,0 +1,729 @@
+{
+  "schema_version": 1,
+  "reference_release": "f2-dashboard-snapshot-v2",
+  "year_filter": false,
+  "measures": [
+    {
+      "measure_id": "K01A",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k01a",
+      "display_order": 1,
+      "label_th": "จังหวัดที่มีหลักฐานกิจกรรมหรือความครอบคลุมโครงการ",
+      "requested_label_th": "พื้นที่เป้าหมาย",
+      "unit": "province",
+      "baseline_value": 77,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT province_code with qualifying programme coverage evidence",
+      "scope": "Qualifying programme activity, area, product, participation and innovation-use evidence across supplied sources",
+      "limitations": "77 provinces with some programme evidence does not establish complete data for every KPI in every province. Institution-only addresses do not qualify.",
+      "drilldown": "Province -> coverage assertions -> source record",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K01B",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k01b",
+      "display_order": 2,
+      "label_th": "พื้นที่วัฒนธรรมตามทะเบียนที่ใช้ในชุดส่งมอบ",
+      "requested_label_th": "พื้นที่วัฒนธรรม",
+      "unit": "area",
+      "baseline_value": 491,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT eligible global_area_id; 16 AtLocal + 476 Cultural Map - 1 supported overlap",
+      "scope": "AtLocal areas and Cultural Map Cultural Space subjects",
+      "limitations": "Other mapped categories are not automatically cultural areas. Unresolved possible identities remain separately provisional.",
+      "drilldown": "Area -> source memberships -> names, descriptions, locations and source records",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K02",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k02",
+      "display_order": 3,
+      "label_th": "นวัตกรตามยอดรวมที่ PMUA รายงาน",
+      "requested_label_th": "สร้างนวัตกรชุมชน",
+      "unit": "person",
+      "baseline_value": 12251,
+      "status": "source_aggregate",
+      "formula": "SUM PMUA innovators_all province total_inno; reconcile to reported headline",
+      "scope": "PMUA all-scope captured aggregate, without a year filter",
+      "limitations": "76 supplied province entries. Missing province entry means unavailable, not zero. Named-person companions cannot explain or be subtracted from this total. Levels retain source labels without inferred skill meaning.",
+      "drilldown": "Province and source-reported level within province; no individual roster for the headline",
+      "supported_filters": [
+        "province",
+        "source_level"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ],
+        [
+          "source_level"
+        ],
+        [
+          "province",
+          "source_level"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K03",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k03",
+      "display_order": 4,
+      "label_th": "กิจกรรมโครงการที่มีรายงาน",
+      "requested_label_th": "เกิดกิจกรรมทางวัฒนธรรมรวม",
+      "unit": "activity",
+      "baseline_value": 50,
+      "status": "substitute_measure",
+      "formula": "COUNT DISTINCT global_activity_id in accepted reported activities",
+      "scope": "AtLocal, Cultural Map and iCommunity reported occurrences, including workshops and meetings",
+      "limitations": "Publications and sessions are not additional activities. Source-reported occurrence does not prove completion. Overseas activities remain in the overall total.",
+      "drilldown": "Activity -> publications, dates, venues and sessions",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K04",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k04",
+      "display_order": 5,
+      "label_th": "นวัตกรรมที่มีหลักฐานความพร้อมตามเกณฑ์",
+      "requested_label_th": "เทคโนโลยีที่เหมาะสมและนวัตกรรมพร้อมใช้",
+      "unit": "innovation",
+      "baseline_value": 514,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT global_innovation_id with at least one eligible readiness assessment",
+      "scope": "iCommunity, PMUA AppTech, RINMP and AppTech MRU after accepted identity resolution",
+      "limitations": "Numeric 8-9 qualifies; valid numeric level takes precedence over a label within an assessment. Explicit ready label is fallback only. Apply iCommunity export-first and proven supersession. Preserve conflicts; no canonical maximum or verified-current claim.",
+      "drilldown": "Innovation -> all readiness assertions, source identities and use locations",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K05",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k05",
+      "display_order": 6,
+      "label_th": "ธุรกิจ ร้านค้า และกลุ่มผู้ดำเนินการที่มีหลักฐานรองรับ",
+      "requested_label_th": "ผู้ประกอบการจำหน่ายสินค้าและบริการเชิงวัฒนธรรม",
+      "unit": "operator",
+      "baseline_value": 3731,
+      "status": "partial_coverage",
+      "formula": "COUNT DISTINCT global_operator_id after reviewed business admission and accepted identity reconciliation",
+      "scope": "Accepted catalogue businesses plus reviewed Learning directory, Cultural Map/AtLocal narratives and iCommunity/PMUA/RINMP/MRU business evidence; seven sources contribute",
+      "limitations": "Partial coverage of reviewed evidence, not a complete business population. Shops and supported producers qualify; people, projects and unspecified households do not each create a business. Learning directory evidence does not create a K07 product. Unresolved eligibility is excluded; admitted possible duplicates retain flags. Unknown business geography is not borrowed from products or projects.",
+      "drilldown": "Business -> crosswalk -> seller/reviewed evidence -> confirmed product relationships and supported locations",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K06",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k06",
+      "display_order": 7,
+      "label_th": "ผู้ประกอบการวัฒนธรรม — ยังไม่คำนวณในชุดส่งมอบนี้",
+      "requested_label_th": "ผู้ประกอบการวัฒนธรรม",
+      "unit": "person",
+      "baseline_value": null,
+      "status": "deferred",
+      "formula": "Not calculated in this release",
+      "scope": "Future systematic person-role-business discovery and qualification",
+      "limitations": "The original 58-person inventory reflects uneven, incomplete discovery. User deferred calculation entirely. Neither 58 nor the 156-person pilot is a released result; absence of a total does not mean absence of supporting examples.",
+      "drilldown": "Method and deferral explanation only",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "deferred_or_insufficient"
+    },
+    {
+      "measure_id": "K07",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k07",
+      "display_order": 8,
+      "label_th": "ตระกูลสินค้า บริการ และผลงานที่มีหลักฐานรองรับ",
+      "requested_label_th": "พัฒนาผลิตภัณฑ์และบริการเชิงวัฒนธรรม",
+      "unit": "offering_family",
+      "baseline_value": 3729,
+      "status": "substitute_partial_coverage",
+      "formula": "COUNT DISTINCT family_id; ordinary variants within a supported maker context share one family; a broad range adds no extra parent count",
+      "scope": "Accepted catalogue offerings plus reviewed actual outputs, prototypes, completed designs and systems from AtLocal, Cultural Map, iCommunity, PMUA, RINMP and AppTech MRU; Learning directory-only product claims excluded",
+      "limitations": "Partial reviewed coverage. Existence or sale does not prove programme development. Ordinary flavour/filling/colour/size variants count once per supported family; distinct finished forms and confirmed designs remain separate. Global offering row count is not the KPI. Unenumerated totals are non-additive. Known unresolved identity and geography limitations remain visible.",
+      "drilldown": "Family -> offering_family_members -> preserved offering identities -> listings/reviewed evidence, variants, innovation context, relationships, locations, prices and media",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K08",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k08",
+      "display_order": 9,
+      "label_th": "ธุรกิจชุมชนที่พัฒนาขีดความสามารถ — ยังไม่คำนวณในชุดส่งมอบนี้",
+      "requested_label_th": "พัฒนาขีดความสามารถของผู้ประกอบการในธุรกิจชุมชน",
+      "unit": "business",
+      "baseline_value": null,
+      "status": "deferred",
+      "formula": "Not calculated; accepted narrower score-linked business measure also deferred",
+      "scope": "Future business/group identity linked to an affiliated person's complete positive assessment in relevant context",
+      "limitations": "984 participating units do not prove improvement. 163 people with increased scores are not 163 businesses. Person-business membership and business deduplication are not finalized; qualitative improvement cannot replace numeric score evidence.",
+      "drilldown": "Separate participation and person-assessment companions only",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "deferred_or_insufficient"
+    },
+    {
+      "measure_id": "K09",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k09",
+      "display_order": 10,
+      "label_th": "การจ้างงานในพื้นที่ตามที่แหล่งข้อมูลรายงาน",
+      "requested_label_th": "เกิดรายได้จากการจ้างงานในพื้นที่",
+      "unit": "person_per_month",
+      "baseline_value": 10315,
+      "status": "source_aggregate",
+      "formula": "SUM six regional localEmployeeAmount values",
+      "scope": "Learning dashboard employment aggregate",
+      "limitations": "Employment count, not an income amount. No employee/business roster or province allocation. Monthly source unit does not identify the observation calendar month.",
+      "drilldown": "Six regional employment components",
+      "supported_filters": [
+        "region"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "region"
+        ]
+      ],
+      "unsupported_filters": [
+        "province",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K10",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k10",
+      "display_order": 11,
+      "label_th": "เงินที่รายงานว่าจ่ายแก่แรงงานและผู้จัดหาทรัพยากรในพื้นที่",
+      "requested_label_th": "สร้างรายได้กลับสู่ท้องถิ่น",
+      "unit": "million_THB_per_month",
+      "baseline_value": 24.069508,
+      "status": "assumed_aggregate",
+      "formula": "(SUM localEmployeeExpense + SUM localResourceExpense) / 1000000 = (11701018 + 12368490) / 1000000",
+      "scope": "Learning dashboard regional worker payments and resource spending",
+      "limitations": "Assumes additive local receipts without overlap and compatible monthly periods. Not verified net income. Display 24.1, retain exact 24.069508. Do not add the alternative or Wallet totals.",
+      "drilldown": "Six regions and worker/resource components; underlying THB amounts retained",
+      "supported_filters": [
+        "region",
+        "component"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "region"
+        ],
+        [
+          "component"
+        ],
+        [
+          "region",
+          "component"
+        ]
+      ],
+      "unsupported_filters": [
+        "province",
+        "category",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "K11A",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k11a",
+      "display_order": 12,
+      "label_th": "คลัสเทอร์อุตสาหกรรม — ไม่มีข้อมูลเพียงพอ",
+      "requested_label_th": "ขับเคลื่อนคลัสเทอร์อุตสาหกรรมในพื้นที่",
+      "unit": "cluster",
+      "baseline_value": null,
+      "status": "insufficient_data",
+      "formula": "Unavailable; no supported cluster inventory",
+      "scope": "Supplied snapshots",
+      "limitations": "Industry category labels do not establish distinct cluster identities. Null is not zero.",
+      "drilldown": "Insufficiency explanation only",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "deferred_or_insufficient"
+    },
+    {
+      "measure_id": "K11B",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k11b",
+      "display_order": 13,
+      "label_th": "จังหวัดที่มีคลัสเทอร์ — ไม่มีข้อมูลเพียงพอ",
+      "requested_label_th": "จังหวัดที่มีคลัสเทอร์อุตสาหกรรม",
+      "unit": "province",
+      "baseline_value": null,
+      "status": "insufficient_data",
+      "formula": "Unavailable; no supported cluster-province relationships",
+      "scope": "Supplied snapshots",
+      "limitations": "General programme provinces cannot substitute for cluster geography. Null is not zero.",
+      "drilldown": "Insufficiency explanation only",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "deferred_or_insufficient"
+    },
+    {
+      "measure_id": "K12",
+      "kind": "headline",
+      "parent_measure_id": null,
+      "topic_id": "k12",
+      "display_order": 14,
+      "label_th": "รายการทุนหรือเรื่องทางวัฒนธรรมในแผนที่หลังขจัดรายการซ้ำ",
+      "requested_label_th": "ระบบสารสนเทศด้านวัฒนธรรมและแผนที่วัฒนธรรม",
+      "unit": "mapped_subject",
+      "baseline_value": 5141,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT eligible Cultural Map map_inspiration subject_id",
+      "scope": "All map_inspiration categories after accepted source deduplication",
+      "limitations": "Counts mapped subjects, not information systems or websites. Multiple category memberships do not add subjects. Other sources do not expand this user-defined population.",
+      "drilldown": "Subject -> listings, descriptions, categories, media and locations",
+      "supported_filters": [
+        "province",
+        "category"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ],
+        [
+          "category"
+        ],
+        [
+          "province",
+          "category"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C02_COMMUNITY",
+      "kind": "companion",
+      "parent_measure_id": "K02",
+      "topic_id": "k02",
+      "display_order": 15,
+      "label_th": "บุคคลที่มีหลักฐานนวัตกรชุมชนในทะเบียน",
+      "requested_label_th": null,
+      "unit": "person",
+      "baseline_value": 4433,
+      "status": "partial_coverage",
+      "formula": "COUNT DISTINCT global_person_id in community_innovator contributions",
+      "scope": "Available named-person role inventory",
+      "limitations": "Related inventory; overlap with PMUA aggregate is unestablished. Never add to or subtract from 12251.",
+      "drilldown": "Person -> qualifying role assertions -> source identity",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C02_BROADER",
+      "kind": "companion",
+      "parent_measure_id": "K02",
+      "topic_id": "k02",
+      "display_order": 16,
+      "label_th": "บุคคลตามนิยามนวัตกรที่กว้างขึ้น",
+      "requested_label_th": null,
+      "unit": "person",
+      "baseline_value": 4640,
+      "status": "partial_coverage",
+      "formula": "COUNT DISTINCT global_person_id in broader_innovator contributions",
+      "scope": "Community innovators, inventors and explicitly identified innovators",
+      "limitations": "Includes C02_COMMUNITY. Researcher or owner alone does not qualify. Never sum these inventories.",
+      "drilldown": "Person -> qualifying role assertions -> source identity",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C04_LISTED",
+      "kind": "companion",
+      "parent_measure_id": "K04",
+      "topic_id": "k04",
+      "display_order": 17,
+      "label_th": "นวัตกรรมที่มีรายการทั้งหมด",
+      "requested_label_th": null,
+      "unit": "innovation",
+      "baseline_value": 2399,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT global_innovation_id in broader listed inventory",
+      "scope": "Four innovation sources after accepted identity resolution",
+      "limitations": "Includes K04. Records without qualifying readiness may have missing evidence rather than proven unreadiness.",
+      "drilldown": "Innovation -> source records and all readiness evidence",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C08_PARTICIPATING",
+      "kind": "companion",
+      "parent_measure_id": "K08",
+      "topic_id": "k08",
+      "display_order": 18,
+      "label_th": "ธุรกิจหรือหน่วยธุรกิจที่มีหลักฐานเข้าร่วมโครงการ",
+      "requested_label_th": null,
+      "unit": "participating_business_unit",
+      "baseline_value": 984,
+      "status": "provisional_identity_count",
+      "formula": "COUNT DISTINCT contributing Learning area-based business_id",
+      "scope": "Learning area-based participating-business directory",
+      "limitations": "967 provisional units and 17 supported merged businesses. Participation is not improvement. Not an established parent population of person assessments or the 375 aggregate.",
+      "drilldown": "Business unit -> participations, projects, research units, locations and source records",
+      "supported_filters": [
+        "province"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "province"
+        ]
+      ],
+      "unsupported_filters": [
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C08_REPORTED_BUSINESSES",
+      "kind": "companion",
+      "parent_measure_id": "K08",
+      "topic_id": "k08",
+      "display_order": 19,
+      "label_th": "ธุรกิจตามยอดรวม Learning dashboard",
+      "requested_label_th": null,
+      "unit": "business",
+      "baseline_value": 375,
+      "status": "source_aggregate",
+      "formula": "SUM counts within each independent dimension; each reconciles to 375",
+      "scope": "Learning dashboard four independent marginal breakdowns",
+      "limitations": "No business roster or joint cross-tab. Never sum dimensions or add to 984. A missing member is unavailable unless the source explicitly reports zero.",
+      "drilldown": "One supplied count dimension at a time",
+      "supported_filters": [
+        "source_dimension"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "source_dimension"
+        ]
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C08_ASSESSED_PEOPLE",
+      "kind": "companion",
+      "parent_measure_id": "K08",
+      "topic_id": "k08",
+      "display_order": 20,
+      "label_th": "บุคคลที่มีชุดคะแนนก่อนและหลังครบ",
+      "requested_label_th": null,
+      "unit": "person",
+      "baseline_value": 266,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT global person linked to a complete iCommunity assessment",
+      "scope": "352 complete source-reported assessments, with within-assessment score pairs",
+      "limitations": "Multiple assessments per person do not add people. Undated source assessments are not a verified latest score.",
+      "drilldown": "Person -> assessments -> start/current scores by dimension and observation context",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C08_INCREASED_PEOPLE",
+      "kind": "companion",
+      "parent_measure_id": "K08",
+      "topic_id": "k08",
+      "display_order": 21,
+      "label_th": "บุคคลที่รายงานคะแนนเพิ่มขึ้นอย่างน้อยหนึ่งด้าน",
+      "requested_label_th": null,
+      "unit": "person",
+      "baseline_value": 163,
+      "status": "available_snapshot",
+      "formula": "COUNT DISTINCT global person with at least one complete assessment having any dimension delta > 0",
+      "scope": "iCommunity complete assessment pairs",
+      "limitations": "Subset of C08_ASSESSED_PEOPLE, not businesses. Mixed increases/decreases remain visible. Missing assessments do not imply no improvement.",
+      "drilldown": "Person -> qualifying and other assessments -> each dimension's scores and delta",
+      "supported_filters": [],
+      "permitted_filter_combinations": [
+        []
+      ],
+      "unsupported_filters": [
+        "province",
+        "region",
+        "category",
+        "component",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    },
+    {
+      "measure_id": "C10_ALTERNATIVE",
+      "kind": "companion",
+      "parent_measure_id": "K10",
+      "topic_id": "k10",
+      "display_order": 22,
+      "label_th": "สูตรทางเลือกเพื่ออธิบายตัวเลขรายได้เดิม",
+      "requested_label_th": null,
+      "unit": "million_THB_per_month",
+      "baseline_value": 212.46149,
+      "status": "assumed_historical_reconstruction",
+      "formula": "(SUM localResourceExpense + excludedResourceExpense) / 1000000 = (12368490 + 200093000) / 1000000",
+      "scope": "Learning dashboard resource spending and separate excluded-resource amount",
+      "limitations": "Display 212.5. Excluded amount meaning and monthly-period compatibility remain assumptions. Matching the old display is not verification. Never add this alternative to K10.",
+      "drilldown": "Regional resource amounts and the separately labelled excluded amount",
+      "supported_filters": [
+        "region",
+        "component"
+      ],
+      "permitted_filter_combinations": [
+        [],
+        [
+          "region"
+        ],
+        [
+          "component"
+        ],
+        [
+          "region",
+          "component"
+        ]
+      ],
+      "unsupported_filters": [
+        "province",
+        "category",
+        "source_level",
+        "source_dimension"
+      ],
+      "baseline_availability": "available_baseline"
+    }
+  ]
+}

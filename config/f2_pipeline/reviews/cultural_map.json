@@ -1,0 +1,2028 @@
+{
+  "geography_reference": {
+    "directory": "config/f2_pipeline/geography",
+    "manifest_file": "thailand_geography_manifest.json",
+    "manifest_sha256": "3ddfdab53ed14c3813deff6050fbb3e4c9edf5b0edb296dafd90418ee3c52492",
+    "required_files": {
+      "districts.json": "e79d617f35ca4099b43856b8b7634ed44b079fb7f0b024b0942604eb5d540c03",
+      "provinces.json": "bf46bb07e3e1a58552504a557cbd070e12ec794ef0319990294d456d3466339a",
+      "subdistricts.json": "c7f0e62ab7ccaf135a11a48105e62f846c633103ce21e933d5e5227b143a2916"
+    }
+  },
+  "location_decisions": {
+    "overrides": [],
+    "policy": "K12 province membership is derived only from each pinned mapped-subject location through the pinned Thai hierarchy; retain all raw claims and do not select a replacement location."
+  },
+  "review_id": "cultural-map-k12-subject-identity-v1",
+  "schema_version": 1,
+  "scope": "K12 Cultural Map mapped subjects only",
+  "source": {
+    "dataset_key": "map_inspiration",
+    "record_grain": "capture envelope data.records",
+    "run_id": "20260820T142533Z",
+    "source_id": "f2_culturalmap_university",
+    "validation": {
+      "accepted_review_source_sha256": "ef57d4855fadc6b9281558605ec59184b182afeea2410fa7bcd3f358667289a4",
+      "capture_sha256": "4df55ca0e4f1976c7958621e433c6bf82c176682e4311cb504138ebc0bf53fd0",
+      "compressed_capture_sha256": "0be428daa8dada947ad531aa6a99475cdcbb1672c934ac37be881919c1d3bc95",
+      "record_count": 5258
+    }
+  },
+  "subject_identity": {
+    "candidate_reviews": [
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-39",
+          "CD-7379"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-119",
+          "CD-2080"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-245",
+          "CD-837"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-273",
+          "CD-4693"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-275",
+          "CD-277",
+          "CD-5663",
+          "CD-5905"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-329",
+          "CD-2638",
+          "CD-7194"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-390",
+          "CD-2841",
+          "CD-4598"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-396",
+          "CD-423"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-447",
+          "CD-4128"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-465",
+          "CD-1292",
+          "CD-7314"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-600",
+          "CD-607"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-609",
+          "CD-847"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-610",
+          "CD-845"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-612",
+          "CD-844"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-613",
+          "CD-849"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-614",
+          "CD-850"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-615",
+          "CD-839"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-616",
+          "CD-838"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-617",
+          "CD-825"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-618",
+          "CD-824"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-620",
+          "CD-822"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-656",
+          "CD-3363",
+          "CD-4873"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-665",
+          "CD-5352"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-682",
+          "CD-5967",
+          "CD-7313"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-712",
+          "CD-842"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-713",
+          "CD-843"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-714",
+          "CD-846"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-715",
+          "CD-2247"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-853",
+          "CD-854"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1001",
+          "CD-1028"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1110",
+          "CD-1563"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1178",
+          "CD-5274",
+          "CD-6763"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1268",
+          "CD-2776"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1440",
+          "CD-1446",
+          "CD-1450"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1456",
+          "CD-1460"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1820",
+          "CD-7061"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-1893",
+          "CD-2388"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2633",
+          "CD-3404"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2686",
+          "CD-5894"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2689",
+          "CD-4127"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2691",
+          "CD-6441"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2766",
+          "CD-3389"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2890",
+          "CD-4136"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2938",
+          "CD-3114"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-2954",
+          "CD-6536"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3041",
+          "CD-5696"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3070",
+          "CD-5700"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3136",
+          "CD-4126"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3216",
+          "CD-4927"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3382",
+          "CD-4640"
+        ]
+      },
+      {
+        "disposition": "partial_merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "partial_merges": [
+          [
+            "CD-5024",
+            "CD-6445"
+          ]
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "separate_components": [
+          [
+            "CD-3386"
+          ],
+          [
+            "CD-5024",
+            "CD-6445"
+          ],
+          [
+            "CD-6057"
+          ]
+        ],
+        "source_ids": [
+          "CD-3386",
+          "CD-5024",
+          "CD-6057",
+          "CD-6445"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3394",
+          "CD-4600"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3395",
+          "CD-3480"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3400",
+          "CD-6406"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3417",
+          "CD-5695"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3586",
+          "CD-3587"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3588",
+          "CD-3628"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3601",
+          "CD-3605"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3630",
+          "CD-3635"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3657",
+          "CD-3658"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3659",
+          "CD-3933"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3769",
+          "CD-5044"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3818",
+          "CD-7165"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3878",
+          "CD-6729"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3942",
+          "CD-4815"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-3944",
+          "CD-5869"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4145",
+          "CD-7015"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4384",
+          "CD-4877"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4390",
+          "CD-4891"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4467",
+          "CD-7300"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4497",
+          "CD-6768",
+          "CD-7479"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4690",
+          "CD-6629"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4758",
+          "CD-6039"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4875",
+          "CD-6424"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4881",
+          "CD-6460"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-4974",
+          "CD-7648"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5022",
+          "CD-6425"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5145",
+          "CD-6119"
+        ]
+      },
+      {
+        "disposition": "unresolved",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5152",
+          "CD-5418"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5481",
+          "CD-6471"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5586",
+          "CD-5891"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5860",
+          "CD-5861"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5883",
+          "CD-5946"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-5886",
+          "CD-5888"
+        ]
+      },
+      {
+        "disposition": "merge",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-6142",
+          "CD-7220"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-6503",
+          "CD-6772"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-6771",
+          "CD-7478"
+        ]
+      },
+      {
+        "disposition": "separate",
+        "evidence_fields": [
+          "title",
+          "data/description/history",
+          "data/description/identity",
+          "data/description/stakeholders",
+          "data/location"
+        ],
+        "reason": "Accepted narrative identity disposition; evaluate only against the pinned map_inspiration capture and listed evidence fields.",
+        "source_ids": [
+          "CD-7224",
+          "CD-7306"
+        ]
+      }
+    ],
+    "cannot_links": [
+      [
+        "CD-2636",
+        "CD-274"
+      ],
+      [
+        "CD-3386",
+        "CD-5024"
+      ],
+      [
+        "CD-3386",
+        "CD-6057"
+      ],
+      [
+        "CD-3386",
+        "CD-6445"
+      ],
+      [
+        "CD-5024",
+        "CD-6057"
+      ],
+      [
+        "CD-6057",
+        "CD-6445"
+      ],
+      [
+        "CD-6244",
+        "CD-7307"
+      ]
+    ],
+    "partial_merge_protection": {
+      "materialized_cannot_link_pair_count": 5,
+      "rule": "Every pair across separate_components is a cannot-link, preventing a reviewed partial merge from becoming transitive."
+    },
+    "reviewed_merges": [
+      [
+        "CD-2134",
+        "CD-2135"
+      ],
+      [
+        "CD-2136",
+        "CD-2137"
+      ],
+      [
+        "CD-2138",
+        "CD-2139",
+        "CD-2140"
+      ],
+      [
+        "CD-2142",
+        "CD-2143",
+        "CD-3203"
+      ],
+      [
+        "CD-2146",
+        "CD-2147",
+        "CD-2148"
+      ],
+      [
+        "CD-2149",
+        "CD-2150"
+      ],
+      [
+        "CD-2151",
+        "CD-2152",
+        "CD-2153"
+      ],
+      [
+        "CD-2157",
+        "CD-2158",
+        "CD-3205"
+      ],
+      [
+        "CD-2159",
+        "CD-2160",
+        "CD-2161"
+      ],
+      [
+        "CD-2162",
+        "CD-2163"
+      ],
+      [
+        "CD-2170",
+        "CD-2171",
+        "CD-2172"
+      ],
+      [
+        "CD-2173",
+        "CD-2174",
+        "CD-2175"
+      ],
+      [
+        "CD-2176",
+        "CD-2179"
+      ],
+      [
+        "CD-2177",
+        "CD-2178"
+      ],
+      [
+        "CD-2181",
+        "CD-2182"
+      ],
+      [
+        "CD-2754",
+        "CD-2755"
+      ],
+      [
+        "CD-2777",
+        "CD-2778",
+        "CD-2779",
+        "CD-2780"
+      ],
+      [
+        "CD-2785",
+        "CD-2786"
+      ],
+      [
+        "CD-2787",
+        "CD-2788",
+        "CD-2789"
+      ],
+      [
+        "CD-2790",
+        "CD-2791",
+        "CD-2792"
+      ],
+      [
+        "CD-2793",
+        "CD-2794",
+        "CD-2795"
+      ],
+      [
+        "CD-2796",
+        "CD-2797",
+        "CD-2798"
+      ],
+      [
+        "CD-2800",
+        "CD-2801"
+      ],
+      [
+        "CD-2808",
+        "CD-2810"
+      ],
+      [
+        "CD-2811",
+        "CD-2813",
+        "CD-2815",
+        "CD-3208"
+      ],
+      [
+        "CD-2817",
+        "CD-2818"
+      ],
+      [
+        "CD-2820",
+        "CD-2822",
+        "CD-2823"
+      ],
+      [
+        "CD-3500",
+        "CD-3501"
+      ],
+      [
+        "CD-3502",
+        "CD-3503",
+        "CD-3504"
+      ],
+      [
+        "CD-3505",
+        "CD-3506",
+        "CD-3507",
+        "CD-3508"
+      ],
+      [
+        "CD-3509",
+        "CD-3510"
+      ],
+      [
+        "CD-3511",
+        "CD-3512"
+      ],
+      [
+        "CD-3513",
+        "CD-3514",
+        "CD-3515"
+      ],
+      [
+        "CD-3516",
+        "CD-3517",
+        "CD-3518",
+        "CD-3519"
+      ],
+      [
+        "CD-3520",
+        "CD-3521"
+      ],
+      [
+        "CD-3522",
+        "CD-3523"
+      ],
+      [
+        "CD-3524",
+        "CD-3525"
+      ],
+      [
+        "CD-3526",
+        "CD-3527",
+        "CD-3528"
+      ],
+      [
+        "CD-3529",
+        "CD-3530",
+        "CD-3531"
+      ],
+      [
+        "CD-3532",
+        "CD-3533",
+        "CD-3534",
+        "CD-3536",
+        "CD-3537",
+        "CD-3538",
+        "CD-3539"
+      ],
+      [
+        "CD-3540",
+        "CD-3541",
+        "CD-3542",
+        "CD-3543"
+      ],
+      [
+        "CD-3544",
+        "CD-3545"
+      ],
+      [
+        "CD-3546",
+        "CD-3547"
+      ],
+      [
+        "CD-3566",
+        "CD-3567"
+      ],
+      [
+        "CD-3568",
+        "CD-3569"
+      ],
+      [
+        "CD-3570",
+        "CD-3571"
+      ],
+      [
+        "CD-3572",
+        "CD-3573"
+      ],
+      [
+        "CD-3576",
+        "CD-3577",
+        "CD-3578"
+      ],
+      [
+        "CD-5402",
+        "CD-5835"
+      ],
+      [
+        "CD-5951",
+        "CD-5952"
+      ],
+      [
+        "CD-608",
+        "CD-848"
+      ],
+      [
+        "CD-2154",
+        "CD-2155"
+      ],
+      [
+        "CD-245",
+        "CD-837"
+      ],
+      [
+        "CD-609",
+        "CD-847"
+      ],
+      [
+        "CD-610",
+        "CD-845"
+      ],
+      [
+        "CD-612",
+        "CD-844"
+      ],
+      [
+        "CD-613",
+        "CD-849"
+      ],
+      [
+        "CD-614",
+        "CD-850"
+      ],
+      [
+        "CD-615",
+        "CD-839"
+      ],
+      [
+        "CD-616",
+        "CD-838"
+      ],
+      [
+        "CD-617",
+        "CD-825"
+      ],
+      [
+        "CD-618",
+        "CD-824"
+      ],
+      [
+        "CD-620",
+        "CD-822"
+      ],
+      [
+        "CD-712",
+        "CD-842"
+      ],
+      [
+        "CD-713",
+        "CD-843"
+      ],
+      [
+        "CD-714",
+        "CD-846"
+      ],
+      [
+        "CD-1001",
+        "CD-1028"
+      ],
+      [
+        "CD-1893",
+        "CD-2388"
+      ],
+      [
+        "CD-5024",
+        "CD-6445"
+      ],
+      [
+        "CD-3586",
+        "CD-3587"
+      ],
+      [
+        "CD-3588",
+        "CD-3628"
+      ],
+      [
+        "CD-3601",
+        "CD-3605"
+      ],
+      [
+        "CD-3657",
+        "CD-3658"
+      ],
+      [
+        "CD-3659",
+        "CD-3933"
+      ],
+      [
+        "CD-3769",
+        "CD-5044"
+      ],
+      [
+        "CD-4384",
+        "CD-4877"
+      ],
+      [
+        "CD-4390",
+        "CD-4891"
+      ],
+      [
+        "CD-4758",
+        "CD-6039"
+      ],
+      [
+        "CD-4875",
+        "CD-6424"
+      ],
+      [
+        "CD-4881",
+        "CD-6460"
+      ],
+      [
+        "CD-5022",
+        "CD-6425"
+      ],
+      [
+        "CD-5481",
+        "CD-6471"
+      ],
+      [
+        "CD-1110",
+        "CD-1563"
+      ],
+      [
+        "CD-6142",
+        "CD-7220"
+      ]
+    ],
+    "separations": [
+      [
+        "CD-119",
+        "CD-2080"
+      ],
+      [
+        "CD-273",
+        "CD-4693"
+      ],
+      [
+        "CD-275",
+        "CD-277",
+        "CD-5663",
+        "CD-5905"
+      ],
+      [
+        "CD-329",
+        "CD-2638",
+        "CD-7194"
+      ],
+      [
+        "CD-390",
+        "CD-2841",
+        "CD-4598"
+      ],
+      [
+        "CD-396",
+        "CD-423"
+      ],
+      [
+        "CD-447",
+        "CD-4128"
+      ],
+      [
+        "CD-465",
+        "CD-1292",
+        "CD-7314"
+      ],
+      [
+        "CD-600",
+        "CD-607"
+      ],
+      [
+        "CD-656",
+        "CD-3363",
+        "CD-4873"
+      ],
+      [
+        "CD-665",
+        "CD-5352"
+      ],
+      [
+        "CD-682",
+        "CD-5967",
+        "CD-7313"
+      ],
+      [
+        "CD-715",
+        "CD-2247"
+      ],
+      [
+        "CD-1178",
+        "CD-5274",
+        "CD-6763"
+      ],
+      [
+        "CD-1268",
+        "CD-2776"
+      ],
+      [
+        "CD-1456",
+        "CD-1460"
+      ],
+      [
+        "CD-1820",
+        "CD-7061"
+      ],
+      [
+        "CD-2686",
+        "CD-5894"
+      ],
+      [
+        "CD-2689",
+        "CD-4127"
+      ],
+      [
+        "CD-2766",
+        "CD-3389"
+      ],
+      [
+        "CD-2890",
+        "CD-4136"
+      ],
+      [
+        "CD-2938",
+        "CD-3114"
+      ],
+      [
+        "CD-2954",
+        "CD-6536"
+      ],
+      [
+        "CD-3041",
+        "CD-5696"
+      ],
+      [
+        "CD-3070",
+        "CD-5700"
+      ],
+      [
+        "CD-3136",
+        "CD-4126"
+      ],
+      [
+        "CD-3216",
+        "CD-4927"
+      ],
+      [
+        "CD-3382",
+        "CD-4640"
+      ],
+      [
+        "CD-3394",
+        "CD-4600"
+      ],
+      [
+        "CD-3395",
+        "CD-3480"
+      ],
+      [
+        "CD-3400",
+        "CD-6406"
+      ],
+      [
+        "CD-3818",
+        "CD-7165"
+      ],
+      [
+        "CD-3878",
+        "CD-6729"
+      ],
+      [
+        "CD-3942",
+        "CD-4815"
+      ],
+      [
+        "CD-3944",
+        "CD-5869"
+      ],
+      [
+        "CD-4974",
+        "CD-7648"
+      ],
+      [
+        "CD-5145",
+        "CD-6119"
+      ],
+      [
+        "CD-5586",
+        "CD-5891"
+      ],
+      [
+        "CD-5860",
+        "CD-5861"
+      ],
+      [
+        "CD-5883",
+        "CD-5946"
+      ],
+      [
+        "CD-5886",
+        "CD-5888"
+      ],
+      [
+        "CD-6503",
+        "CD-6772"
+      ],
+      [
+        "CD-6771",
+        "CD-7478"
+      ],
+      [
+        "CD-7224",
+        "CD-7306"
+      ]
+    ],
+    "unresolved_candidates": [
+      [
+        "CD-39",
+        "CD-7379"
+      ],
+      [
+        "CD-853",
+        "CD-854"
+      ],
+      [
+        "CD-1440",
+        "CD-1446",
+        "CD-1450"
+      ],
+      [
+        "CD-2633",
+        "CD-3404"
+      ],
+      [
+        "CD-2691",
+        "CD-6441"
+      ],
+      [
+        "CD-3417",
+        "CD-5695"
+      ],
+      [
+        "CD-3630",
+        "CD-3635"
+      ],
+      [
+        "CD-4145",
+        "CD-7015"
+      ],
+      [
+        "CD-4467",
+        "CD-7300"
+      ],
+      [
+        "CD-4497",
+        "CD-6768",
+        "CD-7479"
+      ],
+      [
+        "CD-4690",
+        "CD-6629"
+      ],
+      [
+        "CD-5152",
+        "CD-5418"
+      ]
+    ]
+  }
+}

@@ -118,6 +118,60 @@ class F1ProvinceDetailResponse(PublicApiModel):
     province: JsonObject
 
 
+class F2OverviewResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    scope: str
+    requested_scope: JsonObject
+    availability: str
+    headlines: list[JsonObject]
+    limitations: list[JsonValue]
+    provenance: JsonObject
+
+
+class F2MapResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    measure_id: str
+    availability: str
+    unit: str | None
+    coverage: JsonObject | None
+    legend: JsonObject
+    filters: JsonObject
+    cells: list[JsonObject]
+    provenance: JsonObject
+
+
+class F2TopicResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    topic_id: str
+    measure_id: str
+    scope: str
+    availability: str
+    result: JsonObject
+    filter_contract: JsonObject
+    filters: JsonObject
+    coverage: JsonObject | None
+    context_results: list[JsonObject]
+    sources: list[JsonObject]
+    limitations: list[JsonValue]
+    source_region_results: list[JsonObject]
+    list: JsonObject
+    provenance: JsonObject
+
+
+class F2DetailResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    topic_id: str
+    measure_id: str
+    scope: str
+    availability: str
+    detail: JsonObject
+    provenance: JsonObject
+
+
 class SourceInsightsResponse(PublicApiModel):
     schema_version: str
     generated_at: str

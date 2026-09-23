@@ -146,6 +146,35 @@ def _fixture(tmp_path: Path, *, include_csv: bool = False) -> tuple[Path, Path, 
     return root, contracts_root, catalog_path
 
 
+def test_reviewed_total_budget_preserves_exact_boundary_and_per_output_limits(
+    tmp_path, monkeypatch
+):
+    from app import publication
+
+    assert publication.MAX_DEFAULT_TOTAL_BYTES == 160 * 1024 * 1024
+    assert publication.MAX_DEFAULT_FILE_BYTES == 25 * 1024 * 1024
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    total = sum(
+        path.stat().st_size
+        for path in (root / "data/public").rglob("*")
+        if path.is_file()
+    )
+    monkeypatch.setattr(publication, "MAX_DEFAULT_TOTAL_BYTES", total)
+    assert validate_workspace(root, contracts_root, catalog_path)["status"] == "valid"
+    monkeypatch.setattr(publication, "MAX_DEFAULT_TOTAL_BYTES", total - 1)
+    report = validate_workspace(root, contracts_root, catalog_path)
+    assert report["problems"] == [f"data/public/: total bytes exceed {total - 1}"]
+
+    monkeypatch.setattr(publication, "MAX_DEFAULT_TOTAL_BYTES", 160 * 1024 * 1024)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    artifact_size = (root / "data/public/artifact.json").stat().st_size
+    contract["outputs"][0]["max_bytes"] = artifact_size - 1
+    _write_json(contract_path, contract)
+    report = validate_workspace(root, contracts_root, catalog_path)
+    assert "data/public/artifact.json: exceeds contract max_bytes" in report["problems"]
+
+
 def _declare_source_b(contracts_root: Path, catalog_path: Path) -> None:
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     catalog["sources"].append(
@@ -161,6 +190,15 @@ def _declare_source_b(contracts_root: Path, catalog_path: Path) -> None:
     contract_path = contracts_root / "sample.json"
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
     contract["source_ids"].append("source_b")
+    _write_json(contract_path, contract)
+
+
+def _declare_media_prefixes(
+    contracts_root: Path, prefixes: object
+) -> None:
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["media_source_prefixes"] = prefixes
     _write_json(contract_path, contract)
 
 
@@ -194,6 +232,60 @@ def test_public_work_contexts_survive_json_csv_and_serving_validation(tmp_path, 
     assert any("private/contact field" in p for p in report["problems"])
     with pytest.raises(RuntimeError, match="private/contact"):
         public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)
+
+
+@pytest.mark.parametrize("change", ["bytes", "contexts", "approval", "restricted"])
+def test_serving_policy_cache_rechecks_changed_bytes_or_policy(tmp_path, monkeypatch, change):
+    import os
+    from app import public_artifacts
+
+    root, contracts_root, _ = _fixture(tmp_path)
+    contract_path = contracts_root / "sample.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["outputs"][0]["field_contexts"] = {"/items/*/owner_name": "work_attribution"}
+    _write_json(contract_path, contract)
+    artifact_path = root / "data/public/artifact.json"
+    payload = {"items": [{
+        "id": "one", "source_id": "source_a", "owner_name": "Synthetic author",
+        "note": "x" * len("private@example.org"),
+    }]}
+    _write_json(artifact_path, payload)
+    permissions = ({"source_a"}, set())
+    monkeypatch.setattr(public_artifacts, "PROJECT_ROOT", root)
+    monkeypatch.setattr(public_artifacts, "_approved_and_restricted_source_ids", lambda: permissions)
+    inputs = public_artifacts.artifact_inputs(root / "data/public", enforce_core=False)
+    original = public_artifacts._privacy_problems
+    scans = []
+
+    def scan(*args, **kwargs):
+        scans.append(True)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(public_artifacts, "_privacy_problems", scan)
+    def validate():
+        return public_artifacts.validate_public_artifacts(inputs, contracts_root=contracts_root)
+
+    # An unchanged scan is reused, but mutable payloads are never reused.
+    first = validate()[0][1]
+    first["items"][0]["note"] = "caller mutation"
+    assert validate()[0][1] == payload
+    assert len(scans) == 1
+
+    if change == "bytes":
+        before = artifact_path.stat()
+        payload["items"][0]["note"] = "private@example.org"
+        _write_json(artifact_path, payload)
+        os.utime(artifact_path, ns=(before.st_atime_ns, before.st_mtime_ns))
+        assert artifact_path.stat().st_size == before.st_size
+    elif change == "contexts":
+        contract["outputs"][0]["field_contexts"] = {}
+        _write_json(contract_path, contract)
+    elif change == "approval":
+        permissions[0].clear()
+    else:
+        permissions[1].add("source_a")
+    with pytest.raises(RuntimeError, match="public artifact policy rejected"):
+        validate()
 
 
 def _geojson_payload(
@@ -528,6 +620,128 @@ def test_registered_source_landing_descendant_and_exact_endpoint_are_valid(tmp_p
 
     assert report["status"] == "valid"
     assert report["problems"] == []
+
+
+def test_output_scoped_media_prefix_accepts_only_media_url_and_keeps_catalog_rules(
+    tmp_path,
+):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    _declare_media_prefixes(
+        contracts_root,
+        {"source_a": ["https://dp.culturalmapthailand.info/file-upload/"]},
+    )
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_url": "https://source-a.example/datasets/current",
+            "items": [
+                {
+                    "id": "one",
+                    "count": 1,
+                    "media": [
+                        {
+                            "url": "https://dp.culturalmapthailand.info/file-upload/image.jpg"
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+
+    assert report["status"] == "valid"
+    assert report["problems"] == []
+
+
+def test_output_scoped_media_prefix_does_not_authorize_source_url(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    media_url = "https://dp.culturalmapthailand.info/file-upload/image.jpg"
+    _declare_media_prefixes(
+        contracts_root,
+        {"source_a": ["https://dp.culturalmapthailand.info/file-upload/"]},
+    )
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "source_url": media_url,
+            "items": [{"id": "one", "count": 1}],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert media_url not in encoded
+
+
+def test_output_scoped_media_prefix_enforces_path_boundary(tmp_path):
+    root, contracts_root, catalog_path = _fixture(tmp_path)
+    media_url = "https://dp.culturalmapthailand.info/file-uploaded/image.jpg"
+    _declare_media_prefixes(
+        contracts_root,
+        {"source_a": ["https://dp.culturalmapthailand.info/file-upload/"]},
+    )
+    _write_json(
+        root / "data" / "public" / "artifact.json",
+        {
+            "generated_at": "2026-08-17T00:00:00+00:00",
+            "source_id": "source_a",
+            "items": [
+                {
+                    "id": "one",
+                    "count": 1,
+                    "media": [{"url": media_url}],
+                }
+            ],
+        },
+    )
+    write_receipt(root, contracts_root, catalog_path)
+
+    report = validate_workspace(root, contracts_root, catalog_path)
+    encoded = json.dumps(report, ensure_ascii=False)
+
+    assert report["status"] == "invalid"
+    assert "provenance URL is not registered for its declared source" in encoded
+    assert media_url not in encoded
+
+
+@pytest.mark.parametrize(
+    "prefixes",
+    [
+        {"source_not_declared": ["https://media.example/file-upload/"]},
+        {"source_a": ["http://media.example/file-upload/"]},
+        {"source_a": ["https://media.example/file-upload/?size=large"]},
+        {"source_a": ["https://media.example/file-upload/#preview"]},
+        # Assemble synthetic userinfo so the secret scanner does not treat this
+        # negative fixture as a committed credential.
+        {"source_a": ["https://" + "user:password@media.example/file-upload/"]},
+        {"source_a": ["https://media.example/file-upload"]},
+        {"source_a": []},
+        {
+            "source_a": [
+                "https://media.example/file-upload/",
+                "https://media.example/file-upload/",
+            ]
+        },
+    ],
+)
+def test_invalid_output_scoped_media_prefix_contract_is_rejected(
+    tmp_path, prefixes
+):
+    _, contracts_root, _ = _fixture(tmp_path)
+    _declare_media_prefixes(contracts_root, prefixes)
+
+    with pytest.raises(PublicationError):
+        load_contracts(contracts_root)
 
 
 @pytest.mark.parametrize(
