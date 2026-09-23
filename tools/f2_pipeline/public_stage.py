@@ -360,7 +360,7 @@ def validate_public_stage(
         policy=policy_contract,
     )
     catalog = repository / "config/source_catalog.json"
-    with TemporaryDirectory(prefix="f2-publication-overlay-", dir="/tmp") as temporary:
+    with TemporaryDirectory(prefix="f2-publication-overlay-") as temporary:
         root = Path(temporary)
         expected = root / "rederived"
         build_full_projection(release_dir, expected, comparison_proof=proof)

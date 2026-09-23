@@ -183,7 +183,7 @@ def _verified_source(
         raise PipelineError(
             "Local promotion requires the complete all-eight-field owner-approved stage"
         )
-    with TemporaryDirectory(prefix="f2-promotion-rederive-", dir="/tmp") as temporary:
+    with TemporaryDirectory(prefix="f2-promotion-rederive-") as temporary:
         expected = Path(temporary) / "stage"
         build_full_projection(release_dir, expected, comparison_proof=proof)
         expected_manifest = verify_public_stage(
@@ -444,7 +444,7 @@ def verify_local_promotion(
     bundle_dir = Path(bundle_dir)
     if not bundle_dir.is_dir() or bundle_dir.is_symlink():
         raise PipelineError("Local promotion bundle is missing or not a directory")
-    with TemporaryDirectory(prefix="f2-promotion-verify-", dir="/tmp") as temporary:
+    with TemporaryDirectory(prefix="f2-promotion-verify-") as temporary:
         expected = Path(temporary) / "bundle"
         expected.mkdir()
         report = _expected_bundle(
