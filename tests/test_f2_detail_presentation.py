@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -271,7 +272,7 @@ console.log(JSON.stringify(Object.fromEntries(Object.entries(models).map(([key, 
         capture_output=True,
         timeout=30,
         input=script,
-        env={"SAMPLES": json.dumps(samples, ensure_ascii=False)},
+        env={**os.environ, "SAMPLES": json.dumps(samples, ensure_ascii=False)},
     )
     assert result.returncode == 0, result.stderr
     rendered = json.loads(result.stdout)
@@ -454,7 +455,7 @@ console.log(JSON.stringify({community: community.sections.length}));
         capture_output=True,
         timeout=30,
         input=script,
-        env={"SAMPLES": json.dumps(samples, ensure_ascii=False)},
+        env={**os.environ, "SAMPLES": json.dumps(samples, ensure_ascii=False)},
     )
     assert result.returncode == 0, result.stderr
 
