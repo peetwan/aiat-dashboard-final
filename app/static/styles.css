@@ -417,6 +417,73 @@
   font-size: 11px;
   white-space: nowrap;
 }
+.f4-policy-other-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid #dce5de;
+  border-radius: 9px;
+  background: #f7f9f6;
+  color: #526159;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+.f4-policy-other-toggle:hover,
+.f4-policy-other-toggle:focus-visible { border-color: #7652b5; outline: none; }
+.f4-policy-other-toggle > span { display: flex; align-items: center; gap: 8px; }
+.f4-policy-other-toggle i { width: 10px; height: 10px; border-radius: 50%; }
+.f4-policy-other-toggle strong { color: #173f2c; font-size: 11px; white-space: nowrap; }
+.f4-policy-other-list {
+  display: grid;
+  gap: 5px;
+  max-height: 230px;
+  padding: 5px 6px 5px 24px;
+  overflow: auto;
+  border-left: 2px solid #dfe5df;
+  scrollbar-width: thin;
+}
+.f4-policy-other-list p {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  color: #526159;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.f4-policy-other-list strong { color: #173f2c; white-space: nowrap; }
+.f4-policy-chart-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #6d7a72;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.f4-policy-status-breakdown {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+}
+.f4-policy-status-breakdown > header h3 { margin: 0; color: #1c2922; font-size: 15px; line-height: 1.5; }
+.f4-policy-status-breakdown > header p { margin: 3px 0 0; color: #6d7a72; font-size: 11px; line-height: 1.5; }
+.f4-policy-status-bars { display: grid; gap: 7px; }
+.f4-policy-status-row {
+  min-width: 0;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: #f8faf7;
+}
+.f4-policy-status-row > span { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.5; }
+.f4-policy-status-row > span strong { overflow-wrap: anywhere; }
+.f4-policy-status-row > span b { color: #64429d; white-space: nowrap; }
+.f4-policy-status-row > i { display: block; height: 6px; margin-top: 6px; overflow: hidden; border-radius: 99px; background: #e6eae5; }
+.f4-policy-status-row > i b { display: block; height: 100%; border-radius: inherit; background: #7652b5; }
 .f4-fund-summary {
   grid-column: 1 / -1;
   display: grid;
@@ -4665,7 +4732,8 @@
   transform: translateY(-1px);
 }
 
-.department-panel--f1 .department-kpi-card.active {
+.department-panel--f1 .department-kpi-card.active,
+.department-panel--f4 .department-kpi-card.active {
   border-color: var(--department-accent);
   background: var(--department-accent-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--department-accent) 20%, transparent);

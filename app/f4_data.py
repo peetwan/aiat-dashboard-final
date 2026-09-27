@@ -230,15 +230,31 @@ def _policy_project_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     counts: dict[str, int] = {}
     budget_total = 0.0
     budget_known = 0
+    province_budgets: dict[str, float] = {}
+    province_project_counts: dict[str, int] = {}
+    unmatched_province_projects = 0
+    multi_province_projects = 0
     for row in rows:
         status = _policy_status_label(row.get("status"))
         counts[status] = counts.get(status, 0) + 1
+        provinces = sorted(
+            {str(name).strip() for name in row.get("matched_provinces") or [] if str(name).strip()}
+        )
+        if not provinces:
+            unmatched_province_projects += 1
+        elif len(provinces) > 1:
+            multi_province_projects += 1
+        for province in provinces:
+            province_project_counts[province] = province_project_counts.get(province, 0) + 1
         budget = row.get("budget_baht")
         if budget in (None, ""):
             continue
         try:
-            budget_total += float(budget)
+            amount = float(budget)
+            budget_total += amount
             budget_known += 1
+            for province in provinces:
+                province_budgets[province] = province_budgets.get(province, 0.0) + amount
         except (TypeError, ValueError):
             pass
     ordered = [
@@ -251,6 +267,19 @@ def _policy_project_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "status_summary": ordered,
         "budget_baht_total": budget_total,
         "budget_known_rows": budget_known,
+        "province_budget_summary": [
+            {
+                "province": province,
+                "budget_baht": province_budgets.get(province, 0.0),
+                "project_count": count,
+            }
+            for province, count in sorted(
+                province_project_counts.items(),
+                key=lambda item: (-province_budgets.get(item[0], 0.0), item[0]),
+            )
+        ],
+        "unmatched_province_projects": unmatched_province_projects,
+        "multi_province_projects": multi_province_projects,
         "total": len(rows),
     }
 
@@ -878,6 +907,9 @@ def f4_policy_projects(
         "status_summary": summary["status_summary"],
         "budget_baht_total": summary["budget_baht_total"],
         "budget_known_rows": summary["budget_known_rows"],
+        "province_budget_summary": summary["province_budget_summary"],
+        "unmatched_province_projects": summary["unmatched_province_projects"],
+        "multi_province_projects": summary["multi_province_projects"],
         "quality_label_th": "รายการหลักฐานนวัตกรรมเชิงนโยบายจากต้นทาง; จำนวนจังหวัดจับคู่จากหลักฐาน",
         "source_key": CLIG_PROJECTS_KEY,
     }
