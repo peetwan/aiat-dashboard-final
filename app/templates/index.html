@@ -12,9 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css" />
-    <link rel="stylesheet" href="/static/styles.css?v=departments-20260905-02" />
+    <link rel="stylesheet" href="/static/styles.css?v=f4-policy-provinces-20260927-03" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
-    <link rel="stylesheet" href="/static/departments.css?v=20260905-06" />
+    <link rel="stylesheet" href="/static/departments.css?v=f4-tab-coverage-spacing-20260927-03" />
     <link rel="stylesheet" href="/static/f2.css?v=20260921-ui-audit-02" />
   </head>
   <body>
@@ -140,16 +140,20 @@
           <button type="button" id="f4TabEvidence" role="tab" data-f4-tab="evidence" aria-controls="f4EvidencePanel" aria-selected="false" tabindex="-1"><strong>แหล่งข้อมูล</strong><small>ที่มาและข้อควรอ่าน</small></button>
         </nav>
         <section class="f4-tab-panel active" id="f4OverviewPanel" role="tabpanel" aria-labelledby="f4TabOverview" tabindex="0" data-f4-panel="overview">
-          <p class="department-kpi-hint">กดเทคโนโลยีหรือนวัตกรรมเชิงนโยบายเพื่อดูรายการ</p>
+          <p class="department-kpi-hint">กดจำนวนจังหวัดเพื่อดูข้อมูลแยกตามภาค หรือกดหัวข้อนวัตกรรมเพื่อดูรายการ</p>
           <div class="f4-source-overview" id="f4SourceOverview">
-            <section class="f4-source-section" aria-labelledby="f4PmuaHeading">
-              <header><div><strong id="f4PmuaHeading">เทคโนโลยีและนวัตกรรมพร้อมใช้</strong><small>ข้อมูลนวัตกรรมและนวัตกรชุมชน</small></div><a href="https://pmua-apptech.com/" target="_blank" rel="noreferrer">เปิดต้นทาง</a></header>
+            <section class="f4-source-section is-pmua" aria-labelledby="f4PmuaHeading">
+              <header><div><span class="f4-source-badge">PMUA AppTech</span><strong id="f4PmuaHeading">เทคโนโลยีและนวัตกรรม</strong><small>ข้อมูลนวัตกรรมและนวัตกรชุมชน</small></div><a href="https://pmua-apptech.com/" target="_blank" rel="noreferrer">เปิดต้นทาง</a></header>
               <div class="department-kpi-grid f4-card-grid" id="f4PmuaCards"></div>
               <section class="f4-economic-table-wrap" id="f4EconomicImpactWrap" hidden>
                 <header>
-                  <strong>ผลกระทบเศรษฐกิจรวมระดับประเทศ</strong>
-                  <small>ข้อมูลจากต้นทางเป็นยอดรวมระดับประเทศรายปี ไม่ใช่การเปรียบเทียบก่อน–หลังรายพื้นที่</small>
+                  <strong>ผลกระทบเศรษฐกิจระดับประเทศจากข้อมูลครัวเรือน</strong>
+                  <small>ยอดรวมจาก PMUA รายปี ไม่ใช่งบประมาณโครงการ CLIG หรือการเปรียบเทียบก่อน–หลังรายพื้นที่</small>
                 </header>
+                <div class="f4-economic-unavailable" id="f4EconomicUnavailable" role="status" hidden>
+                  <strong>ไม่พร้อมใช้งาน</strong>
+                  <p>ขณะนี้ยังไม่มีข้อมูลผลกระทบเศรษฐกิจแยกตามภาคหรือจังหวัด</p>
+                </div>
                 <div class="f4-economic-total" id="f4EconomicTotal" aria-label="ยอดรวมผลกระทบเศรษฐกิจ"></div>
                 <div class="f4-economic-annual" id="f4EconomicAnnual">
                   <h4>ผลกระทบรายปี</h4>
@@ -169,8 +173,8 @@
                 </div>
               </section>
             </section>
-            <section class="f4-source-section" aria-labelledby="f4CligHeading">
-              <header><div><strong id="f4CligHeading">โครงการวิจัยและนวัตกรรมเชิงพื้นที่</strong><small>โครงการวิจัยและนวัตกรรมเชิงนโยบาย</small></div><a href="https://clig.oas.psu.ac.th/project/search_project" target="_blank" rel="noreferrer">เปิดต้นทาง</a></header>
+            <section class="f4-source-section is-clig" aria-labelledby="f4CligHeading">
+              <header><div><span class="f4-source-badge">CLIG</span><strong id="f4CligHeading">นวัตกรรมเชิงนโยบาย</strong><small>โครงการวิจัยและนวัตกรรมเชิงนโยบายจาก CLIG</small></div><a href="https://clig.oas.psu.ac.th/project/search_project" target="_blank" rel="noreferrer">เปิดต้นทาง</a></header>
               <div class="department-kpi-grid f4-card-grid" id="f4CligCards"></div>
               <div class="f4-policy-window f4-overview-policy-window" aria-label="สรุปโครงการนวัตกรรมเชิงนโยบาย">
                 <div class="f4-policy-main">
@@ -179,19 +183,43 @@
                   <small>โครงการวิจัย</small>
                 </div>
                 <div class="f4-policy-chart">
-                  <div class="f4-donut" id="f4OverviewPolicyDonut" aria-label="สัดส่วนสถานะโครงการ"></div>
+                  <div class="f4-donut" id="f4OverviewPolicyDonut" aria-label="สัดส่วนงบประมาณโครงการตามจังหวัดที่จับคู่ได้"></div>
                   <div class="f4-status-legend" id="f4OverviewPolicyStatusLegend"></div>
+                  <p class="f4-policy-chart-note" id="f4OverviewPolicyChartNote">งบประมาณตามจังหวัดที่จับคู่จากข้อความโครงการ อาจนับซ้ำเมื่อโครงการจับคู่ได้หลายจังหวัด และไม่รวมโครงการที่ไม่พบจังหวัด</p>
+                  <div class="f4-fund-summary">
+                    <span>งบประมาณรวมในชุดโครงการ</span>
+                    <strong id="f4OverviewPolicyBudget">ยังไม่มีข้อมูล</strong>
+                  </div>
                 </div>
-                <div class="f4-fund-summary">
-                  <span>งบประมาณรวมในชุดโครงการ</span>
-                  <strong id="f4OverviewPolicyBudget">ยังไม่มีข้อมูล</strong>
-                </div>
+                <section class="f4-policy-status-breakdown" aria-labelledby="f4OverviewPolicyStatusHeading">
+                  <header><h3 id="f4OverviewPolicyStatusHeading">จำนวนโครงการตามสถานะ</h3><p>จำนวนโครงการในแต่ละสถานะจากต้นทาง CLIG</p></header>
+                  <div class="f4-policy-status-bars" id="f4OverviewPolicyStatusBars"></div>
+                </section>
               </div>
             </section>
           </div>
-          <section class="department-detail-card f4-area-detail" id="f4AreaDetail" tabindex="-1" hidden></section>
+          <section class="department-detail-card f4-area-detail" id="f4AreaDetail" tabindex="-1" aria-live="polite" hidden></section>
         </section>
         <section class="f4-tab-panel" id="f4InnovationsPanel" role="tabpanel" aria-labelledby="f4TabInnovations" tabindex="0" data-f4-panel="innovations" hidden>
+          <div class="f4-tab-coverage" id="f4InnovationProvinceCoverage" aria-label="จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม"></div>
+          <section class="f4-innovation-analytics" id="f4InnovationAnalytics" aria-label="ภาพรวมเทคโนโลยีและนวัตกรรม" hidden>
+            <section class="f4-analytics-card" id="f4InnovationProvinceChart" aria-labelledby="f4InnovationProvinceHeading">
+              <header>
+                <h3 id="f4InnovationProvinceHeading">จำนวนเทคโนโลยีและนวัตกรรมในแต่ละจังหวัด</h3>
+                <p>นับจากจังหวัดที่ระบุในข้อมูลผลิตภัณฑ์ ผลิตภัณฑ์หนึ่งรายการอาจเชื่อมโยงได้มากกว่าหนึ่งจังหวัด</p>
+              </header>
+              <div class="f4-analytics-bars" id="f4InnovationProvinceRows"></div>
+              <button type="button" class="f4-analytics-toggle" id="f4InnovationProvinceToggle" hidden></button>
+            </section>
+            <section class="f4-analytics-card" aria-labelledby="f4InnovationTrlHeading">
+              <header>
+                <h3 id="f4InnovationTrlHeading">ระดับความพร้อมเทคโนโลยี (TRL)</h3>
+                <p>จำนวนผลิตภัณฑ์ในแต่ละระดับความพร้อม</p>
+              </header>
+              <div class="f4-analytics-bars" id="f4InnovationTrlRows"></div>
+            </section>
+          </section>
+          <div class="f4-innovation-filter-summary" id="f4InnovationFilterSummary" aria-live="polite" hidden></div>
           <section class="f4-list-panel">
             <header>
               <h3>เทคโนโลยีและนวัตกรรม</h3>
@@ -202,6 +230,7 @@
           </section>
         </section>
         <section class="f4-tab-panel" id="f4PolicyPanel" role="tabpanel" aria-labelledby="f4TabPolicy" tabindex="0" data-f4-panel="policy" hidden>
+          <div class="f4-tab-coverage" id="f4PolicyProvinceCoverage" aria-label="จังหวัดที่มีโครงการนวัตกรรมเชิงนโยบาย"></div>
           <div class="f4-policy-window">
             <div class="f4-policy-main">
               <span>นวัตกรรมเชิงนโยบาย</span>
@@ -209,13 +238,25 @@
               <small>โครงการวิจัย</small>
             </div>
             <div class="f4-policy-chart">
-              <div class="f4-donut" id="f4PolicyDonut" aria-label="สัดส่วนสถานะโครงการ"></div>
+              <div class="f4-donut" id="f4PolicyDonut" aria-label="สัดส่วนงบประมาณโครงการตามจังหวัดที่จับคู่ได้"></div>
               <div class="f4-status-legend" id="f4PolicyStatusLegend"></div>
+              <p class="f4-policy-chart-note" id="f4PolicyChartNote">งบประมาณตามจังหวัดที่จับคู่จากข้อความโครงการ อาจนับซ้ำเมื่อโครงการจับคู่ได้หลายจังหวัด และไม่รวมโครงการที่ไม่พบจังหวัด</p>
+              <div class="f4-fund-summary">
+                <span>งบประมาณรวมในชุดโครงการ</span>
+                <strong id="f4PolicyBudget">ยังไม่มีข้อมูล</strong>
+              </div>
             </div>
-            <div class="f4-fund-summary">
-              <span>งบประมาณรวมในชุดโครงการ</span>
-              <strong id="f4PolicyBudget">ยังไม่มีข้อมูล</strong>
-            </div>
+            <section class="f4-policy-status-breakdown" aria-labelledby="f4PolicyStatusHeading">
+              <header><h3 id="f4PolicyStatusHeading">จำนวนโครงการตามสถานะ</h3><p>จำนวนโครงการในแต่ละสถานะจากต้นทาง CLIG</p></header>
+              <div class="f4-policy-status-bars" id="f4PolicyStatusBars"></div>
+            </section>
+            <section class="f4-policy-province-breakdown" id="f4PolicyProvinceBreakdown" aria-labelledby="f4PolicyProvinceHeading" hidden>
+              <header>
+                <h3 id="f4PolicyProvinceHeading">จำนวนโครงการที่จับคู่กับแต่ละจังหวัด</h3>
+                <p>นับจากข้อความโครงการจากต้นทาง โครงการหนึ่งอาจจับคู่ได้มากกว่าหนึ่งจังหวัด</p>
+              </header>
+              <div class="f4-policy-province-list" id="f4PolicyProvinceList"></div>
+            </section>
           </div>
           <section class="f4-list-panel">
             <header>
@@ -487,6 +528,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
     <script src="/static/f2-detail.js?v=20260921-ui-audit-02" defer></script>
     <script src="/static/f2.js?v=20260921-ui-audit-03" defer></script>
-    <script src="/static/app.js?v=departments-20260920-f2-map-03" defer></script>
+    <script src="/static/app.js?v=f4-tab-coverage-cards-20260927-01" defer></script>
   </body>
 </html>

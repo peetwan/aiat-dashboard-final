@@ -42,11 +42,16 @@ const state = {
   f4RegionOverviews: {},
   f4BoardCollapsed: false,
   f4CountryTab: "overview",
+  f4CoverageSource: null,
   f4InnovationRows: [],
   f4InnovationQuery: "",
+  f4InnovationTrlFilter: null,
+  f4InnovationProvinceExpanded: false,
   f4PolicyRows: [],
   f4PolicyQuery: "",
   f4PolicyMeta: null,
+  f4PolicyProvinceExpanded: false,
+  f4PolicyOtherProvincesExpanded: false,
   f4ListContextKey: "",
   f4ListRequestTokens: {},
   f4CoveredProvinceCodes: new Set(),
@@ -59,6 +64,31 @@ const state = {
 
 const THAILAND_BOUNDS = [[97.2, 5.5], [105.7, 20.5]];
 const NO_DATA_COLOR = "#e7ebe6";
+
+function f4MapSourceKey() {
+  if (state.f4CountryTab === "innovations") return "pmua_apptech";
+  if (state.f4CountryTab === "policy") return "clig";
+  return state.f4CountryTab === "overview" ? state.f4CoverageSource : null;
+}
+
+function f4MapProvinceCodes() {
+  const overview = state.selectedRegion
+    ? state.f4RegionOverviews[state.selectedRegion] || state.f4Overview
+    : state.f4Overview;
+  const source = f4MapSourceKey();
+  const codes = source
+    ? overview?.coverage_province_codes_by_source?.[source]
+    : overview?.covered_province_codes;
+  return new Set((codes || []).map((code) => String(code).padStart(2, "0")));
+}
+
+function f4ProvinceHasMapData(province) {
+  const codes = f4MapProvinceCodes();
+  const code = String(province.province_code).padStart(2, "0");
+  return codes.size
+    ? codes.has(code)
+    : !f4MapSourceKey() && Boolean(province.f4_covered_province);
+}
 
 // Executive map lenses: each colors provinces by one source-backed metric.
 const MAP_MODES = {
@@ -152,7 +182,7 @@ const MAP_MODES = {
     legendTitle: "จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม หรือนวัตกรรมเชิงนโยบาย",
     legendNote: "สีแสดงจังหวัดที่มีหลักฐานจากอย่างน้อยหนึ่งแหล่ง",
     zeroLabel: "ไม่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย",
-    value: (province) => province.f4_covered_province ? 1 : null,
+    value: (province) => f4ProvinceHasMapData(province) ? 1 : null,
     format: () => "มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย",
     summarize: (summary) => `${formatNumber(summary.withData)} จังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย`,
     steps: [
@@ -428,6 +458,13 @@ function applyFillForLevel() {
   state.map.setPaintProperty("province-base", "fill-color", buildFillExpression(state.mapMode));
 }
 
+function refreshF4Map() {
+  if (state.mapMode !== "f4") return;
+  renderLegend();
+  updateRegionMarkerColors();
+  applyFillForLevel();
+}
+
 function updateRegionMarkerColors() {
   state.regionMarkers.forEach(({ element, name }) => {
     element.hidden = state.mapMode === "f2";
@@ -471,12 +508,24 @@ function renderLegend() {
   const config = MAP_MODES[state.mapMode];
   const atCountry = !state.selectedRegion && state.mapMode !== "f2";
   const steps = atCountry ? config.regionSteps : config.steps;
-  document.getElementById("legendTitle").textContent = atCountry
+  let legendTitle = atCountry
     ? config.regionLegendTitle
     : config.legendTitle;
-  document.getElementById("legendNote").textContent = atCountry
+  let legendNote = atCountry
     ? config.regionLegendNote
     : config.legendNote;
+  if (state.mapMode === "f4") {
+    const source = f4MapSourceKey();
+    if (source === "pmua_apptech") {
+      legendTitle = "จังหวัดที่มีเทคโนโลยีและนวัตกรรม";
+      legendNote = "สีม่วง = มีข้อมูลจาก PMUA AppTech · สีเทา = ไม่มีข้อมูล";
+    } else if (source === "clig") {
+      legendTitle = "จังหวัดที่มีนวัตกรรมเชิงนโยบาย";
+      legendNote = "สีม่วง = มีโครงการที่จับคู่กับจังหวัดจาก CLIG · สีเทา = ไม่มีข้อมูล";
+    }
+  }
+  document.getElementById("legendTitle").textContent = legendTitle;
+  document.getElementById("legendNote").textContent = legendNote;
   if (state.mapMode === "f3") {
     document.getElementById("legendItems").innerHTML = `<li><i style="background:${NO_DATA_COLOR}"></i><span>ยังไม่มีข้อมูล</span></li>`;
     return;
@@ -789,19 +838,39 @@ async function loadF4ProvinceOverview(code) {
 }
 
 function renderF4Card(card, scope = "country") {
-  const clickable = ["target_provinces", "innovations", "policy_projects"].includes(card.key);
-  const action = clickable ? ` data-f4-${scope}-kind="${card.key}"` : "";
+  const coverageSource = {
+    pmua_provinces_covered: "pmua_apptech",
+    clig_provinces_covered: "clig",
+  }[card.key];
+  const isCountryCoverage = Boolean(coverageSource && scope === "country" && !state.selectedRegion && !state.selectedCode);
+  const clickable = ["target_provinces", "innovations", "policy_projects"].includes(card.key) || isCountryCoverage;
+  const action = isCountryCoverage
+    ? ` data-f4-coverage-source="${coverageSource}" aria-pressed="${state.f4CoverageSource === coverageSource}"`
+    : clickable ? ` data-f4-${scope}-kind="${card.key}"` : "";
+  const active = isCountryCoverage && state.f4CoverageSource === coverageSource ? " active" : "";
   const value = card.value === null || card.value === undefined ? '<span class="metric-na">ยังไม่มีข้อมูล</span>' : formatNumber(card.value);
   const unit = String(card.unit || "")
     .replace(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/gi, "")
     .replace(/\s{2,}/g, " ")
     .trim();
   return `
-    <button type="button" class="department-kpi-card province-kpi f4-kpi" data-f4-metric="${escapeHtml(card.key)}"${action}${clickable ? "" : " disabled"}>
+    <button type="button" class="department-kpi-card province-kpi f4-kpi${active}" data-f4-metric="${escapeHtml(card.key)}"${action}${clickable ? "" : " disabled"}>
       <span>${escapeHtml(card.label)}</span>
       <strong>${value}</strong>
       <small>${escapeHtml(unit)}</small>
     </button>`;
+}
+
+function renderF4CoverageStat(card) {
+  if (!card) return "";
+  const value = card.value === null || card.value === undefined
+    ? '<span class="metric-na">ยังไม่มีข้อมูล</span>'
+    : formatNumber(card.value);
+  return `<article class="department-kpi-card province-kpi f4-kpi">
+    <span>${escapeHtml(card.label)}</span>
+    <strong>${value}</strong>
+    <small>${escapeHtml(card.unit || "")}</small>
+  </article>`;
 }
 
 function formatBahtMillions(value) {
@@ -814,8 +883,14 @@ function renderF4EconomicImpactTable(overview) {
   const total = document.getElementById("f4EconomicTotal");
   const annual = document.getElementById("f4EconomicAnnual");
   const body = document.getElementById("f4EconomicImpactRows");
-  const rows = !state.selectedCode && !state.selectedRegion ? (overview.economic_impact_rows || []) : [];
-  wrap.hidden = !rows.length;
+  const unavailable = Boolean(state.selectedCode || state.selectedRegion)
+    && !(overview.economic_impact_rows || []).length;
+  const unavailableMessage = document.getElementById("f4EconomicUnavailable");
+  const rows = overview.economic_impact_rows || [];
+  wrap.hidden = !rows.length && !unavailable;
+  unavailableMessage.hidden = !unavailable;
+  total.hidden = unavailable;
+  annual.hidden = unavailable;
   if (!rows.length) {
     total.innerHTML = "";
     annual.hidden = true;
@@ -825,13 +900,22 @@ function renderF4EconomicImpactTable(overview) {
   const isTotalRow = (row) => row.year_filter === "all" || row.label === "รวมทั้งหมด";
   const totalRow = rows.find(isTotalRow);
   const annualRows = rows.filter((row) => !isTotalRow(row));
+  const netDifference = totalRow
+    ? Number(totalRow.net_income_increased_baht || 0)
+      - Number(totalRow.cost_reduced_baht || 0)
+      - Number(totalRow.income_increased_baht || 0)
+    : 0;
+  const netSourceNote = !netDifference
+    ? "แสดงยอดสุทธิตามที่ต้นทางรายงาน"
+    : `ยอดสุทธิตามต้นทาง${netDifference > 0 ? "สูงกว่า" : "ต่ำกว่า"}ผลบวกของสองรายการ ${formatNumber(Math.abs(netDifference))} บาท`;
   total.innerHTML = totalRow ? `
     <p class="f4-economic-total-label">รวมทั้งหมด</p>
     <dl class="f4-economic-total-grid">
       <div class="f4-economic-total-card is-cost"><dt>ต้นทุนที่ลดลง</dt><dd>${escapeHtml(formatBahtMillions(totalRow.cost_reduced_baht))}</dd></div>
       <div class="f4-economic-total-card is-income"><dt>รายได้ที่เพิ่มขึ้น</dt><dd>${escapeHtml(formatBahtMillions(totalRow.income_increased_baht))}</dd></div>
-      <div class="f4-economic-total-card is-net"><dt>ผลกระทบสุทธิ</dt><dd>${escapeHtml(formatBahtMillions(totalRow.net_income_increased_baht))}</dd></div>
-    </dl>` : "";
+      <div class="f4-economic-total-card is-net"><dt>ผลกระทบสุทธิ (ตามต้นทาง)</dt><dd>${escapeHtml(formatBahtMillions(totalRow.net_income_increased_baht))}</dd></div>
+    </dl>
+    <p class="f4-economic-source-note">${escapeHtml(netSourceNote)}</p>` : "";
   annual.hidden = !annualRows.length;
   body.innerHTML = annualRows
     .map((row) => `
@@ -852,7 +936,15 @@ function renderF4OverviewPolicySummary(section) {
     budget: "f4OverviewPolicyBudget",
     donut: "f4OverviewPolicyDonut",
     legend: "f4OverviewPolicyStatusLegend",
+    statusBars: "f4OverviewPolicyStatusBars",
+    note: "f4OverviewPolicyChartNote",
   });
+}
+
+function refreshF4PolicySummaries() {
+  const cligSection = (state.f4Overview?.source_sections || []).find((item) => item.key === "clig");
+  renderF4OverviewPolicySummary(cligSection);
+  if (state.f4PolicyMeta) renderF4PolicySummary(state.f4PolicyMeta);
 }
 
 function renderF4CountryPanel() {
@@ -904,8 +996,14 @@ function renderF4CountryPanel() {
   const sections = overview.source_sections || [];
   const pmuaSection = sections.find((section) => section.key === "pmua_apptech");
   const cligSection = sections.find((section) => section.key === "clig");
-  const pmuaCards = pmuaSection?.cards || [];
+  const pmuaCards = (pmuaSection?.cards || []).filter((card) => card.key !== "economic_impact");
   const cligCards = cligSection?.cards || [];
+  document.getElementById("f4InnovationProvinceCoverage").innerHTML = renderF4CoverageStat(
+    pmuaCards.find((card) => card.key === "pmua_provinces_covered"),
+  );
+  document.getElementById("f4PolicyProvinceCoverage").innerHTML = renderF4CoverageStat(
+    cligCards.find((card) => card.key === "clig_provinces_covered"),
+  );
   document.getElementById("f4PmuaCards").innerHTML = pmuaCards.map((card) => renderF4Card(card, "country")).join("");
   document.getElementById("f4CligCards").innerHTML = cligCards
     .filter((card) => card.key === "clig_provinces_covered")
@@ -919,6 +1017,17 @@ function renderF4CountryPanel() {
   }
   renderF4AreaNavigation();
   renderF4EconomicImpactTable(overview);
+  document.querySelectorAll("[data-f4-coverage-source]").forEach((card) => {
+    card.addEventListener("click", () => {
+      state.f4CoverageSource = card.dataset.f4CoverageSource;
+      refreshF4Map();
+      renderF4CountryPanel();
+      document.querySelectorAll("[data-f4-coverage-source]").forEach((button) => {
+        if (button.dataset.f4CoverageSource === state.f4CoverageSource) button.focus({ preventScroll: true });
+      });
+      document.getElementById("f4AreaDetail")?.scrollIntoView({ block: "nearest" });
+    });
+  });
   document.querySelectorAll("[data-f4-country-kind]").forEach((card) => {
     card.addEventListener("click", () => {
       const tab = card.dataset.f4CountryKind === "policy_projects" ? "policy" : "innovations";
@@ -931,21 +1040,36 @@ function renderF4CountryPanel() {
     const contextKey = `${state.selectedCode ? `province:${state.selectedCode}` : state.selectedRegion || "country"}:${state.f4CountryTab}`;
     if (state.f4ListContextKey !== contextKey) {
       state.f4ListContextKey = contextKey;
+      if (state.f4CountryTab === "innovations") {
+        state.f4InnovationTrlFilter = null;
+        state.f4InnovationProvinceExpanded = false;
+      }
       openF4CountryList(state.f4CountryTab === "policy" ? "policy_projects" : "innovations");
     }
   }
 }
 
 function renderF4AreaNavigation() {
-  const provinces = (state.catalog?.provinces || []).filter((row) => state.f4CoveredProvinceCodes.has(row.province_code));
+  const allProvinces = state.catalog?.provinces || [];
+  const provinces = allProvinces.filter((row) => state.f4CoveredProvinceCodes.has(row.province_code));
   const area = document.getElementById("f4AreaDetail");
-  area.hidden = Boolean(state.selectedCode);
-  if (!state.selectedCode) {
-    const rows = state.selectedRegion
-      ? provinces.filter((row) => row.region === state.selectedRegion).map((row) => ({ name: row.province_name_th, code: row.province_code }))
-      : Object.keys(state.regions).map((region) => ({ name: region, count: provinces.filter((row) => row.region === region).length })).filter((row) => row.count);
-    rows.sort((a, b) => a.name.localeCompare(b.name, "th"));
-    area.innerHTML = `<header><h3>พื้นที่ที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบาย</h3><p>${state.selectedRegion ? "เลือกจังหวัดเพื่อดูข้อมูลในพื้นที่" : "เลือกภาคเพื่อดูจังหวัดที่มีข้อมูล"}</p></header><div class="department-area-list">${rows.map((row) => `<button type="button" ${row.code ? `data-f4-province="${escapeHtml(row.code)}"` : `data-f4-region="${escapeHtml(row.name)}"`}><span>${escapeHtml(row.name)}</span>${row.count == null ? "" : `<strong>${formatNumber(row.count)} จังหวัด</strong>`}</button>`).join("") || '<p class="empty-note">ไม่มีจังหวัดที่มีข้อมูลเทคโนโลยีและนวัตกรรม/นวัตกรรมเชิงนโยบายในภาคนี้</p>'}</div>`;
+  const showSourceBreakdown = !state.selectedCode && !state.selectedRegion && Boolean(state.f4CoverageSource);
+  area.hidden = !showSourceBreakdown;
+  area.innerHTML = "";
+  if (showSourceBreakdown) {
+    const section = (state.f4Overview?.source_sections || []).find((item) => item.key === state.f4CoverageSource);
+    const provinceCodes = new Set((state.f4Overview?.coverage_province_codes_by_source?.[state.f4CoverageSource] || []).map((code) => String(code).padStart(2, "0")));
+    const regionalCounts = new Map();
+    allProvinces.forEach((province) => {
+      const code = String(province.province_code).padStart(2, "0");
+      if (!provinceCodes.has(code)) return;
+      regionalCounts.set(province.region, (regionalCounts.get(province.region) || 0) + 1);
+    });
+    const rows = [...regionalCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name, "th"));
+    const maxCount = Math.max(1, ...rows.map((row) => row.count));
+    area.innerHTML = `<header><h3>${escapeHtml(section?.label || "จังหวัดที่มีข้อมูล")}</h3><p>พบ ${formatNumber(provinceCodes.size)} จังหวัด แยกตามภูมิภาคจากต้นทางนี้</p></header><div class="f4-coverage-region-list" role="list">${rows.map((row) => `<div class="f4-coverage-region" role="listitem"><div><strong>${escapeHtml(row.name)}</strong><span>${formatNumber(row.count)} จังหวัด</span></div><i aria-hidden="true"><b style="width:${(row.count / maxCount * 100).toFixed(1)}%"></b></i></div>`).join("") || '<p class="empty-note">ไม่มีข้อมูลจังหวัดจากต้นทางนี้</p>'}</div>`;
   }
   const switcher = document.getElementById("f4ProvinceSwitch");
   const siblings = provinces.filter((row) => row.region === state.selectedRegion && row.province_code !== state.selectedCode)
@@ -1098,6 +1222,7 @@ function renderF4Evidence() {
 
 function setF4CountryTab(tab, load = true) {
   state.f4CountryTab = tab;
+  refreshF4Map();
   document.querySelectorAll("[data-f4-tab]").forEach((button) => {
     const active = button.dataset.f4Tab === tab;
     button.classList.toggle("active", active);
@@ -1123,30 +1248,100 @@ function renderF4PolicySummary(payload, ids = {}) {
     budgetNote: "f4PolicyBudgetNote",
     donut: "f4PolicyDonut",
     legend: "f4PolicyStatusLegend",
+    statusBars: "f4PolicyStatusBars",
+    note: "f4PolicyChartNote",
     ...ids,
   };
   const total = Number(payload.total || 0);
   const budget = Number(payload.budget_baht_total || 0);
   const statuses = payload.status_summary || [];
-  const colors = ["#173f2c", "#8a6a18", "#5f7869", "#9b4f40", "#9aa59d"];
+  const provinces = payload.province_budget_summary || [];
+  const colors = ["#173f2c", "#8a6a18", "#5f7869", "#9b4f40", "#66519b", "#a2aaa3"];
+  const topProvinces = provinces.slice(0, 5);
+  const otherProvinces = provinces.slice(5);
+  const otherBudget = otherProvinces.reduce((sum, item) => sum + Number(item.budget_baht || 0), 0);
+  const donutItems = [...topProvinces.map((item, index) => ({ ...item, color: colors[index] })),
+    ...(otherProvinces.length ? [{ province: "จังหวัดอื่นๆ", budget_baht: otherBudget, color: colors[5], isOther: true }] : [])];
+  const provinceBudgetTotal = donutItems.reduce((sum, item) => sum + Number(item.budget_baht || 0), 0);
   let cursor = 0;
-  const slices = statuses.map((item, index) => {
+  const slices = donutItems.map((item) => {
     const start = cursor;
-    const degrees = total ? (Number(item.count || 0) / total) * 360 : 0;
+    const degrees = provinceBudgetTotal ? (Number(item.budget_baht || 0) / provinceBudgetTotal) * 360 : 0;
     cursor += degrees;
-    return `${colors[index % colors.length]} ${start.toFixed(2)}deg ${cursor.toFixed(2)}deg`;
+    return `${item.color} ${start.toFixed(2)}deg ${cursor.toFixed(2)}deg`;
   });
   document.getElementById(targetIds.total).textContent = formatNumber(total);
   document.getElementById(targetIds.budget).textContent = `${formatNumber(Math.round(budget))} บาท`;
   const budgetNote = document.getElementById(targetIds.budgetNote);
   if (budgetNote) budgetNote.textContent = "";
-  document.getElementById(targetIds.donut).style.background = slices.length
+  const donut = document.getElementById(targetIds.donut);
+  donut.style.background = slices.length && provinceBudgetTotal
     ? `conic-gradient(${slices.join(", ")})`
     : "#dce4de";
-  document.getElementById(targetIds.legend).innerHTML = statuses
-    .map((item, index) => `
-      <p><i style="background:${colors[index % colors.length]}"></i><span>${escapeHtml(item.label)}</span><strong>${formatNumber(item.count)} โครงการ</strong></p>`)
-    .join("");
+  donut.setAttribute("aria-label", `สัดส่วนงบประมาณโครงการตามจังหวัดที่จับคู่ได้ รวม ${formatNumber(Math.round(provinceBudgetTotal))} บาท`);
+  const legend = document.getElementById(targetIds.legend);
+  const visibleLegend = topProvinces.map((item, index) => `
+    <p><i style="background:${colors[index]}"></i><span>${escapeHtml(item.province)}</span><strong>${formatNumber(Math.round(Number(item.budget_baht || 0)))} บาท</strong></p>`).join("");
+  const otherLegend = otherProvinces.length ? `
+    <button type="button" class="f4-policy-other-toggle" data-f4-policy-budget-other aria-expanded="${state.f4PolicyOtherProvincesExpanded}">
+      <span><i style="background:${colors[5]}"></i><span>จังหวัดอื่นๆ</span></span>
+      <strong>${formatNumber(Math.round(otherBudget))} บาท</strong>
+    </button>
+    ${state.f4PolicyOtherProvincesExpanded ? `<div class="f4-policy-other-list">${otherProvinces.map((item) => `
+      <p><span>${escapeHtml(item.province)}</span><strong>${formatNumber(Math.round(Number(item.budget_baht || 0)))} บาท</strong></p>`).join("")}</div>` : ""}` : "";
+  legend.innerHTML = visibleLegend + otherLegend || '<p class="empty-note">ยังไม่มีข้อมูลงบประมาณที่จับคู่กับจังหวัด</p>';
+  const note = document.getElementById(targetIds.note);
+  if (note) {
+    const multi = Number(payload.multi_province_projects || 0);
+    const unmatched = Number(payload.unmatched_province_projects || 0);
+    note.textContent = `ยอดตามจังหวัดจากข้อความโครงการ อาจนับซ้ำเมื่อโครงการจับคู่หลายจังหวัด (${formatNumber(multi)} โครงการ); ไม่รวม ${formatNumber(unmatched)} โครงการที่ไม่พบจังหวัด และไม่ใช่การจัดสรรงบประมาณจริง`;
+  }
+  const statusBars = document.getElementById(targetIds.statusBars);
+  const maxCount = Math.max(1, ...statuses.map((item) => Number(item.count || 0)));
+  statusBars.innerHTML = statuses.length ? statuses.map((item) => `
+    <div class="f4-policy-status-row">
+      <span><strong>${escapeHtml(item.label)}</strong><b>${formatNumber(item.count)} โครงการ</b></span>
+      <i aria-hidden="true"><b style="width:${(Number(item.count || 0) / maxCount * 100).toFixed(1)}%"></b></i>
+    </div>`).join("") : '<p class="empty-note">ยังไม่มีข้อมูลสถานะโครงการ</p>';
+}
+
+function renderF4PolicyProvinceBreakdown(rows) {
+  const section = document.getElementById("f4PolicyProvinceBreakdown");
+  const list = document.getElementById("f4PolicyProvinceList");
+  if (!section || !list) return;
+  if (state.selectedCode) {
+    section.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+
+  const scopedProvinces = (state.catalog?.provinces || []).filter((province) =>
+    !state.selectedRegion || province.region === state.selectedRegion
+  );
+  const provinceByName = new Map(scopedProvinces.map((province) => [province.province_name_th, province]));
+  const headingNote = document.querySelector("#f4PolicyProvinceBreakdown header p");
+  if (headingNote) {
+    headingNote.textContent = `${state.selectedRegion ? `นับเฉพาะจังหวัดใน${state.selectedRegion} · ` : ""}นับจากข้อความโครงการ โครงการหนึ่งอาจจับคู่ได้มากกว่าหนึ่งจังหวัด`;
+  }
+  const counts = new Map();
+  (rows || []).forEach((row) => {
+    [...new Set(row.matched_provinces || [])].forEach((name) => {
+      if (provinceByName.has(name)) counts.set(name, (counts.get(name) || 0) + 1);
+    });
+  });
+  const items = [...counts.entries()]
+    .map(([name, count]) => ({ name, count, province: provinceByName.get(name) }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "th"));
+  const maxCount = Math.max(1, ...items.map((item) => item.count));
+  const visibleItems = state.f4PolicyProvinceExpanded ? items : items.slice(0, 5);
+  section.hidden = false;
+  list.innerHTML = items.length
+    ? `${visibleItems.map(({ name, count, province }) => `
+      <button type="button" class="f4-policy-province-row" data-f4-policy-province="${escapeHtml(province.province_code)}" aria-label="ดู ${escapeHtml(formatNumber(count))} โครงการที่จับคู่กับจังหวัด${escapeHtml(name)}">
+        <span class="f4-policy-province-label"><strong>${escapeHtml(name)}</strong><b>${formatNumber(count)} โครงการ</b></span>
+        <i aria-hidden="true"><b style="width:${(count / maxCount * 100).toFixed(1)}%"></b></i>
+      </button>`).join("")}${items.length > 5 ? `<button type="button" class="f4-policy-province-toggle" data-f4-policy-province-toggle>${state.f4PolicyProvinceExpanded ? "แสดงน้อยลง" : `เพิ่มเติม${state.f4PolicyProvinceExpanded ? "" : ` (${formatNumber(items.length - 5)} จังหวัด)`}`}</button>` : ""}`
+    : '<p class="empty-note">ยังไม่พบจังหวัดที่จับคู่กับโครงการ</p>';
 }
 
 function f4ListEndpoint(kind) {
@@ -1167,8 +1362,16 @@ async function openF4CountryList(kind) {
     && f4ListEndpoint(kind) === endpoint && state.f4ListRequestTokens[kind] === token;
   const rowsId = isPolicy ? "f4PolicyRows" : "f4InnovationRows";
   const summaryId = isPolicy ? "f4PolicyListSummary" : "f4InnovationListSummary";
+  if (isPolicy) {
+    document.getElementById("f4PolicyProvinceBreakdown").hidden = true;
+    state.f4PolicyProvinceExpanded = false;
+  }
   if (isPolicy) state.f4PolicyRows = [];
-  else state.f4InnovationRows = [];
+  else {
+    state.f4InnovationRows = [];
+    document.getElementById("f4InnovationAnalytics").hidden = true;
+    document.getElementById("f4InnovationFilterSummary").hidden = true;
+  }
   document.getElementById(summaryId).textContent = "กำลังโหลดรายการ";
   document.getElementById(rowsId).innerHTML = `<div class="portfolio-loading"><span></span><span></span><span></span></div>`;
   try {
@@ -1179,12 +1382,13 @@ async function openF4CountryList(kind) {
       state.f4PolicyRows = payload.rows || [];
       state.f4PolicyMeta = payload;
       renderF4PolicySummary(payload);
+      renderF4PolicyProvinceBreakdown(state.f4PolicyRows);
       const count = renderF4Rows(rowsId, state.f4PolicyRows, kind, query);
       document.getElementById(summaryId).textContent = `${formatNumber(count)} รายการ`;
     } else {
       state.f4InnovationRows = payload.rows || [];
-      const count = renderF4Rows(rowsId, state.f4InnovationRows, kind, query);
-      document.getElementById(summaryId).textContent = `${formatNumber(count)} รายการ`;
+      renderF4InnovationAnalytics();
+      rerenderF4InnovationList();
       const innovationSummary = document.getElementById("f4InnovationSummary");
       if (innovationSummary) innovationSummary.textContent = "";
     }
@@ -1197,8 +1401,66 @@ async function openF4CountryList(kind) {
 }
 
 function rerenderF4InnovationList() {
-  const count = renderF4Rows("f4InnovationRows", state.f4InnovationRows, "innovations", state.f4InnovationQuery);
+  const rows = state.f4InnovationRows.filter((row) => {
+    const trlMatches = !state.f4InnovationTrlFilter
+      || String(row.trl_level ?? "") === state.f4InnovationTrlFilter;
+    return trlMatches;
+  });
+  const count = renderF4Rows("f4InnovationRows", rows, "innovations", state.f4InnovationQuery);
   document.getElementById("f4InnovationListSummary").textContent = `${formatNumber(count)} รายการ`;
+  renderF4InnovationAnalytics();
+  const filters = [];
+  if (state.f4InnovationTrlFilter) filters.push(`TRL ${state.f4InnovationTrlFilter}`);
+  const summary = document.getElementById("f4InnovationFilterSummary");
+  summary.hidden = !filters.length;
+  summary.innerHTML = filters.length
+    ? `<span>กรองรายการตาม ${filters.map(escapeHtml).join(" · ")}</span><button type="button" data-f4-innovation-clear>ล้างตัวกรอง</button>`
+    : "";
+}
+
+function renderF4InnovationAnalytics() {
+  const panel = document.getElementById("f4InnovationAnalytics");
+  if (!panel) return;
+  panel.hidden = !state.f4InnovationRows.length;
+
+  const provincePanel = document.getElementById("f4InnovationProvinceChart");
+  provincePanel.hidden = Boolean(state.selectedCode);
+  const provinceCounts = new Map();
+  state.f4InnovationRows.forEach((row) => {
+    const codes = [...new Set((row.provinces || []).map((code) => String(code).padStart(2, "0")))];
+    codes.forEach((code) => provinceCounts.set(code, (provinceCounts.get(code) || 0) + 1));
+  });
+  const provinceItems = [...provinceCounts.entries()].map(([code, count]) => ({
+    code,
+    count,
+    name: (state.catalog?.provinces || []).find((item) => String(item.province_code).padStart(2, "0") === code)?.province_name_th
+      || state.f4InnovationRows.find((row) => (row.provinces || []).some((item) => String(item).padStart(2, "0") === code))?.province_names?.[0]
+      || code,
+  })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "th"));
+  const visibleProvinces = state.f4InnovationProvinceExpanded ? provinceItems : provinceItems.slice(0, 5);
+  const maxProvinceCount = Math.max(1, ...provinceItems.map((item) => item.count));
+  document.getElementById("f4InnovationProvinceRows").innerHTML = visibleProvinces.map(({ code, name, count }) => `
+    <button type="button" class="f4-analytics-row" data-f4-innovation-province="${escapeHtml(code)}" aria-label="ดูเทคโนโลยีและนวัตกรรม ${formatNumber(count)} รายการในจังหวัด${escapeHtml(name)}">
+      <span><strong>${escapeHtml(name)}</strong><b>${formatNumber(count)} รายการ</b></span>
+      <i aria-hidden="true"><b style="width:${(count / maxProvinceCount * 100).toFixed(1)}%"></b></i>
+    </button>`).join("") || '<p class="f4-analytics-empty">ไม่มีข้อมูลจังหวัด</p>';
+  const provinceToggle = document.getElementById("f4InnovationProvinceToggle");
+  provinceToggle.hidden = provinceItems.length <= 5;
+  provinceToggle.textContent = state.f4InnovationProvinceExpanded
+    ? "แสดงน้อยลง"
+    : `เพิ่มเติม (${formatNumber(provinceItems.length - 5)} จังหวัด)`;
+
+  const trlCounts = new Map(Array.from({ length: 9 }, (_, index) => [String(index + 1), 0]));
+  state.f4InnovationRows.forEach((row) => {
+    const level = String(row.trl_level ?? "");
+    if (trlCounts.has(level)) trlCounts.set(level, trlCounts.get(level) + 1);
+  });
+  const maxTrlCount = Math.max(1, ...trlCounts.values());
+  document.getElementById("f4InnovationTrlRows").innerHTML = [...trlCounts.entries()].map(([level, count]) => `
+    <button type="button" class="f4-analytics-row${state.f4InnovationTrlFilter === level ? " active" : ""}" data-f4-innovation-trl="${level}" aria-pressed="${state.f4InnovationTrlFilter === level}">
+      <span><strong>TRL ${level}</strong><b>${formatNumber(count)} รายการ</b></span>
+      <i aria-hidden="true"><b style="width:${(count / maxTrlCount * 100).toFixed(1)}%"></b></i>
+    </button>`).join("");
 }
 
 function rerenderF4PolicyList() {
@@ -2393,7 +2655,10 @@ function selectRegion(name, moveMap = true) {
   else if (state.mapMode === "f4") {
     state.f4ListContextKey = "";
     state.f4Province = null;
-    loadF4RegionOverview(name).then(renderF4CountryPanel);
+    loadF4RegionOverview(name).then((payload) => {
+      if (payload) refreshF4Map();
+      renderF4CountryPanel();
+    });
   }
   else renderWorkspacePanel();
   if (moveMap) fitRegionBounds(region);
@@ -4215,6 +4480,8 @@ async function selectProvince(code, moveMap = true, notifyF2 = true) {
     state.f4CountryTab = "overview";
     state.f4ListContextKey = "";
     state.f4InnovationQuery = "";
+    state.f4InnovationTrlFilter = null;
+    state.f4InnovationProvinceExpanded = false;
     state.f4PolicyQuery = "";
     document.getElementById("f4InnovationSearch").value = "";
     document.getElementById("f4PolicySearch").value = "";
@@ -4374,6 +4641,44 @@ function bindEvents() {
     document.getElementById("f4PanelStage").scrollTop = 0;
   });
   document.getElementById("f4CountryPanel").addEventListener("click", (event) => {
+    if (event.target.closest("[data-f4-policy-budget-other]")) {
+      state.f4PolicyOtherProvincesExpanded = !state.f4PolicyOtherProvincesExpanded;
+      refreshF4PolicySummaries();
+      return;
+    }
+    if (event.target.closest("[data-f4-innovation-clear]")) {
+      state.f4InnovationTrlFilter = null;
+      rerenderF4InnovationList();
+      return;
+    }
+    const innovationProvince = event.target.closest("[data-f4-innovation-province]");
+    if (innovationProvince) {
+      selectProvince(innovationProvince.dataset.f4InnovationProvince, true)
+        .then(() => setF4CountryTab("innovations"));
+      return;
+    }
+    const innovationTrl = event.target.closest("[data-f4-innovation-trl]");
+    if (innovationTrl) {
+      const level = innovationTrl.dataset.f4InnovationTrl;
+      state.f4InnovationTrlFilter = state.f4InnovationTrlFilter === level ? null : level;
+      rerenderF4InnovationList();
+      return;
+    }
+    if (event.target.closest("#f4InnovationProvinceToggle")) {
+      state.f4InnovationProvinceExpanded = !state.f4InnovationProvinceExpanded;
+      renderF4InnovationAnalytics();
+      return;
+    }
+    if (event.target.closest("[data-f4-policy-province-toggle]")) {
+      state.f4PolicyProvinceExpanded = !state.f4PolicyProvinceExpanded;
+      renderF4PolicyProvinceBreakdown(state.f4PolicyRows);
+      return;
+    }
+    const policyProvince = event.target.closest("[data-f4-policy-province]");
+    if (policyProvince) {
+      selectProvince(policyProvince.dataset.f4PolicyProvince, true).then(() => setF4CountryTab("policy"));
+      return;
+    }
     const button = event.target.closest("[data-f4-region], [data-f4-province]");
     if (!button) return;
     document.getElementById("f4PanelStage").scrollTop = 0;
