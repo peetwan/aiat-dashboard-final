@@ -81,7 +81,7 @@
     K05: "ธุรกิจหรือผู้ประกอบการ",
     K07: "กลุ่มสินค้าและบริการ",
     C08_PARTICIPATING: "ธุรกิจที่เข้าร่วมโครงการ",
-    K12: "รายการทุนวัฒนธรรม",
+    K12: "รายการทุนวัฒนธรรมบนแผนที่",
   };
   const IDENTITY_PRESENTATIONS = {
     source_record_only: { label: "ระบุตามข้อมูลต้นทาง", notice: "รายการนี้ระบุตามข้อมูลต้นทาง และยังไม่ได้เชื่อมโยงข้ามแหล่งข้อมูล", warning: false },
@@ -190,7 +190,11 @@
         if (!isObject(row)) return [];
         const url = safeUrl(row.source_url || row.public_url || row.url);
         if (!url) return [];
-        return [{ label: cleanText(row.label) || `ดูข้อมูลจาก ${sourceName(row.source_id)}`, url }];
+        const culturalRecord = row.source_id === "f2_culturalmap_university"
+          && /^https:\/\/www\.culturalmapthailand\.info\/CD-[A-Za-z0-9-]+\/?$/.test(url);
+        const kind = row.link_scope !== "source" && row.record_link_availability !== "withheld"
+          && (row.link_scope === "record" || culturalRecord) ? "record" : "source";
+        return [{ label: cleanText(row.label) || `ดูข้อมูลจาก ${sourceName(row.source_id)}`, url, kind }];
       }),
       (row) => row.url,
     );
@@ -219,6 +223,7 @@
         .map((row) => ({
           label: sourceName(row?.source_id),
           url: safeUrl(row?.public_url),
+          kind: "source",
         })).filter((row) => row.url),
       (row) => row.url,
     );
@@ -234,6 +239,7 @@
       asArray(provenance?.sources).filter((row) => admitted.has(cleanText(row?.source_id))).map((row) => ({
         label: c02SourceName(row.source_id),
         url: safeUrl(row.public_url),
+        kind: "source",
       })).filter((row) => row.url),
       (row) => row.url,
     );
