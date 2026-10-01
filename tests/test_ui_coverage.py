@@ -473,7 +473,7 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert "จังหวัดที่แสดงเป็นจังหวัดที่แหล่งข้อมูลระบุไว้ในทะเบียน" in script
     assert "ส่วนอีก ${withoutProvince} คนจะแสดงเฉพาะในยอดรวมประเทศ" in script
     assert "บางคนมีข้อมูลมากกว่าหนึ่งจังหวัด" in script
-    assert "ข้อมูลชุดนี้มีนิยามต่างจาก K02" in script
+    assert "รายชื่อในทะเบียนนี้เป็นคนละชุดข้อมูลกับ “นวัตกรตามยอดรวมที่ PMUA รายงาน”" in script
     assert "f2-metric-description" not in script
     assert "coverage.national_total" in script
     assert 'role: "status", "aria-live": "polite"' in script
