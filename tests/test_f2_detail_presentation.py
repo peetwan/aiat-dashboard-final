@@ -205,7 +205,7 @@ const listK12 = presenter.presentListItem('K12', {
   category_codes: ['PA', 'PA2'],
   province_names_th: ['สงขลา'],
 });
-assert.deepEqual(listK12.context, ['รายการทุนวัฒนธรรม', 'ศิลปะการแสดง', 'จังหวัดสงขลา']);
+assert.deepEqual(listK12.context, ['รายการทุนวัฒนธรรมบนแผนที่', 'ศิลปะการแสดง', 'จังหวัดสงขลา']);
 assert.equal(listK12.warning, '');
 assert.equal(JSON.stringify(listK12).includes('entity_id'), false);
 assert.equal(JSON.stringify(listK12).includes('source_listing_identity'), false);
@@ -246,6 +246,10 @@ assert.ok(JSON.stringify(models.K01B).includes('ประวัติและ�
 assert.equal(models.K12.title, 'ชื่อรายการอยู่ระหว่างการตรวจสอบ');
 assert.ok(models.K12.notices.some((notice) => notice.text.includes('อยู่ระหว่างการตรวจสอบ')));
 assert.ok(JSON.stringify(models.K12).includes('ศิลปะการแสดง'));
+const mappedRecord = presenter.present('K12', {...samples.K12, listings: [{source_id: 'f2_culturalmap_university', source_url: 'https://www.culturalmapthailand.info/CD-7288'}]}, provenance);
+assert.equal(mappedRecord.sources[0].kind, 'record');
+const sourceHomepage = presenter.present('C04_LISTED', {...samples.C04_LISTED, listings: [{source_id: 'f2_apptech_mtr', source_url: 'https://rinmp.com/', link_scope: 'source', record_link_availability: 'withheld'}]}, provenance);
+assert.equal(sourceHomepage.sources[0].kind, 'source');
 assert.ok(models.K03.notices.some((notice) => notice.text.includes('ไม่ได้ยืนยันว่าโครงการทั้งหมดเสร็จสมบูรณ์')));
 assert.ok(models.K04.sections.some((section) => section.title === 'ระดับความพร้อมตามแหล่งข้อมูล'));
 assert.ok(JSON.stringify(models.K04).includes('ระดับความพร้อมเทคโนโลยี (TRL) 8'));

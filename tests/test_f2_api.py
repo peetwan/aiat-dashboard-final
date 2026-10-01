@@ -36,7 +36,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             "K03": "ครั้ง",
             "K04": "นวัตกรรม",
             "C04_LISTED": "นวัตกรรม",
-            "K05": "ร้านค้า",
+            "K05": "ผู้ประกอบการ/หน่วยธุรกิจ",
             "K06": "คน",
             "K07": "รายการ",
             "K08": "ธุรกิจชุมชน",
@@ -180,6 +180,24 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             row["result"]["unit"]
             for row in source_regions.json()["source_region_results"]
         } == {"คนต่อเดือน"}
+
+        business_breakdown = client.get(
+            "/api/public/v1/f2/topics/k08",
+            params={"measure": "C08_REPORTED_BUSINESSES", "source_dimension": "categories"},
+        )
+        assert business_breakdown.status_code == 200
+        breakdown = business_breakdown.json()["source_dimension_breakdown"]
+        assert breakdown["label_th"] == "หมวดหมู่ธุรกิจ"
+        assert sum(int(row["display_value"]) for row in breakdown["rows"]) == 375
+        assert {row["unit"] for row in breakdown["rows"]} == {"ธุรกิจชุมชน"}
+        assert all(set(row) == {"label_th", "display_value", "unit"} for row in breakdown["rows"])
+        region_breakdown = client.get(
+            "/api/public/v1/f2/topics/k08",
+            params={"measure": "C08_REPORTED_BUSINESSES", "source_dimension": "geography"},
+        ).json()["source_dimension_breakdown"]
+        assert region_breakdown["label_th"] == "ภูมิภาคตามแหล่งข้อมูล"
+        assert len(region_breakdown["rows"]) == 6
+        assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == 375
 
         zero_price = client.get(
             "/api/public/v1/f2/topics/k07/details/offering_family_002dfbc09f8c360f3395?measure=K07"

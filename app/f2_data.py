@@ -40,7 +40,7 @@ _THAI_UNITS = {
     "person": "คน",
     "activity": "ครั้ง",
     "innovation": "นวัตกรรม",
-    "operator": "ร้านค้า",
+    "operator": "ผู้ประกอบการ/หน่วยธุรกิจ",
     "offering_family": "รายการ",
     "business": "ธุรกิจชุมชน",
     "participating_business_unit": "ธุรกิจชุมชน",
@@ -574,6 +574,33 @@ def get_topic(
                 "province_names_th": province_names,
             }
         )
+    source_dimension_breakdown: dict[str, Any] | None = None
+    if measure_id == "C08_REPORTED_BUSINESSES":
+        dimension_id = next(
+            iter((result.get("applied_filters") or {}).get("source_dimension") or []),
+            None,
+        )
+        dimension_choices = (
+            ((scope.get("prepared_filters") or {}).get(measure_id) or {})
+            .get("choices", {})
+            .get("source_dimension") or []
+        )
+        dimension_label = next(
+            (choice.get("label_th") for choice in dimension_choices if choice.get("id") == dimension_id),
+            None,
+        )
+        breakdowns = selected.get("breakdowns") or []
+        source_dimension_breakdown = {
+            "label_th": dimension_label or "ข้อมูลแยกตามแหล่งข้อมูล",
+            "rows": [
+                {
+                    "label_th": str(row.get("label") or "ไม่ระบุ"),
+                    "display_value": str(row.get("amount") or "0"),
+                    "unit": _thai_unit(row.get("amount_unit")),
+                }
+                for row in breakdowns
+            ],
+        }
     source_region_results: list[dict[str, Any]] = []
     if province is None and "source_region" in (contract.get("supported_filters") or []):
         national_prepared = (
@@ -623,6 +650,7 @@ def get_topic(
         "sources": topic.get("sources") or [],
         "limitations": topic.get("limitations") or [],
         "source_region_results": source_region_results,
+        "source_dimension_breakdown": source_dimension_breakdown,
         "list": {
             "capability": list_capability,
             "scoped_item_count": len(item_ids),
