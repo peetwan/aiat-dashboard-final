@@ -297,6 +297,54 @@ def test_f2_detail_ui_uses_presenter_instead_of_raw_schema_as_primary_view() -> 
 
 
 @pytest.mark.skipif(NODE is None, reason="node is not installed")
+def test_innovation_and_sparse_business_details_explain_evidence_without_repeating_it() -> None:
+    assert NODE is not None
+    script = r"""
+const assert = require('node:assert/strict');
+const presenter = require('./app/static/f2-detail.js');
+const innovation = {
+  label: 'นวัตกรรมตัวอย่าง',
+  source_ids: ['f2_apptech_mru', 'f2_target_household'],
+  descriptions: [
+    {kind: 'detail', text: 'ช่วยให้ชุมชนทำงานได้เร็วขึ้น'},
+    {kind: 'description', text: 'ช่วยให้ชุมชนทำงานได้เร็วขึ้น'},
+  ],
+  locations: [{province: 'ลำปาง'}, {province: 'เชียงใหม่'}],
+  children: {readiness: [
+    {scale: 'TRL', numeric_level: 6, qualifies: false, source_id: 'f2_apptech_mru'},
+    {scale: 'TRL', numeric_level: 8, qualifies: true, source_id: 'f2_target_household'},
+    {scale: 'TRL', numeric_level: 8, qualifies: true, source_id: 'f2_target_household'},
+  ]},
+  flags: {readiness_conflict: true},
+};
+const model = presenter.present('K04', innovation, {}, {provinceName: 'เชียงใหม่'});
+assert.ok(model.facts.some(row => row.label === 'เหตุผลที่อยู่ในตัวชี้วัด' && row.value.includes('TRL) 8')));
+assert.ok(model.facts.some(row => row.label.includes('จังหวัดเชียงใหม่')));
+assert.equal(model.facts.find(row => row.label === 'พื้นที่ตามแหล่งข้อมูล').value, 'จังหวัดเชียงใหม่');
+assert.equal(model.sections.find(row => row.title === 'รายละเอียดและประโยชน์').items.length, 1);
+const readiness = model.sections.find(row => row.title === 'ระดับความพร้อมตามแหล่งข้อมูล');
+assert.equal(readiness.items.length, 2);
+assert.equal(readiness.items[1].facts.length, 1);
+assert.equal(model.technical.source_readiness.length, 3);
+assert.equal(model.technical.source_descriptions.length, 2);
+assert.ok(model.badges.includes('ระดับความพร้อมต่างกันตามหลักฐาน'));
+const otherProvince = presenter.present('K04', innovation, {}, {provinceName: 'สงขลา'});
+assert.equal(otherProvince.facts.some(row => row.label.includes('จังหวัดสงขลา')), false);
+const business = presenter.present('K05', {
+  label: 'ร้านตัวอย่าง', descriptions: [{kind: 'description', text: 'ร้านตัวอย่าง'}],
+  locations: [{province: 'เชียงใหม่'}],
+}, {});
+assert.equal(business.sections.some(row => row.title === 'เกี่ยวกับธุรกิจหรือกลุ่ม'), false);
+assert.ok(business.notices.some(row => row.text.includes('ยังไม่มีรายละเอียดเพิ่มเติม')));
+"""
+    result = subprocess.run(
+        [NODE, "-"], cwd=ROOT, text=True, encoding="utf-8",
+        capture_output=True, timeout=30, input=script,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.skipif(NODE is None, reason="node is not installed")
 def test_c02_person_presenters_only_show_admitted_public_person_context() -> None:
     assert NODE is not None
     samples = {
@@ -409,7 +457,8 @@ assert.ok(community.sections.some((section) => section.title === 'หน่ว�
 assert.equal(community.sections.find((section) => section.title === 'ผลงานหรือโครงการที่เกี่ยวข้อง').items.length, 4);
 const linked = community.sections.find((section) => section.title === 'ผลงานหรือโครงการที่เกี่ยวข้อง').items[0];
 assert.deepEqual(linked.targetDetail, {topicId: 'k04', measureId: 'K04', entityId: 'work-1'});
-assert.ok(community.notices.some((notice) => notice.text.includes('K02')));
+assert.ok(community.notices.some((notice) => notice.text.includes('นวัตกรตามยอดรวมที่ PMUA รายงาน')));
+assert.ok(community.notices.every((notice) => !/\b[KC]\d{2}\b/.test(notice.text)));
 assert.ok(community.badges.includes('ทะเบียนนวัตกรชุมชนและผู้ประดิษฐ์'));
 assert.ok(community.sections.some((section) => section.title === 'จังหวัดที่ต้นทางระบุสำหรับนวัตกร' && JSON.stringify(section).includes('จังหวัดกรุงเทพมหานคร')));
 assert.ok(community.notices.some((notice) => notice.text === 'จังหวัดนี้เป็นข้อมูลที่ต้นทางผูกกับระเบียนนวัตกร ไม่ได้หมายถึงจังหวัดที่อยู่อาศัยหรือสถานที่ทำงานปัจจุบัน'));
@@ -485,7 +534,7 @@ function functionSource(name) {
 (async () => {
   for (const failure of ['unsupported filter combination for measure', 'HTTP 503', 'AbortError', 'stale']) {
     const calls = [], notices = [], errors = [], restored = [], urls = [];
-    const state = {topic: 'k09', measure: 'K09', province: '90', topicData: null, scopeNotice: '', callbacks: {
+    const state = {open: true, tab: 'sources', revision: 'test-revision', topic: 'k09', measure: 'K09', province: '90', topicData: null, scopeNotice: '', callbacks: {
       getProvinces: () => [{province_code: '90', province_name_th: 'สงขลา'}],
       onProvinceRestore: province => restored.push(province),
     }};
@@ -493,10 +542,12 @@ function functionSource(name) {
     const context = vm.createContext({
       state, text: String, views: {sources: {}},
       selectedMeasureDefinition: () => ({label_th: 'การจ้างงาน'}),
+      measureDisplayLabel: definition => definition.label_th,
       detailScope: () => ({measure: state.measure, province: state.province}),
       query: params => '?' + new URLSearchParams(params),
       request: async path => {
         calls.push(path);
+        if (path.startsWith('/topics/k01a?')) return {revision: 'test-revision', result: {value: 77}};
         if (state.province) {
           const error = new Error(failure);
           if (failure === 'AbortError') error.name = 'AbortError';
@@ -516,10 +567,15 @@ function functionSource(name) {
     vm.runInContext(['renderScopeNotice', 'recoverUnsupportedProvince', 'loadSources'].map(functionSource).join('\n'), context);
     await context.loadSources();
     if (recovery) await recovery;
+    const topicCalls = calls.filter(path => path.startsWith('/topics/k09?'));
+    const coverageCalls = calls.filter(path => path.startsWith('/topics/k01a?'));
+    assert.ok(coverageCalls.length > 0);
+    assert.ok(coverageCalls.every(path => !new URLSearchParams(path.split('?')[1]).has('province')));
     if (failure.startsWith('unsupported')) {
-      assert.equal(calls.length, 2);
-      assert.equal(new URLSearchParams(calls[0].split('?')[1]).get('province'), '90');
-      assert.equal(new URLSearchParams(calls[1].split('?')[1]).get('province'), '');
+      assert.equal(topicCalls.length, 2);
+      assert.equal(new URLSearchParams(topicCalls[0].split('?')[1]).get('province'), '90');
+      assert.equal(new URLSearchParams(topicCalls[1].split('?')[1]).get('province'), '');
+      assert.equal(state.coverageData.result.value, 77);
       assert.equal(state.topicData.scope, 'national');
       assert.deepEqual(restored, ['']);
       assert.deepEqual(urls, [{push: false, province: ''}]);
@@ -527,7 +583,7 @@ function functionSource(name) {
       assert.ok(JSON.stringify(notices).includes('มุมมองประเทศไทย'));
       assert.equal(errors.length, 0);
     } else {
-      assert.equal(calls.length, 1);
+      assert.equal(topicCalls.length, 1);
       assert.equal(state.province, '90');
       assert.equal(restored.length, 0);
       assert.equal(notices.length, 0);

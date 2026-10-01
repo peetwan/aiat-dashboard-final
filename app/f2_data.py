@@ -505,6 +505,7 @@ def get_topic(
     component: str | None = None,
     source_dimension: str | None = None,
     q: str | None = None,
+    sort: str = "source",
     limit: int = PAGE_DEFAULT,
     offset: int = 0,
     revision: str | None = None,
@@ -526,7 +527,9 @@ def get_topic(
     result = selected["result"]
     detail_availability = contract.get("detail_availability")
     list_capability = "available" if detail_availability == "available" else "none"
-    if list_capability == "none" and (q is not None or limit != PAGE_DEFAULT or offset != 0):
+    if sort not in {"source", "name_asc", "name_desc"}:
+        raise F2InvalidQuery("unsupported list sort")
+    if list_capability == "none" and (q is not None or sort != "source" or limit != PAGE_DEFAULT or offset != 0):
         raise F2InvalidQuery("list and search parameters are not supported for this measure")
 
     query = q or ""
@@ -556,8 +559,18 @@ def get_topic(
         if not normalized_query
         or normalized_query in _normalize_label((compact_items.get(item_id) or {}).get("label"))
     ]
+    # Sort the complete filtered index before pagination; KPI results are unchanged.
+    if sort != "source":
+        matched_ids.sort(
+            key=lambda item_id: (
+                _normalize_label((compact_items.get(item_id) or {}).get("label")),
+                item_id,
+            ),
+            reverse=sort == "name_desc",
+        )
     page_ids = matched_ids[offset : offset + limit]
     page = []
+    preview_artifacts = set()
     for item_id in page_ids:
         compact = compact_items.get(item_id)
         if not isinstance(compact, dict):
@@ -574,6 +587,21 @@ def get_topic(
                 "province_names_th": province_names,
             }
         )
+        if measure_id == "K03":
+            # Preview only dates already admitted in the reviewed public detail.
+            artifact_key = (topic.get("detail_artifacts") or {}).get(item_id)
+            detail_container = topic
+            if artifact_key is not None:
+                if artifact_key not in snapshot.files:
+                    raise F2DataError("F2 detail mapping points outside the active revision")
+                detail_container = _load_artifact(snapshot, artifact_key)
+                preview_artifacts.add(artifact_key)
+            detail = (detail_container.get("details_by_id") or {}).get(item_id) or {}
+            page[-1]["activity_dates"] = [
+                {key: row[key] for key in ("start_date", "end_date", "has_conflict") if key in row}
+                for row in (detail.get("children") or {}).get("dates", [])
+                if isinstance(row, dict) and (row.get("start_date") or row.get("end_date"))
+            ]
     source_dimension_breakdown: dict[str, Any] | None = None
     if measure_id == "C08_REPORTED_BUSINESSES":
         dimension_id = next(
@@ -653,6 +681,7 @@ def get_topic(
         "source_dimension_breakdown": source_dimension_breakdown,
         "list": {
             "capability": list_capability,
+            "sort": sort,
             "scoped_item_count": len(item_ids),
             "matching_item_count": len(matched_ids),
             "offset": offset,
@@ -660,7 +689,7 @@ def get_topic(
             "returned_count": len(page),
             "items": page,
         },
-        "provenance": _provenance(snapshot, [f"f2/topic/{topic.get('topic_id')}"]),
+        "provenance": _provenance(snapshot, [f"f2/topic/{topic.get('topic_id')}", *sorted(preview_artifacts)]),
     }
 
 

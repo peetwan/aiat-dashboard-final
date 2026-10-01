@@ -20,6 +20,33 @@ def _measure(overview: dict, measure_id: str) -> dict:
     raise AssertionError(f"missing measure {measure_id}")
 
 
+def test_f2_name_sort_precedes_pagination_and_preserves_counts():
+    with TestClient(app) as client:
+        overview = client.get("/api/public/v1/f2/overview").json()
+        topic = _measure(overview, "K03")["topic_id"]
+        url = f"/api/public/v1/f2/topics/{topic}"
+        params = {"measure": "K03", "sort": "name_asc"}
+        whole = client.get(url, params={**params, "limit": 100}).json()
+        first = client.get(url, params={**params, "limit": 7}).json()
+        second = client.get(url, params={**params, "limit": 7, "offset": 7}).json()
+        ids = lambda payload: [row["entity_id"] for row in payload["list"]["items"]]
+        assert ids(first) + ids(second) == ids(whole)[:14]
+        descending = client.get(url, params={**params, "sort": "name_desc", "limit": 100}).json()
+        assert ids(descending) == list(reversed(ids(whole)))
+        source = client.get(url, params={"measure": "K03", "limit": 100}).json()
+        assert set(ids(source)) == set(ids(whole))
+        assert source["result"] == whole["result"] == descending["result"]
+        assert first["list"]["matching_item_count"] == whole["list"]["matching_item_count"]
+        assert client.get(url, params={**params, "sort": "invalid"}).status_code == 422
+        dated = next(row for row in whole["list"]["items"] if row["activity_dates"])
+        detail = client.get(f"{url}/details/{dated['entity_id']}", params={"measure": "K03"}).json()["detail"]
+        assert dated["activity_dates"] == [
+            {key: row[key] for key in ("start_date", "end_date", "has_conflict") if key in row}
+            for row in detail["children"]["dates"]
+            if row.get("start_date") or row.get("end_date")
+        ]
+
+
 def test_f2_api_contract_selective_reads_and_semantic_regressions():
     reset_f2_cache()
     with TestClient(app) as client:

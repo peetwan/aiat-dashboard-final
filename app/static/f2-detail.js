@@ -471,17 +471,22 @@
     return "รายละเอียดนวัตกรรม";
   }
 
-  function innovationPresentation(measureId, detail, provenance) {
+  function innovationPresentation(measureId, detail, provenance, context = {}) {
     const children = detail.children || {};
+    const selectedProvince = cleanText(context.provinceName).replace(/^จังหวัด/, "");
     const locations = locationRows(detail);
+    const matchingLocations = selectedProvince
+      ? locations.filter((row) => row.title.includes(`จังหวัด${selectedProvince}`))
+      : [];
+    const orderedLocations = [...matchingLocations, ...locations.filter((row) => !matchingLocations.includes(row))];
     const descriptions = dedupeRows(
       asArray(detail.descriptions).filter(isObject).map((row) => ({
         title: innovationDescriptionTitle(row.kind),
         text: cleanText(row.text),
       })).filter((row) => row.text),
-      (row) => `${row.title}\u0000${row.text}`,
+      (row) => row.text.replace(/\s+/g, " ").trim(),
     );
-    const readiness = asArray(children.readiness).filter(isObject).map((row) => {
+    const readinessEvidence = asArray(children.readiness).filter(isObject).map((row) => {
       const scale = cleanText(row.scale);
       const level = row.numeric_level
         ? scale.toUpperCase() === "TRL"
@@ -489,11 +494,25 @@
           : `${scale || "ระดับ"} ${row.numeric_level}`
         : cleanText(row.label) || scale;
       return {
-        title: level || "ระดับความพร้อมตามแหล่งข้อมูล",
-        subtitle: row.qualifies ? "ผ่านเกณฑ์ของตัวชี้วัด" : "ไม่อยู่ในเกณฑ์ของตัวชี้วัดนี้",
-        facts: [{ label: "แหล่งข้อมูล", value: sourceName(row.source_id) }],
+        source: sourceName(row.source_id),
+        level: level || "ระดับความพร้อมตามแหล่งข้อมูล",
+        qualifies: row.qualifies === true,
       };
     });
+    const readiness = [];
+    for (const source of unique(readinessEvidence.map((row) => row.source))) {
+      const levels = dedupeRows(readinessEvidence.filter((row) => row.source === source),
+        (row) => `${row.level}\u0000${row.qualifies}`);
+      readiness.push({
+        title: source,
+        facts: levels.map((row) => ({
+          label: row.qualifies ? "ผ่านเกณฑ์ตัวชี้วัด" : "ไม่อยู่ในเกณฑ์ตัวชี้วัดนี้",
+          value: row.level,
+        })),
+      });
+    }
+    const qualifyingLevels = unique(readinessEvidence.filter((row) => row.qualifies).map((row) => row.level));
+    const distinctLevels = unique(readinessEvidence.map((row) => row.level));
     const organizations = asArray(children.organizations).filter(isObject).map((row) => ({
       title: cleanText(row.organization),
       subtitle: roleName(row.role),
@@ -516,14 +535,21 @@
     return {
       eyebrow: measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรมในรายการทั้งหมด",
       title: cleanText(detail.label),
-      badges: unique([measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรม", ...readinessBadges, identityPresentation(detail).label]).slice(0, 5),
-      facts: [locations[0]?.title ? { label: "พื้นที่ใช้งาน", value: locations[0].title } : null].filter(Boolean),
+      badges: unique([measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรม", ...(distinctLevels.length > 1 ? ["ระดับความพร้อมต่างกันตามหลักฐาน"] : readinessBadges), identityPresentation(detail).label]).slice(0, 5),
+      facts: [
+        measureId === "K04" ? { label: "เหตุผลที่อยู่ในตัวชี้วัด", value: qualifyingLevels.length
+          ? `มีหลักฐานที่ผ่านเกณฑ์: ${qualifyingLevels.join(" · ")} (รายละเอียดแยกตามแหล่งข้อมูลด้านล่าง)`
+          : "รายการนี้อยู่ในตัวชี้วัดนวัตกรรมพร้อมใช้ แต่รายละเอียดที่เผยแพร่ไม่ได้ระบุระดับที่ผ่านเกณฑ์" } : null,
+        distinctLevels.length > 1 ? { label: "การอ่านระดับความพร้อม", value: "ต้นทางรายงานหลายระดับ ดูหลักฐานแยกตามแหล่งข้อมูลด้านล่าง" } : null,
+        matchingLocations.length ? { label: `เหตุผลที่พบในจังหวัด${selectedProvince}`, value: `แหล่งข้อมูลระบุจังหวัด${selectedProvince}เป็นพื้นที่ที่เกี่ยวข้องกับรายการนี้` } : null,
+        orderedLocations[0]?.title ? { label: "พื้นที่ตามแหล่งข้อมูล", value: orderedLocations[0].title } : null,
+      ].filter(Boolean),
       sections: [
         section("รายละเอียดและประโยชน์", "prose", descriptions),
         section("ระดับความพร้อมตามแหล่งข้อมูล", "cards", readiness),
         section("ผู้พัฒนาและผู้เกี่ยวข้อง", "cards", people),
         section("หน่วยงาน", "cards", organizations),
-        section("พื้นที่นำไปใช้", "cards", locations),
+        section("พื้นที่ที่แหล่งข้อมูลระบุ", "cards", orderedLocations),
         section("รายการจากแหล่งข้อมูล", "cards", listings),
       ].filter(Boolean),
       notices: dedupeRows([
@@ -532,13 +558,18 @@
         detail.flags?.readiness_conflict ? { tone: "warning", text: "แหล่งข้อมูลระบุระดับความพร้อมต่างกัน จึงแสดงแต่ละหลักฐานแยกกัน" } : null,
       ].filter(Boolean), (row) => row.text),
       sources: dedupeRows([...listingLinks(detail.listings), ...provenanceSources(provenance, detail.source_ids)], (row) => row.url),
-      technical: technical(detail),
+      technical: {
+        ...technical(detail),
+        source_descriptions: detail.descriptions,
+        source_readiness: children.readiness,
+      },
     };
   }
 
   function operatorPresentation(detail, provenance) {
     const locations = locationRows(detail);
-    const descriptions = descriptionRows(detail.descriptions, "ข้อมูลธุรกิจตามแหล่งต้นทาง");
+    const descriptions = descriptionRows(detail.descriptions, "ข้อมูลธุรกิจตามแหล่งต้นทาง")
+      .filter((row) => row.text !== cleanText(detail.label));
     const offerings = asArray(detail.relationships).filter(isObject).map((row) => ({
       title: cleanText(row.label),
       subtitle: "สินค้า บริการ หรือผลงานที่เกี่ยวข้อง",
@@ -550,6 +581,7 @@
     const notices = baseNotices(detail);
     if (detail.flags?.person_relationships_withheld) notices.push({ tone: "info", text: "ไม่แสดงความเชื่อมโยงระดับบุคคล เพื่อคงขอบเขตข้อมูลสาธารณะที่ได้รับอนุมัติ" });
     if (detail.flags?.geography_not_borrowed_from_offerings && !locations.length) notices.push({ tone: "info", text: "ไม่มีที่ตั้งของผู้ประกอบการที่ยืนยันได้ ระบบจึงไม่นำที่ตั้งของสินค้ามาใช้แทน" });
+    if (!descriptions.length) notices.push({ tone: "info", text: "แหล่งข้อมูลยังไม่มีรายละเอียดเพิ่มเติมเกี่ยวกับธุรกิจนี้" });
     return {
       eyebrow: "ธุรกิจ ร้านค้า หรือกลุ่มผู้ดำเนินการ",
       title: publicLabel(detail.label, "ไม่พบชื่อธุรกิจจากแหล่งข้อมูล"),
@@ -666,7 +698,7 @@
     const locations = locationRows(detail);
     const notices = baseNotices(detail);
     if (detail.flags?.k02_relationship === "not_established") {
-      notices.push({ tone: "info", text: "รายการบุคคลนี้ไม่ได้นำมาใช้ปรับยอดรวม K02 และไม่ควรนำไปเทียบหรือบวกกับ K02" });
+      notices.push({ tone: "info", text: "รายชื่อนี้เป็นคนละชุดข้อมูลกับ “นวัตกรตามยอดรวมที่ PMUA รายงาน” จึงไม่ได้ใช้ปรับยอดรวมนั้น และไม่ควรนำจำนวนมาเทียบหรือบวกกัน" });
     }
     if (locations.length) {
       notices.push({ tone: "info", text: "จังหวัดนี้เป็นข้อมูลที่ต้นทางผูกกับระเบียนนวัตกร ไม่ได้หมายถึงจังหวัดที่อยู่อาศัยหรือสถานที่ทำงานปัจจุบัน" });
@@ -723,12 +755,12 @@
     };
   }
 
-  function present(measureId, detail, provenance = {}) {
+  function present(measureId, detail, provenance = {}, context = {}) {
     if (!isObject(detail)) return fallbackPresentation({}, provenance);
     if (["K01B", "K12"].includes(measureId)) return culturalPresentation(measureId, detail, provenance);
     if (measureId === "K03") return activityPresentation(detail, provenance);
     if (C02_MEASURES.has(measureId)) return c02PersonPresentation(measureId, detail, provenance);
-    if (["K04", "C04_LISTED"].includes(measureId)) return innovationPresentation(measureId, detail, provenance);
+    if (["K04", "C04_LISTED"].includes(measureId)) return innovationPresentation(measureId, detail, provenance, context);
     if (measureId === "K05") return operatorPresentation(detail, provenance);
     if (measureId === "K07") return offeringPresentation(detail, provenance);
     if (measureId === "C08_PARTICIPATING") return participationPresentation(detail, provenance);

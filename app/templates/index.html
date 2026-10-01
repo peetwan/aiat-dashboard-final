@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/static/styles.css?v=legend-wrap-20260928-01" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
     <link rel="stylesheet" href="/static/departments.css?v=f4-tab-coverage-spacing-20260927-03" />
-    <link rel="stylesheet" href="/static/f2.css?v=20260928-ux-fixes-01" />
+    <link rel="stylesheet" href="/static/f2.css?v=20261001-f2-coverage-context-01" />
   </head>
   <body>
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
@@ -298,10 +298,11 @@
             <span>ฝ่าย 2</span>
             <h2>การยกระดับเศรษฐกิจฐานราก</h2>
             <nav class="f2-breadcrumbs" id="f2Breadcrumbs" aria-label="ขอบเขตข้อมูล"></nav>
+            <button type="button" id="f2Expand" class="f2-expand" aria-pressed="false">ขยายข้อมูล</button>
           </div>
           <button type="button" data-f2-close aria-label="ปิดแผงข้อมูล">×</button>
         </header>
-        <button class="f2-filters-toggle" id="f2FiltersToggle" type="button" aria-expanded="false" aria-controls="f2Controls">ตัวชี้วัด ตัวกรอง และค้นหา</button>
+        <button class="f2-filters-toggle" id="f2FiltersToggle" type="button" aria-expanded="false" aria-controls="f2FilterDialog">ตัวชี้วัด ตัวกรอง และค้นหา</button>
         <div class="f2-controls" id="f2Controls"></div>
         <div class="f2-tabs" role="tablist" aria-label="ส่วนข้อมูลฝ่าย 2">
           <button type="button" role="tab" id="f2-tab-overview" aria-controls="f2-view-overview" aria-selected="true" data-f2-tab="overview">ภาพรวม</button>
@@ -314,6 +315,11 @@
           <section id="f2-view-sources" role="tabpanel" aria-labelledby="f2-tab-sources" data-f2-view="sources" hidden></section>
         </div>
       </aside>
+      <dialog id="f2FilterDialog" class="f2-filter-dialog" aria-labelledby="f2FilterTitle">
+        <header><h2 id="f2FilterTitle">ตัวชี้วัด ตัวกรอง และค้นหา</h2></header>
+        <div id="f2FilterFields"></div>
+        <footer><button type="button" id="f2FiltersCancel">ยกเลิก</button><button type="button" id="f2FiltersApply">แสดงผล</button></footer>
+      </dialog>
       <section class="f2-detail-sheet" id="f2DetailSheet" role="dialog" aria-modal="true" aria-labelledby="f2DetailTitle" hidden>
         <div class="f2-detail-backdrop" data-f2-detail-close></div>
         <article class="f2-detail-card">
@@ -526,8 +532,8 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/f2-detail.js?v=20260928-ux-fixes-01" defer></script>
-    <script src="/static/f2.js?v=20260928-ux-fixes-01" defer></script>
-    <script src="/static/app.js?v=f4-tab-coverage-cards-20260927-01" defer></script>
+    <script src="/static/f2-detail.js?v=20261001-f2-category-code-01" defer></script>
+    <script src="/static/f2.js?v=20261001-f2-coverage-context-01" defer></script>
+    <script src="/static/app.js?v=20261001-f2-category-code-01" defer></script>
   </body>
 </html>
