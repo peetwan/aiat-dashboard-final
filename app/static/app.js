@@ -336,8 +336,9 @@ function syncResponsiveWorkspace() {
       else loadF4Overview();
     }
   } else if (state.mapMode === "f2") {
+    // Keep an active data lookup open when the viewport crosses a breakpoint.
+    if (window.F2Dashboard?.isOpen()) return;
     if (mobileMapFirst) {
-      window.F2Dashboard?.close();
       hideWorkspacePanel(true);
     } else {
       showWorkspacePanel();
@@ -435,14 +436,16 @@ function applyF2MapData(payload) {
     MAP_MODES.f2.steps = thresholds.map((minimum, index) => ({
       min: minimum,
       color: palette[Math.min(index, palette.length - 1)],
-      label: index === 0
+      label: state.f2MapMeasure === "K01A" ? "พบหลักฐานในจังหวัด"
+        : index === 0
         ? `ตั้งแต่ ${formatNumber(minimum)} ${state.f2MapUnit}`.trim()
         : `${formatNumber(minimum)} ถึงต่ำกว่า ${formatNumber(thresholds[index - 1])} ${state.f2MapUnit}`.trim(),
     }));
     MAP_MODES.f2.steps.push({
       min: 0,
       color: "#eef2ee",
-      label: state.f2MapMeasure === "C02_COMMUNITY"
+      label: state.f2MapMeasure === "K01A" ? "นับได้ศูนย์ในข้อมูลชุดนี้"
+        : state.f2MapMeasure === "C02_COMMUNITY"
         ? "0 คน — ไม่มีระเบียนที่ผ่านเกณฑ์ในฉบับนี้"
         : `0 ${state.f2MapUnit}`.trim(),
     });

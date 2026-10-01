@@ -473,11 +473,11 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert "จังหวัดที่แสดงเป็นจังหวัดที่แหล่งข้อมูลระบุไว้ในทะเบียน" in script
     assert "ส่วนอีก ${withoutProvince} คนจะแสดงเฉพาะในยอดรวมประเทศ" in script
     assert "บางคนมีข้อมูลมากกว่าหนึ่งจังหวัด" in script
-    assert "ข้อมูลชุดนี้มีนิยามต่างจาก K02" in script
+    assert "รายชื่อในทะเบียนนี้เป็นคนละชุดข้อมูลกับ “นวัตกรตามยอดรวมที่ PMUA รายงาน”" in script
     assert "f2-metric-description" not in script
     assert "coverage.national_total" in script
     assert 'role: "status", "aria-live": "polite"' in script
-    assert "definition?.label_th || data.measure_id" in script
+    assert "measureDisplayLabel(definition) || data.measure_id" in script
     assert ".f2-map-unavailable" in styles
     assert "#mapFallback" in styles
     assert 'state.mapMode === "f2" && !state.f2MapAvailable) return' not in integration
@@ -500,7 +500,9 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert "changeMeasure(select.value)" in script
     assert "!supportsProvince(definition)" in script
     assert "ไม่มีข้อมูลระดับจังหวัด ระบบจึงเปลี่ยน" in script
-    assert "ตัวชี้วัดนี้มีเฉพาะยอดรวม ไม่มีรายการรายชื่อให้ค้นหา" in script
+    assert "ข้อมูลชุดนี้แสดงเป็นยอดรวม จึงไม่มีรายชื่อให้ค้นหา" in script
+    assert "ดูที่มาและข้อควรทราบ" in script
+    assert "source_dimension_breakdown" in script
     assert "สูตร รหัส และรายละเอียดทางเทคนิค" in script
     assert "วันที่นี้เป็นวันที่จัดเตรียมฉบับข้อมูล ไม่ใช่ช่วงเวลาที่ตัวเลขวัด" in script
     assert 'id="f2FiltersToggle"' in template

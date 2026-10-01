@@ -2525,8 +2525,9 @@
   .mode-dock [data-map-mode="f4"] i { background: #8060b8; }
   .mode-dock button.active[data-map-mode] i { background: #fff; }
 
-  .evidence-legend ol { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .evidence-legend li { font-size: 10px; }
+  .evidence-legend ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .evidence-legend li { min-width: 0; align-items: flex-start; font-size: 10px; line-height: 1.4; white-space: normal; }
+  .evidence-legend li span { min-width: 0; overflow-wrap: anywhere; }
   .evidence-legend i { flex: 0 0 auto; }
 
   /* Hero: name + chips, no boxy ring */
