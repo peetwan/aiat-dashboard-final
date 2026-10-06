@@ -50,7 +50,10 @@ parser และ completeness ให้ตรงต้นทางจริง
 
 Field ภูมิศาสตร์ ตัวเลขรวม และรหัสโครงการประกาศได้ตามปกติ ชื่อเจ้าของงาน
 ผู้วิจัย ช่องทางติดต่องาน และสถานที่สาธารณะใช้ `field_contexts` ตาม
-[คู่มือบริบทข้อมูล](field-contexts.md) ลองก่อนนำเข้าด้วย:
+[คู่มือบริบทข้อมูล](field-contexts.md) ประกาศตั้งแต่ scaffold ได้ด้วย
+`--field-context /owner_name work_attribution` หรือ
+`--field-context /contact/email public_contact` (ระบุซ้ำได้; path เริ่มจาก payload)
+แล้วลองก่อนนำเข้าด้วย:
 
 ```powershell
 python tools/preview_privacy.py path/to/records.jsonl --source <source_id> --dataset-key <key>

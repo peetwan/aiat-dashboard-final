@@ -266,29 +266,18 @@ def _serving_contract_snapshot(session) -> dict:
 
     artifact_counts = database_artifact_counts(session)
     artifact_total = sum(artifact_counts.values())
-    all_source_ids = set(session.scalars(select(Source.source_id)).all())
-    approved_ids = set(
-        session.scalars(
-            select(Source.source_id).where(Source.production_values_allowed.is_(True))
-        ).all()
-    )
-    public_policy_ids = set(
-        session.scalars(
-            select(Source.source_id).where(
-                Source.cloud_policy == "team_approved_public"
-            )
-        ).all()
-    )
-    metadata_ids = set(
-        session.scalars(
-            select(Source.source_id).where(Source.cloud_policy == "metadata_only")
-        ).all()
-    )
-    restricted_ids = set(
-        session.scalars(
-            select(Source.source_id).where(Source.cloud_policy == "restricted_local_only")
-        ).all()
-    )
+    source_rows = session.execute(select(
+        Source.source_id, Source.production_values_allowed, Source.cloud_policy,
+    )).all()
+    all_source_ids = {row.source_id for row in source_rows}
+    approved_ids = {row.source_id for row in source_rows if row.production_values_allowed}
+    public_policy_ids = {
+        row.source_id for row in source_rows if row.cloud_policy == "team_approved_public"
+    }
+    metadata_ids = {row.source_id for row in source_rows if row.cloud_policy == "metadata_only"}
+    restricted_ids = {
+        row.source_id for row in source_rows if row.cloud_policy == "restricted_local_only"
+    }
     catalog_payload = session.scalar(
         select(PublicArtifact.payload).where(PublicArtifact.artifact_key == "catalog")
     )
@@ -308,34 +297,18 @@ def _serving_contract_snapshot(session) -> dict:
         and published_id_set <= approved_ids
     )
     restricted_catalog_sources = published_id_set & restricted_ids
-    disallowed_operational_records = (
-        session.scalar(
-            select(func.count())
-            .select_from(DashboardRecord)
-            .join(Source, DashboardRecord.source_id == Source.source_id)
-            .where(Source.production_values_allowed.is_(False))
-        )
-        or 0
-    )
-    approved_operational_records = (
-        session.scalar(
-            select(func.count())
-            .select_from(DashboardRecord)
-            .join(Source, DashboardRecord.source_id == Source.source_id)
-            .where(Source.production_values_allowed.is_(True))
-        )
-        or 0
-    )
-    endpoint_total = session.scalar(select(func.count()).select_from(Endpoint)) or 0
-    runtime_endpoint_total = (
-        session.scalar(
-            select(func.count()).select_from(Endpoint).where(
-                Endpoint.runtime_enabled.is_(True),
-                Endpoint.restricted.is_(False),
-            )
-        )
-        or 0
-    )
+    operational_counts = dict(session.execute(
+        select(Source.production_values_allowed, func.count())
+        .select_from(DashboardRecord)
+        .join(Source, DashboardRecord.source_id == Source.source_id)
+        .group_by(Source.production_values_allowed)
+    ).all())
+    disallowed_operational_records = operational_counts.get(False, 0)
+    approved_operational_records = operational_counts.get(True, 0)
+    endpoint_total, runtime_endpoint_total = session.execute(select(
+        func.count(),
+        func.count().filter(Endpoint.runtime_enabled.is_(True), Endpoint.restricted.is_(False)),
+    ).select_from(Endpoint)).one()
     spatial = spatial_contract_snapshot(
         session,
         required=SPATIAL_DATABASE_REQUIRED,

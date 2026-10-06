@@ -142,6 +142,30 @@ def test_dry_run_reports_paths_without_creating_directories(tmp_path):
     assert not (tmp_path / "config/publication_contracts").exists()
 
 
+def test_fixture_preserves_nested_siblings_across_semantic_roles(tmp_path):
+    _write_catalog(tmp_path)
+    scaffold(
+        _spec(
+            identity_fields=("attributes.project_id", "attributes.revision"),
+            geography_fields=("attributes.province_code",),
+            as_of_fields=("attributes.metadata.as_of",),
+            measure_field="attributes.metadata.project_count",
+        ),
+        project_root=tmp_path,
+    )
+    fixture = json.loads(
+        (tmp_path / "tests/fixtures/publication/sample_dataset.json").read_text(encoding="utf-8")
+    )
+    assert fixture["reviewed_records"] == [{
+        "attributes": {
+            "project_id": "synthetic-project_id-001",
+            "revision": "synthetic-revision-001",
+            "province_code": "synthetic-geography",
+            "metadata": {"as_of": "2000-01-01T00:00:00Z", "project_count": 0},
+        }
+    }]
+
+
 def test_second_run_refuses_overwrite_and_preserves_existing_file(tmp_path):
     _write_catalog(tmp_path)
     scaffold(_spec(), project_root=tmp_path)

@@ -56,10 +56,11 @@ def load_demand_manifest(path: Path = DEMAND_MANIFEST_PATH) -> dict[str, Any]:
     root = path.parent.resolve()
     if root not in artifact_path.parents or not artifact_path.is_file():
         raise RuntimeError("housing demand serving artifact is missing")
-    raw = artifact_path.read_bytes()
-    if len(raw) != int(artifact.get("bytes", -1)):
+    if artifact_path.stat().st_size != int(artifact.get("bytes", -1)):
         raise RuntimeError("housing demand serving artifact byte count mismatch")
-    if hashlib.sha256(raw).hexdigest() != str(artifact.get("sha256", "")):
+    with artifact_path.open("rb") as handle:
+        digest = hashlib.file_digest(handle, "sha256").hexdigest()
+    if digest != str(artifact.get("sha256", "")):
         raise RuntimeError("housing demand serving artifact hash mismatch")
     return payload
 

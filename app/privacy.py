@@ -7,7 +7,7 @@ from typing import Any
 
 from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
-    is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
+    is_contact_exposure_metadata, key_kind, normalise_key, pointer_child, validate_field_contexts,
 )
 
 
@@ -18,14 +18,6 @@ from app.field_contexts import (
 # และรหัสระเบียนไว้ การจับชื่อ key ใช้ขอบเขตคำหลังแปลง camelCase เป็น
 # snake_case จึงไม่ตัด address_province, citizen_count หรือ secretariat_name
 # เพียงเพราะมีคำบางส่วนคล้ายชื่อฟิลด์ส่วนตัว
-_CAMEL_BOUNDARY = re.compile(r"([a-z0-9])([A-Z])")
-
-
-def normalise_key(key: object) -> str:
-    text = _CAMEL_BOUNDARY.sub(r"\1_\2", str(key))
-    return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
-
-
 # Administrative-geography keys prefixed with `address_` are location metadata,
 # not a person's street address.  A map-first dashboard cannot place records
 # without them.

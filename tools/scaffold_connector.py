@@ -14,7 +14,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.privacy import forbidden_key_reason, sanitize_payload  # noqa: E402
+from app.field_contexts import FieldContextError, validate_field_contexts  # noqa: E402
+from app.privacy import sanitize_payload  # noqa: E402
 
 
 TEMPLATE_ROOT = PROJECT_ROOT / "templates" / "connector"
@@ -38,6 +39,7 @@ class ScaffoldSpec:
     geography_fields: tuple[str, ...] = ()
     as_of_fields: tuple[str, ...] = ()
     driver_name: str | None = None
+    field_contexts: tuple[tuple[str, str], ...] = ()
 
     @property
     def class_name(self) -> str:
@@ -49,33 +51,39 @@ class ScaffoldSpec:
         return self.driver_name or self.source_id
 
 
-def _validate_field_path(path: str, *, label: str) -> str:
+def _validate_field_path(
+    path: str, *, label: str, field_contexts: dict[str, str] | None = None
+) -> str:
     if path == "$payload_hash":
         return path
     if not FIELD_PATH_PATTERN.fullmatch(path):
         raise ScaffoldError(
             f"{label} must be a field name or dotted field path, got {path!r}"
         )
-    # Same token-bounded rules the runtime applies, so a declarable field is
-    # exactly a field that survives sanitize_payload (address_province is
-    # geography and allowed; owner_email is contact data and rejected).
-    for segment in path.split("."):
-        reason = forbidden_key_reason(segment)
-        if reason is not None:
-            raise ScaffoldError(
-                f"{label} uses a forbidden personal/contact field ({reason}): {segment}"
-            )
+    # Exercise the runtime projection instead of maintaining a second policy.
+    # This also handles a declared public leaf inside a contact container.
+    sample: dict = {}
+    _set_fixture_path(sample, path, "synthetic-value")
+    if sanitize_payload(sample, field_contexts=field_contexts) != sample:
+        raise ScaffoldError(
+            f"{label} uses a forbidden personal/contact field: {path}; "
+            "public work/contact fields require an exact --field-context"
+        )
     return path
 
 
-def parse_identity_options(values: Sequence[str]) -> tuple[tuple[str, ...], ...]:
+def parse_identity_options(
+    values: Sequence[str], *, field_contexts: dict[str, str] | None = None
+) -> tuple[tuple[str, ...], ...]:
     options: list[tuple[str, ...]] = []
     for index, raw in enumerate(values, start=1):
         fields = tuple(part.strip() for part in raw.split(",") if part.strip())
         if not fields:
             raise ScaffoldError(f"identity option {index} is empty")
         for field in fields:
-            _validate_field_path(field, label=f"identity option {index}")
+            _validate_field_path(
+                field, label=f"identity option {index}", field_contexts=field_contexts
+            )
         if "$payload_hash" in fields and fields != ("$payload_hash",):
             raise ScaffoldError("$payload_hash must be the only field in its identity option")
         if len(fields) != len(set(fields)):
@@ -89,6 +97,10 @@ def parse_identity_options(values: Sequence[str]) -> tuple[tuple[str, ...], ...]
 
 
 def validate_spec(spec: ScaffoldSpec) -> ScaffoldSpec:
+    try:
+        contexts = validate_field_contexts(dict(spec.field_contexts))
+    except FieldContextError as exc:
+        raise ScaffoldError(str(exc)) from exc
     if not SOURCE_ID_PATTERN.fullmatch(spec.source_id):
         raise ScaffoldError("source_id must match ^[a-z][a-z0-9_]*$")
     if not TRANSPORT_PATTERN.fullmatch(spec.transport):
@@ -108,7 +120,9 @@ def validate_spec(spec: ScaffoldSpec) -> ScaffoldSpec:
         raise ScaffoldError("grain_th must explain what one record represents")
     if not spec.identity_options:
         raise ScaffoldError("at least one identity option is required")
-    parse_identity_options([",".join(option) for option in spec.identity_options])
+    parse_identity_options(
+        [",".join(option) for option in spec.identity_options], field_contexts=contexts
+    )
     for label, fields in (
         ("geography field", spec.geography_fields),
         ("as-of field", spec.as_of_fields),
@@ -118,7 +132,7 @@ def validate_spec(spec: ScaffoldSpec) -> ScaffoldSpec:
         for field in fields:
             if field == "$payload_hash":
                 raise ScaffoldError(f"{label} cannot be $payload_hash")
-            _validate_field_path(field, label=label)
+            _validate_field_path(field, label=label, field_contexts=contexts)
     return spec
 
 
@@ -151,7 +165,7 @@ def _fixture_payload(spec: ScaffoldSpec) -> dict:
         _set_fixture_path(payload, field, "จังหวัดตัวอย่าง")
     for field in spec.as_of_fields:
         _set_fixture_path(payload, field, "2026-01-01")
-    if sanitize_payload(payload) != payload:
+    if sanitize_payload(payload, field_contexts=dict(spec.field_contexts)) != payload:
         raise ScaffoldError("generated fixture contains a field rejected by runtime privacy rules")
     return payload
 
@@ -219,6 +233,7 @@ def scaffold_connector(
         "__IDENTITY_OPTIONS_PY__": repr(spec.identity_options),
         "__GEOGRAPHY_FIELDS_JSON__": json_text(list(spec.geography_fields)),
         "__AS_OF_FIELDS_JSON__": json_text(list(spec.as_of_fields)),
+        "__FIELD_CONTEXTS_JSON__": json_text(dict(spec.field_contexts)),
         "__FIXTURE_PATH_JSON__": json_text(fixture_path),
         "__FIXTURE_PAYLOAD_JSON__": json_text(_fixture_payload(spec)),
     }
@@ -277,6 +292,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--geography-field", action="append", default=[], metavar="FIELD")
     parser.add_argument("--as-of-field", action="append", default=[], metavar="FIELD")
     parser.add_argument("--driver", help="connector driver name; defaults to source_id")
+    parser.add_argument(
+        "--field-context", action="append", nargs=2, default=[],
+        metavar=("POINTER", "CONTEXT"),
+        help="exact payload leaf context, e.g. /owner_name work_attribution; repeat as needed",
+    )
     parser.add_argument("--dry-run", action="store_true", help="show target files without writing")
     return parser
 
@@ -285,18 +305,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
+        contexts = validate_field_contexts(dict(args.field_context))
         spec = ScaffoldSpec(
             source_id=args.source_id,
             transport=args.transport,
             dataset_key=args.dataset_key,
             grain_th=args.grain_th,
-            identity_options=parse_identity_options(args.identity_fields),
+            identity_options=parse_identity_options(args.identity_fields, field_contexts=contexts),
             geography_fields=tuple(args.geography_field),
             as_of_fields=tuple(args.as_of_field),
             driver_name=args.driver,
+            field_contexts=tuple(contexts.items()),
         )
         created = scaffold_connector(spec, dry_run=args.dry_run)
-    except ScaffoldError as exc:
+    except (ScaffoldError, FieldContextError) as exc:
         parser.exit(2, f"error: {exc}\n")
 
     prefix = "would create" if args.dry_run else "created"

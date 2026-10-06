@@ -473,8 +473,9 @@ def _set_nested(record: dict[str, object], path: str, value: object) -> None:
     current = record
     parts = path.split(".")
     for part in parts[:-1]:
-        child: dict[str, object] = {}
-        current[part] = child
+        child = current.setdefault(part, {})
+        if not isinstance(child, dict):
+            raise ScaffoldError(f"fixture fields overlap at {path!r}")
         current = child
     current[parts[-1]] = value
 

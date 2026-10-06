@@ -14,6 +14,8 @@ CONTEXTS = frozenset({
     "work_attribution", "organization", "public_contact", "public_location",
     "record_identifier", "public_measure",
 })
+_CAMEL_BOUNDARY = re.compile(r"([a-z0-9])([A-Z])")
+_KEY_SEPARATORS = re.compile(r"[^a-z0-9ก-๙]+")
 _HARD_KEY = re.compile(
     r"(?:^|_)(?:password|passwd|secret|token|cookie|authorization|credential|api_?key|"
     r"citizen_?id|national_?id|id_?card|person_?id|patient_?id|household_?id|"
@@ -36,6 +38,17 @@ class FieldContextError(ValueError):
     pass
 
 
+@lru_cache(maxsize=4096)
+def _normalise_key_text(text: str) -> str:
+    text = _CAMEL_BOUNDARY.sub(r"\1_\2", text)
+    return _KEY_SEPARATORS.sub("_", text.lower()).strip("_")
+
+
+def normalise_key(key: object) -> str:
+    """Normalize shared privacy field names without retaining arbitrary objects."""
+    return _normalise_key_text(str(key))
+
+
 def is_contact_exposure_metadata(parent_key: str, key: str, value: Any) -> bool:
     """ธง boolean ใน metadata ไม่ใช่เบอร์หรืออีเมลที่เผยแพร่."""
     return parent_key == "privacy_projection" and key == "contact_fields_exposed" and type(value) is bool
@@ -43,8 +56,7 @@ def is_contact_exposure_metadata(parent_key: str, key: str, value: Any) -> bool:
 
 @lru_cache(maxsize=4096)
 def key_kind(key: str) -> str | None:
-    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", key)
-    text = re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
+    text = normalise_key(key)
     if text == "medical" or _HARD_KEY.search(text) or any(x in text for x in (
         "เลขบัตร", "วันเกิด", "วันเดือนปีเกิด", "ที่อยู่บ้าน", "โรคประจำตัว",
     )):

@@ -1,18 +1,35 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from app.catalog import sync_catalog
-from app.database import SessionLocal
-from app.models import PublicArtifact
+from app.database import SessionLocal, engine
+from app.models import HousingDemandSnapshot, IngestionRun, PublicArtifact, SpatialLayerSnapshot
 from explorer.main import _safe_json_preview, app
 from explorer.source_profiles import SOURCE_PROFILES, validate_profile_coverage
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def sql_statements():
+    statements: list[str] = []
+
+    def record_statement(connection, cursor, statement, parameters, context, executemany):
+        statements.append(statement)
+
+    event.listen(engine, "before_cursor_execute", record_statement)
+    try:
+        yield statements
+    finally:
+        event.remove(engine, "before_cursor_execute", record_statement)
 
 
 def seed_catalog() -> None:
@@ -122,6 +139,143 @@ def test_data_preview_returns_only_safe_physical_rows_and_supports_source_filter
     assert staging_preview.status_code == 200
     assert "payload" not in staging_preview.text
     assert missing_preview.status_code == 404
+
+
+@pytest.mark.parametrize("source_id, expected_queries", [(None, 2), ("f1_sradss_ppaos", 3)])
+def test_preview_counts_only_its_table_and_preserves_global_count(
+    sql_statements, source_id, expected_queries
+) -> None:
+    seed_catalog()
+    sql_statements.clear()
+    params = {"source_id": source_id} if source_id else {}
+    with TestClient(app) as client:
+        response = client.get("/api/data-preview/sources", params=params)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["physical_row_count"] == (1 if source_id else len(catalog_sources()))
+    assert payload["serving_or_contract_count"] == len(catalog_sources())
+    assert len(sql_statements) == expected_queries
+    assert all("ingestion_runs" not in statement for statement in sql_statements)
+    assert all("dashboard_records" not in statement for statement in sql_statements)
+
+
+def test_overview_schema_and_preview_share_snapshot_contract_counts(sql_statements) -> None:
+    seed_catalog()
+    source_ids = [source["source_id"] for source in catalog_sources()[:2]]
+    with SessionLocal() as session:
+        session.add_all(
+            [
+                SpatialLayerSnapshot(
+                    layer_id=f"synthetic-layer-{index}",
+                    source_id=source_id,
+                    content_hash="0" * 64,
+                    feature_count=count,
+                    source_path="synthetic.json",
+                )
+                for index, (source_id, count) in enumerate(zip(source_ids, (7, 11)))
+            ]
+            + [
+                HousingDemandSnapshot(
+                    snapshot_id="synthetic-demand",
+                    source_id=source_ids[0],
+                    content_hash="0" * 64,
+                    record_count=13,
+                    source_path="synthetic.json",
+                )
+            ]
+        )
+        session.commit()
+
+    sql_statements.clear()
+    with TestClient(app) as client:
+        schema_response = client.get("/api/schema")
+        assert len(sql_statements) == 1
+        # The schema must use cheap snapshot totals, not scan physical GIS/answer rows.
+        assert "FROM spatial_features" not in sql_statements[0]
+        assert "FROM housing_demand_records" not in sql_statements[0]
+        sql_statements.clear()
+        overview_response = client.get("/api/overview")
+        assert len(sql_statements) == 7
+        preview_response = client.get(
+            "/api/data-preview/spatial_features", params={"source_id": source_ids[0]}
+        )
+
+    assert schema_response.status_code == overview_response.status_code == preview_response.status_code == 200
+    counts = {table["name"]: table["live_row_count"] for table in schema_response.json()["tables"]}
+    overview = overview_response.json()
+    assert counts["spatial_layer_snapshots"] == overview["spatial_layer_total"] == 2
+    assert counts["spatial_features"] == overview["spatial_feature_total"] == 18
+    assert counts["housing_demand_snapshots"] == overview["housing_demand_snapshot_total"] == 1
+    assert counts["housing_demand_records"] == overview["housing_demand_record_total"] == 13
+    assert preview_response.json()["physical_row_count"] == 0
+    assert preview_response.json()["serving_or_contract_count"] == 18
+
+
+def test_sources_select_latest_run_metadata_without_loading_history(sql_statements) -> None:
+    seed_catalog()
+    source_ids = [source["source_id"] for source in catalog_sources()[:2]]
+    started_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    with SessionLocal() as session:
+        session.add_all(
+            IngestionRun(
+                run_id=f"old-{index:03}",
+                source_id=source_ids[0],
+                strategy="synthetic",
+                status="completed",
+                started_at=started_at - timedelta(days=index + 1),
+                manifest_path="private-manifest-path",
+                error_message="private-error-details",
+            )
+            for index in range(30)
+        )
+        session.add_all(
+            [
+                IngestionRun(
+                    run_id=run_id,
+                    source_id=source_id,
+                    strategy="synthetic",
+                    status=status,
+                    started_at=started_at,
+                    records_seen=5,
+                    records_loaded=3,
+                    records_skipped=2,
+                )
+                for source_id, run_id, status in (
+                    (source_ids[0], "latest-a", "completed"),
+                    (source_ids[0], "latest-z", "failed"),
+                    (source_ids[1], "other-source", "completed"),
+                )
+            ]
+        )
+        session.commit()
+
+    sql_statements.clear()
+    with TestClient(app) as client:
+        response = client.get("/api/sources")
+
+    assert response.status_code == 200
+    sources = {source["source_id"]: source for source in response.json()["sources"]}
+    assert sources[source_ids[0]]["latest_run"] == {
+        "run_id": "latest-z",
+        "status": "failed",
+        "strategy": "synthetic",
+        "started_at": "2026-01-01T00:00:00",
+        "finished_at": None,
+        "records_seen": 5,
+        "records_loaded": 3,
+        "records_skipped": 2,
+    }
+    assert sources[source_ids[1]]["latest_run"]["run_id"] == "other-source"
+    assert sum(source["latest_run"] is not None for source in sources.values()) == 2
+    run_queries = [statement for statement in sql_statements if "ingestion_runs" in statement]
+    assert len(run_queries) == 1
+    assert "row_number() OVER" in run_queries[0]
+    assert "WHERE anon_1.run_rank =" in run_queries[0]
+    assert "manifest_path" not in run_queries[0]
+    assert "error_message" not in run_queries[0]
+    assert "private-manifest-path" not in response.text
+    assert "private-error-details" not in response.text
 
 
 def test_json_preview_is_bounded_and_hides_sensitive_values() -> None:

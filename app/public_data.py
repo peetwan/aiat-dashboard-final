@@ -5,9 +5,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import SessionLocal
+from app.models import PublicArtifact
 from app.public_artifacts import artifact_payload
 from app.settings import PROJECT_ROOT
 
@@ -35,6 +37,40 @@ def load_public_artifact(artifact_key: str, fallback_filename: str) -> dict[str,
         # The fallback keeps CLI builders/import-time checks usable before init_db.
         pass
     return load_public_file(fallback_filename)
+
+
+def _load_provincial_artifacts(
+    province_codes: list[str], artifact_name: str, directory: str,
+) -> dict[str, dict[str, Any]]:
+    """Read reviewed province artifacts in one query, falling back per missing key."""
+
+    keys = {
+        code.strip().zfill(2): f"province/{code.strip().zfill(2)}/{artifact_name}"
+        for code in province_codes
+    }
+    if not keys:
+        return {}
+    try:
+        with SessionLocal() as session:
+            payloads = dict(session.execute(
+                select(PublicArtifact.artifact_key, PublicArtifact.payload)
+                .where(PublicArtifact.artifact_key.in_(keys.values()))
+            ).all())
+    except SQLAlchemyError:
+        # CLI builders also run before serving tables have been initialized.
+        payloads = {}
+
+    root = (PUBLIC_DATA_ROOT / directory).resolve()
+    result = {}
+    for code, key in keys.items():
+        payload = payloads.get(key)
+        if payload is None:
+            path = (root / f"{code}.json").resolve()
+            if path.parent != root or not path.is_file():
+                raise FileNotFoundError(code)
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        result[code] = payload
+    return result
 
 
 def public_catalog() -> dict[str, Any]:
@@ -124,6 +160,10 @@ def f1_overview() -> dict[str, Any]:
         if str(province.get("sra_scope_status") or "").startswith("in_scope")
     ]
     details = f1_details()
+    briefings = _load_provincial_artifacts(
+        [str(province["province_code"]) for province in target_provinces],
+        "briefing", "provincial_briefings",
+    )
     metric_keys = (
         "people",
         "households",
@@ -162,9 +202,9 @@ def f1_overview() -> dict[str, Any]:
 
     province_rows: list[dict[str, Any]] = []
     for province in target_provinces:
-        code = str(province["province_code"]).zfill(2)
+        code = str(province["province_code"]).strip().zfill(2)
         detail_province = (details.get("provinces") or {}).get(code) or {}
-        briefing = provincial_briefing(code)
+        briefing = briefings[code]
         sections = briefing.get("sections", {})
         sra = sections.get("sra") or {}
         ppp = sections.get("pppconnext") or {}
@@ -387,32 +427,10 @@ def f1_overview() -> dict[str, Any]:
 @lru_cache(maxsize=77)
 def provincial_briefing(province_code: str) -> dict[str, Any]:
     code = province_code.strip().zfill(2)
-    try:
-        with SessionLocal() as session:
-            payload = artifact_payload(session, f"province/{code}/briefing")
-        if payload is not None:
-            return payload
-    except SQLAlchemyError:
-        pass
-    path = (PUBLIC_DATA_ROOT / "provincial_briefings" / f"{code}.json").resolve()
-    briefing_root = (PUBLIC_DATA_ROOT / "provincial_briefings").resolve()
-    if path.parent != briefing_root or not path.exists():
-        raise FileNotFoundError(code)
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _load_provincial_artifacts([code], "briefing", "provincial_briefings")[code]
 
 
 @lru_cache(maxsize=77)
 def executive_summary(province_code: str) -> dict[str, Any]:
     code = province_code.strip().zfill(2)
-    try:
-        with SessionLocal() as session:
-            payload = artifact_payload(session, f"province/{code}/summary")
-        if payload is not None:
-            return payload
-    except SQLAlchemyError:
-        pass
-    path = (PUBLIC_DATA_ROOT / "executive_summaries" / f"{code}.json").resolve()
-    summary_root = (PUBLIC_DATA_ROOT / "executive_summaries").resolve()
-    if path.parent != summary_root or not path.exists():
-        raise FileNotFoundError(code)
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _load_provincial_artifacts([code], "summary", "executive_summaries")[code]
