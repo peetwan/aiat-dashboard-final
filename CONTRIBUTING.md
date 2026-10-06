@@ -20,6 +20,27 @@ python -m app.cli check
 
 บน macOS/Linux ใช้ `source .venv/bin/activate` แทนคำสั่ง activate ของ PowerShell
 
+## เลือกทางสั้นตามงาน
+
+ระหว่างพัฒนาให้ตรวจเฉพาะส่วนที่แก้ได้ ไม่ต้องดึงข้อมูลใหม่หรือ rebuild Public release ทุกครั้ง
+ค่อยรัน `python -m app.cli check` ครบก่อนเปิด PR
+
+| งาน | เริ่มตรงไหน | ตรวจระหว่างแก้ |
+|---|---|---|
+| แก้หน้า Dashboard/API | `app/templates/`, `app/static/`, `app/main.py` | `python -m pytest -q tests/test_api.py tests/test_ui_coverage.py` |
+| แก้ Explorer | `explorer/` | `python -m pytest -q tests/test_explorer.py` |
+| แก้ connector | module + contract + fixture ของ source นั้น | `python -m pytest -q tests/test_<source>_connector.py` (แทนชื่อไฟล์จริง) |
+| เพิ่ม connector | `tools/scaffold_connector.py` + [คู่มือ](docs/connector-development.md) | tests ที่ scaffold สร้างให้ |
+| แก้ builder/ข้อมูลที่เผยแพร่ | [Publication workflow](docs/publication-workflow.md) | tests ของ builder แล้วสร้าง receipt/validate |
+
+งาน application และ fixture tests ใช้ public clone ได้เลย ไม่ต้องตั้ง evidence workspace หรือ credentials
+ชื่อเจ้าของผลงาน/ช่องทางติดต่องานที่ต้นทางเผยแพร่ให้ระบุ `field_contexts` ตามบริบท ไม่ต้องลบทิ้งทั้ง dataset
+ส่วน raw evidence, completeness และขั้น review ก่อนเผยแพร่ยังตรวจตามเดิม
+
+ถ้าต้องการตรวจ config/publication โดยยังไม่รัน tests ใช้ `python -m app.cli check --skip-tests`
+แต่ชุดนี้ยังตรวจ release ทั้งชุด จึงเหมาะกับการตรวจรวมมากกว่าการรันทุกครั้งที่แก้ไฟล์
+Tests ใช้ SQLite ชั่วคราวแยกแต่ละ process จึงรันหลายชุดพร้อมกันได้โดยไม่ล้างตารางของกันและกัน
+
 ## Workflow ของทีม
 
 1. สร้าง issue หรืออธิบาย source/bug ที่จะทำ

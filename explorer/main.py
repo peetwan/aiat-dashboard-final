@@ -350,17 +350,13 @@ def _connection_status(item: dict[str, Any], runtime_endpoint_count: int) -> tup
 
 
 def _live_snapshot(session) -> dict[str, Any]:
-    source_total = session.scalar(select(func.count()).select_from(Source)) or 0
-    endpoint_total = session.scalar(select(func.count()).select_from(Endpoint)) or 0
+    counts = _table_counts(session)
     runtime_endpoints = (
         session.scalar(
             select(func.count()).select_from(Endpoint).where(Endpoint.runtime_enabled.is_(True))
         )
         or 0
     )
-    run_total = session.scalar(select(func.count()).select_from(IngestionRun)) or 0
-    candidate_total = session.scalar(select(func.count()).select_from(DashboardRecord)) or 0
-    artifact_total = session.scalar(select(func.count()).select_from(PublicArtifact)) or 0
     artifact_groups = dict(
         session.execute(
             select(PublicArtifact.artifact_group, func.count())
@@ -368,10 +364,6 @@ def _live_snapshot(session) -> dict[str, Any]:
             .order_by(PublicArtifact.artifact_group)
         ).all()
     )
-    spatial_layers = session.scalar(select(func.count()).select_from(SpatialLayerSnapshot)) or 0
-    spatial_features = session.scalar(select(func.sum(SpatialLayerSnapshot.feature_count))) or 0
-    demand_snapshots = session.scalar(select(func.count()).select_from(HousingDemandSnapshot)) or 0
-    housing_demand_records = session.scalar(select(func.sum(HousingDemandSnapshot.record_count))) or 0
     latest_artifact_at = session.scalar(select(func.max(PublicArtifact.updated_at)))
     latest_run_at = session.scalar(select(func.max(IngestionRun.finished_at)))
     policy_counts = dict(
@@ -385,21 +377,21 @@ def _live_snapshot(session) -> dict[str, Any]:
         "database_backend": engine.dialect.name,
         "checked_at": _utc_now(),
         "refresh_interval_seconds": REFRESH_INTERVAL_SECONDS,
-        "source_total": source_total,
+        "source_total": counts["sources"],
         "public_candidate_sources": policy_counts.get("team_approved_public", 0),
         "metadata_only_sources": policy_counts.get("metadata_only", 0),
         "restricted_sources": policy_counts.get("restricted_local_only", 0),
-        "endpoint_total": endpoint_total,
+        "endpoint_total": counts["endpoints"],
         "runtime_endpoint_total": runtime_endpoints,
-        "ingestion_run_total": run_total,
+        "ingestion_run_total": counts["ingestion_runs"],
         "run_status_counts": run_status_counts,
-        "operational_candidate_records": candidate_total,
-        "public_artifact_total": artifact_total,
+        "operational_candidate_records": counts["dashboard_records"],
+        "public_artifact_total": counts["public_artifacts"],
         "public_artifact_groups": artifact_groups,
-        "spatial_layer_total": spatial_layers,
-        "spatial_feature_total": spatial_features,
-        "housing_demand_snapshot_total": demand_snapshots,
-        "housing_demand_record_total": housing_demand_records,
+        "spatial_layer_total": counts["spatial_layer_snapshots"],
+        "spatial_feature_total": counts["spatial_features"],
+        "housing_demand_snapshot_total": counts["housing_demand_snapshots"],
+        "housing_demand_record_total": counts["housing_demand_records"],
         "latest_public_artifact_at": latest_artifact_at.isoformat() if latest_artifact_at else None,
         "latest_ingestion_run_at": latest_run_at.isoformat() if latest_run_at else None,
         "serving_mode": "read_only_live_shared_postgresql",
@@ -419,12 +411,19 @@ def _source_rows(session) -> list[dict[str, Any]]:
             select(DashboardRecord.source_id, func.count()).group_by(DashboardRecord.source_id)
         ).all()
     )
-    runs = session.scalars(
-        select(IngestionRun).order_by(IngestionRun.source_id, IngestionRun.started_at.desc())
-    ).all()
-    latest_runs: dict[str, IngestionRun] = {}
-    for run in runs:
-        latest_runs.setdefault(run.source_id, run)
+    # Rank in the database so history size does not determine response memory.
+    # Reuse the safe preview columns; manifest paths and error details stay out.
+    ranked_runs = select(
+        *(getattr(IngestionRun, name) for name in PREVIEW_TABLES["ingestion_runs"]["columns"]),
+        func.row_number().over(
+            partition_by=IngestionRun.source_id,
+            order_by=(IngestionRun.started_at.desc(), IngestionRun.run_id.desc()),
+        ).label("run_rank"),
+    ).subquery()
+    latest_runs = {
+        run.source_id: run
+        for run in session.execute(select(ranked_runs).where(ranked_runs.c.run_rank == 1))
+    }
 
     result: list[dict[str, Any]] = []
     for item in sorted(catalog["sources"], key=lambda row: int(row["ordinal"])):
@@ -496,20 +495,21 @@ def _source_rows(session) -> list[dict[str, Any]]:
     return result
 
 
-def _table_counts(session) -> dict[str, int]:
-    spatial_contract_count = session.scalar(select(func.sum(SpatialLayerSnapshot.feature_count))) or 0
-    demand_contract_count = session.scalar(select(func.sum(HousingDemandSnapshot.record_count))) or 0
-    return {
-        "sources": session.scalar(select(func.count()).select_from(Source)) or 0,
-        "endpoints": session.scalar(select(func.count()).select_from(Endpoint)) or 0,
-        "ingestion_runs": session.scalar(select(func.count()).select_from(IngestionRun)) or 0,
-        "dashboard_records": session.scalar(select(func.count()).select_from(DashboardRecord)) or 0,
-        "public_artifacts": session.scalar(select(func.count()).select_from(PublicArtifact)) or 0,
-        "spatial_layer_snapshots": session.scalar(select(func.count()).select_from(SpatialLayerSnapshot)) or 0,
-        "spatial_features": spatial_contract_count,
-        "housing_demand_snapshots": session.scalar(select(func.count()).select_from(HousingDemandSnapshot)) or 0,
-        "housing_demand_records": demand_contract_count,
+def _table_counts(session, table_names: list[str] | None = None) -> dict[str, int]:
+    """Fetch requested global counts in one round trip, using snapshot contracts."""
+    contract_columns = {
+        "spatial_features": SpatialLayerSnapshot.feature_count,
+        "housing_demand_records": HousingDemandSnapshot.record_count,
     }
+    statements = []
+    for name in table_names if table_names is not None else PREVIEW_TABLES:
+        if name in contract_columns:
+            statement = select(func.sum(contract_columns[name]))
+        else:
+            statement = select(func.count()).select_from(PREVIEW_TABLES[name]["model"])
+        statements.append(statement.scalar_subquery().label(name))
+    counts = session.execute(select(*statements)).mappings().one()
+    return {name: int(value or 0) for name, value in counts.items()}
 
 
 def _preview_value(value: Any) -> Any:
@@ -640,7 +640,10 @@ def _preview_rows(
         for row in session.execute(row_statement).mappings().all()
     ]
     table_definition = next(item for item in TABLE_DEFINITIONS if item["name"] == table_name)
-    contract_count = _table_counts(session)[table_name]
+    if table_definition["count_mode"] == "row_count" and not filter_applied:
+        contract_count = physical_row_count
+    else:
+        contract_count = _table_counts(session, [table_name])[table_name]
     relationships = [
         item
         for item in RELATIONSHIPS

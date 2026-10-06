@@ -9,7 +9,8 @@
       "grain_th": __GRAIN_TH_JSON__,
       "identity_options": __IDENTITY_OPTIONS_JSON__,
       "geography_fields": __GEOGRAPHY_FIELDS_JSON__,
-      "as_of_fields": __AS_OF_FIELDS_JSON__
+      "as_of_fields": __AS_OF_FIELDS_JSON__,
+      "field_contexts": __FIELD_CONTEXTS_JSON__
     }
   ],
   "completeness_checks": [

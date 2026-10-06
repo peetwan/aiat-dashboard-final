@@ -10,12 +10,14 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from sqlalchemy import delete, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from app.catalog import load_catalog
 from app.models import PublicArtifact, utc_now
 from app.privacy import EMAIL_RE, PHONE_RE, SOCIAL_CONTACT_RE
-from app.field_contexts import is_contact_exposure_metadata, key_kind
+from app.field_contexts import (
+    is_contact_exposure_metadata, key_kind, normalise_key as _normalise_key,
+)
 from app.settings import PROJECT_ROOT
 from app.publication import _privacy_problems, bind_outputs, load_contracts
 
@@ -402,11 +404,6 @@ def _load_input(item: ArtifactInput) -> tuple[dict, str, int]:
     return payload, hashlib.sha256(raw).hexdigest(), _item_count(payload)
 
 
-def _normalise_key(key: object) -> str:
-    value = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(key))
-    return re.sub(r"[^a-z0-9ก-๙]+", "_", value.lower()).strip("_")
-
-
 def _negative_privacy_audit_value(key: str, value: Any) -> bool:
     if key in NEGATIVE_PRIVACY_AUDIT_KEYS and value is False:
         return True
@@ -615,19 +612,28 @@ def sync_public_artifacts(
                 f"actual={dict(group_counts)}, expected={REQUIRED_GROUP_COUNTS}"
             )
     loaded_inputs = validate_public_artifacts(selected)
+    # Compare only metadata: the existing JSON bodies can be much larger than
+    # the reviewed inputs and are never needed to decide whether to update.
+    existing = {
+        artifact.artifact_key: artifact
+        for artifact in session.scalars(
+            select(PublicArtifact).options(defer(PublicArtifact.payload))
+        )
+    }
     expected_keys: list[str] = []
     inserted = 0
     updated = 0
     unchanged = 0
     for item, payload, digest, item_count in loaded_inputs:
         expected_keys.append(item.key)
-        artifact = session.get(PublicArtifact, item.key)
+        artifact = existing.get(item.key)
+        source_path = item.path.relative_to(PROJECT_ROOT).as_posix()
         changed = (
             artifact is None
             or artifact.content_hash != digest
             or artifact.artifact_group != item.group
             or artifact.province_code != item.province_code
-            or artifact.source_path != item.path.relative_to(PROJECT_ROOT).as_posix()
+            or artifact.source_path != source_path
             or artifact.item_count != item_count
         )
         if artifact is None:
@@ -641,11 +647,11 @@ def sync_public_artifacts(
             artifact.artifact_group = item.group
             artifact.province_code = item.province_code
             artifact.content_hash = digest
-            artifact.source_path = item.path.relative_to(PROJECT_ROOT).as_posix()
+            artifact.source_path = source_path
             artifact.item_count = item_count
             artifact.payload = payload
             artifact.updated_at = utc_now()
-        session.add(artifact)
+            session.add(artifact)
 
     if expected_keys:
         session.execute(

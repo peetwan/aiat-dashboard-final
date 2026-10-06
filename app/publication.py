@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.field_contexts import (
     FieldContextError, context_allows_key, context_allows_value_reason,
     is_contact_exposure_metadata, key_kind, pointer_child, validate_field_contexts,
+    normalise_key as _normalise_key,
 )
 from app.privacy import EMAIL_RE, PHONE_RE, SOCIAL_CONTACT_RE
 
@@ -346,16 +347,6 @@ def _read_json_file(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise PublicationError(f"JSON object required: {path.as_posix()}")
     return payload
-
-
-def _normalise_key(value: object) -> str:
-    return _normalise_text_key(str(value))
-
-
-@lru_cache(maxsize=4096)
-def _normalise_text_key(value: str) -> str:
-    text = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
-    return re.sub(r"[^a-z0-9ก-๙]+", "_", text.lower()).strip("_")
 
 
 def _has_exposed_credential_assignment(value: str) -> bool:

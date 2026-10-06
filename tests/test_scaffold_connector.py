@@ -11,6 +11,7 @@ from tools.scaffold_connector import (
     PROJECT_ROOT,
     ScaffoldError,
     ScaffoldSpec,
+    main,
     parse_identity_options,
     scaffold_connector,
 )
@@ -159,6 +160,71 @@ def test_identity_option_parser_supports_composite_and_hash_fallback():
 
     with pytest.raises(ScaffoldError, match="only field"):
         parse_identity_options(["id,$payload_hash"])
+
+
+@pytest.mark.parametrize(
+    "field,context",
+    [
+        ("attributes.owner_name", "work_attribution"),
+        ("contact.email", "public_contact"),
+        ("location.address", "public_location"),
+    ],
+)
+def test_scaffold_preserves_declared_public_leaves_through_runtime(tmp_path, field, context):
+    pointer = "/" + field.replace(".", "/")
+    spec = sample_spec(
+        identity_options=((field,),), field_contexts=((pointer, context),)
+    )
+    scaffold_connector(spec, output_root=tmp_path)
+    contract = json.loads(
+        (tmp_path / "config/connector_contracts/f9_sample_source.json").read_text(encoding="utf-8")
+    )
+    fixture = json.loads(
+        (tmp_path / "tests/fixtures/connectors/f9_sample_source.json").read_text(encoding="utf-8")
+    )
+    assert contract["dataset_grains"][0]["field_contexts"] == {pointer: context}
+    row = fixture["records"][0]
+    records = prepare_contract_records(contract, [(row["dataset_key"], row["payload"])])
+    assert records[0].payload == row["payload"]
+    assert records[0].record_id == "example-1"
+
+
+@pytest.mark.parametrize(
+    "pointer,context",
+    [
+        ("/token", "public_contact"),
+        ("/contact/citizen_id", "record_identifier"),
+        ("/owner_name", "public_measure"),
+        ("/*", "public_contact"),
+    ],
+)
+def test_scaffold_contexts_cannot_override_private_or_mismatched_fields(tmp_path, pointer, context):
+    with pytest.raises(ScaffoldError, match="field_contexts"):
+        scaffold_connector(
+            sample_spec(field_contexts=((pointer, context),)), output_root=tmp_path
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_scaffold_context_for_one_leaf_does_not_allow_a_sibling(tmp_path):
+    with pytest.raises(ScaffoldError, match="forbidden"):
+        scaffold_connector(
+            sample_spec(
+                identity_options=(("contact.private_email",),),
+                field_contexts=(("/contact/email", "public_contact"),),
+            ),
+            output_root=tmp_path,
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_connector_cli_accepts_exact_public_context_in_dry_run(capsys):
+    assert main([
+        "f9_sample_source", "--transport", "json", "--dataset-key", "projects",
+        "--grain-th", "หนึ่งแถวต่อผลงาน", "--identity-fields", "owner_name",
+        "--field-context", "/owner_name", "work_attribution", "--dry-run",
+    ]) == 0
+    assert capsys.readouterr().out.count("would create:") == 4
 
 
 def test_repository_templates_are_the_templates_used_by_default():

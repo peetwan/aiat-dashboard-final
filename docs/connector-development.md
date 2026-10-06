@@ -20,6 +20,13 @@ python tools/scaffold_connector.py <source_id> --transport <lower_snake_case> --
 
 รันด้วย `--dry-run` ก่อนได้ และเพิ่ม `--identity-fields` หลายครั้งเมื่อต้นทางมี identity สำรอง Tool ไม่แก้ generated source catalog/ingestion plan และไม่ overwrite ไฟล์เดิม จึงต้องเพิ่ม plan และแก้ parser, grain, identity, geography, `as_of` และ completeness ให้ตรงกับต้นทางจริงก่อนเปิด PR
 
+ถ้า source มีชื่อเจ้าของผลงานหรือช่องทางติดต่องานที่เผยแพร่สาธารณะ ให้เพิ่ม
+`--field-context /owner_name work_attribution` หรือ
+`--field-context /contact/email public_contact` ต่อท้ายคำสั่ง (ระบุซ้ำได้)
+ใช้ JSON pointer จากรากของ payload ตรงกับ [field_contexts](field-contexts.md)
+Tool จะใส่บริบทใน contract ให้ และใช้กติกาเดียวกับ runtime ตรวจ fixture
+บริบทอนุญาตเฉพาะ leaf ที่ระบุ; credential และข้อมูลส่วนตัวที่ห้ามยังถูกปฏิเสธ
+
 สำหรับ source ลำดับใหม่ที่ยังไม่อยู่ใน catalog ให้ลงทะเบียนใน canonical evidence workspace ก่อน — ในโฟลเดอร์ workspace (`AIAT_EVIDENCE_ROOT`; ค่าเริ่มต้นคือโฟลเดอร์แม่ของ repo นี้) รันคำสั่งเดียว:
 
 ```powershell

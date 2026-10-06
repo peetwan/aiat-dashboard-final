@@ -63,10 +63,11 @@ def load_spatial_manifest(path: Path = SPATIAL_MANIFEST_PATH) -> dict[str, Any]:
         artifact_path = (root / Path(str(layer.get("artifact_path"))).name).resolve()
         if root not in artifact_path.parents or not artifact_path.is_file():
             raise RuntimeError(f"housing spatial artifact is missing: {layer_id}")
-        raw = artifact_path.read_bytes()
-        if len(raw) != int(layer.get("artifact_bytes", -1)):
+        if artifact_path.stat().st_size != int(layer.get("artifact_bytes", -1)):
             raise RuntimeError(f"housing spatial artifact byte count mismatch: {layer_id}")
-        if hashlib.sha256(raw).hexdigest() != str(layer.get("artifact_sha256", "")):
+        with artifact_path.open("rb") as handle:
+            digest = hashlib.file_digest(handle, "sha256").hexdigest()
+        if digest != str(layer.get("artifact_sha256", "")):
             raise RuntimeError(f"housing spatial artifact hash mismatch: {layer_id}")
     return payload
 
