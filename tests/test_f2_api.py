@@ -142,7 +142,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert topic_page["result"]["unit"] == "รายการ"
 
         first_item = topic_page["list"]["items"][0]
-        assert first_item["province_names_th"] == ["สงขลา"]
+        assert first_item["province_names_th"] == ["อุบลราชธานี"]
         query = first_item["label"][:4]
         searched = client.get(
             "/api/public/v1/f2/topics/k12",
@@ -227,7 +227,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == 375
 
         zero_price = client.get(
-            "/api/public/v1/f2/topics/k07/details/offering_family_002dfbc09f8c360f3395?measure=K07"
+            "/api/public/v1/f2/topics/k07/details/fam_24cb3ff0cd61?measure=K07"
         )
         assert zero_price.status_code == 200
         assert "price unspecified/source reports 0" in json.dumps(
@@ -235,7 +235,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         )
 
         withheld = client.get(
-            "/api/public/v1/f2/topics/k12/details/cultural_map_subject_c8aca030751e9a4d6c32?measure=K12"
+            "/api/public/v1/f2/topics/k12/details/cul_979abbbf50db?measure=K12"
         )
         assert withheld.status_code == 200
         assert withheld.json()["detail"]["label"] == "Title withheld pending review"
