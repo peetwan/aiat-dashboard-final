@@ -28,6 +28,8 @@ VENDOR_CODE = re.compile(r"\s*\b\d{2}_\d+$")
 CODE_ONLY = re.compile(r"^[\d_\-\s]*$")
 # Category words AtLocal uses; "อาหาร 04_34" is a code with a category in front, not a name.
 CATEGORY_WORDS = {"อาหาร", "ของใช้", "ความสวยงาม", "ความเชื่อ"}
+# Map listings and areas give image file names; the site serves them from these folders.
+ITEM_IMAGE, SHOP_IMAGE = "https://atlocalthailand.com/api/s9001/get_image_item/", "https://atlocalthailand.com/api/s9001/get_image_shop/"
 
 
 def clean(raw, geo) -> dict[str, list[dict]]:
@@ -47,7 +49,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             **place,
             "url": item.get("map_url"),
             "raw_ref": f"{MAP}#data/{index}",
-            "details": {"tags": item.get("tags"), "images": item.get("image_filenames"),
+            "details": {"tags": item.get("tags"), "images": [ITEM_IMAGE + f for f in item.get("image_filenames") or []],
                         "sale_channel": (item.get("sale_channel") or {}).get("name"),
                         "fulfilment": (item.get("fulfilment_status") or {}).get("name"),
                         "exclusive": item.get("exclusive")},
@@ -76,7 +78,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
     areas = [{"record_id": f"areas_16:{item['area_id']}", "title": norm(item.get("name")), "category": "area",
               "description": clean_or_none(item.get("description_raw")),
               **geo.place(item.get("province"), item.get("district")), "raw_ref": f"{AREAS}#data/{index}",
-              "details": {"images": item.get("image_filenames")}}
+              "details": {"images": [SHOP_IMAGE + f for f in item.get("image_filenames") or []]}}
              for index, item in enumerate(raw.json(AREAS)["data"])]
     publications = []
     for name, (kind, id_field, title_field, text_fields) in PAGES.items():

@@ -71,7 +71,7 @@ def _subjects(raw, geo) -> tuple[list[dict], list[dict]]:
             "details": {"record_code": (data.get("identifiers") or {}).get("record_code"),
                         "address": clean_or_none(location.get("address_raw")), "dates": data.get("dates"),
                         "funding": data.get("funding"), "page_roles": data.get("page_roles"),
-                        "keywords": data.get("keywords")},
+                        "keywords": data.get("keywords"), "images": _images((data.get("media") or {}).get("images"))},
         })
         about = {"kind": "listed", "about_kind": "cultural_record", "about_record_id": rid, "raw_ref": ref}
         recorder = (data.get("people") or {}).get("recorder") or {}
@@ -85,6 +85,10 @@ def _subjects(raw, geo) -> tuple[list[dict], list[dict]]:
             people.append({"record_id": f"{rid}#informant#0", "role": "informant", **(person(informants) or
                            {"name": informants}), **about, "details": {"written_as": informants}})
     return records, people
+
+
+def _images(images) -> list[dict]:
+    return [{"url": i["url"], "caption": clean_or_none(i.get("caption"))} for i in images or [] if i.get("url")]
 
 
 def _coded_place(location: dict, geo) -> dict:
@@ -108,7 +112,8 @@ def _publications(raw) -> tuple[list[dict], list[dict]]:
         publications.append({"record_id": record["external_id"], "kind": "activity_page", "title": norm(record.get("title")),
                              "text": clean_or_none(data.get("description")), "url": record.get("source_url"),
                              "raw_ref": f"{ACTIVITIES}#data/records/{index}",
-                             "details": {"date_text": data.get("date_text"), "links": data.get("external_links")}})
+                             "details": {"date_text": data.get("date_text"), "links": data.get("external_links"),
+                                         "images": _images(data.get("gallery_images"))}})
     for index, record in enumerate(raw.json(RECREATION)["data"]["records"]):
         data, rid, ref = record["data"], record["external_id"], f"{RECREATION}#data/records/{index}"
         publications.append({"record_id": rid, "kind": "recreation_project", "title": norm(record.get("title")),

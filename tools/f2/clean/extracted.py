@@ -40,7 +40,8 @@ def rows(source: str, raw, decisions: dict, tables: dict[str, list[dict]]) -> di
         row = {**base, "raw_ref": quotes[0]["ref"],
                "details": {"aliases": e["aliases"], "basis": e["basis"], "output_type": e.get("output_type"),
                            "source_records": [r["record_id"] for r in e["records"]],
-                           "innovation_upstream_ids": e["innovation_upstream_ids"], **checked}}
+                           "innovation_upstream_ids": e["innovation_upstream_ids"], **checked,
+                           "evidence": [q["text"] for q in quotes if q.get("text")]}}
         if e["kind"] == "operator":
             out["operators"].append({**row, "name": e["name"], "name_quality": "named"})
         elif e["kind"] == "offering":

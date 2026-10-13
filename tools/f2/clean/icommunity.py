@@ -145,7 +145,8 @@ def _products(raw, geo) -> tuple[list[dict], list[dict], list[dict]]:
             **place,
             "url": item.get("permalink"),
             "raw_ref": f"{PRODUCTS}#data/{index}",
-            "details": {"in_stock": item.get("is_in_stock"), "purchasable": item.get("is_purchasable")},
+            "details": {"in_stock": item.get("is_in_stock"), "purchasable": item.get("is_purchasable"),
+                        "images": [i["src"] for i in item.get("images") or [] if i.get("src")]},
         })
     return list(operators.values()), offerings, links
 
