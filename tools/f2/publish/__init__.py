@@ -98,7 +98,7 @@ def run(db_path: Path = DB_PATH) -> dict:
                                      "detail_record_count": sum(len(r) for r in records.values())}}
     (out / "manifest.json").write_bytes(dump(manifest))
 
-    _workspace(stage, files, reviewed)
+    _workspace(stage, files, reviewed, config)
     _receipt(stage)
     report = _validate(stage)
     (stage / "validation.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -203,7 +203,7 @@ def _geography(config: dict, results: Results, provinces: dict, header: dict) ->
 
 # Candidate workspace, contract and checks ---------------------------------------
 
-def _workspace(stage: Path, files: dict, reviewed: dict[str, str]) -> None:
+def _workspace(stage: Path, files: dict, reviewed: dict[str, str], config: dict) -> None:
     """The rest of the public workspace next to the new F2 files (hard links: no copies of 30 MB)."""
     for path in sorted((ROOT / PUBLIC).rglob("*")):
         relative = path.relative_to(ROOT)
@@ -214,7 +214,7 @@ def _workspace(stage: Path, files: dict, reviewed: dict[str, str]) -> None:
     for path in sorted((ROOT / CONTRACTS).glob("*.json")):
         if path.name != CONTRACT.name:
             os.link(path, stage / CONTRACTS / path.name)
-    (stage / CONTRACT).write_text(json.dumps(_contract(files, reviewed), ensure_ascii=False, indent=2) + "\n",
+    (stage / CONTRACT).write_text(json.dumps(_contract(files, reviewed, config), ensure_ascii=False, indent=2) + "\n",
                                   encoding="utf-8")
     serving = json.loads((ROOT / SERVING).read_text(encoding="utf-8"))
     serving["artifacts"] = [a for a in serving["artifacts"] if not str(a.get("key", "")).startswith("f2/")] + [
@@ -223,10 +223,13 @@ def _workspace(stage: Path, files: dict, reviewed: dict[str, str]) -> None:
     (stage / SERVING).write_text(json.dumps(serving, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _contract(files: dict, reviewed: dict[str, str]) -> dict:
-    """The F2 publication contract for these files; reviewed labels get a field context where they appear."""
+def _contract(files: dict, reviewed: dict[str, str], config: dict) -> dict:
+    """The F2 publication contract for these files; reviewed labels get a field context where they appear.
+    Measure names and formulas come from config.json, so the contract always matches the dashboard text."""
     contract = json.loads((ROOT / CONTRACT).read_text(encoding="utf-8"))
     contract["builder"] = "tools.f2.__main__:main"
+    contract["measures"] = [{"name": f"{m}: {meta['label_th']}", "denominator": meta["formula"], "unit": meta["unit"]}
+                            for m, meta in sorted(config["measures"].items(), key=lambda kv: kv[1]["display_order"])]
     outputs = []
     for path, (payload, _, sources) in sorted(files.items()):
         kind = "detail" if path.startswith("details/") else "topic" if path.startswith("topics/") else path.split(".")[0]
