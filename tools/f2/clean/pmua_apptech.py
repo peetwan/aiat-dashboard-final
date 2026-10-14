@@ -1,6 +1,9 @@
 """PMUA AppTech (pmua-apptech.com): products.json (one detail page per innovation) and the
-innovation map dashboard (dashboards/innovation_map_all.json: the same innovations listed per province,
-with use areas and TRL). Two map innovations have no detail page; they come from the map alone."""
+innovation map dashboard (innovation_map_all.json: the same innovations listed per province, with use areas
+and TRL). Two map innovations have no detail page; they come from the map alone.
+
+The scraper writes the dashboards under dashboards/; the evidence bucket stores every dataset under its file name
+alone, so a pulled run has them at the top level."""
 
 from __future__ import annotations
 
@@ -13,8 +16,7 @@ PRODUCTS, MAP, RESEARCHERS = "products.json", "innovation_map_all.json", "resear
 DASHBOARDS = ("innovators_all", "innovators_2025", "innovators_2026", "family_all", "family_2025", "family_2026")
 # Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
 SKIPPED = {"stations.json": "research station profiles (organisations), not counted entities",
-           "universities.json": "university profiles; each innovation states its university",
-           **{f"{name}.json": f"a compressed copy of dashboards/{name}.json" for name in (MAP.removesuffix(".json"), *DASHBOARDS)}}
+           "universities.json": "university profiles; each innovation states its university"}
 MAP_AREA = re.compile(r"^อ\.(?P<district>.*?)\s+ต\.(?P<subdistrict>.*)$")
 
 
@@ -53,7 +55,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             places += [{**key, "role": "use", "stated_in": "detail", **place} for place in _detail_area(area, geo)]
 
     map_trl = set()
-    for province, items in raw.json(f"dashboards/{MAP}")["prov_data"].items():
+    for province, items in raw.json(MAP)["prov_data"].items():
         province = geo.english_province.get(province, province)
         for position, item in enumerate(items):
             rid = str(item["prod_id"])
@@ -61,7 +63,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             if rid not in innovations:  # listed on the map only
                 innovations[rid] = {**key, "upstream_id": rid, "title": norm(item.get("prod_name")),
                                     "institution": clean_or_none(item.get("univ")),
-                                    "raw_ref": f"dashboards/{MAP}#prov_data/{province}/{position}",
+                                    "raw_ref": f"{MAP}#prov_data/{province}/{position}",
                                     "details": {"map_only": True}}
             if (rid, item.get("trl")) not in map_trl:
                 map_trl.add((rid, item.get("trl")))
@@ -87,7 +89,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
 def _dashboard(raw, name: str, geo) -> list[dict]:
     """Every number a PMUA dashboard shows: the headline, economic metrics, and per-province values
     (nested counts such as levels {"1": 2} become metric "levels.1")."""
-    data, ref = raw.json(f"dashboards/{name}.json"), f"dashboards/{name}.json#"
+    data, ref = raw.json(f"{name}.json"), f"{name}.json#"
     rows = [{"dataset": name, "metric": "headline", "value": data.get("headline"), "raw_ref": ref + "headline"}]
     for metric, value in (data.get("economic_metrics") or {}).items():
         if isinstance(value, dict) and "thb" in value:

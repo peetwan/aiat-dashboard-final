@@ -30,6 +30,8 @@ BROKEN_LINK = re.compile(r"[\s\"<>\\^`{|}?#]")
 MOO = r"\s*(?:ม\.|หมู่(?:ที่)?)\s?\d+(?![\d.,])"  # village number: "ม.4", "หมู่ที่ 10"
 ADDRESS = re.compile(rf"บ้านเลขที่\s*\d+(?:/\d+)?(?:{MOO})?|(?:เลขที่\s*)?(?<![\d.,/-])\d+(?:/\d+)?{MOO}")
 PRIVATE_SECTIONS = {"targetUserAddressDetail"}  # RINMP: where the target user lives
+# what a source shows when no price is given (0; AtLocal also 99999): not a price, and 0 does not mean free
+PLACEHOLDER_PRICES = {0, 99999}
 # role in the Clean tables -> public role code (f2-detail.js has the Thai labels)
 WORK_ROLES = {"lead": "researcher", "co": "researcher", "researcher": "researcher", "inventor": "inventor",
               "owner": "listing_account_owner", "rights_holder": "rights_holder", "collector": "source_reported_owner"}
@@ -489,9 +491,10 @@ def offering_families(ctx: Context) -> dict[str, dict]:
                         listing["source_url"] = None
                     listings.append({**listing, "category": label(row["category"])})
                     media_rows += [media(url, sid) for url in details.get("images") or []]
-                    if row["price_thb"] == 0:  # the source shows 0 when no price is given; it does not mean free
-                        prices.append({"amounts": [{"value": "0", "status": "unspecified",
-                                                    "display_label": "price unspecified/source reports 0"}],
+                    if row["price_thb"] in PLACEHOLDER_PRICES:
+                        shown = str(int(row["price_thb"]))
+                        prices.append({"amounts": [{"value": shown, "status": "unspecified",
+                                                    "display_label": f"price unspecified/source reports {shown}"}],
                                        "currency": "THB", "source_id": sid})
                     elif row["price_thb"] is not None or details.get("price_amounts"):  # one price, or a range/choices
                         amounts = [row["price_thb"]] if row["price_thb"] is not None else details["price_amounts"]
