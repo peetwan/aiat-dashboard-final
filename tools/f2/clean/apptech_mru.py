@@ -10,9 +10,11 @@ from __future__ import annotations
 import re
 
 from .. import decisions
-from ..text import TITLES, clean_or_none, level, norm, person, sections, split_title, title_sex
+from ..text import TITLES, clean_or_none, level, member_id, norm, person, sections, split_title, title_sex
 
 FILE = "innovations.json"
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"requirements.json": "technology requests posted by users (demand side), not innovations or people"}
 # A researcher "university" that is really a faculty ("วิทยาศาสตร์และเทคโนโลยี") does not match this;
 # for those the record's account affiliation (data.listing.affiliation) is the university.
 ORGANISATION = re.compile(r"มหาวิทยาลัย|^ม\.|มรภ|มทร|สถาบัน|วิทยาลัย|วิสาหกิจ|กลุ่ม|บริษัท|ห้างหุ้นส่วน|สหกรณ์|ชุมชน|"
@@ -55,7 +57,8 @@ def clean(raw, geo) -> dict[str, list[dict]]:
         about = {"kind": "listed", "about_kind": "innovation", "about_record_id": rid, "raw_ref": f"{FILE}#data/{index}"}
         # a researcher field can hold two people: "ดร.ก ข, ผศ. ค ง"
         researchers = [(r, name) for r in data.get("researchers") or [] for name in str(r.get("name") or "").split(",")]
-        for n, (researcher, name) in enumerate(researchers):
+        seen = {}
+        for researcher, name in researchers:
             who = person(name)
             if not who:
                 continue
@@ -64,19 +67,22 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             if not university or not INSTITUTION.search(university):
                 university, faculty = affiliation, faculty or university
             role = researcher.get("role") or "researcher"
-            people.append({"record_id": f"{rid}#{role}#{n}", "role": role, **who, **about,
+            people.append({"record_id": member_id(rid, role, who["name"], seen), "role": role, **who, **about,
                            "institution": university, "faculty": faculty})
         # Inventors are usually also listed as researchers; Resolve joins them, the inventor role must stay.
-        for n, who in enumerate(_inventors(data, reviewed_inventors.get(rid))):
-            people.append({"record_id": f"{rid}#inventor#{n}", "role": "inventor", **who, **about,
+        inventors, stale = _inventors(data, reviewed_inventors.get(rid))
+        if stale:  # on the innovation: the new text may name no inventor at all
+            innovations[-1]["details"]["reviewed_reading_stale"] = True
+        for who in inventors:
+            people.append({"record_id": member_id(rid, "inventor", who["name"], seen), "role": "inventor", **who, **about,
                            "institution": affiliation})
         owner = person(data["listing"].get("owner_name"))
         if owner:
             people.append({"record_id": f"{rid}#owner#0", "role": "owner", **owner, **about, "institution": affiliation,
                            "person_ref": clean_or_none(data["listing"].get("owner_user_id"))})
-        for n, who in enumerate(_rights_holders(data.get("rights_holder"))):
-            people.append({"record_id": f"{rid}#rights_holder#{n}", "role": "rights_holder", **who, **about,
-                           "institution": affiliation})
+        for who in _rights_holders(data.get("rights_holder")):
+            people.append({"record_id": member_id(rid, "rights_holder", who["name"], seen), "role": "rights_holder",
+                           **who, **about, "institution": affiliation})
     # names a reviewer found are not a person (decisions/parsing.json, apptech_mru.not_a_person)
     people = [p for p in people if p["name"] not in not_a_person and f"{p.get('title') or ''}{p['name']}" not in not_a_person]
     return {"innovations": innovations, "innovation_readiness": readiness, "people": people}
@@ -93,15 +99,23 @@ def _rights_holders(value) -> list[dict]:
     return [who for who in (person(part) for part in parts if part not in ("", "คณะ")) if who]
 
 
-def _inventors(data: dict, reviewed: dict | None) -> list[dict]:
+def _inventors(data: dict, reviewed: dict | None) -> tuple[list[dict], bool]:
+    """The inventors, and whether a reviewed reading exists but the inventor text has changed since (then the
+    rule reads the new text and the record needs a new look)."""
     written = norm(data.get("inventors_raw"))
-    if reviewed is not None:
-        return [{"title": _title_before(written, name), "name": name,
-                 "sex": title_sex(_title_before(written, name) or "")} for name in reviewed["people"]]
+    if reviewed is not None and norm(reviewed["written"]) == written:
+        return [_titled(written, name) for name in reviewed["people"]], False
     found = [who for who in (person(r.get("name")) for r in data.get("researchers") or [])
              if who and len(who["name"].split()) >= 2 and who["name"].casefold() in written.casefold()]
     # keep the longest name when one is part of another (a full name and a given-name-only entry)
-    return [who for who in found if not any(o["name"] != who["name"] and who["name"] in o["name"] for o in found)]
+    found = [who for who in found if not any(o["name"] != who["name"] and who["name"] in o["name"] for o in found)]
+    # the title written in the inventor text ("นาง…") wins over the researcher list's ("ผศ.…")
+    return [_titled(written, who["name"]) if _title_before(written, who["name"]) else who for who in found], reviewed is not None
+
+
+def _titled(written: str, name: str) -> dict:
+    title = _title_before(written, name)
+    return {"title": title, "name": name, "sex": title_sex(title or "")}
 
 
 def _title_before(text: str, name: str) -> str | None:

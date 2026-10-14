@@ -215,7 +215,8 @@ def innovations(ctx: Context) -> dict[str, dict]:
         readiness[r["source"], r["record_id"]].append(r)
     for r in ctx.rows("SELECT * FROM innovation_places WHERE role = 'use' ORDER BY ALL"):
         places[r["source"], r["record_id"]].append(r)
-    for r in ctx.rows("SELECT * FROM people WHERE about_kind = 'innovation' ORDER BY source, record_id"):
+    # role, then the order the source lists people in (rowid = insertion order; ids no longer carry a position)
+    for r in ctx.rows("SELECT * FROM people WHERE about_kind = 'innovation' ORDER BY source, about_record_id, role, rowid"):
         people[r["source"], r["about_record_id"]].append(r)
     out = {}
     for entity_id in entity_ids(ctx.con, ("C04_LISTED", "K04")):
@@ -472,8 +473,9 @@ def offering_families(ctx: Context) -> dict[str, dict]:
                         prices.append({"amounts": [{"value": "0", "status": "unspecified",
                                                     "display_label": "price unspecified/source reports 0"}],
                                        "currency": "THB", "source_id": sid})
-                    elif row["price_thb"] is not None:
-                        prices.append({"amounts": [{"value": f"{row['price_thb']:g}", "status": "source_reported"}],
+                    elif row["price_thb"] is not None or details.get("price_amounts"):  # one price, or a range/choices
+                        amounts = [row["price_thb"]] if row["price_thb"] is not None else details["price_amounts"]
+                        prices.append({"amounts": [{"value": f"{a:g}", "status": "source_reported"} for a in amounts],
                                        "currency": "THB", "source_id": sid})
                 descriptions.append(description("listing", row["description"], sid))
                 locations.append(location(row, sid, "source_listing_location"))

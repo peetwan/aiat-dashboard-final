@@ -53,19 +53,59 @@ class Raw:
                 self._cache[name] = json.loads((self.folder / name).read_text(encoding="utf-8"))
         return self._cache[name]
 
-    def at(self, ref: str):
-        """The value a raw_ref ("file.json#data/3/title") points to."""
+    def jsonl(self, name: str) -> list:
+        """Read name.gz (preferred) or name, one JSON value per line. Parsed once per run."""
+        if name not in self._cache:
+            gz = self.folder / f"{name}.gz"
+            with (gzip.open(gz, "rt", encoding="utf-8") if gz.is_file() else open(self.folder / name, encoding="utf-8")) as f:
+                self._cache[name] = [json.loads(line) for line in f if line.strip()]
+        return self._cache[name]
+
+    def at(self, ref: str, record_id: str | None = None):
+        """The value a raw_ref ("file.json#data/3/title") points to. Path parts are escaped like JSON Pointer
+        (text.ref_part). With record_id, the record (the first list item on the path) is found by its id when the
+        snapshot lists records in another order; KeyError when no record has that id."""
         name, _, path = ref.partition("#")
-        value = self.json(name)
+        value = self.jsonl(name) if name.endswith(".jsonl") else self.json(name)
+        found = record_id is None
         for part in filter(None, path.split("/")):
-            value = value[int(part)] if isinstance(value, list) else value[part]
+            part = part.replace("~1", "/").replace("~0", "~")
+            if isinstance(value, list):
+                if not found:
+                    value, found = _record(value, int(part), record_id), True
+                    continue
+                value = value[int(part)]
+            else:
+                value = value[part]
         return value
 
-    def jsonl(self, name: str) -> list:
-        """Read name.gz (preferred) or name, one JSON value per line."""
-        gz = self.folder / f"{name}.gz"
-        with (gzip.open(gz, "rt", encoding="utf-8") if gz.is_file() else open(self.folder / name, encoding="utf-8")) as f:
-            return [json.loads(line) for line in f if line.strip()]
+    def files_read(self) -> set[str]:
+        return set(self._cache)
+
+    def files(self) -> set[str]:
+        """Data files in the snapshot (one name per file, with or without .gz), not its manifests or notes."""
+        names = {str(p.relative_to(self.folder)).removesuffix(".gz") for p in self.folder.rglob("*") if p.is_file()}
+        return {n for n in names if n.endswith((".json", ".jsonl"))
+                and not (n.endswith("manifest.json") or Path(n).name == "complete_refresh_summary.json")}
+
+
+ID_SUFFIXES = ("id", "_key")
+
+
+def _record(items: list, index: int, record_id: str):
+    """The item with this source record id: the one at index if it has that id, else the one that has it.
+    Ids are compared with the item's id fields; "articles:1" also matches an item whose id is "1"."""
+    wanted = {str(record_id), str(record_id).rpartition(":")[2]}
+
+    def has_id(item) -> bool:
+        return isinstance(item, dict) and any(str(v) in wanted for k, v in item.items()
+                                              if k.endswith(ID_SUFFIXES) and isinstance(v, (str, int)))
+    if 0 <= index < len(items) and has_id(items[index]):
+        return items[index]
+    match = next((item for item in items if has_id(item)), None)
+    if match is None:
+        raise KeyError(f"no record {record_id}")
+    return match
 
 
 def latest_run(folder: str) -> Path:
@@ -88,13 +128,15 @@ def insert(con: duckdb.DuckDBPyConnection, table: str, rows: list[dict]) -> None
         con.executemany(f"INSERT INTO {table} VALUES ({', '.join('?' * len(columns))})", values)
 
 
-def run(db_path: Path = DB_PATH) -> dict[str, Counter]:
+def run(db_path: Path = DB_PATH) -> dict[str, dict]:
+    """Per source: rows per table, and notes for a person to look at (raw files no cleaner accounts for,
+    reviewed findings whose source text changed)."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = db_path.with_suffix(".tmp")
     tmp.unlink(missing_ok=True)
     con = duckdb.connect(str(tmp))
     con.execute(SCHEMA.read_text(encoding="utf-8"))
-    geo, counts, reviewed = Geo(), {}, extracted.load()
+    geo, out, reviewed = Geo(), {}, extracted.load()
     for source, (folder, cleaner) in CLEANERS.items():
         run_dir = latest_run(folder)
         raw = Raw(run_dir)
@@ -105,10 +147,28 @@ def run(db_path: Path = DB_PATH) -> dict[str, Counter]:
         insert(con, "runs", [{"source": source, "raw_folder": folder, "run_id": run_dir.name}])
         for table, rows in tables.items():
             insert(con, table, [{"source": source, **row} for row in rows])
-        counts[source] = Counter({table: len(rows) for table, rows in tables.items()})
+        unread = raw.files() - raw.files_read() - set(getattr(cleaner, "SKIPPED", {}))
+        out[source] = {"rows": Counter({table: len(rows) for table, rows in tables.items()}),
+                       "unaccounted_raw_files": sorted(unread), "needs_new_look": needs_new_look(tables)}
     con.close()
     tmp.replace(db_path)  # only a complete run replaces the previous database
-    return counts
+    return out
+
+
+def needs_new_look(tables: dict) -> list[str]:
+    """Rows built from a review whose evidence is no longer in the current snapshot ("table record_id: why").
+    They are still written; a person decides whether the review still holds."""
+    notes = []
+    for table, rows in tables.items():
+        for row in rows:
+            details = row.get("details") or {}
+            why = [f"{details['quotes_missing']} of {details['quotes']} quotes missing" if details.get("quotes_missing") else "",
+                   "publication missing" if details.get("publication_missing") else "",
+                   "publication text changed since the review" if details.get("publication_changed") else "",
+                   "reviewed inventor reading no longer matches the text" if details.get("reviewed_reading_stale") else ""]
+            if any(why):
+                notes.append(f"{table} {row['record_id']}: {'; '.join(w for w in why if w)}")
+    return notes
 
 
 def _link(source: str, tables: dict, links: list[dict]) -> None:

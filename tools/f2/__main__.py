@@ -41,8 +41,12 @@ def main() -> int:
         for measure_id, value in measure.run().items():
             print(f"{measure_id}: {value:,.6g}")
     elif stage == "clean":
-        for source, tables in clean.run().items():
-            print(source, ", ".join(f"{table} {n:,}" for table, n in sorted(tables.items())))
+        for source, result in clean.run().items():
+            print(source, ", ".join(f"{table} {n:,}" for table, n in sorted(result["rows"].items())))
+            for name in result["unaccounted_raw_files"]:
+                print(f"  WARNING raw file not read and not listed as skipped: {name}")
+            for note in result["needs_new_look"]:
+                print(f"  NEEDS A NEW LOOK (source changed since the review): {note}")
     else:
         for entity, n in resolve.run().items():
             print(f"{entity}: {n['records']:,} records -> {n['entities']:,} entities; pairs same {n['same']:,}, "

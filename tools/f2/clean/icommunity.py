@@ -2,7 +2,9 @@
 
 Innovations: the export lists an innovation once per plan group, so one innovation_id can appear several times:
 record_id is the listing (source_key "group:innovation_id"), upstream_id the innovation_id.
-Readiness comes from the export's "start/end" text (e.g. "6/8" = TRL 6 at project start, 8 at end).
+Readiness comes from the export's "start/end" text (e.g. "6/8" = TRL 6 at project start, 8 at end). The
+detail page states its own start/current levels, which often disagree; they are kept in details
+(detail_readiness, readiness_disagrees) for review and are not counted until their meaning is settled.
 
 Products: the seller is the name on the description's "พื้นที่:" line, before its address.
 """
@@ -15,6 +17,10 @@ from ..text import clean_or_none, level, norm, person, strip_html
 
 FILE, PRODUCTS, INNOVATORS = "apptech_innovations.json", "community_products.json", "apptech_innovators.json"
 POSTS, BACKGROUND = "activity_posts.json", "programme_background.json"
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"apptech_dashboard_summaries.json": "dashboard totals; innovations and innovators are read from the exports",
+           "apptech_group_catalog.json": "the list of plan groups; each innovation states its own group",
+           "location_assertions.jsonl": "a place derived from the dashboard summaries, not from an innovation record"}
 # The three development scores an innovator's detail page states (start and current level).
 DIMENSIONS = ("technology_knowledge", "learning_process_management", "collaboration_network")
 # Seller names the "พื้นที่:" line writes incompletely or not at all (checked by hand in the old pipeline).
@@ -43,11 +49,19 @@ def clean(raw, geo) -> dict[str, list[dict]]:
                         "project_name": project.get("name"), "project_year_be": project.get("year_be"),
                         "group": (record.get("scope") or {}).get("group_label_th")},
         })
-        for scale, field in (("TRL", "latest_readiness_level_raw"), ("SRL", "latest_social_readiness_level_raw")):
+        disagrees, stated = [], {}
+        for scale, field, detail_field in (("TRL", "latest_readiness_level_raw", "technology_readiness"),
+                                           ("SRL", "latest_social_readiness_level_raw", "social_readiness")):
             m = re.fullmatch(r"\s*(\d+)\s*/\s*(\d+)\s*", str(record.get(field) or ""))
             readiness.append({**key, "scale": scale, "level": level(m[2]) if m else None,
                               "start_level": level(m[1]) if m else None, "raw": record.get(field),
                               "stated_in": "export"})
+            page = detail.get(detail_field) or {}
+            stated[scale] = {"start_level": page.get("start_level"), "current_level": page.get("current_level")}
+            if (level(page.get("start_level")), level(page.get("current_level"))) != (
+                    (level(m[1]), level(m[2])) if m else (None, None)):
+                disagrees.append(scale)
+        innovations[-1]["details"] |= {"detail_readiness": stated, "readiness_disagrees": disagrees}
         researcher = record.get("researcher") or {}
         who = person(researcher.get("full_name"))
         if who:

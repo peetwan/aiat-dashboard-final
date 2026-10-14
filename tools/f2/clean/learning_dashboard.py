@@ -11,6 +11,8 @@ from __future__ import annotations
 from ..text import norm
 
 FILE = "learning_dashboard.json"
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"dashboard_keys.jsonl": "the names of the dashboard's fields"}
 DIMENSIONS = {"provinces": "province", "entityTypes": "entity_type", "categories": "category", "geography": "region"}
 
 

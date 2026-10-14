@@ -89,9 +89,16 @@ def clean(raw, geo) -> dict[str, list[dict]]:
                 "text": "\n".join(filter(None, (strip_html(item.get(f)) for f in text_fields))) or None,
                 "published_at": item.get("published_date"), "url": item.get("source_url") or item.get("detail_api_url"),
                 "raw_ref": f"{name}#data/{index}",
-                "details": {k: item.get(k) for k in ("type_raw", "area", "province", "active", "highlight_id") if k in item}})
+                "details": {**{k: item.get(k) for k in ("type_raw", "area", "province", "active", "highlight_id") if k in item},
+                            "images": _page_images(item)}})
     return {"operators": list(operators.values()), "offerings": offerings, "offering_operators": links,
             "cultural_records": areas, "publications": publications}
+
+
+def _page_images(item: dict) -> list[dict]:
+    """A page's cover and gallery images, without the site logo; as {"url"} like other publications."""
+    urls = [item.get("cover_image_url"), item.get("image_url"), *(item.get("image_urls") or [])]
+    return [{"url": u} for u in dict.fromkeys(u for u in urls if u and not u.endswith("atlocal_logo.png"))]
 
 
 def _link(offering: str, operator: str, basis: str) -> dict:

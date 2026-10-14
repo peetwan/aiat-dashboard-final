@@ -10,6 +10,9 @@ from __future__ import annotations
 from ..text import clean_or_none, norm
 
 ROWS = "area_based_rows.jsonl"
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"area_based.json": "the API response the same rows come from (area_based_rows.jsonl)",
+           "area_based_stats.json": "the site's totals by region, province and business type"}
 
 
 def clean(raw, geo) -> dict[str, list[dict]]:

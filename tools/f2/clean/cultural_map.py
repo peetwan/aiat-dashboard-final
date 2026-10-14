@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 
-from ..text import clean_or_none, norm, person
+from ..text import clean_or_none, member_id, norm, person
 
 PRODUCTS, MAP, ACTIVITIES, RECREATION, TEAM = (
     "products.json", "map_inspiration.json", "activities.json", "recreation.json", "team.json")
@@ -28,18 +28,20 @@ def clean(raw, geo) -> dict[str, list[dict]]:
         address = norm(data.get("address_text"))
         site = SITE_ADDRESS.findall(address)
         subdistrict, district, province = site[-1] if site else ("", "", "")
-        price = re.search(r"\d[\d,]*(?:\.\d+)?", str(data.get("price_text") or ""))
+        # "500-1500.00 บาท", "99, 149, 199 บาท": a range or choices is several amounts, not one price
+        amounts = [float(a.replace(",", "")) for a in re.findall(r"\d[\d,]*(?:\.\d+)?", str(data.get("price_text") or ""))]
         offerings.append({
             "record_id": record["external_id"],
             "kind": "listed",
             "name": norm(record.get("title")),
             "description": clean_or_none(data.get("description")),
             "category": clean_or_none(data.get("product_category")),
-            "price_thb": float(price[0].replace(",", "")) if price else None,
+            "price_thb": amounts[0] if len(amounts) == 1 else None,
             **geo.place(province, district, subdistrict),
             "url": record.get("source_url"),
             "raw_ref": f"{PRODUCTS}#data/records/{index}",
-            "details": {"address": address, "sales_channels": data.get("sales_channels"),
+            "details": {"address": address, "price_text": clean_or_none(data.get("price_text")),
+                        "price_amounts": amounts if len(amounts) > 1 else None, "sales_channels": data.get("sales_channels"),
                         "related_cultural_record": data.get("related_cultural_record"),
                         "external_links": data.get("external_links")},
         })
@@ -121,10 +123,11 @@ def _publications(raw) -> tuple[list[dict], list[dict]]:
                              "url": record.get("source_url"), "raw_ref": ref,
                              "details": {"team_name": data.get("team_name"), "category": data.get("recreation_category"),
                                          "recorded_by": data.get("recorded_by")}})
-        for n, member in enumerate(data.get("team_members") or []):
+        seen = {}
+        for member in data.get("team_members") or []:
             who = person(member)
             if who:
-                team.append({"record_id": f"{rid}#team_member#{n}", "kind": "listed", "role": "project_team_member", **who,
+                team.append({"record_id": member_id(rid, "team_member", who["name"], seen), "kind": "listed", "role": "project_team_member", **who,
                              "about_kind": "publication", "about_record_id": rid, "raw_ref": ref})
     for index, record in enumerate(raw.json(TEAM)["data"]["records"]):
         who = person(record.get("title"))

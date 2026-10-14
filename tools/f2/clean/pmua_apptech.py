@@ -6,11 +6,15 @@ from __future__ import annotations
 
 import re
 
-from ..text import clean_or_none, level, norm, person, sections
+from ..text import clean_or_none, level, norm, person, ref_part, sections
 
 PRODUCTS, MAP, RESEARCHERS = "products.json", "innovation_map_all.json", "researchers.json"
 # Dashboards publishing totals per province (K02 uses innovators_all's total_inno).
 DASHBOARDS = ("innovators_all", "innovators_2025", "innovators_2026", "family_all", "family_2025", "family_2026")
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"stations.json": "research station profiles (organisations), not counted entities",
+           "universities.json": "university profiles; each innovation states its university",
+           **{f"{name}.json": f"a compressed copy of dashboards/{name}.json" for name in (MAP.removesuffix(".json"), *DASHBOARDS)}}
 MAP_AREA = re.compile(r"^อ\.(?P<district>.*?)\s+ต\.(?P<subdistrict>.*)$")
 
 
@@ -88,7 +92,7 @@ def _dashboard(raw, name: str, geo) -> list[dict]:
     for metric, value in (data.get("economic_metrics") or {}).items():
         if isinstance(value, dict) and "thb" in value:
             rows.append({"dataset": name, "metric": metric, "value": value["thb"],
-                         "raw_ref": f"{ref}economic_metrics/{metric}/thb"})
+                         "raw_ref": f"{ref}economic_metrics/{ref_part(metric)}/thb"})
     for province, values in (data.get("prov_data") or {}).items():
         place = geo.place(geo.english_province.get(province, province))
         for field, value in values.items():
@@ -96,7 +100,8 @@ def _dashboard(raw, name: str, geo) -> list[dict]:
                 rows.append({"dataset": name, "metric": f"{field}.{metric}" if metric else field,
                              "dimension": "province", "dimension_value": province,
                              "province_code": place["province_code"], "value": number,
-                             "raw_ref": f"{ref}prov_data/{province}/{field}" + (f"/{metric}" if metric else "")})
+                             "raw_ref": f"{ref}prov_data/{ref_part(province)}/{ref_part(field)}"
+                             + (f"/{ref_part(metric)}" if metric else "")})
     return rows
 
 

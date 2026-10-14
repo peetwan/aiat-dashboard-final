@@ -39,6 +39,19 @@ def key(value: object) -> str:
     return "".join(c for c in norm(value).casefold() if unicodedata.category(c)[0] in "LMN")
 
 
+def member_id(parent: str, role: str, name: str, seen: dict) -> str:
+    """Record id of a person listed inside another record: "<parent>#<role>#<name key>". It stays with the
+    person when the source reorders the list (decisions are keyed by it); a repeated name gets "#2", "#3"."""
+    base = f"{parent}#{role}#{key(name)}"
+    seen[base] = seen.get(base, 0) + 1
+    return base if seen[base] == 1 else f"{base}#{seen[base]}"
+
+
+def ref_part(key: object) -> str:
+    """A dictionary key as one raw_ref path part ("วิสาหกิจ/แปลงใหญ่" must not split the path)."""
+    return str(key).replace("~", "~0").replace("/", "~1")
+
+
 def clean_or_none(value: object) -> str | None:
     text = norm(value)
     return None if text.casefold() in PLACEHOLDERS else text

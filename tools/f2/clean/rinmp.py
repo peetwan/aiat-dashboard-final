@@ -14,9 +14,11 @@ from __future__ import annotations
 
 import re
 
-from ..text import clean_or_none, level, norm, person, sections
+from ..text import clean_or_none, level, member_id, norm, person, sections
 
 FILE, OWNERS = "app_tech.json", "owner_profiles.json"
+# Raw files this cleaner does not read, and why (the clean stage warns about any other unread file).
+SKIPPED = {"statistics.json": "the site's own totals; the records are counted directly (its reconciliation says they match)"}
 TARGET_SECTION = "targetUserAddressDetail"
 USE_PHRASES = ("พื้นที่ที่นำไปใช้ประโยชน์", "ที่นำนวัตกรรมไปใช้ประโยชน์", "ติดตั้งอุปกรณ์ดังกล่าวในพื้นที่",
                "ถูกนำไปใช้", "ชุมชนนำผลงานออกแบบไปใช้ประโยชน์", "นำไปใช้การใน")
@@ -54,10 +56,11 @@ def clean(raw, geo) -> dict[str, list[dict]]:
                           "stated_in": "profile"})
         readiness.append({**key, "scale": "ATL", "level": None, "raw": record.get("atl_level"), "stated_in": "profile"})
 
-        for n, owner in enumerate(owners.get(int(record["id"])) or [{"fullname": record.get("owner_display_name")}]):
+        seen = {}
+        for owner in owners.get(int(record["id"])) or [{"fullname": record.get("owner_display_name")}]:
             who = person(owner["fullname"])
             if who:
-                people.append({"record_id": f"{rid}#collector#{n}", "kind": "listed", "role": "collector", **who,
+                people.append({"record_id": member_id(rid, "collector", who["name"], seen), "kind": "listed", "role": "collector", **who,
                                "institution": clean_or_none(owner.get("institute"))
                                or clean_or_none((record.get("institute") or {}).get("name")),
                                "about_kind": "innovation", "about_record_id": rid,

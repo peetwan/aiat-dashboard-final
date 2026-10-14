@@ -27,7 +27,7 @@ from pathlib import Path
 
 import duckdb
 
-from ..clean import DB_PATH, ROOT
+from ..clean import DB_PATH, ROOT, needs_new_look
 from ..geo import Geo
 from . import details as detail_records
 from .results import Results
@@ -63,6 +63,9 @@ def run(db_path: Path = DB_PATH) -> dict:
     con = duckdb.connect(str(db_path), read_only=True)
     results = Results(con, config)
     records, reviewed = detail_records.build(con, config)
+    stale = needs_new_look({table: [{"record_id": rid, "details": json.loads(details) if details else {}}
+                                    for rid, details in con.execute(f"SELECT record_id, details FROM {table}").fetchall()]
+                            for table in ("operators", "offerings", "people", "activities", "innovations")})
     con.close()
     provinces = Geo().provinces
 
@@ -105,8 +108,13 @@ def run(db_path: Path = DB_PATH) -> dict:
 
     from tools import f2_public_diff
     f2_public_diff.main(["--base", str(ROOT / F2), "--new", str(out), "--out", str(stage / "diff")])
+    if stale:  # the sign-off must see reviews whose evidence changed; the rows are still counted
+        with open(stage / "diff" / "diff.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## Reviewed findings whose source changed ({len(stale)})\n\nStill counted. Check each "
+                    "review still holds, then update or reject it in data/runtime/f2/decisions/.\n\n"
+                    + "".join(f"- {note}\n" for note in stale))
     return {"candidate": str(stage), "validation": report["status"], "problems": report["problems"][:20],
-            "diff": str(stage / "diff" / "diff.md")}
+            "diff": str(stage / "diff" / "diff.md"), "needs_new_look": len(stale)}
 
 
 # Files ------------------------------------------------------------------------

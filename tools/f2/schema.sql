@@ -61,7 +61,7 @@ CREATE TABLE innovation_places (
 
 CREATE TABLE people (
     source           VARCHAR NOT NULL,
-    record_id        VARCHAR NOT NULL,  -- the person's own record id, or "<about record>#<role>#<n>"
+    record_id        VARCHAR NOT NULL,  -- the person's own record id, or "<about record>#<role>#<name key>" (text.member_id)
     kind             VARCHAR NOT NULL,
     review_status    VARCHAR,
     role             VARCHAR NOT NULL,  -- community_innovator, researcher, lead, co, inventor, owner, ...
