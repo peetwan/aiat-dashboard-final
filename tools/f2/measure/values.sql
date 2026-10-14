@@ -26,11 +26,13 @@ UNION ALL
 SELECT 'C10_ALTERNATIVE', 'components', coalesce(dimension_value, metric), NULL, dimension_value, metric, NULL, value, 1000000, ord
 FROM f WHERE dataset = 'learning_dashboard' AND metric IN ('localResourceExpense', 'excludedResourceExpense')
 
--- C08: businesses on the Learning dashboard, in four independent breakdowns that each add up to the total.
+-- C08: businesses on the Learning dashboard, in four independent breakdowns that each add up to the total
+-- (a new businesses_by_* breakdown stops the Measure stage; see __init__.py).
 UNION ALL
 SELECT 'C08_REPORTED_BUSINESSES',
        CASE metric WHEN 'businesses_by_category' THEN 'categories' WHEN 'businesses_by_entity_type' THEN 'entityTypes'
-                   WHEN 'businesses_by_region' THEN 'geography' ELSE 'provinces' END,
+                   WHEN 'businesses_by_region' THEN 'geography' WHEN 'businesses_by_province' THEN 'provinces' END,
        dimension_value, province_code, CASE WHEN metric = 'businesses_by_region' THEN dimension_value END, NULL, NULL,
        value, 1, ord
-FROM f WHERE dataset = 'learning_dashboard' AND metric LIKE 'businesses_by_%';
+FROM f WHERE dataset = 'learning_dashboard'
+         AND metric IN ('businesses_by_category', 'businesses_by_entity_type', 'businesses_by_region', 'businesses_by_province');

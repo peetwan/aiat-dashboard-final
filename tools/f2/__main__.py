@@ -13,6 +13,8 @@ from __future__ import annotations
 import argparse
 import json
 
+import duckdb
+
 from . import clean, measure, publish, resolve, review
 from .resolve import judge
 
@@ -40,6 +42,9 @@ def main() -> int:
     if stage == "measure":
         for measure_id, value in measure.run().items():
             print(f"{measure_id}: {value:,.6g}")
+        with duckdb.connect(str(clean.DB_PATH), read_only=True) as con:
+            for measure_id, ref, issue, detail in con.execute("SELECT * FROM counting_issues ORDER BY ALL").fetchall():
+                print(f"  NEEDS A NEW LOOK (counting decision {ref}, {measure_id}): {issue} {detail}")
     elif stage == "clean":
         for source, result in clean.run().items():
             print(source, ", ".join(f"{table} {n:,}" for table, n in sorted(result["rows"].items())))

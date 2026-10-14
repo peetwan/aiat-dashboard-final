@@ -66,6 +66,9 @@ def run(db_path: Path = DB_PATH) -> dict:
     stale = needs_new_look({table: [{"record_id": rid, "details": json.loads(details) if details else {}}
                                     for rid, details in con.execute(f"SELECT record_id, details FROM {table}").fetchall()]
                             for table in ("operators", "offerings", "people", "activities", "innovations")})
+    issues = [f"{kind} decision {ref} ({what}): {issue} {detail}" for kind, what, ref, issue, detail in con.execute(
+        """SELECT 'matching', entity, decision_ref, issue, detail FROM decision_issues
+           UNION ALL SELECT 'counting', measure_id, decision_ref, issue, detail FROM counting_issues ORDER BY ALL""").fetchall()]
     con.close()
     provinces = Geo().provinces
 
@@ -113,8 +116,12 @@ def run(db_path: Path = DB_PATH) -> dict:
             f.write(f"\n## Reviewed findings whose source changed ({len(stale)})\n\nStill counted. Check each "
                     "review still holds, then update or reject it in data/runtime/f2/decisions/.\n\n"
                     + "".join(f"- {note}\n" for note in stale))
+    if issues:  # decisions Resolve or Measure could not apply: the numbers are computed without them
+        with open(stage / "diff" / "diff.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## Reviewed decisions that no longer fit the data ({len(issues)})\n\nNot applied. Fix or "
+                    "remove each in data/runtime/f2/decisions/.\n\n" + "".join(f"- {note}\n" for note in issues))
     return {"candidate": str(stage), "validation": report["status"], "problems": report["problems"][:20],
-            "diff": str(stage / "diff" / "diff.md"), "needs_new_look": len(stale)}
+            "diff": str(stage / "diff" / "diff.md"), "needs_new_look": len(stale) + len(issues)}
 
 
 # Files ------------------------------------------------------------------------

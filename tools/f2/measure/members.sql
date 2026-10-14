@@ -52,7 +52,7 @@ cultural_counted AS (
 -- Activities: provinces of the venues (online delivery has none).
 activity_counted AS (
     SELECT DISTINCT 'K03' AS measure_id, m.entity_id,
-           CASE WHEN v.venue->>'role' <> 'online_delivery' THEN v.venue->>'province_code' END AS province_code
+           CASE WHEN v.venue->>'role' IS DISTINCT FROM 'online_delivery' THEN v.venue->>'province_code' END AS province_code
     FROM member m JOIN activities a USING (source, record_id)
     LEFT JOIN LATERAL (SELECT unnest(CAST(a.venues AS JSON[])) AS venue) v ON true
     WHERE m.entity = 'activity'),

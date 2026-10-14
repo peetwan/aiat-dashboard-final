@@ -6,7 +6,7 @@ The reviewer sorts a cluster's entities into groups (one group = one entity); th
 same/high answers are pre-filled, every judge answer is shown on its pair.
 
 A saved cluster is written straight into data/runtime/f2/decisions/matching.json (origin user:<date>,
-ref review:<cluster>:...): a "same" decision per group of two or more, and a "different" (or, when the
+ref review:<cluster>:...): a "same" decision per group of two or more records, and a "different" (or, when the
 reviewer is not sure, "unsure") decision that keeps the groups apart. Saving a cluster again replaces
 its decisions. Run `python -m tools.f2 resolve` afterwards to apply them; decided clusters then leave
 the queue.

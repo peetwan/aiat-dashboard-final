@@ -487,7 +487,7 @@
    "label_th": "นวัตกรรมที่มีหลักฐานความพร้อมตามเกณฑ์",
    "formula": "COUNT DISTINCT global_innovation_id with at least one eligible readiness assessment",
    "scope": "iCommunity, PMUA AppTech, RINMP and AppTech MRU after accepted identity resolution",
-   "limitations": "Numeric 8-9 qualifies; valid numeric level takes precedence over a label within an assessment. Explicit ready label is fallback only. Apply iCommunity export-first and proven supersession. Preserve conflicts; no canonical maximum or verified-current claim.",
+   "limitations": "Counts an innovation when at least one of its source records states a numeric technology readiness level (TRL) of 8 or 9; a readiness label without a number does not count. For iCommunity the level in the export is used. Records that disagree are kept as stated; this is not a verified current level.",
    "map_legend_th": null,
    "status": "available_snapshot",
    "unit": "innovation",
