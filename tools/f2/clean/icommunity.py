@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 
-from ..text import clean_or_none, level, norm, person, strip_html
+from ..text import clean_or_none, level, member_id, norm, person, strip_html
 
 FILE, PRODUCTS, INNOVATORS = "apptech_innovations.json", "community_products.json", "apptech_innovators.json"
 POSTS, BACKGROUND = "activity_posts.json", "programme_background.json"
@@ -65,7 +65,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
         researcher = record.get("researcher") or {}
         who = person(researcher.get("full_name"))
         if who:
-            people.append({"record_id": f"{record['source_key']}#researcher#0", "kind": "listed", "role": "researcher",
+            people.append({"record_id": member_id(record["source_key"], "researcher", who["name"], {}), "kind": "listed", "role": "researcher",
                            **who, "institution": institution, "person_ref": clean_or_none(researcher.get("user_id")),
                            "about_kind": "innovation", "about_record_id": record["source_key"],
                            "raw_ref": f"{FILE}#data/{index}"})
@@ -102,7 +102,7 @@ def _innovators(raw, geo) -> tuple[list[dict], list[dict]]:
                                    "group": (record.get("scope") or {}).get("group_label_th")}})
         researcher = person((record.get("researcher") or {}).get("full_name"))
         if researcher:
-            people.append({"record_id": f"{key}#researcher#0", "kind": "listed", "role": "researcher", **researcher,
+            people.append({"record_id": member_id(key, "researcher", researcher["name"], {}), "kind": "listed", "role": "researcher", **researcher,
                            "person_ref": clean_or_none((record.get("researcher") or {}).get("user_id")),
                            "about_kind": "person", "about_record_id": key, "raw_ref": ref})
         detail = record.get("detail") or {}

@@ -2,8 +2,8 @@
 
 Run `python -m tools.f2 judge` after `resolve`, then `resolve` again to use the answers. Answers are kept
 in data/runtime/f2/decisions/judge.json, keyed by the pair, with a hash of the exact request: a pair is
-asked again only when a record's text changed. Only queued pairs are asked (and pairs whose stored
-answer is in use), so a refresh costs only its new pairs.
+asked again only when a record's text changed, and until then Resolve does not use the old answer.
+Only queued pairs are asked (and pairs whose stored answer is in use), so a refresh costs only its new pairs.
 
 How an answer counts (tested on the user's reviews, 2026-10-13):
 - innovations, different + high confidence: applied, the pair is separated (197 right / 3 wrong of 200);
@@ -192,6 +192,12 @@ def load() -> dict:
 def applied(entity: str) -> dict[tuple, dict]:
     """sorted (a, b) -> stored answer, for Resolve."""
     return {(tuple(x["a"]), tuple(x["b"])): x for x in load()["answers"] if x["entity"] == entity}
+
+
+def stale(con) -> set[tuple]:
+    """(entity, a, b) of stored answers whose request, built from the current tables, is not the one answered."""
+    stored = {(x["entity"], tuple(x["a"]), tuple(x["b"])): x["hash"] for x in load()["answers"]}
+    return {k for r in requests(con) if stored.get(k := (r["entity"], tuple(r["a"]), tuple(r["b"])), r["hash"]) != r["hash"]}
 
 
 def requests(con, entities=ENTITIES) -> list[dict]:

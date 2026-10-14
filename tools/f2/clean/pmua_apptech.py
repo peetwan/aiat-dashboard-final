@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 
-from ..text import clean_or_none, level, norm, person, ref_part, sections
+from ..text import clean_or_none, level, member_id, norm, person, ref_part, sections
 
 PRODUCTS, MAP, RESEARCHERS = "products.json", "innovation_map_all.json", "researchers.json"
 # Dashboards publishing totals per province (K02 uses innovators_all's total_inno).
@@ -46,7 +46,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
         researcher = record.get("researcher") or {}
         who = person(researcher.get("name_raw"))
         if who:
-            people.append({"record_id": f"{rid}#researcher#0", "kind": "listed", "role": "researcher", **who,
+            people.append({"record_id": member_id(rid, "researcher", who["name"], {}), "kind": "listed", "role": "researcher", **who,
                            "institution": university, "person_ref": clean_or_none(researcher.get("agent_id")),
                            "about_kind": "innovation", "about_record_id": rid, "raw_ref": f"{PRODUCTS}#data/{index}"})
         for area in record.get("areas") or []:

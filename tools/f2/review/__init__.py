@@ -182,7 +182,7 @@ def clusters(db_path: Path = DB_PATH) -> list[dict]:
                               "others_count": len(others)})
             pair_rows = []
             for a, b, rule, verdict in pairs:
-                x = answers.get((a, b))
+                x = answers.get((a, b)) if verdict else None  # no verdict: no answer, or a stale one (Resolve)
                 ia, ib = index[entity_of[entity, *a]], index[entity_of[entity, *b]]
                 producers = ""
                 if entity == "offering":
@@ -263,7 +263,8 @@ def decisions_for(cluster: dict, groups: list[int], unsure: bool, note: str) -> 
     head = {"entity": cluster["entity"], "reason": note.strip() or DEFAULT_REASON, "origin": f"user:{date.today().isoformat()}"}
     out = []
     for g, entities in sorted(by_group.items()):
-        if len(entities) > 1:
+        # also one item showing several records: the reviewer saw them as one, rules may stop joining them
+        if sum(len(keys) for keys in entities) > 1:
             out.append({**head, "decision": "same", "groups": entities, "ref": f"review:{cluster['id']}:same-{len(out) + 1}"})
     if len(by_group) > 1:
         out.append({**head, "decision": "unsure" if unsure else "different",

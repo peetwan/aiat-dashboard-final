@@ -39,14 +39,30 @@ def load() -> list[dict]:
 
 
 def run(db_path: Path = DB_PATH) -> dict[str, dict[str, int]]:
+    """A judge answer is used only while its request, built from the resolved tables, is the one it answered.
+    The request depends on other kinds' entities (innovations <-> people), so resolving is repeated until no
+    further answer turns out stale; stale pairs stay queued, to be asked again."""
     con = duckdb.connect(str(db_path))
     con.begin()  # all entity kinds or none
+    stale: set[tuple] = set()
+    while True:
+        counts = _resolve_all(con, stale)
+        found = judge.stale(con)
+        if found <= stale:
+            break
+        stale |= found
+    con.commit()
+    con.close()
+    return counts
+
+
+def _resolve_all(con, stale: set[tuple]) -> dict[str, dict[str, int]]:
     con.execute(SCHEMA.read_text(encoding="utf-8"))
     all_decisions, counts = load(), {}
     for entity, matcher in MATCHERS.items():
         nodes = matcher.nodes(con)
         known = set(con.execute(f"SELECT source, record_id FROM {matcher.TABLE}").fetchall())
-        answers = judge.applied(entity)
+        answers = {k: x for k, x in judge.applied(entity).items() if (entity, *k) not in stale}
         apart = {k for k, x in answers.items() if (entity, x["decision"], x["confidence"]) in judge.APPLIED}
         result = resolve(nodes, matcher.pairs(con), [d for d in all_decisions if d["entity"] == entity], known, apart)
         for row in result["pairs"]:
@@ -61,8 +77,6 @@ def run(db_path: Path = DB_PATH) -> dict[str, dict[str, int]]:
         counts[entity] = {"records": len(nodes), "entities": len(result["entities"]),
                           **{k: sum(1 for p in result["pairs"] if p["status"] == k) for k in ("same", "different", "queue")},
                           "issues": len(result["issues"])}
-    con.commit()
-    con.close()
     return counts
 
 

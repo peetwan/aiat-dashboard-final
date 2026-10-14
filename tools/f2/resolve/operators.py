@@ -29,6 +29,7 @@ GENERIC_WORDS = ["ห้างหุ้นส่วนจำกัด", "หจ�
                  "เครือข่าย", "สหกรณ์", "กลุ่ม", "ร้าน", "ศูนย์", "ชมรม", "สมาคม", "ฟาร์ม"]
 NAME_PLACE = re.compile(r"(?:ตำบล|ต\.|อำเภอ|อ\.|จังหวัด|จ\.)\s*[ก-๙]+")
 GROUP_NO = re.compile(r"กลุ่มที่\s*(\d+)")
+TROUPE = re.compile(r"^\s*คณะ")  # "คณะศิลปินภูไท" is the troupe "ศิลปินภูไท"
 PERSON = re.compile(r"(?:นาย|นางสาว|นาง|น\.ส\.)\s*([ก-๙]+)")
 LEGAL = ("บริษัท", "จำกัด", "หจก", "ห้างหุ้นส่วน")
 NEXT_ITEM = re.compile(r"\d{1,2}\.\s*(?=[ก-๙A-Za-z])|\n")
@@ -57,7 +58,7 @@ def nodes(con) -> list[tuple[str, str]]:
 
 def core_name(name: str) -> str:
     def strip(text, keep_place=False):
-        text = GROUP_NO.sub(" ", text)
+        text = GROUP_NO.sub(" ", TROUPE.sub(" ", text))
         if not keep_place:
             text = NAME_PLACE.sub(" ", text)
         text = re.sub(r"\(.*?\)", " ", text)

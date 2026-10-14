@@ -78,7 +78,7 @@ def clean(raw, geo) -> dict[str, list[dict]]:
                            "institution": affiliation})
         owner = person(data["listing"].get("owner_name"))
         if owner:
-            people.append({"record_id": f"{rid}#owner#0", "role": "owner", **owner, **about, "institution": affiliation,
+            people.append({"record_id": member_id(rid, "owner", owner["name"], seen), "role": "owner", **owner, **about, "institution": affiliation,
                            "person_ref": clean_or_none(data["listing"].get("owner_user_id"))})
         for who in _rights_holders(data.get("rights_holder")):
             people.append({"record_id": member_id(rid, "rights_holder", who["name"], seen), "role": "rights_holder",
