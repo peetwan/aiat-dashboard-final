@@ -300,4 +300,4 @@ python -m app.cli check
 
 ## Pipeline เดิม
 
-Release ที่เผยแพร่ก่อนวันที่ 13 ตุลาคม 2026 สร้างโดย `tools/f2_pipeline/` โดยมี configuration อยู่ใต้ `config/f2_pipeline/` และ tests อยู่ใต้ `tests/f2_pipeline/` โค้ดนี้ยังอยู่ใน repository แต่ไม่ได้ใช้สร้างข้อมูลที่เผยแพร่แล้ว และจะถูกลบหลังการอัปเดตข้อมูลรอบแรกผ่าน `tools/f2` คู่มือเดิมอยู่ใน Git history (`git show 8ce6871:docs/f2-th.md`) การตัดสินที่ตรวจทานแล้วของ release สุดท้ายถูกย้ายมาไว้ในไฟล์การตัดสินข้างต้นแล้ว
+Release ที่เผยแพร่ก่อนวันที่ 13 ตุลาคม 2026 สร้างโดย `tools/f2_pipeline/` โดยมี configuration อยู่ใต้ `config/f2_pipeline/` และ tests อยู่ใต้ `tests/f2_pipeline/` โค้ดนี้ถูกลบเมื่อวันที่ 14 ตุลาคม 2026 หลังการอัปเดตข้อมูลรอบแรกผ่าน `tools/f2` commit สุดท้ายที่ยังมีโค้ดนี้คือ `fb9cb8d` (เช่น `git show fb9cb8d:tools/f2_pipeline/`) คู่มือเดิมอยู่ที่ `git show 8ce6871:docs/f2-th.md` การตัดสินที่ตรวจทานแล้วของ release สุดท้ายถูกย้ายมาไว้ในไฟล์การตัดสินข้างต้นแล้ว และรายชื่อสถานที่ที่โค้ดนี้ใช้ย้ายไปอยู่ที่ `config/f2/geography/`

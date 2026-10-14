@@ -1,6 +1,6 @@
 """Thai administrative geography: turn written place names into official codes.
 
-One resolver for every source. Reference lists: config/f2_pipeline/geography.
+One resolver for every source. Reference lists: config/f2/geography.
 Order of trust: exact official name → a unique lower level fixes or fills the level above →
 a close spelling match within the already-known parent (typo fix). Every fix is noted.
 """
@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .text import norm
 
-GEO_DIR = Path(__file__).resolve().parents[2] / "config" / "f2_pipeline" / "geography"
+GEO_DIR = Path(__file__).resolve().parents[2] / "config" / "f2" / "geography"
 
 PREFIXES = {
     "province": ("จังหวัด", "จ."),
