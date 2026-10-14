@@ -109,23 +109,19 @@ Builder ตรวจ SHA-256/ขนาดของ response และบัง�
 
 ไฟล์ raw อยู่ใน runtime/evidence เท่านั้น PR เผยแพร่ได้เฉพาะ projection กับ manifest/receipt ตาม contract และต้องผ่าน review ก่อน merge
 
-## F2 local promotion
+## F2: สร้างและเผยแพร่ release
 
-See the [F2 guide](f2.md) for the complete build, review, staged-validation and refresh workflow, data semantics, and API/UI contract.
+F2 ใช้ pipeline `tools/f2` ขั้นตอนเต็มอยู่ใน[คู่มือ F2](f2-th.md#การเผยแพร่) สรุปสั้น ๆ:
 
-Local promotion is a separate owner-authorized action after all staged detail fields are accepted. It does not authorize commit, push, deployment, upstream fetching or image hosting.
+```bash
+python -m tools.f2 publish                                    # สร้าง candidate + ตรวจ + รายงานความต่าง
+python -m tools.f2 publish --promote data/runtime/f2/publish/<time>   # หลังเจ้าของข้อมูล sign-off
+python -m app.cli check
+```
 
-`python -m tools.f2_pipeline promote-local` takes the approved `--stage`, reviewed internal `--release`, `--comparison`, `--comparison-review`, explicit `--decision` and a new `--output` directory. The decision must bind the exact stage-manifest SHA-256 and explicitly permit `local_publication_only` with deployment disabled. It is a trusted local workflow record, not a cryptographic identity check or an endpoint for untrusted callers. Repository review and owner authorization remain required; neither field approval nor a publication receipt grants promotion.
-
-The builder rederives the approved stage, verifies its policy/review bindings, and creates a separate activation bundle. `verify-local-promotion` accepts the same inputs with `--bundle` instead of `--output` and independently reproduces every bundle byte. Neither command activates files or writes a receipt.
-
-The bundle contains `data/public/f2/`, `config/publication_contracts/f2_dashboard.json`, `serving-entries.json` and a promotion attestation. Before activation, validate these alongside all existing public files/contracts in a disposable workspace. Then replace the F2 directory and contract, replace only serving entries whose path starts with `f2/`, and regenerate the receipt with `python -m app.cli publication receipt`. Preserve all prior source artifacts and existing non-F2 data. Run `python -m app.cli check` after local activation.
-
-Publication-ready F2 roots use `publication_status=approved_local_publication`, `staged_for_review=false`, `owner_checkpoint_required=false` and `publication_approval_claimed=true`. Historical field/internal approval blocks remain unchanged and non-promotional; a separate `local_promotion` manifest binding records the actual promotion decision. Prices, locations, identities, uncertainty, withheld fields and media references do not change.
-
-The active C02 aggregate-map successor is `f2-dashboard-snapshot-v3-c02-map-accepted-v1`. Its acceptance is bound to the exact immutable pending candidate `f2-dashboard-snapshot-v3-c02-map-review-v1`, separately from the historical person-field and province-membership acceptances. Evidence is under `data/runtime/f2/checkpoints/c02-map-review-v1/` and `c02-map-local-promotion-v1/`. The verified active workspace retains 39 F2 serving entries and the 4,640-person national population, with 4,418 nonadditive province memberships for 4,415 people and 225 people remaining national-only. The map publishes aggregate distinct-person counts over 77 canonical province scopes only; it publishes no person points, coordinates, lower-level geography, residence, or workplace inference. The active F2 manifest SHA-256 is `cb454f3b8afb5665450e09d79a835a767f69b52fb6de1ebeb5859f5fa80fe0d5`; the receipt release digest is `bd51c9c0eff4c73051119d99b255e5d21afee160b74c8004940e59585b775475`. Deployment remains disabled.
-
-Unavailable methodology-only topics may have no source IDs. They are admitted to serving only through an exact database-output contract binding, not invented source provenance. Complete receipt/publication/privacy checks still apply.
+- `publish` เขียน candidate ไว้ใน `data/runtime/f2/publish/<time>/` เป็นสำเนา public workspace ทั้งชุด (`data/public/f2/`, `config/publication_contracts/f2_dashboard.json` ที่สร้างใหม่, serving manifest และ receipt) แล้วตรวจด้วย `validate_workspace` ของ repository ผลอยู่ใน `validation.json` และรายงานความต่างอยู่ใน `diff/diff.md`
+- ไม่มีอะไรสาธารณะเปลี่ยนจนกว่าเจ้าของข้อมูลจะ sign-off และสั่ง `--promote` ซึ่งคัดลอก `data/public/f2/`, contract และรายการ `f2/` ใน serving manifest เข้า repository, ตั้งสถานะ F2 manifest เป็นอนุมัติแล้ว, เขียน receipt ใหม่ และตรวจ workspace อีกครั้ง ไฟล์ที่ไม่ใช่ F2 ไม่ถูกแตะ
+- Commit release (ไฟล์สาธารณะ contract serving manifest receipt) บน feature branch การ promote ไม่ใช่การ merge หรือ deploy
 
 ## หลัง merge
 

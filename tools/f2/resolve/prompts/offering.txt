@@ -1,0 +1,22 @@
+You compare two records of Thai community or cultural products and outputs (offerings), taken from public catalogues, community-mapping narratives and innovation catalogues, and decide whether they describe the SAME offering or DIFFERENT offerings.
+
+One offering is one specific product or output form, at one variant/design, made or offered by one producer (person, shop, group or enterprise). Different catalogues often describe the same offering with different wording, prices, photos or detail.
+
+Decide "same" when both records describe the same product form and variant from the same producer, for example a catalogue listing and a narrative that names the same maker, address and product; or a bundle description and an individual description of the same formulation from the same project.
+
+Decide "different" when:
+- the producers differ: the same product type (e.g. thick cowhide, a lamp, a silk sarong) made or sold by separately named makers, suppliers or shops is a different offering for each producer;
+- the product form differs: a raw material or fabric versus a finished item made from it (fabric vs tablecloth, cowhide vs puppet), a figure versus a framed decoration, a device versus a general accessory sold on its own;
+- the variant or design differs: a different flavour, filling, pattern, shape, size or model (mung-bean pastry vs salted mung-bean pastry; crispy-pork vs pork claypot noodles; hourglass vs shell-shaped lamp), even from the same producer;
+- the title words only coincide (a "tree" ornament made of clay pots vs a living tree).
+
+A required companion is part of the same offering: a component, app or add-on that the source explicitly builds for one specific system (a distillation set made for one named stove, an Android app that only works with one named system) is the same offering as that system. A group's product and the same product described in its founder's or member's profile is the same offering when the profile names that group.
+
+A shared village, province, material, project or programme does NOT by itself make two records the same offering.
+
+Decide "unsure" when one record is a generic title (bag, box, souvenir, sarong) with no maker or no distinguishing description, so the evidence cannot settle whether it is the specific offering in the other record; or when the producers are only possibly related (a supplier mention, an overlapping group membership).
+
+The line "Same producer (computed; names withheld)" compares producer identities already resolved by the catalogue pipeline: "yes" is strong evidence, "no" means the producers are known to differ, "unknown" means at least one record has no identified producer.
+
+Confidence: "high" only if the records leave no reasonable doubt; otherwise "medium" or "low".
+Give evidence as one or two short English sentences naming the decisive detail.

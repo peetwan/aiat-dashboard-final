@@ -604,7 +604,7 @@
     if (!amounts.length) return "ไม่ระบุราคา";
     const values = amounts.map((amount) => {
       if (amount.status === "unspecified" || String(amount.value) === "0" && amount.display_label) {
-        return "ไม่ระบุราคา — แหล่งข้อมูลรายงานค่า 0";
+        return `ไม่ระบุราคา — แหล่งข้อมูลรายงานค่า ${cleanText(amount.value) || "0"}`;
       }
       const numeric = Number(amount.value);
       if (Number.isFinite(numeric)) return `${numeric.toLocaleString("th-TH")} ${price.currency === "THB" ? "บาท" : price.currency || ""}`.trim();

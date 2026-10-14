@@ -1,0 +1,1211 @@
+{
+ "about": "Fixed public text and labels for data/public/f2, written by `python -m tools.f2 publish`. Edit the text here; numbers come from the Measure stage.",
+ "schema_version": "f2-dashboard-v1",
+ "source_ids": [
+  "f2_apptech_mru",
+  "f2_apptech_mtr",
+  "f2_cultural_market_civil",
+  "f2_culturalmap_university",
+  "f2_icommunity",
+  "f2_learning_area_based",
+  "f2_learning_dashboard",
+  "f2_target_household"
+ ],
+ "sources": {
+  "f2_apptech_mtr": {
+   "originating_system": "RinMP AppTech public API snapshot",
+   "public_url": "https://rinmp.com/",
+   "source_context_review": {
+    "rationale": "Public innovation profiles support profile labels, reviewed description sections, readiness assertions, innovation-use geography and explicit owner/institute work attribution.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "matrix and commercial scores",
+     "owner directory use",
+     "private contacts",
+     "funding fields",
+     "readiness-as-current claim"
+    ]
+   },
+   "source_id": "f2_apptech_mtr"
+  },
+  "f2_cultural_market_civil": {
+   "originating_system": "AtLocal Thailand public cultural marketplace snapshot",
+   "public_url": "https://atlocalthailand.com/",
+   "source_context_review": {
+    "rationale": "The snapshot is from public cultural marketplace surfaces. The owner separately accepted the source-scoped business, product and activity field matrix, including safe excerpts, contextual prices and media references, under detail_owner_approval. Other uses are not implicitly approved; source-specific exclusions and non-current/zero-price caveats remain.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "platform shop IDs",
+     "zero-price-as-free inference",
+     "stock or active fields as current availability",
+     "raw image filenames",
+     "person links and contacts"
+    ]
+   },
+   "source_id": "f2_cultural_market_civil"
+  },
+  "f2_culturalmap_university": {
+   "originating_system": "Cultural Map Thailand, Kanchanaburi Rajabhat University",
+   "public_url": "https://www.culturalmapthailand.info/",
+   "source_context_review": {
+    "rationale": "Original K12 scope includes all deduplicated map_inspiration subjects, including named people and cultural knowledge holders. Accepted separate provisional identities remain usable with explicit uncertainty. Public subject titles, attached listings, administrative geography and selected history/identity excerpts are projected without turning unrelated informant/contact fields into a directory.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "account identifiers",
+     "interviewee/contact passages",
+     "unrelated informant and private contact directory fields",
+     "coordinates",
+     "addresses containing contacts",
+     "funding, assessment and metrics blobs",
+     "media rights or availability inference"
+    ]
+   },
+   "source_id": "f2_culturalmap_university"
+  },
+  "f2_icommunity": {
+   "originating_system": "iCommunity portal with AppTech PMUA supporting system",
+   "public_url": "https://www.icommunity.in.th/",
+   "source_context_review": {
+    "rationale": "The canonical iCommunity source includes a public portal and AppTech supporting system. The owner separately accepted the business, product, activity and innovation field matrix under detail_owner_approval. Work attribution requires an explicit innovation association; price snapshot context is not an effective date, and media approval covers references only.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "community/person directory",
+     "author IDs",
+     "names inferred from prose",
+     "meeting access details",
+     "profile tokens",
+     "person coordinates",
+     "individual assessment records and scores",
+     "row geography borrowed between subjects"
+    ]
+   },
+   "source_id": "f2_icommunity"
+  },
+  "f2_learning_area_based": {
+   "originating_system": "LE Super PMUA area-based dashboard API",
+   "public_url": "https://lesuper.app/opendata/pmua/area-based",
+   "source_context_review": {
+    "rationale": "The audited public area-based listing supports business/unit labels, project names, research-unit names, fiscal years and business-owned administrative geography. It does not establish improvement or a person roster.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "person assessment links",
+     "individual scores",
+     "private contacts",
+     "unresolved person-like business labels",
+     "geography borrowed from projects or researchers"
+    ]
+   },
+   "source_id": "f2_learning_area_based"
+  },
+  "f2_learning_dashboard": {
+   "originating_system": "LE Super PMUA public aggregate dashboard",
+   "public_url": "https://lesuper.app/opendata/pmua/dashboard",
+   "source_context_review": {
+    "rationale": "Pinned public dashboard source supports aggregate employment/payment components and four independent business marginals only; no person or business roster is inferred. Public URL is taken from the canonical source catalog.",
+    "status": "aggregate_only_existing_scope"
+   },
+   "source_id": "f2_learning_dashboard"
+  },
+  "f2_target_household": {
+   "originating_system": "PMUA AppTech public innovation catalogue and dashboards",
+   "public_url": "https://pmua-apptech.com/",
+   "source_context_review": {
+    "rationale": "The active path is the public innovation catalogue. Work attribution is restricted to source fields attached to a listed innovation; the source name does not authorize household or person-level disclosure.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "household records",
+     "researcher directory profiles",
+     "private contacts",
+     "funding history",
+     "raw impact prose without field review",
+     "profile tokens"
+    ]
+   },
+   "source_id": "f2_target_household"
+  },
+  "f2_apptech_mru": {
+   "originating_system": "38RAT public innovation API",
+   "public_url": "https://38rat.nstru.ac.th/",
+   "source_context_review": {
+    "rationale": "The public innovation API and detail pages support innovation labels, reviewed sections, readiness and the audited inventor/researcher/rights-holder attribution fields attached to the work.",
+    "status": "measure_scoped_owner_field_approval",
+    "unsafe_or_unsupported": [
+     "auth and password-reset endpoints",
+     "account user IDs",
+     "raw HTML",
+     "private contacts",
+     "funding and economic claims",
+     "unparsed person text"
+    ]
+   },
+   "source_id": "f2_apptech_mru"
+  }
+ },
+ "limitations": [
+  "K12 includes every deduplicated map_inspiration subject, including named people and cultural knowledge holders. Reviewed possible duplicates retain separate provisional identities and their uncertainty. Names, aliases and informant matches do not exclude a K12 subject; private contacts, informant fields and sensitive personal details remain field-level exclusions.",
+  "K03 publications, dates, venues and sessions remain children of an occurrence and never add entities; source-reported occurrence does not prove completion.",
+  "Innovation readiness rows are source assertions, not individual development assessments and not claims of current verified readiness. Innovation geography uses only attached use locations.",
+  "Operator geography uses only operator-owned location rows. Offering geography is retained with the offering and is never borrowed by an operator.",
+  "K07 counts families. Every preserved offering, variant and range-evidence member remains a child; source-reported price does not prove a free, current or available offering.",
+  "C08_PARTICIPATING lists source-supported business units and their own participations, projects, research units and locations. Participation is not improvement; person assessment companions remain aggregate-only.",
+  "Text is plain-text excerpted and contact/access values are removed or the field is withheld. Links are HTTPS references constrained by source/host/path/query allowlists; no media availability or reuse rights are inferred."
+ ],
+ "topics": {
+  "k01a": {
+   "measure_ids": [
+    "K01A"
+   ],
+   "source_ids": [
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_learning_dashboard",
+    "f2_target_household"
+   ]
+  },
+  "k01b": {
+   "measure_ids": [
+    "K01B"
+   ],
+   "source_ids": [
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university"
+   ]
+  },
+  "k02": {
+   "measure_ids": [
+    "K02",
+    "C02_COMMUNITY"
+   ],
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_icommunity",
+    "f2_target_household"
+   ]
+  },
+  "k03": {
+   "measure_ids": [
+    "K03"
+   ],
+   "source_ids": [
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity"
+   ]
+  },
+  "k04": {
+   "measure_ids": [
+    "K04",
+    "C04_LISTED"
+   ],
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_icommunity",
+    "f2_target_household"
+   ]
+  },
+  "k05": {
+   "measure_ids": [
+    "K05"
+   ],
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_target_household"
+   ]
+  },
+  "k06": {
+   "measure_ids": [
+    "K06"
+   ],
+   "source_ids": []
+  },
+  "k07": {
+   "measure_ids": [
+    "K07"
+   ],
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_target_household"
+   ]
+  },
+  "k08": {
+   "measure_ids": [
+    "K08",
+    "C08_PARTICIPATING",
+    "C08_REPORTED_BUSINESSES",
+    "C08_ASSESSED_PEOPLE",
+    "C08_INCREASED_PEOPLE"
+   ],
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_learning_dashboard"
+   ]
+  },
+  "k09": {
+   "measure_ids": [
+    "K09"
+   ],
+   "source_ids": [
+    "f2_learning_dashboard"
+   ]
+  },
+  "k10": {
+   "measure_ids": [
+    "K10",
+    "C10_ALTERNATIVE"
+   ],
+   "source_ids": [
+    "f2_learning_dashboard"
+   ]
+  },
+  "k11a": {
+   "measure_ids": [
+    "K11A"
+   ],
+   "source_ids": []
+  },
+  "k11b": {
+   "measure_ids": [
+    "K11B"
+   ],
+   "source_ids": []
+  },
+  "k12": {
+   "measure_ids": [
+    "K12"
+   ],
+   "source_ids": [
+    "f2_culturalmap_university"
+   ]
+  }
+ },
+ "measures": {
+  "K01A": {
+   "topic_id": "k01a",
+   "parent_measure_id": null,
+   "display_order": 1,
+   "label_th": "จังหวัดที่มีหลักฐานกิจกรรมหรือความครอบคลุมโครงการ",
+   "formula": "COUNT DISTINCT province_code with qualifying programme coverage evidence",
+   "scope": "Qualifying programme activity, area, product, participation and innovation-use evidence across supplied sources",
+   "limitations": "Provinces with some programme evidence do not establish complete data for every KPI in every province. Institution-only addresses do not qualify.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "province",
+   "detail_availability": "not_applicable",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_learning_dashboard",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k01a_coverage",
+     "kind": "coverage_by_province",
+     "title_th": "หลักฐานความครอบคลุมโครงการรายจังหวัด"
+    }
+   ]
+  },
+  "K01B": {
+   "topic_id": "k01b",
+   "parent_measure_id": null,
+   "display_order": 2,
+   "label_th": "พื้นที่วัฒนธรรมตามทะเบียนที่ใช้ในชุดส่งมอบ",
+   "formula": "COUNT DISTINCT cultural area: AtLocal programme areas and Cultural Map cultural spaces; an area found in both counts once",
+   "scope": "AtLocal areas and Cultural Map Cultural Space subjects",
+   "limitations": "Other mapped categories are not automatically cultural areas. Unresolved possible identities remain separately provisional.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "area",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k01b",
+     "kind": "entity_index",
+     "title_th": "พื้นที่วัฒนธรรม"
+    }
+   ]
+  },
+  "K02": {
+   "topic_id": "k02",
+   "parent_measure_id": null,
+   "display_order": 3,
+   "label_th": "นวัตกรตามยอดรวมที่ PMUA รายงาน",
+   "formula": "SUM PMUA innovators_all province total_inno; reconcile to reported headline",
+   "scope": "PMUA all-scope captured aggregate, without a year filter",
+   "limitations": "The source reports innovators by province group; a group without a province counts only in the national total. A province the source does not report returns unavailable, not zero. Named-person companions cannot explain or be subtracted from this total. Levels retain source labels without inferred skill meaning.",
+   "map_legend_th": null,
+   "status": "source_aggregate",
+   "unit": "person",
+   "detail_availability": "not_applicable",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province",
+    "source_level"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ],
+    [
+     "source_level"
+    ],
+    [
+     "province",
+     "source_level"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k02",
+     "kind": "aggregate_breakdown",
+     "title_th": "ยอดรวมนวัตกรที่แหล่งข้อมูลรายงาน"
+    }
+   ]
+  },
+  "C02_COMMUNITY": {
+   "topic_id": "k02",
+   "parent_measure_id": "K02",
+   "display_order": 15,
+   "label_th": "บุคคลที่มีหลักฐานนวัตกรชุมชนในทะเบียน",
+   "formula": "COUNT DISTINCT global_person_id with a community_innovator or inventor contribution; province scope uses accepted source-reported innovator province memberships",
+   "scope": "Accepted named community-scoped innovators and inventors nationally, with optional province scope from person-attached source-reported innovator location evidence",
+   "limitations": "Province is the canonical province explicitly attached by the source to the innovator record; it is not residence or current workplace. People without admitted province evidence remain in the national total. Multiple province memberships may overlap and province counts are not additive. Researcher or owner alone does not qualify. Never add to or subtract from K02.",
+   "map_legend_th": "สีแสดงจำนวนบุคคลไม่ซ้ำที่มีจังหวัดต้นทางที่ยอมรับแล้วในแต่ละจังหวัด สีเข้มหมายถึงจำนวนมากกว่า สีอ่อนหมายถึงจำนวนน้อยกว่า และสีเทาหมายถึงไม่มีค่าที่รองรับ",
+   "status": "partial_coverage",
+   "unit": "person",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_icommunity",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "c02_community",
+     "kind": "entity_index",
+     "title_th": "ประชากรนวัตกรชุมชนที่เกี่ยวข้อง"
+    }
+   ]
+  },
+  "K03": {
+   "topic_id": "k03",
+   "parent_measure_id": null,
+   "display_order": 4,
+   "label_th": "กิจกรรมโครงการที่มีรายงาน",
+   "formula": "COUNT DISTINCT global_activity_id in accepted reported activities",
+   "scope": "AtLocal, Cultural Map and iCommunity reported occurrences, including workshops and meetings",
+   "limitations": "Publications and sessions are not additional activities. Source-reported occurrence does not prove completion. Overseas activities remain in the overall total.",
+   "map_legend_th": null,
+   "status": "substitute_measure",
+   "unit": "activity",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k03",
+     "kind": "entity_index",
+     "title_th": "กิจกรรมโครงการ"
+    }
+   ]
+  },
+  "K04": {
+   "topic_id": "k04",
+   "parent_measure_id": null,
+   "display_order": 5,
+   "label_th": "นวัตกรรมที่มีหลักฐานความพร้อมตามเกณฑ์",
+   "formula": "COUNT DISTINCT global_innovation_id with at least one eligible readiness assessment",
+   "scope": "iCommunity, PMUA AppTech, RINMP and AppTech MRU after accepted identity resolution",
+   "limitations": "Counts an innovation when at least one of its source records states a numeric technology readiness level (TRL) of 8 or 9; a readiness label without a number does not count. For iCommunity the level in the export is used. Records that disagree are kept as stated; this is not a verified current level.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "innovation",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_icommunity",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k04",
+     "kind": "entity_index",
+     "title_th": "นวัตกรรมที่มีหลักฐานความพร้อม"
+    }
+   ]
+  },
+  "C04_LISTED": {
+   "topic_id": "k04",
+   "parent_measure_id": "K04",
+   "display_order": 16,
+   "label_th": "นวัตกรรมที่มีรายการทั้งหมด",
+   "formula": "COUNT DISTINCT global_innovation_id in broader listed inventory",
+   "scope": "Four innovation sources after accepted identity resolution",
+   "limitations": "Includes K04. Records without qualifying readiness may have missing evidence rather than proven unreadiness.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "innovation",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_icommunity",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "c04_listed",
+     "kind": "entity_index",
+     "title_th": "นวัตกรรมที่มีรายการในแหล่งข้อมูล"
+    }
+   ]
+  },
+  "K05": {
+   "topic_id": "k05",
+   "parent_measure_id": null,
+   "display_order": 6,
+   "label_th": "ผู้ประกอบการและหน่วยธุรกิจวัฒนธรรมที่มีหลักฐานรองรับ",
+   "formula": "COUNT DISTINCT global_operator_id after source-contract cultural-business admission and accepted identity reconciliation",
+   "scope": "Accepted catalogue businesses plus all source-declared Learning area-based cultural business units and reviewed Cultural Map/AtLocal/iCommunity/PMUA/RINMP/MRU business evidence; seven sources contribute",
+   "limitations": "Partial coverage across seven reviewed sources, not a complete cultural-business population. All valid Learning area-based business IDs are eligible by source contract; ambiguous or missing labels remain provisional and do not remove eligibility. Identities are reconciled before counting, so C08 participation is not additive to K05. Unknown business geography is not borrowed from products or projects.",
+   "map_legend_th": null,
+   "status": "partial_coverage",
+   "unit": "operator",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_learning_area_based",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k05",
+     "kind": "entity_index",
+     "title_th": "ธุรกิจ ร้านค้า และกลุ่มผู้ดำเนินการ"
+    }
+   ]
+  },
+  "K06": {
+   "topic_id": "k06",
+   "parent_measure_id": null,
+   "display_order": 7,
+   "label_th": "ผู้ประกอบการวัฒนธรรม — ยังไม่คำนวณในชุดส่งมอบนี้",
+   "formula": "Not calculated in this release",
+   "scope": "Future systematic person-role-business discovery and qualification",
+   "limitations": "The original 58-person inventory reflects uneven, incomplete discovery. User deferred calculation entirely. Neither 58 nor the 156-person pilot is a released result; absence of a total does not mean absence of supporting examples.",
+   "map_legend_th": null,
+   "status": "deferred",
+   "unit": "person",
+   "detail_availability": "not_applicable",
+   "map_availability": "unavailable",
+   "source_ids": [],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "k06",
+     "kind": "methodology",
+     "title_th": "วิธีการและข้อจำกัด"
+    }
+   ],
+   "unavailable_reason": {
+    "code": "deferred",
+    "message_th": "The original 58-person inventory reflects uneven, incomplete discovery. User deferred calculation entirely. Neither 58 nor the 156-person pilot is a released result; absence of a total does not mean absence of supporting examples."
+   }
+  },
+  "K07": {
+   "topic_id": "k07",
+   "parent_measure_id": null,
+   "display_order": 8,
+   "label_th": "ตระกูลสินค้า บริการ และผลงานที่มีหลักฐานรองรับ",
+   "formula": "COUNT DISTINCT family_id; ordinary variants within a supported maker context share one family; a broad range adds no extra parent count",
+   "scope": "Accepted catalogue offerings plus reviewed actual outputs, prototypes, completed designs and systems from AtLocal, Cultural Map, iCommunity, PMUA, RINMP and AppTech MRU; Learning directory-only product claims excluded",
+   "limitations": "Partial reviewed coverage. Existence or sale does not prove programme development. Ordinary flavour/filling/colour/size variants count once per supported family; distinct finished forms and confirmed designs remain separate. Global offering row count is not the KPI. Unenumerated totals are non-additive. Known unresolved identity and geography limitations remain visible.",
+   "map_legend_th": null,
+   "status": "substitute_partial_coverage",
+   "unit": "offering_family",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_apptech_mtr",
+    "f2_cultural_market_civil",
+    "f2_culturalmap_university",
+    "f2_icommunity",
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k07",
+     "kind": "entity_index",
+     "title_th": "ตระกูลสินค้า บริการ และผลงาน"
+    }
+   ]
+  },
+  "K08": {
+   "topic_id": "k08",
+   "parent_measure_id": null,
+   "display_order": 9,
+   "label_th": "ธุรกิจชุมชนที่พัฒนาขีดความสามารถ — ยังไม่คำนวณในชุดส่งมอบนี้",
+   "formula": "Not calculated; accepted narrower score-linked business measure also deferred",
+   "scope": "Future business/group identity linked to an affiliated person's complete positive assessment in relevant context",
+   "limitations": "Participating units do not prove improvement. People with increased scores are not businesses. Person-business membership and business deduplication are not finalized; qualitative improvement cannot replace numeric score evidence.",
+   "map_legend_th": null,
+   "status": "deferred",
+   "unit": "business",
+   "detail_availability": "not_applicable",
+   "map_availability": "unavailable",
+   "source_ids": [],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "k08",
+     "kind": "methodology",
+     "title_th": "วิธีการและข้อจำกัด"
+    }
+   ],
+   "unavailable_reason": {
+    "code": "deferred",
+    "message_th": "Participating units do not prove improvement. People with increased scores are not businesses. Person-business membership and business deduplication are not finalized; qualitative improvement cannot replace numeric score evidence."
+   }
+  },
+  "C08_PARTICIPATING": {
+   "topic_id": "k08",
+   "parent_measure_id": "K08",
+   "display_order": 17,
+   "label_th": "ธุรกิจหรือหน่วยธุรกิจที่มีหลักฐานเข้าร่วมโครงการ",
+   "formula": "COUNT DISTINCT contributing Learning area-based business_id",
+   "scope": "Learning area-based participating-business directory",
+   "limitations": "Directory businesses, with reviewed duplicates merged. Participation is not improvement. Not an established parent population of person assessments or the reported business total.",
+   "map_legend_th": null,
+   "status": "provisional_identity_count",
+   "unit": "participating_business_unit",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_learning_area_based"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "c08_participating",
+     "kind": "entity_index",
+     "title_th": "ธุรกิจที่เข้าร่วม"
+    }
+   ]
+  },
+  "C08_REPORTED_BUSINESSES": {
+   "topic_id": "k08",
+   "parent_measure_id": "K08",
+   "display_order": 18,
+   "label_th": "ธุรกิจตามยอดรวม Learning dashboard",
+   "formula": "SUM counts within each independent dimension; each reconciles to the reported total",
+   "scope": "Learning dashboard four independent marginal breakdowns",
+   "limitations": "No business roster or joint cross-tab. Never sum dimensions or add to the participating-business count. A missing member is unavailable unless the source explicitly reports zero.",
+   "map_legend_th": null,
+   "status": "source_aggregate",
+   "unit": "business",
+   "detail_availability": "not_applicable",
+   "map_availability": "unavailable",
+   "source_ids": [
+    "f2_learning_dashboard"
+   ],
+   "supported_filters": [
+    "source_dimension"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "source_dimension"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "c08_reported_businesses",
+     "kind": "aggregate_breakdown",
+     "title_th": "ยอดรวมธุรกิจที่แหล่งข้อมูลรายงาน"
+    }
+   ]
+  },
+  "C08_ASSESSED_PEOPLE": {
+   "topic_id": "k08",
+   "parent_measure_id": "K08",
+   "display_order": 19,
+   "label_th": "บุคคลที่มีชุดคะแนนก่อนและหลังครบ",
+   "formula": "COUNT DISTINCT global person linked to a complete iCommunity assessment",
+   "scope": "Complete source-reported assessments, with within-assessment score pairs",
+   "limitations": "Multiple assessments per person do not add people. Undated source assessments are not a verified latest score.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "person",
+   "detail_availability": "internal_only",
+   "map_availability": "unavailable",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_icommunity"
+   ],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "c08_assessed_people",
+     "kind": "related_population",
+     "title_th": "ผู้ได้รับการประเมิน"
+    }
+   ]
+  },
+  "C08_INCREASED_PEOPLE": {
+   "topic_id": "k08",
+   "parent_measure_id": "K08",
+   "display_order": 20,
+   "label_th": "บุคคลที่รายงานคะแนนเพิ่มขึ้นอย่างน้อยหนึ่งด้าน",
+   "formula": "COUNT DISTINCT global person with at least one complete assessment having any dimension delta > 0",
+   "scope": "iCommunity complete assessment pairs",
+   "limitations": "Subset of C08_ASSESSED_PEOPLE, not businesses. Mixed increases/decreases remain visible. Missing assessments do not imply no improvement.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "person",
+   "detail_availability": "internal_only",
+   "map_availability": "unavailable",
+   "source_ids": [
+    "f2_apptech_mru",
+    "f2_icommunity"
+   ],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "c08_increased_people",
+     "kind": "related_population",
+     "title_th": "ผู้ที่คะแนนเพิ่มขึ้น"
+    }
+   ]
+  },
+  "K09": {
+   "topic_id": "k09",
+   "parent_measure_id": null,
+   "display_order": 10,
+   "label_th": "การจ้างงานในพื้นที่ตามที่แหล่งข้อมูลรายงาน",
+   "formula": "SUM six regional localEmployeeAmount values",
+   "scope": "Learning dashboard employment aggregate",
+   "limitations": "Employment count, not an income amount. No employee/business roster or province allocation. Monthly source unit does not identify the observation calendar month.",
+   "map_legend_th": null,
+   "status": "source_aggregate",
+   "unit": "person_per_month",
+   "detail_availability": "not_applicable",
+   "map_availability": "source_region_only",
+   "source_ids": [
+    "f2_learning_dashboard"
+   ],
+   "supported_filters": [
+    "source_region"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "source_region"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k09",
+     "kind": "aggregate_breakdown",
+     "title_th": "การจ้างงานที่แหล่งข้อมูลรายงาน"
+    }
+   ]
+  },
+  "K10": {
+   "topic_id": "k10",
+   "parent_measure_id": null,
+   "display_order": 11,
+   "label_th": "เงินที่รายงานว่าจ่ายแก่แรงงานและผู้จัดหาทรัพยากรในพื้นที่",
+   "formula": "(SUM localEmployeeExpense + SUM localResourceExpense) / 1000000",
+   "scope": "Learning dashboard regional worker payments and resource spending",
+   "limitations": "Assumes additive local receipts without overlap and compatible monthly periods. Not verified net income. The display is rounded to one decimal; the exact value is kept. Do not add the alternative or Wallet totals.",
+   "map_legend_th": null,
+   "status": "assumed_aggregate",
+   "unit": "million_THB_per_month",
+   "detail_availability": "not_applicable",
+   "map_availability": "source_region_only",
+   "source_ids": [
+    "f2_learning_dashboard"
+   ],
+   "supported_filters": [
+    "source_region",
+    "component"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "source_region"
+    ],
+    [
+     "component"
+    ],
+    [
+     "source_region",
+     "component"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k10",
+     "kind": "aggregate_breakdown",
+     "title_th": "รายจ่ายในพื้นที่ที่แหล่งข้อมูลรายงาน"
+    }
+   ]
+  },
+  "C10_ALTERNATIVE": {
+   "topic_id": "k10",
+   "parent_measure_id": "K10",
+   "display_order": 21,
+   "label_th": "สูตรทางเลือกเพื่ออธิบายตัวเลขรายได้เดิม",
+   "formula": "(SUM localResourceExpense + SUM excludedResourceExpense) / 1000000",
+   "scope": "Learning dashboard resource spending and separate excluded-resource amount",
+   "limitations": "The display is rounded to one decimal; the exact value is kept. Excluded amount meaning and monthly-period compatibility remain assumptions. Matching the old display is not verification. Never add this alternative to K10.",
+   "map_legend_th": null,
+   "status": "assumed_historical_reconstruction",
+   "unit": "million_THB_per_month",
+   "detail_availability": "not_applicable",
+   "map_availability": "source_region_only",
+   "source_ids": [
+    "f2_learning_dashboard"
+   ],
+   "supported_filters": [
+    "source_region",
+    "component"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "source_region"
+    ],
+    [
+     "component"
+    ],
+    [
+     "source_region",
+     "component"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "c10_alternative",
+     "kind": "aggregate_breakdown",
+     "title_th": "รายจ่ายทรัพยากรทางเลือก"
+    }
+   ]
+  },
+  "K11A": {
+   "topic_id": "k11a",
+   "parent_measure_id": null,
+   "display_order": 12,
+   "label_th": "คลัสเทอร์อุตสาหกรรม — ไม่มีข้อมูลเพียงพอ",
+   "formula": "Unavailable; no supported cluster inventory",
+   "scope": "Supplied snapshots",
+   "limitations": "Industry category labels do not establish distinct cluster identities. Null is not zero.",
+   "map_legend_th": null,
+   "status": "insufficient_data",
+   "unit": "cluster",
+   "detail_availability": "not_applicable",
+   "map_availability": "unavailable",
+   "source_ids": [],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "k11a",
+     "kind": "methodology",
+     "title_th": "วิธีการและข้อจำกัด"
+    }
+   ],
+   "unavailable_reason": {
+    "code": "insufficient_data",
+    "message_th": "Industry category labels do not establish distinct cluster identities. Null is not zero."
+   }
+  },
+  "K11B": {
+   "topic_id": "k11b",
+   "parent_measure_id": null,
+   "display_order": 13,
+   "label_th": "จังหวัดที่มีคลัสเทอร์ — ไม่มีข้อมูลเพียงพอ",
+   "formula": "Unavailable; no supported cluster-province relationships",
+   "scope": "Supplied snapshots",
+   "limitations": "General programme provinces cannot substitute for cluster geography. Null is not zero.",
+   "map_legend_th": null,
+   "status": "insufficient_data",
+   "unit": "province",
+   "detail_availability": "not_applicable",
+   "map_availability": "unavailable",
+   "source_ids": [],
+   "supported_filters": [],
+   "permitted_combinations": [
+    []
+   ],
+   "sections": [
+    {
+     "section_id": "k11b",
+     "kind": "methodology",
+     "title_th": "วิธีการและข้อจำกัด"
+    }
+   ],
+   "unavailable_reason": {
+    "code": "insufficient_data",
+    "message_th": "General programme provinces cannot substitute for cluster geography. Null is not zero."
+   }
+  },
+  "K12": {
+   "topic_id": "k12",
+   "parent_measure_id": null,
+   "display_order": 14,
+   "label_th": "รายการทุนหรือเรื่องทางวัฒนธรรมในแผนที่หลังขจัดรายการซ้ำ",
+   "formula": "COUNT DISTINCT eligible Cultural Map map_inspiration subject_id",
+   "scope": "All map_inspiration categories after accepted source deduplication",
+   "limitations": "Counts mapped subjects, not information systems or websites. Multiple category memberships do not add subjects. Other sources do not expand this user-defined population.",
+   "map_legend_th": null,
+   "status": "available_snapshot",
+   "unit": "mapped_subject",
+   "detail_availability": "available",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_culturalmap_university"
+   ],
+   "supported_filters": [
+    "province",
+    "category"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ],
+    [
+     "category"
+    ],
+    [
+     "province",
+     "category"
+    ]
+   ],
+   "sections": [
+    {
+     "section_id": "k12",
+     "kind": "entity_index",
+     "title_th": "รายการข้อมูลวัฒนธรรม"
+    }
+   ]
+  }
+ },
+ "labels": {
+  "source_level": {
+   "1": "ระดับที่แหล่งข้อมูลระบุ 1",
+   "2": "ระดับที่แหล่งข้อมูลระบุ 2",
+   "3": "ระดับที่แหล่งข้อมูลระบุ 3",
+   "4": "ระดับที่แหล่งข้อมูลระบุ 4"
+  },
+  "component": {
+   "excludedResourceExpense": "ค่าทรัพยากรทางเลือกที่ไม่นับในผลหลัก",
+   "localResourceExpense": "ค่าทรัพยากรในพื้นที่",
+   "localEmployeeExpense": "ค่าจ้างแรงงานในพื้นที่"
+  },
+  "source_dimension": {
+   "categories": "หมวดหมู่ธุรกิจ",
+   "entityTypes": "ประเภทหน่วยข้อมูล",
+   "geography": "ภูมิภาคตามแหล่งข้อมูล",
+   "provinces": "จังหวัดตามแหล่งข้อมูล"
+  },
+  "category": {
+   "AA": "โบราณวัตถุ",
+   "AA1": "AA1",
+   "AA3": "AA3",
+   "AA5": "AA5",
+   "AA6": "AA6",
+   "AA7": "AA7",
+   "AR": "สถาปัตยกรรม",
+   "AR1": "AR1",
+   "AR2": "AR2",
+   "AR3": "AR3",
+   "AR4": "AR4",
+   "AR5": "AR5",
+   "AR6": "AR6",
+   "AS": "โบราณสถาน",
+   "AS1": "AS1",
+   "AS11": "AS11",
+   "AS2": "AS2",
+   "AS3": "AS3",
+   "AS4": "AS4",
+   "AS5": "AS5",
+   "AS6": "AS6",
+   "AS7": "AS7",
+   "AS8": "AS8",
+   "AS9": "AS9",
+   "ASA1": "ASA1",
+   "ASA2": "ASA2",
+   "CS": "พื้นที่วัฒนธรรม",
+   "CS1": "CS1",
+   "CS2": "CS2",
+   "EL": "ภาษา",
+   "EL2": "EL2",
+   "EL3": "EL3",
+   "FL": "วรรณกรรมพื้นบ้าน",
+   "FL1": "FL1",
+   "FL2": "FL2",
+   "FL3": "FL3",
+   "FL4": "FL4",
+   "FL5": "FL5",
+   "FL7": "FL7",
+   "KP": "ความรู้และแนวปฏิบัติเกี่ยวกับธรรมชาติและจักรวาล",
+   "KP1": "KP1",
+   "KP2": "KP2",
+   "KP3": "KP3",
+   "KP4": "KP4",
+   "KP5": "KP5",
+   "PA": "ศิลปะการแสดง",
+   "PA1": "PA1",
+   "PA2": "PA2",
+   "SM": "กีฬาภูมิปัญญาไทย",
+   "SM1": "SM1",
+   "SM2": "SM2",
+   "SM3": "SM3",
+   "SP": "แนวปฏิบัติทางสังคม พิธีกรรม และงานเทศกาล",
+   "SP1": "SP1",
+   "SP2": "SP2",
+   "SP3": "SP3",
+   "SP4": "SP4",
+   "SP5": "SP5",
+   "TC": "งานช่างฝีมือดั้งเดิม",
+   "TC1": "TC1",
+   "TC2": "TC2",
+   "TC3": "TC3",
+   "TC4": "TC4",
+   "TC5": "TC5",
+   "TC6": "TC6",
+   "TC7": "TC7",
+   "TC8": "TC8",
+   "TC9": "TC9",
+   "TCA1": "TCA1"
+  }
+ },
+ "source_regions": {
+  "ภาคกลาง": "source_region_2cdd879e0dd0dbc16c9c",
+  "ภาคเหนือ": "source_region_4958d044013e86eaef2f",
+  "ภาคตะวันออก": "source_region_5ab25d5da638deb0348e",
+  "ภาคตะวันออกเฉียงเหนือ": "source_region_bbc580bafcbe631c73ad",
+  "ภาคตะวันตก": "source_region_bbfef8fd98c01635bd46",
+  "ภาคใต้": "source_region_de8fec2da83e9b0857a4"
+ },
+ "geography": {
+  "coverage_note": "Source regions are independent source categories and are not mapped to dashboard regions or provinces.",
+  "source_region_scheme": {
+   "dashboard_region_mapping": null,
+   "label_th": "ภูมิภาคตามที่แหล่งข้อมูลรายงาน",
+   "mapping_status": "not_defined",
+   "scheme_id": "f2_learning_dashboard_source_regions_v1"
+  }
+ },
+ "reviewed_labels": {
+  "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them. Each is bound to the reviewed text (label_sha256): a changed label goes through the normal check until it is reviewed again.",
+  "labels": [
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1601",
+    "context": "public_location",
+    "label_sha256": "a0d11b148ca19b1b"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1599",
+    "context": "public_location",
+    "label_sha256": "281570be1359bfe1"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-2073",
+    "context": "public_location",
+    "label_sha256": "f3e60ae4a41c2b20"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1911",
+    "context": "public_location",
+    "label_sha256": "58762e064c2177e6"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1642",
+    "context": "public_location",
+    "label_sha256": "d14d7d4e1c4213f3"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1645",
+    "context": "public_location",
+    "label_sha256": "832a291502aa9272"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1640",
+    "context": "public_location",
+    "label_sha256": "55ec95a7f8423cfe"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-1913",
+    "context": "public_location",
+    "label_sha256": "f61031d35effd831"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-5800",
+    "context": "public_location",
+    "label_sha256": "48f143fa524e711c"
+   },
+   {
+    "source": "cultural_map",
+    "record_id": "CD-473",
+    "context": "public_location",
+    "label_sha256": "d53822a7d9c459a5"
+   },
+   {
+    "source": "icommunity",
+    "record_id": "2:NzUycG9pdXl0cmVlZGZnaGprbGtqaGdmZHJ0eWlva21uYnZjeHN3ZXJmZHZnaHl1aWs=",
+    "context": "public_contact",
+    "label_sha256": "1735f563d0e0a417"
+   }
+  ]
+ }
+}

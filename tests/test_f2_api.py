@@ -5,7 +5,7 @@ import json
 from fastapi.testclient import TestClient
 
 from app.database import SessionLocal
-from app.f2_data import f2_cache_stats, reset_f2_cache
+from app.f2_data import F2_ROOT, f2_cache_stats, reset_f2_cache
 from app.main import app
 from app.models import PublicArtifact
 
@@ -18,6 +18,25 @@ def _measure(overview: dict, measure_id: str) -> dict:
             if companion["measure_id"] == measure_id:
                 return companion
     raise AssertionError(f"missing measure {measure_id}")
+
+
+# The API is checked against the published files rather than against numbers typed in here, so a new
+# release does not need test edits; whether the numbers themselves are right is the publish sign-off's job.
+def _published(relative_path: str) -> dict:
+    return json.loads((F2_ROOT / relative_path).read_text(encoding="utf-8"))
+
+
+def _published_value(topic_id: str, measure_id: str, scope: str = "national"):
+    return _published(f"topics/{topic_id}.json")["scopes"][scope]["results"][measure_id]["value"]
+
+
+def _published_detail_id(topic_id: str, matches) -> str:
+    """The first published detail of a topic that `matches`, for checks that need a specific kind of record."""
+    for path in sorted((F2_ROOT / "details").glob(f"{topic_id}-*.json")):
+        for entity_id, detail in _published(f"details/{path.name}")["details_by_id"].items():
+            if matches(detail):
+                return entity_id
+    raise AssertionError(f"no published {topic_id} detail of the kind this check needs; pick another check")
 
 
 def test_f2_name_sort_precedes_pagination_and_preserves_counts():
@@ -83,7 +102,8 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             assert measure["unit"] == expected_unit
             assert measure["result"]["unit"] == expected_unit
         assert "C02_BROADER" not in expected_units
-        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == 4640
+        c02_total = _published_value("k02", "C02_COMMUNITY")
+        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == c02_total
         assert len(overview_response.content) <= 256 * 1024
         assert overview["revision"] != overview["release_id"]
         assert len(overview["revision"]) == 64
@@ -117,39 +137,47 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert c02_map_response.status_code == 200
         c02_map = c02_map_response.json()
         assert len(c02_map["cells"]) == 77
-        c02_values = [cell["result"]["value"] for cell in c02_map["cells"]]
-        assert sum(value > 0 for value in c02_values) == 37
-        assert sum(value == 0 for value in c02_values) == 40
-        assert sum(c02_values) == 4418
-        assert max(c02_values) == 490
-        assert c02_map["coverage"] == {
-            "national_total": 4640,
-            "province_sum_is_additive": False,
-            "selected_count": 4640,
-            "with_province": 4415,
-            "without_province": 225,
+        assert {cell["province_code"]: cell["result"]["value"] for cell in c02_map["cells"]} == {
+            cell["province_code"]: _published_value("k02", "C02_COMMUNITY", f"province/{cell['province_code']}")
+            for cell in c02_map["cells"]
         }
+        c02_values = [cell["result"]["value"] for cell in c02_map["cells"]]
+        assert all(isinstance(value, int) and value >= 0 for value in c02_values)
+        coverage = c02_map["coverage"]
+        assert coverage == _published("topics/k02.json")["scopes"]["national"]["coverage"]["C02_COMMUNITY"]
+        assert coverage["province_sum_is_additive"] is False
+        assert coverage["national_total"] == coverage["selected_count"] == c02_total
+        assert coverage["with_province"] + coverage["without_province"] == c02_total
+        # a person can be counted in several provinces, so the cells add up to at least the people placed
+        assert max(c02_values) <= coverage["with_province"] <= sum(c02_values)
         assert "บุคคลไม่ซ้ำ" in c02_map["legend"]["meaning_th"]
 
         list_response = client.get("/api/public/v1/f2/topics/k12?measure=K12&limit=25")
         assert list_response.status_code == 200
         topic_page = list_response.json()
-        assert topic_page["result"]["value"] == 5141
-        assert topic_page["list"]["scoped_item_count"] == 5141
-        assert topic_page["list"]["matching_item_count"] == 5141
+        k12 = _published("topics/k12.json")
+        k12_total = k12["scopes"]["national"]["results"]["K12"]["value"]
+        assert k12_total == len(k12["item_ids_by_measure_and_scope"]["K12"]["national"])
+        assert topic_page["result"]["value"] == k12_total
+        assert topic_page["list"]["scoped_item_count"] == k12_total
+        assert topic_page["list"]["matching_item_count"] == k12_total
         assert topic_page["list"]["returned_count"] == 25
         assert len(list_response.content) <= 256 * 1024
         assert topic_page["result"]["unit"] == "รายการ"
 
         first_item = topic_page["list"]["items"][0]
-        assert first_item["province_names_th"] == ["สงขลา"]
+        provinces = _published("geography.json")["provinces"]
+        assert first_item["province_names_th"] == [
+            provinces[code]["province_name_th"]
+            for code in k12["items_by_id"][first_item["entity_id"]]["province_codes"]
+        ]
         query = first_item["label"][:4]
         searched = client.get(
             "/api/public/v1/f2/topics/k12",
             params={"measure": "K12", "q": query, "limit": 25},
         ).json()
         assert searched["result"] == topic_page["result"]
-        assert searched["list"]["matching_item_count"] <= 5141
+        assert searched["list"]["matching_item_count"] <= k12_total
         assert all(
             query.casefold() in item["label"].casefold()
             for item in searched["list"]["items"]
@@ -193,12 +221,16 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
 
         k04 = client.get("/api/public/v1/f2/topics/k04?measure=K04").json()
         c04 = client.get("/api/public/v1/f2/topics/k04?measure=C04_LISTED").json()
-        assert k04["result"]["value"] == 514
-        assert c04["result"]["value"] == 2399
+        assert k04["result"]["value"] == _published_value("k04", "K04")
+        assert c04["result"]["value"] == _published_value("k04", "C04_LISTED")
 
         source_regions = client.get("/api/public/v1/f2/topics/k09?measure=K09")
         assert source_regions.status_code == 200
-        assert len(source_regions.json()["source_region_results"]) == 6
+        k09_regions = _published("topics/k09.json")["scopes"]["national"]["prepared_filters"]["K09"]["choices"]["source_region"]
+        assert [row["source_region_id"] for row in source_regions.json()["source_region_results"]] == [
+            choice["id"] for choice in k09_regions
+        ]
+        assert source_regions.json()["source_region_results"]
         assert all(
             row["result"]["scope_key"].startswith("source_region/")
             for row in source_regions.json()["source_region_results"]
@@ -214,28 +246,38 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         )
         assert business_breakdown.status_code == 200
         breakdown = business_breakdown.json()["source_dimension_breakdown"]
+        reported_businesses = business_breakdown.json()["result"]["value"]
         assert breakdown["label_th"] == "หมวดหมู่ธุรกิจ"
-        assert sum(int(row["display_value"]) for row in breakdown["rows"]) == 375
+        assert sum(int(row["display_value"]) for row in breakdown["rows"]) == reported_businesses
         assert {row["unit"] for row in breakdown["rows"]} == {"ธุรกิจชุมชน"}
         assert all(set(row) == {"label_th", "display_value", "unit"} for row in breakdown["rows"])
         region_breakdown = client.get(
             "/api/public/v1/f2/topics/k08",
             params={"measure": "C08_REPORTED_BUSINESSES", "source_dimension": "geography"},
         ).json()["source_dimension_breakdown"]
+        published_regions = _published("topics/k08.json")["scopes"]["national"]["prepared_filters"][
+            "C08_REPORTED_BUSINESSES"]["selections"]["source_dimension/geography"]["breakdowns"]
         assert region_breakdown["label_th"] == "ภูมิภาคตามแหล่งข้อมูล"
-        assert len(region_breakdown["rows"]) == 6
-        assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == 375
+        assert [row["label_th"] for row in region_breakdown["rows"]] == [row["label"] for row in published_regions]
+        # every C08 breakdown shares one total (Measure stops otherwise)
+        assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == reported_businesses
 
+        zero_price_id = _published_detail_id(
+            "k07", lambda detail: "price unspecified/source reports 0" in json.dumps(detail, ensure_ascii=False)
+        )
         zero_price = client.get(
-            "/api/public/v1/f2/topics/k07/details/offering_family_002dfbc09f8c360f3395?measure=K07"
+            f"/api/public/v1/f2/topics/k07/details/{zero_price_id}?measure=K07"
         )
         assert zero_price.status_code == 200
         assert "price unspecified/source reports 0" in json.dumps(
             zero_price.json()["detail"], ensure_ascii=False
         )
 
+        withheld_id = _published_detail_id(
+            "k12", lambda detail: detail.get("label") == "Title withheld pending review"
+        )
         withheld = client.get(
-            "/api/public/v1/f2/topics/k12/details/cultural_map_subject_c8aca030751e9a4d6c32?measure=K12"
+            f"/api/public/v1/f2/topics/k12/details/{withheld_id}?measure=K12"
         )
         assert withheld.status_code == 200
         assert withheld.json()["detail"]["label"] == "Title withheld pending review"
