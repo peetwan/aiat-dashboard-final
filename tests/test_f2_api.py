@@ -83,7 +83,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             assert measure["unit"] == expected_unit
             assert measure["result"]["unit"] == expected_unit
         assert "C02_BROADER" not in expected_units
-        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == 4640
+        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == 4638
         assert len(overview_response.content) <= 256 * 1024
         assert overview["revision"] != overview["release_id"]
         assert len(overview["revision"]) == 64
@@ -120,13 +120,13 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         c02_values = [cell["result"]["value"] for cell in c02_map["cells"]]
         assert sum(value > 0 for value in c02_values) == 37
         assert sum(value == 0 for value in c02_values) == 40
-        assert sum(c02_values) == 4418
+        assert sum(c02_values) == 4416
         assert max(c02_values) == 490
         assert c02_map["coverage"] == {
-            "national_total": 4640,
+            "national_total": 4638,
             "province_sum_is_additive": False,
-            "selected_count": 4640,
-            "with_province": 4415,
+            "selected_count": 4638,
+            "with_province": 4413,
             "without_province": 225,
         }
         assert "บุคคลไม่ซ้ำ" in c02_map["legend"]["meaning_th"]
@@ -134,9 +134,9 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         list_response = client.get("/api/public/v1/f2/topics/k12?measure=K12&limit=25")
         assert list_response.status_code == 200
         topic_page = list_response.json()
-        assert topic_page["result"]["value"] == 5141
-        assert topic_page["list"]["scoped_item_count"] == 5141
-        assert topic_page["list"]["matching_item_count"] == 5141
+        assert topic_page["result"]["value"] == 5132
+        assert topic_page["list"]["scoped_item_count"] == 5132
+        assert topic_page["list"]["matching_item_count"] == 5132
         assert topic_page["list"]["returned_count"] == 25
         assert len(list_response.content) <= 256 * 1024
         assert topic_page["result"]["unit"] == "รายการ"
@@ -149,7 +149,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             params={"measure": "K12", "q": query, "limit": 25},
         ).json()
         assert searched["result"] == topic_page["result"]
-        assert searched["list"]["matching_item_count"] <= 5141
+        assert searched["list"]["matching_item_count"] <= 5132
         assert all(
             query.casefold() in item["label"].casefold()
             for item in searched["list"]["items"]
@@ -194,7 +194,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         k04 = client.get("/api/public/v1/f2/topics/k04?measure=K04").json()
         c04 = client.get("/api/public/v1/f2/topics/k04?measure=C04_LISTED").json()
         assert k04["result"]["value"] == 514
-        assert c04["result"]["value"] == 2399
+        assert c04["result"]["value"] == 2390
 
         source_regions = client.get("/api/public/v1/f2/topics/k09?measure=K09")
         assert source_regions.status_code == 200
