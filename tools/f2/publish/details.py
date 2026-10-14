@@ -9,6 +9,7 @@ Each builder returns {entity_id: detail}; the list item is a short form of the d
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -25,6 +26,10 @@ RECORD_LINKS = {"pmua_apptech", "cultural_map"}       # sources whose record pag
 MEDIA_HOSTS = {"dp.culturalmapthailand.info", "atlocalthailand.com", "www.icommunity.in.th"}
 # sources also hold media file names with spaces or "???" in them, which are not working links
 BROKEN_LINK = re.compile(r"[\s\"<>\\^`{|}?#]")
+# a house address: "บ้านเลขที่ 12", "123 ม.4", "เลขที่ 25/463 หมู่ 10" (the place names around it stay)
+MOO = r"\s*(?:ม\.|หมู่(?:ที่)?)\s?\d+(?![\d.,])"  # village number: "ม.4", "หมู่ที่ 10"
+ADDRESS = re.compile(rf"บ้านเลขที่\s*\d+(?:/\d+)?(?:{MOO})?|(?:เลขที่\s*)?(?<![\d.,/-])\d+(?:/\d+)?{MOO}")
+PRIVATE_SECTIONS = {"targetUserAddressDetail"}  # RINMP: where the target user lives
 # role in the Clean tables -> public role code (f2-detail.js has the Thai labels)
 WORK_ROLES = {"lead": "researcher", "co": "researcher", "researcher": "researcher", "inventor": "inventor",
               "owner": "listing_account_owner", "rights_holder": "rights_holder", "collector": "source_reported_owner"}
@@ -44,11 +49,22 @@ def text(value, limit: int = EXCERPT) -> tuple[str | None, bool, bool]:
         return None, False, False
     changes: list = []
     clean = sanitize_payload(str(value).strip(), changes=changes)
-    # every public text sits next to a source_id, where the check also refuses money/health/household words
-    shown = clean[:limit]
-    if privacy_reasons(shown, restricted_source_ids=set(), allow_restricted=True) or PERSON_LEVEL_SENSITIVE_RE.search(shown):
+    # checked before the house addresses are removed (removing them never makes a refused text public), and
+    # after (the shorter text's excerpt reaches further)
+    if refused(clean[:limit]):
         return None, False, True
-    return shown, len(clean) > limit, bool(changes)
+    clean = ADDRESS.sub("[redacted-address]", clean)  # an address form the publication check does not catch
+    shown = clean[:limit]
+    if refused(shown):
+        return None, False, True
+    return shown, len(clean) > limit, bool(changes) or "[redacted-address]" in shown
+
+
+def refused(text: str) -> bool:
+    """The publication check would flag it; every public text sits next to a source_id, where the check also
+    refuses money, health and household words."""
+    return bool(privacy_reasons(text, restricted_source_ids=set(), allow_restricted=True)
+                or PERSON_LEVEL_SENSITIVE_RE.search(text))
 
 
 def label(value) -> str | None:
@@ -131,13 +147,15 @@ class Context:
         self.unresolved = {self.entity_of.get((e, s, r)) for e, *pair in con.execute(
             "SELECT entity, a_source, a_record_id, b_source, b_record_id FROM match_pairs WHERE status = 'queue'").fetchall()
             for s, r in (pair[:2], pair[2:])}
-        self.reviewed = {(r["source"], r["record_id"]): r["context"] for r in config["reviewed_labels"]["labels"]}
+        self.reviewed = {(r["source"], r["record_id"]): (r["label_sha256"], r["context"]) for r in config["reviewed_labels"]["labels"]}
         self.contexts: dict[str, str] = {}  # entity_id -> field context of its reviewed label
 
     def name(self, entity_id: str, key: tuple[str, str], value) -> str | None:
-        """A record's public label: a reviewed label as written (and noted for the contract), else label()."""
-        if key in self.reviewed and value:
-            self.contexts[entity_id] = self.reviewed[key]
+        """A record's public label: a reviewed label as written (and noted for the contract), else label().
+        A reviewed record whose label has changed since the review is checked like any other."""
+        reviewed_hash, context = self.reviewed.get(key, (None, None))
+        if value and reviewed_hash == hashlib.sha256(str(value).strip().encode()).hexdigest()[:16]:
+            self.contexts[entity_id] = context
             return str(value).strip()
         return title(value)
 
@@ -227,7 +245,8 @@ def innovations(ctx: Context) -> dict[str, dict]:
             source, sid = row["source"], ctx.source_id[row["source"]]
             for line in (row["description"] or "").split("\n"):
                 kind, _, body = line.partition(": ") if source in SECTIONED else ("description", "", line)
-                descriptions.append(description(kind, body, sid))
+                if kind not in PRIVATE_SECTIONS:
+                    descriptions.append(description(kind, body, sid))
             for r in readiness[key]:
                 levels.append({"scale": r["scale"], "numeric_level": None if r["level"] is None else str(r["level"]),
                                "label": None, "qualifies": r["scale"] == "TRL" and (r["level"] or 0) >= 8, "source_id": sid})
@@ -277,7 +296,8 @@ def people(ctx: Context, innovation_details: dict[str, dict]) -> dict[str, dict]
                 named = [c for c in candidates if c["title"] == details.get("linked_innovation")]
                 targets = [(c["source"], c["record_id"]) for c in named or (candidates if len(candidates) == 1 else [])]
                 if "geocode_disagrees" not in (row["geo_note"] or ""):
-                    locations.append(location(row, sid, "source_reported_innovator_location"))
+                    place = location(row, sid, "source_reported_innovator_location")  # a person: province only
+                    locations.append(place and {k: place[k] for k in ("location_role", "source_id", "province", "province_code")})
             elif code and row["about_kind"] == "innovation":
                 targets = [(row["source"], row["about_record_id"])]
             for target in targets:
@@ -475,7 +495,7 @@ def offering_families(ctx: Context) -> dict[str, dict]:
                                        "currency": "THB", "source_id": sid})
                     elif row["price_thb"] is not None or details.get("price_amounts"):  # one price, or a range/choices
                         amounts = [row["price_thb"]] if row["price_thb"] is not None else details["price_amounts"]
-                        prices.append({"amounts": [{"value": f"{a:g}", "status": "source_reported"} for a in amounts],
+                        prices.append({"amounts": [{"value": f"{a:f}".rstrip("0").rstrip("."), "status": "source_reported"} for a in amounts],
                                        "currency": "THB", "source_id": sid})
                 descriptions.append(description("listing", row["description"], sid))
                 locations.append(location(row, sid, "source_listing_location"))

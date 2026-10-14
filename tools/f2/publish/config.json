@@ -1138,62 +1138,73 @@
   }
  },
  "reviewed_labels": {
-  "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them.",
+  "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them. Each is bound to the reviewed text (label_sha256): a changed label goes through the normal check until it is reviewed again.",
   "labels": [
    {
     "source": "cultural_map",
     "record_id": "CD-1601",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "a0d11b148ca19b1b"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1599",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "281570be1359bfe1"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-2073",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "f3e60ae4a41c2b20"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1911",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "58762e064c2177e6"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1642",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "d14d7d4e1c4213f3"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1645",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "832a291502aa9272"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1640",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "55ec95a7f8423cfe"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-1913",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "f61031d35effd831"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-5800",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "48f143fa524e711c"
    },
    {
     "source": "cultural_map",
     "record_id": "CD-473",
-    "context": "public_location"
+    "context": "public_location",
+    "label_sha256": "d53822a7d9c459a5"
    },
    {
     "source": "icommunity",
     "record_id": "2:NzUycG9pdXl0cmVlZGZnaGprbGtqaGdmZHJ0eWlva21uYnZjeHN3ZXJmZHZnaHl1aWs=",
-    "context": "public_contact"
+    "context": "public_contact",
+    "label_sha256": "1735f563d0e0a417"
    }
   ]
  }

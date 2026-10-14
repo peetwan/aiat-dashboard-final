@@ -47,6 +47,16 @@ class Results:
         for row in cursor.fetchall():
             row = dict(zip(names, row))
             self.parts[row["measure_id"]].append(row)
+        # filter choices come from config.json; a source level, region or breakdown it does not list would
+        # silently drop out of the filters, so it stops the build until its meaning is reviewed
+        rows = [r for parts in self.parts.values() for r in parts]
+        unknown = sorted({f"source_level {r['source_level']}" for r in rows
+                          if r["source_level"] and r["source_level"] not in self.labels["source_level"]}
+                         | {f"source_region {r['region']}" for r in rows if r["region"] and r["region"] not in self.regions}
+                         | {f"source_dimension {r['breakdown']}" for r in rows if r["measure_id"] == "C08_REPORTED_BUSINESSES"
+                            and r["breakdown"] not in self.labels["source_dimension"]})
+        if unknown:
+            raise ValueError(f"not in tools/f2/publish/config.json, add it after review: {', '.join(unknown)}")
         # K12 category filter: the Cultural Map primary and additional category codes of a subject
         self.codes = defaultdict(set)
         for entity_id, category, categories in con.execute(

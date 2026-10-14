@@ -116,10 +116,11 @@ def run(db_path: Path = DB_PATH) -> dict:
             f.write(f"\n## Reviewed findings whose source changed ({len(stale)})\n\nStill counted. Check each "
                     "review still holds, then update or reject it in data/runtime/f2/decisions/.\n\n"
                     + "".join(f"- {note}\n" for note in stale))
-    if issues:  # decisions Resolve or Measure could not apply: the numbers are computed without them
+    if issues:  # decisions Resolve or Measure could not apply as reviewed
         with open(stage / "diff" / "diff.md", "a", encoding="utf-8") as f:
-            f.write(f"\n## Reviewed decisions that no longer fit the data ({len(issues)})\n\nNot applied. Fix or "
-                    "remove each in data/runtime/f2/decisions/.\n\n" + "".join(f"- {note}\n" for note in issues))
+            f.write(f"\n## Reviewed decisions that no longer fit the data ({len(issues)})\n\nMatching decisions listed "
+                    "here are not applied; each counting line says whether its exclusion still applies. Fix or remove "
+                    "each in data/runtime/f2/decisions/.\n\n" + "".join(f"- {note}\n" for note in issues))
     return {"candidate": str(stage), "validation": report["status"], "problems": report["problems"][:20],
             "diff": str(stage / "diff" / "diff.md"), "needs_new_look": len(stale) + len(issues)}
 
@@ -292,8 +293,9 @@ def promote(candidate: Path) -> dict:
     """Copy a signed-off candidate into the repo: data/public/f2, the F2 contract and the F2 serving entries,
     mark the F2 manifest approved, rewrite the receipt and check the whole repo workspace."""
     candidate = Path(candidate).resolve()
-    if json.loads((candidate / "validation.json").read_text(encoding="utf-8"))["status"] != "valid":
-        raise SystemExit("the candidate did not pass the publication check; fix it and publish again")
+    # checked again now, not trusted from validation.json: the candidate may have changed since it was built
+    if _validate(candidate)["status"] != "valid":
+        raise SystemExit("the candidate does not pass the publication check; fix it and publish again")
     manifest = json.loads((candidate / F2 / "manifest.json").read_text(encoding="utf-8"))
     manifest.update({"publication_status": "approved_local_publication", "publication_approval_claimed": True,
                      "staged_for_review": False, "validation_status": "passed",

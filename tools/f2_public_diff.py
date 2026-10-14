@@ -26,7 +26,7 @@ METADATA_KEYS = {
     "internal_review", "local_promotion", "release_date", "release_id", "private_revision_id",
     "detail_owner_approval", "c02_field_review", "c02_geography_review", "publication_status",
     "publication_approval_claimed", "staged_for_review", "owner_checkpoint_required",
-    "additional_field_review_status", "limitations", "files", "source_snapshots", "validation_status",
+    "additional_field_review_status", "files", "source_snapshots", "validation_status",
 }
 
 
@@ -169,6 +169,55 @@ def compare_structure(base: dict, new: dict) -> dict:
             "metadata_changed": sorted(metadata_changed)}
 
 
+ID_MAP = 20  # a dict with more keys than this is keyed by ids (scopes, provinces, entities): one path for all
+
+
+def changed_paths(b, n, path: str, out: dict) -> None:
+    """Every value that differs, as path pattern -> [count, first example]; bookkeeping keys skipped."""
+    if isinstance(b, dict) and isinstance(n, dict):
+        for k in sorted(b.keys() | n.keys()):
+            if not is_metadata(k):
+                part = "*" if max(len(b), len(n)) > ID_MAP else k
+                changed_paths(b.get(k), n.get(k), f"{path}/{part}", out)
+    elif isinstance(b, list) and isinstance(n, list) and len(b) == len(n):
+        for x, y in zip(b, n):
+            changed_paths(x, y, f"{path}/#", out)
+    elif b != n:
+        entry = out.setdefault(path, [0, (b, n)])
+        entry[0] += 1
+
+
+SHARD_KEYS = {"detail_artifacts", "detail_count"}  # which detail file holds a record: not visible to a reader
+
+
+def merged(bundle: dict) -> dict:
+    """The bundle with each topic's detail files as one (a record moving to another file is not a change)."""
+    out = {}
+    for name, doc in bundle.items():
+        if name.startswith("details/") and isinstance(doc, dict):
+            topic = out.setdefault(f"details/{name.split('/')[1].split('-')[0]}-*.json", {"details_by_id": {}})
+            topic["details_by_id"].update(doc.get("details_by_id") or {})
+        else:
+            out[name] = doc
+    return out
+
+
+def compare_everything(base: dict, new: dict) -> list[dict]:
+    """A safety net under sections 1-6: whatever a reader can see that changed, in any file."""
+    base, new = merged(base), merged(new)
+    rows = []  # results and lists (overview, geography, topics) before the detail files
+    for name in sorted(base.keys() & new.keys(), key=lambda n: (n.startswith("details/"), n)):
+        out: dict = {}
+        changed_paths(_without(base[name]), _without(new[name]), "", out)
+        rows += [{"file": name, "path": path or "/", "changed": count, "example": example}
+                 for path, (count, example) in out.items()]
+    return rows
+
+
+def _without(doc):
+    return {k: v for k, v in doc.items() if k not in SHARD_KEYS} if isinstance(doc, dict) else doc
+
+
 def compare_counts(base: dict, new: dict) -> list[dict]:
     b = (base.get("manifest.json") or {}).get("counts_by_measure", {})
     n = (new.get("manifest.json") or {}).get("counts_by_measure", {})
@@ -241,7 +290,34 @@ def markdown(report: dict) -> str:
               f"- Files removed: {', '.join(s['files_removed']) or 'none'}",
               f"- Files with added/removed top-level keys: {', '.join(s['top_level_key_changes']) or 'none'}",
               f"- Metadata changed (provenance/approval bookkeeping): {', '.join(s['metadata_changed']) or 'none'}", ""]
-    return "\n".join(lines)
+    every = r["everything"]
+    lines += ["## 7. Every changed value", "",
+              "All values that differ in files present in both bundles, release bookkeeping excepted, including those "
+              "summarised above (filtered results, labels, limitations, filter choices...).", ""]
+    if every:
+        lines += ["| File | Path (`*` = every id, `#` = every list item) | Values changed | Example: base → new |",
+                  "|---|---|---:|---|"]
+        for e in every[:EVERYTHING_ROWS]:
+            b, n = e["example"]
+            if isinstance(b, str) and isinstance(n, str):  # long texts: show where they start to differ
+                start = max(0, next((i for i, (x, y) in enumerate(zip(b, n)) if x != y), min(len(b), len(n))) - 20)
+                b, n = (("…" if start else "") + v[start:] for v in (b, n))
+            b, n = short(b), short(n)
+            lines.append(f"| {e['file']} | `{e['path']}` | {e['changed']:,} | {b} → {n} |")
+        if len(every) > EVERYTHING_ROWS:
+            lines.append(f"\n{len(every) - EVERYTHING_ROWS} more paths in diff.json (`everything`).")
+    else:
+        lines.append("None.")
+    return "\n".join(lines + [""])
+
+
+EVERYTHING_ROWS = 60
+
+
+def short(value) -> str:
+    text = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
+    text = text.replace("|", "\\|").replace("\n", " ")
+    return f"`{text[:80]}{'…' if len(text) > 80 else ''}`"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -261,7 +337,7 @@ def main(argv: list[str] | None = None) -> int:
     if not report["identical"]:
         report.update(results=compare_results(results(base), results(new)), items=compare_items(items(base), items(new)),
                       details=compare_details(details(base), details(new)), counts=compare_counts(base, new),
-                      structure=compare_structure(base, new))
+                      structure=compare_structure(base, new), everything=compare_everything(base, new))
     out = args.out or ROOT / "data/runtime/f2/diffs" / stamp
     out.mkdir(parents=True, exist_ok=True)
     (out / "diff.json").write_text(json.dumps(report, ensure_ascii=False, indent=1, default=str), encoding="utf-8")

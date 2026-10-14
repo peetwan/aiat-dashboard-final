@@ -46,6 +46,7 @@ TOTALS = [
      "WHERE measure_id = 'C10_ALTERNATIVE' AND component = 'excludedResourceExpense'", "SELECT 1"),
 ]
 C08_BREAKDOWNS = {"categories", "entityTypes", "geography", "provinces"}
+TRL_SOURCES = ("apptech_mru", "icommunity", "pmua_apptech", "rinmp")  # each states numeric readiness levels (K04)
 
 
 def run(db_path: Path = DB_PATH) -> dict[str, int]:
@@ -83,16 +84,19 @@ def run(db_path: Path = DB_PATH) -> dict[str, int]:
 
 
 def _gone(con, exclusions: list[dict]) -> list[dict]:
-    """An excluded K07 listing, or a family record taking its place, that is no longer in the data."""
+    """An excluded K07 listing that is no longer in the data (the exclusion then has no effect), or a family
+    record taking its place that is gone (the exclusion still applies; that family no longer takes its place)."""
     offerings = set(con.execute("SELECT source, record_id FROM offerings").fetchall())
     families = set(con.execute("SELECT source, record_id FROM entity_members WHERE entity = 'offering_family'").fetchall())
     out = []
     for x in exclusions:
-        missing = [[x["source"], x["record_id"]]] if (x["source"], x["record_id"]) not in offerings else []
-        missing += [[s, r] for s, r in x.get("evidence_for", []) if (s, r) not in families]
+        head = {"measure_id": x["measure"], "decision_ref": x.get("ref") or x["record_id"]}
+        if (x["source"], x["record_id"]) not in offerings:
+            out.append({**head, "issue": "excluded_record_not_found_exclusion_has_no_effect",
+                        "detail": {"excluded": [x["source"], x["record_id"]]}})
+        missing = [[s, r] for s, r in x.get("evidence_for", []) if (s, r) not in families]
         if missing:
-            out.append({"measure_id": x["measure"], "decision_ref": x.get("ref") or x["record_id"],
-                        "issue": "records_not_found",
+            out.append({**head, "issue": "evidence_records_not_found_exclusion_still_applies",
                         "detail": {"excluded": [x["source"], x["record_id"]], "missing": missing}})
     return out
 
@@ -103,6 +107,10 @@ def check(con) -> list[str]:
     for measure in COUNTED:
         if not con.execute("SELECT count(*) FROM measure_members WHERE measure_id = ?", [measure]).fetchone()[0]:
             problems.append(f"{measure} counts nothing")
+    for source in TRL_SOURCES:
+        if not con.execute("SELECT count(level) FROM innovation_readiness WHERE scale = 'TRL' AND source = ?",
+                           [source]).fetchone()[0]:
+            problems.append(f"{source} states no numeric TRL level any more (K04)")
     for table, column, value in CODES:
         if not con.execute(f"SELECT count(*) FROM {table} WHERE {column} = ?", [value]).fetchone()[0]:
             problems.append(f"no {table} row has {column} = {value!r} any more (renamed by the source?)")
