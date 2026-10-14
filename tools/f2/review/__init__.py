@@ -139,12 +139,15 @@ def clusters(db_path: Path = DB_PATH) -> list[dict]:
     for e, a_s, a_r, b_s, b_r, rule, verdict in con.execute("""SELECT entity, a_source, a_record_id, b_source, b_record_id,
             rule, judge FROM match_pairs WHERE status = 'queue' ORDER BY ALL""").fetchall():
         queued[e].append(((a_s, a_r), (b_s, b_r), rule, verdict))
-    apart = defaultdict(set)  # entity -> {(entity id, entity id)} a reviewed decision keeps apart
-    for e, a_s, a_r, b_s, b_r in con.execute("""SELECT entity, a_source, a_record_id, b_source, b_record_id
+    apart = defaultdict(lambda: defaultdict(set))  # entity -> (entity id, entity id) -> refs of the decisions keeping them apart
+    for e, a_s, a_r, b_s, b_r, basis in con.execute("""SELECT entity, a_source, a_record_id, b_source, b_record_id, basis
             FROM match_pairs WHERE status = 'different' AND basis LIKE 'decision:%'""").fetchall():
         ea, eb = entity_of.get((e, a_s, a_r)), entity_of.get((e, b_s, b_r))
         if ea and eb:
-            apart[e] |= {(ea, eb), (eb, ea)}
+            ref = basis.removeprefix("decision:").removesuffix("+transitive")
+            apart[e][ea, eb].add(ref)
+            apart[e][eb, ea].add(ref)
+    decided = {d["ref"]: d for d in reviewed.load(FILE, {"decisions": []})["decisions"]}
     saved = _saved()
     out = []
     for entity, matcher in MATCHERS.items():
@@ -192,10 +195,20 @@ def clusters(db_path: Path = DB_PATH) -> list[dict]:
                                   "evidence": x["evidence"] if x else None, "same_producer": producers})
             cid = _cluster_id(entity, [k for eid in eids for k in shown[eid]])
             hard = sorted({tuple(sorted((index[x], index[y]))) for x, y in apart[entity] if x in index and y in index})
-            out.append({"id": cid, "entity": entity, "items": items, "pairs": pair_rows, "apart": hard,
+            why = [[_why(decided.get(ref), ref) for ref in sorted(apart[entity][eids[i], eids[j]])] for i, j in hard]
+            out.append({"id": cid, "entity": entity, "items": items, "pairs": pair_rows, "apart": hard, "apart_why": why,
                         "prefill": _prefill(len(eids), pair_rows, hard), "saved": _restore(saved.get(cid), items)})
     con.close()
     return sorted(out, key=lambda c: (list(MATCHERS).index(c["entity"]), len(c["items"]), c["id"]))
+
+
+def _why(decision: dict | None, ref: str) -> dict:
+    """A decision that keeps two items apart, as the page shows it: what it says, who made it, why."""
+    decision = decision or {}
+    origin = decision.get("origin", "")
+    return {"ref": ref, "decision": decision.get("decision", "different"), "reason": decision.get("reason", ""),
+            "by": f"your review {origin.removeprefix('user:')}" if origin.startswith("user:")
+            else "earlier pipeline review" if origin.startswith("release:") else origin}
 
 
 def _name(table: str, row: dict) -> str:
@@ -254,9 +267,10 @@ def decisions_for(cluster: dict, groups: list[int], unsure: bool, note: str) -> 
     n = len(cluster["items"])
     if len(groups) != n or any(not isinstance(g, int) or g < 0 for g in groups):
         raise ValueError("one group number per item")
-    for i, j in cluster["apart"]:
+    for (i, j), why in zip(cluster["apart"], cluster["apart_why"]):
         if groups[i] == groups[j]:
-            raise ValueError(f"items {i + 1} and {j + 1} were decided different before")
+            raise ValueError(f"items {i + 1} and {j + 1} are kept apart by " + "; ".join(
+                f"{w['decision']} ({w['by']}): {w['reason']}" for w in why))
     by_group = defaultdict(list)
     for i, g in enumerate(groups):
         by_group[g].append([list(k) for k in cluster["items"][i]["keys"]])
