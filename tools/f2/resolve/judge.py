@@ -6,9 +6,12 @@ asked again only when a record's text changed, and until then Resolve does not u
 Only queued pairs are asked (and pairs whose stored answer is in use), so a refresh costs only its new pairs.
 
 How an answer counts (tested on the user's reviews, 2026-10-13):
-- innovations, different + high confidence: applied, the pair is separated (197 right / 3 wrong of 200);
-- everything else is a proposal shown to the user, who confirms it. Innovation merges were right 120 of
-  124 times and offerings were tested on only 179 labels, so they wait for confirmations first.
+- innovations, different + high confidence: applied, the pair is separated (64 right / 1 wrong of 65 on a
+  blind test; 197 / 3 of 200 on a second set);
+- offerings, different + high confidence: applied (32 / 4 of 36 before a prompt fix that caused 3 of the
+  wrong ones; after it, the user confirmed all 30 review cards, 48 pairs, on 2026-10-14);
+- everything else is a proposal shown to the user, who confirms it. Merges were wrong 4 of 124 (innovations)
+  and 3 of 66 (offerings), so they wait for confirmations first.
 
 Privacy: personal names never leave the machine. Every full name the people table knows, titled names
 ("นายสมชาย", "ป้าแดง") and phone numbers / e-mail addresses are masked as [person] / [contact]; a
@@ -45,7 +48,7 @@ MODEL, EFFORT = "deepseek/deepseek-v4.1-flash", "low"
 URL = "https://openrouter.ai/api/v1/chat/completions"
 FILE = "judge.json"
 ENTITIES = ("innovation", "offering")
-APPLIED = {("innovation", "different", "high")}
+APPLIED = {("innovation", "different", "high"), ("offering", "different", "high")}
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 SCHEMA = {"type": "object", "additionalProperties": False, "required": ["decision", "confidence", "evidence"],
           "properties": {"decision": {"type": "string", "enum": ["same", "different", "unsure"]},
