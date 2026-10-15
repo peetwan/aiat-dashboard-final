@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F2 ตั้งแต่เว็บไซต์ต้นทางถึงแดชบอร์ด</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Anuphan:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Anuphan', 'Noto Sans Thai', sans-serif; background: #f2f5ef; color: #13251e; min-height: 100vh;
+           display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1280px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+    .eyebrow { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+               text-transform: uppercase; color: #617068; margin-bottom: 0.5rem; }
+    h1 { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400;
+          letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 0.75rem; }
+    .lead { font-size: 1rem; line-height: 1.6; color: #13251e; max-width: 60rem; margin-bottom: 1.75rem; }
+    .notes { font-size: 0.875rem; line-height: 1.6; color: #617068; max-width: 60rem; padding-left: 1.2rem; }
+    .notes li { margin-bottom: 0.35rem; }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · F2</p>
+    <h1>F2 ตั้งแต่เว็บไซต์ต้นทางถึงแดชบอร์ด</h1>
+    <p class="lead">ข้อมูลไหลจากซ้ายไปขวา ข้อมูลที่มีชื่อบุคคลไม่ขึ้น repo สาธารณะ: ข้อมูลดิบ (snapshot ที่เก็บจากเว็บไซต์) อยู่ใน R2 ของทีมและในเครื่อง ส่วนไฟล์การตัดสินและหน้าตรวจอยู่ในเครื่องของผู้ดูแลเท่านั้น สิ่งที่ข้ามไปฝั่งสาธารณะต้องผ่านชุดรอเผยแพร่ (release candidate) ซึ่งตรวจฟิลด์และความเป็นส่วนตัว และเจ้าของข้อมูลต้องอนุมัติก่อน</p>
+<div class="diagram-container"><svg viewBox="0 0 1280 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="r1-f2-end-to-end-title r1-f2-end-to-end-desc">
+<title id="r1-f2-end-to-end-title">F2 ตั้งแต่เว็บไซต์ต้นทางถึงแดชบอร์ด</title>
+<desc id="r1-f2-end-to-end-desc">Architecture of F2 in three zones: external services (source websites, the private Cloudflare R2 evidence bucket, OpenRouter), the maintainer's machine where raw snapshots, the pipeline, decision files with personal names and the release candidate stay out of Git, and the public side (GitHub repository and the Railway deployment).</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#617068"/></marker><marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#17643c"/></marker><marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker></defs>
+<rect width="100%" height="100%" fill="#f2f5ef"/>
+<rect x="40" y="88" width="240" height="456" rx="8" fill="rgba(19,37,30,0.02)" stroke="rgba(19,37,30,0.10)" stroke-width="0.8"/><rect x="56" y="80" width="92.0" height="16" rx="2" fill="#f2f5ef"/><text x="62" y="92" fill="#617068" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">บริการภายนอก</text>
+<rect x="300" y="88" width="680" height="456" rx="8" fill="rgba(19,37,30,0.02)" stroke="rgba(23,100,60,0.50)" stroke-width="0.8" stroke-dasharray="6,4"/><rect x="316" y="80" width="180.0" height="16" rx="2" fill="#f2f5ef"/><text x="322" y="92" fill="#17643c" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">เครื่องของผู้ดูแล · ไม่ขึ้น Git</text>
+<rect x="1000" y="88" width="240" height="456" rx="8" fill="rgba(19,37,30,0.02)" stroke="rgba(19,37,30,0.10)" stroke-width="0.8"/><rect x="1016" y="80" width="64.0" height="16" rx="2" fill="#f2f5ef"/><text x="1022" y="92" fill="#617068" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">สาธารณะ</text>
+<path d="M160 184 L160 264" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M256 296 L324 296" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M516 296 L544 296" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M736 296 L764 296" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M956 296 L1024 296" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M1120 328 L1120 440" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M608 440 L608 344" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M672 344 L672 440" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M544 336 L298 336 A8 8 0 0 0 290 344 L290 456 A8 8 0 0 1 282 464 L256 464" fill="none" stroke="#2e5aa8" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-link)"/>
+<path d="M256 484 L544 484" fill="none" stroke="#2e5aa8" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-link)"/>
+<rect x="168" y="216" width="116.0" height="16" fill="#f2f5ef"/><text x="172" y="228" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">อัปโหลด snapshot</text>
+<rect x="278.0" y="272" width="24.0" height="16" fill="#f2f5ef"/><text x="290" y="284" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">ดึง</text>
+<rect x="1128" y="376" width="52.0" height="16" fill="#f2f5ef"/><text x="1132" y="388" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">deploy</text>
+<rect x="528.0" y="388" width="76.0" height="16" fill="#f2f5ef"/><text x="600" y="400" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="end">ใช้การตัดสิน</text>
+<rect x="676" y="388" width="68.0" height="16" fill="#f2f5ef"/><text x="680" y="400" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">คิวรอตรวจ</text>
+<rect x="294" y="400" width="80.0" height="16" fill="#f2f5ef"/><text x="298" y="412" fill="#2e5aa8" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">ถามแบบปิดชื่อ</text>
+<rect x="350.0" y="460" width="140.0" height="16" fill="#f2f5ef"/><text x="420" y="472" fill="#2e5aa8" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">คำตอบ → judge.json</text>
+<rect x="64" y="120" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="64" y="120" width="192" height="64" rx="6" fill="rgba(19,37,30,0.03)" stroke="rgba(19,37,30,0.30)" stroke-width="1"/><text x="160.0" y="148.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">เว็บไซต์ต้นทาง</text><text x="160.0" y="164.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">8 แหล่งข้อมูล</text>
+<rect x="64" y="264" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="64" y="264" width="192" height="64" rx="6" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="160.0" y="292.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">Cloudflare R2</text><text x="160.0" y="308.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">snapshot กลางของทีม (ส่วนตัว)</text>
+<rect x="64" y="440" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="64" y="440" width="192" height="64" rx="6" fill="rgba(19,37,30,0.03)" stroke="rgba(19,37,30,0.30)" stroke-width="1"/><text x="160.0" y="468.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">OpenRouter</text><text x="160.0" y="484.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">LLM judge · มีค่าใช้จ่าย</text>
+<rect x="324" y="264" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="324" y="264" width="192" height="64" rx="6" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="420.0" y="292.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ข้อมูลดิบ (snapshot)</text><text x="420.0" y="308.0" fill="#617068" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">data/runtime/f2/raw/</text>
+<rect x="544" y="264" width="192" height="80" rx="6" fill="#f2f5ef"/><rect x="544" y="264" width="192" height="80" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="640.0" y="292.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ไปป์ไลน์ F2</text><text x="640.0" y="308.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">clean → resolve → measure</text><text x="640.0" y="324.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">DuckDB f2.duckdb</text>
+<rect x="544" y="440" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="544" y="440" width="192" height="64" rx="6" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="640.0" y="468.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">การตัดสิน + หน้าตรวจ</text><text x="640.0" y="484.0" fill="#617068" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">data/runtime/f2/decisions/</text>
+<rect x="764" y="256" width="192" height="80" rx="6" fill="#f2f5ef"/><rect x="764" y="256" width="192" height="80" rx="6" fill="rgba(23,100,60,0.08)" stroke="#17643c" stroke-width="1"/><text x="860.0" y="284.0" fill="#17643c" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ชุดรอเผยแพร่ (candidate)</text><text x="860.0" y="300.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ตรวจฟิลด์และความเป็นส่วนตัว</text><text x="860.0" y="316.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">diff · เจ้าของอนุมัติ</text>
+<rect x="1024" y="264" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="1024" y="264" width="192" height="64" rx="6" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="1120.0" y="292.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">GitHub (repo สาธารณะ)</text><text x="1120.0" y="308.0" fill="#617068" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">data/public/f2/</text>
+<rect x="1024" y="440" width="192" height="64" rx="6" fill="#f2f5ef"/><rect x="1024" y="440" width="192" height="64" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="1120.0" y="468.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">Railway</text><text x="1120.0" y="484.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">FastAPI + แดชบอร์ด F2</text>
+<line x1="40" y1="580" x2="1240" y2="580" stroke="rgba(19,37,30,0.12)" stroke-width="1"/>
+<rect x="40" y="600" width="20" height="14" rx="3" fill="rgba(19,37,30,0.03)" stroke="rgba(19,37,30,0.30)" stroke-width="1"/><text x="68" y="611" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">บริการภายนอก</text>
+<rect x="179" y="600" width="20" height="14" rx="3" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="207" y="611" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">ที่เก็บข้อมูล</text>
+<rect x="297" y="600" width="20" height="14" rx="3" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="325" y="611" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">โปรแกรม</text>
+<rect x="407" y="600" width="20" height="14" rx="3" fill="rgba(23,100,60,0.08)" stroke="#17643c" stroke-width="1"/><text x="435" y="611" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">ด่านก่อนเผยแพร่</text>
+<line x1="553" y1="607" x2="581" y2="607" stroke="#2e5aa8" stroke-width="1" stroke-dasharray="4,3"/><text x="589" y="611" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">เรียกใช้เมื่อสั่งเท่านั้น (มีค่าใช้จ่าย)</text>
+<text x="1240" y="611" fill="#617068" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="end">กรอบเส้นประเขียว = ห้ามขึ้น Git</text>
+</svg></div>
+    <ul class="notes"><li>ดึง snapshot ด้วย python tools/evidence_pull.py &lt;source_id&gt; · รันไปป์ไลน์ด้วย python -m tools.f2 clean / resolve / measure / publish</li><li>LLM judge ทำงานเฉพาะเมื่อสั่ง python -m tools.f2 judge --send ส่งเฉพาะคู่นวัตกรรมและสินค้าที่รอตรวจ ปิดชื่อและข้อมูลติดต่อก่อนส่ง ผู้ให้บริการตั้งไว้ไม่เก็บข้อมูล</li><li>แดชบอร์ดอ่านเฉพาะไฟล์ใน data/public/f2 ที่เผยแพร่แล้ว ไม่คำนวณใหม่ตอนเปิดหน้า</li><li>รายละเอียดแต่ละขั้น: docs/f2.md (The pipeline, Publishing, API and dashboard)</li></ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คู่ระเบียนหนึ่งคู่ถูกตัดสินอย่างไร</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Anuphan:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Anuphan', 'Noto Sans Thai', sans-serif; background: #f2f5ef; color: #13251e; min-height: 100vh;
+           display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+    .eyebrow { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+               text-transform: uppercase; color: #617068; margin-bottom: 0.5rem; }
+    h1 { font-family: 'Instrument Serif', 'Noto Serif Thai', serif; font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400;
+          letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 0.75rem; }
+    .lead { font-size: 1rem; line-height: 1.6; color: #13251e; max-width: 60rem; margin-bottom: 1.75rem; }
+    .notes { font-size: 0.875rem; line-height: 1.6; color: #617068; max-width: 60rem; padding-left: 1.2rem; }
+    .notes li { margin-bottom: 0.35rem; }
+    svg { width: 100%; min-width: 960px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · F2 resolve</p>
+    <h1>คู่ระเบียนหนึ่งคู่ถูกตัดสินอย่างไร</h1>
+    <p class="lead">ทุกชนิดข้อมูล (นวัตกรรม ธุรกิจ สินค้า บุคคล ข้อมูลวัฒนธรรม กิจกรรม) ตัดสินคู่ระเบียนตามลำดับเดียวกัน การตัดสินของคนมาก่อน ตามด้วยกฎ แล้วจึง LLM ซึ่งใช้เฉพาะนวัตกรรมและสินค้า และทำได้เพียงแยก ไม่เคยรวม</p>
+<div class="diagram-container"><svg viewBox="0 0 960 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="r2-pair-decision-title r2-pair-decision-desc">
+<title id="r2-pair-decision-title">คู่ระเบียนหนึ่งคู่ถูกตัดสินอย่างไร</title>
+<desc id="r2-pair-decision-desc">Flowchart: a candidate pair first follows a person's reviewed decision if one exists; otherwise the rule outcome merges or separates it; an unclear pair is separated if the LLM answered different with high confidence (innovations and products); otherwise it waits for review, and the reviewer's decision is used on the next run.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#617068"/></marker><marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#17643c"/></marker><marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker></defs>
+<rect width="100%" height="100%" fill="#f2f5ef"/>
+<path d="M480 84 L480 124" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M620 168 L700 168" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M480 212 L480 260" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M620 304 L700 304" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M340 304 L260 304" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M480 348 L480 396" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M340 440 L158 440 A8 8 0 0 1 150 432 L150 336" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M480 484 L480 528" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M480 592 L480 632" fill="none" stroke="#617068" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M590 664 L936 664 A8 8 0 0 0 944 656 L944 66 A8 8 0 0 0 936 58 L600 58" fill="none" stroke="#617068" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+<rect x="648.0" y="144" width="24.0" height="16" fill="#f2f5ef"/><text x="660" y="156" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">ใช่</text>
+<rect x="488" y="228" width="24.0" height="16" fill="#f2f5ef"/><text x="492" y="240" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">ไม่</text>
+<rect x="630.0" y="280" width="60.0" height="16" fill="#f2f5ef"/><text x="660" y="292" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">เหมือนกัน</text>
+<rect x="278.0" y="280" width="44.0" height="16" fill="#f2f5ef"/><text x="300" y="292" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">ต่างกัน</text>
+<rect x="488" y="364" width="40.0" height="16" fill="#f2f5ef"/><text x="492" y="376" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">ไม่ชัด</text>
+<rect x="233.0" y="416" width="24.0" height="16" fill="#f2f5ef"/><text x="245" y="428" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">ใช่</text>
+<rect x="488" y="500" width="24.0" height="16" fill="#f2f5ef"/><text x="492" y="512" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="start">ไม่</text>
+<rect x="644.0" y="34" width="256.0" height="16" fill="#f2f5ef"/><text x="772" y="46" fill="#617068" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" font-size="12" font-weight="500" text-anchor="middle">บันทึกใน matching.json · ใช้ในรอบถัดไป</text>
+<rect x="360" y="32" width="240" height="52" rx="26.0" fill="#f2f5ef"/><rect x="360" y="32" width="240" height="52" rx="26.0" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="480.0" y="56.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">คู่ระเบียนที่อาจซ้ำ</text><text x="480.0" y="71.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">จากกฎจับคู่ของแต่ละชนิด</text>
+<polygon points="480,124 620,168 480,212 340,168" fill="#f2f5ef"/><polygon points="480,124 620,168 480,212 340,168" fill="rgba(23,100,60,0.08)" stroke="#17643c" stroke-width="1"/><text x="480" y="172" fill="#17643c" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">คนเคยตัดสินคู่นี้แล้ว?</text>
+<rect x="700" y="136" width="220" height="64" rx="6" fill="#f2f5ef"/><rect x="700" y="136" width="220" height="64" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="810.0" y="164.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ใช้การตัดสินของคน</text><text x="810.0" y="180.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">เหมือน / ต่าง / ไม่แน่ใจ</text>
+<polygon points="480,260 620,304 480,348 340,304" fill="#f2f5ef"/><polygon points="480,260 620,304 480,348 340,304" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="480" y="300" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">กฎของชนิดข้อมูลนั้น</text><text x="480" y="316" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">บอกว่าอะไร?</text>
+<rect x="700" y="272" width="220" height="64" rx="6" fill="#f2f5ef"/><rect x="700" y="272" width="220" height="64" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="810.0" y="300.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">รวมเป็นรายการเดียว</text><text x="810.0" y="316.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">เว้นแต่ต้องแยกจากคู่อื่น</text>
+<rect x="40" y="272" width="220" height="64" rx="6" fill="#f2f5ef"/><rect x="40" y="272" width="220" height="64" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="150.0" y="300.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">แยกเป็นสองรายการ</text><text x="150.0" y="316.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">นับเป็นสองรายการ</text>
+<polygon points="480,396 620,440 480,484 340,440" fill="#f2f5ef"/><polygon points="480,396 620,440 480,484 340,440" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="480" y="428" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">LLM ตอบว่าต่างกัน</text><text x="480" y="444" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ด้วยความมั่นใจสูง?</text><text x="480" y="460" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">(นวัตกรรม และสินค้า)</text>
+<rect x="370" y="528" width="220" height="64" rx="6" fill="#f2f5ef"/><rect x="370" y="528" width="220" height="64" rx="6" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="480.0" y="556.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">รอตรวจ</text><text x="480.0" y="572.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">ระหว่างนี้นับเป็นสองรายการ</text>
+<rect x="370" y="632" width="220" height="64" rx="6" fill="#f2f5ef"/><rect x="370" y="632" width="220" height="64" rx="6" fill="rgba(19,37,30,0.05)" stroke="#617068" stroke-width="1"/><text x="480.0" y="660.0" fill="#13251e" font-size="12" font-weight="600" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">หน้าตรวจ (ในเครื่อง)</text><text x="480.0" y="676.0" fill="#617068" font-size="12" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="middle">คนเลือก เหมือน / ต่าง / ไม่แน่ใจ</text>
+<line x1="40" y1="736" x2="920" y2="736" stroke="rgba(19,37,30,0.12)" stroke-width="1"/>
+<polygon points="54,749 68,757 54,765 40,757" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="76" y="761" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">คำถามที่ระบบตรวจ</text>
+<rect x="196" y="750" width="28" height="14" rx="3" fill="#ffffff" stroke="#13251e" stroke-width="1"/><text x="232" y="761" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">ผลของคู่นี้</text>
+<line x1="324" y1="757" x2="352" y2="757" stroke="#617068" stroke-width="1.2" stroke-dasharray="5,4"/><text x="360" y="761" fill="#13251e" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif">ย้อนกลับในรอบถัดไป</text>
+<text x="920" y="761" fill="#617068" font-size="12" font-weight="500" font-family="'Anuphan', 'Noto Sans Thai', sans-serif" text-anchor="end">เขียว: การตัดสินของคนมาก่อนกฎและ LLM เสมอ</text>
+</svg></div>
+    <ul class="notes"><li>ระเบียนถูกรวมทีละคู่ คู่ที่จะทำให้ระเบียนซึ่งต้องแยกกันมาอยู่กลุ่มเดียวกันจะไม่ถูกรวม (การตัดสินที่ขัดกันถูกรายงานในตาราง decision_issues)</li><li>คู่ที่รอตรวจแต่ผลของคู่อื่นตัดสินได้แล้ว เช่น อยู่กลุ่มเดียวกันแล้ว หรือต้องแยกตามคู่อื่น จะไม่ต้องตรวจ (ระบุว่า transitive)</li><li>"ไม่แน่ใจ" คือคนตรวจแล้วแต่หลักฐานไม่พอ ระเบียนจึงแยกกันและจะไม่ถูกถามอีก</li><li>การแยกสินค้าอัตโนมัติด้วย LLM อยู่ในโค้ดชุดใหม่ (branch feature/f2-offering-judge-auto) ซึ่งรอรวมเข้า main ก่อนหน้านั้นใช้กับนวัตกรรมเท่านั้น</li><li>คำตอบของ LLM ที่ไม่ใช้อัตโนมัติ แสดงเป็นข้อเสนอในหน้าตรวจ · ที่มา: tools/f2/resolve/__init__.py และ resolve/judge.py</li></ul>
+  </div>
+</body>
+</html>
