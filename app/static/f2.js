@@ -180,6 +180,26 @@
       ? "ขอบเขต: ประเทศไทย / ภูมิภาคตามต้นทาง"
       : "ขอบเขต: ประเทศไทย";
   }
+  const BANGKOK_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
+  const THAI_DAY = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  function thaiDay(day) { return THAI_DAY.format(new Date(`${day}T00:00:00Z`)); }
+  function sourceSnapshots() { return state.overview?.sources?.by_id || {}; }
+  // The days (Thai time) we fetched these sources, as one date or a range: "12–14 ต.ค. 2569".
+  function fetchedRange(ids) {
+    const days = [...new Set(ids.map((id) => sourceSnapshots()[id]?.fetched_at).filter(Boolean)
+      .map((value) => BANGKOK_DAY.format(new Date(value))))].sort();
+    if (!days.length) return "";
+    const first = days[0], last = days[days.length - 1];
+    if (first === last) return thaiDay(first);
+    return first.slice(0, 7) === last.slice(0, 7) ? `${Number(first.slice(8))}–${thaiDay(last)}` : `${thaiDay(first)} – ${thaiDay(last)}`;
+  }
+  // "ที่มา: <source> · ดึงข้อมูล <date>" for a number; empty for a release without fetch dates.
+  function sourceLine(ids, lead = "ที่มา") {
+    const unique = [...new Set(ids || [])];
+    const fetched = fetchedRange(unique);
+    if (!unique.length || !fetched) return "";
+    return `${lead}: ${unique.length === 1 ? SOURCE_NAMES[unique[0]] || unique[0] : `${unique.length} แหล่ง`} · ดึงข้อมูล ${fetched}`;
+  }
   function metricExplanation(measureId) {
     return MEASURE_LIMITATIONS[measureId] || "";
   }
@@ -618,6 +638,9 @@
       el("p", { class: "f2-overview-key", text: "0 หมายถึงนับได้ศูนย์ในข้อมูลชุดนี้ ส่วน — หมายถึงยังไม่มีตัวเลขที่รองรับสำหรับพื้นที่ที่เลือก" }),
       el("p", { class: "f2-overview-key", text: "กรอบเส้นประคือตัวเลขประกอบ ซึ่งอาจใช้ข้อมูลคนละชุดหรือวิธีนับต่างกัน" }),
       el("p", { class: "f2-overview-key", text: "วันที่ฉบับข้อมูลเป็นวันที่จัดเตรียม ไม่ใช่ช่วงเวลาที่วัด ตัวเลขแต่ละชุดอาจครอบคลุมคนละช่วงเวลา ตรวจสอบช่วงเวลาจากที่มาของแต่ละตัวชี้วัด" }),
+      Object.keys(sourceSnapshots()).length ? el("p", { class: "f2-overview-key" },
+        `ทุกตัวเลขบอกแหล่งและวันที่ดึงข้อมูลไว้ใต้ตัวเลข ข้อมูลชุดนี้ดึงจากเว็บต้นทาง ${Object.keys(sourceSnapshots()).length} แห่ง ${fetchedRange(Object.keys(sourceSnapshots()))} `,
+        el("button", { type: "button", class: "f2-inline-link", text: "ดูที่มาข้อมูล", onclick: () => { setTab("sources"); $("f2-tab-sources").focus(); } })) : "",
     ));
     const coverageCount = datasetCoverageCount(data);
     if (coverageCount !== null) view.append(el("aside", { class: "f2-coverage-note", "aria-label": "ความครอบคลุมของข้อมูล" },
@@ -665,6 +688,8 @@
         }
         if (companion) metric.append(el("span", { class: "f2-metric-kind", text: "ข้อมูลประกอบ" }));
         metric.append(el("small", { class: "f2-metric-scope", text: metricContext(item) }));
+        const origin = sourceLine(item.source_ids);
+        if (origin) metric.append(el("small", { class: "f2-metric-source", text: origin }));
         metric.append(el("span", { class: "f2-metric-action", text: item.detail_availability === "available" ? "ดูรายการ →" : "ดูรายละเอียดตัวเลข →" }));
         const wrapper = el("div", { class: "f2-metric-wrap" }, metric);
         group.append(wrapper);
@@ -856,6 +881,8 @@
     view.append(el("p", { class: "f2-result-context", text: state.filters.source_region
       ? `ขอบเขตตัวเลข: ${filterValueLabel("source_region", state.filters.source_region, data)} (ภูมิภาคตามต้นทาง)`
       : state.province ? `ขอบเขตตัวเลข: จังหวัด${provinceName(state.province)}` : "ขอบเขตตัวเลข: ประเทศไทย" }));
+    const origin = sourceLine(definition?.source_ids);
+    if (origin) view.append(el("p", { class: "f2-result-context", text: origin }));
     if (metricExplanation(state.measure)) view.append(el("p", { class: "f2-result-context", text: metricExplanation(state.measure) }));
     const businessBreakdown = data.source_dimension_breakdown;
     if (state.measure === "C08_REPORTED_BUSINESSES" && businessBreakdown?.rows?.length) {
@@ -977,10 +1004,38 @@
       status(views.sources, "เปิดที่มาไม่ได้", "ระบบยังเปิดที่มานี้ไม่ได้ โปรดลองอีกครั้ง", loadSources);
     }
   }
+  // Every source of the release: when we fetched it, and the latest change date the source itself states.
+  function renderSourceDates(view) {
+    const snapshots = Object.values(sourceSnapshots());
+    if (!snapshots.length) return;
+    const windowDays = Number(state.overview.sources.updated_within_days) || 365;
+    const span = windowDays === 365 ? "1 ปี" : `${formattedCount(windowDays)} วัน`;
+    const freshness = { stamped_within_window: `พบวันที่แก้ไขภายใน ${span} ก่อนวันดึง`, none_within_window: `ไม่พบวันที่แก้ไขภายใน ${span} ก่อนวันดึง`, no_date: "ต้นทางไม่ระบุวันที่" };
+    const rows = snapshots.slice().sort((a, b) => text(SOURCE_NAMES[a.source_id]).localeCompare(text(SOURCE_NAMES[b.source_id]), "th"));
+    const table = el("table", { class: "f2-source-region-table f2-source-dates-table" },
+      el("thead", {}, el("tr", {}, ["แหล่งข้อมูล", "ดึงข้อมูลล่าสุด", "ต้นทางแก้ไขล่าสุด", "สถานะ"].map((name) => el("th", { scope: "col", text: name })))),
+      el("tbody", {}, rows.map((row) => el("tr", {},
+        // phones hide the status column and show the status under the name instead
+        el("th", { scope: "row" }, SOURCE_NAMES[row.source_id] || row.source_id,
+          el("span", { class: `f2-freshness f2-freshness--${row.freshness} f2-freshness--inline`, text: freshness[row.freshness] || row.freshness })),
+        el("td", { text: fetchedRange([row.source_id]) }),
+        el("td", {}, row.updated
+          ? [`${row.updated.basis_th} ล่าสุด ${thaiDay(row.updated.latest)}`, el("small", { text: row.updated.days === 1 && row.updated.records > 1
+            ? `ทั้ง ${formattedCount(row.updated.records)} รายการลงวันที่เดียวกัน จึงน่าจะเป็นวันที่ของทั้งชุดข้อมูล`
+            : `จาก ${formattedCount(row.updated.records)} รายการที่ต้นทางระบุวันที่` })]
+          : "—"),
+        el("td", {}, el("span", { class: `f2-freshness f2-freshness--${row.freshness}`, text: freshness[row.freshness] || row.freshness }))))));
+    view.append(section("แหล่งข้อมูลและวันที่ของข้อมูล", el("div", { class: "f2-source-dates" },
+      el("dl", { class: "f2-detail-facts" },
+        el("dt", { text: "ดึงข้อมูล" }), el("dd", { text: "วันที่ระบบของเราไปเก็บข้อมูลจากเว็บต้นทาง ตัวเลขทุกตัวบอกวันที่นี้ไว้ใต้ตัวเลข" }),
+        el("dt", { text: "ต้นทางแก้ไขล่าสุด" }), el("dd", { text: "วันที่แก้ไขล่าสุดที่เว็บต้นทางใส่ไว้ในรายการ มีให้แค่บางแหล่ง และบางแหล่งใส่ไว้แค่ในข้อมูลบางส่วน (ตารางบอกว่าครอบคลุมอะไร) เป็นวันที่ที่ต้นทางระบุเอง ไม่ได้ยืนยันว่าเนื้อหาเปลี่ยนจริง และไม่ได้บอกว่าแหล่งยังมีคนดูแล ข้อมูลถูกต้อง หรือครบถ้วน" })),
+      el("div", { class: "f2-table-scroll", tabindex: "0", role: "region", "aria-label": "ตารางวันที่ของแหล่งข้อมูล" }, table))));
+  }
   function renderSources() {
     const view = views.sources; clear(view); controls(state.topicData || state.overview || {});
     backToOverview(view);
     renderScopeNotice(view);
+    renderSourceDates(view);
     const data = state.topicData || state.overview || {};
     const definition = selectedMeasureDefinition();
     const coverage = state.coverageData;
@@ -1028,6 +1083,7 @@
         sourceCards.append(el("article", { class: "f2-generic-card" },
           el("h4", { text: sourceName }),
           source.originating_system ? el("p", { text: `ระบบต้นทาง: ${source.originating_system}` }) : "",
+          fetchedRange([source.source_id]) ? el("p", { text: `ดึงข้อมูล ${fetchedRange([source.source_id])}` }) : "",
           link ? el("a", { href: link, target: "_blank", rel: "noopener noreferrer", text: "เปิดแหล่งข้อมูลต้นทาง" }) : "",
         ));
       });
@@ -1130,6 +1186,8 @@
       return row ? `${name} ${formattedCount(row.with_university)} จาก ${formattedCount(row.counted)}` : "";
     }).filter(Boolean).join(" · ");
     if (coverage) view.append(el("p", { class: "f2-result-context", text: `ระบุมหาวิทยาลัยได้: ${coverage}` }));
+    const origin = sourceLine(list.attribution_source_ids, "แหล่งที่ระบุมหาวิทยาลัย");
+    if (origin) view.append(el("p", { class: "f2-result-context", text: origin }));
     if (howCounted.length) view.append(el("details", { class: "f2-university-method" },
       el("summary", { text: "นับอย่างไร" }), el("ul", {}, howCounted.map((note) => el("li", { text: note })))));
 
@@ -1185,6 +1243,9 @@
     }
     const sources = (university.innovation_sources || []).map((row) => `${SOURCE_NAMES[row.source_id] || row.source_id} ${formattedCount(row.count)}`);
     if (sources.length) view.append(el("p", { class: "f2-result-context", text: `ที่มาของนวัตกรรม: ${sources.join(" · ")} (นวัตกรรมชิ้นเดียวกันอยู่ได้หลายแหล่ง)` }));
+    // each count with the sources that tie it to this university, and when they were fetched
+    const origins = UNIVERSITY_COUNTS.map(([measureId, name]) => sourceLine(university.source_ids_by_measure?.[measureId], `ที่มาของ${name}`)).filter(Boolean);
+    if (origins.length) view.append(el("ul", { class: "f2-result-context f2-university-origins" }, origins.map((line) => el("li", { text: line }))));
 
     const search = el("input", { id: "f2UniversityItemSearch", type: "search", placeholder: "ชื่อนวัตกรรม", value: state.universityQuery, autocomplete: "off" });
     const form = el("form", { class: "f2-university-search", role: "search", onsubmit: (event) => {

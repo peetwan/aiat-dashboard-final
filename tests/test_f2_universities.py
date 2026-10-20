@@ -100,4 +100,13 @@ def test_university_counts_count_entities_once_per_university_and_group():
     assert srivijaya["innovation_sources"] == [{"source_id": "f2_apptech_mtr", "count": 1},
                                                {"source_id": "f2_target_household", "count": 2}]
     assert key == "f2/universities"
-    assert sources == ["f2_apptech_mtr", "f2_icommunity", "f2_learning_area_based", "f2_target_household"]
+    assert sources == doc["attribution_source_ids"] == ["f2_apptech_mtr", "f2_icommunity", "f2_learning_area_based", "f2_target_household"]
+    # each count names the sources that tie it to the university, not every source of the measure
+    assert {name: u["source_ids_by_measure"] for name, u in by_name.items()} == {
+        "มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย": {"C04_LISTED": ["f2_apptech_mtr", "f2_target_household"],
+                                                 "K04": ["f2_apptech_mtr", "f2_target_household"]},
+        "มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา": {"C04_LISTED": ["f2_apptech_mtr"]},
+        "มหาวิทยาลัยราชภัฏสงขลา": {"C04_LISTED": ["f2_target_household"], "C02_COMMUNITY": ["f2_icommunity"],
+                                    "K05": ["f2_target_household"]},
+        "มหาวิทยาลัยทักษิณ": {"C04_LISTED": ["f2_icommunity"], "K05": ["f2_icommunity", "f2_learning_area_based"]},
+    }

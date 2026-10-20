@@ -456,7 +456,7 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
         "ภาพรวม",
         "มหาวิทยาลัย",
         "รายการ",
-        "ที่มาและข้อจำกัด",
+        "ที่มาข้อมูล",
     ]
     assert soup.select_one("#f2DetailSheet[aria-modal='true']") is not None
     assert 'const API = "/api/public/v1/f2"' in script

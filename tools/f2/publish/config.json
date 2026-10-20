@@ -1158,6 +1158,17 @@
    "ธุรกิจนับเมื่อแหล่งข้อมูลระบุหน่วยวิจัยที่ดูแล (โครงการพัฒนาพื้นที่การเรียนรู้) หรือผู้ตรวจพบชื่อธุรกิจในข้อมูลนวัตกรรมของมหาวิทยาลัยนั้น ธุรกิจที่แหล่งข้อมูลไม่ได้โยงกับมหาวิทยาลัย เช่น ร้านค้าในแผนที่ตลาดวัฒนธรรม ไม่ถูกนับในแท็บนี้"
   ]
  },
+ "source_dates": {
+  "about": "The two dates the sources tab and the number labels show (overview.json sources), as Thai calendar days: when we fetched each snapshot, and the latest change date the source itself stamps on a record (Clean's runs table). A stamp is what the source supplies: it does not show that content changed, that the source is maintained, or that its data are correct or complete. The basis names what the source dates, since some sources date only part of their data.",
+  "updated_within_days": 365,
+  "updated_basis_th": {
+   "f2_apptech_mtr": "นวัตกรรม",
+   "f2_cultural_market_civil": "สินค้าในตลาดออนไลน์",
+   "f2_culturalmap_university": "รายการทุนวัฒนธรรม",
+   "f2_icommunity": "โพสต์กิจกรรมและหน้าข้อมูลโครงการ",
+   "f2_learning_area_based": "รายชื่อผู้ประกอบการ"
+  }
+ },
  "reviewed_labels": {
   "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them. Each is bound to the reviewed text (label_sha256): a changed label goes through the normal check until it is reviewed again.",
   "labels": [

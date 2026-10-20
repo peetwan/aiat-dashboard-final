@@ -82,6 +82,12 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             "publications": _publications(raw)}
 
 
+def updated(raw) -> list:
+    """The dates the source gives for when each activity post or programme page was last changed (Clean keeps the
+    latest). The innovation and innovator exports carry no such date."""
+    return [item.get("modified_at") for name in (POSTS, BACKGROUND) for item in raw.json(name)["data"]]
+
+
 def _innovators(raw, geo) -> tuple[list[dict], list[dict]]:
     """Community innovators (one row per listing; the export repeats an innovator per plan group),
     the researcher working with each, and the innovator's development scores."""

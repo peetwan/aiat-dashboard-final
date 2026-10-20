@@ -126,6 +126,7 @@ class F2OverviewResponse(PublicApiModel):
     availability: str
     headlines: list[JsonObject]
     limitations: list[JsonValue]
+    sources: JsonObject = {}  # per source: fetch date and the latest change date it states (older releases: empty)
     provenance: JsonObject
 
 
@@ -178,6 +179,7 @@ class F2UniversitiesResponse(PublicApiModel):
     availability: str
     measure_ids: list[str]
     measure_labels: JsonObject
+    attribution_source_ids: list[str] = []  # the sources that tie entities to universities (older releases: empty)
     coverage: JsonObject
     groups: JsonObject
     notes: list[str]

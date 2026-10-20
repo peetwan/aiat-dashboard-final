@@ -95,6 +95,11 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             "cultural_records": areas, "publications": publications}
 
 
+def updated(raw) -> list:
+    """The dates the source gives for when each marketplace listing was last changed (Clean keeps the latest)."""
+    return [item.get("updated_at") for item in raw.json(MARKET)["data"]]
+
+
 def _page_images(item: dict) -> list[dict]:
     """A page's cover and gallery images, without the site logo; as {"url"} like other publications."""
     urls = [item.get("cover_image_url"), item.get("image_url"), *(item.get("image_urls") or [])]

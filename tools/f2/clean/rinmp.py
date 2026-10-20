@@ -71,6 +71,11 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             "people": people, "innovation_places": places}
 
 
+def updated(raw) -> list:
+    """The dates the source gives for when each innovation was last changed (Clean keeps the latest)."""
+    return [record.get("source_last_update_at") for record in raw.json(FILE)["data"]["records"]]
+
+
 def _places(record: dict, geo) -> list[dict]:
     passages = []
     for section in record.get("description_sections") or []:

@@ -51,6 +51,11 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             "publications": publications}
 
 
+def updated(raw) -> list:
+    """The dates the source gives for when each cultural subject was last changed (Clean keeps the latest)."""
+    return [((record.get("data") or {}).get("dates") or {}).get("updated") for record in raw.json(MAP)["data"]["records"]]
+
+
 def _subjects(raw, geo) -> tuple[list[dict], list[dict]]:
     records, people = [], []
     for index, record in enumerate(raw.json(MAP)["data"]["records"]):
