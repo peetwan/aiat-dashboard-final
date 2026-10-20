@@ -131,7 +131,7 @@ def insert(con: duckdb.DuckDBPyConnection, table: str, rows: list[dict]) -> None
 
 def run(db_path: Path = DB_PATH) -> dict[str, dict]:
     """Per source: rows per table, and notes for a person to look at (raw files no cleaner accounts for,
-    reviewed findings whose source text changed)."""
+    reviewed findings whose source text changed); then institution_names, with the names to check."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = db_path.with_suffix(".tmp")
     tmp.unlink(missing_ok=True)
@@ -151,12 +151,25 @@ def run(db_path: Path = DB_PATH) -> dict[str, dict]:
         unread = raw.files() - raw.files_read() - set(getattr(cleaner, "SKIPPED", {}))
         out[source] = {"rows": Counter({table: len(rows) for table, rows in tables.items()}),
                        "unaccounted_raw_files": sorted(unread), "needs_new_look": needs_new_look(tables)}
-    insert(con, "institution_names", institutions.rows(n for (n,) in con.execute(
+    names = institutions.rows(n for (n,) in con.execute(
         "SELECT institution FROM innovations UNION SELECT institution FROM people "
-        "UNION SELECT details->>'research_unit' FROM operators").fetchall()))
+        "UNION SELECT details->>'research_unit' FROM operators WHERE source = 'learning_area_based'").fetchall())
+    insert(con, "institution_names", names)
     con.close()
+    out["institution_names"] = {"rows": Counter({"institution_names": len(names)}), "unaccounted_raw_files": [],
+                                "needs_new_look": [], "institution_notes": institutions.review(names, _universities(db_path))}
     tmp.replace(db_path)  # only a complete run replaces the previous database
     return out
+
+
+def _universities(db_path: Path) -> set[str]:
+    """The university names of the previous Clean run (none on a first run)."""
+    if not db_path.is_file():
+        return set()
+    with duckdb.connect(str(db_path), read_only=True) as con:
+        if not con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = 'institution_names'").fetchone()[0]:
+            return set()
+        return {u for (u,) in con.execute("SELECT DISTINCT university FROM institution_names").fetchall()}
 
 
 def needs_new_look(tables: dict) -> list[str]:
