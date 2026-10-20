@@ -52,6 +52,8 @@ def main() -> int:
                 print(f"  WARNING raw file not read and not listed as skipped: {name}")
             for note in result["needs_new_look"]:
                 print(f"  NEEDS A NEW LOOK (source changed since the review): {note}")
+            for note in result.get("institution_notes", []):
+                print(f"  CHECK THE INSTITUTION NAME (tools/f2/institutions.py): {note}")
     else:
         for entity, n in resolve.run().items():
             print(f"{entity}: {n['records']:,} records -> {n['entities']:,} entities; pairs same {n['same']:,}, "
