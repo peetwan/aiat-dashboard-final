@@ -421,6 +421,7 @@ def get_overview(*, province: str | None = None, revision: str | None = None) ->
         "availability": "available",
         "headlines": headlines,
         "limitations": overview.get("limitations") or [],
+        "sources": overview.get("sources") or {},
         "provenance": _provenance(snapshot, ["f2/overview", "f2/geography"]),
     }
 
@@ -796,6 +797,7 @@ def get_universities(*, revision: str | None = None) -> dict[str, Any]:
         "availability": "available",
         "measure_ids": data.get("measure_ids") or [],
         "measure_labels": data.get("measure_labels") or {},
+        "attribution_source_ids": data.get("attribution_source_ids") or [],
         "coverage": data.get("coverage") or {},
         "groups": data.get("groups") or {},
         "notes": data.get("notes") or [],

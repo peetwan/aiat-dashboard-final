@@ -9,9 +9,13 @@
 --               review_status says whether it counts.
 
 CREATE TABLE runs (
-    source      VARCHAR PRIMARY KEY,
-    raw_folder  VARCHAR NOT NULL,   -- data/runtime/f2/raw/<raw_folder>/<run_id>
-    run_id      VARCHAR NOT NULL
+    source           VARCHAR PRIMARY KEY,
+    raw_folder       VARCHAR NOT NULL,  -- data/runtime/f2/raw/<raw_folder>/<run_id>
+    run_id           VARCHAR NOT NULL,
+    fetched_at       VARCHAR NOT NULL,  -- when we fetched the snapshot (its manifest), ISO 8601 with time zone
+    updated_latest   DATE,              -- the latest Thai day the source says one of its records was changed;
+    updated_records  INTEGER NOT NULL,  -- NULL (and 0 records) when the source gives no such date
+    updated_days     INTEGER NOT NULL   -- distinct days among them (1 for a whole set stamped at once)
 );
 
 -- Innovations ---------------------------------------------------------------

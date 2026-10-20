@@ -88,6 +88,9 @@ body.f2-dashboard-open .region-label[hidden] { display: none; }
 .f2-metric-explanation h4 { margin: 0 0 8px; color: #245a38; font-size: 13px; }
 .f2-metric-explanation p { margin: 0; }
 .f2-metric-scope { margin-top: 8px; }
+.f2-metric-source { color: #657269; }
+.f2-inline-link { border: 0; padding: 0; background: transparent; color: #17643c; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.f2-inline-link:focus-visible { outline: 2px solid #17643c; outline-offset: 2px; }
 .f2-subgroup-title { grid-column: 1 / -1; margin: 12px 0 0; color: #344a3b; font-size: 14px; }
 .f2-release-note, .f2-result-context { color: #526159; font-size: 12px; line-height: 1.65; margin: 0 0 16px; }
 .f2-cluster-notice { display: grid; gap: 10px; border: 1px solid #dce7de; border-radius: 12px; padding: 16px; background: #f7faf8; color: #435047; font-size: 13px; line-height: 1.7; }
@@ -295,3 +298,18 @@ label.f2-university-search { display: grid; gap: 4px; }
 .f2-coverage-details { margin-bottom: 22px; border: 1px solid #dce7de; border-radius: 10px; padding: 12px; color: #344a3b; font-size: 12px; line-height: 1.7; }
 .f2-coverage-details summary { color: #17643c; font-weight: 700; cursor: pointer; }
 .f2-coverage-details[open] > :not(summary) { margin-top: 12px; }
+.f2-source-dates { display: grid; gap: 12px; }
+.f2-university-origins { margin-top: -8px; padding-left: 18px; }
+.f2-source-dates-table td small { display: block; color: #657269; font-size: 11px; }
+.f2-source-dates-table :is(td:nth-child(2), thead th) { white-space: nowrap; }
+.f2-freshness { display: inline-block; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.f2-freshness--stamped_within_window { background: #17643c; color: #fff; }
+.f2-freshness--none_within_window { background: #8a4209; color: #fff; }
+.f2-freshness--no_date { border: 1px dashed #8c8a83; color: #526159; }
+.f2-freshness--inline { display: none; }
+@media (max-width: 720px) {
+  .f2-source-dates-table :is(th, td) { padding: 8px 6px; }
+  .f2-source-dates-table :is(td, th):nth-child(4) { display: none; }
+  .f2-source-dates-table tbody th { width: 40%; }
+  .f2-source-dates-table .f2-freshness--inline { display: inline-block; margin-top: 6px; white-space: normal; border-radius: 8px; }
+}

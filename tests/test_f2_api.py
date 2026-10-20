@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 
 from fastapi.testclient import TestClient
 
@@ -8,6 +9,7 @@ from app.database import SessionLocal
 from app.f2_data import F2_ROOT, f2_cache_stats, reset_f2_cache
 from app.main import app
 from app.models import PublicArtifact
+from tools.f2.clean import thai_day
 
 
 def _measure(overview: dict, measure_id: str) -> dict:
@@ -74,6 +76,13 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         overview = overview_response.json()
         assert len(overview["headlines"]) == 14
         assert sum(len(row["companions"]) for row in overview["headlines"]) == 7
+        # every number can name its sources and when they were fetched
+        snapshots = overview["sources"]["by_id"]
+        assert set(snapshots) == set(overview["provenance"]["source_ids"])
+        assert all(set(row["source_ids"]) <= set(snapshots) for headline in overview["headlines"]
+                   for row in [headline, *headline["companions"]])
+        assert all(thai_day(datetime.fromisoformat(row["fetched_at"])).isoformat() == row["fetched_date"]
+                   and (row["updated"] is None) == (row["freshness"] == "no_date") for row in snapshots.values())
         expected_units = {
             "K01A": "จังหวัด",
             "K01B": "แห่ง",
@@ -328,6 +337,9 @@ def test_f2_universities_serve_the_published_file():
         innovations = [row["counts"]["C04_LISTED"] for row in rows]
         assert innovations == sorted(innovations, reverse=True)
         assert body["groups"].keys() == published["groups"].keys()
+        # the sources that tie entities to universities: those behind some university's count, and no others
+        assert body["attribution_source_ids"] == sorted({source for record in published["universities"].values()
+                                                         for ids in record["source_ids_by_measure"].values() for source in ids})
         for measure_id, coverage in body["coverage"].items():
             assert coverage["with_university"] <= coverage["counted"], measure_id
             # each entity once per group: a group can only be smaller than or equal to the national count

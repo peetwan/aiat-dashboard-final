@@ -29,7 +29,7 @@ from pathlib import Path
 
 import duckdb
 
-from ..clean import DB_PATH, ROOT, needs_new_look
+from ..clean import DB_PATH, ROOT, needs_new_look, thai_day
 from ..geo import Geo
 from . import details as detail_records
 from .results import Results
@@ -75,6 +75,7 @@ def run(db_path: Path = DB_PATH) -> dict:
     innovation_places = con.execute("SELECT entity_id, province_code FROM measure_members "
                                     "WHERE measure_id = 'C04_LISTED' AND province_code IS NOT NULL").fetchall()
     source_ids = dict(con.execute("SELECT source, raw_folder FROM runs").fetchall())
+    snapshots = con.execute("SELECT raw_folder, fetched_at, updated_latest, updated_records, updated_days FROM runs").fetchall()
     issues = [f"{kind} decision {ref} ({what}): {issue} {detail}" for kind, what, ref, issue, detail in con.execute(
         """SELECT 'matching', entity, decision_ref, issue, detail FROM decision_issues
            UNION ALL SELECT 'counting', measure_id, decision_ref, issue, detail FROM counting_issues ORDER BY ALL""").fetchall()]
@@ -84,7 +85,8 @@ def run(db_path: Path = DB_PATH) -> dict:
     files: dict[str, tuple[dict, str, list[str]]] = {}  # path in f2/ -> (payload, artifact key, source ids)
     for topic_id, topic in config["topics"].items():
         files.update(_topic(topic_id, topic, config, results, records.get(topic_id), provinces, header))
-    files["overview.json"] = (_overview(config, results, header), "f2/overview", config["source_ids"])
+    files["overview.json"] = ({**_overview(config, results, header), "sources": _sources(config, snapshots)},
+                              "f2/overview", config["source_ids"])
     files["geography.json"] = (_geography(config, results, provinces, header), "f2/geography", config["source_ids"])
     files["universities.json"] = _universities(config, results, university_rows, innovation_places, source_ids, header)
 
@@ -214,6 +216,31 @@ def _overview(config: dict, results: Results, header: dict) -> dict:
     return {**header, "headlines": headlines, "limitations": config["limitations"]}
 
 
+def _sources(config: dict, snapshots: list[tuple]) -> dict:
+    """Per source, in Thai calendar days: when we fetched it, and the latest change date it stamps on a record (with
+    what it dates, how many records carry a stamp and on how many days), so every number can say how old its evidence
+    is. freshness only says whether such a stamp falls within updated_within_days before the fetch day."""
+    meta = config["source_dates"]
+    out = {}
+    for source_id, fetched_at, latest, records, days in snapshots:
+        fetched = datetime.fromisoformat(fetched_at)
+        fetched_day = thai_day(fetched)
+        updated = None
+        if latest is not None:
+            if source_id not in meta["updated_basis_th"]:
+                raise SystemExit(f"{source_id} states change dates but config.json source_dates has no basis for it")
+            updated = {"latest": latest.isoformat(), "records": records, "days": days,
+                       "basis_th": meta["updated_basis_th"][source_id]}
+        out[source_id] = {
+            "source_id": source_id, "fetched_at": fetched.isoformat(), "fetched_date": fetched_day.isoformat(),
+            "updated": updated,
+            "freshness": "no_date" if latest is None
+            else "stamped_within_window" if (fetched_day - latest).days <= meta["updated_within_days"] else "none_within_window"}
+    if set(out) != set(config["source_ids"]):
+        raise SystemExit(f"runs table sources {sorted(out)} differ from config.json source_ids")
+    return {"updated_within_days": meta["updated_within_days"], "by_id": dict(sorted(out.items()))}
+
+
 def _geography(config: dict, results: Results, provinces: dict, header: dict) -> dict:
     measures = sorted(config["measures"], key=lambda m: config["measures"][m]["display_order"])
 
@@ -235,9 +262,11 @@ def _universities(config: dict, results: Results, rows: list[tuple], places: lis
     measures = meta["measure_ids"]
     group_of, by_university, by_group = {}, defaultdict(lambda: defaultdict(set)), defaultdict(lambda: defaultdict(set))
     innovation_sources = defaultdict(lambda: defaultdict(set))
+    measure_sources = defaultdict(lambda: defaultdict(set))  # the sources that tie each count to the university
     for measure, entity_id, university, group, source in rows:
         group_of[university] = group
         by_university[university][measure].add(entity_id)
+        measure_sources[university][measure].add(source_ids[source])
         by_group[group][measure].add(entity_id)
         if measure == "C04_LISTED":
             innovation_sources[university][source_ids[source]].add(entity_id)
@@ -258,8 +287,10 @@ def _universities(config: dict, results: Results, rows: list[tuple], places: lis
             "innovation_provinces": [{"province_code": code, "count": n}
                                      for code, n in sorted(provinces.items(), key=lambda kv: (-kv[1], kv[0]))],
             "innovation_sources": [{"source_id": sid, "count": len(ids)} for sid, ids in sorted(innovation_sources[name].items())],
+            "source_ids_by_measure": {m: sorted(measure_sources[name][m]) for m in measures if measure_sources[name][m]},
             "item_ids": {"C04_LISTED": sorted(counted["C04_LISTED"])}}
-    doc = {**header, "measure_ids": measures, "notes": meta["notes"],
+    attributed = sorted({source_ids[source] for *_, source in rows})
+    doc = {**header, "measure_ids": measures, "notes": meta["notes"], "attribution_source_ids": attributed,
            "measure_labels": {m: config["measures"][m]["label_th"] for m in measures},
            "coverage": {m: {"with_university": len(set().union(*(u[m] for u in by_university.values()))),
                             "counted": len(results.everyone[m])} for m in measures},
@@ -267,7 +298,7 @@ def _universities(config: dict, results: Results, rows: list[tuple], places: lis
                               "counts": {m: len(by_group[group][m]) for m in measures}}
                       for group, label in meta["groups"].items()},
            "universities": dict(sorted(universities.items()))}
-    return doc, "f2/universities", sorted({source_ids[source] for *_, source in rows})
+    return doc, "f2/universities", attributed
 
 
 # Candidate workspace, contract and checks ---------------------------------------

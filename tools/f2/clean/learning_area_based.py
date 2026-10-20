@@ -30,3 +30,8 @@ def clean(raw, geo) -> dict[str, list[dict]]:
                         "sequence": row.get("sequence")},
         })
     return {"operators": operators}
+
+
+def updated(raw) -> list:
+    """The dates the source gives for when each row was last changed (Clean keeps the latest)."""
+    return [row.get("updatedAt") for row in raw.json(ROWS)["data"]]

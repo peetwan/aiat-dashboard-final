@@ -2,6 +2,8 @@
 
 A cleaner is a module with `clean(raw: Raw, geo: Geo) -> dict[table, list[row dict]]`.
 It reads only its own source's raw snapshot and states facts; it never merges records.
+A cleaner whose source dates its records also has `updated(raw) -> list` (the stated last-change dates);
+the runs table keeps the latest, next to when we fetched the snapshot.
 """
 
 from __future__ import annotations
@@ -9,6 +11,7 @@ from __future__ import annotations
 import gzip
 import json
 from collections import Counter
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import duckdb
@@ -22,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[3]
 RAW_ROOT = ROOT / "data" / "runtime" / "f2" / "raw"
 DB_PATH = ROOT / "data" / "runtime" / "f2" / "pipeline" / "f2.duckdb"
 SCHEMA = Path(__file__).resolve().parents[1] / "schema.sql"
+BANGKOK = timezone(timedelta(hours=7), "Asia/Bangkok")  # Thailand keeps no daylight saving
 
 # source name -> (raw snapshot folder, cleaner)
 CLEANERS = {
@@ -116,6 +120,39 @@ def latest_run(folder: str) -> Path:
     return runs[-1]
 
 
+def fetched(run_dir: Path) -> datetime:
+    """When the snapshot was fetched, from the manifest evidence_push writes next to it."""
+    manifest = run_dir / "manifest.json"
+    try:
+        value = datetime.fromisoformat(json.loads(manifest.read_text(encoding="utf-8"))["fetched_at"])
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        raise SystemExit(f"{manifest}: no readable fetched_at ({error})") from error
+    if value.tzinfo is None:
+        raise SystemExit(f"{manifest}: fetched_at has no time zone")
+    return value
+
+
+def thai_day(moment: datetime) -> date:
+    """The calendar day in Thailand of a time-zone-aware moment."""
+    return moment.astimezone(BANGKOK).date()
+
+
+def updated_dates(values, fetched_at: datetime) -> list[date]:
+    """The Thai calendar days of a cleaner's updated() values. A stamp with a time zone is converted to Thai time;
+    one without (most of these Thai sites) is read as Thai local time. Unreadable values are skipped, and so is a day
+    after the fetch day: the record cannot have been changed after we read it."""
+    out = []
+    for value in values:
+        try:
+            moment = datetime.fromisoformat(str(value))
+        except ValueError:
+            continue
+        day = thai_day(moment) if moment.tzinfo else moment.date()
+        if day <= thai_day(fetched_at):
+            out.append(day)
+    return out
+
+
 def insert(con: duckdb.DuckDBPyConnection, table: str, rows: list[dict]) -> None:
     columns = [r[0] for r in con.execute(f"DESCRIBE {table}").fetchall()]
     unknown = {key for row in rows for key in row} - set(columns)
@@ -145,10 +182,14 @@ def run(db_path: Path = DB_PATH) -> dict[str, dict]:
         for table, rows in extracted.rows(source, raw, reviewed, tables).items():
             tables[table] = tables.get(table, []) + rows
         _link(source, tables, extracted.links(source, reviewed))
-        insert(con, "runs", [{"source": source, "raw_folder": folder, "run_id": run_dir.name}])
         for table, rows in tables.items():
             insert(con, table, [{"source": source, **row} for row in rows])
         unread = raw.files() - raw.files_read() - set(getattr(cleaner, "SKIPPED", {}))
+        fetched_at = fetched(run_dir)
+        changed = updated_dates(getattr(cleaner, "updated", lambda _raw: [])(raw), fetched_at)
+        insert(con, "runs", [{"source": source, "raw_folder": folder, "run_id": run_dir.name,
+                              "fetched_at": fetched_at.isoformat(), "updated_latest": max(changed, default=None),
+                              "updated_records": len(changed), "updated_days": len(set(changed))}])
         out[source] = {"rows": Counter({table: len(rows) for table, rows in tables.items()}),
                        "unaccounted_raw_files": sorted(unread), "needs_new_look": needs_new_look(tables)}
     names = institutions.rows(n for (n,) in con.execute(
