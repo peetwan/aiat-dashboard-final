@@ -102,7 +102,7 @@ raw snapshot (data/runtime/f2/raw/<source_id>/<run_id>/)
 | สถานที่และชื่อภาษาไทย | `tools/f2/geo.py` (ข้อมูลพื้นที่ทางการ), `tools/f2/text.py` (คำนำหน้า การ normalize) |
 | การจับคู่ หนึ่ง module ต่อชนิด entity | `tools/f2/resolve/` (`innovations.py`, `operators.py`, `offerings.py`, `offering_families.py`, `people.py`, `cultural_records.py`, `activities.py`) |
 | LLM judge | `tools/f2/resolve/judge.py`, prompt ใน `resolve/prompts/` |
-| ตัวชี้วัด | `tools/f2/measure/members.sql` (entity ที่นับ), `values.sql` (ยอดรวมจากแหล่ง) |
+| ตัวชี้วัด | `tools/f2/measure/members.sql` (entity ที่นับ), `values.sql` (ยอดรวมจากแหล่ง), `universities.sql` (มหาวิทยาลัยของ entity ที่นับ) |
 | ไฟล์สาธารณะ | `tools/f2/publish/results.py` (ผลลัพธ์ ตัวกรอง บริบท), `details.py` (รายการและรายละเอียด), `__init__.py` (ไฟล์ contract การตรวจ promote) |
 | ข้อความสาธารณะที่กำหนดไว้ | `tools/f2/publish/config.json` |
 | การตรวจการเผยแพร่และความเป็นส่วนตัวที่ใช้ร่วมกัน | `app/publication.py`, `app/privacy.py`, `app/field_contexts.py` |
@@ -241,11 +241,12 @@ data/runtime/f2/
 
 ## ไฟล์สาธารณะ
 
-`data/public/f2/` มี `overview.json`, `geography.json`, `topics/k*.json` 14 ไฟล์, `details/<topic>-NNN.json` ที่จำกัดขนาด และ `manifest.json` ทุกไฟล์ประกาศไว้ใน manifest, serving manifest และ publication contract
+`data/public/f2/` มี `overview.json`, `geography.json`, `topics/k*.json` 14 ไฟล์, `details/<topic>-NNN.json` ที่จำกัดขนาด, `universities.json` และ `manifest.json` ทุกไฟล์ประกาศไว้ใน manifest, serving manifest และ publication contract
 
 - **Overview:** ตัวชี้วัดหลักแต่ละตัวพร้อมตัวชี้วัดประกอบ: ข้อความนิยาม ผลระดับประเทศ ความครอบคลุม และ filter contract
 - **Geography:** 77 จังหวัด พร้อมผล ความครอบคลุม และบริบทที่ติดป้ายของทุกตัวชี้วัด
 - **Topic:** `filter_contracts`, `scopes` ที่คำนวณไว้ล่วงหน้า (ประเทศ แต่ละจังหวัด และภูมิภาคตามแหล่งในกรณีที่รองรับ) พร้อมผล ตัวเลือกตัวกรอง และ selection, `items_by_id`, `item_ids_by_measure_and_scope` และ `details_by_id` หรือ `detail_artifacts` ที่ชี้ไปยังไฟล์รายละเอียด
+- **Universities:** รายมหาวิทยาลัย (รหัส `uni_…` ชื่อ และกลุ่ม) จำนวนนวัตกรรม (C04 และ K04 ที่อยู่ในนั้น) นวัตกรชุมชน (C02) และธุรกิจ (K05) ที่แหล่งข้อมูลผูกไว้ จังหวัดและแหล่งที่มาของนวัตกรรม และรหัสนวัตกรรม พร้อมค่ารายกลุ่ม และจำนวน entity ของแต่ละตัวชี้วัดที่ระบุมหาวิทยาลัยได้ ชื่อหน่วยงานจัดให้เป็นมาตรฐานด้วย `tools/f2/institutions.py` (วิทยาเขตนับรวมกับมหาวิทยาลัยแม่) entity ที่ผูกกับสองมหาวิทยาลัยนับในทั้งสองแห่ง ผลรวมรายมหาวิทยาลัยจึงไม่เท่ายอดประเทศ
 - **ผลลัพธ์:** `value` ที่เป็นตัวเลขหรือ null, `display_value`, `unit`, `status`, `availability`, `requested_filters` / `applied_filters` และ `unavailable_reason` ผู้ใช้ข้อมูลต้องไม่แปลงข้อความที่แสดงกลับเป็นตัวเลขหรือนับรายการเพื่อหาค่า
 
 | รายละเอียด | เนื้อหา |
@@ -270,6 +271,8 @@ data/runtime/f2/
 | `GET /map?measure=<id>` | ช่องรายจังหวัดและคำอธิบายแผนที่ของตัวชี้วัดที่รองรับจังหวัด |
 | `GET /topics/{topic_id}` | ผล ตัวกรอง ที่มา และรายการหนึ่งหน้าของตัวชี้วัดและขอบเขตที่เลือก |
 | `GET /topics/{topic_id}/details/{entity_id}?measure=<id>` | รายละเอียดหนึ่งรายการที่อยู่ในตัวชี้วัดและขอบเขตนั้น |
+| `GET /universities` | ทุกมหาวิทยาลัยพร้อมจำนวน ค่ารายกลุ่ม ความครอบคลุม และหมายเหตุวิธีนับ (ระดับประเทศเท่านั้น) |
+| `GET /universities/{university_id}` | มหาวิทยาลัยหนึ่งแห่ง จังหวัดและแหล่งที่มา และรายการนวัตกรรมหนึ่งหน้า (`q`, `limit`, `offset`) |
 
 Query parameter ที่ route และตัวชี้วัดรองรับ: `province`, `category`, `source_level`, `source_region`, `component`, `source_dimension`, `q`, `sort`, `limit`, `offset`, `revision`
 
@@ -277,7 +280,7 @@ Query parameter ที่ route และตัวชี้วัดรองร
 - Response มี revision (hash ของ manifest) การส่ง `revision` ป้องกันการปนข้อมูลต่าง release entity ที่ไม่รู้จักหรือไม่ได้อยู่ในตัวชี้วัดคืน 404 ตัวกรองไม่ถูกต้องคืน 422 revision เก่าคืน 409 ข้อมูลเผยแพร่ที่ขาดหรือไม่สอดคล้องคืน 503
 - ETag เปลี่ยนตาม revision และ request response ต้อง revalidate (`public, max-age=0, must-revalidate`)
 
-Dashboard มีสามแท็บ: **ภาพรวม**, **รายการ**, **ที่มาและข้อจำกัด** ตัวชี้วัด ขอบเขต ตัวกรอง การค้นหา หน้า และรายละเอียดที่เปิดอยู่ถูกเก็บใน URL สื่อเป็นลิงก์เท่านั้น ไม่โหลดอัตโนมัติ
+Dashboard มีสี่แท็บ: **ภาพรวม**, **มหาวิทยาลัย**, **รายการ**, **ที่มาและข้อจำกัด** ตัวชี้วัด ขอบเขต ตัวกรอง การค้นหา หน้า มหาวิทยาลัยที่เลือก และรายละเอียดที่เปิดอยู่ถูกเก็บใน URL สื่อเป็นลิงก์เท่านั้น ไม่โหลดอัตโนมัติ
 
 ![แดชบอร์ด F2 กดแล้วเห็นอะไร: ภาพรวม ขอบเขตจังหวัด รายการหรือยอดรวม และรายละเอียด](diagrams/f2/r4-dashboard-click-flow.svg)
 

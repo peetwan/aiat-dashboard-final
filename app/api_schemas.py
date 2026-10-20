@@ -172,6 +172,30 @@ class F2DetailResponse(PublicApiModel):
     provenance: JsonObject
 
 
+class F2UniversitiesResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    availability: str
+    measure_ids: list[str]
+    measure_labels: JsonObject
+    coverage: JsonObject
+    groups: JsonObject
+    notes: list[str]
+    universities: list[JsonObject]
+    provenance: JsonObject
+
+
+class F2UniversityResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    availability: str
+    university: JsonObject
+    group_label_th: str | None
+    measure_labels: JsonObject
+    list: JsonObject
+    provenance: JsonObject
+
+
 class SourceInsightsResponse(PublicApiModel):
     schema_version: str
     generated_at: str

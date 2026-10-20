@@ -878,6 +878,25 @@
       }
     },
     {
+      "path": "data/public/f2/universities.json",
+      "role": "database",
+      "format": "json",
+      "downloadable": true,
+      "schema_policy": "stable",
+      "expected_files": 1,
+      "expected_count": 77,
+      "minimum_count": 77,
+      "records_pointer": "/universities",
+      "max_bytes": 1048576,
+      "identity_fields": [
+        "$key"
+      ],
+      "max_identity_churn_ratio": 1,
+      "field_contexts": {
+        "/universities/*/name_th": "organization"
+      }
+    },
+    {
       "path": "data/public/f2/manifest.json",
       "role": "provenance",
       "format": "json",

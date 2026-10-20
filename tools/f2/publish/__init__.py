@@ -2,7 +2,8 @@
 
 `python -m tools.f2 publish` builds a candidate in data/runtime/f2/publish/<stamp>/, laid out like the repo:
 
-- data/public/f2/: the files the dashboard reads (overview, geography, one file per topic, detail shards);
+- data/public/f2/: the files the dashboard reads (overview, geography, one file per topic, detail shards,
+  universities);
 - config/publication_contracts/f2_dashboard.json: the F2 publication contract (file list, record counts,
   allowed name/place fields), regenerated for these files;
 - data/public/serving_manifest.json with its F2 entries replaced, and a new publication receipt;
@@ -22,6 +23,7 @@ import hashlib
 import json
 import os
 import shutil
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,13 +42,15 @@ F2, CONTRACT, SERVING = PUBLIC / "f2", CONTRACTS / "f2_dashboard.json", PUBLIC /
 CATALOG = ROOT / "config" / "source_catalog.json"
 SHARD_BYTES = 3_900_000   # detail child files stay under the contract's 4 MiB
 INLINE_BYTES = 3_000_000  # a topic whose details are smaller keeps them in the topic file
-MAX_BYTES = {"overview": 524_288, "geography": 4_194_304, "topic": 8_388_608, "detail": 4_194_304}
+MAX_BYTES = {"overview": 524_288, "geography": 4_194_304, "topic": 8_388_608, "detail": 4_194_304,
+             "universities": 1_048_576}
 # Labels the generic privacy check would mistake for a contact or an address, reviewed as public.
 FIELD_CONTEXTS = {
     "/details_by_id/*/children/organizations/*/organization": "organization",
     "/details_by_id/*/children/participations/*/research_unit": "organization",
     "/details_by_id/*/children/work_attributions/*/attribution": "work_attribution",
 }
+UNIVERSITY_CONTEXTS = {"/universities/*/name_th": "organization"}  # e.g. "...หมู่บ้านจอมบึง" is not an address
 
 
 def dump(payload) -> bytes:
@@ -66,6 +70,11 @@ def run(db_path: Path = DB_PATH) -> dict:
     stale = needs_new_look({table: [{"record_id": rid, "details": json.loads(details) if details else {}}
                                     for rid, details in con.execute(f"SELECT record_id, details FROM {table}").fetchall()]
                             for table in ("operators", "offerings", "people", "activities", "innovations")})
+    university_rows = con.execute("SELECT measure_id, entity_id, university, university_group, source "
+                                  "FROM university_members ORDER BY ALL").fetchall()
+    innovation_places = con.execute("SELECT entity_id, province_code FROM measure_members "
+                                    "WHERE measure_id = 'C04_LISTED' AND province_code IS NOT NULL").fetchall()
+    source_ids = dict(con.execute("SELECT source, raw_folder FROM runs").fetchall())
     issues = [f"{kind} decision {ref} ({what}): {issue} {detail}" for kind, what, ref, issue, detail in con.execute(
         """SELECT 'matching', entity, decision_ref, issue, detail FROM decision_issues
            UNION ALL SELECT 'counting', measure_id, decision_ref, issue, detail FROM counting_issues ORDER BY ALL""").fetchall()]
@@ -77,6 +86,7 @@ def run(db_path: Path = DB_PATH) -> dict:
         files.update(_topic(topic_id, topic, config, results, records.get(topic_id), provinces, header))
     files["overview.json"] = (_overview(config, results, header), "f2/overview", config["source_ids"])
     files["geography.json"] = (_geography(config, results, provinces, header), "f2/geography", config["source_ids"])
+    files["universities.json"] = _universities(config, results, university_rows, innovation_places, source_ids, header)
 
     out = stage / F2
     out.mkdir(parents=True)
@@ -217,6 +227,49 @@ def _geography(config: dict, results: Results, provinces: dict, header: dict) ->
                           for code, name in sorted(provinces.items())}}
 
 
+def _universities(config: dict, results: Results, rows: list[tuple], places: list[tuple], source_ids: dict,
+                  header: dict) -> tuple[dict, str, list[str]]:
+    """The university tab: per university and per group, the counted entities the sources tie to it.
+    Group values count each entity once; the universities of a group may share an entity."""
+    meta = config["universities"]
+    measures = meta["measure_ids"]
+    group_of, by_university, by_group = {}, defaultdict(lambda: defaultdict(set)), defaultdict(lambda: defaultdict(set))
+    innovation_sources = defaultdict(lambda: defaultdict(set))
+    for measure, entity_id, university, group, source in rows:
+        group_of[university] = group
+        by_university[university][measure].add(entity_id)
+        by_group[group][measure].add(entity_id)
+        if measure == "C04_LISTED":
+            innovation_sources[university][source_ids[source]].add(entity_id)
+    unknown = set(group_of.values()) - set(meta["groups"])
+    if unknown:
+        raise SystemExit(f"university groups without a label in config.json: {sorted(unknown)}")
+    provinces_of = defaultdict(set)
+    for entity_id, code in places:
+        provinces_of[entity_id].add(code)
+    universities = {}
+    for name, group in group_of.items():
+        counted = by_university[name]
+        provinces = Counter(code for entity_id in counted["C04_LISTED"] for code in provinces_of[entity_id])
+        university_id = "uni_" + hashlib.sha1(name.encode()).hexdigest()[:12]
+        universities[university_id] = {
+            "university_id": university_id, "name_th": name, "group": group,
+            "counts": {m: len(counted[m]) for m in measures},
+            "innovation_provinces": [{"province_code": code, "count": n}
+                                     for code, n in sorted(provinces.items(), key=lambda kv: (-kv[1], kv[0]))],
+            "innovation_sources": [{"source_id": sid, "count": len(ids)} for sid, ids in sorted(innovation_sources[name].items())],
+            "item_ids": {"C04_LISTED": sorted(counted["C04_LISTED"])}}
+    doc = {**header, "measure_ids": measures, "notes": meta["notes"],
+           "measure_labels": {m: config["measures"][m]["label_th"] for m in measures},
+           "coverage": {m: {"with_university": len(set().union(*(u[m] for u in by_university.values()))),
+                            "counted": len(results.everyone[m])} for m in measures},
+           "groups": {group: {"label_th": label, "university_count": sum(g == group for g in group_of.values()),
+                              "counts": {m: len(by_group[group][m]) for m in measures}}
+                      for group, label in meta["groups"].items()},
+           "universities": dict(sorted(universities.items()))}
+    return doc, "f2/universities", sorted({source_ids[source] for *_, source in rows})
+
+
 # Candidate workspace, contract and checks ---------------------------------------
 
 def _workspace(stage: Path, files: dict, reviewed: dict[str, str], config: dict) -> None:
@@ -249,7 +302,8 @@ def _contract(files: dict, reviewed: dict[str, str], config: dict) -> dict:
     outputs = []
     for path, (payload, _, sources) in sorted(files.items()):
         kind = "detail" if path.startswith("details/") else "topic" if path.startswith("topics/") else path.split(".")[0]
-        pointer = {"overview": "/headlines", "geography": "/provinces", "topic": "/items_by_id", "detail": "/details_by_id"}[kind]
+        pointer = {"overview": "/headlines", "geography": "/provinces", "topic": "/items_by_id", "detail": "/details_by_id",
+                   "universities": "/universities"}[kind]
         records = payload[pointer.strip("/")]
         output = {"path": f"data/public/f2/{path}", "role": "database", "format": "json", "downloadable": True,
                   "schema_policy": "stable", "expected_files": 1, "expected_count": len(records),
@@ -258,6 +312,8 @@ def _contract(files: dict, reviewed: dict[str, str], config: dict) -> dict:
                   "max_identity_churn_ratio": 1}
         if kind in ("detail", "topic") and payload.get("details_by_id"):
             output["field_contexts"] = dict(FIELD_CONTEXTS)
+        if kind == "universities":
+            output["field_contexts"] = dict(UNIVERSITY_CONTEXTS)
         for entity_id, context in sorted(reviewed.items()):
             if entity_id in payload.get("details_by_id", {}):
                 output.setdefault("field_contexts", {}).update({f"/details_by_id/{entity_id}/label": context,

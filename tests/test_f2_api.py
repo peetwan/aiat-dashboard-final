@@ -314,3 +314,43 @@ def test_f2_public_responses_do_not_contain_runtime_paths():
     encoded = json.dumps(payload, ensure_ascii=False)
     assert "data/runtime" not in encoded
     assert "raw/" not in encoded
+
+
+def test_f2_universities_serve_the_published_file():
+    published = _published("universities.json")
+    with TestClient(app) as client:
+        listing = client.get("/api/public/v1/f2/universities")
+        assert listing.status_code == 200
+        body = listing.json()
+        rows = body["universities"]
+        assert {row["university_id"] for row in rows} == set(published["universities"])
+        assert all("item_ids" not in row for row in rows)
+        innovations = [row["counts"]["C04_LISTED"] for row in rows]
+        assert innovations == sorted(innovations, reverse=True)
+        assert body["groups"].keys() == published["groups"].keys()
+        for measure_id, coverage in body["coverage"].items():
+            assert coverage["with_university"] <= coverage["counted"], measure_id
+            # each entity once per group: a group can only be smaller than or equal to the national count
+            assert all(group["counts"][measure_id] <= coverage["counted"] for group in body["groups"].values())
+
+        top = rows[0]
+        url = f"/api/public/v1/f2/universities/{top['university_id']}"
+        page = client.get(url, params={"limit": 100}).json()
+        record = published["universities"][top["university_id"]]
+        assert page["list"]["scoped_item_count"] == len(record["item_ids"]["C04_LISTED"]) == top["counts"]["C04_LISTED"]
+        assert "item_ids" not in page["university"]
+        first, second = (client.get(url, params={"limit": 3, "offset": offset}).json()["list"]["items"] for offset in (0, 3))
+        assert [i["entity_id"] for i in first + second] == [i["entity_id"] for i in page["list"]["items"][:6]]
+
+        item = page["list"]["items"][0]
+        searched = client.get(url, params={"q": item["label"]}).json()["list"]
+        assert item["entity_id"] in {i["entity_id"] for i in searched["items"]}
+        assert searched["scoped_item_count"] == page["list"]["scoped_item_count"]
+        detail = client.get(f"/api/public/v1/f2/topics/{page['list']['topic_id']}/details/{item['entity_id']}",
+                            params={"measure": page["list"]["measure_id"]})
+        assert detail.status_code == 200
+
+        assert client.get("/api/public/v1/f2/universities/uni_000000000000").status_code == 404
+        assert client.get(url, params={"limit": 101}).status_code == 422
+        assert client.get(url, params={"province": "10"}).status_code == 422
+        assert client.get("/api/public/v1/f2/universities", params={"revision": "0" * 64}).status_code == 409

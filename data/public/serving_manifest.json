@@ -438,6 +438,18 @@
       "source_ids": [
         "f2_culturalmap_university"
       ]
+    },
+    {
+      "group": "source_dataset",
+      "key": "f2/universities",
+      "path": "f2/universities.json",
+      "source_ids": [
+        "f2_apptech_mru",
+        "f2_apptech_mtr",
+        "f2_icommunity",
+        "f2_learning_area_based",
+        "f2_target_household"
+      ]
     }
   ],
   "manifest_version": "1.0"
