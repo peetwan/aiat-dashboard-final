@@ -184,6 +184,7 @@ class F2UniversitiesResponse(PublicApiModel):
     coverage: JsonObject
     groups: JsonObject
     notes: list[str]
+    province: JsonObject | None = None  # ?province=: the province, its innovations and how many name a university
     universities: list[JsonObject]
     provenance: JsonObject
 

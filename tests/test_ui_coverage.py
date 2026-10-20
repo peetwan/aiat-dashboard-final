@@ -454,6 +454,7 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert panel is not None
     assert [tab.get_text(strip=True) for tab in panel.select("[data-f2-tab]")] == [
         "ภาพรวม",
+        "พื้นที่",
         "มหาวิทยาลัย",
         "รายการ",
         "ที่มาข้อมูล",

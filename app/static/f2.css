@@ -339,3 +339,51 @@ label.f2-university-search { display: grid; gap: 4px; }
   .f2-official-table :is(tbody th, td:nth-child(2), td:nth-child(3)) { width: auto; }
   .f2-official-table td::before { content: attr(data-label); display: block; color: #526159; font-size: 11px; font-weight: 700; }
 }
+.f2-area-picker { margin-bottom: 14px; }
+.f2-area-picker label { display: grid; gap: 4px; color: #526159; font-size: 11px; font-weight: 700; }
+.f2-area-picker select { width: 100%; max-width: 360px; min-width: 0; height: 38px; border: 1px solid #cbd7ce; border-radius: 8px; padding: 0 9px; background: #fff; color: #17251d; font: inherit; font-size: 13px; }
+.f2-area-summary { display: grid; gap: 4px; }
+.f2-area-summary strong { color: #17251d; font-size: 14px; }
+.f2-area-summary p { margin: 0; color: #526159; font-size: 12px; line-height: 1.6; }
+.f2-area-table caption, .f2-area-brief-table caption { padding: 0 0 8px; text-align: left; color: #526159; font-size: 12px; line-height: 1.5; }
+.f2-area-table td { width: 60%; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f2-table-scroll + .f2-retry { margin-top: 10px; }
+.f2-area-others { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; font-size: 12px; }
+.f2-area-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.f2-area-actions .f2-back-overview { margin: 0; }
+.f2-area-brief-table tbody th { width: 45%; font-weight: 700; }
+.f2-area-brief-table tbody th small { display: block; margin-top: 2px; color: #657269; font-size: 11px; font-weight: 400; line-height: 1.5; }
+.f2-area-brief-table td strong { display: block; color: var(--f2-accent); font-size: 15px; }
+.f2-area-brief-table td .f2-area-none { color: #526159; font-size: 13px; }
+.f2-area-brief-table td small { display: block; margin-top: 2px; font-size: 11px; }
+.f2-area-brief-table td .f2-inline-link { margin-top: 4px; font-size: 12px; }
+.f2-area-institutions { display: grid; gap: 6px; margin: 0; padding-left: 22px; font-size: 12px; line-height: 1.5; }
+.f2-area-institutions .f2-university-group-label { display: inline; margin-left: 6px; }
+.f2-area-count { margin-left: 6px; color: #344a3b; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f2-area-footer { margin-top: 8px; border-top: 1px solid #dce7de; padding-top: 8px; color: #657269; font-size: 11px; line-height: 1.6; }
+.f2-area-footer p { margin: 0; }
+.f2-print-only, .f2-print-root { display: none; }
+@media screen and (max-width: 720px) {
+  .f2-area-table .f2-bar { display: none; }
+  .f2-area-table :is(td, thead th:nth-child(2)) { text-align: right; }
+  .f2-area-table .f2-bar-value { justify-content: flex-end; }
+  .f2-area-brief-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .f2-area-brief-table :is(tbody, tr, th, td), .f2-area-brief-table tbody th { display: block; width: auto; }
+  .f2-area-brief-table tr { border-bottom: 1px solid #dce7de; padding: 6px 0; }
+  .f2-area-brief-table tbody :is(th, td) { border: 0; padding: 4px 0; }
+}
+/* Printing the area tab: only the province brief, copied into #f2PrintRoot (f2.js beforeprint). */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html:has(body.f2-printing), body.f2-printing { height: auto !important; overflow: visible !important; background: #fff !important; }
+  body.f2-printing > :not(#f2PrintRoot) { display: none !important; }
+  body.f2-printing .f2-print-root { --f2-accent: #17643c; display: block; color: #000; font-size: 9pt; }
+  .f2-print-root .f2-section { gap: 5px; margin-bottom: 10px; }
+  .f2-print-root .f2-source-region-table :is(th, td) { padding: 5px 6px; }
+  .f2-print-root .f2-print-only { display: block; overflow-wrap: anywhere; }
+  .f2-print-root .f2-no-print { display: none !important; }
+  .f2-print-root button { border: 0; padding: 0; background: none; color: inherit; font: inherit; text-decoration: none; }
+  .f2-print-root .f2-table-scroll { overflow: visible; }
+  .f2-print-root :is(tr, li) { break-inside: avoid; }
+  .f2-print-root .f2-detail-more summary { list-style: none; color: #000; }
+}

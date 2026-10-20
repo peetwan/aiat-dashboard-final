@@ -786,11 +786,14 @@ def _university_summary(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def get_universities(*, revision: str | None = None) -> dict[str, Any]:
+def get_universities(*, province: str | None = None, revision: str | None = None) -> dict[str, Any]:
     snapshot = _active_revision()
     _require_revision(snapshot, revision)
     data = _universities(snapshot)
-    rows = [_university_summary(record) for record in (data.get("universities") or {}).values()]
+    records = (data.get("universities") or {}).values()
+    if province is not None:
+        return _universities_in_province(snapshot, data, records, province)
+    rows = [_university_summary(record) for record in records]
     rows.sort(key=lambda row: (-int(row["counts"].get(UNIVERSITY_LIST_MEASURE) or 0), _normalize_label(row["name_th"])))
     return {
         "revision": snapshot.revision,
@@ -804,6 +807,47 @@ def get_universities(*, revision: str | None = None) -> dict[str, Any]:
         "notes": data.get("notes") or [],
         "universities": rows,
         "provenance": _provenance(snapshot, ["f2/universities"]),
+    }
+
+
+def _universities_in_province(
+    snapshot: RevisionSnapshot, data: dict[str, Any], records: Any, province: str
+) -> dict[str, Any]:
+    """The universities whose innovations a source places in one province: an innovation link, not where a
+    university is or works. An innovation with several universities counts for each of them."""
+    geography = _load_artifact(snapshot, "f2/geography")
+    code = _validate_province(geography, province)
+    topic = _load_artifact(snapshot, f"f2/topic/{UNIVERSITY_LIST_TOPIC}")
+    scoped = (topic.get("item_ids_by_measure_and_scope") or {}).get(UNIVERSITY_LIST_MEASURE, {})
+    in_province = {str(i) for i in scoped.get(f"province/{code}", [])}
+    rows, linked, sources = [], set(), set()
+    for record in records:
+        count = next((int(row.get("count") or 0) for row in record.get("innovation_provinces") or []
+                      if row.get("province_code") == code), 0)
+        if not count:
+            continue
+        rows.append({**_university_summary(record), "province_innovations": count})
+        linked |= in_province & {str(i) for i in (record.get("item_ids") or {}).get(UNIVERSITY_LIST_MEASURE) or []}
+        sources.update((record.get("source_ids_by_measure") or {}).get(UNIVERSITY_LIST_MEASURE) or [])
+    rows.sort(key=lambda row: (-row["province_innovations"], _normalize_label(row["name_th"])))
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "measure_ids": [UNIVERSITY_LIST_MEASURE],
+        "measure_labels": data.get("measure_labels") or {},
+        "attribution_source_ids": sorted(sources),
+        "coverage": {},
+        "groups": data.get("groups") or {},
+        "notes": data.get("notes") or [],
+        "province": {
+            "province_code": code,
+            "province_name_th": geography["provinces"][code].get("province_name_th"),
+            "innovations": len(in_province),
+            "innovations_with_university": len(linked),
+        },
+        "universities": rows,
+        "provenance": _provenance(snapshot, ["f2/universities", "f2/geography", f"f2/topic/{UNIVERSITY_LIST_TOPIC}"]),
     }
 
 
