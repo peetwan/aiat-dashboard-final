@@ -2,6 +2,7 @@
 
 members.sql: which entities each count measure counts, and in which provinces (measure_members).
 values.sql: totals a source publishes, with the parts they add up from (measure_values).
+universities.sql: the universities the sources tie each counted innovation, innovator and business to (university_members).
 Reviewed counting exclusions (data/runtime/f2/decisions/counting.json) are loaded as counting_exclusions;
 one whose records are gone is reported in counting_issues.
 
@@ -46,6 +47,7 @@ TOTALS = [
      "WHERE measure_id = 'C10_ALTERNATIVE' AND component = 'excludedResourceExpense'", "SELECT 1"),
 ]
 C08_BREAKDOWNS = {"categories", "entityTypes", "geography", "provinces"}
+UNIVERSITY_MEASURES = ("C02_COMMUNITY", "C04_LISTED", "K05")  # the university tab counts these
 TRL_SOURCES = ("apptech_mru", "icommunity", "pmua_apptech", "rinmp")  # each states numeric readiness levels (K04)
 
 
@@ -67,7 +69,7 @@ def run(db_path: Path = DB_PATH) -> dict[str, int]:
         {"measure_id": x["measure"], "source": s, "record_id": r, "place_source": x["source"], "place_record_id": x["record_id"]}
         for x in exclusions for s, r in x.get("evidence_for", [])])
     insert(con, "counting_issues", _gone(con, exclusions))
-    for name in ("members.sql", "values.sql"):
+    for name in ("members.sql", "values.sql", "universities.sql"):
         con.execute((HERE / name).read_text(encoding="utf-8"))
     problems = check(con)
     if problems:
@@ -107,6 +109,9 @@ def check(con) -> list[str]:
     for measure in COUNTED:
         if not con.execute("SELECT count(*) FROM measure_members WHERE measure_id = ?", [measure]).fetchone()[0]:
             problems.append(f"{measure} counts nothing")
+    for measure in UNIVERSITY_MEASURES:
+        if not con.execute("SELECT count(*) FROM university_members WHERE measure_id = ?", [measure]).fetchone()[0]:
+            problems.append(f"{measure}: no counted entity has a university any more (institution_names, universities.sql)")
     for source in TRL_SOURCES:
         if not con.execute("SELECT count(level) FROM innovation_readiness WHERE scale = 'TRL' AND source = ?",
                            [source]).fetchone()[0]:

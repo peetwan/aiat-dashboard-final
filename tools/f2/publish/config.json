@@ -1137,6 +1137,27 @@
    "scheme_id": "f2_learning_dashboard_source_regions_v1"
   }
  },
+ "universities": {
+  "about": "The university tab (universities.json): what each university's innovations, community innovators and businesses count, from Measure's university_members.",
+  "measure_ids": [
+   "C04_LISTED",
+   "K04",
+   "C02_COMMUNITY",
+   "K05"
+  ],
+  "groups": {
+   "rajabhat": "มหาวิทยาลัยราชภัฏ",
+   "rajamangala": "มหาวิทยาลัยเทคโนโลยีราชมงคล",
+   "university": "มหาวิทยาลัยอื่น",
+   "other": "หน่วยงานอื่น"
+  },
+  "notes": [
+   "เทียบข้ามกลุ่มตรง ๆ ไม่ได้: มหาวิทยาลัยราชภัฏและมหาวิทยาลัยเทคโนโลยีราชมงคลมีแพลตฟอร์มรวบรวมผลงานของตัวเอง (AppTech ของแต่ละเครือข่าย) ซึ่งดึงมาได้ทั้งแพลตฟอร์ม มหาวิทยาลัยกลุ่มอื่นมีเฉพาะผลงานบนชุมชนนวัตกรรมและ PMUA AppTech ตัวเลขของสองกลุ่มแรกจึงครบกว่า",
+   "นับตามชื่อหน่วยงานที่แหล่งข้อมูลระบุ วิทยาเขตและศูนย์การศึกษานับรวมกับมหาวิทยาลัยแม่ ผลงานที่แหล่งข้อมูลระบุสองมหาวิทยาลัยนับในทั้งสองแห่ง ผลรวมของทุกมหาวิทยาลัยจึงมากกว่ายอดทั้งประเทศ",
+   "นวัตกรชุมชนนับตามมหาวิทยาลัยของโครงการหรือรายการนวัตกรรมที่บุคคลนั้นอยู่ ไม่ใช่สังกัดของบุคคล",
+   "ธุรกิจนับเมื่อแหล่งข้อมูลระบุหน่วยวิจัยที่ดูแล (โครงการพัฒนาพื้นที่การเรียนรู้) หรือผู้ตรวจพบชื่อธุรกิจในข้อมูลนวัตกรรมของมหาวิทยาลัยนั้น ธุรกิจที่แหล่งข้อมูลไม่ได้โยงกับมหาวิทยาลัย เช่น ร้านค้าในแผนที่ตลาดวัฒนธรรม ไม่ถูกนับในแท็บนี้"
+  ]
+ },
  "reviewed_labels": {
   "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them. Each is bound to the reviewed text (label_sha256): a changed label goes through the normal check until it is reviewed again.",
   "labels": [

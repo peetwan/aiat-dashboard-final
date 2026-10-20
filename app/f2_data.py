@@ -764,6 +764,124 @@ def get_detail(
     }
 
 
+UNIVERSITY_LIST_MEASURE = "C04_LISTED"
+UNIVERSITY_LIST_TOPIC = "k04"
+
+
+def _universities(snapshot: RevisionSnapshot) -> dict[str, Any]:
+    if "f2/universities" not in snapshot.files:
+        raise F2NotFound("this F2 release has no university view")
+    return _load_artifact(snapshot, "f2/universities")
+
+
+def _university_summary(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "university_id": record.get("university_id"),
+        "name_th": record.get("name_th"),
+        "group": record.get("group"),
+        "counts": record.get("counts") or {},
+        "province_count": len(record.get("innovation_provinces") or []),
+    }
+
+
+def get_universities(*, revision: str | None = None) -> dict[str, Any]:
+    snapshot = _active_revision()
+    _require_revision(snapshot, revision)
+    data = _universities(snapshot)
+    rows = [_university_summary(record) for record in (data.get("universities") or {}).values()]
+    rows.sort(key=lambda row: (-int(row["counts"].get(UNIVERSITY_LIST_MEASURE) or 0), _normalize_label(row["name_th"])))
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "measure_ids": data.get("measure_ids") or [],
+        "measure_labels": data.get("measure_labels") or {},
+        "coverage": data.get("coverage") or {},
+        "groups": data.get("groups") or {},
+        "notes": data.get("notes") or [],
+        "universities": rows,
+        "provenance": _provenance(snapshot, ["f2/universities"]),
+    }
+
+
+def get_university(
+    university_id: str,
+    *,
+    q: str | None = None,
+    limit: int = PAGE_DEFAULT,
+    offset: int = 0,
+    revision: str | None = None,
+) -> dict[str, Any]:
+    snapshot = _active_revision()
+    _require_revision(snapshot, revision)
+    data = _universities(snapshot)
+    record = (data.get("universities") or {}).get(university_id)
+    if not isinstance(record, dict):
+        raise F2NotFound("unknown university")
+    query = q or ""
+    if len(query) > QUERY_MAX:
+        raise F2InvalidQuery("q must not exceed 200 characters")
+    if limit < 1 or limit > PAGE_MAX or offset < 0:
+        raise F2InvalidQuery("invalid paging parameters")
+    geography = _load_artifact(snapshot, "f2/geography")
+    provinces = geography.get("provinces") or {}
+    topic = _load_artifact(snapshot, f"f2/topic/{UNIVERSITY_LIST_TOPIC}")
+    compact_items = topic.get("items_by_id") or {}
+    members = set((topic.get("item_ids_by_measure_and_scope") or {}).get(UNIVERSITY_LIST_MEASURE, {}).get("national", []))
+    item_ids = [str(i) for i in (record.get("item_ids") or {}).get(UNIVERSITY_LIST_MEASURE) or []]
+    if not set(item_ids) <= members:
+        raise F2DataError("F2 university items are not members of the published innovation list")
+    normalized_query = _normalize_label(query)
+    matched = sorted(
+        (
+            item_id
+            for item_id in item_ids
+            if not normalized_query
+            or normalized_query in _normalize_label((compact_items.get(item_id) or {}).get("label"))
+        ),
+        key=lambda item_id: (_normalize_label((compact_items.get(item_id) or {}).get("label")), item_id),
+    )
+    items = []
+    for item_id in matched[offset : offset + limit]:
+        compact = compact_items.get(item_id)
+        if isinstance(compact, dict):
+            items.append(
+                {
+                    "entity_id": item_id,
+                    **compact,
+                    "province_names_th": [
+                        provinces[code]["province_name_th"]
+                        for code in compact.get("province_codes") or []
+                        if code in provinces
+                    ],
+                }
+            )
+    university = {key: value for key, value in record.items() if key != "item_ids"}
+    university["innovation_provinces"] = [
+        {**row, "province_name_th": (provinces.get(row.get("province_code")) or {}).get("province_name_th")}
+        for row in record.get("innovation_provinces") or []
+    ]
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "university": university,
+        "group_label_th": ((data.get("groups") or {}).get(record.get("group")) or {}).get("label_th"),
+        "measure_labels": data.get("measure_labels") or {},
+        "list": {
+            "measure_id": UNIVERSITY_LIST_MEASURE,
+            "topic_id": UNIVERSITY_LIST_TOPIC,
+            "scoped_item_count": len(item_ids),
+            "matching_item_count": len(matched),
+            "offset": offset,
+            "limit": limit,
+            "returned_count": len(items),
+            "items": items,
+        },
+        "provenance": _provenance(snapshot, ["f2/universities", "f2/geography", f"f2/topic/{UNIVERSITY_LIST_TOPIC}"]),
+    }
+
+
 def variant_etag(revision: str, route: str, parameters: dict[str, Any]) -> str:
     canonical = json.dumps(
         [revision, route, sorted((key, value) for key, value in parameters.items() if value is not None)],
