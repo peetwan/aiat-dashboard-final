@@ -217,3 +217,12 @@ CREATE TABLE reported_figures (
     value            DOUBLE,
     raw_ref          VARCHAR NOT NULL
 );
+
+-- Stated institution names -> one university (tools/f2/institutions.py) ----------
+-- Covers innovations.institution, people.institution and the Learning area-based research unit.
+
+CREATE TABLE institution_names (
+    raw               VARCHAR PRIMARY KEY,  -- the name as a source states it
+    university        VARCHAR NOT NULL,     -- campuses, abbreviations and typos folded together
+    university_group  VARCHAR NOT NULL      -- rajabhat | rajamangala | university | other
+);

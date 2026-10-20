@@ -13,6 +13,7 @@ from pathlib import Path
 
 import duckdb
 
+from .. import institutions
 from ..geo import Geo
 from . import (apptech_mru, atlocal, cultural_map, extracted, icommunity, learning_area_based,
                learning_dashboard, pmua_apptech, rinmp)
@@ -150,6 +151,9 @@ def run(db_path: Path = DB_PATH) -> dict[str, dict]:
         unread = raw.files() - raw.files_read() - set(getattr(cleaner, "SKIPPED", {}))
         out[source] = {"rows": Counter({table: len(rows) for table, rows in tables.items()}),
                        "unaccounted_raw_files": sorted(unread), "needs_new_look": needs_new_look(tables)}
+    insert(con, "institution_names", institutions.rows(n for (n,) in con.execute(
+        "SELECT institution FROM innovations UNION SELECT institution FROM people "
+        "UNION SELECT details->>'research_unit' FROM operators").fetchall()))
     con.close()
     tmp.replace(db_path)  # only a complete run replaces the previous database
     return out
