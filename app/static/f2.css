@@ -313,3 +313,29 @@ label.f2-university-search { display: grid; gap: 4px; }
   .f2-source-dates-table tbody th { width: 40%; }
   .f2-source-dates-table .f2-freshness--inline { display: inline-block; margin-top: 6px; white-space: normal; border-radius: 8px; }
 }
+.f2-official-intro { margin: 0 0 12px; color: #344a3b; font-size: 12px; line-height: 1.6; }
+.f2-official-table { margin-bottom: 16px; }
+.f2-official-table caption { padding: 0 0 8px; text-align: left; color: #344a3b; font-size: 12px; line-height: 1.5; }
+.f2-official-table caption strong { display: block; color: #1f2d24; font-size: 13px; }
+.f2-official-table tbody th { width: 22%; font-weight: 600; }
+.f2-official-table :is(td:nth-child(2), td:nth-child(3)) { width: 24%; }
+.f2-official-table td:nth-child(2) > strong { color: #8a4209; font-size: 15px; }
+.f2-official-table .f2-official-unit { color: #8a4209; }
+.f2-official-table .f2-official-published { display: block; margin-top: 4px; color: #657269; font-size: 11px; }
+.f2-official-ours { display: grid; justify-items: start; gap: 1px; }
+.f2-official-ours + .f2-official-ours { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #dce7de; }
+.f2-official-ours > span:first-child { color: #526159; font-size: 11px; }
+.f2-official-ours strong { color: #17643c; font-size: 15px; }
+.f2-official-ours strong small { color: #344a3b; font-size: 11px; font-weight: 400; }
+.f2-official-kind { white-space: nowrap; border: 1px solid #b9cfbf; border-radius: 999px; padding: 0 7px; color: #344a3b; font-size: 10px; }
+.f2-official-ours .f2-inline-link { font-size: 11px; }
+@media (max-width: 720px) {
+  /* each row becomes a card: the column name sits above each value */
+  /* headers stay for screen readers, only hidden from sight */
+  .f2-official-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .f2-official-table :is(tbody, tr, th, td) { display: block; width: auto; }
+  .f2-official-table tr { border-bottom: 1px solid #dce7de; padding: 6px 0; }
+  .f2-official-table tbody :is(th, td) { border: 0; padding: 4px 0; }
+  .f2-official-table :is(tbody th, td:nth-child(2), td:nth-child(3)) { width: auto; }
+  .f2-official-table td::before { content: attr(data-label); display: block; color: #526159; font-size: 11px; font-weight: 700; }
+}

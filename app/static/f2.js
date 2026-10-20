@@ -25,7 +25,8 @@
     K04: "ยอดรายการนวัตกรรมทั้งหมดรวมรายการที่ผ่านเกณฑ์ความพร้อมแล้ว จึงไม่ควรนำสองยอดมาบวกกัน",
     K08: "ตัวเลขประกอบเหล่านี้บอกการเข้าร่วม จำนวนธุรกิจที่ต้นทางรายงาน หรือคะแนนของบุคคล ยังใช้ยืนยันว่าธุรกิจพัฒนาขึ้นไม่ได้",
   };
-  const UNIVERSITY_GROUP_ORDER = ["rajabhat", "rajamangala", "university", "other"];
+  const OFFICIAL_TITLE = "ตัวเลขในสไลด์ บพท. กับข้อมูลที่เรารวบรวม";
+  const UNIVERSITY_GROUP_ORDER =["rajabhat", "rajamangala", "university", "other"];
   const UNIVERSITY_COUNTS = [["C04_LISTED", "นวัตกรรม"], ["C02_COMMUNITY", "นวัตกรชุมชน"], ["K05", "ธุรกิจ"]];
   const MONTH_NOTE = "แหล่งข้อมูลยังไม่ระบุว่าเป็นเดือนปฏิทินใด";
   const K10_EXCLUDED_AMOUNT_NOTE = "ข้อมูลต้นทางทั้งชุดมีอีกยอด 200,093,000 บาท (ประมาณ 200.1 ล้านบาท) ที่ไม่ได้รวมในการคำนวณนี้ เพราะยังไม่ชัดเจนว่าเป็นค่าอะไรและครอบคลุมช่วงเวลาใด";
@@ -623,6 +624,7 @@
     selectMeasure(state.measure);
     controls(data);
     const jump = el("select", { id: "f2TopicJump", "aria-label": "ข้ามไปยังหัวข้อ" }, el("option", { value: "", text: "ข้ามไปยังหัวข้อ" }));
+    if (data.official?.rows?.length) jump.append(el("option", { value: "f2-overview-official", text: OFFICIAL_TITLE }));
     OVERVIEW_GROUPS.forEach(([title, ids], index) => {
       if (headlines.some((headline) => ids.includes(headline.measure_id))) jump.append(el("option", { value: `f2-overview-group-${index}`, text: title }));
     });
@@ -648,6 +650,7 @@
       el("p", { text: "พบข้อมูลพื้นที่จากแหล่งข้อมูลที่รวบรวมอย่างน้อยหนึ่งประเภทในแต่ละจังหวัด แต่ละจังหวัดอาจมีข้อมูลไม่ครบทุกหัวข้อ" }),
       el("button", { type: "button", text: MEASURE_HELP_TITLES.K01A, onclick: () => { state.openCoverage = true; setTab("sources"); } }),
     ));
+    renderOfficial(view, data);
     OVERVIEW_GROUPS.forEach(([title, ids], index) => {
       const rows = headlines.filter((headline) => ids.includes(headline.measure_id));
       if (!rows.length) return;
@@ -728,6 +731,56 @@
       view.append(topicSection);
     });
     if (!headlines.length) view.append(section("ภาพรวม", null, "ยังไม่มีข้อมูลสรุปสำหรับขอบเขตที่เลือก"));
+  }
+  // บพท.'s slide figures beside ours, grouped by how far they can be read together. Never a ratio or a gap.
+  function renderOfficial(view, data) {
+    const official = data.official;
+    if (!official?.rows?.length) return;
+    const node = section(OFFICIAL_TITLE, null);
+    node.id = "f2-overview-official";
+    node.classList.add("f2-official");
+    view.append(node);
+    if (state.province) {
+      node.append(el("p", { class: "f2-companion-note" }, `ตัวเลขในสไลด์ บพท. มีเฉพาะระดับประเทศ จึงไม่แสดงคู่กับตัวเลขจังหวัด${provinceName(state.province)} `,
+        el("button", { type: "button", class: "f2-inline-link", text: "ดูทั้งประเทศ", onclick: () => handleProvince("", true) })));
+      return;
+    }
+    node.append(el("p", { class: "f2-official-intro", text: `ตัวเลขฝั่ง บพท. มาจาก${official.source_th} ข้อมูล ณ ${thaiDay(official.as_of)} ส่วนของเรานับจากข้อมูลบนเว็บที่ดึงเมื่อ ${fetchedRange(Object.keys(sourceSnapshots())) || "วันที่ระบุในแท็บที่มาข้อมูล"} ซึ่งเป็นวันที่ดึง ไม่ใช่ช่วงเวลาที่ตัวเลขวัด ยังไม่รู้ว่านิยามและช่วงเวลาของสองฝั่งตรงกันหรือไม่ ตารางนี้จึงไม่ได้บอกว่าฝั่งไหนถูก และไม่ใช่สัดส่วนของผลงาน` }));
+    const measures = Object.fromEntries((data.headlines || []).flatMap((h) => [h, ...(h.companions || [])]).map((m) => [m.measure_id, m]));
+    const kind = (m) => m.status === "source_aggregate" ? "ยอดที่ต้นทางรายงาน" : m.status === "assumed_aggregate" ? "คำนวณโดยมีข้อสมมติ" : "นับจากรายการที่พบ";
+    const open = (m) => {
+      state.overviewScroll = panel.querySelector(".f2-stage").scrollTop;
+      state.overviewTopic = "f2-overview-official";
+      if (m.measure_id === "K01A") { state.openCoverage = true; setTab("sources"); return; }
+      state.rememberedProvince = "";  // these are national figures: do not reopen a province chosen earlier
+      changeMeasure(m.measure_id);
+      if (m.result?.availability === "unavailable") { setTab("sources"); return; }
+      setTab("list");
+      loadMap();
+    };
+    const ours = (ids) => ids.map((id) => measures[id]).filter(Boolean).map((m, _, all) => {
+      const unavailable = m.result?.availability === "unavailable";
+      return el("div", { class: "f2-official-ours" },
+        all.length > 1 ? el("span", { text: measureDisplayLabel(m) }) : "",  // one measure: the row and "เรานับอะไร" say it
+        unavailable ? el("strong", { text: "—" }) : el("strong", {}, valueText(m.result?.display_value ?? m.result?.value) || "—", m.unit ? el("small", { text: ` ${m.unit}` }) : ""),
+        unavailable ? "" : el("span", { class: "f2-official-kind", text: kind(m) }),
+        el("button", { type: "button", class: "f2-inline-link", text: unavailable || m.measure_id === "K01A" ? "ดูวิธีนับ" : m.detail_availability === "available" ? "ดูรายการ" : "ดูรายละเอียดตัวเลข", onclick: () => open(m) }));
+    });
+    official.groups.forEach((group) => {
+      const rows = official.rows.filter((row) => row.group === group.id);
+      if (!rows.length) return;
+      node.append(el("div", { class: "f2-table-scroll" }, el("table", { class: "f2-source-region-table f2-official-table" },
+        el("caption", {}, el("strong", { text: group.title_th }), el("span", { text: group.note_th })),
+        el("thead", {}, el("tr", {}, ["ตัวชี้วัดในสไลด์", "สไลด์ บพท.", "ข้อมูลที่เรารวบรวม", "เรานับอะไร"].map((name) => el("th", { scope: "col", text: name })))),
+        el("tbody", {}, rows.map((row) => el("tr", {},
+          el("th", { scope: "row", text: row.label_th }),
+          el("td", { "data-label": "สไลด์ บพท." },
+            el("strong", { text: formattedCount(row.value) }), el("small", { class: "f2-official-unit", text: ` ${row.unit_th}${row.qualifier_th ? ` ${row.qualifier_th}` : ""}` }),
+            (row.published || []).map((place) => el("small", { class: "f2-official-published" },
+              `พบเผยแพร่ใน ${place.where_th}${place.period_th ? ` · ${place.period_th}` : ""}${place.says_th ? ` · เขียนว่า “${place.says_th}”` : ""}`))),
+          el("td", { "data-label": "ข้อมูลที่เรารวบรวม" }, ours(row.measure_ids)),
+          el("td", { "data-label": "เรานับอะไร", text: row.ours_th })))))));
+    });
   }
   async function loadOverview() {
     if (!state.open) return;

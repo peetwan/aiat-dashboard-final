@@ -422,6 +422,7 @@ def get_overview(*, province: str | None = None, revision: str | None = None) ->
         "headlines": headlines,
         "limitations": overview.get("limitations") or [],
         "sources": overview.get("sources") or {},
+        "official": overview.get("official") or {},
         "provenance": _provenance(snapshot, ["f2/overview", "f2/geography"]),
     }
 
