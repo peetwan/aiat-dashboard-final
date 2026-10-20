@@ -18,7 +18,9 @@ ALIASES = {
     # source that uses this abbreviation (Fatoni writes FTU): an inference from the letters and the place.
     "ม.ฟ.น.": "มหาวิทยาลัยฟาฏอนี",
     "มจธ.": "มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี",
+    "มจธ": "มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี",
     "มนร.": "มหาวิทยาลัยนราธิวาสราชนครินทร์",
+    "มนร": "มหาวิทยาลัยนราธิวาสราชนครินทร์",
 }
 RENAMED = {"มหาวิทยาลัยราชภัฏกาฬสินธุ์": "มหาวิทยาลัยกาฬสินธุ์"}  # merged into it by the 2558 (2015) Act
 PREFIXES = [
@@ -50,9 +52,9 @@ def university(raw: object) -> str | None:
         if pattern.match(text):
             text = pattern.sub(full, text, count=1)
             break
-    text = FAMILY_SPACE.sub(r"\1", text)
     for wrong, right in TYPOS.items():
         text = text.replace(wrong, right)
+    text = FAMILY_SPACE.sub(r"\1", text)  # after the typos: "ราชภัฎ กาฬสินธุ์" is a spaced family too
     if text in TOWN_CAMPUSES:
         text = text.rsplit(" ", 1)[0]
     return RENAMED.get(text, text)
@@ -64,8 +66,8 @@ def group(name: str) -> str:
         return "rajabhat"
     if name.startswith("มหาวิทยาลัยเทคโนโลยีราชมงคล"):
         return "rajamangala"
-    # "จุฬาลงกรณ์มหาวิทยาลัย" ends with it; "มูลนิธิมหาวิทยาลัย..." is a foundation
-    if name.startswith(("มหาวิทยาลัย", "สถาบันเทคโนโลยีพระจอมเกล้า")) or name.endswith("มหาวิทยาลัย"):
+    # "มูลนิธิมหาวิทยาลัย..." is a foundation and "สมาคมนิสิตเก่าจุฬาลงกรณ์มหาวิทยาลัย" an association
+    if name.startswith(("มหาวิทยาลัย", "สถาบันเทคโนโลยีพระจอมเกล้า")) or name == "จุฬาลงกรณ์มหาวิทยาลัย":
         return "university"
     return "other"
 
