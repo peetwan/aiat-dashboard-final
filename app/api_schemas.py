@@ -127,6 +127,7 @@ class F2OverviewResponse(PublicApiModel):
     headlines: list[JsonObject]
     limitations: list[JsonValue]
     sources: JsonObject = {}  # per source: fetch date and the latest change date it states (older releases: empty)
+    official: JsonObject = {}  # บพท.'s slide figures with the measures shown beside them, national only (older releases: empty)
     provenance: JsonObject
 
 

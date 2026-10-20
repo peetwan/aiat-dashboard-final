@@ -24,7 +24,7 @@ import json
 import os
 import shutil
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import duckdb
@@ -85,8 +85,8 @@ def run(db_path: Path = DB_PATH) -> dict:
     files: dict[str, tuple[dict, str, list[str]]] = {}  # path in f2/ -> (payload, artifact key, source ids)
     for topic_id, topic in config["topics"].items():
         files.update(_topic(topic_id, topic, config, results, records.get(topic_id), provinces, header))
-    files["overview.json"] = ({**_overview(config, results, header), "sources": _sources(config, snapshots)},
-                              "f2/overview", config["source_ids"])
+    files["overview.json"] = ({**_overview(config, results, header), "sources": _sources(config, snapshots),
+                               "official": _official(config)}, "f2/overview", config["source_ids"])
     files["geography.json"] = (_geography(config, results, provinces, header), "f2/geography", config["source_ids"])
     files["universities.json"] = _universities(config, results, university_rows, innovation_places, source_ids, header)
 
@@ -239,6 +239,33 @@ def _sources(config: dict, snapshots: list[tuple]) -> dict:
     if set(out) != set(config["source_ids"]):
         raise SystemExit(f"runs table sources {sorted(out)} differ from config.json source_ids")
     return {"updated_within_days": meta["updated_within_days"], "by_id": dict(sorted(out.items()))}
+
+
+def _official(config: dict) -> dict:
+    """บพท.'s own figures to show beside ours (config.json official_figures), checked so a row cannot point at a
+    measure we do not publish, claim a number for a measure we cannot compute, or lose its date or unit."""
+    meta = config["official_figures"]
+    date.fromisoformat(meta["as_of"])  # a real day, or publish stops
+    if not meta["source_th"].strip():
+        raise SystemExit("config.json official_figures does not say where the figures come from")
+    groups = [g["id"] for g in meta["groups"]]
+    rows = meta["rows"]
+    if len(groups) != len(set(groups)) or len({r["id"] for r in rows}) != len(rows):
+        raise SystemExit("config.json official_figures has a repeated group or row id")
+    for row in rows:
+        unknown = [m for m in row["measure_ids"] if m not in config["measures"]]
+        if unknown or not row["measure_ids"]:
+            raise SystemExit(f"official figure {row['id']} names no measure or unknown measures {unknown}")
+        if row["group"] not in groups:
+            raise SystemExit(f"official figure {row['id']} is in unknown group {row['group']}")
+        if any(bool(config["measures"][m].get("unavailable_reason")) != (row["group"] == "unavailable")
+               for m in row["measure_ids"]):
+            raise SystemExit(f"official figure {row['id']}: group {row['group']} does not match whether we have a value")
+        number = isinstance(row["value"], (int, float)) and not isinstance(row["value"], bool)  # True would show as 1
+        if not (number and row["value"] > 0 and row["unit_th"] and row["label_th"] and row["ours_th"]
+                and all(p["where_th"] for p in row["published"])):
+            raise SystemExit(f"official figure {row['id']} lacks a value, unit, label, our definition or a citation")
+    return {k: meta[k] for k in ("source_th", "as_of", "groups", "rows")}
 
 
 def _geography(config: dict, results: Results, provinces: dict, header: dict) -> dict:

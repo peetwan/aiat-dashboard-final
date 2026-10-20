@@ -83,6 +83,11 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
                    for row in [headline, *headline["companions"]])
         assert all(thai_day(datetime.fromisoformat(row["fetched_at"])).isoformat() == row["fetched_date"]
                    and (row["updated"] is None) == (row["freshness"] == "no_date") for row in snapshots.values())
+        # บพท.'s slide figures sit beside measures the overview publishes
+        official = overview["official"]
+        published = {row["measure_id"] for headline in overview["headlines"] for row in [headline, *headline["companions"]]}
+        assert official["as_of"] == "2025-09-30" and len(official["rows"]) == 13
+        assert all(set(row["measure_ids"]) <= published for row in official["rows"])
         expected_units = {
             "K01A": "จังหวัด",
             "K01B": "แห่ง",

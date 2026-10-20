@@ -1169,6 +1169,222 @@
    "f2_learning_area_based": "รายชื่อผู้ประกอบการ"
   }
  },
+ "official_figures": {
+  "about": "Figures from บพท.'s own summary slide for ฝ่าย 2, shown next to the measures we count from web evidence (overview.json official). They are not ours and we do not check them: each row keeps the slide's wording, value and unit, names where the same figure was found published (no figure is attributed to our sources), and says only what our count covers. Groups say how far the two can be read together; no row is a ratio, a gap or a share of the official figure. National only.",
+  "source_th": "สไลด์สรุปผลการดำเนินงาน บพท. ปีงบประมาณ 2563–2568 หน้าฝ่าย 2",
+  "as_of": "2025-09-30",
+  "groups": [
+   {
+    "id": "related",
+    "title_th": "เรื่องเดียวกัน แต่ยังไม่รู้ว่านับเหมือนกันหรือไม่",
+    "note_th": "ตัวเลขสองฝั่งพูดถึงเรื่องเดียวกัน แต่ยังไม่รู้ว่า บพท. นับใครหรืออะไรบ้าง และนับแบบเดียวกับเราหรือไม่ ตัวเลขที่ตรงกันจึงไม่ได้ยืนยันกัน และตัวเลขที่ต่างกันก็ไม่ได้แปลว่าฝั่งไหนผิด"
+   },
+   {
+    "id": "different",
+    "title_th": "นับคนละอย่าง",
+    "note_th": "ของเรานับหน่วยหรือขอบเขตที่ต่างจากชื่อในสไลด์ จึงนำมาเทียบกันตรง ๆ ไม่ได้"
+   },
+   {
+    "id": "unavailable",
+    "title_th": "เรายังไม่มีตัวเลข",
+    "note_th": "ข้อมูลบนเว็บที่เรารวบรวมยังไม่พอจะนับเรื่องนี้ การไม่มีตัวเลขไม่ได้แปลว่าเป็นศูนย์"
+   }
+  ],
+  "rows": [
+   {
+    "id": "target_provinces",
+    "group": "different",
+    "label_th": "พื้นที่เป้าหมาย",
+    "value": 69,
+    "unit_th": "จังหวัด",
+    "measure_ids": [
+     "K01A"
+    ],
+    "ours_th": "จังหวัดที่พบหลักฐานกิจกรรมหรือผลงานของโครงการอย่างน้อยหนึ่งแหล่ง ไม่ใช่รายชื่อจังหวัดเป้าหมาย",
+    "published": [
+     {
+      "where_th": "กรุงเทพธุรกิจ: นวัตกรชุมชน ขับเคลื่อนเศรษฐกิจชุมชนไทยด้วยเทคโนโลยีที่เหมาะสม",
+      "period_th": "ปีงบประมาณ 2563–2568"
+     }
+    ]
+   },
+   {
+    "id": "cultural_areas",
+    "group": "related",
+    "label_th": "พื้นที่วัฒนธรรม",
+    "value": 316,
+    "unit_th": "แห่ง",
+    "measure_ids": [
+     "K01B"
+    ],
+    "ours_th": "พื้นที่ใน AtLocal และพื้นที่วัฒนธรรมในแผนที่วัฒนธรรมรวมกัน พื้นที่ที่ตรวจแล้วว่าอยู่ทั้งสองแหล่งนับครั้งเดียว ส่วนคู่ที่อาจเป็นที่เดียวกันแต่ยังไม่ได้ตรวจยังนับแยกกัน",
+    "published": [
+     {
+      "where_th": "newswit: สืบสาน สร้างสรรค์พลัง #ทุนวัฒนธรรม สู่เศรษฐกิจยั่งยืน (25 ส.ค. 2568)",
+      "period_th": "ปี 2564–2567"
+     }
+    ]
+   },
+   {
+    "id": "community_innovators",
+    "group": "related",
+    "label_th": "สร้างนวัตกรชุมชน",
+    "value": 23753,
+    "unit_th": "คน",
+    "measure_ids": [
+     "K02",
+     "C02_COMMUNITY"
+    ],
+    "ours_th": "ยอดรวมนวัตกรที่ PMUA AppTech รายงาน และจำนวนบุคคลที่มีชื่อในทะเบียนว่าเป็นนวัตกรชุมชน เป็นข้อมูลคนละชุด นำมาบวกหรือลบกันไม่ได้",
+    "published": [
+     {
+      "where_th": "กรุงเทพธุรกิจ: นวัตกรชุมชน ขับเคลื่อนเศรษฐกิจชุมชนไทยด้วยเทคโนโลยีที่เหมาะสม",
+      "period_th": "ปีงบประมาณ 2563–2568"
+     }
+    ]
+   },
+   {
+    "id": "cultural_activities",
+    "group": "different",
+    "label_th": "เกิดกิจกรรมทางวัฒนธรรม",
+    "value": 2089,
+    "unit_th": "ครั้ง",
+    "measure_ids": [
+     "K03"
+    ],
+    "ours_th": "กิจกรรมที่ AtLocal แผนที่วัฒนธรรม และ iCommunity รายงานไว้ รวมเวิร์กช็อปและการประชุม การมีรายงานไม่ได้ยืนยันว่าจัดจริง",
+    "published": []
+   },
+   {
+    "id": "ready_innovations",
+    "group": "related",
+    "label_th": "เทคโนโลยีที่เหมาะสมและนวัตกรรมพร้อมใช้",
+    "value": 1739,
+    "unit_th": "นวัตกรรม",
+    "measure_ids": [
+     "K04",
+     "C04_LISTED"
+    ],
+    "ours_th": "นวัตกรรมที่แหล่งข้อมูลระบุระดับความพร้อม (TRL) 8 หรือ 9 เป็นตัวเลข ส่วนยอดนวัตกรรมทั้งหมดในรายการรวมกลุ่มแรกไว้แล้ว นำมาบวกกันไม่ได้",
+    "published": []
+   },
+   {
+    "id": "cultural_shops",
+    "group": "different",
+    "label_th": "ผู้ประกอบการจำหน่ายสินค้าและบริการเชิงวัฒนธรรม",
+    "value": 1813,
+    "unit_th": "ร้านค้า",
+    "measure_ids": [
+     "K05"
+    ],
+    "ours_th": "ผู้ประกอบการ กลุ่ม และหน่วยธุรกิจวัฒนธรรมจาก 7 แหล่ง ไม่ได้นับเฉพาะร้านค้า",
+    "published": []
+   },
+   {
+    "id": "cultural_entrepreneurs",
+    "group": "unavailable",
+    "label_th": "ผู้ประกอบการวัฒนธรรม",
+    "value": 8028,
+    "unit_th": "คน",
+    "measure_ids": [
+     "K06"
+    ],
+    "ours_th": "ยังหาบุคคลที่เป็นผู้ประกอบการวัฒนธรรมจากข้อมูลบนเว็บได้ไม่ครบพอจะนับ",
+    "published": []
+   },
+   {
+    "id": "cultural_products",
+    "group": "different",
+    "label_th": "พัฒนาผลิตภัณฑ์และบริการเชิงวัฒนธรรม",
+    "value": 1932,
+    "unit_th": "รายการ",
+    "measure_ids": [
+     "K07"
+    ],
+    "ours_th": "ตระกูลสินค้า บริการ และผลงาน รวมต้นแบบ โดยรุ่นย่อยนับเป็นหนึ่ง การมีสินค้าไม่ได้ยืนยันว่าโครงการเป็นผู้พัฒนา",
+    "published": []
+   },
+   {
+    "id": "community_businesses",
+    "group": "unavailable",
+    "label_th": "พัฒนาขีดความสามารถของผู้ประกอบการ",
+    "value": 3650,
+    "unit_th": "ธุรกิจชุมชน",
+    "measure_ids": [
+     "K08"
+    ],
+    "ours_th": "มีข้อมูลธุรกิจที่เข้าร่วมโครงการ แต่ยังไม่มีหลักฐานว่าธุรกิจใดพัฒนาขึ้น",
+    "published": [
+     {
+      "where_th": "เว็บไซต์ บพท.: บพท. หนุนการจัดงาน SUPER เกื้อกูลLEs Exposition 2024 (งานวันที่ 6–7 ก.ย. 2567)",
+      "period_th": null
+     }
+    ]
+   },
+   {
+    "id": "local_employment",
+    "group": "related",
+    "label_th": "เกิดรายได้จากการจ้างงานในพื้นที่",
+    "value": 10315,
+    "unit_th": "คนต่อเดือน",
+    "measure_ids": [
+     "K09"
+    ],
+    "ours_th": "ยอดการจ้างงานที่ Learning dashboard รายงาน ไม่มีรายชื่อผู้ถูกจ้าง และไม่ระบุว่าเป็นเดือนใด ตัวเลขที่ตรงกับสไลด์จึงไม่ได้แปลว่าเรานับยืนยันได้",
+    "published": [
+     {
+      "where_th": "เว็บไซต์ บพท.: บพท. หนุนการจัดงาน SUPER เกื้อกูลLEs Exposition 2024 (งานวันที่ 6–7 ก.ย. 2567)",
+      "period_th": null,
+      "says_th": "การจ้างงานคนในพื้นที่เพิ่มขึ้น 10,315 คนต่อเดือน"
+     }
+    ]
+   },
+   {
+    "id": "local_income",
+    "group": "different",
+    "label_th": "สร้างรายได้กลับสู่ท้องถิ่น",
+    "value": 212.5,
+    "unit_th": "ล้านบาทต่อเดือน",
+    "measure_ids": [
+     "K10"
+    ],
+    "ours_th": "เงินที่ Learning dashboard รายงานว่าจ่ายให้แรงงานและผู้จัดหาทรัพยากรในพื้นที่ นำมารวมกันโดยสมมติว่าไม่ซ้ำกันและเป็นช่วงเดือนเดียวกัน ซึ่งต้นทางไม่ได้ระบุเดือน ไม่ใช่รายได้สุทธิ",
+    "published": [
+     {
+      "where_th": "เว็บไซต์ บพท.: บพท. หนุนการจัดงาน SUPER เกื้อกูลLEs Exposition 2024 (งานวันที่ 6–7 ก.ย. 2567)",
+      "period_th": null,
+      "says_th": "รายจ่ายในการซื้อวัตถุดิบในพื้นที่ 212.5 ล้านบาทต่อเดือน"
+     }
+    ]
+   },
+   {
+    "id": "industry_clusters",
+    "group": "unavailable",
+    "label_th": "ขับเคลื่อนคลัสเตอร์อุตสาหกรรมในพื้นที่",
+    "value": 29,
+    "unit_th": "คลัสเตอร์",
+    "qualifier_th": "ใน 34 จังหวัด",
+    "measure_ids": [
+     "K11A",
+     "K11B"
+    ],
+    "ours_th": "ข้อมูลบนเว็บยังระบุไม่ได้ว่าคลัสเตอร์ใดเป็นคลัสเตอร์เดียวกัน จึงนับคลัสเตอร์และจังหวัดไม่ได้",
+    "published": []
+   },
+   {
+    "id": "cultural_map_items",
+    "group": "related",
+    "label_th": "ระบบสารสนเทศด้านวัฒนธรรมและแผนที่วัฒนธรรม",
+    "value": 5000,
+    "unit_th": "รายการ",
+    "measure_ids": [
+     "K12"
+    ],
+    "ours_th": "รายการทุนหรือเรื่องทางวัฒนธรรมบนแผนที่วัฒนธรรมทุกหมวด รวมบุคคล หลังตัดรายการซ้ำ ไม่ได้นับจำนวนระบบหรือเว็บไซต์",
+    "published": []
+   }
+  ]
+ },
  "reviewed_labels": {
   "about": "Names the privacy check would mistake for a home address or a contact, reviewed as public (historic houses named by their house number; an innovation named after its LINE channel). The publisher shows them and adds a field context to the F2 contract for them. Each is bound to the reviewed text (label_sha256): a changed label goes through the normal check until it is reviewed again.",
   "labels": [
