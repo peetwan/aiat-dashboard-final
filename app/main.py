@@ -1255,11 +1255,14 @@ def public_f2_detail(
 )
 def public_f2_universities(
     request: Request,
+    province: str | None = Query(None),
     revision: str | None = Query(None, min_length=64, max_length=64),
 ):
-    _validate_f2_query(request, {"revision"})
-    payload = _f2_call(lambda: f2_universities(revision=revision))
-    return _f2_http_response(request, payload, "universities", {"revision": revision})
+    _validate_f2_query(request, {"province", "revision"})
+    payload = _f2_call(lambda: f2_universities(province=province, revision=revision))
+    return _f2_http_response(
+        request, payload, "universities", {"province": province, "revision": revision}
+    )
 
 
 @app.get(

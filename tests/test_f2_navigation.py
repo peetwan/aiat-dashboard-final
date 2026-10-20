@@ -176,3 +176,49 @@ assert.equal(panels.get('c').hidden,true);
         cwd=Path(__file__).resolve().parents[1], timeout=30,
     )
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
+def test_area_tab_drops_list_filters_and_uses_an_area_measure():
+    script = r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('app/static/f2.js', 'utf8');
+function extract(name) {
+  const start = source.indexOf('  function ' + name + '(');
+  const candidates = ['\n  function ', '\n  async function ', '\n  // '].map(marker => source.indexOf(marker, start + 1)).filter(index => index >= 0);
+  return source.slice(start, Math.min(...candidates));
+}
+const definitions = [{measure_id:'K10', topic_id:'k10'}, {measure_id:'C04_LISTED', topic_id:'k04'}, {measure_id:'K12', topic_id:'k12'}];
+const state = {province:'10', measure:'K12', topic:'k12', filters:{category:'AA', q:'x'}, searchDraft:'x', sort:'name_asc', offset:25, scopeNotice:'notice'};
+const context = vm.createContext({state, clearTimeout, allMeasureDefinitions: () => definitions});
+vm.runInContext(source.split('\n').find(line => line.startsWith('  const AREA_MEASURES =')), context);
+vm.runInContext(['selectMeasure', 'enterAreas'].map(extract).join('\n'), context);
+// /overview takes no list filters, so a filtered table beside an unfiltered province brief would disagree
+context.enterAreas();
+assert.equal(Object.keys(state.filters).length, 0);
+assert.equal(state.searchDraft, '');
+assert.equal(state.offset, 0);
+assert.equal(state.sort, 'source');
+assert.equal(state.measure, 'K12');  // an area measure stays
+assert.equal(state.province, '10');  // the province is the area tab's own scope
+state.measure = 'K10';               // region-only measure: not comparable by province
+context.enterAreas();
+assert.equal(state.measure, 'C04_LISTED');
+assert.equal(state.topic, 'k04');
+// the list tab may have fetched a filtered map of the same measure: the area list must not draw from it
+vm.runInContext(extract('areaMap'), context);
+state.revision = 'r1';
+state.mapData = {measure_id:'C04_LISTED', revision:'r1', filters:{applied:{category:'AA'}}};
+assert.equal(context.areaMap(), null);
+state.mapData = {measure_id:'C04_LISTED', revision:'r1', filters:{applied:{}}};
+assert.equal(context.areaMap(), state.mapData);
+state.mapData.revision = 'r0';
+assert.equal(context.areaMap(), null);
+"""
+    result = subprocess.run(
+        [shutil.which("node"), "-"], input=script, text=True, capture_output=True,
+        cwd=Path(__file__).resolve().parents[1], timeout=30,
+    )
+    assert result.returncode == 0, result.stderr

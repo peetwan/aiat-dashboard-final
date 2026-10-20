@@ -371,3 +371,30 @@ def test_f2_universities_serve_the_published_file():
         assert client.get(url, params={"limit": 101}).status_code == 422
         assert client.get(url, params={"province": "10"}).status_code == 422
         assert client.get("/api/public/v1/f2/universities", params={"revision": "0" * 64}).status_code == 409
+
+
+def test_f2_universities_in_a_province_invert_the_published_innovation_provinces():
+    published = _published("universities.json")["universities"]
+    k04 = _published("topics/k04.json")
+    with TestClient(app) as client:
+        for code in ("10", "30", "96", "38"):  # 38: no innovation placed there, so an empty list
+            body = client.get("/api/public/v1/f2/universities", params={"province": code}).json()
+            expected = {uid: row["count"] for uid, record in published.items()
+                        for row in record["innovation_provinces"] if row["province_code"] == code and row["count"]}
+            assert {row["university_id"]: row["province_innovations"] for row in body["universities"]} == expected
+            counts = [row["province_innovations"] for row in body["universities"]]
+            assert counts == sorted(counts, reverse=True)
+            assert all("item_ids" not in row for row in body["universities"])
+            in_province = set(k04["item_ids_by_measure_and_scope"]["C04_LISTED"].get(f"province/{code}", []))
+            linked = in_province & {i for uid in expected for i in published[uid]["item_ids"]["C04_LISTED"]}
+            assert body["province"] == {
+                "province_code": code,
+                "province_name_th": _published("geography.json")["provinces"][code]["province_name_th"],
+                "innovations": len(in_province),
+                "innovations_with_university": len(linked),
+            }
+            # an innovation can name several universities, so the rows may add up to more than the province has
+            assert max(counts, default=0) <= len(in_province)
+        assert client.get("/api/public/v1/f2/universities").json().get("province") is None
+        for bad in ("99", "1", "bangkok"):
+            assert client.get("/api/public/v1/f2/universities", params={"province": bad}).status_code == 422, bad
