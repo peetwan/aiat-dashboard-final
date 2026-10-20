@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const panel = $("f2DashboardPanel");
   const views = { overview: $("f2-view-overview"), universities: $("f2-view-universities"), list: $("f2-view-list"), sources: $("f2-view-sources") };
-  const state = { open: false, tab: "overview", province: "", measure: "", topic: "", detail: "", detailHistory: false, revision: "", overview: null, topicData: null, filterChoices: {}, choiceFailures: {}, controllers: {}, requests: {}, returnFocus: null, pendingListFocus: "", callbacks: {}, filters: {}, searchDraft: "", searchTimer: null, scopeNotice: "", offset: 0, limit: 25, sort: "source", rememberedProvince: "", overviewScroll: 0, overviewTopic: "", filterDraft: null, coverageData: null, openCoverage: false, universities: null, university: "", universityOffset: 0, universityQuery: "" };
+  const state = { open: false, tab: "overview", province: "", measure: "", topic: "", detail: "", detailHistory: false, revision: "", overview: null, topicData: null, filterChoices: {}, choiceFailures: {}, controllers: {}, requests: {}, returnFocus: null, pendingListFocus: "", callbacks: {}, filters: {}, searchDraft: "", searchTimer: null, scopeNotice: "", offset: 0, limit: 25, sort: "source", rememberedProvince: "", overviewScroll: 0, overviewTopic: "", filterDraft: null, coverageData: null, openCoverage: false, universities: null, university: "", universityOffset: 0, universityQuery: "", universitySearch: "", universityFocus: "" };
   const C02_MEASURE_ID = "C02_COMMUNITY";
   const C02_SOURCE_PROVINCE_MEANING = "จังหวัดที่แสดงเป็นจังหวัดที่แหล่งข้อมูลระบุไว้ในทะเบียน ไม่ใช่ที่อยู่หรือสถานที่ทำงานปัจจุบัน";
   const K12_DISPLAY_LABEL = "รายการทุนวัฒนธรรมบนแผนที่";
@@ -251,7 +251,7 @@
     const url = new URL(location.href);
     url.searchParams.set("mode", "f2");
     url.searchParams.set("f2tab", state.tab);
-    ["f2measure", "province", "f2detail", "f2category", "f2source_level", "f2source_region", "f2component", "f2source_dimension", "f2q", "f2offset", "f2sort", "f2preferredProvince", "f2uni", "f2unioffset", "f2uniq"].forEach((name) => url.searchParams.delete(name));
+    ["f2measure", "province", "f2detail", "f2category", "f2source_level", "f2source_region", "f2component", "f2source_dimension", "f2q", "f2offset", "f2sort", "f2preferredProvince", "f2uni", "f2unioffset", "f2uniq", "f2unisearch"].forEach((name) => url.searchParams.delete(name));
     if (state.measure) url.searchParams.set("f2measure", state.measure);
     if (state.province) url.searchParams.set("province", state.province);
     if (state.detail) url.searchParams.set("f2detail", state.detail);
@@ -259,6 +259,7 @@
     if (state.offset) url.searchParams.set("f2offset", state.offset);
     if (state.sort !== "source") url.searchParams.set("f2sort", state.sort);
     if (state.rememberedProvince && !state.province) url.searchParams.set("f2preferredProvince", state.rememberedProvince);
+    if (state.tab === "universities" && state.universitySearch) url.searchParams.set("f2unisearch", state.universitySearch);
     if (state.tab === "universities" && state.university) {
       url.searchParams.set("f2uni", state.university);
       if (state.universityOffset) url.searchParams.set("f2unioffset", state.universityOffset);
@@ -272,6 +273,7 @@
     state.university = params.get("f2uni") || "";
     state.universityOffset = Math.max(0, Number(params.get("f2unioffset")) || 0);
     state.universityQuery = params.get("f2uniq") || "";
+    state.universitySearch = params.get("f2unisearch") || "";
     state.measure = params.get("f2measure") || "";
     state.province = params.get("province") || "";
     state.rememberedProvince = params.get("f2preferredProvince") || state.province;
@@ -307,6 +309,7 @@
     if (changingTab) panel.querySelector(".f2-stage").scrollTop = 0;
     // the measure and province controls do not apply to the university tab (national, its own counts)
     $("f2Controls").hidden = $("f2FiltersToggle").hidden = tab === "universities";
+    renderBreadcrumbs(state.overview?.requested_scope || {});
     writeUrl(push);
     if (tab === "overview") loadOverview();
     if (tab === "universities") loadUniversities();
@@ -316,7 +319,8 @@
   function renderBreadcrumbs(scope) {
     const crumb = $("f2Breadcrumbs"); clear(crumb);
     crumb.append(el("button", { type: "button", text: "ประเทศไทย", onclick: () => handleProvince("", true) }));
-    const province = scope?.province_name_th || scope?.province || scope?.province_code || state.province;
+    // the university tab counts nationally; the province stays selected for the other tabs
+    const province = state.tab === "universities" ? "" : scope?.province_name_th || scope?.province || scope?.province_code || state.province;
     if (province) crumb.append(el("span", { text: province }));
   }
   function choices(contract, key, fallback) {
@@ -1061,24 +1065,29 @@
     if (!state.open || state.tab !== "universities") return;
     const view = views.universities;
     status(view, "กำลังโหลดข้อมูลมหาวิทยาลัย", "กำลังขอข้อมูลจากระบบ");
+    if (!state.university) abort("university");
+    const wanted = JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
+    const current = () => state.tab === "universities" && wanted === JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
     try {
       const list = state.universities && state.universities.revision === state.revision ? state.universities
         : await request("/universities" + query({ revision: state.revision }), "universities");
-      if (!list) return;
+      if (!list || !current()) return;
       state.universities = list;
       state.revision = list.revision || state.revision;
       if (!state.university) { renderUniversities(list); return; }
       const data = await request(`/universities/${encodeURIComponent(state.university)}`
         + query({ q: state.universityQuery, limit: state.limit, offset: state.universityOffset, revision: state.revision }), "university");
-      if (!data || state.tab !== "universities") return;
+      if (!data || !current()) return;
       renderUniversity(list, data);
     } catch (error) {
       if (error.stale || error.name === "AbortError") return;
       if (error.status === 404 && state.university) { showUniversity("", false); return; }
+      if (error.status === 404) { status(view, "ข้อมูลชุดนี้ยังไม่มีมุมมองมหาวิทยาลัย", "ข้อมูลที่เผยแพร่ชุดนี้สร้างก่อนมีแท็บมหาวิทยาลัย"); return; }
       status(view, "เปิดข้อมูลมหาวิทยาลัยไม่ได้", "ระบบยังเปิดข้อมูลนี้ไม่ได้ โปรดลองอีกครั้ง", loadUniversities);
     }
   }
   function showUniversity(id, push = true) {
+    state.universityFocus = id ? "heading" : state.university && `row:${state.university}`;
     state.university = id;
     state.universityOffset = 0;
     state.universityQuery = "";
@@ -1089,6 +1098,15 @@
   function countList(counts, rows) {
     return el("dl", { class: "f2-university-counts" }, rows.map(([measureId, name]) => el("div", {},
       el("dt", { text: name }), el("dd", { text: formattedCount(counts?.[measureId]) || "0" }))));
+  }
+  function applyUniversityFocus(view) {
+    const focus = state.universityFocus;
+    state.universityFocus = "";
+    const target = focus === "heading" ? view.querySelector(".f2-university-head h3")
+      : focus === "search" ? $("f2UniversityItemSearch")
+        : focus === "list" ? view.querySelector(".f2-item")
+          : focus.startsWith("row:") ? view.querySelector(`[data-f2-university-id="${CSS.escape(focus.slice(4))}"]`) : null;
+    target?.focus({ preventScroll: focus !== "list" });
   }
   function bar(value, max) {
     const fill = el("span");
@@ -1115,7 +1133,7 @@
     if (howCounted.length) view.append(el("details", { class: "f2-university-method" },
       el("summary", { text: "นับอย่างไร" }), el("ul", {}, howCounted.map((note) => el("li", { text: note })))));
 
-    const search = el("input", { id: "f2UniversitySearch", type: "search", placeholder: "ชื่อมหาวิทยาลัย", autocomplete: "off" });
+    const search = el("input", { id: "f2UniversitySearch", type: "search", placeholder: "ชื่อมหาวิทยาลัย", autocomplete: "off", value: state.universitySearch });
     const summary = el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite" });
     const body = el("tbody");
     const max = Math.max(...rows.map((row) => Number(row.counts?.C04_LISTED) || 0));
@@ -1124,7 +1142,7 @@
       const shown = rows.filter((row) => !wanted || text(row.name_th).normalize("NFKC").includes(wanted));
       body.replaceChildren(...shown.map((row) => el("tr", {},
         el("th", { scope: "row" },
-          el("button", { type: "button", class: "f2-university-link", text: row.name_th, onclick: () => showUniversity(row.university_id) }),
+          el("button", { type: "button", class: "f2-university-link", "data-f2-university-id": row.university_id, text: row.name_th, onclick: () => showUniversity(row.university_id) }),
           // the group only where the name does not already say it ("มหาวิทยาลัยราชภัฏ..." does)
           text(row.name_th).startsWith(groups[row.group]?.label_th) ? "" : el("span", { class: "f2-university-group-label", text: groups[row.group]?.label_th || "" })),
         el("td", {}, el("span", { class: "f2-bar-value" }, bar(row.counts?.C04_LISTED, max), formattedCount(row.counts?.C04_LISTED) || "0")),
@@ -1133,7 +1151,7 @@
         el("td", { text: formattedCount(row.province_count) || "0" }))));
       summary.textContent = wanted ? `${shown.length} จาก ${rows.length} แห่งที่ตรงคำค้นหา` : `${rows.length} แห่ง เรียงตามจำนวนนวัตกรรม`;
     };
-    search.addEventListener("input", fill);
+    search.addEventListener("input", () => { state.universitySearch = search.value.trim(); writeUrl(false); fill(); });
     fill();
     const table = el("table", { class: "f2-source-region-table f2-university-table" },
       el("thead", {}, el("tr", {}, ["มหาวิทยาลัย", "นวัตกรรม", "นวัตกร", "ธุรกิจ", "จังหวัด"]
@@ -1141,6 +1159,7 @@
     view.append(section("รายชื่อมหาวิทยาลัย", el("div", { class: "f2-university-list" },
       el("label", { class: "f2-university-search", htmlFor: "f2UniversitySearch", text: "ค้นหา" }, search),
       summary, el("div", { class: "f2-table-scroll", tabindex: "0" }, table))));
+    applyUniversityFocus(view);
   }
   function renderUniversity(list, data) {
     const view = clear(views.universities);
@@ -1149,11 +1168,13 @@
     const items = data.list?.items || [];
     view.append(el("button", { type: "button", class: "f2-back-overview", text: "← กลับไปรายชื่อมหาวิทยาลัย", onclick: () => showUniversity("") }));
     view.append(el("header", { class: "f2-university-head" },
-      el("p", { class: "f2-detail-eyebrow", text: data.group_label_th || "" }), el("h3", { text: university.name_th })));
+      el("p", { class: "f2-detail-eyebrow", text: data.group_label_th || "" }), el("h3", { text: university.name_th, tabindex: "-1" })));
     const places = university.innovation_provinces || [];
     view.append(countList({ ...counts, provinces: places.length }, [
-      ["C04_LISTED", `นวัตกรรม (พร้อมใช้ ${formattedCount(counts.K04) || "0"})`], ["C02_COMMUNITY", "นวัตกรชุมชน"],
-      ["K05", "ธุรกิจที่เข้าร่วม"], ["provinces", "จังหวัดที่ใช้นวัตกรรม"]]));
+      ["C04_LISTED", "นวัตกรรม"], ["K04", "มีหลักฐาน TRL 8–9"], ["C02_COMMUNITY", "นวัตกรชุมชน"],
+      ["K05", "ธุรกิจที่โยงกับมหาวิทยาลัย"], ["provinces", "จังหวัดที่ใช้นวัตกรรม"]]));
+    view.append(el("p", { class: "f2-result-context", text: "TRL 8–9 คือระดับที่แหล่งข้อมูลระบุ ไม่ใช่การยืนยันว่าใช้งานได้ในวันนี้ และบางชิ้นมีแหล่งที่ระบุระดับต่างกัน · "
+      + "ธุรกิจนับเมื่อแหล่งข้อมูลระบุหน่วยวิจัยที่ดูแล หรือพบชื่อธุรกิจในข้อมูลนวัตกรรมของมหาวิทยาลัยนี้ จึงยังไม่ได้ยืนยันว่าเข้าร่วมโครงการ" }));
     if (places.length) {
       const max = Number(places[0].count) || 1;
       const row = (place) => el("li", {}, el("span", { text: place.province_name_th || place.province_code }), bar(place.count, max), el("span", { text: formattedCount(place.count) }));
@@ -1170,6 +1191,7 @@
       event.preventDefault();
       state.universityQuery = search.value.trim();
       state.universityOffset = 0;
+      state.universityFocus = "search";
       writeUrl(true);
       loadUniversities();
     } }, el("label", { htmlFor: "f2UniversityItemSearch", text: "ค้นหานวัตกรรมของมหาวิทยาลัยนี้" }, search), el("button", { type: "submit", class: "f2-retry", text: "ค้นหา" }));
@@ -1189,7 +1211,7 @@
       cards.length ? el("div", { class: "f2-item-list" }, cards) : el("p", { text: "ไม่พบนวัตกรรมที่ตรงกับคำค้นหา" }))));
     if (Number(found.matching_item_count) > items.length) {
       const offset = Number(found.offset || 0);
-      const page = (next) => { state.universityOffset = next; writeUrl(true); panel.querySelector(".f2-stage").scrollTop = 0; loadUniversities(); };
+      const page = (next) => { state.universityOffset = next; state.universityFocus = "list"; writeUrl(true); panel.querySelector(".f2-stage").scrollTop = 0; loadUniversities(); };
       view.append(el("nav", { class: "f2-pagination", "aria-label": "เปลี่ยนหน้ารายการนวัตกรรม" },
         el("button", { type: "button", text: "ก่อนหน้า", disabled: !offset, onclick: () => page(Math.max(0, offset - state.limit)) }),
         el("span", { text: `แสดง ${offset + 1}–${offset + items.length} จาก ${matching} รายการ` }),
@@ -1198,6 +1220,7 @@
     if (list.notes?.length) view.append(el("details", { class: "f2-university-method" },
       el("summary", { text: "นับอย่างไร" }), el("ul", {}, list.notes.map((note) => el("li", { text: note })))));
     restorePendingListFocus();
+    applyUniversityFocus(view);
   }
   function genericDetail(value, depth = 0) {
     if (!isObject(value) && !Array.isArray(value)) return el("p", { text: valueText(value) || "ไม่มีข้อมูล" });
