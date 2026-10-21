@@ -12,6 +12,7 @@ smaller number, the stage then stops with the list of problems and writes nothin
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import duckdb
@@ -29,13 +30,15 @@ CODES = [("innovation_places", "role", "use"), ("innovation_readiness", "scale",
          ("cultural_records", "source", "cultural_map"), ("cultural_records", "category", "CS"),
          ("cultural_records", "category", "area"), ("operators", "source", "learning_area_based"),
          ("operators", "kind", "listed"), ("offerings", "kind", "listed"),
-         ("reported_figures", "metric", "businesses_by_province")]
+         ("reported_figures", "metric", "businesses_by_province"), ("reported_figures", "metric", "total_hh")]
 LEARNING = "SELECT any_value(value) FROM reported_figures WHERE dataset = 'learning_dashboard' AND metric = "
 PARTS = "SELECT sum(value) FROM measure_values WHERE measure_id = "
 # A source total must add up to the total the source states itself: (what, sum of parts, source's total).
 TOTALS = [
     ("K02 = PMUA headline", PARTS + "'K02'", "SELECT any_value(value) FROM reported_figures "
      "WHERE source = 'pmua_apptech' AND dataset = 'innovators_all' AND metric = 'headline'"),
+    ("H01 = PMUA family headline", PARTS + "'H01'", "SELECT any_value(value) FROM reported_figures "
+     "WHERE source = 'pmua_apptech' AND dataset = 'family_all' AND metric = 'headline'"),
     ("K09 = Learning totalEmplyeeAmount", PARTS + "'K09'", LEARNING + "'totalEmplyeeAmount'"),  # the source's spelling
     ("K10 workers = Learning totalEmployeeExpense", PARTS + "'K10' AND component = 'localEmployeeExpense'",
      LEARNING + "'totalEmployeeExpense'"),
@@ -49,6 +52,13 @@ TOTALS = [
 C08_BREAKDOWNS = {"categories", "entityTypes", "geography", "provinces"}
 UNIVERSITY_MEASURES = ("C02_COMMUNITY", "C04_LISTED", "K05")  # the university tab counts these
 TRL_SOURCES = ("apptech_mru", "icommunity", "pmua_apptech", "rinmp")  # each states numeric readiness levels (K04)
+# PMUA's family dashboard: H01 households by province, and national money and fiscal-year figures that publish shows
+# as stated. These metrics are the only family figures published; its district and business-type cells never are.
+FAMILY_ALL, FAMILY_YEARS = "family_all", {"family_2025": "2568", "family_2026": "2569"}  # year_filter = Thai fiscal year
+FAMILY_MONEY = ("income_increase", "cost_reduction", "net_income_increase")
+FAMILY_METRICS = ("headline", *FAMILY_MONEY)
+# The page's money does not always add up to the baht (net vs its parts, fiscal years vs all years); a wider gap stops.
+FAMILY_MONEY_SLACK_THB = 1
 
 
 def run(db_path: Path = DB_PATH) -> dict[str, int]:
@@ -138,4 +148,42 @@ def check(con) -> list[str]:
             AND metric LIKE 'businesses_by_%' AND metric NOT IN ('businesses_by_category', 'businesses_by_entity_type',
             'businesses_by_region', 'businesses_by_province') ORDER BY 1""").fetchall():
         problems.append(f"new Learning breakdown {metric}: decide how C08 shows it (values.sql)")
+    return problems + household_problems(con)
+
+
+def household_problems(con) -> list[str]:
+    """H01 and the family figures publish shows: every province once, fiscal years adding up to all years, and
+    money within FAMILY_MONEY_SLACK_THB of adding up."""
+    problems = []
+    for code, n in con.execute("""SELECT province_code, count(*) FROM measure_values WHERE measure_id = 'H01'
+                                  GROUP BY 1 HAVING province_code IS NULL OR count(*) > 1 ORDER BY 1""").fetchall():
+        problems.append(f"H01: {n} province rows with code {code} (an unmapped or repeated province)")
+    for member, value in con.execute("SELECT member, value FROM measure_values WHERE measure_id = 'H01' ORDER BY ord").fetchall():
+        if not _count(value):
+            problems.append(f"H01 {member}: {value!r} households is not a whole number of zero or more")
+    datasets = [FAMILY_ALL, *FAMILY_YEARS]
+    figures = {(d, m): v for d, m, v in con.execute(
+        f"""SELECT dataset, metric, any_value(value) FROM reported_figures WHERE source = 'pmua_apptech'
+            AND dimension IS NULL AND dataset IN ({", ".join("?" * len(datasets))}) GROUP BY ALL""", datasets).fetchall()}
+    missing = [f"{d} {m}" for d in datasets for m in FAMILY_METRICS
+               if not isinstance(figures.get((d, m)), (int, float)) or not math.isfinite(figures[(d, m)])]
+    if missing:
+        return problems + [f"family dashboard figure missing or not a number: {', '.join(missing)}"]
+    problems += [f"{d} headline: {figures[(d, 'headline')]!r} households is not a whole number of zero or more"
+                 for d in datasets if not _count(figures[(d, "headline")])]
+    years = sum(figures[(d, "headline")] for d in FAMILY_YEARS)
+    if years != figures[(FAMILY_ALL, "headline")]:
+        problems.append(f"family households: fiscal years add up to {years:,.0f}, all years state {figures[(FAMILY_ALL, 'headline')]:,.0f}")
+    for d in datasets:
+        gap = figures[(d, "net_income_increase")] - figures[(d, "income_increase")] - figures[(d, "cost_reduction")]
+        if abs(gap) > FAMILY_MONEY_SLACK_THB:
+            problems.append(f"{d}: net income increase is {gap:+,.0f} THB off income increase + cost reduction")
+    for m in FAMILY_MONEY:
+        gap = sum(figures[(d, m)] for d in FAMILY_YEARS) - figures[(FAMILY_ALL, m)]
+        if abs(gap) > FAMILY_MONEY_SLACK_THB:
+            problems.append(f"family {m}: fiscal years are {gap:+,.0f} THB off all years")
     return problems
+
+
+def _count(value) -> bool:
+    return isinstance(value, (int, float)) and math.isfinite(value) and value >= 0 and value == int(value)

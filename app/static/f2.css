@@ -315,6 +315,10 @@ label.f2-university-search { display: grid; gap: 4px; }
 }
 .f2-official-intro { margin: 0 0 12px; color: #344a3b; font-size: 12px; line-height: 1.6; }
 .f2-official-table { margin-bottom: 16px; }
+.f2-household-table { grid-column: 1 / -1; display: grid; gap: 8px; }
+.f2-household-table caption { padding: 0 0 8px; text-align: left; color: #344a3b; font-size: 12px; }
+.f2-household-table td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.f2-household-notes { margin: 0; padding-left: 18px; color: #344a3b; font-size: 11px; line-height: 1.55; }
 .f2-official-table caption { padding: 0 0 8px; text-align: left; color: #344a3b; font-size: 12px; line-height: 1.5; }
 .f2-official-table caption strong { display: block; color: #1f2d24; font-size: 13px; }
 .f2-official-table tbody th { width: 22%; font-weight: 600; }
@@ -332,12 +336,13 @@ label.f2-university-search { display: grid; gap: 4px; }
 @media (max-width: 720px) {
   /* each row becomes a card: the column name sits above each value */
   /* headers stay for screen readers, only hidden from sight */
-  .f2-official-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .f2-official-table :is(tbody, tr, th, td) { display: block; width: auto; }
-  .f2-official-table tr { border-bottom: 1px solid #dce7de; padding: 6px 0; }
-  .f2-official-table tbody :is(th, td) { border: 0; padding: 4px 0; }
+  :is(.f2-official-table, .f2-household-table table) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :is(.f2-official-table, .f2-household-table table) :is(tbody, tr, th, td) { display: block; width: auto; }
+  :is(.f2-official-table, .f2-household-table table) tr { border-bottom: 1px solid #dce7de; padding: 6px 0; }
+  :is(.f2-official-table, .f2-household-table table) tbody :is(th, td) { border: 0; padding: 4px 0; }
+  .f2-household-table td { text-align: left; white-space: normal; }
   .f2-official-table :is(tbody th, td:nth-child(2), td:nth-child(3)) { width: auto; }
-  .f2-official-table td::before { content: attr(data-label); display: block; color: #526159; font-size: 11px; font-weight: 700; }
+  :is(.f2-official-table, .f2-household-table table) td::before { content: attr(data-label); display: block; color: #526159; font-size: 11px; font-weight: 700; }
 }
 .f2-area-picker { margin-bottom: 14px; }
 .f2-area-picker label { display: grid; gap: 4px; color: #526159; font-size: 11px; font-weight: 700; }
@@ -385,5 +390,7 @@ label.f2-university-search { display: grid; gap: 4px; }
   .f2-print-root button { border: 0; padding: 0; background: none; color: inherit; font: inherit; text-decoration: none; }
   .f2-print-root .f2-table-scroll { overflow: visible; }
   .f2-print-root :is(tr, li) { break-inside: avoid; }
+  .f2-print-root .f2-area-institutions { display: block; columns: 2; column-gap: 16px; }
+  .f2-print-root .f2-area-institutions li { margin-bottom: 3px; }
   .f2-print-root .f2-detail-more summary { list-style: none; color: #000; }
 }

@@ -222,3 +222,29 @@ assert.equal(context.areaMap(), null);
         cwd=Path(__file__).resolve().parents[1], timeout=30,
     )
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
+def test_a_missing_province_total_says_so_instead_of_its_kind_of_number():
+    script = r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('app/static/f2.js', 'utf8');
+const lines = source.split('\n');
+const start = lines.findIndex(line => line.startsWith('  const RESULT_STATUS_LABELS = {'));
+const labels = lines.slice(start, lines.indexOf('  };', start) + 1).join('\n');
+const helpers = lines.filter(line => line.startsWith('  const statusLabel =')).join('\n');
+const unavailable = lines.slice(lines.findIndex(line => line.startsWith('  const unavailableLabel =')), lines.findIndex(line => line.startsWith('  const unavailableLabel =')) + 2).join('\n');
+const context = vm.createContext({label: (value) => value});
+vm.runInContext(`${labels}\n${helpers}\n${unavailable}\nthis.unavailableLabel = unavailableLabel;`, context);
+// H01 and K02 are source totals: a province the source does not report is missing, not "a source total"
+assert.equal(context.unavailableLabel({status: 'source_aggregate', availability: 'unavailable', unavailable_reason: {code: 'unknown_province'}}), 'ไม่มีข้อมูลรายจังหวัด');
+assert.equal(context.unavailableLabel({status: 'source_aggregate', availability: 'unavailable', unavailable_reason: {code: 'unsupported_filter'}}), 'ไม่มีข้อมูลสำหรับขอบเขตนี้');
+assert.equal(context.unavailableLabel({status: 'deferred', availability: 'unavailable'}), 'ยังไม่คำนวณ');
+"""
+    result = subprocess.run(
+        [shutil.which("node"), "-"], input=script, text=True, capture_output=True,
+        cwd=Path(__file__).resolve().parents[1], timeout=30,
+    )
+    assert result.returncode == 0, result.stderr

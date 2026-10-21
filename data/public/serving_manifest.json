@@ -306,6 +306,14 @@
     },
     {
       "group": "source_dataset",
+      "key": "f2/topic/h01",
+      "path": "f2/topics/h01.json",
+      "source_ids": [
+        "f2_target_household"
+      ]
+    },
+    {
+      "group": "source_dataset",
       "key": "f2/topic/k01a",
       "path": "f2/topics/k01a.json",
       "source_ids": [

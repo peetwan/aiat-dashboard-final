@@ -110,7 +110,7 @@
    "originating_system": "PMUA AppTech public innovation catalogue and dashboards",
    "public_url": "https://pmua-apptech.com/",
    "source_context_review": {
-    "rationale": "The active path is the public innovation catalogue. Work attribution is restricted to source fields attached to a listed innovation; the source name does not authorize household or person-level disclosure.",
+    "rationale": "The active path is the public innovation catalogue and dashboards. Work attribution is restricted to source fields attached to a listed innovation. From the family dashboard only target-household counts by province (H01) and the national money and fiscal-year totals (overview households) are published, as the source states them; the source name does not authorize household or person-level disclosure.",
     "status": "measure_scoped_owner_field_approval",
     "unsafe_or_unsupported": [
      "household records",
@@ -118,7 +118,9 @@
      "private contacts",
      "funding history",
      "raw impact prose without field review",
-     "profile tokens"
+     "profile tokens",
+     "family dashboard district and business-type cells",
+     "money by province or per household"
     ]
    },
    "source_id": "f2_target_household"
@@ -291,6 +293,14 @@
    ],
    "source_ids": [
     "f2_culturalmap_university"
+   ]
+  },
+  "h01": {
+   "measure_ids": [
+    "H01"
+   ],
+   "source_ids": [
+    "f2_target_household"
    ]
   }
  },
@@ -1028,6 +1038,40 @@
      "title_th": "รายการข้อมูลวัฒนธรรม"
     }
    ]
+  },
+  "H01": {
+   "topic_id": "h01",
+   "parent_measure_id": null,
+   "display_order": 22,
+   "label_th": "ครัวเรือนเป้าหมายตามที่ PMUA AppTech รายงาน",
+   "formula": "SUM PMUA family_all province total_hh; reconcile to reported headline",
+   "scope": "PMUA AppTech family dashboard, all fiscal years, without a year filter",
+   "limitations": "Target households as the source reports them, not households shown to have reached an outcome. The source revises past figures and states no reference period. Province totals add up to the national total; a province the source does not report returns unavailable, not zero. No district, business-type or household-level figure is published.",
+   "map_legend_th": null,
+   "status": "source_aggregate",
+   "unit": "household",
+   "detail_availability": "not_applicable",
+   "map_availability": "province",
+   "source_ids": [
+    "f2_target_household"
+   ],
+   "supported_filters": [
+    "province"
+   ],
+   "permitted_combinations": [
+    [],
+    [
+     "province"
+    ]
+   ],
+   "province_sum_is_additive": true,
+   "sections": [
+    {
+     "section_id": "h01",
+     "kind": "aggregate_breakdown",
+     "title_th": "ครัวเรือนเป้าหมายรายจังหวัดตามที่แหล่งข้อมูลรายงาน"
+    }
+   ]
   }
  },
  "labels": {
@@ -1454,6 +1498,42 @@
     "context": "public_contact",
     "label_sha256": "1735f563d0e0a417"
    }
+  ]
+ },
+ "households": {
+  "about": "The national table of PMUA AppTech's family dashboard on the overview (overview.json households): target households and the money the page states, for all fiscal years and each one, as stated (Measure checks they add up). Only these metrics are published; never the dashboard's district or business-type cells. Its province household counts are measure H01.",
+  "measure_id": "H01",
+  "source_id": "f2_target_household",
+  "title_th": "ครัวเรือนเป้าหมายและตัวเลขเศรษฐกิจที่ PMUA AppTech รายงาน",
+  "all_years_th": "รวมทุกปีงบประมาณ",
+  "rows": [
+   {
+    "metric": "headline",
+    "label_th": "ครัวเรือนเป้าหมาย",
+    "unit_th": "ครัวเรือน"
+   },
+   {
+    "metric": "income_increase",
+    "label_th": "มูลค่ารายได้ที่เพิ่มขึ้นรวม",
+    "unit_th": "บาท"
+   },
+   {
+    "metric": "cost_reduction",
+    "label_th": "มูลค่าต้นทุนที่ลดลงรวม",
+    "unit_th": "บาท"
+   },
+   {
+    "metric": "net_income_increase",
+    "label_th": "มูลค่ารายได้สุทธิเพิ่มขึ้น (Net)",
+    "unit_th": "บาท"
+   }
+  ],
+  "notes_th": [
+   "ทุกตัวเลขในตารางเป็นยอดที่หน้า Dashboard ครัวเรือนของ PMUA AppTech แสดง เราไม่ได้ตรวจวิธีคำนวณ และต้นทางไม่ได้บอกช่วงเวลาที่วัดผลลัพธ์",
+   "ครัวเรือนเป้าหมายคือครัวเรือนที่ต้นทางรายงานไว้ ไม่ได้แปลว่าทุกครัวเรือนได้ผลลัพธ์ตามตัวเลขเงิน",
+   "ยอดสุทธิที่ต้นทางแสดงใกล้เคียงผลบวกของรายได้ที่เพิ่มขึ้นกับต้นทุนที่ลดลง (ต่างกันไม่เกิน 1 บาท) เราไม่ได้ยืนยันว่าเป็นนิยามของต้นทาง ตัวเลขนี้ไม่ใช่กำไรหรือผลตอบแทนที่กลับคืนผู้ให้ทุน",
+   "ต้นทางแก้ตัวเลขย้อนหลังได้ รวมถึงปีงบประมาณที่ผ่านไปแล้ว ตัวเลขนี้เป็นตามวันที่ดึงข้อมูล",
+   "ตัวเลขเงินมีเฉพาะระดับประเทศ ต้นทางไม่ได้แยกรายจังหวัด"
   ]
  }
 }

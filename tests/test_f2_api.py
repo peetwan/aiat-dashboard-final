@@ -74,7 +74,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         overview_response = client.get("/api/public/v1/f2/overview")
         assert overview_response.status_code == 200
         overview = overview_response.json()
-        assert len(overview["headlines"]) == 14
+        assert len(overview["headlines"]) == 15
         assert sum(len(row["companions"]) for row in overview["headlines"]) == 7
         # every number can name its sources and when they were fetched
         snapshots = overview["sources"]["by_id"]
@@ -110,6 +110,7 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             "K11A": "คลัสเตอร์",
             "K11B": "จังหวัด",
             "K12": "รายการ",
+            "H01": "ครัวเรือน",
         }
         for measure_id, expected_unit in expected_units.items():
             measure = _measure(overview, measure_id)
@@ -136,6 +137,24 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert _measure(province, "K09")["result"]["availability"] == "unavailable"
         assert _measure(province, "K09")["national_context"]["relationship"] == "independent_source_region_not_mapped_to_selected_dashboard_geography"
         assert _measure(overview, "K08")["result"] != _measure(overview, "C08_PARTICIPATING")["result"]
+
+        # PMUA target households: province values add up to the national total; the money table is national only
+        households = overview["households"]
+        values = {row["metric"]: row["values"] for row in households["rows"]}
+        assert set(values) == {"headline", "income_increase", "cost_reduction", "net_income_increase"}
+        assert values["headline"]["all"] == _measure(overview, "H01")["result"]["value"]
+        assert values["headline"]["2568"] + values["headline"]["2569"] == values["headline"]["all"]
+        assert province["households"] == households
+        h01_map = client.get("/api/public/v1/f2/map?measure=H01").json()
+        reported = [cell["result"]["value"] for cell in h01_map["cells"] if cell["result"]["availability"] == "available"]
+        assert h01_map["coverage"]["province_sum_is_additive"] is True
+        assert sum(reported) == h01_map["coverage"]["national_total"] == values["headline"]["all"]
+        absent = [cell for cell in h01_map["cells"] if cell["result"]["availability"] != "available"]
+        assert len(reported) + len(absent) == 77
+        for cell in absent:  # a province the source does not report is unavailable, never zero
+            assert cell["result"]["value"] is None and cell["result"]["unavailable_reason"]["code"] == "unknown_province"
+            h01 = _measure(client.get(f"/api/public/v1/f2/overview?province={cell['province_code']}").json(), "H01")
+            assert h01["result"]["value"] is None and h01["national_context"]["result"]["value"] == values["headline"]["all"]
 
         map_response = client.get("/api/public/v1/f2/map?measure=K01B")
         assert map_response.status_code == 200

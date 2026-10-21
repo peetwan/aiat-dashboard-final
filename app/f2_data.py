@@ -48,6 +48,7 @@ _THAI_UNITS = {
     "million_THB_per_month": "ล้านบาทต่อเดือน",
     "cluster": "คลัสเตอร์",
     "mapped_subject": "รายการ",
+    "household": "ครัวเรือน",
 }
 
 
@@ -423,6 +424,7 @@ def get_overview(*, province: str | None = None, revision: str | None = None) ->
         "limitations": overview.get("limitations") or [],
         "sources": overview.get("sources") or {},
         "official": overview.get("official") or {},
+        "households": overview.get("households") or {},
         "provenance": _provenance(snapshot, ["f2/overview", "f2/geography"]),
     }
 

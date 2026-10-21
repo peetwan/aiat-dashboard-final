@@ -31,6 +31,7 @@ import duckdb
 
 from ..clean import DB_PATH, ROOT, needs_new_look, thai_day
 from ..geo import Geo
+from ..measure import FAMILY_ALL, FAMILY_METRICS, FAMILY_YEARS
 from . import details as detail_records
 from .results import Results
 
@@ -76,6 +77,7 @@ def run(db_path: Path = DB_PATH) -> dict:
                                     "WHERE measure_id = 'C04_LISTED' AND province_code IS NOT NULL").fetchall()
     source_ids = dict(con.execute("SELECT source, raw_folder FROM runs").fetchall())
     snapshots = con.execute("SELECT raw_folder, fetched_at, updated_latest, updated_records, updated_days FROM runs").fetchall()
+    family = _family_figures(con)
     issues = [f"{kind} decision {ref} ({what}): {issue} {detail}" for kind, what, ref, issue, detail in con.execute(
         """SELECT 'matching', entity, decision_ref, issue, detail FROM decision_issues
            UNION ALL SELECT 'counting', measure_id, decision_ref, issue, detail FROM counting_issues ORDER BY ALL""").fetchall()]
@@ -86,7 +88,8 @@ def run(db_path: Path = DB_PATH) -> dict:
     for topic_id, topic in config["topics"].items():
         files.update(_topic(topic_id, topic, config, results, records.get(topic_id), provinces, header))
     files["overview.json"] = ({**_overview(config, results, header), "sources": _sources(config, snapshots),
-                               "official": _official(config)}, "f2/overview", config["source_ids"])
+                               "official": _official(config), "households": _households(config, family)},
+                              "f2/overview", config["source_ids"])
     files["geography.json"] = (_geography(config, results, provinces, header), "f2/geography", config["source_ids"])
     files["universities.json"] = _universities(config, results, university_rows, innovation_places, source_ids, header)
 
@@ -266,6 +269,36 @@ def _official(config: dict) -> dict:
                 and all(p["where_th"] for p in row["published"])):
             raise SystemExit(f"official figure {row['id']} lacks a value, unit, label, our definition or a citation")
     return {k: meta[k] for k in ("source_th", "as_of", "groups", "rows")}
+
+
+def _family_figures(con) -> list[tuple]:
+    """The family dashboard figures publish may show: national values of the allowlisted metrics only."""
+    datasets = [FAMILY_ALL, *FAMILY_YEARS]
+    return con.execute(f"""SELECT dataset, metric, any_value(value) FROM reported_figures WHERE source = 'pmua_apptech'
+                           AND dimension IS NULL AND dataset IN ({", ".join("?" * len(datasets))})
+                           AND metric IN ({", ".join("?" * len(FAMILY_METRICS))}) GROUP BY ALL ORDER BY ALL""",
+                       [*datasets, *FAMILY_METRICS]).fetchall()
+
+
+def _households(config: dict, figures: list[tuple]) -> dict:
+    """PMUA's family dashboard as the overview's national table: only the allowlisted metrics, as the page states
+    them (Measure checked that they add up), for all fiscal years and each one."""
+    meta = config["households"]
+    if sorted(row["metric"] for row in meta["rows"]) != sorted(FAMILY_METRICS):
+        raise SystemExit(f"config.json households rows must be exactly {FAMILY_METRICS}")
+    columns = [(FAMILY_ALL, "all", meta["all_years_th"])] + [(d, y, f"ปีงบประมาณ {y}") for d, y in FAMILY_YEARS.items()]
+    values = {(d, m): v for d, m, v in figures}
+    rows = []
+    for row in meta["rows"]:
+        cells = {}
+        for dataset, column, _ in columns:
+            value = values.get((dataset, row["metric"]))
+            if value is None or value != int(value):
+                raise SystemExit(f"family dashboard {dataset} {row['metric']} is {value!r}, not a whole number")
+            cells[column] = int(value)
+        rows.append({**row, "values": cells})
+    return {**{k: meta[k] for k in ("measure_id", "source_id", "title_th", "notes_th")},
+            "columns": [{"id": column, "label_th": label} for _, column, label in columns], "rows": rows}
 
 
 def _geography(config: dict, results: Results, provinces: dict, header: dict) -> dict:
