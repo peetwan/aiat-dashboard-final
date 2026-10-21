@@ -160,6 +160,8 @@ class F2TopicResponse(PublicApiModel):
     sources: list[JsonObject]
     limitations: list[JsonValue]
     source_region_results: list[JsonObject]
+    # topic k04: what the innovation list's follow-up evidence, TRL bands and notes mean
+    follow_up: JsonObject | None = None
     list: JsonObject
     provenance: JsonObject
 

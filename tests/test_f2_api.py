@@ -417,3 +417,54 @@ def test_f2_universities_in_a_province_invert_the_published_innovation_provinces
         assert client.get("/api/public/v1/f2/universities").json().get("province") is None
         for bad in ("99", "1", "bangkok"):
             assert client.get("/api/public/v1/f2/universities", params={"province": bad}).status_code == 422, bad
+
+
+def test_f2_innovation_list_filters_count_the_published_follow_up_evidence():
+    topic = _published("topics/k04.json")
+    items = topic["items_by_id"]
+    kinds = {row["id"]: row for row in topic["follow_up"]["evidence"]}
+    url = "/api/public/v1/f2/topics/k04"
+    with TestClient(app) as client:
+        whole = client.get(url, params={"measure": "C04_LISTED", "limit": 100}).json()
+        assert whole["follow_up"] == topic["follow_up"]
+        summary = whole["list"]["summary"]
+        assert summary["matching"] == whole["list"]["matching_item_count"] == len(
+            topic["item_ids_by_measure_and_scope"]["C04_LISTED"]["national"])
+        # each card: innovations from a source that carries the field (eligible), and those that have it
+        for row in summary["evidence"]:
+            kind = kinds[row["id"]]
+            eligible = [i for i in items.values() if set(i["follow_up"]) & set(kind["source_ids"])]
+            assert row["eligible"] == len(eligible), row["id"]
+            assert row["found"] == sum(any(kind["field"] in r for r in i["follow_up"].values()) for i in eligible), row["id"]
+
+        # an evidence filter returns the innovations its card counts; the list filters never move the KPI value
+        found = {row["id"]: row["found"] for row in summary["evidence"]}
+        for evidence in kinds:
+            body = client.get(url, params={"measure": "C04_LISTED", "evidence": evidence}).json()
+            assert body["list"]["matching_item_count"] == found[evidence], evidence
+            assert body["result"] == whole["result"]
+        # each source's provinces are its own, and together they are the provinces the innovation is counted in
+        for item in items.values():
+            stated = {code for row in item["follow_up"].values() for code in row.get("province_codes", [])}
+            assert stated == set(item["province_codes"]), item["label"]
+            assert all(bool(row.get("province_codes")) == bool(row.get("use_area")) for row in item["follow_up"].values())
+        # a source filter keeps that source's records and counts that source's fields only
+        icommunity = client.get(url, params={"measure": "C04_LISTED", "source": "f2_icommunity", "limit": 100}).json()
+        assert all("f2_icommunity" in item["source_ids"] for item in icommunity["list"]["items"])
+        assert {row["id"]: row["eligible"] for row in icommunity["list"]["summary"]["evidence"]}["updated"] == 0
+        # a project code finds its innovation
+        coded = next(i for i in items.values() if i["follow_up"].get("f2_icommunity", {}).get("project_codes"))
+        code = coded["follow_up"]["f2_icommunity"]["project_codes"][0]
+        searched = client.get(url, params={"measure": "C04_LISTED", "q": code, "limit": 100}).json()["list"]["items"]
+        assert coded["label"] in {i["label"] for i in searched}
+        # the university filter matches the university tab's count, and items carry the university names
+        universities = _published("universities.json")["universities"]
+        top_id, top = max(universities.items(), key=lambda kv: kv[1]["counts"]["C04_LISTED"])
+        mine = client.get(url, params={"measure": "C04_LISTED", "university": top_id}).json()["list"]
+        assert mine["matching_item_count"] == top["counts"]["C04_LISTED"]
+        assert all(top["name_th"] in i["university_names_th"] for i in mine["items"])
+
+        assert client.get("/api/public/v1/f2/topics/k05", params={"evidence": "k04"}).status_code == 422
+        for bad in ({"university": "uni_000000000000"}, {"trl": "10"}, {"source": "f2_learning_dashboard"},
+                    {"evidence": "still_used"}):
+            assert client.get(url, params={"measure": "C04_LISTED", **bad}).status_code == 422, bad

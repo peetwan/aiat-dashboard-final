@@ -49,7 +49,8 @@ def clean(raw, geo) -> dict[str, list[dict]]:
             "raw_ref": f"{FILE}#data/records/{index}",
             "details": {"sub_category": record.get("sub_category"), "status": record.get("status"),
                         "ip_category": (record.get("ip") or {}).get("category"), "tags": record.get("tags"),
-                        "target_segments": record.get("target_segments")},
+                        "target_segments": record.get("target_segments"),
+                        "source_updated_at": record.get("source_last_update_at")},
         })
         trl = record.get("trl") or {}
         readiness.append({**key, "scale": "TRL", "level": level(trl.get("level")), "raw": trl.get("raw"),

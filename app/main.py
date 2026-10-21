@@ -1161,6 +1161,10 @@ def public_f2_topic(
     sort: str = Query("source"),
     limit: int = Query(25, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    university: str | None = Query(None, max_length=64),
+    trl: str | None = Query(None, max_length=16),
+    source: str | None = Query(None, max_length=64),
+    evidence: str | None = Query(None, max_length=32),
     revision: str | None = Query(None, min_length=64, max_length=64),
 ):
     parameters = {
@@ -1175,6 +1179,10 @@ def public_f2_topic(
         "sort": sort,
         "limit": limit,
         "offset": offset,
+        "university": university,
+        "trl": trl,
+        "source": source,
+        "evidence": evidence,
         "revision": revision,
     }
     _validate_f2_query(request, set(parameters))
@@ -1192,6 +1200,10 @@ def public_f2_topic(
             sort=sort,
             limit=limit,
             offset=offset,
+            university=university,
+            trl=trl,
+            source=source,
+            evidence=evidence,
             revision=revision,
         )
     )

@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/static/styles.css?v=legend-wrap-20260928-01" />
     <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
     <link rel="stylesheet" href="/static/departments.css?v=f4-tab-coverage-spacing-20260927-03" />
-    <link rel="stylesheet" href="/static/f2.css?v=20261021-f2-households-01" />
+    <link rel="stylesheet" href="/static/f2.css?v=20261021-f2-innovations-01" />
   </head>
   <body>
     <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
@@ -308,6 +308,7 @@
           <button type="button" role="tab" id="f2-tab-overview" aria-controls="f2-view-overview" aria-selected="true" data-f2-tab="overview">ภาพรวม</button>
           <button type="button" role="tab" id="f2-tab-areas" aria-controls="f2-view-areas" aria-selected="false" data-f2-tab="areas">พื้นที่</button>
           <button type="button" role="tab" id="f2-tab-universities" aria-controls="f2-view-universities" aria-selected="false" data-f2-tab="universities">มหาวิทยาลัย</button>
+          <button type="button" role="tab" id="f2-tab-innovations" aria-controls="f2-view-innovations" aria-selected="false" data-f2-tab="innovations">นวัตกรรม</button>
           <button type="button" role="tab" id="f2-tab-list" aria-controls="f2-view-list" aria-selected="false" data-f2-tab="list">รายการ</button>
           <button type="button" role="tab" id="f2-tab-sources" aria-controls="f2-view-sources" aria-selected="false" data-f2-tab="sources">ที่มาข้อมูล</button>
         </div>
@@ -315,6 +316,7 @@
           <section id="f2-view-overview" role="tabpanel" aria-labelledby="f2-tab-overview" data-f2-view="overview"></section>
           <section id="f2-view-areas" role="tabpanel" aria-labelledby="f2-tab-areas" data-f2-view="areas" hidden></section>
           <section id="f2-view-universities" role="tabpanel" aria-labelledby="f2-tab-universities" data-f2-view="universities" hidden></section>
+          <section id="f2-view-innovations" role="tabpanel" aria-labelledby="f2-tab-innovations" data-f2-view="innovations" hidden></section>
           <section id="f2-view-list" role="tabpanel" aria-labelledby="f2-tab-list" data-f2-view="list" hidden></section>
           <section id="f2-view-sources" role="tabpanel" aria-labelledby="f2-tab-sources" data-f2-view="sources" hidden></section>
         </div>
@@ -536,8 +538,8 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/f2-detail.js?v=20261001-f2-category-code-01" defer></script>
-    <script src="/static/f2.js?v=20261021-f2-households-01" defer></script>
+    <script src="/static/f2-detail.js?v=20261021-f2-innovations-01" defer></script>
+    <script src="/static/f2.js?v=20261021-f2-innovations-01" defer></script>
     <script src="/static/app.js?v=20261001-f2-category-code-01" defer></script>
   </body>
 </html>

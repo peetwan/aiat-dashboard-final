@@ -13,11 +13,14 @@ import hashlib
 import json
 import re
 from collections import defaultdict
+from datetime import datetime
 from urllib.parse import urlsplit
 
 from app.privacy import sanitize_payload
 from app.publication import PERSON_LEVEL_SENSITIVE_RE, PublicationError, _canonical_url
 from app.publication import _privacy_reasons_for_text as privacy_reasons
+
+from ..clean import updated_dates
 
 EXCERPT = 1000
 CULTURAL_DESCRIPTIONS = ("history", "identity")      # Cultural Map description fields that are public
@@ -35,7 +38,9 @@ PLACEHOLDER_PRICES = {0, 99999}
 # role in the Clean tables -> public role code (f2-detail.js has the Thai labels)
 WORK_ROLES = {"lead": "researcher", "co": "researcher", "researcher": "researcher", "inventor": "inventor",
               "owner": "listing_account_owner", "rights_holder": "rights_holder", "collector": "source_reported_owner"}
-ORGANIZATION_ROLES = {"pmua_apptech": "university", "rinmp": "institute", "icommunity": "institution"}
+# MRU names the affiliation of the account that listed the work, not who made it
+ORGANIZATION_ROLES = {"pmua_apptech": "university", "rinmp": "institute", "icommunity": "institution",
+                      "apptech_mru": "listing_affiliation"}
 VARIANT_WORDS = {"ขนาด", "สี", "โทนสี", "รุ่น", "แบบ", "ลาย", "สูตร", "กลิ่น", "รส", "size"}  # end a variant's name
 NAME_ORDER = ("icommunity", "pmua_apptech", "apptech_mru", "rinmp")  # whose title names a merged innovation
 C02_ROLES = {"community_innovator": ("community_innovator", "นวัตกรชุมชน"),
@@ -138,6 +143,9 @@ class Context:
     def __init__(self, con, config: dict):
         self.con = con
         self.source_id = dict(con.execute("SELECT source, raw_folder FROM runs").fetchall())
+        self.fetched_at = {s: datetime.fromisoformat(f) for s, f in con.execute("SELECT source, fetched_at FROM runs").fetchall()}
+        self.follow_up = config["innovations"]
+        self.skipped_links: list[str] = []  # reviewed links publish could not tie to one innovation
         self.systems = {sid: s["originating_system"] for sid, s in config["sources"].items()}
         self.site = {sid: s["public_url"] for sid, s in config["sources"].items()}
         self.members: dict[tuple[str, str], list[tuple[str, str]]] = defaultdict(list)
@@ -228,8 +236,86 @@ def entity_ids(con, measure_ids: tuple[str, ...]) -> list[str]:
 
 # Innovations (K04, C04_LISTED) ------------------------------------------------
 
+# follow-up evidence kind (config.json innovations.evidence) -> its field in follow_up[source_id]
+FOLLOW_UP_FIELDS = {"use_area": "use_area", "k04": "k04", "linked": "linked", "project": "project_codes",
+                    "updated": "updated"}
+
+
+def university_id(name: str) -> str:
+    return "uni_" + hashlib.sha1(name.encode()).hexdigest()[:12]
+
+
+def linked_innovations(ctx: Context) -> set[tuple[str, str]]:
+    """(innovation entity, source) pairs a reviewer tied a business or product to: an extracted operator or offering
+    that Resolve kept, naming the innovation's upstream id in the same source. An upstream id that is more than one
+    innovation entity is not given to either (noted in ctx.skipped_links)."""
+    entities = defaultdict(set)  # (source, upstream id) -> innovation entities
+    for r in ctx.rows("SELECT source, record_id, upstream_id FROM innovations"):
+        entity_id = ctx.entity_of.get(("innovation", r["source"], r["record_id"]))
+        if entity_id:
+            entities[r["source"], r["upstream_id"]].add(entity_id)
+    out = set()
+    for table, entity in (("operators", "operator"), ("offerings", "offering")):
+        for r in ctx.rows(f"SELECT source, record_id, details->'innovation_upstream_ids' AS ids FROM {table} "
+                          "WHERE kind = 'extracted' ORDER BY ALL"):
+            if (entity, r["source"], r["record_id"]) not in ctx.entity_of:
+                continue
+            for upstream in json.loads(r["ids"] or "[]"):
+                targets = entities.get((r["source"], upstream), set())
+                if len(targets) == 1:
+                    out.add((next(iter(targets)), r["source"]))
+                elif targets:
+                    ctx.skipped_links.append(f"{table} {r['record_id']} names {r['source']} innovation {upstream}, "
+                                             f"which is {len(targets)} innovations")
+    return out
+
+
+def follow_up(ctx: Context, entity_id: str, members: list[tuple[str, str]], records: dict, readiness: dict,
+              places: dict, linked: set, k04: set) -> dict[str, dict]:
+    """source_id -> what that source's records of the innovation state: admitted TRL levels, a use area (and its
+    provinces), the K04 level, a reviewed business/product link, project codes, its own last-updated day. A missing
+    key means not found."""
+    by_source: dict[str, dict] = defaultdict(dict)
+    for key in members:
+        source, details = key[0], json.loads(records[key]["details"] or "{}")
+        got = by_source[ctx.source_id[source]]
+        levels = {r["level"] for r in readiness[key] if r["scale"] == "TRL" and r["level"] is not None}
+        if levels:
+            got["trl"] = sorted(levels | set(got.get("trl", [])))
+            if max(levels) >= 8:  # members.sql K04
+                got["k04"] = True
+        provinces = {p["province_code"] for p in places[key] if p["province_code"]}
+        if provinces:  # kept per source: a merged innovation's area must not read as another source's evidence
+            got["use_area"] = True
+            got["province_codes"] = sorted(provinces | set(got.get("province_codes", [])))
+        if (entity_id, source) in linked:
+            got["linked"] = True
+        if details.get("project_code"):
+            got["project_codes"] = sorted({details["project_code"], *got.get("project_codes", [])})
+        days = updated_dates([details["source_updated_at"]], ctx.fetched_at[source]) if details.get("source_updated_at") else []
+        if days:
+            got["updated"] = max(days[0].isoformat(), got.get("updated", ""))
+    if any(got.get("k04") for got in by_source.values()) != (entity_id in k04):
+        raise SystemExit(f"{entity_id}: its admitted TRL levels do not match its K04 membership")
+    supported = {e["id"]: set(e["source_ids"]) for e in ctx.follow_up["evidence"]}
+    for source_id, got in by_source.items():
+        unexpected = [kind for kind, field in FOLLOW_UP_FIELDS.items() if field in got and source_id not in supported[kind]]
+        if unexpected:
+            raise SystemExit(f"{entity_id}: {source_id} states {unexpected}, which config.json innovations says it "
+                             "does not carry; add it there so the tab counts it in N")
+    return dict(sorted(by_source.items()))
+
+
 def innovations(ctx: Context) -> dict[str, dict]:
+    if {e["id"]: e["field"] for e in ctx.follow_up["evidence"]} != FOLLOW_UP_FIELDS:
+        raise SystemExit(f"config.json innovations.evidence must be exactly these kinds and fields: {FOLLOW_UP_FIELDS}")
     records = ctx.by_record("innovations")
+    linked = linked_innovations(ctx)
+    k04 = {r[0] for r in ctx.con.execute("SELECT entity_id FROM measure_members WHERE measure_id = 'K04'").fetchall()}
+    universities = defaultdict(set)
+    for entity_id, name in ctx.con.execute("SELECT DISTINCT entity_id, university FROM university_members "
+                                           "WHERE measure_id = 'C04_LISTED'").fetchall():
+        universities[entity_id].add(university_id(name))
     readiness, places, people = defaultdict(list), defaultdict(list), defaultdict(list)
     for r in ctx.rows("SELECT * FROM innovation_readiness ORDER BY source, record_id, scale"):
         readiness[r["source"], r["record_id"]].append(r)
@@ -243,8 +329,13 @@ def innovations(ctx: Context) -> dict[str, dict]:
         members = ctx.members["innovation", entity_id]
         rows = [records[m] for m in members]
         descriptions, levels, organizations, attributions, listings, locations = [], [], [], [], [], []
+        projects = []
         for key, row in zip(members, rows):
             source, sid = row["source"], ctx.source_id[row["source"]]
+            details = json.loads(row["details"] or "{}")
+            if details.get("project_code"):
+                projects.append({"code": details["project_code"], "name": label(details.get("project_name")),
+                                 "fiscal_year_be": details.get("project_year_be"), "source_id": sid})
             for line in (row["description"] or "").split("\n"):
                 kind, _, body = line.partition(": ") if source in SECTIONED else ("description", "", line)
                 if kind not in PRIVATE_SECTIONS:
@@ -262,13 +353,17 @@ def innovations(ctx: Context) -> dict[str, dict]:
                 listings.append(ctx.listing(source, ctx.name(entity_id, key, row["title"]), row["url"]))
             locations += [location(p, sid, "declared_innovation_use") for p in places[key]]
         trl = {l["numeric_level"] for l in levels if l["scale"] == "TRL" and l["numeric_level"]}
+        evidence = follow_up(ctx, entity_id, members, records, readiness, places, linked, k04)
+        updates = [{"date": got["updated"], "source_id": sid} for sid, got in evidence.items() if got.get("updated")]
         key, row = min(zip(members, rows), key=lambda m: NAME_ORDER.index(m[0][0]))
         out[entity_id] = ctx.base(
             "innovation", entity_id, ctx.name(entity_id, key, row["title"]), [s for s, _ in members],
             descriptions=descriptions, listings=listings, locations=[l for l in locations if l],
             children={"readiness": unique(levels), "organizations": unique(organizations),
-                      "work_attributions": unique(attributions)},
-            flags={"readiness_conflict": len(trl) > 1})
+                      "work_attributions": unique(attributions), "projects": unique(projects),
+                      "source_updates": updates},
+            flags={"readiness_conflict": len(trl) > 1},
+            follow_up=evidence, university_ids=sorted(universities[entity_id]))
     return out
 
 
@@ -541,8 +636,9 @@ def family_name(names: list[str]) -> str | None:
     return shared if len(shared) >= 4 else names[0]
 
 
-def build(con, config: dict) -> tuple[dict[str, dict[str, dict]], dict[str, str]]:
-    """(topic -> entity_id -> detail record, entity_id -> field context of a reviewed label)."""
+def build(con, config: dict) -> tuple[dict[str, dict[str, dict]], dict[str, str], list[str]]:
+    """(topic -> entity_id -> detail record, entity_id -> field context of a reviewed label, reviewed innovation
+    links that could not be published)."""
     ctx = Context(con, config)
     innovation = innovations(ctx)
     topics = {
@@ -567,10 +663,11 @@ def build(con, config: dict) -> tuple[dict[str, dict[str, dict]], dict[str, str]
             detail["province_codes"] = provinces[entity_id]
             if "missing_geography" in detail["flags"]:
                 detail["flags"]["missing_geography"] = not provinces[entity_id]
-    return topics, ctx.contexts
+    return topics, ctx.contexts, ctx.skipped_links
 
 
-ITEM_EXTRA = {"k02": ("label_availability", "role_codes", "related_work_count")}
+ITEM_EXTRA = {"k02": ("label_availability", "role_codes", "related_work_count"),
+              "k04": ("follow_up", "university_ids")}  # what the innovation tab filters on
 
 
 def items(topic: str, detail: dict) -> dict:

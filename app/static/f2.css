@@ -197,6 +197,20 @@ label.f2-university-search { display: grid; gap: 4px; }
   .f2-university-table :is(td, th):nth-child(2) { text-align: right; }
   .f2-university-table .f2-bar-value { justify-content: flex-end; }
 }
+/* Innovation tab: follow-up cards, filters and badges */
+.f2-follow-up-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.f2-follow-up-card { min-width: 0; border: 1px solid #dce7de; border-radius: 12px; padding: 13px; background: #fff; color: #526159; font-size: 12px; line-height: 1.6; }
+.f2-follow-up-card h4 { margin: 0 0 4px; color: #17251d; font-size: 13px; line-height: 1.5; }
+.f2-follow-up-card p { margin: 0 0 4px; }
+.f2-follow-up-value strong { color: var(--f2-accent); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.f2-follow-up-basis { color: #657269; font-size: 11px; }
+.f2-follow-up-limit { border-radius: 10px; padding: 10px 12px; background: #fff4d9; color: #5d4618; font-size: 12px; line-height: 1.65; }
+.f2-innovation-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.f2-innovation-filters label { display: grid; gap: 4px; min-width: 0; color: #526159; font-size: 11px; font-weight: 700; }
+.f2-innovation-filters select { width: 100%; min-width: 0; height: 38px; border: 1px solid #cbd7ce; border-radius: 8px; padding: 0 9px; background: #fff; color: #17251d; font: inherit; font-size: 13px; }
+.f2-follow-up-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.f2-follow-up-badge { border-radius: 12px; padding: 2px 9px; background: var(--f2-accent); color: #fff; font-size: 11px; font-weight: 700; line-height: 1.6; overflow-wrap: anywhere; }
+.f2-follow-up-badge.f2-follow-up-missing { border: 1px dashed #8a968e; padding: 1px 8px; background: transparent; color: #526159; font-weight: 400; }
 .f2-source-region-table :is(th, td) { border-bottom: 1px solid #dce7de; padding: 9px; text-align: left; vertical-align: top; }
 .f2-source-region-table thead th { color: #526159; background: #f7f9f7; }
 .f2-source-region-table .f2-region-selected { background: #edf6ef; }

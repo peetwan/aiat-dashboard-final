@@ -218,8 +218,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 655,
-      "minimum_count": 655,
+      "expected_count": 629,
+      "minimum_count": 629,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
@@ -239,8 +239,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 682,
-      "minimum_count": 682,
+      "expected_count": 644,
+      "minimum_count": 644,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
@@ -260,8 +260,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 702,
-      "minimum_count": 702,
+      "expected_count": 663,
+      "minimum_count": 663,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
@@ -283,8 +283,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 371,
-      "minimum_count": 371,
+      "expected_count": 474,
+      "minimum_count": 474,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
