@@ -48,6 +48,7 @@
     community_organization: "องค์กรชุมชน",
     source_reported_organization: "หน่วยงานตามที่แหล่งข้อมูลรายงาน",
     listing_account_owner: "เจ้าของรายการตามแหล่งข้อมูล",
+    listing_affiliation: "หน่วยงานของบัญชีที่ลงรายการ",
   };
   const C02_ROLE_LABELS = {
     community_innovator: "นวัตกรชุมชน",
@@ -532,6 +533,16 @@
       links: listingLinks([row]),
       note: row.record_link_availability === "withheld" ? "แหล่งข้อมูลไม่เผยแพร่ลิงก์ระดับรายการ" : "",
     }));
+    const projects = dedupeRows(asArray(children.projects).filter(isObject).map((row) => ({
+      title: cleanText(row.name) || cleanText(row.code),
+      subtitle: sourceName(row.source_id),
+      facts: [
+        { label: "รหัสโครงการ", value: cleanText(row.code) },
+        row.fiscal_year_be ? { label: "ปีงบประมาณ", value: cleanText(row.fiscal_year_be) } : null,
+      ].filter(Boolean),
+    })).filter((row) => row.title), (row) => `${row.title}\u0000${row.subtitle}`);
+    const updates = asArray(children.source_updates).filter((row) => isObject(row) && row.date)
+      .map((row) => `${formatDate(row.date)} (${sourceName(row.source_id)})`);
     return {
       eyebrow: measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรมในรายการทั้งหมด",
       title: cleanText(detail.label),
@@ -543,12 +554,14 @@
         distinctLevels.length > 1 ? { label: "การอ่านระดับความพร้อม", value: "ต้นทางรายงานหลายระดับ ดูหลักฐานแยกตามแหล่งข้อมูลด้านล่าง" } : null,
         matchingLocations.length ? { label: `เหตุผลที่พบในจังหวัด${selectedProvince}`, value: `แหล่งข้อมูลระบุจังหวัด${selectedProvince}เป็นพื้นที่ที่เกี่ยวข้องกับรายการนี้` } : null,
         orderedLocations[0]?.title ? { label: "พื้นที่ตามแหล่งข้อมูล", value: orderedLocations[0].title } : null,
+        updates.length ? { label: "วันที่ปรับปรุงที่ต้นทางระบุ", value: `${updates.join(" · ")} ไม่ใช่วันที่ใช้งาน` } : null,
       ].filter(Boolean),
       sections: [
         section("รายละเอียดและประโยชน์", "prose", descriptions),
         section("ระดับความพร้อมตามแหล่งข้อมูล", "cards", readiness),
         section("ผู้พัฒนาและผู้เกี่ยวข้อง", "cards", people),
         section("หน่วยงาน", "cards", organizations),
+        section("โครงการตามแหล่งข้อมูล", "cards", projects),
         section("พื้นที่ที่แหล่งข้อมูลระบุ", "cards", orderedLocations),
         section("รายการจากแหล่งข้อมูล", "cards", listings),
       ].filter(Boolean),

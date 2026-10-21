@@ -456,6 +456,7 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
         "ภาพรวม",
         "พื้นที่",
         "มหาวิทยาลัย",
+        "นวัตกรรม",
         "รายการ",
         "ที่มาข้อมูล",
     ]

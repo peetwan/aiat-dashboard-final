@@ -40,7 +40,9 @@ assert.equal(state.rememberedProvince, '50');
 context.changeMeasure('K04');
 assert.equal(state.province, '50');
 assert.deepEqual(restored, ['', '50']);
+state.innovationOffset = 2400;
 context.handleProvince('');
+assert.equal(state.innovationOffset, 0); // a new province's innovation list starts at its first page
 context.changeMeasure('K09');
 context.changeMeasure('K04');
 assert.equal(state.province, ''); // Explicit national selection clears remembered province.
@@ -83,6 +85,7 @@ assert.equal(vm.runInContext("visibleMeasures([{measure_id:'K10'},{measure_id:'C
 assert.equal(vm.runInContext("visibleMeasures([{value:'K10'},{value:'C10_ALTERNATIVE'}])[0].value", context), 'K10');
 context.URLSearchParams = URLSearchParams;
 context.location = {search:'?f2tab=list&f2measure=C10_ALTERNATIVE&f2component=excludedResourceExpense&f2offset=25'};
+vm.runInContext(source.split('\n').find(line => line.startsWith('  const INNOVATION_FILTERS =')), context);
 vm.runInContext(extract('restoreUrl'), context);
 context.restoreUrl();
 assert.equal(state.measure, 'K10');
@@ -102,6 +105,12 @@ assert.equal(state.measure, 'K12');
 assert.equal(state.topic, 'k12');
 assert.equal(state.province, '50');
 assert.equal(state.offset, 0);
+// The innovation tab keeps its own list filters and page; unknown f2i names are ignored.
+context.location.search = '?f2tab=innovations&f2isource=f2_icommunity&f2itrl=none&f2ioffset=25&f2ibogus=x';
+context.restoreUrl();
+assert.equal(state.tab, 'innovations');
+assert.deepEqual({...state.innovationFilters}, {source: 'f2_icommunity', trl: 'none'});
+assert.equal(state.innovationOffset, 25);
 assert.equal(state.detail, '');
 context.selectMeasure('K01A');
 assert.equal(state.measure, 'K12');

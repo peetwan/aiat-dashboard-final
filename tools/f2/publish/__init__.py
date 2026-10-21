@@ -43,6 +43,7 @@ F2, CONTRACT, SERVING = PUBLIC / "f2", CONTRACTS / "f2_dashboard.json", PUBLIC /
 CATALOG = ROOT / "config" / "source_catalog.json"
 SHARD_BYTES = 3_900_000   # detail child files stay under the contract's 4 MiB
 INLINE_BYTES = 3_000_000  # a topic whose details are smaller keeps them in the topic file
+INNOVATION_TOPIC = "k04"
 MAX_BYTES = {"overview": 524_288, "geography": 4_194_304, "topic": 8_388_608, "detail": 4_194_304,
              "universities": 1_048_576}
 # Labels the generic privacy check would mistake for a contact or an address, reviewed as public.
@@ -67,7 +68,7 @@ def run(db_path: Path = DB_PATH) -> dict:
               "release_date": now.date().isoformat(), "source_ids": config["source_ids"]}
     con = duckdb.connect(str(db_path), read_only=True)
     results = Results(con, config)
-    records, reviewed = detail_records.build(con, config)
+    records, reviewed, skipped_links = detail_records.build(con, config)
     stale = needs_new_look({table: [{"record_id": rid, "details": json.loads(details) if details else {}}
                                     for rid, details in con.execute(f"SELECT record_id, details FROM {table}").fetchall()]
                             for table in ("operators", "offerings", "people", "activities", "innovations")})
@@ -136,6 +137,10 @@ def run(db_path: Path = DB_PATH) -> dict:
             f.write(f"\n## Reviewed decisions that no longer fit the data ({len(issues)})\n\nMatching decisions listed "
                     "here are not applied; each counting line says whether its exclusion still applies. Fix or remove "
                     "each in data/runtime/f2/decisions/.\n\n" + "".join(f"- {note}\n" for note in issues))
+    if skipped_links:  # the innovation tab does not show these links
+        with open(stage / "diff" / "diff.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## Reviewed innovation links not shown ({len(skipped_links)})\n\nThe upstream id names more than "
+                    "one innovation, so the link is given to neither.\n\n" + "".join(f"- {note}\n" for note in skipped_links))
     return {"candidate": str(stage), "validation": report["status"], "problems": report["problems"][:20],
             "diff": str(stage / "diff" / "diff.md"), "needs_new_look": len(stale) + len(issues)}
 
@@ -172,6 +177,8 @@ def _topic(topic_id: str, topic: dict, config: dict, results: Results, records: 
            "filter_contracts": {m: _filter_contract(config["measures"][m]) for m in measure_ids},
            "scopes": scopes, "sources": sources, "limitations": config["limitations"],
            "items_by_id": {}, "item_ids_by_measure_and_scope": index, "details_by_id": {}, "detail_artifacts": {}}
+    if topic_id == INNOVATION_TOPIC:  # what the innovation tab's follow-up filters and cards mean
+        doc["follow_up"] = {k: config["innovations"][k] for k in ("title_th", "evidence", "trl_bands", "notes_th")}
     files = {}
     if records:
         doc["items_by_id"] = {i: detail_records.items(topic_id, r) for i, r in sorted(records.items())}
@@ -340,7 +347,7 @@ def _universities(config: dict, results: Results, rows: list[tuple], places: lis
     for name, group in group_of.items():
         counted = by_university[name]
         provinces = Counter(code for entity_id in counted["C04_LISTED"] for code in provinces_of[entity_id])
-        university_id = "uni_" + hashlib.sha1(name.encode()).hexdigest()[:12]
+        university_id = detail_records.university_id(name)
         universities[university_id] = {
             "university_id": university_id, "name_th": name, "group": group,
             "counts": {m: len(counted[m]) for m in measures},
