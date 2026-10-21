@@ -128,6 +128,7 @@ class F2OverviewResponse(PublicApiModel):
     limitations: list[JsonValue]
     sources: JsonObject = {}  # per source: fetch date and the latest change date it states (older releases: empty)
     official: JsonObject = {}  # บพท.'s slide figures with the measures shown beside them, national only (older releases: empty)
+    households: JsonObject = {}  # PMUA's family dashboard: national household and money table (older releases: empty)
     provenance: JsonObject
 
 

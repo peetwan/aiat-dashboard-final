@@ -18,6 +18,7 @@
     ["คน กิจกรรม และนวัตกรรม", ["K02", "K03", "K04"]],
     ["ธุรกิจและข้อเสนอ", ["K05", "K06", "K07", "K08"]],
     ["การจ้างงานและการจ่ายเงิน", ["K09", "K10"]],
+    ["ครัวเรือนเป้าหมายและตัวเลขเศรษฐกิจที่ PMUA AppTech รายงาน", ["H01"]],
     ["คลัสเตอร์", ["K11A", "K11B"]],
   ];
   const COMPANION_NOTES = {
@@ -27,13 +28,14 @@
   };
   const OFFICIAL_TITLE = "ตัวเลขในสไลด์ บพท. กับข้อมูลที่เรารวบรวม";
   // Area tab: the measures it compares by province, and what "in a province" means for each (measures/members.sql).
-  const AREA_MEASURES = ["C04_LISTED", "C02_COMMUNITY", "K05", "K07", "K12"];
+  const AREA_MEASURES = ["C04_LISTED", "C02_COMMUNITY", "K05", "K07", "K12", "H01"];
   const AREA_PLACE_MEANINGS = {
     C04_LISTED: "จังหวัดที่แหล่งข้อมูลระบุว่าเป็นพื้นที่ใช้หรือพื้นที่ของผู้ใช้เป้าหมายของนวัตกรรม ไม่ใช่ที่ตั้งของมหาวิทยาลัย",
     C02_COMMUNITY: C02_SOURCE_PROVINCE_MEANING,
     K05: "จังหวัดที่ตั้งของธุรกิจตามที่แหล่งข้อมูลระบุ",
     K07: "จังหวัดที่แหล่งข้อมูลระบุไว้กับรายการสินค้าหรือบริการ",
     K12: "จังหวัดของรายการบนแผนที่วัฒนธรรมไทย",
+    H01: "จังหวัดของครัวเรือนเป้าหมายตามที่ PMUA AppTech รายงาน",
   };
   const AREA_TOP = 15;
   const UNIVERSITY_GROUP_ORDER =["rajabhat", "rajamangala", "university", "other"];
@@ -94,6 +96,7 @@
     K11A: "ทำไมยังไม่มีจำนวนคลัสเตอร์?",
     K11B: "ทำไมยังระบุจังหวัดที่มีคลัสเตอร์ไม่ได้?",
     K12: "รายการทุนวัฒนธรรมหนึ่งรายการคืออะไร?",
+    H01: "ครัวเรือนเป้าหมายคือใคร และตัวเลขเงินมาจากไหน?",
   };
   const MEASURE_LIMITATIONS = {
     K01A: "นับจังหวัดที่พบข้อมูลพื้นที่อย่างน้อยหนึ่งประเภทจากแหล่งข้อมูลที่รวบรวม เช่น พื้นที่ใช้หรือพื้นที่เป้าหมายของนวัตกรรม ที่ตั้งธุรกิจที่เข้าร่วมโครงการ รายการทุนวัฒนธรรม สินค้า หรือกิจกรรม จังหวัดเดียวกันที่พบหลายรายการหรือหลายแหล่งนับเพียงครั้งเดียว โดยรวมกรุงเทพมหานครด้วย ที่อยู่ของมหาวิทยาลัยหรือหน่วยงานเพียงอย่างเดียวไม่นำมานับ ยอดนี้ไม่ได้ยืนยันว่ามีการดำเนินโครงการจริงในทุกจังหวัด หรือมีข้อมูลครบทุกหัวข้อ",
@@ -111,6 +114,7 @@
     C08_REPORTED_BUSINESSES: "แสดงจำนวนธุรกิจที่แหล่งข้อมูลสรุปแยกไว้ในแต่ละด้าน โดยไม่มีรายชื่อธุรกิจให้ตรวจดูว่าซ้ำกันระหว่างด้านหรือไม่ จึงนำยอดแต่ละด้านมาบวกเป็นจำนวนธุรกิจทั้งหมดไม่ได้",
     C08_ASSESSED_PEOPLE: "นับคนที่มีคะแนนประเมินก่อนและหลังครบ คนหนึ่งอาจมีหลายแบบประเมิน จึงไม่ใช้จำนวนแบบประเมินแทนจำนวนคน แบบประเมินที่ไม่มีวันที่อาจไม่ใช่ข้อมูลล่าสุด",
     C08_INCREASED_PEOPLE: "นับคนที่มีคะแนนก่อนและหลังให้เทียบกันได้ และมีคะแนนเพิ่มขึ้นอย่างน้อยหนึ่งด้าน คนกลุ่มนี้รวมอยู่ใน “บุคคลที่มีชุดคะแนนก่อนและหลังครบ” แล้ว จึงนำสองยอดมาบวกกันไม่ได้ คะแนนที่เพิ่มขึ้นเป็นผลของบุคคล ไม่ใช่จำนวนธุรกิจที่พัฒนาขึ้น และข้อมูลที่ขาดไม่ได้แปลว่าไม่มีการเปลี่ยนแปลง",
+    H01: "แสดงจำนวนครัวเรือนเป้าหมายตามยอดที่ PMUA AppTech รายงาน ไม่ได้แปลว่าทุกครัวเรือนได้ผลลัพธ์ และไม่มีรายชื่อครัวเรือนให้ตรวจดู ยอดรายจังหวัดรวมกันเท่ากับยอดประเทศ จังหวัดที่ต้นทางไม่ได้รายงานไม่ได้แปลว่ามีศูนย์ครัวเรือน ต้นทางแก้ตัวเลขย้อนหลังได้และไม่ได้บอกช่วงเวลาที่วัด ตัวเลขเงินมีเฉพาะระดับประเทศ ดูได้ในตารางครัวเรือนเป้าหมายบนหน้าภาพรวม",
     K09: "แสดงจำนวนการจ้างงานที่ต้นทางรายงานในหน่วยคนต่อเดือน แต่ไม่ได้ระบุว่าเป็นเดือนปฏิทินใด จึงยังบอกไม่ได้ว่าเป็นยอดของเดือนล่าสุด มีเฉพาะข้อมูลรวม ไม่มีรายชื่อแรงงานหรือจำนวนแยกรายจังหวัด",
     K10: "เป็นยอดเงินที่รายงานว่าจ่ายแก่แรงงานและผู้จัดหาทรัพยากรในพื้นที่ ไม่ใช่รายได้สุทธิที่ยืนยันแล้ว การรวมยอดนี้อาศัยข้อสมมติว่ายอดรับในพื้นที่นำมาบวกกันได้และครอบคลุมช่วงเดือนที่เทียบกันได้",
     K11A: "ป้ายหมวดอุตสาหกรรมยังไม่เพียงพอที่จะยืนยันตัวตนคลัสเตอร์ จึงแสดงว่าไม่มีข้อมูล ไม่ใช่ศูนย์",
@@ -152,6 +156,9 @@
   const allMeasureDefinitions = () => visibleMeasures((state.overview?.headlines || []).flatMap((headline) => [headline, ...(headline.companions || [])]));
   const supportsProvince = (definition) => definition?.filter_contract?.supported_filters?.includes("province");
   const statusLabel = (value) => RESULT_STATUS_LABELS[value] || label(value);
+  // A missing value says why, not what kind of number it would be (a source total's status is not a reason).
+  const unavailableLabel = (result) => result?.unavailable_reason?.code === "unknown_province" ? "ไม่มีข้อมูลรายจังหวัด"
+    : statusLabel(["deferred", "insufficient_data"].includes(result?.status) ? result.status : "unavailable");
   const provinceName = (code) => code
     ? (state.callbacks.getProvinces?.() || []).find((province) => text(province.province_code) === code)?.province_name_th || code
     : "";
@@ -584,7 +591,7 @@
     if (!isObject(value)) { card.append(el("h4", { text: fallbackTitle }), el("p", { text: valueText(value) || "ไม่มีข้อมูล" })); return card; }
     card.append(el("h4", { text: MEASURE_DISPLAY_LABELS[state.measure] || value.title_th || value.label_th || value.title || value.label || value.name || fallbackTitle }));
     if (value.availability === "unavailable") {
-      card.append(el("p", { class: "f2-unavailable-value", text: statusLabel(value.status || value.availability) }));
+      card.append(el("p", { class: "f2-unavailable-value", text: unavailableLabel(value) }));
       return card;
     }
     const summary = value.description || value.summary || value.note || value.display_value || valueText(value.value);
@@ -671,7 +678,7 @@
       const rows = headlines.filter((headline) => ids.includes(headline.measure_id));
       if (!rows.length) return;
       const group = el("div", { class: "f2-headlines" });
-      if (index === 4 && rows.every((item) => item.result?.availability === "unavailable")) {
+      if (ids.includes("K11A") && rows.every((item) => item.result?.availability === "unavailable")) {
         const unavailable = section(title, el("div", { class: "f2-cluster-notice" },
           el("strong", { text: "ยังไม่มีหลักฐานเพียงพอสำหรับจำนวนคลัสเตอร์และจังหวัดที่มีคลัสเตอร์" }),
           el("p", { text: "ยังยืนยันตัวตนคลัสเตอร์ไม่ได้ และหลักฐานโครงการทั่วไปใช้แทนหลักฐานคลัสเตอร์ไม่ได้ การไม่มีข้อมูลไม่ใช่ศูนย์" }),
@@ -701,7 +708,7 @@
           el("strong", { text: valueText(result.display_value ?? result.value) || "—" }),
         );
         if (item.unit || result.unit) metric.append(el("small", { text: item.unit || result.unit }));
-        if (result.availability === "unavailable") metric.append(el("span", { class: "f2-metric-state", text: statusLabel(result.status || result.availability) }));
+        if (result.availability === "unavailable") metric.append(el("span", { class: "f2-metric-state", text: unavailableLabel(result) }));
         if (["K09", "K10"].includes(item.measure_id) && result.availability !== "unavailable") {
           metric.append(el("span", { class: "f2-metric-state", text: MONTH_NOTE }));
         }
@@ -741,12 +748,32 @@
           appendMetric(companion, true);
         });
         if (COMPANION_NOTES[item.measure_id]) group.append(el("p", { class: "f2-companion-note", text: COMPANION_NOTES[item.measure_id] }));
+        if (item.measure_id === data.households?.measure_id) group.append(householdTable(data.households));
       });
       const topicSection = section(title, group);
       topicSection.id = `f2-overview-group-${index}`;
       view.append(topicSection);
     });
     if (!headlines.length) view.append(section("ภาพรวม", null, "ยังไม่มีข้อมูลสรุปสำหรับขอบเขตที่เลือก"));
+  }
+  // PMUA's national household and money figures as the page states them; never per province or per household.
+  function householdTable(households) {
+    const money = (value) => `${(value / 1e6).toLocaleString("th-TH", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ล้านบาท`;
+    const name = provinceName(state.province);
+    const origin = sourceLine([households.source_id]);
+    return el("div", { class: "f2-household-table" },
+      name ? el("p", { class: "f2-companion-note", text: `ตารางนี้เป็นยอดระดับประเทศ ไม่ใช่ของจังหวัด${name} ต้นทางไม่ได้แยกตัวเลขเงินรายจังหวัด` }) : "",
+      el("div", { class: "f2-table-scroll", tabindex: "0", role: "region", "aria-label": "ตารางครัวเรือนเป้าหมายระดับประเทศ" },
+        el("table", { class: "f2-source-region-table" },
+          el("caption", { text: "ยอดระดับประเทศตามที่ PMUA AppTech แสดง แยกตามปีงบประมาณที่ต้นทางใช้กรอง" }),
+          el("thead", {}, el("tr", {}, el("th", { scope: "col", text: "รายการ" }), households.columns.map((column) => el("th", { scope: "col", text: column.label_th })))),
+          el("tbody", {}, households.rows.map((row) => el("tr", {},
+            el("th", { scope: "row", text: row.label_th }),
+            households.columns.map((column) => el("td", { "data-label": column.label_th,
+              title: row.unit_th === "บาท" ? `${formattedCount(row.values[column.id])} บาท` : null,
+              text: row.unit_th === "บาท" ? money(row.values[column.id]) : `${formattedCount(row.values[column.id])} ${row.unit_th}` }))))))),
+      el("ul", { class: "f2-household-notes" }, households.notes_th.map((note) => el("li", { text: note }))),
+      origin ? el("p", { class: "f2-metric-source", text: origin }) : "");
   }
   // บพท.'s slide figures beside ours, grouped by how far they can be read together. Never a ratio or a gap.
   function renderOfficial(view, data) {
@@ -1440,7 +1467,9 @@
     const origin = sourceLine(definition.source_ids);
     view.append(section(`${measureDisplayLabel(definition)} รายจังหวัด`, null, el("div", { class: "f2-area-summary" },
       el("strong", { text: summary.join(" · ") }),
-      el("p", { text: `จังหวัดในที่นี้หมายถึง${AREA_PLACE_MEANINGS[state.measure] || "จังหวัดที่แหล่งข้อมูลระบุ"} รายการเดียวอาจอยู่ได้หลายจังหวัด ยอดรายจังหวัดจึงบวกกันเป็นยอดประเทศไม่ได้` }),
+      el("p", { text: `จังหวัดในที่นี้หมายถึง${AREA_PLACE_MEANINGS[state.measure] || "จังหวัดที่แหล่งข้อมูลระบุ"} ${coverage.province_sum_is_additive
+        ? `ต้นทางรายงานยอดแยกรายจังหวัด และยอดรายจังหวัดรวมกันเท่ากับยอดประเทศ ${formattedCount(coverage.national_total)} ${unit}`.trim()
+        : "รายการเดียวอาจอยู่ได้หลายจังหวัด ยอดรายจังหวัดจึงบวกกันเป็นยอดประเทศไม่ได้"}` }),
       origin ? el("p", { class: "f2-metric-source", text: origin }) : "")));
     view.append(areaLimits());
     const shown = state.areaShowAll ? found : found.slice(0, AREA_TOP);
@@ -1462,7 +1491,8 @@
     const others = (title, rows, note) => rows.length ? view.append(section(`${title} (${formattedCount(rows.length)} จังหวัด)`,
       el("ul", { class: "f2-area-others" }, rows.map((cell) => el("li", {}, el("button", { type: "button", class: "f2-university-link", "data-f2-area-province": cell.province_code, text: cell.province_name_th || cell.province_code, onclick: () => selectAreaProvince(cell.province_code) })))), note)) : null;
     others("ไม่พบในข้อมูลที่รวบรวม", zero, "แหล่งข้อมูลที่รวบรวมไม่มีรายการที่ระบุจังหวัดเหล่านี้ ไม่ได้แปลว่าในจังหวัดนั้นไม่มีผลงาน");
-    others("ไม่มีข้อมูลรายจังหวัด", unavailable, "ตัวชี้วัดนี้ยังไม่มีตัวเลขที่รองรับสำหรับจังหวัดเหล่านี้");
+    others("ไม่มีข้อมูลรายจังหวัด", unavailable, definition.status === "source_aggregate"
+      ? "แหล่งข้อมูลไม่ได้รายงานจังหวัดเหล่านี้ ไม่ได้แปลว่ามีศูนย์" : "ตัวชี้วัดนี้ยังไม่มีตัวเลขที่รองรับสำหรับจังหวัดเหล่านี้");
     return true;
   }
   function renderAreaProvince(view) {
@@ -1486,7 +1516,8 @@
           : el("strong", { class: "f2-area-none", text: "ไม่มีข้อมูลรายจังหวัด" });
       const origin = sourceLine(item.source_ids);
       return el("tr", {},
-        el("th", { scope: "row" }, measureDisplayLabel(item), el("small", { text: AREA_PLACE_MEANINGS[item.measure_id] || "" })),
+        el("th", { scope: "row" }, measureDisplayLabel(item), el("small", { text: item.measure_id === "H01"
+          ? "ตัวเลขเงินของครัวเรือนเป้าหมายมีเฉพาะระดับประเทศ ดูได้ที่หน้าภาพรวม" : AREA_PLACE_MEANINGS[item.measure_id] || "" })),
         el("td", { "data-label": "ในจังหวัดนี้" }, figure, origin ? el("small", { class: "f2-metric-source", text: origin }) : "",
           value > 0 && item.detail_availability === "available" ? el("button", { type: "button", class: "f2-inline-link f2-no-print", text: "ดูรายการในจังหวัดนี้", onclick: () => {
             changeMeasure(item.measure_id);

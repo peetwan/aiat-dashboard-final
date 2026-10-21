@@ -10,6 +10,12 @@ SELECT 'K02' AS measure_id, 'province_level' AS breakdown, dimension_value AS me
        NULL AS region, NULL AS component, replace(metric, 'levels.', '') AS source_level, value, 1 AS divisor, ord
 FROM f WHERE source = 'pmua_apptech' AND dataset = 'innovators_all' AND metric LIKE 'levels.%'
 
+-- H01: PMUA target households (all years) by province. Its money and fiscal-year figures are national only and
+-- are not parts: summed with the households or with each other they would count twice (publish _households).
+UNION ALL
+SELECT 'H01', 'province', dimension_value, province_code, NULL, NULL, NULL, value, 1, ord
+FROM f WHERE source = 'pmua_apptech' AND dataset = 'family_all' AND metric = 'total_hh'
+
 -- K09: local employment (people per month) by region.
 UNION ALL
 SELECT 'K09', 'components', dimension_value, NULL, dimension_value, metric, NULL, value, 1, ord

@@ -187,6 +187,14 @@ class Results:
         return {"choices": choices, "default": default, "selections": selections}
 
     def coverage(self, measure: str, place: dict) -> dict:
+        if self.is_total(measure) and self.measures[measure].get("province_sum_is_additive"):
+            # a source total split by province once (H01): its province values add up to the national total
+            parts = self.parts[measure]
+            total = int(sum(r["value"] for r in parts))
+            placed = int(sum(r["value"] for r in parts if r["province_code"]))
+            selected = self.result(measure, place)["value"] if "province" in place else total
+            return {"national_total": total, "province_sum_is_additive": True, "selected_count": selected,
+                    "with_province": placed, "without_province": total - placed}
         if self.is_total(measure) or self.measures[measure].get("unavailable_reason"):
             return {"national_total": None, "province_sum_is_additive": False, "selected_count": None,
                     "with_province": None, "without_province": None}

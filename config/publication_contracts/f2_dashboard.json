@@ -140,6 +140,11 @@
       "name": "C10_ALTERNATIVE: สูตรทางเลือกเพื่ออธิบายตัวเลขรายได้เดิม",
       "denominator": "(SUM localResourceExpense + SUM excludedResourceExpense) / 1000000",
       "unit": "million_THB_per_month"
+    },
+    {
+      "name": "H01: ครัวเรือนเป้าหมายตามที่ PMUA AppTech รายงาน",
+      "denominator": "SUM PMUA family_all province total_hh; reconcile to reported headline",
+      "unit": "household"
     }
   ],
   "outputs": [
@@ -578,12 +583,28 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 14,
-      "minimum_count": 14,
+      "expected_count": 15,
+      "minimum_count": 15,
       "records_pointer": "/headlines",
       "max_bytes": 524288,
       "identity_fields": [
         "measure_id"
+      ],
+      "max_identity_churn_ratio": 1
+    },
+    {
+      "path": "data/public/f2/topics/h01.json",
+      "role": "database",
+      "format": "json",
+      "downloadable": true,
+      "schema_policy": "stable",
+      "expected_files": 1,
+      "expected_count": 0,
+      "minimum_count": 0,
+      "records_pointer": "/items_by_id",
+      "max_bytes": 8388608,
+      "identity_fields": [
+        "$key"
       ],
       "max_identity_churn_ratio": 1
     },
