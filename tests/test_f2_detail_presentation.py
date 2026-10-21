@@ -346,6 +346,24 @@ const business = presenter.present('K05', {
 }, {});
 assert.equal(business.sections.some(row => row.title === 'เกี่ยวกับธุรกิจหรือกลุ่ม'), false);
 assert.ok(business.notices.some(row => row.text.includes('ยังไม่มีรายละเอียดเพิ่มเติม')));
+assert.equal(business.sections.some(row => row.title === 'โครงการที่เข้าร่วม'), false);
+assert.equal(business.notices.some(row => row.text.includes('เข้าร่วมโครงการ')), false);
+const noParticipations = presenter.present('K05', {label: 'ร้านตัวอย่าง', children: {participations: []}}, {});
+assert.equal(noParticipations.sections.some(row => row.title === 'โครงการที่เข้าร่วม'), false);
+assert.equal(noParticipations.notices.some(row => row.text.includes('เข้าร่วมโครงการ')), false);
+// a Learning business shows the projects it took part in, as on its C08 detail
+const participations = [
+  {project: 'ผ้าทอตัวอย่าง', fiscal_year_be: '2566', research_unit: 'มหาวิทยาลัยตัวอย่าง', source_id: 'f2_learning_area_based'},
+  {project: 'ผ้าทอตัวอย่าง', fiscal_year_be: '2567', research_unit: 'มหาวิทยาลัยอื่น', source_id: 'f2_learning_area_based'}];
+const learning = presenter.present('K05', {label: 'กลุ่มตัวอย่าง', source_ids: ['f2_learning_area_based'], children: {participations}}, {});
+const joined = learning.sections.find(row => row.title === 'โครงการที่เข้าร่วม');
+assert.equal(joined.kind, 'timeline');
+assert.deepEqual(joined.items.map(row => [row.title, row.subtitle]), [['ผ้าทอตัวอย่าง', 'ปีงบประมาณ 2566'], ['ผ้าทอตัวอย่าง', 'ปีงบประมาณ 2567']]);
+assert.ok(joined.items[1].facts.some(row => row.label === 'หน่วยงานวิจัย' && row.value === 'มหาวิทยาลัยอื่น'));
+assert.ok(joined.items[0].facts.some(row => row.label === 'แหล่งข้อมูล' && row.value));
+assert.ok(learning.notices.some(row => row.text.startsWith('แหล่งข้อมูลระบุว่าธุรกิจนี้เข้าร่วมโครงการ')));
+const c08 = presenter.present('C08_PARTICIPATING', {label: 'กลุ่มตัวอย่าง', children: {participations}}, {});
+assert.deepEqual(c08.sections.find(row => row.title === 'โครงการที่เข้าร่วม').items, joined.items);
 """
     result = subprocess.run(
         [NODE, "-"], cwd=ROOT, text=True, encoding="utf-8",

@@ -468,3 +468,19 @@ def test_f2_innovation_list_filters_count_the_published_follow_up_evidence():
         for bad in ({"university": "uni_000000000000"}, {"trl": "10"}, {"source": "f2_learning_dashboard"},
                     {"evidence": "still_used"}):
             assert client.get(url, params={"measure": "C04_LISTED", **bad}).status_code == 422, bad
+
+
+def test_f2_learning_businesses_show_their_participations_on_the_k05_detail():
+    participating = _published("topics/k08.json")["details_by_id"]
+    businesses = {entity_id: detail for path in sorted((F2_ROOT / "details").glob("k05-*.json"))
+                  for entity_id, detail in _published(f"details/{path.name}")["details_by_id"].items()}
+    learning = {e for e, d in businesses.items() if "f2_learning_area_based" in d["source_ids"]}
+    assert learning == set(participating)
+    for entity_id, detail in businesses.items():
+        # the same Learning rows as the C08 detail, and nothing from a business's other sources
+        assert detail["children"].get("participations") == participating.get(entity_id, {}).get("children", {}).get(
+            "participations"), entity_id
+    entity_id = next(e for e in sorted(learning) if len(participating[e]["children"]["participations"]) > 1)
+    with TestClient(app) as client:
+        detail = client.get(f"/api/public/v1/f2/topics/k05/details/{entity_id}", params={"measure": "K05"}).json()["detail"]
+    assert detail["children"]["participations"] == participating[entity_id]["children"]["participations"]
