@@ -591,7 +591,9 @@
       title: sourceName(row.source_id),
       subtitle: cleanText(row.label),
     }));
+    const participations = participationRows(detail);
     const notices = baseNotices(detail);
+    if (participations.length) notices.push({ tone: "warning", text: PARTICIPATION_NOTICE });
     if (detail.flags?.person_relationships_withheld) notices.push({ tone: "info", text: "ไม่แสดงความเชื่อมโยงระดับบุคคล เพื่อคงขอบเขตข้อมูลสาธารณะที่ได้รับอนุมัติ" });
     if (detail.flags?.geography_not_borrowed_from_offerings && !locations.length) notices.push({ tone: "info", text: "ไม่มีที่ตั้งของผู้ประกอบการที่ยืนยันได้ ระบบจึงไม่นำที่ตั้งของสินค้ามาใช้แทน" });
     if (!descriptions.length) notices.push({ tone: "info", text: "แหล่งข้อมูลยังไม่มีรายละเอียดเพิ่มเติมเกี่ยวกับธุรกิจนี้" });
@@ -603,6 +605,7 @@
       sections: [
         section("เกี่ยวกับธุรกิจหรือกลุ่ม", "prose", descriptions),
         section("ที่ตั้งผู้ประกอบการ", "cards", locations),
+        section("โครงการที่เข้าร่วม", "timeline", participations),
         section("สินค้าและบริการที่เกี่ยวข้อง", "cards", offerings),
         section("พบในแหล่งข้อมูล", "cards", memberships),
       ].filter(Boolean),
@@ -670,9 +673,11 @@
     };
   }
 
-  function participationPresentation(detail, provenance) {
-    const locations = locationRows(detail);
-    const participations = asArray(detail.children?.participations).filter(isObject).map((row) => ({
+  // Learning area-based participations, shown on both the K05 and the C08 business detail.
+  const PARTICIPATION_NOTICE = "แหล่งข้อมูลระบุว่าธุรกิจนี้เข้าร่วมโครงการ แต่ไม่ได้ยืนยันว่าธุรกิจมีผลประกอบการหรือขีดความสามารถดีขึ้น";
+
+  function participationRows(detail) {
+    return asArray(detail.children?.participations).filter(isObject).map((row) => ({
       title: cleanText(row.project) || "โครงการที่เข้าร่วม",
       subtitle: row.fiscal_year_be ? `ปีงบประมาณ ${row.fiscal_year_be}` : "",
       facts: [
@@ -680,8 +685,13 @@
         row.source_id ? { label: "แหล่งข้อมูล", value: sourceName(row.source_id) } : null,
       ].filter(Boolean),
     }));
+  }
+
+  function participationPresentation(detail, provenance) {
+    const locations = locationRows(detail);
+    const participations = participationRows(detail);
     const notices = baseNotices(detail);
-    notices.push({ tone: "warning", text: "ข้อมูลนี้ยืนยันการเข้าร่วมโครงการ แต่ไม่ได้ยืนยันว่าธุรกิจมีผลประกอบการหรือขีดความสามารถดีขึ้น" });
+    notices.push({ tone: "warning", text: PARTICIPATION_NOTICE });
     if (detail.flags?.person_assessments_withheld) notices.push({ tone: "info", text: "ไม่แสดงผลประเมินระดับบุคคลในหน้าสาธารณะ" });
     return {
       eyebrow: "ธุรกิจหรือหน่วยธุรกิจที่เข้าร่วมโครงการ",

@@ -522,7 +522,7 @@ def operators(ctx: Context, measure_id: str) -> dict[str, dict]:
         descriptions, locations, related, memberships, participations = [], [], [], [], []
         for key, row in zip(members, rows):
             sid, details = ctx.source_id[row["source"]], json.loads(row["details"] or "{}")
-            if row["source"] == "learning_area_based" and measure_id == "C08_PARTICIPATING":
+            if row["source"] == "learning_area_based":
                 participations.append({"project": label(details.get("project")), "fiscal_year_be": details.get("fiscal_year_be"),
                                        "research_unit": label(details.get("research_unit")), "source_id": sid})
             descriptions += [description("source_reported_business", q, sid) for q in details.get("evidence") or []]
@@ -549,7 +549,8 @@ def operators(ctx: Context, measure_id: str) -> dict[str, dict]:
                 "operator", entity_id, title((named or rows)[0]["name"]), [s for s, _ in members],
                 descriptions=descriptions,
                 locations=[l for l in locations if l], relationships=related, identity_review=identity,
-                children={"source_memberships": unique(memberships)},
+                children={"source_memberships": unique(memberships),
+                          **({"participations": unique(participations)} if participations else {})},
                 flags={"geography_not_borrowed_from_offerings": True})
     return out
 

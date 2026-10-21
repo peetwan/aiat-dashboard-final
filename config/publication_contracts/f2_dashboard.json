@@ -304,8 +304,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 2396,
-      "minimum_count": 2396,
+      "expected_count": 2310,
+      "minimum_count": 2310,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
@@ -331,8 +331,8 @@
       "downloadable": true,
       "schema_policy": "stable",
       "expected_files": 1,
-      "expected_count": 1468,
-      "minimum_count": 1468,
+      "expected_count": 1554,
+      "minimum_count": 1554,
       "records_pointer": "/details_by_id",
       "max_bytes": 4194304,
       "identity_fields": [
