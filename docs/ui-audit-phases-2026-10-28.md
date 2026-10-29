@@ -212,15 +212,38 @@ branch `fix/ui-audit-phases-0-5` แตกจาก fd94c7f3 ระหว่า�
 git เขียนไฟล์ที่ merge เป็น CRLF ทำให้ `tests/test_f2_navigation.py` (อ่าน `f2.js` ทีละบรรทัดด้วย `split("\n")`) ล้ม 1 เทส คืนเป็น LF แล้วผ่าน
 ตรวจบนต้นไม้ที่ merge แล้ว: `PYTHONUTF8=1 .venv/Scripts/python.exe -m app.cli check` exit 0, pytest 827 passed 1 skipped (น้อยกว่ารอบ phase 5 เพราะ main ตัดชุดเทส pipeline เก่าออก 48 ไฟล์ 12,601 บรรทัด) main เพิ่ม `duckdb>=1.5.6,<2` ใน requirements.txt จึงต้องติดตั้งเข้า venv ก่อน (venv นี้สร้างจาก uv ไม่มี pip: `uv pip install --python .venv/Scripts/python.exe "duckdb>=1.5.6,<2"`)
 
-## Phase 6 ปิดท้าย (โครงสร้าง CSS)
+## Phase 6 ปิดท้าย (โครงสร้าง CSS) (ทำแล้ว)
 
 | # | ปัญหา | ไฟล์ | สถานะ |
 |---|---|---|---|
-| 6.1 | `:hover` ที่เหลือประมาณ 46 กฎ (card, row, link ในชีต) ยังไม่ครอบ media query (lane A) | `styles.css`, `departments.css`, `f2.css`, `province.css`, `insights.css` | รอ |
-| 6.2 | token `:root` ธีมมืดชั้น base ถูกทับด้วย lightmap 11 บล็อก มี `color-scheme: dark` ค้าง (lane G) | `styles.css:990-1008, 2213, 2620` | รอ |
-| 6.3 | `@layer uiux2026` ไม่อยู่ในประกาศลำดับชั้น (lane G) | `styles.css:1` | รอ |
-| 6.4 | รายการ F4 ไม่มี load more (lane B POLISH) รอจำนวนแถวจริงจาก API | `app.js:1407` | รอ นับก่อน |
-| 6.5 | F2 filter dialog ไม่มี enter animation (lane F POLISH) ไม่ใช่ข้อผิดพลาด | `f2.css:110` | ไม่ทำก็ได้ |
+| 6.1 | `:hover` ที่เหลือประมาณ 46 กฎ (card, row, link ในชีต) ยังไม่ครอบ media query (lane A) | `styles.css`, `departments.css`, `f2.css`, `province.css`, `insights.css` | ทำแล้ว นับจริงได้ 43 กฎ (styles 27, departments 5, f2 4, province 6, insights 1) ครอบด้วย `(hover: hover) and (pointer: fine)` กฎที่รวม `:focus-visible` หรือ class สถานะ (`.is-active`, `.is-hovered`, `.active`, `[aria-pressed]`) แยก selector เหล่านั้นไว้นอก media query ด้วยค่าเดิม จำนวน `:hover` และ `:focus-visible` ต่อไฟล์เท่าเดิม ไม่เหลือกฎ hover นอก media query ทั้ง 5 ไฟล์ |
+| 6.2 | token `:root` ธีมมืดชั้น base ถูกทับด้วย lightmap 11 บล็อก มี `color-scheme: dark` ค้าง (lane G) | `styles.css:990-1008, 2213, 2620` | ทำแล้วเฉพาะ `color-scheme`: ชั้น base เป็น `light` (หน้ามี meta color-scheme=light อยู่แล้ว) และลบ `color-scheme: light` ที่ซ้ำใน lightmap 2 จุด token ชุดมืดใน `:root` ชั้น base คงไว้เพราะ lightmap ทับค่าแล้ว การยุบรวม token เป็นงานแยก |
+| 6.3 | `@layer uiux2026` ไม่อยู่ในประกาศลำดับชั้น (lane G) | `styles.css:1` | ทำแล้ว เพิ่ม `uiux2026` ท้ายประกาศบรรทัดแรก ลำดับเท่าเดิมเพราะปรากฏครั้งแรกหลัง lightmap อยู่แล้ว |
+| 6.4 | รายการ F4 ไม่มี load more (lane B POLISH) รอจำนวนแถวจริงจาก API | `app.js:1407` | ทำแล้ว นับจาก API production: นวัตกรรม 1,160 แถว นโยบาย 107 แถว รายการแสดงทีละ 40 แถวพร้อมปุ่ม "แสดงอีก 40 รายการ (เหลือ N)" summary ยังนับทุกแถวที่ตรงคำค้น จำนวนที่แสดงรีเซ็ตเมื่อเปลี่ยนคำค้น ตัวกรอง TRL หรือขอบเขต (ประเทศ ภาค จังหวัด) focus ย้ายไปปุ่มใหม่หลังกด |
+| 6.5 | F2 filter dialog ไม่มี enter animation (lane F POLISH) ไม่ใช่ข้อผิดพลาด | `f2.css:110` | ไม่ทำ ตามที่ระบุว่าไม่ใช่ข้อผิดพลาด |
+
+รายการที่เพิ่มจากหมายเหตุตอนรวม main และจากการไล่ cascade:
+
+| รายการ | ไฟล์ | สถานะ |
+|---|---|---|
+| กฎเลื่อน dock ที่ `(min-width: 1080px)` 6 บล็อก กฎซ่อน dock เมื่อชีตเปิดที่ 721 ถึง 1079px และที่มือถือ ตายทั้งหมด | `styles.css` | ลบแล้ว 7 จุด เพราะกฎ `body.*-open .mode-dock` นอก layer ที่ `min-width: 721px` (phase 5.3) และ mobile.css ตั้งทุก property ที่กฎเหล่านี้ตั้งและอยู่หลังกว่าใน cascade ตำแหน่ง dock หลังลบเท่ากับ production ก่อนลบทุก class |
+| แท็บ F2 ใหม่ 4 แท็บและชีตรายละเอียดโหลดเป็นข้อความ "กำลังโหลด" | `f2.js` | ทำแล้ว skeleton ตามรูปทรงที่วัดจากของจริงที่ 375px (ดูตารางผลตรวจ) แท็บนวัตกรรมขึ้น skeleton ตั้งแต่สลับแท็บเหมือนแท็บพื้นที่ ไม่รอ overview ก่อน |
+| ขีดยาว (em dash) ในภาพรวม F2 มาจากข้อมูล generated | `data/public/public_dashboard.json` | ไม่แตะ เป็นข้อมูลไม่ใช่โค้ด UI งาน dashboard ไม่แก้ข้อมูล |
+
+### ผลตรวจ phase 6 (29 ตุลาคม 2569)
+
+ตรวจใน browser pane (Chromium) ที่ 1280x800, 900x700 และ 375x812 บน branch `fix/ui-audit-phase-6` จาก main de92367 (PR #87 merge แล้ว)
+
+| รายการ | ค่าที่วัดได้ |
+|---|---|
+| กฎ `:hover` นอก media query | ก่อน 43 (styles 27, departments 5, f2 4, province 6, insights 1) หลัง 0 ทุกไฟล์ จำนวน `:hover` และ `:focus-visible` ต่อไฟล์เท่าเดิม |
+| ตำแหน่ง dock เมื่อเปิดชีต (panel-open, f1-country-open, f4-country-open, workspace-panel-open) | 1280x800 left 210 กว้าง 860 ห่างล่าง 18 และ 900x700 left 20 กว้าง 860 ห่างล่าง 18 opacity 1 ทุก class เท่ากับ production (de92367) ก่อนลบกฎ |
+| skeleton แท็บ F2 ที่ 375px (จำลอง API ช้า 7 วินาที) | พื้นที่ 64/181/56/360, มหาวิทยาลัย 44x104/20/300/96/96, นวัตกรรม 44x104/20/132 สี่แท่ง, ที่มาข้อมูล 44x104/24/300/183/139, รายละเอียด 24/120/96/96 ทุกจุดมีหัวข้อ "กำลังโหลด" แบบ `.sr-only` ใน `role="status"` |
+| รายการ F4 นวัตกรรมระดับประเทศ | แสดง 40 แถวแรก กดปุ่มแล้ว 80 ปุ่มใหม่ได้ focus summary "1,160 รายการ" ปุ่มสูง 46px กว้างเต็มรายการ (545px เดสก์ท็อป 318px มือถือ) ตัวอักษร 14px |
+| เทส | `tests/test_ui_coverage.py` แก้ 1 assertion ที่อ้างข้อความจากกฎ 1080px ที่ลบ เป็นอ้าง `body.f4-country-open .mode-dock` ในกฎ 721px แทน และ `tests/test_f2_detail_presentation.py` เพิ่ม stub `skeleton` ใน vm context ของเทส loadSources (check รอบแรกล้ม 1 เทสเพราะ loadSources เรียก skeleton แทน status แล้ว) |
+| check เต็มชุด | `PYTHONUTF8=1 .venv/Scripts/python.exe -m app.cli check` exit 0, pytest 827 passed 1 skipped |
+
+เวอร์ชัน asset: styles.css f2.css province.css insights.css app.js `?v=20261029-phase06a` และ departments.css f2.js `?v=20261029-phase06b`
 
 ## ต้องทดสอบบนเครื่องจริงหลังแต่ละ phase
 

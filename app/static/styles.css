@@ -1,4 +1,6 @@
-@layer reset, base, map, controls, panel, responsive, redesign, executive, lightmap;
+/* phase 6.3 (docs/ui-audit-phases-2026-10-28.md): uiux2026 อยู่ท้ายสุดตามลำดับที่ปรากฏครั้งแรกอยู่แล้ว
+   ประกาศไว้ตรงนี้ให้ลำดับชั้นทั้งหมดอ่านได้จากบรรทัดเดียว ไม่เปลี่ยนผลการทับกัน */
+@layer reset, base, map, controls, panel, responsive, redesign, executive, lightmap, uiux2026;
 
 @layer reset {
   *, *::before, *::after { box-sizing: border-box; }
@@ -29,7 +31,7 @@
   border-radius: 14px;
   cursor: pointer;
 }
-.province-kpi:hover { border-color: #79a28a; background: #f7faf8; }
+@media (hover: hover) and (pointer: fine) { .province-kpi:hover { border-color: #79a28a; background: #f7faf8; } }
 .province-kpi:focus-visible,
 .overview-districts button:focus-visible,
 .overview-full-cta:focus-visible { outline: 2px solid #141d18; outline-offset: 2px; }
@@ -71,7 +73,7 @@
 .overview-geography > header > strong { color: #1a4d34; font-size: 22px; font-variant-numeric: tabular-nums; }
 .overview-districts { display: flex; flex-wrap: wrap; gap: 7px; }
 .overview-districts button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #dce4de; color: #3c5145; background: #f8faf8; border-radius: 9px; cursor: pointer; }
-.overview-districts button:hover { border-color: #7aa48c; background: #f1f6f2; }
+@media (hover: hover) and (pointer: fine) { .overview-districts button:hover { border-color: #7aa48c; background: #f1f6f2; } }
 .overview-districts button span { font-size: 10px; }
 .overview-districts button strong { color: #1e4d35; font-size: 11px; font-variant-numeric: tabular-nums; }
 
@@ -96,7 +98,7 @@
 .overview-full-cta strong { font-size: 14px; }
 .overview-full-cta small { margin-top: 4px; color: #bdd2c4; font-size: 10px; }
 .overview-full-cta b { flex: 0 0 auto; color: #c8e2d1; font-size: 10px; }
-.overview-full-cta:hover { background: #21543b; }
+@media (hover: hover) and (pointer: fine) { .overview-full-cta:hover { background: #21543b; } }
 
 .f4-country-panel {
   position: absolute;
@@ -129,7 +131,7 @@
   font-weight: 700;
 }
 .f4-board-toggle[hidden] { display: none; }
-.f4-board-toggle:hover { color: #f4f6f2; background: #14231b; }
+@media (hover: hover) and (pointer: fine) { .f4-board-toggle:hover { color: #f4f6f2; background: #14231b; } }
 .f4-country-panel > header {
   display: flex;
   align-items: flex-start;
@@ -221,7 +223,7 @@
 .f4-country-panel .province-kpi > strong { font-size: 44px; }
 .f4-country-panel .province-kpi > span { font-size: 13px; }
 .f4-kpi[disabled] { cursor: default; }
-.f4-kpi[disabled]:hover { border-color: #dce4de; background: #fff; }
+@media (hover: hover) and (pointer: fine) { .f4-kpi[disabled]:hover { border-color: #dce4de; background: #fff; } }
 .f4-economic-table-wrap {
   display: grid;
   gap: 12px;
@@ -434,8 +436,10 @@
   text-align: left;
   cursor: pointer;
 }
-.f4-policy-other-toggle:hover,
 .f4-policy-other-toggle:focus-visible { border-color: #7652b5; }
+@media (hover: hover) and (pointer: fine) {
+  .f4-policy-other-toggle:hover { border-color: #7652b5; }
+}
 .f4-policy-other-toggle > span { display: flex; align-items: center; gap: 8px; }
 .f4-policy-other-toggle i { width: 10px; height: 10px; border-radius: 50%; }
 .f4-policy-other-toggle strong { color: #173f2c; font-size: 11px; white-space: nowrap; }
@@ -829,13 +833,6 @@
   .source-detail .source-note { padding: 9px 10px; }
   .source-link { display: inline-flex; min-height: 36px; align-items: center; margin-top: 10px; padding: 0 12px; color: #fff; background: var(--green); border-radius: 9px; font-size: 11px; font-weight: 700; }
 
-  @media (min-width: 1080px) {
-    body.panel-open .mode-dock {
-      left: calc((100vw - min(700px, 100vw - 20px) - 18px) / 2);
-      max-width: calc(100vw - min(700px, 100vw - 20px) - 60px);
-    }
-  }
-
   @media (max-width: 720px) {
     .map-header {
       inset: 10px 10px auto;
@@ -1014,7 +1011,9 @@
     --sky: #75cdfa;
     --shadow: 0 28px 90px rgba(0, 8, 6, 0.34);
     --radius: 24px;
-    color-scheme: dark;
+    /* phase 6.2: หน้านี้เป็นธีมสว่างทั้งหมด (meta color-scheme=light) จึงเลิกประกาศ dark ที่ชั้น base
+       token ชุดมืดด้านบนถูกชั้น lightmap ทับค่าแล้ว การยุบรวม token เป็นงานแยก */
+    color-scheme: light;
   }
 
   body {
@@ -1090,10 +1089,17 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.9);
     transition: color 160ms ease, background 160ms ease, transform 160ms ease, opacity 160ms ease;
   }
-  .province-map-label:hover, .province-map-label.is-active {
+  .province-map-label.is-active {
     color: var(--night);
     background: var(--mint);
     transform: scale(1.08);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .province-map-label:hover {
+      color: var(--night);
+      background: var(--mint);
+      transform: scale(1.08);
+    }
   }
   .province-map-label.is-secondary { opacity: 0; pointer-events: none; }
 
@@ -1407,7 +1413,7 @@
   .decision-section { background: #eef2eb; }
   .decision-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .decision-card { min-height: 118px; display: flex; flex-direction: column; justify-content: space-between; padding: 15px; border: 1px solid #cdd8cf; background: #f9fbf6; border-radius: 16px; transition: transform 160ms ease, border-color 160ms ease; }
-  .decision-card:hover { transform: translateY(-2px); border-color: #6fab8d; }
+  @media (hover: hover) and (pointer: fine) { .decision-card:hover { transform: translateY(-2px); border-color: #6fab8d; } }
   .decision-card > span { color: #456057; font-size: 11px; font-weight: 700; line-height: 1.35; }
   .decision-card > strong { margin: 13px 0 7px; color: #0f3025; font-size: clamp(24px, 3vw, 34px); line-height: 1; letter-spacing: -0.04em; }
   .decision-card > small { color: #698078; font-size: 9px; }
@@ -1479,7 +1485,7 @@
   .source-row strong { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .source-row small { margin-top: 4px; color: var(--muted); font-size: 8px; }
   .source-row > a { width: 30px; height: 30px; display: grid; place-items: center; background: #e9eee8; border-radius: 50%; font-size: 12px; }
-  .source-row > a:hover { color: var(--night); background: var(--mint); }
+  @media (hover: hover) and (pointer: fine) { .source-row > a:hover { color: var(--night); background: var(--mint); } }
   .source-row.not_province_scoped, .source-row.source_has_no_record_for_province { opacity: 0.67; }
 
   .panel-footer {
@@ -1803,7 +1809,7 @@
     box-shadow: 0 7px 24px rgba(20, 53, 41, 0.035);
   }
   .decision-card::after { content: none; }
-  .decision-card:hover { transform: translateY(-3px); border-color: #75af91; box-shadow: 0 14px 32px rgba(20, 74, 51, 0.09); }
+  @media (hover: hover) and (pointer: fine) { .decision-card:hover { transform: translateY(-3px); border-color: #75af91; box-shadow: 0 14px 32px rgba(20, 74, 51, 0.09); } }
   .decision-card > span { max-width: 82%; font-size: 12px; font-weight: 650; }
   .decision-card > strong { margin: 16px 0 8px; font-size: clamp(27px, 3vw, 36px); font-weight: 700; }
   .decision-card > small { font-size: 10px; }
@@ -1825,7 +1831,7 @@
     box-shadow: 0 5px 20px rgba(15, 47, 35, 0.035);
     transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease;
   }
-  .data-card:hover { transform: translateY(-2px); border-color: #9fbea9; box-shadow: 0 12px 28px rgba(15, 60, 42, 0.07); }
+  @media (hover: hover) and (pointer: fine) { .data-card:hover { transform: translateY(-2px); border-color: #9fbea9; box-shadow: 0 12px 28px rgba(15, 60, 42, 0.07); } }
   .record-kicker span { padding: 5px 8px; font-size: 9px; }
   .data-card h3 { margin-top: 11px; color: #152e24; font-size: 16px; font-weight: 700; }
   .data-card > p, .culture-card > div > p { margin-top: 8px; font-size: 12px; line-height: 1.6; }
@@ -2025,7 +2031,6 @@
     width: min(640px, calc(100vw - 20px));
     color: #10251d;
     background: #f6f7f3;
-    color-scheme: light;
   }
 
   .panel-content { min-width: 0; background: #f6f7f3; }
@@ -2093,7 +2098,7 @@
     background: #fff;
     border-radius: 14px;
   }
-  .decision-card:hover { transform: none; border-color: #9eb7a7; box-shadow: none; }
+  @media (hover: hover) and (pointer: fine) { .decision-card:hover { transform: none; border-color: #9eb7a7; box-shadow: none; } }
   .decision-card > span { max-width: none; color: #52645b; font-size: 12px; line-height: 1.45; }
   .decision-card > strong { margin: 11px 0 5px; color: #10251d; font-size: clamp(24px, 2.7vw, 32px); }
   .decision-card > small { color: #66786f; font-size: 11px; }
@@ -2226,7 +2231,6 @@
     --green: #176747;
     --green-deep: #0f4a32;
     --gold: #e39b17;
-    color-scheme: light;
   }
 
   body { background: var(--paper); color: var(--ink-strong); }
@@ -2329,11 +2333,20 @@
     background: rgba(255, 255, 255, 0.96);
     font-size: 11px;
   }
-  .province-map-label:hover, .province-map-label.is-hovered, .province-map-label.is-active {
+  .province-map-label.is-hovered,
+  .province-map-label.is-active {
     color: #fff;
     background: var(--green-deep);
     border-color: var(--green-deep);
     transform: translateY(-2px) scale(1.06);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .province-map-label:hover {
+      color: #fff;
+      background: var(--green-deep);
+      border-color: var(--green-deep);
+      transform: translateY(-2px) scale(1.06);
+    }
   }
 
   .evidence-popup .maplibregl-popup-content {
@@ -2401,7 +2414,7 @@
     text-align: left;
     transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
-  .district-chip:hover { background: #e2efe6; border-color: #74a98c; transform: translateY(-1px); }
+  @media (hover: hover) and (pointer: fine) { .district-chip:hover { background: #e2efe6; border-color: #74a98c; transform: translateY(-1px); } }
   .district-chip strong { color: #14392b; font-size: 12px; font-weight: 700; }
   .district-chip span { color: var(--ink-soft); font-size: 10px; }
 
@@ -2595,7 +2608,7 @@
 
   /* Unify card language across sections */
   .executive-dimension, .data-card, .research-block, .clean-metric, .decision-card { border-color: #e3e9e2; box-shadow: none; }
-  .data-card:hover { box-shadow: 0 10px 26px rgba(15, 60, 42, 0.08); }
+  @media (hover: hover) and (pointer: fine) { .data-card:hover { box-shadow: 0 10px 26px rgba(15, 60, 42, 0.08); } }
   .panel-footer { border-radius: 16px; }
 
   @media (max-width: 980px) {
@@ -2615,7 +2628,6 @@
     .panel-tabs { margin: 0 14px 12px; overflow-x: auto; scrollbar-width: none; }
     .panel-tabs::-webkit-scrollbar { display: none; }
     .panel-tabs button { flex: 0 0 auto; min-height: 42px; padding: 0 13px; }
-    body.panel-open .mode-dock { opacity: 0; pointer-events: none; }
   }
 }
 
@@ -2709,11 +2721,20 @@
   .evidence-popup span { color: var(--green); font-weight: 650; }
 
   .province-map-label { border-color: var(--hairline); background: rgba(255, 255, 255, 0.92); border-radius: 8px; box-shadow: 0 2px 10px rgba(16, 26, 20, 0.1); }
-  .province-map-label:hover, .province-map-label.is-hovered, .province-map-label.is-active {
+  .province-map-label.is-hovered,
+  .province-map-label.is-active {
     color: #f4f6f2;
     background: var(--ink-strong);
     border-color: var(--ink-strong);
     transform: translateY(-1px);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .province-map-label:hover {
+      color: #f4f6f2;
+      background: var(--ink-strong);
+      border-color: var(--ink-strong);
+      transform: translateY(-1px);
+    }
   }
 
   /* Panel: squarer, calmer, single accent */
@@ -2747,13 +2768,13 @@
   .research-stats span, .funding-grid span, .decision-card > span { color: var(--ink-soft); }
   .research-bar-row > i b { background: var(--green); }
   .district-chip { border: 1px solid var(--hairline); background: #fff; border-radius: 10px; }
-  .district-chip:hover { background: var(--ink-strong); border-color: var(--ink-strong); transform: none; }
-  .district-chip:hover strong, .district-chip:hover span { color: #f4f6f2; }
+  @media (hover: hover) and (pointer: fine) { .district-chip:hover { background: var(--ink-strong); border-color: var(--ink-strong); transform: none; } }
+  @media (hover: hover) and (pointer: fine) { .district-chip:hover strong, .district-chip:hover span { color: #f4f6f2; } }
   .funding-grid article { background: rgba(20, 29, 24, 0.04); border-radius: 10px; }
   .research-gaps { border-color: var(--hairline); }
 
-  .data-card:hover { transform: none; border-color: rgba(20, 29, 24, 0.28); box-shadow: none; }
-  .decision-card:hover { border-color: rgba(20, 29, 24, 0.28); }
+  @media (hover: hover) and (pointer: fine) { .data-card:hover { transform: none; border-color: rgba(20, 29, 24, 0.28); box-shadow: none; } }
+  @media (hover: hover) and (pointer: fine) { .decision-card:hover { border-color: rgba(20, 29, 24, 0.28); } }
   .project-people { background: rgba(23, 87, 63, 0.07); border-radius: 10px; }
   .record-kicker span { color: var(--green); background: rgba(23, 87, 63, 0.09); }
   .load-more, .panel-footer > a { border-radius: 10px; }
@@ -2849,21 +2870,9 @@
 
   .mode-dock { transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1), opacity 200ms ease; }
 
-  /* Desktop with the panel open: the panel owns the right side, so the dock
-     recenters inside the strip of map that stays visible and the legend
-     yields (its colors are hidden behind the panel anyway). */
-  @media (min-width: 1080px) {
-    body.panel-open .mode-dock {
-      left: calc((100vw - min(640px, 100vw - 20px) - 18px) / 2);
-      max-width: calc(100vw - min(640px, 100vw - 20px) - 60px);
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    body.panel-open .mode-dock::-webkit-scrollbar { display: none; }
-  }
-  @media (min-width: 721px) and (max-width: 1079px) {
-    body.panel-open .mode-dock { opacity: 0; pointer-events: none; }
-  }
+  /* Desktop with the panel open: the legend yields (its colors are hidden
+     behind the panel anyway). The dock stays centred by the unlayered
+     min-width 721px rule near the end of this file (phase 5.3). */
   @media (min-width: 721px) {
     body.panel-open .evidence-legend { display: none; }
     .province-panel { top: 84px; }
@@ -2904,7 +2913,7 @@
     color: var(--ink-strong);
     transition: border-color 150ms ease;
   }
-  .pillar-card:hover { border-color: rgba(20, 29, 24, 0.35); }
+  @media (hover: hover) and (pointer: fine) { .pillar-card:hover { border-color: rgba(20, 29, 24, 0.35); } }
   .pillar-card:focus-visible { outline: 2px solid #141d18; outline-offset: 2px; }
   .pillar-kicker { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: 11px; font-weight: 700; letter-spacing: 0; }
   .pillar-kicker i { width: 8px; height: 8px; border-radius: 50%; }
@@ -3473,15 +3482,6 @@
   .f1-empty-state strong { display: block; color: #34483d; font-size: 15px; line-height: 1.45; }
   .f1-empty-state p { margin: 6px 0 0; color: #66736b; font-size: 12px; line-height: 1.55; }
 
-  @media (min-width: 1080px) {
-    body.f1-country-open .mode-dock {
-      left: calc((100vw - min(470px, 100vw - 44px) - 22px) / 2);
-      max-width: calc(100vw - min(470px, 100vw - 44px) - 56px);
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-  }
-
   @media (max-width: 720px) {
     .f1-country-panel { top: auto; right: 7px; bottom: 72px; left: 7px; width: auto; height: min(68dvh, 720px); border-radius: 18px; }
     .f1-country-head { padding: 16px 16px 12px; }
@@ -3731,9 +3731,11 @@
   font-weight: 700;
 }
 
-.disaster-trend-head button:hover {
-  border-color: #b94949;
-  background: #fff4f4;
+@media (hover: hover) and (pointer: fine) {
+  .disaster-trend-head button:hover {
+    border-color: #b94949;
+    background: #fff4f4;
+  }
 }
 
 .disaster-trend strong {
@@ -4224,15 +4226,6 @@
   padding-bottom: 16px;
 }
 
-@media (min-width: 1080px) {
-  body.workspace-panel-open .mode-dock {
-    left: calc((100vw - min(430px, 100vw - 44px) - 22px) / 2);
-    max-width: calc(100vw - min(430px, 100vw - 44px) - 56px);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-}
-
 @media (max-width: 980px) {
   .department-dock {
     width: auto;
@@ -4411,15 +4404,6 @@
   z-index: var(--z-header);
 }
 
-@media (min-width: 1080px) {
-  body.f4-country-open .mode-dock {
-    left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2);
-    max-width: calc(100vw - min(620px, 100vw - 44px) - 56px);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-}
-
 @media (max-width: 720px) {
   .f4-country-panel {
     top: auto;
@@ -4544,9 +4528,11 @@
   color: #5c3d95;
 }
 
-.department-board-toggle:hover {
-  color: #fff;
-  background: #173d2f;
+@media (hover: hover) and (pointer: fine) {
+  .department-board-toggle:hover {
+    color: #fff;
+    background: #173d2f;
+  }
 }
 
 .department-panel > .department-panel-head {
@@ -4762,10 +4748,12 @@
   overflow-wrap: anywhere;
 }
 
-.department-kpi-card:not([disabled]):hover {
-  border-color: var(--department-accent);
-  background: var(--department-accent-soft);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .department-kpi-card:not([disabled]):hover {
+    border-color: var(--department-accent);
+    background: var(--department-accent-soft);
+    transform: translateY(-1px);
+  }
 }
 
 .department-panel--f1 .department-kpi-card.active,
@@ -4922,18 +4910,6 @@
 
 .province-panel.f1-only .f1-province-tabs button.active small {
   color: #fff0e5;
-}
-
-@media (min-width: 1080px) {
-  body.f1-country-open .mode-dock,
-  body.f4-country-open .mode-dock,
-  body.workspace-panel-open .mode-dock,
-  body.panel-open .mode-dock {
-    left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2);
-    max-width: calc(100vw - min(620px, 100vw - 44px) - 56px);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
 }
 
 @media (max-width: 720px) {
@@ -5461,9 +5437,11 @@
   font-weight: 700;
 }
 
-:is(.f1-crumbs, .department-crumbs) button:hover {
-  border-color: #8d3e14;
-  color: #8d3e14;
+@media (hover: hover) and (pointer: fine) {
+  :is(.f1-crumbs, .department-crumbs) button:hover {
+    border-color: #8d3e14;
+    color: #8d3e14;
+  }
 }
 
 :is(.f1-crumbs, .department-crumbs) > span {
@@ -5550,9 +5528,11 @@
   text-underline-offset: 3px;
 }
 
-:is(.f1-flow, .f4-flow) button.is-link:hover {
-  color: var(--department-accent-strong);
-  text-decoration-color: currentColor;
+@media (hover: hover) and (pointer: fine) {
+  :is(.f1-flow, .f4-flow) button.is-link:hover {
+    color: var(--department-accent-strong);
+    text-decoration-color: currentColor;
+  }
 }
 
 /* Segmented level bars (well-being levels, gender). */
@@ -5873,9 +5853,11 @@
   font-weight: 700;
 }
 
-:is(.f1-province-switch, .department-province-switch) button:hover {
-  border-color: #8d3e14;
-  color: #8d3e14;
+@media (hover: hover) and (pointer: fine) {
+  :is(.f1-province-switch, .department-province-switch) button:hover {
+    border-color: #8d3e14;
+    color: #8d3e14;
+  }
 }
 
 /* Wide screens: shorter header, tab rail on the left, content on the right. */
@@ -5995,7 +5977,7 @@
 }
 
 /* phase 5.3 (docs/ui-audit-phases-2026-10-28.md): dock อยู่เหนือชีตแล้ว และบนเดสก์ท็อป dock อยู่กลางจอทุกความกว้าง
-   เมื่อชีตเปิด (กฎ body.panel-open .mode-dock ที่ min-width 721px ด้านบนทับกฎเลื่อนซ้ายที่ 1080px ทั้งสามจุด)
+   เมื่อชีตเปิด (กฎ body.*-open .mode-dock ที่ min-width 721px ด้านบน กฎเลื่อนซ้ายที่ 1080px ที่เคยถูกทับลบออกแล้วใน phase 6)
    ชีตจังหวัดโหมดผู้บริหารจึงหยุดเหนือ dock เหมือนชีตฝ่าย (bottom 84px) แทน 18px */
 @media (min-width: 721px) {
   .province-panel { bottom: 84px; }

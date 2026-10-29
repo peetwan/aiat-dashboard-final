@@ -60,7 +60,7 @@ main { width: min(1400px, calc(100% - 40px)); margin: 0 auto; }
 .source-index { scrollbar-width: none; }
 .source-index::-webkit-scrollbar { display: none; }
 .source-index a { padding: 9px 15px; border-radius: 10px; font-size: 13px; font-weight: 700; }
-.source-index a:hover { background: #e5ebe5; }
+@media (hover: hover) and (pointer: fine) { .source-index a:hover { background: #e5ebe5; } }
 .page-loading, .page-error { margin: 70px 0; padding: 30px; text-align: center; border: 1px solid var(--line); border-radius: 18px; }
 
 .source-section { scroll-margin-top: 150px; padding: 90px 0; border-top: 1px solid #cbd5cd; }

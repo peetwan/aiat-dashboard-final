@@ -266,7 +266,7 @@ def test_f1_and_f4_share_the_department_panel_pattern() -> None:
     assert "height: min(68dvh, 720px)" in styles
     assert '.department-dock button[data-map-mode="f1"]' in styles
     assert '.department-dock button[data-map-mode="f4"]' in styles
-    assert "left: calc((100vw - min(620px, 100vw - 44px) - 22px) / 2)" in styles
+    assert "body.f4-country-open .mode-dock" in styles  # phase 6: the 1080px left-shift rules were dead and are gone; the 721px centring rule covers every open panel
     assert "body.workspace-panel-open .map-corner" in styles
     assert "@media (min-width: 721px) and (max-width: 949px)" in styles
     assert "grid-template-columns: 176px minmax(0, 1fr)" in styles
