@@ -89,7 +89,7 @@ const STATUS_LABELS = {
   not_province_scoped: "ไม่ใช่ข้อมูลระดับจังหวัด",
   metadata_only: "มีเฉพาะข้อมูลอธิบาย",
   blocked: "ไม่เผยแพร่ค่า",
-  candidate_needs_review: "ข้อมูลเบื้องต้น · รอตรวจ",
+  candidate_needs_review: "ข้อมูลเบื้องต้น รอตรวจ",
   projected_from_source: "สรุปจากต้นทาง",
 };
 
@@ -156,9 +156,9 @@ function acquisitionLabel(value) {
 }
 
 function formatNumber(value, digits = 0) {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "ไม่ระบุ";
   const number = Number(value);
-  if (!Number.isFinite(number)) return "—";
+  if (!Number.isFinite(number)) return "ไม่ระบุ";
   return new Intl.NumberFormat("th-TH", { maximumFractionDigits: digits }).format(number);
 }
 
@@ -209,11 +209,11 @@ function preferredObjectText(value) {
     value.amount_baht,
     value.value,
   ].filter(hasValue);
-  if (preferred.length) return preferred.map((item) => String(item)).join(" · ");
+  if (preferred.length) return preferred.map((item) => String(item)).join(", ");
   return Object.values(value)
     .filter((item) => ["string", "number"].includes(typeof item) && hasValue(item))
     .slice(0, 4)
-    .join(" · ");
+    .join(", ");
 }
 
 function humanValue(value) {
@@ -223,8 +223,8 @@ function humanValue(value) {
   if (Array.isArray(value)) {
     if (!value.length) return "ไม่ระบุ";
     const items = value.map((item) => (typeof item === "object" ? preferredObjectText(item) : String(item))).filter(Boolean);
-    const visible = items.slice(0, 12).join(" · ");
-    return items.length > 12 ? `${visible} · และอีก ${formatNumber(items.length - 12)} รายการ` : visible;
+    const visible = items.slice(0, 12).join(", ");
+    return items.length > 12 ? `${visible} และอีก ${formatNumber(items.length - 12)} รายการ` : visible;
   }
   if (typeof value === "object") return preferredObjectText(value) || "มีข้อมูลจากต้นทาง";
   return String(value);
@@ -324,7 +324,7 @@ function renderExecutiveReadout(summary) {
 function renderDecisionChain(summary) {
   const stages = summary.decision_chain || [];
   document.getElementById("detailDecisionChain").innerHTML = stages.map((stage) => {
-    const metric = stage.metrics?.map((item) => item.display_value).filter(Boolean).join(" · ");
+    const metric = stage.metrics?.map((item) => item.display_value).filter(Boolean).join(", ");
     return `
       <div class="journey-step ${escapeHtml(stage.status || "not_available")}">
         <i aria-hidden="true"></i>
@@ -346,7 +346,7 @@ function renderExecutiveGaps(summary) {
       <summary><span>ข้อมูลที่ยังตอบไม่ได้</span><strong>${formatNumber(total)} ประเด็น</strong></summary>
       <div class="gap-columns">
         ${portfolioGaps.length ? `<div><h3>โครงการและงบ</h3><ul>${portfolioGaps.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul></div>` : ""}
-        ${missingDimensions.length ? `<div><h3>มิติที่ยังไม่มีข้อมูลจังหวัด</h3><ul>${missingDimensions.map((row) => `<li><strong>${escapeHtml(row.label_th)}</strong>${row.note_th ? ` — ${escapeHtml(row.note_th)}` : ""}</li>`).join("")}</ul></div>` : ""}
+        ${missingDimensions.length ? `<div><h3>มิติที่ยังไม่มีข้อมูลจังหวัด</h3><ul>${missingDimensions.map((row) => `<li><strong>${escapeHtml(row.label_th)}</strong>${row.note_th ? `: ${escapeHtml(row.note_th)}` : ""}</li>`).join("")}</ul></div>` : ""}
       </div>
     </details>` : "";
 }
@@ -359,7 +359,7 @@ function chartRows(items, { valueKey = "value", showShare = true } = {}) {
     const width = raw <= 0 ? 0 : Math.max(2, raw / max * 100);
     const display = item.display_value
       || (showShare && item.share_pct !== undefined
-        ? `${formatNumber(item[valueKey], 1)} · ${formatNumber(item.share_pct, 1)}%`
+        ? `${formatNumber(item[valueKey], 1)} (${formatNumber(item.share_pct, 1)}%)`
         : formatNumber(item[valueKey], 1));
     const aria = `${item.label_th} ${display}`;
     return `
@@ -464,7 +464,7 @@ function renderProjectDigest(item, fallback) {
     hasValue(item.participant_record_count) ? `${formatNumber(item.participant_record_count)} รายการผู้เข้าร่วม` : "",
     hasValue(item.business_count) ? `${formatNumber(item.business_count)} กลุ่ม/ธุรกิจ` : "",
     areas !== "ไม่ระบุ" ? areas : "",
-  ].filter(Boolean).join(" · ");
+  ].filter(Boolean).join(", ");
   return `<article class="record-card record-project">
     <header><div><span class="record-kind">โครงการ</span><h4>${escapeHtml(recordTitle(item, fallback))}</h4></div><span class="record-value">${formatNumber(item.participant_record_count)} รายการ</span></header>
     <div class="record-meta">${recordMeta(item).map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</div>
@@ -539,7 +539,7 @@ function renderResearchSection(targetId, section, emptyText, kind) {
     </div>
     ${items.length
       ? `<div class="record-grid">${items.map((item) => renderRecordDigest(item, emptyText, kind)).join("")}</div>`
-      : `<p class="empty-block">${escapeHtml(emptyText)} — ยังไม่มีรายการที่เชื่อมจังหวัดนี้</p>`}`;
+      : `<p class="empty-block">${escapeHtml(emptyText)} ยังไม่มีรายการที่เชื่อมจังหวัดนี้</p>`}`;
 }
 
 function renderResearch(briefing, summary) {
@@ -647,7 +647,7 @@ function renderHighlights(items) {
   if (!items.length) return "";
   return `<div class="highlight-list"><span>รายการตัวอย่าง</span>${items.map((item) => {
     const url = safeExternalUrl(item.source_url);
-    const content = `<strong>${escapeHtml(item.title_th)}</strong><small>${escapeHtml([item.detail_th, item.meta_th].filter(Boolean).join(" · "))}</small>`;
+    const content = `<strong>${escapeHtml(item.title_th)}</strong><small>${escapeHtml([item.detail_th, item.meta_th].filter(Boolean).join(", "))}</small>`;
     return url
       ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${content}</a>`
       : `<div>${content}</div>`;
@@ -694,7 +694,7 @@ function renderSources(summary) {
   document.getElementById("detailQuality").innerHTML = `
     <div class="quality-heading">
       <span>สถานะชุดข้อมูล</span>
-      <strong>${escapeHtml(STATUS_LABELS[quality.status] || "ข้อมูลเบื้องต้น · รอตรวจ")}</strong>
+      <strong>${escapeHtml(STATUS_LABELS[quality.status] || "ข้อมูลเบื้องต้น รอตรวจ")}</strong>
       <p>ข้อมูลยังรอตรวจ จึงไม่ควรใช้เป็นตัวเลขทางการ</p>
     </div>
     <div class="quality-facts">

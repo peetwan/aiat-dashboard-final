@@ -5,6 +5,7 @@ import re
 from copy import deepcopy
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
+from urllib.parse import parse_qs
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -567,7 +568,20 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
+class VersionedStaticFiles(StaticFiles):
+    """Static assets: a week of caching when the URL carries ?v=, revalidate every time otherwise.
+
+    Templates bump ?v= by hand when a file changes, so the long lifetime is not immutable.
+    """
+
+    def file_response(self, full_path, stat_result, scope, status_code=200):
+        response = super().file_response(full_path, stat_result, scope, status_code)
+        query = parse_qs(scope.get("query_string", b"").decode("latin-1"))
+        response.headers["Cache-Control"] = "public, max-age=604800" if query.get("v") else "public, max-age=0, must-revalidate"
+        return response
+
+
+app.mount("/static", VersionedStaticFiles(directory=PROJECT_ROOT / "app" / "static"), name="static")
 
 
 @app.api_route(

@@ -21,5 +21,9 @@ tmp/
 _tmp_*
 tools/_tmp_*.py
 
+# Local agent launch config and scratch
+.claude/launch.json
+.codex_tmp/
+
 # macOS Finder metadata
 .DS_Store

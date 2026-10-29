@@ -230,7 +230,7 @@ const uncertainInnovation = presenter.presentListItem('K04', {
   identity_status: 'provisional_unresolved_candidates',
   province_names_th: ['ปัตตานี'],
 });
-assert.equal(uncertainInnovation.warning, 'อาจซ้ำกับรายการอื่น — ยังนับแยก');
+assert.equal(uncertainInnovation.warning, 'อาจซ้ำกับรายการอื่น แต่ยังนับแยก');
 for (const [measure, model] of Object.entries(models)) {
   assert.ok(model.title, `${measure} title`);
   assert.ok(model.eyebrow, `${measure} eyebrow`);
@@ -260,7 +260,7 @@ assert.ok(models.K04.badges.includes('เชื่อมโยงข้ามแ
 assert.ok(models.K05.sections.some((section) => section.title === 'สินค้าและบริการที่เกี่ยวข้อง'));
 assert.ok(JSON.stringify(models.K05).includes('แผนที่ตลาดวัฒนธรรม'));
 assert.ok(models.K05.badges.includes('ตรวจสอบแล้วว่าเป็นคนละรายการ'));
-assert.ok(JSON.stringify(models.K07).includes('ไม่ระบุราคา — แหล่งข้อมูลรายงานค่า 0'));
+assert.ok(JSON.stringify(models.K07).includes('ไม่ระบุราคา เพราะแหล่งข้อมูลรายงานค่า 0'));
 assert.ok(models.K07.notices.some((notice) => notice.text.includes('ไม่ใช่หน่วยนับเพิ่มเติม')));
 assert.ok(models.K07.badges.includes('จัดกลุ่มสินค้าและบริการแล้ว'));
 assert.ok(models.C08_PARTICIPATING.notices.some((notice) => notice.text.includes('ไม่ได้ยืนยันว่าธุรกิจมีผลประกอบการ')));
@@ -525,7 +525,7 @@ const uncertainCompact = presenter.presentListItem('C02_COMMUNITY', {
   label: 'บุคคลที่อาจซ้ำ',
   identity_review: {outcome: 'unresolved'},
 });
-assert.equal(uncertainCompact.warning, 'อาจซ้ำกับรายการอื่น — ยังนับแยก');
+assert.equal(uncertainCompact.warning, 'อาจซ้ำกับรายการอื่น แต่ยังนับแยก');
 console.log(JSON.stringify({community: community.sections.length}));
 """
     result = subprocess.run(

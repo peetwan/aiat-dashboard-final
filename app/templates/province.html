@@ -2,15 +2,18 @@
 <html lang="th">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="ภาพรวมข้อมูลจังหวัด{{ province.province_name_th }}ที่สรุปโครงการ พื้นที่ ผลผลิต และหลักฐานให้อ่านเข้าใจง่าย" />
+    <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#f5f6f2" />
-    <title>{{ province.province_name_th }} · ข้อมูลจังหวัด | AIAT</title>
+    <title>ข้อมูลจังหวัด{{ province.province_name_th }} | AIAT</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/province.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/province.css?v=20261029-phase05" />
+    <link rel="stylesheet" href="/static/touch.css?v=20261029-01" />
   </head>
   <body data-province-code="{{ province.province_code }}">
     <a class="skip-link" href="#provinceDetailMain">ข้ามไปยังข้อมูลจังหวัด</a>
@@ -37,7 +40,7 @@
           </div>
           <p class="heading-lead">โครงการ คน พื้นที่ ผลงาน และทุนวัฒนธรรมของจังหวัดนี้</p>
           <div class="heading-meta" aria-label="สถานะข้อมูล">
-            <span class="candidate-status"><i aria-hidden="true"></i> ข้อมูลเบื้องต้น · รอตรวจ</span>
+            <span class="candidate-status"><i aria-hidden="true"></i> ข้อมูลเบื้องต้น รอตรวจ</span>
             <span id="detailCoverage">กำลังตรวจความครอบคลุม</span>
             <span id="detailGenerated">กำลังโหลดวันที่ชุดข้อมูล</span>
           </div>
@@ -45,7 +48,7 @@
         <aside class="reading-note">
           <span>วิธีอ่านหน้านี้</span>
           <strong>ใช้มองแนวโน้ม ไม่ใช้จัดอันดับ</strong>
-          <p>ค่าที่ไม่ทราบจะแสดงเป็น “—” และตัวเลขทุนที่เชื่อมนวัตกรรมไม่ใช่งบจัดสรรของจังหวัด</p>
+          <p>ค่าที่ไม่ทราบจะแสดงเป็น “ไม่ระบุ” และตัวเลขทุนที่เชื่อมนวัตกรรมไม่ใช่งบจัดสรรของจังหวัด</p>
         </aside>
       </section>
 
@@ -65,7 +68,7 @@
       <div id="detailContent" hidden>
         <section class="detail-section" id="executive" aria-labelledby="executiveTitle">
           <header class="section-title">
-            <div><small>01 · ภาพรวม</small><h2 id="executiveTitle">จังหวัดนี้มีข้อมูลอะไรบ้าง</h2></div>
+            <div><small>01 ภาพรวม</small><h2 id="executiveTitle">จังหวัดนี้มีข้อมูลอะไรบ้าง</h2></div>
             <p>ตัวเลขสำคัญของจังหวัด</p>
           </header>
           <div class="metric-strip" id="executiveKpis"></div>
@@ -84,7 +87,7 @@
 
         <section class="detail-section" id="research" aria-labelledby="researchTitle">
           <header class="section-title">
-            <div><small>02 · โครงการและผลผลิต</small><h2 id="researchTitle">จากโครงการไปสู่นวัตกรรม</h2></div>
+            <div><small>02 โครงการและผลผลิต</small><h2 id="researchTitle">จากโครงการไปสู่นวัตกรรม</h2></div>
             <p>แยกตามหน่วยนับของต้นทาง</p>
           </header>
           <div id="researchSummary"></div>
@@ -95,7 +98,7 @@
 
         <section class="detail-section" id="people" aria-labelledby="peopleTitle">
           <header class="section-title">
-            <div><small>03 · คนและพื้นที่</small><h2 id="peopleTitle">ข้อมูลที่เกิดขึ้นในพื้นที่</h2></div>
+            <div><small>03 คนและพื้นที่</small><h2 id="peopleTitle">ข้อมูลที่เกิดขึ้นในพื้นที่</h2></div>
             <p>เลือกประเภทหรือค้นหารายการ</p>
           </header>
           <div id="housingDemandPanel"></div>
@@ -103,7 +106,7 @@
             <div class="people-category-nav" id="peopleCategoryNav" aria-label="เลือกประเภทข้อมูล"></div>
             <label class="record-search">
               <span>ค้นหาในข้อมูลพื้นที่</span>
-              <input id="peopleSearch" type="search" placeholder="ชื่อโครงการ กลุ่ม อำเภอ วัฒนธรรม หรือหัวข้อ" autocomplete="off" />
+              <input id="peopleSearch" type="search" placeholder="ชื่อโครงการ กลุ่ม อำเภอ วัฒนธรรม หรือหัวข้อ" autocomplete="off" enterkeyhint="search" autocapitalize="none" spellcheck="false" />
             </label>
           </div>
           <div class="people-sections" id="peopleSections"></div>
@@ -112,7 +115,7 @@
 
         <section class="detail-section" id="dimensions" aria-labelledby="dimensionsTitle">
           <header class="section-title">
-            <div><small>04 · ภาพรายมิติ</small><h2 id="dimensionsTitle">เห็นสัดส่วนและพื้นที่ได้ทันที</h2></div>
+            <div><small>04 ภาพรายมิติ</small><h2 id="dimensionsTitle">เห็นสัดส่วนและพื้นที่ได้ทันที</h2></div>
             <p>แต่ละกราฟแสดงหน่วยแยกกัน</p>
           </header>
           <div class="dimension-list" id="detailDimensions"></div>
@@ -121,7 +124,7 @@
 
         <section class="detail-section" id="sources" aria-labelledby="sourcesTitle">
           <header class="section-title">
-            <div><small>05 · ที่มาข้อมูล</small><h2 id="sourcesTitle">ที่มาและความพร้อมของข้อมูล</h2></div>
+            <div><small>05 ที่มาข้อมูล</small><h2 id="sourcesTitle">ที่มาและความพร้อมของข้อมูล</h2></div>
             <p>แสดงหน่วยนับ วันที่ และข้อจำกัด ข้อมูลที่จำกัดสิทธิ์จะไม่แสดง</p>
           </header>
           <div class="quality-banner" id="detailQuality"></div>
@@ -130,7 +133,7 @@
 
         <section class="detail-section operations-section" id="operations" aria-labelledby="operationsTitle">
           <header class="section-title">
-            <div><small>06 · การอัปเดต</small><h2 id="operationsTitle">ข้อมูลเข้าระบบอย่างไร</h2></div>
+            <div><small>06 การอัปเดต</small><h2 id="operationsTitle">ข้อมูลเข้าระบบอย่างไร</h2></div>
             <p>การดึงข้อมูลกับการอนุมัติเผยแพร่เป็นคนละขั้นตอน</p>
           </header>
           <details class="system-disclosure">
@@ -146,9 +149,9 @@
     </main>
 
     <footer class="detail-footer">
-      <p>AIAT แผนที่ข้อมูลจังหวัด · ข้อมูลเบื้องต้นเพื่อการสำรวจ</p>
+      <p>AIAT แผนที่ข้อมูลจังหวัด (ข้อมูลเบื้องต้นเพื่อการสำรวจ)</p>
       <a href="/?province={{ province.province_code }}&view=overview">กลับหน้าแผนที่</a>
     </footer>
-    <script src="/static/province.js" defer></script>
+    <script src="/static/province.js?v=20261028-phase04" defer></script>
   </body>
 </html>
