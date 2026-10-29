@@ -51,6 +51,8 @@ const state = {
   f4InnovationProvinceExpanded: false,
   f4PolicyRows: [],
   f4PolicyQuery: "",
+  f4ListVisible: {},
+  f4ListKeys: {},
   f4PolicyMeta: null,
   f4PolicyProvinceExpanded: false,
   f4PolicyOtherProvincesExpanded: false,
@@ -1193,11 +1195,25 @@ function renderF4PolicyRow(row) {
     </article>`;
 }
 
+// phase 6.4 (docs/ui-audit-phases-2026-10-28.md): the country innovation list has 1,160 rows (policy 107),
+// so the lists render 40 rows at a time with a load-more button; the summary still counts every match.
+const F4_LIST_PAGE = 40;
+
 function renderF4Rows(containerId, rows, kind, query) {
   const normalized = String(query || "").trim().toLowerCase();
   const filtered = normalized ? rows.filter((row) => f4RowSearchText(row).includes(normalized)) : rows;
+  const listKey = `${f4ListEndpoint(kind)}|${normalized}|${kind === "innovations" ? state.f4InnovationTrlFilter || "" : ""}`;
+  if (state.f4ListKeys[kind] !== listKey) {
+    state.f4ListKeys[kind] = listKey;
+    state.f4ListVisible[kind] = F4_LIST_PAGE;
+  }
+  const visible = filtered.slice(0, state.f4ListVisible[kind] || F4_LIST_PAGE);
+  const remaining = filtered.length - visible.length;
+  const loadMore = remaining > 0
+    ? `<button type="button" class="load-more f4-load-more" data-f4-load-more="${kind}">แสดงอีก ${formatNumber(Math.min(remaining, F4_LIST_PAGE))} รายการ (เหลือ ${formatNumber(remaining)})</button>`
+    : "";
   document.getElementById(containerId).innerHTML = filtered.length
-    ? filtered.map((row) => kind === "policy_projects" ? renderF4PolicyRow(row) : renderF4InnovationRow(row)).join("")
+    ? visible.map((row) => kind === "policy_projects" ? renderF4PolicyRow(row) : renderF4InnovationRow(row)).join("") + loadMore
     : `<div class="portfolio-empty">ไม่พบรายการที่ตรงกับคำค้น</div>`;
   return filtered.length;
 }
@@ -4793,6 +4809,18 @@ function bindEvents() {
     if (event.target.closest("[data-f4-policy-budget-other]")) {
       state.f4PolicyOtherProvincesExpanded = !state.f4PolicyOtherProvincesExpanded;
       refreshF4PolicySummaries();
+      return;
+    }
+    const loadMore = event.target.closest("[data-f4-load-more]");
+    if (loadMore) {
+      const kind = loadMore.dataset.f4LoadMore;
+      state.f4ListVisible[kind] = (state.f4ListVisible[kind] || F4_LIST_PAGE) + F4_LIST_PAGE;
+      if (kind === "policy_projects") rerenderF4PolicyList(); else rerenderF4InnovationList();
+      // the button was replaced: keep keyboard focus in the list instead of dropping it on the page
+      const next = document.querySelector(`[data-f4-load-more="${kind}"]`);
+      const list = document.getElementById(kind === "policy_projects" ? "f4PolicyRows" : "f4InnovationRows");
+      if (next) next.focus({ preventScroll: true });
+      else { list.tabIndex = -1; list.focus({ preventScroll: true }); }
       return;
     }
     if (event.target.closest("[data-f4-innovation-clear]")) {

@@ -258,13 +258,27 @@
     view.append(el("button", { type: "button", class: "f2-back-overview", text: "กลับไปภาพรวม", onclick: () => setTab("overview") }));
   }
 
-  // phase 4.2 (docs/ui-audit-phases-2026-10-28.md): loading state keeps the shape of the loaded view
-  // (overview: metric cards 177px in two columns, list: 96px cards); the heading stays for screen readers.
+  // phase 4.2 and 6 (docs/ui-audit-phases-2026-10-28.md): loading state keeps the shape of the loaded view,
+  // measured at 375px: overview metric cards 177px in two columns, list 96px cards, areas picker 64 + summary 181
+  // + list, universities and innovations back button 44x104 + context line + groups or cards, sources back button
+  // + date table + summaries, detail sheet title + blocks. The heading stays for screen readers.
+  const SKELETON_SHAPES = {
+    overview: [177, 177, 177, 177],
+    list: [96, 96, 96],
+    areas: [64, 181, 56, 360],
+    universities: [[44, 104], 20, 300, 96, 96],
+    innovations: [[44, 104], 20, 132, 132, 132, 132],
+    sources: [[44, 104], 24, 300, 183, 139],
+    detail: [24, 120, 96, 96],
+  };
   function skeleton(view, heading, kind) {
-    const heights = kind === "list" ? [96, 96, 96] : [177, 177, 177, 177];
+    const shape = SKELETON_SHAPES[kind] || SKELETON_SHAPES.list;
     clear(view).append(el("div", { class: "f2-status f2-skeleton", role: "status", "aria-live": "polite" },
       el("strong", { class: "sr-only", text: heading }),
-      el("div", { class: "skeleton-bars f2-skeleton-bars", "data-kind": kind, "aria-hidden": "true" }, ...heights.map((height) => el("span", { style: `min-height: ${height}px` })))));
+      el("div", { class: "skeleton-bars f2-skeleton-bars", "data-kind": kind, "aria-hidden": "true" }, ...shape.map((item) => {
+        const [height, width] = Array.isArray(item) ? item : [item];
+        return el("span", { style: `min-height: ${height}px${width ? `; width: ${width}px` : ""}` });
+      }))));
   }
   function status(view, heading, message, retry) {
     clear(view).append(el("div", { class: "f2-status", role: "status", "aria-live": "polite" }, el("strong", { text: heading }), el("p", { text: message }), retry ? el("button", { class: "f2-retry", type: "button", text: "ลองอีกครั้ง", onclick: retry }) : ""));
@@ -847,7 +861,8 @@
     if (!state.open) return;
     skeleton(views.overview, "กำลังโหลดภาพรวม", "overview");
     // the area tab draws from this response: an old province's brief must not stay up (or printable) meanwhile
-    if (state.tab === "areas") status(views.areas, "กำลังโหลดข้อมูลพื้นที่", "กำลังขอข้อมูลจากระบบ");
+    if (state.tab === "areas") skeleton(views.areas, "กำลังโหลดข้อมูลพื้นที่", "areas");
+    if (state.tab === "innovations") skeleton(views.innovations, "กำลังโหลดรายการนวัตกรรม", "innovations");
     try {
       const data = await request("/overview" + query({ province: state.province, revision: state.revision }), "overview");
       if (!data) return;
@@ -1108,7 +1123,7 @@
     return coverage?.national_total ?? null;
   }
   async function loadSources() {
-    status(views.sources, "กำลังโหลดที่มา", "กำลังขอคำจำกัดความและแหล่งข้อมูล");
+    skeleton(views.sources, "กำลังโหลดที่มา", "sources");
     try {
       const current = state.topicData;
       const topicIsCurrent = current?.topic_id === state.topic && current?.measure_id === state.measure
@@ -1245,7 +1260,7 @@
   async function loadUniversities() {
     if (!state.open || state.tab !== "universities") return;
     const view = views.universities;
-    status(view, "กำลังโหลดข้อมูลมหาวิทยาลัย", "กำลังขอข้อมูลจากระบบ");
+    skeleton(view, "กำลังโหลดข้อมูลมหาวิทยาลัย", "universities");
     if (!state.university) abort("university");
     const wanted = JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
     const current = () => state.tab === "universities" && wanted === JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
@@ -1424,7 +1439,7 @@
     const view = views.innovations;
     const wanted = JSON.stringify([state.province, state.innovationFilters, state.innovationOffset]);
     const current = () => state.tab === "innovations" && wanted === JSON.stringify([state.province, state.innovationFilters, state.innovationOffset]);
-    status(view, "กำลังโหลดรายการนวัตกรรม", "กำลังขอข้อมูลตามเงื่อนไขที่เลือก");
+    skeleton(view, "กำลังโหลดรายการนวัตกรรม", "innovations");
     try {
       // the university filter's names
       const universities = state.universities && state.universities.revision === state.revision ? state.universities
@@ -1593,7 +1608,7 @@
     if (!state.province) { renderAreas(); return; }
     const wanted = JSON.stringify([state.province, state.revision]);
     if (state.areaUniversities?.key !== wanted || state.areaUniversities.failed) {
-      status(views.areas, "กำลังโหลดสรุปจังหวัด", "กำลังขอข้อมูลจากระบบ");
+      skeleton(views.areas, "กำลังโหลดสรุปจังหวัด", "areas");
       try {
         const data = await request("/universities" + query({ province: state.province, revision: state.revision }), "areaUniversities");
         if (!data || state.tab !== "areas" || wanted !== JSON.stringify([state.province, state.revision])) return;
@@ -1637,7 +1652,7 @@
   function renderAreaNational(view) {
     const definition = areaMeasure(state.measure);
     const map = areaMap();
-    if (!definition || !map) { status(view, "กำลังโหลดข้อมูลรายจังหวัด", "กำลังขอข้อมูลจากระบบ"); return false; }
+    if (!definition || !map) { skeleton(view, "กำลังโหลดข้อมูลรายจังหวัด", "areas"); return false; }
     const picker = el("select", { id: "f2AreaMeasure" }, AREA_MEASURES.map((id) => areaMeasure(id)).filter(Boolean)
       .map((item) => el("option", { value: item.measure_id, text: measureDisplayLabel(item) })));
     picker.value = state.measure;
@@ -1685,7 +1700,7 @@
   }
   function renderAreaProvince(view) {
     const overview = state.overview;
-    if (overview?.scope !== `province/${state.province}`) { status(view, "กำลังโหลดสรุปจังหวัด", "กำลังขอข้อมูลจากระบบ"); return false; }
+    if (overview?.scope !== `province/${state.province}`) { skeleton(view, "กำลังโหลดสรุปจังหวัด", "areas"); return false; }
     const name = overview.requested_scope?.province_name_th || provinceName(state.province);
     const complete = !state.areaUniversities?.failed;
     const brief = el("article", { class: "f2-area-brief", "data-f2-printable": complete ? "true" : null });
@@ -1903,7 +1918,7 @@
     if (pushHistory) writeUrl(true);
     sheet.hidden = false;
     $("f2DetailTitle").textContent = "รายละเอียด";
-    $("f2DetailBody").replaceChildren(el("div", { class: "f2-status", text: "กำลังโหลดรายละเอียด" }));
+    skeleton($("f2DetailBody"), "กำลังโหลดรายละเอียด", "detail");
     sheet.querySelector("button[data-f2-detail-close]").focus();
     try {
       const data = await request(`/topics/${encodeURIComponent(state.topic)}/details/${encodeURIComponent(id)}` + query(detailScope()), "detail");

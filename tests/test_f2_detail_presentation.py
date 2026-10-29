@@ -584,6 +584,7 @@ function functionSource(name) {
         }
         return {topic_id: 'k09', measure_id: 'K09', scope: 'national'};
       },
+      skeleton: () => {},  // phase 6: the loading state is a skeleton; only error status calls matter here
       status: (_view, heading, message) => {
         if (heading === 'เปิดที่มาไม่ได้') errors.push(message);
       },
