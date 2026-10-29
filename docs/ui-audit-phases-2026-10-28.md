@@ -210,6 +210,7 @@ branch `fix/ui-audit-phases-0-5` แตกจาก fd94c7f3 ระหว่า�
 
 ข้อสังเกต: แท็บใหม่ยังใช้ข้อความ "กำลังโหลด" แบบเดิมตอนโหลด (ไม่ใช่ skeleton แบบ phase 4.2) และ "—" ที่เห็นในภาพรวมมาจากข้อมูล generated (`public_dashboard.json`) ไม่ใช่โค้ด UI ทั้งสองเรื่องอยู่ในรายการ phase 6
 git เขียนไฟล์ที่ merge เป็น CRLF ทำให้ `tests/test_f2_navigation.py` (อ่าน `f2.js` ทีละบรรทัดด้วย `split("\n")`) ล้ม 1 เทส คืนเป็น LF แล้วผ่าน
+ตรวจบนต้นไม้ที่ merge แล้ว: `PYTHONUTF8=1 .venv/Scripts/python.exe -m app.cli check` exit 0, pytest 827 passed 1 skipped (น้อยกว่ารอบ phase 5 เพราะ main ตัดชุดเทส pipeline เก่าออก 48 ไฟล์ 12,601 บรรทัด) main เพิ่ม `duckdb>=1.5.6,<2` ใน requirements.txt จึงต้องติดตั้งเข้า venv ก่อน (venv นี้สร้างจาก uv ไม่มี pip: `uv pip install --python .venv/Scripts/python.exe "duckdb>=1.5.6,<2"`)
 
 ## Phase 6 ปิดท้าย (โครงสร้าง CSS)
 
