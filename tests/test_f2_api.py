@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 
 from fastapi.testclient import TestClient
 
 from app.database import SessionLocal
-from app.f2_data import f2_cache_stats, reset_f2_cache
+from app.f2_data import F2_ROOT, f2_cache_stats, reset_f2_cache
 from app.main import app
 from app.models import PublicArtifact
+from tools.f2.clean import thai_day
 
 
 def _measure(overview: dict, measure_id: str) -> dict:
@@ -18,6 +20,25 @@ def _measure(overview: dict, measure_id: str) -> dict:
             if companion["measure_id"] == measure_id:
                 return companion
     raise AssertionError(f"missing measure {measure_id}")
+
+
+# The API is checked against the published files rather than against numbers typed in here, so a new
+# release does not need test edits; whether the numbers themselves are right is the publish sign-off's job.
+def _published(relative_path: str) -> dict:
+    return json.loads((F2_ROOT / relative_path).read_text(encoding="utf-8"))
+
+
+def _published_value(topic_id: str, measure_id: str, scope: str = "national"):
+    return _published(f"topics/{topic_id}.json")["scopes"][scope]["results"][measure_id]["value"]
+
+
+def _published_detail_id(topic_id: str, matches) -> str:
+    """The first published detail of a topic that `matches`, for checks that need a specific kind of record."""
+    for path in sorted((F2_ROOT / "details").glob(f"{topic_id}-*.json")):
+        for entity_id, detail in _published(f"details/{path.name}")["details_by_id"].items():
+            if matches(detail):
+                return entity_id
+    raise AssertionError(f"no published {topic_id} detail of the kind this check needs; pick another check")
 
 
 def test_f2_name_sort_precedes_pagination_and_preserves_counts():
@@ -53,8 +74,20 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         overview_response = client.get("/api/public/v1/f2/overview")
         assert overview_response.status_code == 200
         overview = overview_response.json()
-        assert len(overview["headlines"]) == 14
+        assert len(overview["headlines"]) == 15
         assert sum(len(row["companions"]) for row in overview["headlines"]) == 7
+        # every number can name its sources and when they were fetched
+        snapshots = overview["sources"]["by_id"]
+        assert set(snapshots) == set(overview["provenance"]["source_ids"])
+        assert all(set(row["source_ids"]) <= set(snapshots) for headline in overview["headlines"]
+                   for row in [headline, *headline["companions"]])
+        assert all(thai_day(datetime.fromisoformat(row["fetched_at"])).isoformat() == row["fetched_date"]
+                   and (row["updated"] is None) == (row["freshness"] == "no_date") for row in snapshots.values())
+        # บพท.'s slide figures sit beside measures the overview publishes
+        official = overview["official"]
+        published = {row["measure_id"] for headline in overview["headlines"] for row in [headline, *headline["companions"]]}
+        assert official["as_of"] == "2025-09-30" and len(official["rows"]) == 13
+        assert all(set(row["measure_ids"]) <= published for row in official["rows"])
         expected_units = {
             "K01A": "จังหวัด",
             "K01B": "แห่ง",
@@ -77,13 +110,15 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
             "K11A": "คลัสเตอร์",
             "K11B": "จังหวัด",
             "K12": "รายการ",
+            "H01": "ครัวเรือน",
         }
         for measure_id, expected_unit in expected_units.items():
             measure = _measure(overview, measure_id)
             assert measure["unit"] == expected_unit
             assert measure["result"]["unit"] == expected_unit
         assert "C02_BROADER" not in expected_units
-        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == 4640
+        c02_total = _published_value("k02", "C02_COMMUNITY")
+        assert _measure(overview, "C02_COMMUNITY")["result"]["value"] == c02_total
         assert len(overview_response.content) <= 256 * 1024
         assert overview["revision"] != overview["release_id"]
         assert len(overview["revision"]) == 64
@@ -103,6 +138,24 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert _measure(province, "K09")["national_context"]["relationship"] == "independent_source_region_not_mapped_to_selected_dashboard_geography"
         assert _measure(overview, "K08")["result"] != _measure(overview, "C08_PARTICIPATING")["result"]
 
+        # PMUA target households: province values add up to the national total; the money table is national only
+        households = overview["households"]
+        values = {row["metric"]: row["values"] for row in households["rows"]}
+        assert set(values) == {"headline", "income_increase", "cost_reduction", "net_income_increase"}
+        assert values["headline"]["all"] == _measure(overview, "H01")["result"]["value"]
+        assert values["headline"]["2568"] + values["headline"]["2569"] == values["headline"]["all"]
+        assert province["households"] == households
+        h01_map = client.get("/api/public/v1/f2/map?measure=H01").json()
+        reported = [cell["result"]["value"] for cell in h01_map["cells"] if cell["result"]["availability"] == "available"]
+        assert h01_map["coverage"]["province_sum_is_additive"] is True
+        assert sum(reported) == h01_map["coverage"]["national_total"] == values["headline"]["all"]
+        absent = [cell for cell in h01_map["cells"] if cell["result"]["availability"] != "available"]
+        assert len(reported) + len(absent) == 77
+        for cell in absent:  # a province the source does not report is unavailable, never zero
+            assert cell["result"]["value"] is None and cell["result"]["unavailable_reason"]["code"] == "unknown_province"
+            h01 = _measure(client.get(f"/api/public/v1/f2/overview?province={cell['province_code']}").json(), "H01")
+            assert h01["result"]["value"] is None and h01["national_context"]["result"]["value"] == values["headline"]["all"]
+
         map_response = client.get("/api/public/v1/f2/map?measure=K01B")
         assert map_response.status_code == 200
         map_payload = map_response.json()
@@ -117,39 +170,47 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         assert c02_map_response.status_code == 200
         c02_map = c02_map_response.json()
         assert len(c02_map["cells"]) == 77
-        c02_values = [cell["result"]["value"] for cell in c02_map["cells"]]
-        assert sum(value > 0 for value in c02_values) == 37
-        assert sum(value == 0 for value in c02_values) == 40
-        assert sum(c02_values) == 4418
-        assert max(c02_values) == 490
-        assert c02_map["coverage"] == {
-            "national_total": 4640,
-            "province_sum_is_additive": False,
-            "selected_count": 4640,
-            "with_province": 4415,
-            "without_province": 225,
+        assert {cell["province_code"]: cell["result"]["value"] for cell in c02_map["cells"]} == {
+            cell["province_code"]: _published_value("k02", "C02_COMMUNITY", f"province/{cell['province_code']}")
+            for cell in c02_map["cells"]
         }
+        c02_values = [cell["result"]["value"] for cell in c02_map["cells"]]
+        assert all(isinstance(value, int) and value >= 0 for value in c02_values)
+        coverage = c02_map["coverage"]
+        assert coverage == _published("topics/k02.json")["scopes"]["national"]["coverage"]["C02_COMMUNITY"]
+        assert coverage["province_sum_is_additive"] is False
+        assert coverage["national_total"] == coverage["selected_count"] == c02_total
+        assert coverage["with_province"] + coverage["without_province"] == c02_total
+        # a person can be counted in several provinces, so the cells add up to at least the people placed
+        assert max(c02_values) <= coverage["with_province"] <= sum(c02_values)
         assert "บุคคลไม่ซ้ำ" in c02_map["legend"]["meaning_th"]
 
         list_response = client.get("/api/public/v1/f2/topics/k12?measure=K12&limit=25")
         assert list_response.status_code == 200
         topic_page = list_response.json()
-        assert topic_page["result"]["value"] == 5141
-        assert topic_page["list"]["scoped_item_count"] == 5141
-        assert topic_page["list"]["matching_item_count"] == 5141
+        k12 = _published("topics/k12.json")
+        k12_total = k12["scopes"]["national"]["results"]["K12"]["value"]
+        assert k12_total == len(k12["item_ids_by_measure_and_scope"]["K12"]["national"])
+        assert topic_page["result"]["value"] == k12_total
+        assert topic_page["list"]["scoped_item_count"] == k12_total
+        assert topic_page["list"]["matching_item_count"] == k12_total
         assert topic_page["list"]["returned_count"] == 25
         assert len(list_response.content) <= 256 * 1024
         assert topic_page["result"]["unit"] == "รายการ"
 
         first_item = topic_page["list"]["items"][0]
-        assert first_item["province_names_th"] == ["สงขลา"]
+        provinces = _published("geography.json")["provinces"]
+        assert first_item["province_names_th"] == [
+            provinces[code]["province_name_th"]
+            for code in k12["items_by_id"][first_item["entity_id"]]["province_codes"]
+        ]
         query = first_item["label"][:4]
         searched = client.get(
             "/api/public/v1/f2/topics/k12",
             params={"measure": "K12", "q": query, "limit": 25},
         ).json()
         assert searched["result"] == topic_page["result"]
-        assert searched["list"]["matching_item_count"] <= 5141
+        assert searched["list"]["matching_item_count"] <= k12_total
         assert all(
             query.casefold() in item["label"].casefold()
             for item in searched["list"]["items"]
@@ -193,12 +254,16 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
 
         k04 = client.get("/api/public/v1/f2/topics/k04?measure=K04").json()
         c04 = client.get("/api/public/v1/f2/topics/k04?measure=C04_LISTED").json()
-        assert k04["result"]["value"] == 514
-        assert c04["result"]["value"] == 2399
+        assert k04["result"]["value"] == _published_value("k04", "K04")
+        assert c04["result"]["value"] == _published_value("k04", "C04_LISTED")
 
         source_regions = client.get("/api/public/v1/f2/topics/k09?measure=K09")
         assert source_regions.status_code == 200
-        assert len(source_regions.json()["source_region_results"]) == 6
+        k09_regions = _published("topics/k09.json")["scopes"]["national"]["prepared_filters"]["K09"]["choices"]["source_region"]
+        assert [row["source_region_id"] for row in source_regions.json()["source_region_results"]] == [
+            choice["id"] for choice in k09_regions
+        ]
+        assert source_regions.json()["source_region_results"]
         assert all(
             row["result"]["scope_key"].startswith("source_region/")
             for row in source_regions.json()["source_region_results"]
@@ -214,28 +279,38 @@ def test_f2_api_contract_selective_reads_and_semantic_regressions():
         )
         assert business_breakdown.status_code == 200
         breakdown = business_breakdown.json()["source_dimension_breakdown"]
+        reported_businesses = business_breakdown.json()["result"]["value"]
         assert breakdown["label_th"] == "หมวดหมู่ธุรกิจ"
-        assert sum(int(row["display_value"]) for row in breakdown["rows"]) == 375
+        assert sum(int(row["display_value"]) for row in breakdown["rows"]) == reported_businesses
         assert {row["unit"] for row in breakdown["rows"]} == {"ธุรกิจชุมชน"}
         assert all(set(row) == {"label_th", "display_value", "unit"} for row in breakdown["rows"])
         region_breakdown = client.get(
             "/api/public/v1/f2/topics/k08",
             params={"measure": "C08_REPORTED_BUSINESSES", "source_dimension": "geography"},
         ).json()["source_dimension_breakdown"]
+        published_regions = _published("topics/k08.json")["scopes"]["national"]["prepared_filters"][
+            "C08_REPORTED_BUSINESSES"]["selections"]["source_dimension/geography"]["breakdowns"]
         assert region_breakdown["label_th"] == "ภูมิภาคตามแหล่งข้อมูล"
-        assert len(region_breakdown["rows"]) == 6
-        assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == 375
+        assert [row["label_th"] for row in region_breakdown["rows"]] == [row["label"] for row in published_regions]
+        # every C08 breakdown shares one total (Measure stops otherwise)
+        assert sum(int(row["display_value"]) for row in region_breakdown["rows"]) == reported_businesses
 
+        zero_price_id = _published_detail_id(
+            "k07", lambda detail: "price unspecified/source reports 0" in json.dumps(detail, ensure_ascii=False)
+        )
         zero_price = client.get(
-            "/api/public/v1/f2/topics/k07/details/offering_family_002dfbc09f8c360f3395?measure=K07"
+            f"/api/public/v1/f2/topics/k07/details/{zero_price_id}?measure=K07"
         )
         assert zero_price.status_code == 200
         assert "price unspecified/source reports 0" in json.dumps(
             zero_price.json()["detail"], ensure_ascii=False
         )
 
+        withheld_id = _published_detail_id(
+            "k12", lambda detail: detail.get("label") == "Title withheld pending review"
+        )
         withheld = client.get(
-            "/api/public/v1/f2/topics/k12/details/cultural_map_subject_c8aca030751e9a4d6c32?measure=K12"
+            f"/api/public/v1/f2/topics/k12/details/{withheld_id}?measure=K12"
         )
         assert withheld.status_code == 200
         assert withheld.json()["detail"]["label"] == "Title withheld pending review"
@@ -272,3 +347,140 @@ def test_f2_public_responses_do_not_contain_runtime_paths():
     encoded = json.dumps(payload, ensure_ascii=False)
     assert "data/runtime" not in encoded
     assert "raw/" not in encoded
+
+
+def test_f2_universities_serve_the_published_file():
+    published = _published("universities.json")
+    with TestClient(app) as client:
+        listing = client.get("/api/public/v1/f2/universities")
+        assert listing.status_code == 200
+        body = listing.json()
+        rows = body["universities"]
+        assert {row["university_id"] for row in rows} == set(published["universities"])
+        assert all("item_ids" not in row for row in rows)
+        innovations = [row["counts"]["C04_LISTED"] for row in rows]
+        assert innovations == sorted(innovations, reverse=True)
+        assert body["groups"].keys() == published["groups"].keys()
+        # the sources that tie entities to universities: those behind some university's count, and no others
+        assert body["attribution_source_ids"] == sorted({source for record in published["universities"].values()
+                                                         for ids in record["source_ids_by_measure"].values() for source in ids})
+        for measure_id, coverage in body["coverage"].items():
+            assert coverage["with_university"] <= coverage["counted"], measure_id
+            # each entity once per group: a group can only be smaller than or equal to the national count
+            assert all(group["counts"][measure_id] <= coverage["counted"] for group in body["groups"].values())
+
+        top = rows[0]
+        url = f"/api/public/v1/f2/universities/{top['university_id']}"
+        page = client.get(url, params={"limit": 100}).json()
+        record = published["universities"][top["university_id"]]
+        assert page["list"]["scoped_item_count"] == len(record["item_ids"]["C04_LISTED"]) == top["counts"]["C04_LISTED"]
+        assert "item_ids" not in page["university"]
+        first, second = (client.get(url, params={"limit": 3, "offset": offset}).json()["list"]["items"] for offset in (0, 3))
+        assert [i["entity_id"] for i in first + second] == [i["entity_id"] for i in page["list"]["items"][:6]]
+
+        item = page["list"]["items"][0]
+        searched = client.get(url, params={"q": item["label"]}).json()["list"]
+        assert item["entity_id"] in {i["entity_id"] for i in searched["items"]}
+        assert searched["scoped_item_count"] == page["list"]["scoped_item_count"]
+        detail = client.get(f"/api/public/v1/f2/topics/{page['list']['topic_id']}/details/{item['entity_id']}",
+                            params={"measure": page["list"]["measure_id"]})
+        assert detail.status_code == 200
+
+        assert client.get("/api/public/v1/f2/universities/uni_000000000000").status_code == 404
+        assert client.get(url, params={"limit": 101}).status_code == 422
+        assert client.get(url, params={"province": "10"}).status_code == 422
+        assert client.get("/api/public/v1/f2/universities", params={"revision": "0" * 64}).status_code == 409
+
+
+def test_f2_universities_in_a_province_invert_the_published_innovation_provinces():
+    published = _published("universities.json")["universities"]
+    k04 = _published("topics/k04.json")
+    with TestClient(app) as client:
+        for code in ("10", "30", "96", "38"):  # 38: no innovation placed there, so an empty list
+            body = client.get("/api/public/v1/f2/universities", params={"province": code}).json()
+            expected = {uid: row["count"] for uid, record in published.items()
+                        for row in record["innovation_provinces"] if row["province_code"] == code and row["count"]}
+            assert {row["university_id"]: row["province_innovations"] for row in body["universities"]} == expected
+            counts = [row["province_innovations"] for row in body["universities"]]
+            assert counts == sorted(counts, reverse=True)
+            assert all("item_ids" not in row for row in body["universities"])
+            in_province = set(k04["item_ids_by_measure_and_scope"]["C04_LISTED"].get(f"province/{code}", []))
+            linked = in_province & {i for uid in expected for i in published[uid]["item_ids"]["C04_LISTED"]}
+            assert body["province"] == {
+                "province_code": code,
+                "province_name_th": _published("geography.json")["provinces"][code]["province_name_th"],
+                "innovations": len(in_province),
+                "innovations_with_university": len(linked),
+            }
+            # an innovation can name several universities, so the rows may add up to more than the province has
+            assert max(counts, default=0) <= len(in_province)
+        assert client.get("/api/public/v1/f2/universities").json().get("province") is None
+        for bad in ("99", "1", "bangkok"):
+            assert client.get("/api/public/v1/f2/universities", params={"province": bad}).status_code == 422, bad
+
+
+def test_f2_innovation_list_filters_count_the_published_follow_up_evidence():
+    topic = _published("topics/k04.json")
+    items = topic["items_by_id"]
+    kinds = {row["id"]: row for row in topic["follow_up"]["evidence"]}
+    url = "/api/public/v1/f2/topics/k04"
+    with TestClient(app) as client:
+        whole = client.get(url, params={"measure": "C04_LISTED", "limit": 100}).json()
+        assert whole["follow_up"] == topic["follow_up"]
+        summary = whole["list"]["summary"]
+        assert summary["matching"] == whole["list"]["matching_item_count"] == len(
+            topic["item_ids_by_measure_and_scope"]["C04_LISTED"]["national"])
+        # each card: innovations from a source that carries the field (eligible), and those that have it
+        for row in summary["evidence"]:
+            kind = kinds[row["id"]]
+            eligible = [i for i in items.values() if set(i["follow_up"]) & set(kind["source_ids"])]
+            assert row["eligible"] == len(eligible), row["id"]
+            assert row["found"] == sum(any(kind["field"] in r for r in i["follow_up"].values()) for i in eligible), row["id"]
+
+        # an evidence filter returns the innovations its card counts; the list filters never move the KPI value
+        found = {row["id"]: row["found"] for row in summary["evidence"]}
+        for evidence in kinds:
+            body = client.get(url, params={"measure": "C04_LISTED", "evidence": evidence}).json()
+            assert body["list"]["matching_item_count"] == found[evidence], evidence
+            assert body["result"] == whole["result"]
+        # each source's provinces are its own, and together they are the provinces the innovation is counted in
+        for item in items.values():
+            stated = {code for row in item["follow_up"].values() for code in row.get("province_codes", [])}
+            assert stated == set(item["province_codes"]), item["label"]
+            assert all(bool(row.get("province_codes")) == bool(row.get("use_area")) for row in item["follow_up"].values())
+        # a source filter keeps that source's records and counts that source's fields only
+        icommunity = client.get(url, params={"measure": "C04_LISTED", "source": "f2_icommunity", "limit": 100}).json()
+        assert all("f2_icommunity" in item["source_ids"] for item in icommunity["list"]["items"])
+        assert {row["id"]: row["eligible"] for row in icommunity["list"]["summary"]["evidence"]}["updated"] == 0
+        # a project code finds its innovation
+        coded = next(i for i in items.values() if i["follow_up"].get("f2_icommunity", {}).get("project_codes"))
+        code = coded["follow_up"]["f2_icommunity"]["project_codes"][0]
+        searched = client.get(url, params={"measure": "C04_LISTED", "q": code, "limit": 100}).json()["list"]["items"]
+        assert coded["label"] in {i["label"] for i in searched}
+        # the university filter matches the university tab's count, and items carry the university names
+        universities = _published("universities.json")["universities"]
+        top_id, top = max(universities.items(), key=lambda kv: kv[1]["counts"]["C04_LISTED"])
+        mine = client.get(url, params={"measure": "C04_LISTED", "university": top_id}).json()["list"]
+        assert mine["matching_item_count"] == top["counts"]["C04_LISTED"]
+        assert all(top["name_th"] in i["university_names_th"] for i in mine["items"])
+
+        assert client.get("/api/public/v1/f2/topics/k05", params={"evidence": "k04"}).status_code == 422
+        for bad in ({"university": "uni_000000000000"}, {"trl": "10"}, {"source": "f2_learning_dashboard"},
+                    {"evidence": "still_used"}):
+            assert client.get(url, params={"measure": "C04_LISTED", **bad}).status_code == 422, bad
+
+
+def test_f2_learning_businesses_show_their_participations_on_the_k05_detail():
+    participating = _published("topics/k08.json")["details_by_id"]
+    businesses = {entity_id: detail for path in sorted((F2_ROOT / "details").glob("k05-*.json"))
+                  for entity_id, detail in _published(f"details/{path.name}")["details_by_id"].items()}
+    learning = {e for e, d in businesses.items() if "f2_learning_area_based" in d["source_ids"]}
+    assert learning == set(participating)
+    for entity_id, detail in businesses.items():
+        # the same Learning rows as the C08 detail, and nothing from a business's other sources
+        assert detail["children"].get("participations") == participating.get(entity_id, {}).get("children", {}).get(
+            "participations"), entity_id
+    entity_id = next(e for e in sorted(learning) if len(participating[e]["children"]["participations"]) > 1)
+    with TestClient(app) as client:
+        detail = client.get(f"/api/public/v1/f2/topics/k05/details/{entity_id}", params={"measure": "K05"}).json()["detail"]
+    assert detail["children"]["participations"] == participating[entity_id]["children"]["participations"]

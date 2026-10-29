@@ -126,6 +126,9 @@ class F2OverviewResponse(PublicApiModel):
     availability: str
     headlines: list[JsonObject]
     limitations: list[JsonValue]
+    sources: JsonObject = {}  # per source: fetch date and the latest change date it states (older releases: empty)
+    official: JsonObject = {}  # บพท.'s slide figures with the measures shown beside them, national only (older releases: empty)
+    households: JsonObject = {}  # PMUA's family dashboard: national household and money table (older releases: empty)
     provenance: JsonObject
 
 
@@ -157,6 +160,8 @@ class F2TopicResponse(PublicApiModel):
     sources: list[JsonObject]
     limitations: list[JsonValue]
     source_region_results: list[JsonObject]
+    # topic k04: what the innovation list's follow-up evidence, TRL bands and notes mean
+    follow_up: JsonObject | None = None
     list: JsonObject
     provenance: JsonObject
 
@@ -169,6 +174,32 @@ class F2DetailResponse(PublicApiModel):
     scope: str
     availability: str
     detail: JsonObject
+    provenance: JsonObject
+
+
+class F2UniversitiesResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    availability: str
+    measure_ids: list[str]
+    measure_labels: JsonObject
+    attribution_source_ids: list[str] = []  # the sources that tie entities to universities (older releases: empty)
+    coverage: JsonObject
+    groups: JsonObject
+    notes: list[str]
+    province: JsonObject | None = None  # ?province=: the province, its innovations and how many name a university
+    universities: list[JsonObject]
+    provenance: JsonObject
+
+
+class F2UniversityResponse(PublicApiModel):
+    revision: str
+    release_id: str
+    availability: str
+    university: JsonObject
+    group_label_th: str | None
+    measure_labels: JsonObject
+    list: JsonObject
     provenance: JsonObject
 
 

@@ -9,3 +9,4 @@ python-multipart>=0.0.32,<1
 boto3>=1.43.103,<2
 pytest>=9.1.1,<10
 beautifulsoup4>=4.15.0,<5
+duckdb>=1.5.6,<2

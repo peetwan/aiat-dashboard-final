@@ -3,8 +3,8 @@
   const API = "/api/public/v1/f2";
   const $ = (id) => document.getElementById(id);
   const panel = $("f2DashboardPanel");
-  const views = { overview: $("f2-view-overview"), list: $("f2-view-list"), sources: $("f2-view-sources") };
-  const state = { open: false, tab: "overview", province: "", measure: "", topic: "", detail: "", detailHistory: false, revision: "", overview: null, topicData: null, filterChoices: {}, choiceFailures: {}, controllers: {}, requests: {}, returnFocus: null, pendingListFocus: "", callbacks: {}, filters: {}, searchDraft: "", searchTimer: null, scopeNotice: "", offset: 0, limit: 25, sort: "source", rememberedProvince: "", overviewScroll: 0, overviewTopic: "", filterDraft: null, coverageData: null, openCoverage: false };
+  const views = { overview: $("f2-view-overview"), areas: $("f2-view-areas"), universities: $("f2-view-universities"), innovations: $("f2-view-innovations"), list: $("f2-view-list"), sources: $("f2-view-sources") };
+  const state = { open: false, tab: "overview", province: "", measure: "", topic: "", detail: "", detailHistory: false, revision: "", overview: null, topicData: null, filterChoices: {}, choiceFailures: {}, controllers: {}, requests: {}, returnFocus: null, pendingListFocus: "", callbacks: {}, filters: {}, searchDraft: "", searchTimer: null, scopeNotice: "", offset: 0, limit: 25, sort: "source", rememberedProvince: "", overviewScroll: 0, overviewTopic: "", filterDraft: null, coverageData: null, openCoverage: false, universities: null, university: "", universityOffset: 0, universityQuery: "", universitySearch: "", universityFocus: "", mapData: null, areaUniversities: null, areaShowAll: false, areaFocus: "", innovationFilters: {}, innovationOffset: 0, innovationFocus: "" };
   const C02_MEASURE_ID = "C02_COMMUNITY";
   const C02_SOURCE_PROVINCE_MEANING = "จังหวัดที่แสดงเป็นจังหวัดที่แหล่งข้อมูลระบุไว้ในทะเบียน ไม่ใช่ที่อยู่หรือสถานที่ทำงานปัจจุบัน";
   const K12_DISPLAY_LABEL = "รายการทุนวัฒนธรรมบนแผนที่";
@@ -18,6 +18,7 @@
     ["คน กิจกรรม และนวัตกรรม", ["K02", "K03", "K04"]],
     ["ธุรกิจและข้อเสนอ", ["K05", "K06", "K07", "K08"]],
     ["การจ้างงานและการจ่ายเงิน", ["K09", "K10"]],
+    ["ครัวเรือนเป้าหมายและตัวเลขเศรษฐกิจที่ PMUA AppTech รายงาน", ["H01"]],
     ["คลัสเตอร์", ["K11A", "K11B"]],
   ];
   const COMPANION_NOTES = {
@@ -25,6 +26,23 @@
     K04: "ยอดรายการนวัตกรรมทั้งหมดรวมรายการที่ผ่านเกณฑ์ความพร้อมแล้ว จึงไม่ควรนำสองยอดมาบวกกัน",
     K08: "ตัวเลขประกอบเหล่านี้บอกการเข้าร่วม จำนวนธุรกิจที่ต้นทางรายงาน หรือคะแนนของบุคคล ยังใช้ยืนยันว่าธุรกิจพัฒนาขึ้นไม่ได้",
   };
+  const OFFICIAL_TITLE = "ตัวเลขในสไลด์ บพท. กับข้อมูลที่เรารวบรวม";
+  // Area tab: the measures it compares by province, and what "in a province" means for each (measures/members.sql).
+  const AREA_MEASURES = ["C04_LISTED", "C02_COMMUNITY", "K05", "K07", "K12", "H01"];
+  const AREA_PLACE_MEANINGS = {
+    C04_LISTED: "จังหวัดที่แหล่งข้อมูลระบุว่าเป็นพื้นที่ใช้หรือพื้นที่ของผู้ใช้เป้าหมายของนวัตกรรม ไม่ใช่ที่ตั้งของมหาวิทยาลัย",
+    C02_COMMUNITY: C02_SOURCE_PROVINCE_MEANING,
+    K05: "จังหวัดที่ตั้งของธุรกิจตามที่แหล่งข้อมูลระบุ",
+    K07: "จังหวัดที่แหล่งข้อมูลระบุไว้กับรายการสินค้าหรือบริการ",
+    K12: "จังหวัดของรายการบนแผนที่วัฒนธรรมไทย",
+    H01: "จังหวัดของครัวเรือนเป้าหมายตามที่ PMUA AppTech รายงาน",
+  };
+  const AREA_TOP = 15;
+  const UNIVERSITY_GROUP_ORDER =["rajabhat", "rajamangala", "university", "other"];
+  const UNIVERSITY_COUNTS = [["C04_LISTED", "นวัตกรรม"], ["C02_COMMUNITY", "นวัตกรชุมชน"], ["K05", "ธุรกิจ"]];
+  // Innovation tab: the list filters of /topics/k04 (?f2i<key>=), on top of the page's province.
+  const INNOVATION_FILTERS = ["university", "source", "trl", "evidence", "q"];
+  const INNOVATION_MEASURE = "C04_LISTED";
   const MONTH_NOTE = "แหล่งข้อมูลยังไม่ระบุว่าเป็นเดือนปฏิทินใด";
   const K10_EXCLUDED_AMOUNT_NOTE = "ข้อมูลต้นทางทั้งชุดมีอีกยอด 200,093,000 บาท (ประมาณ 200.1 ล้านบาท) ที่ไม่ได้รวมในการคำนวณนี้ เพราะยังไม่ชัดเจนว่าเป็นค่าอะไรและครอบคลุมช่วงเวลาใด";
   const FILTER_LABELS = {
@@ -81,6 +99,7 @@
     K11A: "ทำไมยังไม่มีจำนวนคลัสเตอร์?",
     K11B: "ทำไมยังระบุจังหวัดที่มีคลัสเตอร์ไม่ได้?",
     K12: "รายการทุนวัฒนธรรมหนึ่งรายการคืออะไร?",
+    H01: "ครัวเรือนเป้าหมายคือใคร และตัวเลขเงินมาจากไหน?",
   };
   const MEASURE_LIMITATIONS = {
     K01A: "นับจังหวัดที่พบข้อมูลพื้นที่อย่างน้อยหนึ่งประเภทจากแหล่งข้อมูลที่รวบรวม เช่น พื้นที่ใช้หรือพื้นที่เป้าหมายของนวัตกรรม ที่ตั้งธุรกิจที่เข้าร่วมโครงการ รายการทุนวัฒนธรรม สินค้า หรือกิจกรรม จังหวัดเดียวกันที่พบหลายรายการหรือหลายแหล่งนับเพียงครั้งเดียว โดยรวมกรุงเทพมหานครด้วย ที่อยู่ของมหาวิทยาลัยหรือหน่วยงานเพียงอย่างเดียวไม่นำมานับ ยอดนี้ไม่ได้ยืนยันว่ามีการดำเนินโครงการจริงในทุกจังหวัด หรือมีข้อมูลครบทุกหัวข้อ",
@@ -98,6 +117,7 @@
     C08_REPORTED_BUSINESSES: "แสดงจำนวนธุรกิจที่แหล่งข้อมูลสรุปแยกไว้ในแต่ละด้าน โดยไม่มีรายชื่อธุรกิจให้ตรวจดูว่าซ้ำกันระหว่างด้านหรือไม่ จึงนำยอดแต่ละด้านมาบวกเป็นจำนวนธุรกิจทั้งหมดไม่ได้",
     C08_ASSESSED_PEOPLE: "นับคนที่มีคะแนนประเมินก่อนและหลังครบ คนหนึ่งอาจมีหลายแบบประเมิน จึงไม่ใช้จำนวนแบบประเมินแทนจำนวนคน แบบประเมินที่ไม่มีวันที่อาจไม่ใช่ข้อมูลล่าสุด",
     C08_INCREASED_PEOPLE: "นับคนที่มีคะแนนก่อนและหลังให้เทียบกันได้ และมีคะแนนเพิ่มขึ้นอย่างน้อยหนึ่งด้าน คนกลุ่มนี้รวมอยู่ใน “บุคคลที่มีชุดคะแนนก่อนและหลังครบ” แล้ว จึงนำสองยอดมาบวกกันไม่ได้ คะแนนที่เพิ่มขึ้นเป็นผลของบุคคล ไม่ใช่จำนวนธุรกิจที่พัฒนาขึ้น และข้อมูลที่ขาดไม่ได้แปลว่าไม่มีการเปลี่ยนแปลง",
+    H01: "แสดงจำนวนครัวเรือนเป้าหมายตามยอดที่ PMUA AppTech รายงาน ไม่ได้แปลว่าทุกครัวเรือนได้ผลลัพธ์ และไม่มีรายชื่อครัวเรือนให้ตรวจดู ยอดรายจังหวัดรวมกันเท่ากับยอดประเทศ จังหวัดที่ต้นทางไม่ได้รายงานไม่ได้แปลว่ามีศูนย์ครัวเรือน ต้นทางแก้ตัวเลขย้อนหลังได้และไม่ได้บอกช่วงเวลาที่วัด ตัวเลขเงินมีเฉพาะระดับประเทศ ดูได้ในตารางครัวเรือนเป้าหมายบนหน้าภาพรวม",
     K09: "แสดงจำนวนการจ้างงานที่ต้นทางรายงานในหน่วยคนต่อเดือน แต่ไม่ได้ระบุว่าเป็นเดือนปฏิทินใด จึงยังบอกไม่ได้ว่าเป็นยอดของเดือนล่าสุด มีเฉพาะข้อมูลรวม ไม่มีรายชื่อแรงงานหรือจำนวนแยกรายจังหวัด",
     K10: "เป็นยอดเงินที่รายงานว่าจ่ายแก่แรงงานและผู้จัดหาทรัพยากรในพื้นที่ ไม่ใช่รายได้สุทธิที่ยืนยันแล้ว การรวมยอดนี้อาศัยข้อสมมติว่ายอดรับในพื้นที่นำมาบวกกันได้และครอบคลุมช่วงเดือนที่เทียบกันได้",
     K11A: "ป้ายหมวดอุตสาหกรรมยังไม่เพียงพอที่จะยืนยันตัวตนคลัสเตอร์ จึงแสดงว่าไม่มีข้อมูล ไม่ใช่ศูนย์",
@@ -139,6 +159,9 @@
   const allMeasureDefinitions = () => visibleMeasures((state.overview?.headlines || []).flatMap((headline) => [headline, ...(headline.companions || [])]));
   const supportsProvince = (definition) => definition?.filter_contract?.supported_filters?.includes("province");
   const statusLabel = (value) => RESULT_STATUS_LABELS[value] || label(value);
+  // A missing value says why, not what kind of number it would be (a source total's status is not a reason).
+  const unavailableLabel = (result) => result?.unavailable_reason?.code === "unknown_province" ? "ไม่มีข้อมูลรายจังหวัด"
+    : statusLabel(["deferred", "insufficient_data"].includes(result?.status) ? result.status : "unavailable");
   const provinceName = (code) => code
     ? (state.callbacks.getProvinces?.() || []).find((province) => text(province.province_code) === code)?.province_name_th || code
     : "";
@@ -177,6 +200,26 @@
     return measure?.filter_contract?.supported_filters?.includes("source_region")
       ? "ขอบเขต: ประเทศไทย / ภูมิภาคตามต้นทาง"
       : "ขอบเขต: ประเทศไทย";
+  }
+  const BANGKOK_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
+  const THAI_DAY = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  function thaiDay(day) { return THAI_DAY.format(new Date(`${day}T00:00:00Z`)); }
+  function sourceSnapshots() { return state.overview?.sources?.by_id || {}; }
+  // The days (Thai time) we fetched these sources, as one date or a range: "12 ถึง 14 ต.ค. 2569".
+  function fetchedRange(ids) {
+    const days = [...new Set(ids.map((id) => sourceSnapshots()[id]?.fetched_at).filter(Boolean)
+      .map((value) => BANGKOK_DAY.format(new Date(value))))].sort();
+    if (!days.length) return "";
+    const first = days[0], last = days[days.length - 1];
+    if (first === last) return thaiDay(first);
+    return first.slice(0, 7) === last.slice(0, 7) ? `${Number(first.slice(8))} ถึง ${thaiDay(last)}` : `${thaiDay(first)} ถึง ${thaiDay(last)}`;
+  }
+  // "ที่มา: <source>, ดึงข้อมูล <date>" for a number; empty for a release without fetch dates.
+  function sourceLine(ids, lead = "ที่มา") {
+    const unique = [...new Set(ids || [])];
+    const fetched = fetchedRange(unique);
+    if (!unique.length || !fetched) return "";
+    return `${lead}: ${unique.length === 1 ? SOURCE_NAMES[unique[0]] || unique[0] : `${unique.length} แหล่ง`}, ดึงข้อมูล ${fetched}`;
   }
   function metricExplanation(measureId) {
     return MEASURE_LIMITATIONS[measureId] || "";
@@ -257,7 +300,7 @@
     const url = new URL(location.href);
     url.searchParams.set("mode", "f2");
     url.searchParams.set("f2tab", state.tab);
-    ["f2measure", "province", "f2detail", "f2category", "f2source_level", "f2source_region", "f2component", "f2source_dimension", "f2q", "f2offset", "f2sort", "f2preferredProvince"].forEach((name) => url.searchParams.delete(name));
+    ["f2measure", "province", "f2detail", "f2areaall", "f2category", "f2source_level", "f2source_region", "f2component", "f2source_dimension", "f2q", "f2offset", "f2sort", "f2preferredProvince", "f2uni", "f2unioffset", "f2uniq", "f2unisearch", "f2ioffset", ...INNOVATION_FILTERS.map((key) => `f2i${key}`)].forEach((name) => url.searchParams.delete(name));
     if (state.measure) url.searchParams.set("f2measure", state.measure);
     if (state.province) url.searchParams.set("province", state.province);
     if (state.detail) url.searchParams.set("f2detail", state.detail);
@@ -265,11 +308,29 @@
     if (state.offset) url.searchParams.set("f2offset", state.offset);
     if (state.sort !== "source") url.searchParams.set("f2sort", state.sort);
     if (state.rememberedProvince && !state.province) url.searchParams.set("f2preferredProvince", state.rememberedProvince);
+    if (state.tab === "areas" && state.areaShowAll) url.searchParams.set("f2areaall", "1");
+    if (state.tab === "universities" && state.universitySearch) url.searchParams.set("f2unisearch", state.universitySearch);
+    if (state.tab === "innovations") {
+      INNOVATION_FILTERS.forEach((key) => { if (state.innovationFilters[key]) url.searchParams.set(`f2i${key}`, state.innovationFilters[key]); });
+      if (state.innovationOffset) url.searchParams.set("f2ioffset", state.innovationOffset);
+    }
+    if (state.tab === "universities" && state.university) {
+      url.searchParams.set("f2uni", state.university);
+      if (state.universityOffset) url.searchParams.set("f2unioffset", state.universityOffset);
+      if (state.universityQuery) url.searchParams.set("f2uniq", state.universityQuery);
+    }
     history[push ? "pushState" : "replaceState"]({}, "", url);
   }
   function restoreUrl() {
     const params = new URLSearchParams(location.search);
-    state.tab = ["overview", "list", "sources"].includes(params.get("f2tab")) ? params.get("f2tab") : "overview";
+    state.tab = ["overview", "areas", "universities", "innovations", "list", "sources"].includes(params.get("f2tab")) ? params.get("f2tab") : "overview";
+    state.innovationFilters = Object.fromEntries(INNOVATION_FILTERS.map((key) => [key, params.get(`f2i${key}`)]).filter(([, value]) => value));
+    state.innovationOffset = Math.max(0, Number(params.get("f2ioffset")) || 0);
+    state.areaShowAll = params.get("f2areaall") === "1";
+    state.university = params.get("f2uni") || "";
+    state.universityOffset = Math.max(0, Number(params.get("f2unioffset")) || 0);
+    state.universityQuery = params.get("f2uniq") || "";
+    state.universitySearch = params.get("f2unisearch") || "";
     state.measure = params.get("f2measure") || "";
     state.province = params.get("province") || "";
     state.rememberedProvince = params.get("f2preferredProvince") || state.province;
@@ -303,15 +364,25 @@
       button.tabIndex = active ? 0 : -1;
     });
     if (changingTab) panel.querySelector(".f2-stage").scrollTop = 0;
+    if (tab === "areas") enterAreas();
+    if (tab === "innovations") enterInnovations();
+    // the university tab counts nationally with its own counts; the area and innovation tabs have their own pickers
+    $("f2Controls").hidden = $("f2FiltersToggle").hidden = ["universities", "areas", "innovations"].includes(tab);
+    renderBreadcrumbs(state.overview?.requested_scope || {});
     writeUrl(push);
-    if (tab === "overview") loadOverview();
+    if (tab === "overview" || tab === "areas" || tab === "innovations") loadOverview();
+    if (tab === "universities") loadUniversities();
     if (tab === "list") loadTopic();
     if (tab === "sources") loadSources();
   }
   function renderBreadcrumbs(scope) {
-    const crumb = $("f2Breadcrumbs"); clear(crumb);
+    const crumb = $("f2Breadcrumbs");
+    const hadFocus = crumb.contains(document.activeElement);
+    clear(crumb);
     crumb.append(el("button", { type: "button", text: "ประเทศไทย", onclick: () => handleProvince("", true) }));
-    const province = scope?.province_name_th || scope?.province || scope?.province_code || state.province;
+    if (hadFocus) crumb.firstChild.focus({ preventScroll: true });
+    // the university tab counts nationally; the province stays selected for the other tabs
+    const province = state.tab === "universities" ? "" : scope?.province_name_th || scope?.province || scope?.province_code || state.province;
     if (province) crumb.append(el("span", { text: province }));
   }
   function choices(contract, key, fallback) {
@@ -538,7 +609,7 @@
     if (!isObject(value)) { card.append(el("h4", { text: fallbackTitle }), el("p", { text: valueText(value) || "ไม่มีข้อมูล" })); return card; }
     card.append(el("h4", { text: MEASURE_DISPLAY_LABELS[state.measure] || value.title_th || value.label_th || value.title || value.label || value.name || fallbackTitle }));
     if (value.availability === "unavailable") {
-      card.append(el("p", { class: "f2-unavailable-value", text: statusLabel(value.status || value.availability) }));
+      card.append(el("p", { class: "f2-unavailable-value", text: unavailableLabel(value) }));
       return card;
     }
     const summary = value.description || value.summary || value.note || value.display_value || valueText(value.value);
@@ -594,6 +665,7 @@
     selectMeasure(state.measure);
     controls(data);
     const jump = el("select", { id: "f2TopicJump", "aria-label": "ข้ามไปยังหัวข้อ" }, el("option", { value: "", text: "ข้ามไปยังหัวข้อ" }));
+    if (data.official?.rows?.length) jump.append(el("option", { value: "f2-overview-official", text: OFFICIAL_TITLE }));
     OVERVIEW_GROUPS.forEach(([title, ids], index) => {
       if (headlines.some((headline) => ids.includes(headline.measure_id))) jump.append(el("option", { value: `f2-overview-group-${index}`, text: title }));
     });
@@ -609,6 +681,9 @@
       el("p", { class: "f2-overview-key", text: "0 หมายถึงนับได้ศูนย์ในข้อมูลชุดนี้ ส่วน ไม่ระบุ หมายถึงยังไม่มีตัวเลขที่รองรับสำหรับพื้นที่ที่เลือก" }),
       el("p", { class: "f2-overview-key", text: "กรอบเส้นประคือตัวเลขประกอบ ซึ่งอาจใช้ข้อมูลคนละชุดหรือวิธีนับต่างกัน" }),
       el("p", { class: "f2-overview-key", text: "วันที่ฉบับข้อมูลเป็นวันที่จัดเตรียม ไม่ใช่ช่วงเวลาที่วัด ตัวเลขแต่ละชุดอาจครอบคลุมคนละช่วงเวลา ตรวจสอบช่วงเวลาจากที่มาของแต่ละตัวชี้วัด" }),
+      Object.keys(sourceSnapshots()).length ? el("p", { class: "f2-overview-key" },
+        `ทุกตัวเลขบอกแหล่งและวันที่ดึงข้อมูลไว้ใต้ตัวเลข ข้อมูลชุดนี้ดึงจากเว็บต้นทาง ${Object.keys(sourceSnapshots()).length} แห่ง ${fetchedRange(Object.keys(sourceSnapshots()))} `,
+        el("button", { type: "button", class: "f2-inline-link", text: "ดูที่มาข้อมูล", onclick: () => { setTab("sources"); $("f2-tab-sources").focus(); } })) : "",
     ));
     const coverageCount = datasetCoverageCount(data);
     if (coverageCount !== null) view.append(el("aside", { class: "f2-coverage-note", "aria-label": "ความครอบคลุมของข้อมูล" },
@@ -616,11 +691,12 @@
       el("p", { text: "พบข้อมูลพื้นที่จากแหล่งข้อมูลที่รวบรวมอย่างน้อยหนึ่งประเภทในแต่ละจังหวัด แต่ละจังหวัดอาจมีข้อมูลไม่ครบทุกหัวข้อ" }),
       el("button", { type: "button", text: MEASURE_HELP_TITLES.K01A, onclick: () => { state.openCoverage = true; setTab("sources"); } }),
     ));
+    renderOfficial(view, data);
     OVERVIEW_GROUPS.forEach(([title, ids], index) => {
       const rows = headlines.filter((headline) => ids.includes(headline.measure_id));
       if (!rows.length) return;
       const group = el("div", { class: "f2-headlines" });
-      if (index === 4 && rows.every((item) => item.result?.availability === "unavailable")) {
+      if (ids.includes("K11A") && rows.every((item) => item.result?.availability === "unavailable")) {
         const unavailable = section(title, el("div", { class: "f2-cluster-notice" },
           el("strong", { text: "ยังไม่มีหลักฐานเพียงพอสำหรับจำนวนคลัสเตอร์และจังหวัดที่มีคลัสเตอร์" }),
           el("p", { text: "ยังยืนยันตัวตนคลัสเตอร์ไม่ได้ และหลักฐานโครงการทั่วไปใช้แทนหลักฐานคลัสเตอร์ไม่ได้ การไม่มีข้อมูลไม่ใช่ศูนย์" }),
@@ -650,13 +726,15 @@
           el("strong", { text: valueText(result.display_value ?? result.value) || "ไม่ระบุ" }),
         );
         if (item.unit || result.unit) metric.append(el("small", { text: item.unit || result.unit }));
-        if (result.availability === "unavailable") metric.append(el("span", { class: "f2-metric-state", text: statusLabel(result.status || result.availability) }));
+        if (result.availability === "unavailable") metric.append(el("span", { class: "f2-metric-state", text: unavailableLabel(result) }));
         if (["K09", "K10"].includes(item.measure_id) && result.availability !== "unavailable") {
           metric.append(el("span", { class: "f2-metric-state", text: MONTH_NOTE }));
         }
         if (companion) metric.append(el("span", { class: "f2-metric-kind", text: "ข้อมูลประกอบ" }));
         metric.append(el("small", { class: "f2-metric-scope", text: metricContext(item) }));
-        metric.append(el("span", { class: "f2-metric-action", text: item.detail_availability === "available" ? "ดูรายการทั้งหมด" : "ดูรายละเอียดตัวเลข" }));
+        const origin = sourceLine(item.source_ids);
+        if (origin) metric.append(el("small", { class: "f2-metric-source", text: origin }));
+        metric.append(el("span", { class: "f2-metric-action", text: item.detail_availability === "available" ? "ดูรายการ" : "ดูรายละเอียดตัวเลข" }));
         const wrapper = el("div", { class: "f2-metric-wrap" }, metric);
         group.append(wrapper);
         if (metricExplanation(item.measure_id)) {
@@ -688,6 +766,7 @@
           appendMetric(companion, true);
         });
         if (COMPANION_NOTES[item.measure_id]) group.append(el("p", { class: "f2-companion-note", text: COMPANION_NOTES[item.measure_id] }));
+        if (item.measure_id === data.households?.measure_id) group.append(householdTable(data.households));
       });
       const topicSection = section(title, group);
       topicSection.id = `f2-overview-group-${index}`;
@@ -695,9 +774,80 @@
     });
     if (!headlines.length) view.append(section("ภาพรวม", null, "ยังไม่มีข้อมูลสรุปสำหรับขอบเขตที่เลือก"));
   }
+  // PMUA's national household and money figures as the page states them; never per province or per household.
+  function householdTable(households) {
+    const money = (value) => `${(value / 1e6).toLocaleString("th-TH", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ล้านบาท`;
+    const name = provinceName(state.province);
+    const origin = sourceLine([households.source_id]);
+    return el("div", { class: "f2-household-table" },
+      name ? el("p", { class: "f2-companion-note", text: `ตารางนี้เป็นยอดระดับประเทศ ไม่ใช่ของจังหวัด${name} ต้นทางไม่ได้แยกตัวเลขเงินรายจังหวัด` }) : "",
+      el("div", { class: "f2-table-scroll", tabindex: "0", role: "region", "aria-label": "ตารางครัวเรือนเป้าหมายระดับประเทศ" },
+        el("table", { class: "f2-source-region-table" },
+          el("caption", { text: "ยอดระดับประเทศตามที่ PMUA AppTech แสดง แยกตามปีงบประมาณที่ต้นทางใช้กรอง" }),
+          el("thead", {}, el("tr", {}, el("th", { scope: "col", text: "รายการ" }), households.columns.map((column) => el("th", { scope: "col", text: column.label_th })))),
+          el("tbody", {}, households.rows.map((row) => el("tr", {},
+            el("th", { scope: "row", text: row.label_th }),
+            households.columns.map((column) => el("td", { "data-label": column.label_th,
+              title: row.unit_th === "บาท" ? `${formattedCount(row.values[column.id])} บาท` : null,
+              text: row.unit_th === "บาท" ? money(row.values[column.id]) : `${formattedCount(row.values[column.id])} ${row.unit_th}` }))))))),
+      el("ul", { class: "f2-household-notes" }, households.notes_th.map((note) => el("li", { text: note }))),
+      origin ? el("p", { class: "f2-metric-source", text: origin }) : "");
+  }
+  // บพท.'s slide figures beside ours, grouped by how far they can be read together. Never a ratio or a gap.
+  function renderOfficial(view, data) {
+    const official = data.official;
+    if (!official?.rows?.length) return;
+    const node = section(OFFICIAL_TITLE, null);
+    node.id = "f2-overview-official";
+    node.classList.add("f2-official");
+    view.append(node);
+    if (state.province) {
+      node.append(el("p", { class: "f2-companion-note" }, `ตัวเลขในสไลด์ บพท. มีเฉพาะระดับประเทศ จึงไม่แสดงคู่กับตัวเลขจังหวัด${provinceName(state.province)} `,
+        el("button", { type: "button", class: "f2-inline-link", text: "ดูทั้งประเทศ", onclick: () => handleProvince("", true) })));
+      return;
+    }
+    node.append(el("p", { class: "f2-official-intro", text: `ตัวเลขฝั่ง บพท. มาจาก${official.source_th} ข้อมูล ณ ${thaiDay(official.as_of)} ส่วนของเรานับจากข้อมูลบนเว็บที่ดึงเมื่อ ${fetchedRange(Object.keys(sourceSnapshots())) || "วันที่ระบุในแท็บที่มาข้อมูล"} ซึ่งเป็นวันที่ดึง ไม่ใช่ช่วงเวลาที่ตัวเลขวัด ยังไม่รู้ว่านิยามและช่วงเวลาของสองฝั่งตรงกันหรือไม่ ตารางนี้จึงไม่ได้บอกว่าฝั่งไหนถูก และไม่ใช่สัดส่วนของผลงาน` }));
+    const measures = Object.fromEntries((data.headlines || []).flatMap((h) => [h, ...(h.companions || [])]).map((m) => [m.measure_id, m]));
+    const kind = (m) => m.status === "source_aggregate" ? "ยอดที่ต้นทางรายงาน" : m.status === "assumed_aggregate" ? "คำนวณโดยมีข้อสมมติ" : "นับจากรายการที่พบ";
+    const open = (m) => {
+      state.overviewScroll = panel.querySelector(".f2-stage").scrollTop;
+      state.overviewTopic = "f2-overview-official";
+      if (m.measure_id === "K01A") { state.openCoverage = true; setTab("sources"); return; }
+      state.rememberedProvince = "";  // these are national figures: do not reopen a province chosen earlier
+      changeMeasure(m.measure_id);
+      if (m.result?.availability === "unavailable") { setTab("sources"); return; }
+      setTab("list");
+      loadMap();
+    };
+    const ours = (ids) => ids.map((id) => measures[id]).filter(Boolean).map((m, _, all) => {
+      const unavailable = m.result?.availability === "unavailable";
+      return el("div", { class: "f2-official-ours" },
+        all.length > 1 ? el("span", { text: measureDisplayLabel(m) }) : "",  // one measure: the row and "เรานับอะไร" say it
+        unavailable ? el("strong", { text: "ไม่ระบุ" }) : el("strong", {}, valueText(m.result?.display_value ?? m.result?.value) || "ไม่ระบุ", m.unit ? el("small", { text: ` ${m.unit}` }) : ""),
+        unavailable ? "" : el("span", { class: "f2-official-kind", text: kind(m) }),
+        el("button", { type: "button", class: "f2-inline-link", text: unavailable || m.measure_id === "K01A" ? "ดูวิธีนับ" : m.detail_availability === "available" ? "ดูรายการ" : "ดูรายละเอียดตัวเลข", onclick: () => open(m) }));
+    });
+    official.groups.forEach((group) => {
+      const rows = official.rows.filter((row) => row.group === group.id);
+      if (!rows.length) return;
+      node.append(el("div", { class: "f2-table-scroll" }, el("table", { class: "f2-source-region-table f2-official-table" },
+        el("caption", {}, el("strong", { text: group.title_th }), el("span", { text: group.note_th })),
+        el("thead", {}, el("tr", {}, ["ตัวชี้วัดในสไลด์", "สไลด์ บพท.", "ข้อมูลที่เรารวบรวม", "เรานับอะไร"].map((name) => el("th", { scope: "col", text: name })))),
+        el("tbody", {}, rows.map((row) => el("tr", {},
+          el("th", { scope: "row", text: row.label_th }),
+          el("td", { "data-label": "สไลด์ บพท." },
+            el("strong", { text: formattedCount(row.value) }), el("small", { class: "f2-official-unit", text: ` ${row.unit_th}${row.qualifier_th ? ` ${row.qualifier_th}` : ""}` }),
+            (row.published || []).map((place) => el("small", { class: "f2-official-published" },
+              `พบเผยแพร่ใน ${place.where_th}${place.period_th ? `, ${place.period_th}` : ""}${place.says_th ? `, เขียนว่า “${place.says_th}”` : ""}`))),
+          el("td", { "data-label": "ข้อมูลที่เรารวบรวม" }, ours(row.measure_ids)),
+          el("td", { "data-label": "เรานับอะไร", text: row.ours_th })))))));
+    });
+  }
   async function loadOverview() {
     if (!state.open) return;
     skeleton(views.overview, "กำลังโหลดภาพรวม", "overview");
+    // the area tab draws from this response: an old province's brief must not stay up (or printable) meanwhile
+    if (state.tab === "areas") status(views.areas, "กำลังโหลดข้อมูลพื้นที่", "กำลังขอข้อมูลจากระบบ");
     try {
       const data = await request("/overview" + query({ province: state.province, revision: state.revision }), "overview");
       if (!data) return;
@@ -710,9 +860,14 @@
       if (activeTab === "overview") await ensureFilterChoices(data);
       if (activeTab === "list") await loadTopic();
       if (activeTab === "sources") await loadSources();
+      if (activeTab === "universities") await loadUniversities();
+      if (activeTab === "areas") await loadAreas();
+      if (activeTab === "innovations") await loadInnovations();
       if (state.detail) openDetail(state.detail, false);
     } catch (error) {
-      if (!error.stale && error.name !== "AbortError") status(views.overview, "เปิดภาพรวมไม่ได้", error.message, loadOverview);
+      if (error.stale || error.name === "AbortError") return;
+      status(views.overview, "เปิดภาพรวมไม่ได้", error.message, loadOverview);
+      if (state.tab === "areas") status(views.areas, "เปิดข้อมูลพื้นที่ไม่ได้", error.message, loadOverview);
     }
   }
   async function loadMap() {
@@ -733,7 +888,12 @@
     const { q, ...mapFilters } = state.filters;
     try {
       const data = await request("/map" + query({ measure: state.measure, revision: state.revision, ...mapFilters }), "map");
-      if (data) state.callbacks.onMapData?.({ ...data, map_available: true, legend: { ...data.legend, label_th: measureDisplayLabel(selected) || data.legend?.label_th } });
+      if (!data) return;
+      const drawn = areaMap();
+      state.mapData = data;
+      state.callbacks.onMapData?.({ ...data, map_available: true, legend: { ...data.legend, label_th: measureDisplayLabel(selected) || data.legend?.label_th } });
+      // the area list already drew this map; drawing it again would drop the reader's focus
+      if (state.tab === "areas" && !state.province && !drawn) renderAreas();
     } catch (error) {
       if (!error.stale && error.name !== "AbortError") console.warn("F2 map data unavailable", error);
     }
@@ -773,7 +933,7 @@
     if (sources.length) card.append(el("p", { class: "f2-item-preview", text: `ที่มา: ${[...new Set(sources)].join(", ")}` }));
     if (state.measure === "K03") {
       const dates = item.activity_dates || [];
-      const displayedDates = [...new Set(dates.map((row) => [row.start_date, row.end_date !== row.start_date ? row.end_date : ""].filter(Boolean).map(window.F2DetailPresenter.formatDate).join(" – ")))];
+      const displayedDates = [...new Set(dates.map((row) => [row.start_date, row.end_date !== row.start_date ? row.end_date : ""].filter(Boolean).map(window.F2DetailPresenter.formatDate).join(" ถึง ")))];
       card.append(el("p", { class: "f2-item-preview", text: dates.length
         ? `วันที่ตามต้นทาง: ${displayedDates.join(" / ")}${dates.some((row) => row.has_conflict) ? " (มีข้อมูลวันที่ต่างกัน)" : ""}`
         : "วันที่กิจกรรม: ยังไม่มีวันที่ที่เผยแพร่" }));
@@ -799,7 +959,7 @@
   }
   function restorePendingListFocus() {
     if (!state.pendingListFocus) return;
-    const target = [...views.list.querySelectorAll("[data-f2-detail-id]")].find((node) => node.dataset.f2DetailId === state.pendingListFocus);
+    const target = [...(views[state.tab] || views.list).querySelectorAll("[data-f2-detail-id]")].find((node) => node.dataset.f2DetailId === state.pendingListFocus);
     if (!target) return;
     state.pendingListFocus = "";
     state.returnFocus = target;
@@ -846,6 +1006,8 @@
     view.append(el("p", { class: "f2-result-context", text: state.filters.source_region
       ? `ขอบเขตตัวเลข: ${filterValueLabel("source_region", state.filters.source_region, data)} (ภูมิภาคตามต้นทาง)`
       : state.province ? `ขอบเขตตัวเลข: จังหวัด${provinceName(state.province)}` : "ขอบเขตตัวเลข: ประเทศไทย" }));
+    const origin = sourceLine(definition?.source_ids);
+    if (origin) view.append(el("p", { class: "f2-result-context", text: origin }));
     if (metricExplanation(state.measure)) view.append(el("p", { class: "f2-result-context", text: metricExplanation(state.measure) }));
     const businessBreakdown = data.source_dimension_breakdown;
     if (state.measure === "C08_REPORTED_BUSINESSES" && businessBreakdown?.rows?.length) {
@@ -907,7 +1069,7 @@
     view.append(section("รายการ", el("div", { class: "f2-item-list" }, items.map(itemCard)), el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite", text: countSummary })));
     const previous = el("button", { type: "button", "aria-label": "หน้าก่อนหน้า", text: "ก่อนหน้า", disabled: !list.offset, onclick: () => { state.offset = Math.max(0, Number(list.offset || 0) - state.limit); writeUrl(true); loadTopic(); } });
     const next = el("button", { type: "button", "aria-label": "หน้าถัดไป", text: "ถัดไป", disabled: Number(list.offset || 0) + Number(list.returned_count || items.length) >= Number(list.matching_item_count || 0), onclick: () => { state.offset = Number(list.offset || 0) + Number(list.returned_count || items.length); writeUrl(true); loadTopic(); } });
-    view.append(el("nav", { class: "f2-pagination", "aria-label": "เปลี่ยนหน้ารายการ" }, previous, el("span", { text: `แสดง ${Number(list.offset || 0) + 1}–${Number(list.offset || 0) + items.length} จาก ${matchingCount} รายการ` }), next));
+    view.append(el("nav", { class: "f2-pagination", "aria-label": "เปลี่ยนหน้ารายการ" }, previous, el("span", { text: `แสดง ${Number(list.offset || 0) + 1} ถึง ${Number(list.offset || 0) + items.length} จาก ${matchingCount} รายการ` }), next));
     restorePendingListFocus();
   }
   function renderScopeNotice(view) {
@@ -967,10 +1129,38 @@
       status(views.sources, "เปิดที่มาไม่ได้", "ระบบยังเปิดที่มานี้ไม่ได้ โปรดลองอีกครั้ง", loadSources);
     }
   }
+  // Every source of the release: when we fetched it, and the latest change date the source itself states.
+  function renderSourceDates(view) {
+    const snapshots = Object.values(sourceSnapshots());
+    if (!snapshots.length) return;
+    const windowDays = Number(state.overview.sources.updated_within_days) || 365;
+    const span = windowDays === 365 ? "1 ปี" : `${formattedCount(windowDays)} วัน`;
+    const freshness = { stamped_within_window: `พบวันที่แก้ไขภายใน ${span} ก่อนวันดึง`, none_within_window: `ไม่พบวันที่แก้ไขภายใน ${span} ก่อนวันดึง`, no_date: "ต้นทางไม่ระบุวันที่" };
+    const rows = snapshots.slice().sort((a, b) => text(SOURCE_NAMES[a.source_id]).localeCompare(text(SOURCE_NAMES[b.source_id]), "th"));
+    const table = el("table", { class: "f2-source-region-table f2-source-dates-table" },
+      el("thead", {}, el("tr", {}, ["แหล่งข้อมูล", "ดึงข้อมูลล่าสุด", "ต้นทางแก้ไขล่าสุด", "สถานะ"].map((name) => el("th", { scope: "col", text: name })))),
+      el("tbody", {}, rows.map((row) => el("tr", {},
+        // phones hide the status column and show the status under the name instead
+        el("th", { scope: "row" }, SOURCE_NAMES[row.source_id] || row.source_id,
+          el("span", { class: `f2-freshness f2-freshness--${row.freshness} f2-freshness--inline`, text: freshness[row.freshness] || row.freshness })),
+        el("td", { text: fetchedRange([row.source_id]) }),
+        el("td", {}, row.updated
+          ? [`${row.updated.basis_th} ล่าสุด ${thaiDay(row.updated.latest)}`, el("small", { text: row.updated.days === 1 && row.updated.records > 1
+            ? `ทั้ง ${formattedCount(row.updated.records)} รายการลงวันที่เดียวกัน จึงน่าจะเป็นวันที่ของทั้งชุดข้อมูล`
+            : `จาก ${formattedCount(row.updated.records)} รายการที่ต้นทางระบุวันที่` })]
+          : "ไม่ระบุ"),
+        el("td", {}, el("span", { class: `f2-freshness f2-freshness--${row.freshness}`, text: freshness[row.freshness] || row.freshness }))))));
+    view.append(section("แหล่งข้อมูลและวันที่ของข้อมูล", el("div", { class: "f2-source-dates" },
+      el("dl", { class: "f2-detail-facts" },
+        el("dt", { text: "ดึงข้อมูล" }), el("dd", { text: "วันที่ระบบของเราไปเก็บข้อมูลจากเว็บต้นทาง ตัวเลขทุกตัวบอกวันที่นี้ไว้ใต้ตัวเลข" }),
+        el("dt", { text: "ต้นทางแก้ไขล่าสุด" }), el("dd", { text: "วันที่แก้ไขล่าสุดที่เว็บต้นทางใส่ไว้ในรายการ มีให้แค่บางแหล่ง และบางแหล่งใส่ไว้แค่ในข้อมูลบางส่วน (ตารางบอกว่าครอบคลุมอะไร) เป็นวันที่ที่ต้นทางระบุเอง ไม่ได้ยืนยันว่าเนื้อหาเปลี่ยนจริง และไม่ได้บอกว่าแหล่งยังมีคนดูแล ข้อมูลถูกต้อง หรือครบถ้วน" })),
+      el("div", { class: "f2-table-scroll", tabindex: "0", role: "region", "aria-label": "ตารางวันที่ของแหล่งข้อมูล" }, table))));
+  }
   function renderSources() {
     const view = views.sources; clear(view); controls(state.topicData || state.overview || {});
     backToOverview(view);
     renderScopeNotice(view);
+    renderSourceDates(view);
     const data = state.topicData || state.overview || {};
     const definition = selectedMeasureDefinition();
     const coverage = state.coverageData;
@@ -1018,6 +1208,7 @@
         sourceCards.append(el("article", { class: "f2-generic-card" },
           el("h4", { text: sourceName }),
           source.originating_system ? el("p", { text: `ระบบต้นทาง: ${source.originating_system}` }) : "",
+          fetchedRange([source.source_id]) ? el("p", { text: `ดึงข้อมูล ${fetchedRange([source.source_id])}` }) : "",
           link ? el("a", { href: link, target: "_blank", rel: "noopener noreferrer", text: "เปิดแหล่งข้อมูลต้นทาง" }) : "",
         ));
       });
@@ -1049,6 +1240,517 @@
       ));
     }
     if (!view.childNodes.length) view.append(section("ที่มาและข้อจำกัด", null, "ยังไม่มีข้อมูลที่มาและข้อจำกัดสำหรับขอบเขตนี้"));
+  }
+  // University tab: every university the sources name, then one university with its innovations (?f2uni=).
+  async function loadUniversities() {
+    if (!state.open || state.tab !== "universities") return;
+    const view = views.universities;
+    status(view, "กำลังโหลดข้อมูลมหาวิทยาลัย", "กำลังขอข้อมูลจากระบบ");
+    if (!state.university) abort("university");
+    const wanted = JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
+    const current = () => state.tab === "universities" && wanted === JSON.stringify([state.university, state.universityQuery, state.universityOffset]);
+    try {
+      const list = state.universities && state.universities.revision === state.revision ? state.universities
+        : await request("/universities" + query({ revision: state.revision }), "universities");
+      if (!list || !current()) return;
+      state.universities = list;
+      state.revision = list.revision || state.revision;
+      if (!state.university) { renderUniversities(list); return; }
+      const data = await request(`/universities/${encodeURIComponent(state.university)}`
+        + query({ q: state.universityQuery, limit: state.limit, offset: state.universityOffset, revision: state.revision }), "university");
+      if (!data || !current()) return;
+      renderUniversity(list, data);
+    } catch (error) {
+      if (error.stale || error.name === "AbortError") return;
+      if (error.status === 404 && state.university) { showUniversity("", false); return; }
+      if (error.status === 404) { status(view, "ข้อมูลชุดนี้ยังไม่มีมุมมองมหาวิทยาลัย", "ข้อมูลที่เผยแพร่ชุดนี้สร้างก่อนมีแท็บมหาวิทยาลัย"); return; }
+      status(view, "เปิดข้อมูลมหาวิทยาลัยไม่ได้", "ระบบยังเปิดข้อมูลนี้ไม่ได้ โปรดลองอีกครั้ง", loadUniversities);
+    }
+  }
+  function showUniversity(id, push = true) {
+    state.universityFocus = id ? "heading" : state.university && `row:${state.university}`;
+    state.university = id;
+    state.universityOffset = 0;
+    state.universityQuery = "";
+    writeUrl(push);
+    panel.querySelector(".f2-stage").scrollTop = 0;
+    loadUniversities();
+  }
+  function countList(counts, rows) {
+    return el("dl", { class: "f2-university-counts" }, rows.map(([measureId, name]) => el("div", {},
+      el("dt", { text: name }), el("dd", { text: formattedCount(counts?.[measureId]) || "0" }))));
+  }
+  function applyUniversityFocus(view) {
+    const focus = state.universityFocus;
+    state.universityFocus = "";
+    const target = focus === "heading" ? view.querySelector(".f2-university-head h3")
+      : focus === "search" ? $("f2UniversityItemSearch")
+        : focus === "list" ? view.querySelector(".f2-item")
+          : focus.startsWith("row:") ? view.querySelector(`[data-f2-university-id="${CSS.escape(focus.slice(4))}"]`) : null;
+    target?.focus({ preventScroll: focus !== "list" });
+  }
+  function bar(value, max) {
+    const fill = el("span");
+    fill.style.width = `${Math.round(100 * (Number(value) || 0) / Math.max(1, max))}%`;
+    return el("span", { class: "f2-bar", "aria-hidden": "true" }, fill);
+  }
+  function renderUniversities(list) {
+    const view = clear(views.universities);
+    const groups = list.groups || {};
+    const rows = list.universities || [];
+    backToOverview(view);
+    view.append(el("p", { class: "f2-result-context", text: "ขอบเขต: ประเทศไทย (แท็บนี้ยังไม่แยกตามจังหวัด)" }));
+    const [comparison, ...howCounted] = list.notes || [];
+    view.append(section("ผลงานแยกตามกลุ่มมหาวิทยาลัย", el("div", { class: "f2-university-groups" },
+      UNIVERSITY_GROUP_ORDER.filter((key) => groups[key]).map((key) => el("article", { class: "f2-university-group" },
+        el("h4", {}, groups[key].label_th, el("span", { text: `${formattedCount(groups[key].university_count)} แห่ง` })),
+        countList(groups[key].counts, UNIVERSITY_COUNTS)))),
+      comparison ? el("p", { class: "f2-university-note", text: comparison }) : ""));
+    const coverage = UNIVERSITY_COUNTS.map(([measureId, name]) => {
+      const row = list.coverage?.[measureId];
+      return row ? `${name} ${formattedCount(row.with_university)} จาก ${formattedCount(row.counted)}` : "";
+    }).filter(Boolean).join(", ");
+    if (coverage) view.append(el("p", { class: "f2-result-context", text: `ระบุมหาวิทยาลัยได้: ${coverage}` }));
+    const origin = sourceLine(list.attribution_source_ids, "แหล่งที่ระบุมหาวิทยาลัย");
+    if (origin) view.append(el("p", { class: "f2-result-context", text: origin }));
+    if (howCounted.length) view.append(el("details", { class: "f2-university-method" },
+      el("summary", { text: "นับอย่างไร" }), el("ul", {}, howCounted.map((note) => el("li", { text: note })))));
+
+    const search = el("input", { id: "f2UniversitySearch", type: "search", placeholder: "ชื่อมหาวิทยาลัย", autocomplete: "off", value: state.universitySearch });
+    const summary = el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite" });
+    const body = el("tbody");
+    const max = Math.max(...rows.map((row) => Number(row.counts?.C04_LISTED) || 0));
+    const fill = () => {
+      const wanted = search.value.trim().normalize("NFKC");
+      const shown = rows.filter((row) => !wanted || text(row.name_th).normalize("NFKC").includes(wanted));
+      body.replaceChildren(...shown.map((row) => el("tr", {},
+        el("th", { scope: "row" },
+          el("button", { type: "button", class: "f2-university-link", "data-f2-university-id": row.university_id, text: row.name_th, onclick: () => showUniversity(row.university_id) }),
+          // the group only where the name does not already say it ("มหาวิทยาลัยราชภัฏ..." does)
+          text(row.name_th).startsWith(groups[row.group]?.label_th) ? "" : el("span", { class: "f2-university-group-label", text: groups[row.group]?.label_th || "" })),
+        el("td", {}, el("span", { class: "f2-bar-value" }, bar(row.counts?.C04_LISTED, max), formattedCount(row.counts?.C04_LISTED) || "0")),
+        el("td", { text: formattedCount(row.counts?.C02_COMMUNITY) || "0" }),
+        el("td", { text: formattedCount(row.counts?.K05) || "0" }),
+        el("td", { text: formattedCount(row.province_count) || "0" }))));
+      summary.textContent = wanted ? `${shown.length} จาก ${rows.length} แห่งที่ตรงคำค้นหา` : `${rows.length} แห่ง เรียงตามจำนวนนวัตกรรม`;
+    };
+    search.addEventListener("input", () => { state.universitySearch = search.value.trim(); writeUrl(false); fill(); });
+    fill();
+    const table = el("table", { class: "f2-source-region-table f2-university-table" },
+      el("thead", {}, el("tr", {}, ["มหาวิทยาลัย", "นวัตกรรม", "นวัตกร", "ธุรกิจ", "จังหวัด"]
+        .map((name) => el("th", { scope: "col", text: name })))), body);
+    view.append(section("รายชื่อมหาวิทยาลัย", el("div", { class: "f2-university-list" },
+      el("label", { class: "f2-university-search", htmlFor: "f2UniversitySearch", text: "ค้นหา" }, search),
+      summary, el("div", { class: "f2-table-scroll", tabindex: "0" }, table))));
+    applyUniversityFocus(view);
+  }
+  function renderUniversity(list, data) {
+    const view = clear(views.universities);
+    const university = data.university || {};
+    const counts = university.counts || {};
+    const items = data.list?.items || [];
+    view.append(el("button", { type: "button", class: "f2-back-overview", text: "กลับไปรายชื่อมหาวิทยาลัย", onclick: () => showUniversity("") }));
+    view.append(el("header", { class: "f2-university-head" },
+      el("p", { class: "f2-detail-eyebrow", text: data.group_label_th || "" }), el("h3", { text: university.name_th, tabindex: "-1" })));
+    const places = university.innovation_provinces || [];
+    view.append(countList({ ...counts, provinces: places.length }, [
+      ["C04_LISTED", "นวัตกรรม"], ["K04", "มีหลักฐาน TRL 8 ถึง 9"], ["C02_COMMUNITY", "นวัตกรชุมชน"],
+      ["K05", "ธุรกิจที่โยงกับมหาวิทยาลัย"], ["provinces", "จังหวัดที่ใช้นวัตกรรม"]]));
+    view.append(el("p", { class: "f2-result-context", text: "TRL 8 ถึง 9 คือระดับที่แหล่งข้อมูลระบุ ไม่ใช่การยืนยันว่าใช้งานได้ในวันนี้ และบางชิ้นมีแหล่งที่ระบุระดับต่างกัน "
+      + "ธุรกิจนับเมื่อแหล่งข้อมูลระบุหน่วยวิจัยที่ดูแล หรือพบชื่อธุรกิจในข้อมูลนวัตกรรมของมหาวิทยาลัยนี้ จึงยังไม่ได้ยืนยันว่าเข้าร่วมโครงการ" }));
+    if (places.length) {
+      const max = Number(places[0].count) || 1;
+      const row = (place) => el("li", {}, el("span", { text: place.province_name_th || place.province_code }), bar(place.count, max), el("span", { text: formattedCount(place.count) }));
+      const top = el("ol", { class: "f2-university-places" }, places.slice(0, 5).map(row));
+      view.append(section("นวัตกรรมไปใช้ที่จังหวัดไหนมากที่สุด", el("div", {}, top, places.length > 5
+        ? el("details", { class: "f2-detail-more" }, el("summary", { text: `อีก ${places.length - 5} จังหวัด` }), el("ol", { class: "f2-university-places" }, places.slice(5).map(row)))
+        : "")));
+    }
+    const sources = (university.innovation_sources || []).map((row) => `${SOURCE_NAMES[row.source_id] || row.source_id} ${formattedCount(row.count)}`);
+    if (sources.length) view.append(el("p", { class: "f2-result-context", text: `ที่มาของนวัตกรรม: ${sources.join(", ")} (นวัตกรรมชิ้นเดียวกันอยู่ได้หลายแหล่ง)` }));
+    // each count with the sources that tie it to this university, and when they were fetched
+    const origins = UNIVERSITY_COUNTS.map(([measureId, name]) => sourceLine(university.source_ids_by_measure?.[measureId], `ที่มาของ${name}`)).filter(Boolean);
+    if (origins.length) view.append(el("ul", { class: "f2-result-context f2-university-origins" }, origins.map((line) => el("li", { text: line }))));
+
+    const search = el("input", { id: "f2UniversityItemSearch", type: "search", placeholder: "ชื่อนวัตกรรม", value: state.universityQuery, autocomplete: "off" });
+    const form = el("form", { class: "f2-university-search", role: "search", onsubmit: (event) => {
+      event.preventDefault();
+      state.universityQuery = search.value.trim();
+      state.universityOffset = 0;
+      state.universityFocus = "search";
+      writeUrl(true);
+      loadUniversities();
+    } }, el("label", { htmlFor: "f2UniversityItemSearch", text: "ค้นหานวัตกรรมของมหาวิทยาลัยนี้" }, search), el("button", { type: "submit", class: "f2-retry", text: "ค้นหา" }));
+    const found = data.list || {};
+    const matching = formattedCount(found.matching_item_count) || "0";
+    const cards = items.map((item) => {
+      const model = window.F2DetailPresenter?.presentListItem?.(found.measure_id, item) || { title: titleOf(item), context: [], action: "ดูรายละเอียด" };
+      return el("button", { class: "f2-item", type: "button", "data-f2-detail-id": item.entity_id, "aria-label": `${model.action} ${model.title}`,
+        onclick: () => openTargetDetail({ topicId: found.topic_id, measureId: found.measure_id, entityId: item.entity_id }) },
+      el("h3", { text: model.title }),
+      model.context?.length ? el("p", { class: "f2-item-context", text: model.context.join(", ") }) : "",
+      el("span", { class: "f2-item-action", text: model.action }));
+    });
+    view.append(section(`นวัตกรรมของมหาวิทยาลัยนี้`, el("div", { class: "f2-university-list" }, form,
+      el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite", text: state.universityQuery
+        ? `${matching} รายการที่ตรงคำค้นหา จาก ${formattedCount(found.scoped_item_count)} รายการ` : `${matching} รายการ เรียงตามชื่อ` }),
+      cards.length ? el("div", { class: "f2-item-list" }, cards) : el("p", { text: "ไม่พบนวัตกรรมที่ตรงกับคำค้นหา" }))));
+    if (Number(found.matching_item_count) > items.length) {
+      const offset = Number(found.offset || 0);
+      const page = (next) => { state.universityOffset = next; state.universityFocus = "list"; writeUrl(true); panel.querySelector(".f2-stage").scrollTop = 0; loadUniversities(); };
+      view.append(el("nav", { class: "f2-pagination", "aria-label": "เปลี่ยนหน้ารายการนวัตกรรม" },
+        el("button", { type: "button", text: "ก่อนหน้า", disabled: !offset, onclick: () => page(Math.max(0, offset - state.limit)) }),
+        el("span", { text: `แสดง ${offset + 1} ถึง ${offset + items.length} จาก ${matching} รายการ` }),
+        el("button", { type: "button", text: "ถัดไป", disabled: offset + items.length >= Number(found.matching_item_count), onclick: () => page(offset + items.length) })));
+    }
+    if (list.notes?.length) view.append(el("details", { class: "f2-university-method" },
+      el("summary", { text: "นับอย่างไร" }), el("ul", {}, list.notes.map((note) => el("li", { text: note })))));
+    restorePendingListFocus();
+    applyUniversityFocus(view);
+  }
+  // Innovation tab: every innovation (C04) with what its sources state that helps follow it up (/topics/k04 list
+  // filters). The map keeps showing all innovations by province; these filters only narrow the list.
+  function enterInnovations() {
+    if (state.measure !== INNOVATION_MEASURE) selectMeasure(INNOVATION_MEASURE);
+    state.filters = {};
+    state.searchDraft = "";
+    state.offset = 0;
+    state.sort = "source";
+    state.scopeNotice = "";
+    clearTimeout(state.searchTimer);
+  }
+  async function loadInnovations() {
+    if (!state.open || state.tab !== "innovations") return;
+    const view = views.innovations;
+    const wanted = JSON.stringify([state.province, state.innovationFilters, state.innovationOffset]);
+    const current = () => state.tab === "innovations" && wanted === JSON.stringify([state.province, state.innovationFilters, state.innovationOffset]);
+    status(view, "กำลังโหลดรายการนวัตกรรม", "กำลังขอข้อมูลตามเงื่อนไขที่เลือก");
+    try {
+      // the university filter's names
+      const universities = state.universities && state.universities.revision === state.revision ? state.universities
+        : await request("/universities" + query({ revision: state.revision }), "universities");
+      if (!current()) return;
+      if (universities) state.universities = universities;
+      const data = await request("/topics/k04" + query({ measure: INNOVATION_MEASURE, province: state.province, ...state.innovationFilters,
+        limit: state.limit, offset: state.innovationOffset, revision: state.revision }), "innovations");
+      if (!data || !current()) return;
+      state.revision = data.revision || state.revision;
+      renderInnovations(data);
+    } catch (error) {
+      if (error.stale || error.name === "AbortError") return;
+      if (error.status === 404) { status(view, "ข้อมูลชุดนี้ยังไม่มีแท็บนวัตกรรม", "ข้อมูลที่เผยแพร่ชุดนี้สร้างก่อนมีแท็บนวัตกรรม"); return; }
+      // a link from an older release can name a filter value this one does not have
+      if (error.status === 422 && Object.keys(state.innovationFilters).length) {
+        status(view, "ใช้ตัวกรองนี้ไม่ได้", "ตัวกรองบางค่าไม่มีในข้อมูลชุดนี้");
+        view.querySelector(".f2-status").append(el("button", { type: "button", class: "f2-retry", text: "ล้างตัวกรอง", onclick: () => clearInnovationFilters() }));
+        return;
+      }
+      status(view, "เปิดรายการนวัตกรรมไม่ได้", "ระบบยังเปิดรายการนี้ไม่ได้ โปรดลองอีกครั้ง", loadInnovations);
+    }
+  }
+  function setInnovationFilter(key, value) {
+    if (value) state.innovationFilters[key] = value;
+    else delete state.innovationFilters[key];
+    state.innovationOffset = 0;
+    state.innovationFocus = `f2i-${key}`;
+    writeUrl(true);
+    loadInnovations();
+  }
+  function clearInnovationFilters() {
+    state.innovationFilters = {};
+    state.innovationOffset = 0;
+    state.innovationFocus = "f2i-university";
+    writeUrl(true);
+    loadInnovations();
+  }
+  function countedFrom(ids, all) {
+    return ids.length === all.length ? "นับจากนวัตกรรมทุกแหล่ง" : `นับเฉพาะนวัตกรรมจาก ${ids.map((id) => SOURCE_NAMES[id] || id).join(", ")}`;
+  }
+  // One innovation with its follow-up badges; with a source filter, only that source's evidence and TRL.
+  function innovationCard(item, followUp) {
+    const source = state.innovationFilters.source;
+    const rows = source ? { [source]: item.follow_up?.[source] || {} } : item.follow_up || {};
+    const considered = Object.keys(rows);
+    const model = window.F2DetailPresenter?.presentListItem?.(INNOVATION_MEASURE, item) || { title: titleOf(item), warning: "", action: "ดูรายละเอียด" };
+    const stated = considered.filter((id) => rows[id].trl?.length);
+    const levels = new Set(stated.flatMap((id) => rows[id].trl));
+    const trl = !levels.size ? "ไม่ระบุ TRL"
+      : `TRL ตามที่แหล่งระบุ: ${stated.map((id) => `${rows[id].trl.join(", ")} (${SOURCE_NAMES[id] || id})`).join(", ")}${levels.size > 1 ? " (แหล่งระบุไม่ตรงกัน)" : ""}`;
+    // a kind none of these sources carries gets no badge: "not found" would claim a field the source does not have
+    const badges = (followUp.evidence || []).filter((kind) => considered.some((id) => kind.source_ids.includes(id))).map((kind) => {
+      const values = considered.map((id) => rows[id][kind.field]).filter(Boolean);
+      if (!values.length) return el("span", { class: "f2-follow-up-badge f2-follow-up-missing", text: kind.missing_th });
+      const extra = kind.field === "updated" ? ` ${thaiDay(values.sort().at(-1))}`
+        : kind.field === "project_codes" ? ` ${[...new Set(values.flat())].join(", ")}` : "";
+      return el("span", { class: "f2-follow-up-badge", text: kind.label_th + extra });
+    });
+    const universities = item.university_names_th || [];
+    // with a source selected, only the provinces that source states
+    const provinces = source ? (rows[source].province_codes || []).map(provinceName) : item.province_names_th || [];
+    const where = source ? "พื้นที่ที่แหล่งนี้ระบุ" : "พื้นที่ที่ต้นทางระบุ";
+    const list = (names, prefix = "") => names.length > 3 ? `${names.slice(0, 3).map((n) => prefix + n).join(", ")} และอีก ${names.length - 3}` : names.map((n) => prefix + n).join(", ");
+    // no aria-label: the button's name is its whole text, so a screen reader hears the evidence too
+    return el("button", { class: "f2-item f2-innovation-item", type: "button", "data-f2-detail-id": item.entity_id,
+      onclick: () => { state.topic = "k04"; state.measure = INNOVATION_MEASURE; openDetail(item.entity_id); } },
+    el("h3", { text: model.title }),
+    el("p", { class: "f2-item-context", text: universities.length ? list(universities) : "แหล่งข้อมูลไม่ได้ระบุมหาวิทยาลัย" }),
+    el("p", { class: "f2-item-preview", text: provinces.length ? `${where}: ${list(provinces, "จังหวัด")}` : `ไม่มี${where}` }),
+    el("p", { class: "f2-item-preview", text: trl }),
+    el("span", { class: "f2-follow-up-badges" }, badges),
+    el("p", { class: "f2-item-preview", text: `ที่มา: ${considered.map((id) => SOURCE_NAMES[id] || id).join(", ")}` }),
+    model.warning ? el("span", { class: "f2-item-warning", text: model.warning }) : "",
+    el("span", { class: "f2-item-action", text: model.action }));
+  }
+  function renderInnovations(data) {
+    const view = clear(views.innovations);
+    const followUp = data.follow_up;
+    if (!isObject(followUp)) { status(view, "ข้อมูลชุดนี้ยังไม่มีแท็บนวัตกรรม", "ข้อมูลที่เผยแพร่ชุดนี้สร้างก่อนมีแท็บนวัตกรรม"); return; }
+    const list = data.list || {};
+    const items = list.items || [];
+    const summary = list.summary || { matching: 0, evidence: [] };
+    const kinds = followUp.evidence || [];
+    const allSources = [...new Set(kinds.flatMap((kind) => kind.source_ids))];
+    const [limitation, ...notes] = followUp.notes_th || [];
+    backToOverview(view);
+    view.append(el("p", { class: "f2-result-context", text: state.province ? `ขอบเขต: จังหวัด${provinceName(state.province)}` : "ขอบเขต: ประเทศไทย" }));
+
+    const select = (key, name, options) => {
+      const node = el("select", { id: `f2i-${key}` }, el("option", { value: "", text: "ทั้งหมด" }),
+        options.map(([value, label]) => el("option", { value, text: label })));
+      node.value = state.innovationFilters[key] || "";
+      node.addEventListener("change", () => setInnovationFilter(key, node.value));
+      return el("label", { htmlFor: `f2i-${key}`, text: name }, node);
+    };
+    const province = el("select", { id: "f2i-province" }, el("option", { value: "", text: "ทั่วประเทศ" }),
+      (state.callbacks.getProvinces?.() || []).map((row) => [text(row.province_code), text(row.province_name_th)]).filter(([code, name]) => code && name)
+        .sort((a, b) => a[1].localeCompare(b[1], "th")).map(([code, name]) => el("option", { value: code, text: name })));
+    province.value = state.province;
+    province.addEventListener("change", () => { state.innovationFocus = "f2i-province"; handleProvince(province.value, true); });
+    const universities = [...(state.universities?.universities || [])].sort((a, b) => text(a.name_th).localeCompare(text(b.name_th), "th"));
+    const search = el("input", { id: "f2i-q", type: "search", value: state.innovationFilters.q || "", placeholder: "ชื่อนวัตกรรมหรือรหัสโครงการ", autocomplete: "off" });
+    const form = el("form", { class: "f2-university-search", role: "search", onsubmit: (event) => { event.preventDefault(); setInnovationFilter("q", search.value.trim()); } },
+      el("label", { htmlFor: "f2i-q", text: "ค้นหา" }, search), el("button", { type: "submit", class: "f2-retry", text: "ค้นหา" }));
+    const filters = el("div", { class: "f2-innovation-filters" },
+      select("university", "มหาวิทยาลัย", universities.map((row) => [row.university_id, row.name_th])),
+      el("label", { htmlFor: "f2i-province", text: "จังหวัด (พื้นที่ที่ต้นทางระบุ)" }, province),
+      select("source", "แหล่งข้อมูล", allSources.map((id) => [id, SOURCE_NAMES[id] || id])),
+      select("trl", "ระดับความพร้อม (TRL)", (followUp.trl_bands || []).map((band) => [band.id, band.label_th])),
+      select("evidence", "ข้อมูลประกอบ", kinds.map((kind) => [kind.id, kind.label_th])));
+    const matching = formattedCount(list.matching_item_count) || "0";
+    view.append(section("ค้นหาและกรองนวัตกรรม", el("div", { class: "f2-university-list" }, filters, form,
+      Object.keys(state.innovationFilters).length ? el("button", { type: "button", class: "f2-retry", text: "ล้างตัวกรอง", onclick: clearInnovationFilters }) : "",
+      el("p", { class: "f2-result-context", text: "แผนที่ไม่เปลี่ยนตามตัวกรองในแท็บนี้ แผนที่แสดงจำนวนนวัตกรรมทั้งหมดรายจังหวัด" }),
+      el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite", text: `${matching} รายการที่ตรงตัวกรอง จาก ${formattedCount(list.scoped_item_count) || "0"} นวัตกรรม` }))));
+
+    // the cards count the whole filtered list, not this page
+    const found = Object.fromEntries((summary.evidence || []).map((row) => [row.id, row]));
+    const cards = el("div", { class: "f2-follow-up-cards" }, kinds.map((kind) => {
+      const row = found[kind.id] || { found: 0, eligible: 0 };
+      const others = Number(summary.matching) - Number(row.eligible);
+      return el("article", { class: "f2-follow-up-card" },
+        el("h4", { text: kind.label_th }),
+        Number(row.eligible)
+          ? el("p", { class: "f2-follow-up-value" }, el("strong", { text: formattedCount(row.found) || "0" }), ` จาก ${formattedCount(row.eligible)} ชิ้น`)
+          : el("p", { class: "f2-follow-up-value", text: Number(summary.matching) ? "รายการที่เลือกมาจากแหล่งที่ไม่มีข้อมูลนี้" : "ไม่มีรายการที่ตรงตัวกรอง" }),
+        el("p", { text: `${countedFrom(kind.source_ids, allSources)}${others > 0 && Number(row.eligible) ? `, อีก ${formattedCount(others)} ชิ้นมาจากแหล่งที่ไม่มีข้อมูลนี้` : ""}` }),
+        el("p", { class: "f2-follow-up-basis", text: kind.basis_th }));
+    }));
+    view.append(section(followUp.title_th, cards,
+      `${matching} ชิ้นที่ตรงตัวกรอง (ตัวเลขของแต่ละใบนำมาบวกกันไม่ได้)`));
+    if (limitation) view.append(el("p", { class: "f2-follow-up-limit" }, el("strong", { text: "ข้อจำกัด: " }), limitation));
+    if (notes.length) view.append(el("details", { class: "f2-university-method" },
+      el("summary", { text: "วิธีอ่านข้อมูลนี้" }), el("ul", {}, notes.map((note) => el("li", { text: note })))));
+    const origin = sourceLine(allSources);
+    if (origin) view.append(el("p", { class: "f2-result-context", text: origin }));
+    view.append(section("รายการนวัตกรรม", items.length ? el("div", { class: "f2-item-list" }, items.map((item) => innovationCard(item, followUp)))
+      : el("p", { text: "ไม่พบนวัตกรรมที่ตรงกับตัวกรองนี้ ลองเปลี่ยนหรือล้างตัวกรอง" })));
+    if (Number(list.matching_item_count) > items.length) {
+      const offset = Number(list.offset || 0);
+      const page = (next) => { state.innovationOffset = next; state.innovationFocus = "list"; writeUrl(true); panel.querySelector(".f2-stage").scrollTop = 0; loadInnovations(); };
+      view.append(el("nav", { class: "f2-pagination", "aria-label": "เปลี่ยนหน้ารายการนวัตกรรม" },
+        el("button", { type: "button", text: "ก่อนหน้า", disabled: !offset, onclick: () => page(Math.max(0, offset - state.limit)) }),
+        el("span", { text: `แสดง ${offset + 1} ถึง ${offset + items.length} จาก ${matching} รายการ` }),
+        el("button", { type: "button", text: "ถัดไป", disabled: offset + items.length >= Number(list.matching_item_count), onclick: () => page(offset + items.length) })));
+    }
+    const focus = state.innovationFocus;
+    state.innovationFocus = "";
+    if (focus) (focus === "list" ? view.querySelector(".f2-innovation-item") : $(focus))?.focus({ preventScroll: focus !== "list" });
+    restorePendingListFocus();
+  }
+  // Area tab: where the sources place the work (national), and one province's brief (?province=).
+  // List filters do not apply here: /overview ignores them, so the table, map and brief would disagree.
+  function enterAreas() {
+    if (!AREA_MEASURES.includes(state.measure)) selectMeasure(AREA_MEASURES[0]);
+    state.filters = {};
+    state.searchDraft = "";
+    state.offset = 0;
+    state.sort = "source";
+    state.scopeNotice = "";
+    clearTimeout(state.searchTimer);
+  }
+  async function loadAreas() {
+    if (!state.open || state.tab !== "areas") return;
+    if (!state.province) { renderAreas(); return; }
+    const wanted = JSON.stringify([state.province, state.revision]);
+    if (state.areaUniversities?.key !== wanted || state.areaUniversities.failed) {
+      status(views.areas, "กำลังโหลดสรุปจังหวัด", "กำลังขอข้อมูลจากระบบ");
+      try {
+        const data = await request("/universities" + query({ province: state.province, revision: state.revision }), "areaUniversities");
+        if (!data || state.tab !== "areas" || wanted !== JSON.stringify([state.province, state.revision])) return;
+        state.areaUniversities = { key: wanted, data };
+      } catch (error) {
+        if (error.stale || error.name === "AbortError") return;
+        // a release without the university view still has the province's numbers
+        state.areaUniversities = { key: wanted, data: null, failed: error.status !== 404 };
+      }
+    }
+    renderAreas();
+  }
+  // The map response the area list may use: this measure and release, and no list filter (the tab drops them).
+  function areaMap() {
+    const map = state.mapData;
+    return map?.measure_id === state.measure && map?.revision === state.revision && !Object.keys(map.filters?.applied || {}).length ? map : null;
+  }
+  function areaMeasure(measureId) { return allMeasureDefinitions().find((item) => item.measure_id === measureId); }
+  function renderAreas() {
+    if (state.tab !== "areas") return;
+    const hadFocus = views.areas.contains(document.activeElement);
+    const view = clear(views.areas);
+    renderBreadcrumbs(state.overview?.requested_scope || {});
+    // a loading placeholder keeps the pending focus for the render that has content
+    if (!(state.province ? renderAreaProvince(view) : renderAreaNational(view))) return;
+    // a control the reader was on is redrawn: go back to it, else to the start of what replaced it
+    const focus = state.areaFocus || (hadFocus ? (state.province ? "heading" : "measure") : "");
+    state.areaFocus = "";
+    const target = focus === "measure" ? $("f2AreaMeasure") : focus === "toggle" ? $("f2AreaToggle")
+      : focus === "heading" ? view.querySelector(".f2-area-brief h3")
+        : focus.startsWith("province:") ? view.querySelector(`[data-f2-area-province="${CSS.escape(focus.slice(9))}"]`) : null;
+    target?.focus({ preventScroll: focus !== "heading" });
+  }
+  function areaLimits() {
+    return el("p", { class: "f2-result-context", text: "ตัวเลขในแท็บนี้บอกว่าแหล่งข้อมูลที่เรารวบรวมพบหลักฐานผลงานที่ไหน ยังไม่ได้บอกว่าทุนลงไปที่จังหวัดใด ผลลัพธ์ใดเกิดจากทุน หรือผลงานยังใช้งานอยู่หรือไม่ ค่า 0 หมายถึงไม่พบในข้อมูลที่รวบรวม ไม่ได้แปลว่าจังหวัดนั้นไม่มี เพราะแต่ละแหล่งครอบคลุมพื้นที่ไม่เท่ากัน" });
+  }
+  function selectAreaProvince(code) {
+    state.areaFocus = code ? "heading" : `province:${state.province}`;
+    handleProvince(code, true);
+  }
+  function renderAreaNational(view) {
+    const definition = areaMeasure(state.measure);
+    const map = areaMap();
+    if (!definition || !map) { status(view, "กำลังโหลดข้อมูลรายจังหวัด", "กำลังขอข้อมูลจากระบบ"); return false; }
+    const picker = el("select", { id: "f2AreaMeasure" }, AREA_MEASURES.map((id) => areaMeasure(id)).filter(Boolean)
+      .map((item) => el("option", { value: item.measure_id, text: measureDisplayLabel(item) })));
+    picker.value = state.measure;
+    picker.addEventListener("change", () => { state.areaFocus = "measure"; changeMeasure(picker.value); });
+    view.append(el("div", { class: "f2-area-picker" }, el("label", { htmlFor: "f2AreaMeasure", text: "ตัวชี้วัดที่ใช้เทียบจังหวัด (แผนที่เปลี่ยนตาม)" }, picker)));
+    const unit = map.unit || definition.unit || "";
+    const coverage = map.coverage || {};
+    const cells = (map.cells || []).map((cell) => ({ ...cell, value: cell.result?.availability === "available" ? Number(cell.result.value) : null }));
+    const byName = (a, b) => text(a.province_name_th).localeCompare(text(b.province_name_th), "th");
+    const found = cells.filter((cell) => cell.value > 0).sort((a, b) => b.value - a.value || byName(a, b));
+    const zero = cells.filter((cell) => cell.value === 0).sort(byName);
+    const unavailable = cells.filter((cell) => cell.value === null || Number.isNaN(cell.value)).sort(byName);
+    const summary = [`พบใน ${formattedCount(found.length)} จาก ${formattedCount(cells.length)} จังหวัด`];
+    if (Number(coverage.without_province) > 0) summary.push(`${formattedCount(coverage.without_province)} ${unit} ไม่ระบุจังหวัด (จากทั้งหมด ${formattedCount(coverage.national_total)})`);
+    const origin = sourceLine(definition.source_ids);
+    view.append(section(`${measureDisplayLabel(definition)} รายจังหวัด`, null, el("div", { class: "f2-area-summary" },
+      el("strong", { text: summary.join(", ") }),
+      el("p", { text: `จังหวัดในที่นี้หมายถึง${AREA_PLACE_MEANINGS[state.measure] || "จังหวัดที่แหล่งข้อมูลระบุ"} ${coverage.province_sum_is_additive
+        ? `ต้นทางรายงานยอดแยกรายจังหวัด และยอดรายจังหวัดรวมกันเท่ากับยอดประเทศ ${formattedCount(coverage.national_total)} ${unit}`.trim()
+        : "รายการเดียวอาจอยู่ได้หลายจังหวัด ยอดรายจังหวัดจึงบวกกันเป็นยอดประเทศไม่ได้"}` }),
+      origin ? el("p", { class: "f2-metric-source", text: origin }) : "")));
+    view.append(areaLimits());
+    const shown = state.areaShowAll ? found : found.slice(0, AREA_TOP);
+    const max = found[0]?.value || 1;
+    const row = (cell) => el("tr", {},
+      el("th", { scope: "row" }, el("button", { type: "button", class: "f2-university-link", "data-f2-area-province": cell.province_code, text: cell.province_name_th || cell.province_code, onclick: () => selectAreaProvince(cell.province_code) })),
+      el("td", {}, el("span", { class: "f2-bar-value" }, bar(cell.value, max), `${formattedCount(cell.value)} ${unit}`.trim())));
+    const table = el("table", { class: "f2-source-region-table f2-area-table" },
+      el("caption", { text: `จังหวัดที่พบ เรียงจากมากไปน้อย (ค่าเท่ากันเรียงตามชื่อ) แสดง ${formattedCount(shown.length)} จาก ${formattedCount(found.length)} จังหวัด` }),
+      el("thead", {}, el("tr", {}, el("th", { scope: "col", text: "จังหวัด" }), el("th", { scope: "col", text: measureDisplayLabel(definition) }))),
+      el("tbody", {}, shown.map(row)));
+    const toggle = found.length > AREA_TOP ? el("button", { id: "f2AreaToggle", type: "button", class: "f2-retry", text: state.areaShowAll ? `แสดง ${AREA_TOP} จังหวัดแรก` : `ดูทั้ง ${formattedCount(found.length)} จังหวัดที่พบ`, onclick: () => {
+      state.areaShowAll = !state.areaShowAll;
+      state.areaFocus = "toggle";
+      writeUrl(false);
+      renderAreas();
+    } }) : "";
+    view.append(section("จังหวัดที่พบ", el("div", {}, el("div", { class: "f2-table-scroll", tabindex: "0", role: "region", "aria-label": "ตารางจังหวัดที่พบ" }, table), toggle)));
+    const others = (title, rows, note) => rows.length ? view.append(section(`${title} (${formattedCount(rows.length)} จังหวัด)`,
+      el("ul", { class: "f2-area-others" }, rows.map((cell) => el("li", {}, el("button", { type: "button", class: "f2-university-link", "data-f2-area-province": cell.province_code, text: cell.province_name_th || cell.province_code, onclick: () => selectAreaProvince(cell.province_code) })))), note)) : null;
+    others("ไม่พบในข้อมูลที่รวบรวม", zero, "แหล่งข้อมูลที่รวบรวมไม่มีรายการที่ระบุจังหวัดเหล่านี้ ไม่ได้แปลว่าในจังหวัดนั้นไม่มีผลงาน");
+    others("ไม่มีข้อมูลรายจังหวัด", unavailable, definition.status === "source_aggregate"
+      ? "แหล่งข้อมูลไม่ได้รายงานจังหวัดเหล่านี้ ไม่ได้แปลว่ามีศูนย์" : "ตัวชี้วัดนี้ยังไม่มีตัวเลขที่รองรับสำหรับจังหวัดเหล่านี้");
+    return true;
+  }
+  function renderAreaProvince(view) {
+    const overview = state.overview;
+    if (overview?.scope !== `province/${state.province}`) { status(view, "กำลังโหลดสรุปจังหวัด", "กำลังขอข้อมูลจากระบบ"); return false; }
+    const name = overview.requested_scope?.province_name_th || provinceName(state.province);
+    const complete = !state.areaUniversities?.failed;
+    const brief = el("article", { class: "f2-area-brief", "data-f2-printable": complete ? "true" : null });
+    view.append(el("div", { class: "f2-area-actions f2-no-print" },
+      el("button", { type: "button", class: "f2-back-overview", text: "ดูทุกจังหวัด", onclick: () => selectAreaProvince("") }),
+      complete ? el("button", { type: "button", class: "f2-retry", text: "พิมพ์หรือบันทึกเป็น PDF", onclick: () => window.print() }) : ""), brief);
+    brief.append(el("header", { class: "f2-university-head" },
+      el("p", { class: "f2-detail-eyebrow", text: "สรุปจังหวัด, ข้อมูลฝ่าย 2" }), el("h3", { text: `จังหวัด${name}`, tabindex: "-1" })));
+    brief.append(el("p", { class: "f2-result-context", text: `สิ่งที่แหล่งข้อมูลที่เรารวบรวมพบในจังหวัด${name}` }), areaLimits());
+    const rows = AREA_MEASURES.map(areaMeasure).filter(Boolean).map((item) => {
+      const result = item.result || {};
+      const value = result.availability === "available" ? Number(result.value) : null;
+      const unit = result.unit || item.unit || "";
+      const figure = value > 0 ? el("strong", { text: `${valueText(result.display_value ?? result.value)} ${unit}`.trim() })
+        : value === 0 ? el("strong", { class: "f2-area-none", text: "ไม่พบในข้อมูลที่รวบรวม" })
+          : el("strong", { class: "f2-area-none", text: "ไม่มีข้อมูลรายจังหวัด" });
+      const origin = sourceLine(item.source_ids);
+      return el("tr", {},
+        el("th", { scope: "row" }, measureDisplayLabel(item), el("small", { text: item.measure_id === "H01"
+          ? "ตัวเลขเงินของครัวเรือนเป้าหมายมีเฉพาะระดับประเทศ ดูได้ที่หน้าภาพรวม" : AREA_PLACE_MEANINGS[item.measure_id] || "" })),
+        el("td", { "data-label": "ในจังหวัดนี้" }, figure, origin ? el("small", { class: "f2-metric-source", text: origin }) : "",
+          value > 0 && item.detail_availability === "available" ? el("button", { type: "button", class: "f2-inline-link f2-no-print", text: "ดูรายการในจังหวัดนี้", onclick: () => {
+            changeMeasure(item.measure_id);
+            setTab("list");
+            loadMap();
+          } }) : ""));
+    });
+    brief.append(section("พบอะไรในจังหวัดนี้", el("div", { class: "f2-table-scroll" }, el("table", { class: "f2-source-region-table f2-area-brief-table" },
+      el("caption", { text: "ตัวชี้วัดแต่ละตัวนับคนละแบบและมาจากคนละแหล่ง จึงนำมาบวกกันหรือเทียบกันตรง ๆ ไม่ได้" }),
+      el("thead", {}, el("tr", {}, el("th", { scope: "col", text: "ตัวชี้วัด" }), el("th", { scope: "col", text: "ในจังหวัดนี้" }))),
+      el("tbody", {}, rows)))));
+    brief.append(areaInstitutions(name));
+    const release = overview.provenance?.release_date ? `ฉบับข้อมูล ${overview.release_id} จัดเตรียม ${thaiDay(overview.provenance.release_date)}` : "";
+    const fetched = fetchedRange(Object.keys(sourceSnapshots()));
+    brief.append(el("footer", { class: "f2-area-footer" },
+      el("p", { text: [release, fetched ? `ดึงข้อมูลจากเว็บต้นทาง ${fetched}` : ""].filter(Boolean).join(", ") }),
+      el("p", { class: "f2-print-only", text: `ดูฉบับออนไลน์: ${location.href}` })));
+    return true;
+  }
+  function areaInstitutions(name) {
+    const loaded = state.areaUniversities?.data;
+    const title = "มหาวิทยาลัยและหน่วยงานที่มีนวัตกรรมเชื่อมกับจังหวัดนี้";
+    if (state.areaUniversities?.failed) return section(title, el("button", { type: "button", class: "f2-retry", text: "ลองอีกครั้ง", onclick: loadAreas }), "เปิดรายชื่อหน่วยงานไม่ได้ จึงยังพิมพ์สรุปจังหวัดนี้ไม่ได้");
+    if (!loaded) return section(title, null, "ข้อมูลฉบับนี้ยังไม่มีรายชื่อหน่วยงาน");
+    const rows = loaded.universities || [];
+    const place = loaded.province || {};
+    const groups = loaded.groups || {};
+    const note = el("div", {},
+      el("p", { text: `นับจากนวัตกรรมที่แหล่งข้อมูลระบุจังหวัด${name}เป็นพื้นที่ใช้หรือพื้นที่ของผู้ใช้เป้าหมาย และระบุชื่อหน่วยงานไว้ในรายการ ไม่ได้ยืนยันว่านำไปใช้จริง และไม่ได้แปลว่าหน่วยงานนั้นลงพื้นที่เองหรือตั้งอยู่ในจังหวัดนี้ นวัตกรรมหนึ่งชิ้นอาจมีหลายหน่วยงาน จำนวนของแต่ละแห่งจึงบวกกันไม่ได้ ธุรกิจและนวัตกรชุมชนยังโยงกับจังหวัดผ่านหน่วยงานไม่ได้` }),
+      el("p", { class: "f2-result-context", text: `ระบุหน่วยงานได้ ${formattedCount(place.innovations_with_university)} จาก ${formattedCount(place.innovations)} นวัตกรรมในจังหวัดนี้ (หน้ามหาวิทยาลัยแสดงผลงานทั้งประเทศ)` }));
+    if (!rows.length) return section(title, el("p", { text: "ไม่พบหน่วยงานที่มีนวัตกรรมเชื่อมกับจังหวัดนี้ในข้อมูลที่รวบรวม" }), note);
+    const item = (row) => el("li", {},
+      el("button", { type: "button", class: "f2-university-link", text: row.name_th, onclick: () => {
+        state.university = row.university_id;
+        state.universityOffset = 0;
+        state.universityQuery = "";
+        state.universityFocus = "heading";
+        setTab("universities");
+      } }),
+      text(row.name_th).startsWith(groups[row.group]?.label_th) ? "" : el("span", { class: "f2-university-group-label", text: groups[row.group]?.label_th || "" }),
+      el("span", { class: "f2-area-count", text: `${formattedCount(row.province_innovations)} นวัตกรรม` }));
+    return section(title, el("div", {},
+      el("ol", { class: "f2-area-institutions" }, rows.slice(0, AREA_TOP).map(item)),
+      rows.length > AREA_TOP ? el("details", { class: "f2-detail-more" }, el("summary", { text: `และอีก ${formattedCount(rows.length - AREA_TOP)} แห่ง` }),
+        el("ol", { class: "f2-area-institutions", start: AREA_TOP + 1 }, rows.slice(AREA_TOP).map(item))) : ""), note);
   }
   function genericDetail(value, depth = 0) {
     if (!isObject(value) && !Array.isArray(value)) return el("p", { text: valueText(value) || "ไม่มีข้อมูล" });
@@ -1247,7 +1949,7 @@
     state.rememberedProvince = nextProvince;
     state.scopeNotice = "";
     if (state.province) delete state.filters.source_region;
-    if (changed) state.offset = 0;
+    if (changed) state.offset = state.innovationOffset = 0;
     if (notifyHost && !state.filterDraft) {
       state.callbacks.onProvinceSelect?.(state.province);
       return;
@@ -1266,7 +1968,7 @@
     setTab(state.tab, false);
     if (state.tab !== "overview") loadOverview();
   }
-  function close() { state.open = false; ["overview", "map", "topic", "choices", "coverage", "detail"].forEach(abort); closeDetail(true); panel.hidden = true; panel.setAttribute("aria-hidden", "true"); document.body.classList.remove("f2-dashboard-open"); state.callbacks.onClose?.(); }
+  function close() { state.open = false; ["overview", "map", "topic", "choices", "coverage", "detail", "universities", "university", "areaUniversities", "innovations"].forEach(abort); closeDetail(true); panel.hidden = true; panel.setAttribute("aria-hidden", "true"); document.body.classList.remove("f2-dashboard-open"); state.callbacks.onClose?.(); }
   function init(callbacks = {}) {
     state.callbacks = callbacks;
     let previousPanelWidth = 0;
@@ -1338,6 +2040,18 @@
         event.preventDefault();
         first.focus();
       }
+    });
+    // Printing the area tab prints only the province brief: a copy outside the fixed panel, removed afterwards.
+    window.addEventListener("beforeprint", () => {
+      $("f2PrintRoot")?.remove();
+      const brief = state.open && state.tab === "areas" ? views.areas.querySelector(".f2-area-brief[data-f2-printable]") : null;
+      if (!brief) return;
+      document.body.append(el("div", { id: "f2PrintRoot", class: "f2-print-root" }, brief.cloneNode(true)));
+      document.body.classList.add("f2-printing");
+    });
+    window.addEventListener("afterprint", () => {
+      $("f2PrintRoot")?.remove();
+      document.body.classList.remove("f2-printing");
     });
     window.addEventListener("popstate", () => {
       if (!state.open) return;

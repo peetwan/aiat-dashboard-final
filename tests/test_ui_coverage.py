@@ -454,8 +454,11 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert panel is not None
     assert [tab.get_text(strip=True) for tab in panel.select("[data-f2-tab]")] == [
         "ภาพรวม",
+        "พื้นที่",
+        "มหาวิทยาลัย",
+        "นวัตกรรม",
         "รายการ",
-        "ที่มาและข้อจำกัด",
+        "ที่มาข้อมูล",
     ]
     assert soup.select_one("#f2DetailSheet[aria-modal='true']") is not None
     assert 'const API = "/api/public/v1/f2"' in script

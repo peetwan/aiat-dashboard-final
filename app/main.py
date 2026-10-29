@@ -32,6 +32,8 @@ from app.api_schemas import (
     F2MapResponse,
     F2OverviewResponse,
     F2TopicResponse,
+    F2UniversitiesResponse,
+    F2UniversityResponse,
     HousingDemandSummaryResponse,
     HousingSpatialFeatureCollectionResponse,
     HousingSpatialSummaryResponse,
@@ -101,6 +103,8 @@ from app.f2_data import (
     get_map as f2_map,
     get_overview as f2_overview,
     get_topic as f2_topic,
+    get_universities as f2_universities,
+    get_university as f2_university,
     variant_etag as f2_variant_etag,
 )
 
@@ -1171,6 +1175,10 @@ def public_f2_topic(
     sort: str = Query("source"),
     limit: int = Query(25, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    university: str | None = Query(None, max_length=64),
+    trl: str | None = Query(None, max_length=16),
+    source: str | None = Query(None, max_length=64),
+    evidence: str | None = Query(None, max_length=32),
     revision: str | None = Query(None, min_length=64, max_length=64),
 ):
     parameters = {
@@ -1185,6 +1193,10 @@ def public_f2_topic(
         "sort": sort,
         "limit": limit,
         "offset": offset,
+        "university": university,
+        "trl": trl,
+        "source": source,
+        "evidence": evidence,
         "revision": revision,
     }
     _validate_f2_query(request, set(parameters))
@@ -1202,6 +1214,10 @@ def public_f2_topic(
             sort=sort,
             limit=limit,
             offset=offset,
+            university=university,
+            trl=trl,
+            source=source,
+            evidence=evidence,
             revision=revision,
         )
     )
@@ -1255,6 +1271,46 @@ def public_f2_detail(
     return _f2_http_response(
         request, payload, f"topics/{topic_id}/details/{entity_id}", parameters
     )
+
+
+@app.get(
+    "/api/public/v1/f2/universities",
+    tags=["Public data"],
+    response_model=F2UniversitiesResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_universities(
+    request: Request,
+    province: str | None = Query(None),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    _validate_f2_query(request, {"province", "revision"})
+    payload = _f2_call(lambda: f2_universities(province=province, revision=revision))
+    return _f2_http_response(
+        request, payload, "universities", {"province": province, "revision": revision}
+    )
+
+
+@app.get(
+    "/api/public/v1/f2/universities/{university_id}",
+    tags=["Public data"],
+    response_model=F2UniversityResponse,
+    responses={304: {"description": "Not modified"}},
+)
+def public_f2_university(
+    university_id: str,
+    request: Request,
+    q: str | None = Query(None, max_length=200),
+    limit: int = Query(25, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    revision: str | None = Query(None, min_length=64, max_length=64),
+):
+    parameters = {"q": q, "limit": limit, "offset": offset, "revision": revision}
+    _validate_f2_query(request, set(parameters))
+    payload = _f2_call(
+        lambda: f2_university(university_id, q=q, limit=limit, offset=offset, revision=revision)
+    )
+    return _f2_http_response(request, payload, f"universities/{university_id}", parameters)
 
 
 @app.get(

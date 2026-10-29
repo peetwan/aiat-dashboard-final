@@ -40,7 +40,9 @@ assert.equal(state.rememberedProvince, '50');
 context.changeMeasure('K04');
 assert.equal(state.province, '50');
 assert.deepEqual(restored, ['', '50']);
+state.innovationOffset = 2400;
 context.handleProvince('');
+assert.equal(state.innovationOffset, 0); // a new province's innovation list starts at its first page
 context.changeMeasure('K09');
 context.changeMeasure('K04');
 assert.equal(state.province, ''); // Explicit national selection clears remembered province.
@@ -83,6 +85,7 @@ assert.equal(vm.runInContext("visibleMeasures([{measure_id:'K10'},{measure_id:'C
 assert.equal(vm.runInContext("visibleMeasures([{value:'K10'},{value:'C10_ALTERNATIVE'}])[0].value", context), 'K10');
 context.URLSearchParams = URLSearchParams;
 context.location = {search:'?f2tab=list&f2measure=C10_ALTERNATIVE&f2component=excludedResourceExpense&f2offset=25'};
+vm.runInContext(source.split('\n').find(line => line.startsWith('  const INNOVATION_FILTERS =')), context);
 vm.runInContext(extract('restoreUrl'), context);
 context.restoreUrl();
 assert.equal(state.measure, 'K10');
@@ -102,6 +105,12 @@ assert.equal(state.measure, 'K12');
 assert.equal(state.topic, 'k12');
 assert.equal(state.province, '50');
 assert.equal(state.offset, 0);
+// The innovation tab keeps its own list filters and page; unknown f2i names are ignored.
+context.location.search = '?f2tab=innovations&f2isource=f2_icommunity&f2itrl=none&f2ioffset=25&f2ibogus=x';
+context.restoreUrl();
+assert.equal(state.tab, 'innovations');
+assert.deepEqual({...state.innovationFilters}, {source: 'f2_icommunity', trl: 'none'});
+assert.equal(state.innovationOffset, 25);
 assert.equal(state.detail, '');
 context.selectMeasure('K01A');
 assert.equal(state.measure, 'K12');
@@ -170,6 +179,78 @@ columns = '200px 200px 200px';
 open(a);
 assert.equal(panels.get('a').afterCard,'c'); // Expanded desktop has three columns.
 assert.equal(panels.get('c').hidden,true);
+"""
+    result = subprocess.run(
+        [shutil.which("node"), "-"], input=script, text=True, capture_output=True,
+        cwd=Path(__file__).resolve().parents[1], timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
+def test_area_tab_drops_list_filters_and_uses_an_area_measure():
+    script = r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('app/static/f2.js', 'utf8');
+function extract(name) {
+  const start = source.indexOf('  function ' + name + '(');
+  const candidates = ['\n  function ', '\n  async function ', '\n  // '].map(marker => source.indexOf(marker, start + 1)).filter(index => index >= 0);
+  return source.slice(start, Math.min(...candidates));
+}
+const definitions = [{measure_id:'K10', topic_id:'k10'}, {measure_id:'C04_LISTED', topic_id:'k04'}, {measure_id:'K12', topic_id:'k12'}];
+const state = {province:'10', measure:'K12', topic:'k12', filters:{category:'AA', q:'x'}, searchDraft:'x', sort:'name_asc', offset:25, scopeNotice:'notice'};
+const context = vm.createContext({state, clearTimeout, allMeasureDefinitions: () => definitions});
+vm.runInContext(source.split('\n').find(line => line.startsWith('  const AREA_MEASURES =')), context);
+vm.runInContext(['selectMeasure', 'enterAreas'].map(extract).join('\n'), context);
+// /overview takes no list filters, so a filtered table beside an unfiltered province brief would disagree
+context.enterAreas();
+assert.equal(Object.keys(state.filters).length, 0);
+assert.equal(state.searchDraft, '');
+assert.equal(state.offset, 0);
+assert.equal(state.sort, 'source');
+assert.equal(state.measure, 'K12');  // an area measure stays
+assert.equal(state.province, '10');  // the province is the area tab's own scope
+state.measure = 'K10';               // region-only measure: not comparable by province
+context.enterAreas();
+assert.equal(state.measure, 'C04_LISTED');
+assert.equal(state.topic, 'k04');
+// the list tab may have fetched a filtered map of the same measure: the area list must not draw from it
+vm.runInContext(extract('areaMap'), context);
+state.revision = 'r1';
+state.mapData = {measure_id:'C04_LISTED', revision:'r1', filters:{applied:{category:'AA'}}};
+assert.equal(context.areaMap(), null);
+state.mapData = {measure_id:'C04_LISTED', revision:'r1', filters:{applied:{}}};
+assert.equal(context.areaMap(), state.mapData);
+state.mapData.revision = 'r0';
+assert.equal(context.areaMap(), null);
+"""
+    result = subprocess.run(
+        [shutil.which("node"), "-"], input=script, text=True, capture_output=True,
+        cwd=Path(__file__).resolve().parents[1], timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
+def test_a_missing_province_total_says_so_instead_of_its_kind_of_number():
+    script = r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('app/static/f2.js', 'utf8');
+const lines = source.split('\n');
+const start = lines.findIndex(line => line.startsWith('  const RESULT_STATUS_LABELS = {'));
+const labels = lines.slice(start, lines.indexOf('  };', start) + 1).join('\n');
+const helpers = lines.filter(line => line.startsWith('  const statusLabel =')).join('\n');
+const unavailable = lines.slice(lines.findIndex(line => line.startsWith('  const unavailableLabel =')), lines.findIndex(line => line.startsWith('  const unavailableLabel =')) + 2).join('\n');
+const context = vm.createContext({label: (value) => value});
+vm.runInContext(`${labels}\n${helpers}\n${unavailable}\nthis.unavailableLabel = unavailableLabel;`, context);
+// H01 and K02 are source totals: a province the source does not report is missing, not "a source total"
+assert.equal(context.unavailableLabel({status: 'source_aggregate', availability: 'unavailable', unavailable_reason: {code: 'unknown_province'}}), 'ไม่มีข้อมูลรายจังหวัด');
+assert.equal(context.unavailableLabel({status: 'source_aggregate', availability: 'unavailable', unavailable_reason: {code: 'unsupported_filter'}}), 'ไม่มีข้อมูลสำหรับขอบเขตนี้');
+assert.equal(context.unavailableLabel({status: 'deferred', availability: 'unavailable'}), 'ยังไม่คำนวณ');
 """
     result = subprocess.run(
         [shutil.which("node"), "-"], input=script, text=True, capture_output=True,

@@ -1,0 +1,101 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>F2 Review Queue</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1b;--mute:#6b6b66;--line:#e2e1dc;--same:#1f7a4d;--diff:#b3361f;--unsure:#8a6d1d;--acc:#2f5bd3;--soft:#efeee9}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--card:#20201e;--ink:#ecebe6;--mute:#a3a29b;--line:#34332f;--same:#4cc28a;--diff:#ef7a62;--unsure:#d9b54a;--acc:#7d9cf0;--soft:#2a2a27}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Sarabun",sans-serif}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;z-index:2}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:17px;margin:0;flex:1 1 auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:13.5px;color:var(--mute)}
+button,select{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 11px;cursor:pointer}
+main{max-width:1200px;margin:0 auto;padding:16px}.intro{color:var(--mute);margin:0 0 16px;font-size:14px}
+.cl{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 16px}
+.cl.done{border-color:var(--same)}.cl h2{font-size:13px;color:var(--mute);margin:0 0 10px;font-weight:600}
+.cl h2 .ok{color:var(--same)}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.it{border:2px solid var(--line);border-radius:10px;padding:10px;min-width:0}
+.it .hd{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.num{font-weight:700;font-size:13px;border-radius:6px;padding:0 7px;color:#fff}
+.rec+.rec{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+.rec .n{font-weight:650;word-break:break-word}.src{font-size:12px;color:var(--mute);word-break:break-all}a{color:var(--acc)}
+dl{margin:4px 0 0;display:grid;grid-template-columns:max-content 1fr;gap:1px 8px;font-size:13px}dt{color:var(--mute)}dd{margin:0;word-break:break-word}
+.txt{font-size:13px;white-space:pre-wrap;word-break:break-word;margin-top:6px;color:var(--ink)}
+.txt summary{cursor:pointer;color:var(--mute)}
+.imgs{display:flex;gap:6px;margin-top:6px}.imgs img{width:88px;height:66px;object-fit:cover;border-radius:6px;background:var(--soft)}
+.more{font-size:12.5px;color:var(--mute);margin-top:6px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}.chips button{padding:1px 9px;font-size:13px;font-weight:600}
+.pairs{margin-top:10px;font-size:13px}.pairs summary{cursor:pointer;color:var(--mute)}
+.pr{padding:4px 0;border-top:1px solid var(--line)}.pr b{font-weight:600}.pr .ev{color:var(--mute)}
+.j-same{color:var(--same)}.j-different{color:var(--diff)}.j-unsure{color:var(--unsure)}
+.hard{font-size:13px;color:var(--diff);margin-top:6px}
+.act{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.act input[type=text]{flex:1 1 220px;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.act .same{border-color:var(--same);color:var(--same)}.act .diff{border-color:var(--diff);color:var(--diff)}.act .uns{border-color:var(--unsure);color:var(--unsure)}
+.act .save{background:var(--acc);border-color:var(--acc);color:#fff}
+.act label{font-size:13.5px;color:var(--mute)}.status{font-size:13px;color:var(--same)}
+.pager{text-align:center;margin:10px 0 40px}
+</style></head><body>
+<header><div class="top"><h1>F2 review queue</h1><span id="sum" class="src"></span></div>
+<div class="tabs" id="tabs"></div>
+<div class="filters"><label><input type="checkbox" id="hide" checked> hide reviewed</label>
+<label>judge <select id="jf"><option value="">any</option><option value="same">suggests same</option><option value="different">suggests different</option><option value="unsure">unsure</option><option value="none">not asked</option></select></label></div></header>
+<main><p class="intro">Each block is a cluster: entities that queued pairs connect. Put entities that are the <b>same</b> thing in one
+group (the letter chips; the judge's "same, high" answers are pre-filled), then <b>Save groups</b>. The quick buttons save at once.
+<b>Not sure</b> keeps them apart and stops asking. Saved answers go straight into <code>decisions/matching.json</code>;
+run <code>python -m tools.f2 resolve</code> when done.</p><div id="list"></div><div class="pager"><button id="more">Show more</button></div></main>
+<script>
+const LABEL={innovation:"Innovations",offering:"Offerings",operator:"Businesses",person:"People",cultural_record:"Cultural records",activity:"Activities",offering_family:"Product families"};
+const COLORS=["#2f5bd3","#c2410c","#15803d","#7e22ce","#be185d","#0e7490","#a16207","#4d7c0f","#9f1239","#475569"];
+const PAGE=15;let DATA=[],tab=null,shown=PAGE,state={};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const letter=g=>String.fromCharCode(65+g);
+const color=g=>COLORS[g%COLORS.length];
+function groupsOf(c){return state[c.id]||(c.saved?c.saved.groups:c.prefill).slice()}
+function judgeKind(c){const js=c.pairs.map(p=>p.judge).filter(Boolean);if(!js.length)return"none";
+ if(js.some(j=>j.startsWith("same")))return"same";if(js.some(j=>j.startsWith("different")))return"different";return"unsure"}
+function visible(){const hide=document.getElementById("hide").checked,jf=document.getElementById("jf").value;
+ return DATA.filter(c=>c.entity===tab&&!(hide&&c.saved)&&(!jf||judgeKind(c)===jf))}
+function tabs(){const ents=[...new Set(DATA.map(c=>c.entity))];if(!ents.includes(tab))tab=ents.includes(location.hash.slice(1))?location.hash.slice(1):ents[0];
+ document.getElementById("tabs").innerHTML=ents.map(e=>{const cs=DATA.filter(c=>c.entity===e),left=cs.filter(c=>!c.saved);
+  return `<button data-e="${e}" class="${e===tab?"on":""}">${LABEL[e]||e} · ${left.length}/${cs.length} clusters, ${left.reduce((n,c)=>n+c.pairs.length,0)} pairs left</button>`}).join("");
+ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.e;history.replaceState(null,"","#"+tab);shown=PAGE;render()});
+ const all=DATA.length,done=DATA.filter(c=>c.saved).length;document.getElementById("sum").textContent=`${done} / ${all} clusters reviewed`}
+function rec(r){const f=r.fields.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+ const t=r.text?(r.text.length>420?`<details class="txt"><summary>${esc(r.text.slice(0,420))}… (more)</summary>${esc(r.text.slice(420))}</details>`:`<div class="txt">${esc(r.text)}</div>`):"";
+ const im=r.images.length?`<div class="imgs">${r.images.map(u=>`<a href="${esc(u)}" target="_blank" rel="noreferrer"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></a>`).join("")}</div>`:"";
+ return `<div class="rec"><div class="n">${esc(r.name)}</div><div class="src">${esc(r.source)} · ${esc(r.record_id)}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noreferrer">open</a>`:""}</div><dl>${f}</dl>${t}${im}</div>`}
+function cluster(c){const g=groupsOf(c),n=c.items.length,big=n>2;
+ const items=c.items.map((it,i)=>`<div class="it" style="border-color:${color(g[i])}"><div class="hd"><span class="num" style="background:${color(g[i])}">${i+1} · ${letter(g[i])}</span><span class="src">${esc(it.entity_id)}</span></div>
+  ${it.records.map(rec).join("")}${it.others_count?`<div class="more">+${it.others_count} more record(s) already in this entity: ${esc(it.others.join(" · "))}${it.others_count>it.others.length?" …":""}</div>`:""}
+  ${big?`<div class="chips">${[...Array(n).keys()].map(k=>`<button data-i="${i}" data-g="${k}" style="${g[i]===k?`background:${color(k)};color:#fff;border-color:${color(k)}`:""}">${letter(k)}</button>`).join("")}</div>`:""}</div>`).join("");
+ const pairs=c.pairs.map(p=>`<div class="pr"><b>${Math.min(p.a,p.b)+1} ↔ ${Math.max(p.a,p.b)+1}</b> · ${esc(p.rule)}${p.same_producer?` · same producer: ${p.same_producer}`:""}${p.judge?` · judge: <span class="j-${p.judge.split("/")[0]}">${esc(p.judge)}</span> <span class="ev">${esc(p.evidence||"")}</span>`:""}</div>`).join("");
+ const hard=c.apart.length?`<div class="hard">Kept apart by an earlier decision (cannot be one group):${c.apart.map(([a,b],k)=>`<div>${a+1} ↔ ${b+1}: ${c.apart_why[k].map(w=>`<b>${esc(w.decision)}</b>, ${esc(w.by)}${w.reason?` — ${esc(w.reason)}`:""}`).join("; ")}</div>`).join("")}</div>`:"";
+ const s=c.saved,what=s?(new Set(s.groups).size===1?"same":new Set(s.groups).size===n?(s.unsure?"not sure":"all different"):`${new Set(s.groups).size} groups${s.unsure?" (not sure)":""}`):"";
+ const prefilled=!s&&!state[c.id]&&c.prefill.some((x,i)=>x!==i);
+ return `<section class="cl${s?" done":""}" data-id="${c.id}"><h2>${LABEL[c.entity]||c.entity} · ${n} entities · ${c.pairs.length} queued pair(s)${prefilled?" · judge pre-filled":""}${s?` · <span class="ok">saved ${esc(s.date)}: ${what}</span>`:""}</h2>
+ <div class="items">${items}</div>${hard}
+ <details class="pairs"${c.pairs.length<=6?" open":""}><summary>${c.pairs.length} queued pair(s): rule and judge</summary>${pairs}</details>
+ <div class="act"><button class="same" data-q="same">${big?"All same":"Same"}</button><button class="diff" data-q="different">${big?"All different":"Different"}</button>
+ <button class="uns" data-q="unsure">Not sure</button>${big?`<button class="save" data-q="groups">Save groups</button><label><input type="checkbox" class="un"${s&&s.unsure?" checked":""}> not sure the groups differ</label>`:""}
+ <input type="text" class="note" placeholder="Optional note (why)" value="${esc(s?s.note:"")}">${s?`<button data-q="clear">Undo</button>`:""}</div></section>`}
+function render(){tabs();const v=visible();document.getElementById("list").innerHTML=v.slice(0,shown).map(cluster).join("")||"<p class=intro>Nothing left here.</p>";
+ document.getElementById("more").style.display=v.length>shown?"":"none";
+ document.querySelectorAll(".cl").forEach(bind)}
+function bind(el){const c=DATA.find(x=>x.id===el.dataset.id);
+ el.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{const g=groupsOf(c);g[+b.dataset.i]=+b.dataset.g;state[c.id]=g;
+  el.outerHTML=cluster(c);bind(document.querySelector(`.cl[data-id="${c.id}"]`))});
+ el.querySelectorAll(".act button").forEach(b=>b.onclick=()=>act(c,el,b.dataset.q))}
+async function act(c,el,q){const n=c.items.length,note=el.querySelector(".note").value;let body={id:c.id,note};
+ if(q==="clear")body.clear=true;
+ else if(q==="same")body.groups=Array(n).fill(0);
+ else if(q==="different")body.groups=[...Array(n).keys()];
+ else if(q==="unsure")Object.assign(body,{groups:[...Array(n).keys()],unsure:true});
+ else Object.assign(body,{groups:groupsOf(c),unsure:el.querySelector(".un").checked});
+ const r=await fetch("/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ const out=await r.json();if(!r.ok){alert(out.error||"Not saved");return}
+ c.saved=out.saved;delete state[c.id];render()}
+document.getElementById("hide").onchange=document.getElementById("jf").onchange=()=>{shown=PAGE;render()};
+document.getElementById("more").onclick=()=>{shown+=PAGE;render()};
+fetch("/clusters").then(r=>r.json()).then(d=>{DATA=d;render()});
+</script></body></html>

@@ -48,6 +48,7 @@
     community_organization: "องค์กรชุมชน",
     source_reported_organization: "หน่วยงานตามที่แหล่งข้อมูลรายงาน",
     listing_account_owner: "เจ้าของรายการตามแหล่งข้อมูล",
+    listing_affiliation: "หน่วยงานของบัญชีที่ลงรายการ",
   };
   const C02_ROLE_LABELS = {
     community_innovator: "นวัตกรชุมชน",
@@ -412,7 +413,7 @@
       const start = formatDate(row.start_date);
       const end = formatDate(row.end_date);
       return {
-        title: start && end && start !== end ? `${start} – ${end}` : start || end || "แหล่งข้อมูลไม่ได้ระบุวันที่แน่นอน",
+        title: start && end && start !== end ? `${start} ถึง ${end}` : start || end || "แหล่งข้อมูลไม่ได้ระบุวันที่แน่นอน",
         subtitle: row.has_conflict ? "พบวันที่จากแหล่งข้อมูลที่ไม่ตรงกัน" : "วันที่ตามแหล่งข้อมูล",
       };
     });
@@ -532,6 +533,16 @@
       links: listingLinks([row]),
       note: row.record_link_availability === "withheld" ? "แหล่งข้อมูลไม่เผยแพร่ลิงก์ระดับรายการ" : "",
     }));
+    const projects = dedupeRows(asArray(children.projects).filter(isObject).map((row) => ({
+      title: cleanText(row.name) || cleanText(row.code),
+      subtitle: sourceName(row.source_id),
+      facts: [
+        { label: "รหัสโครงการ", value: cleanText(row.code) },
+        row.fiscal_year_be ? { label: "ปีงบประมาณ", value: cleanText(row.fiscal_year_be) } : null,
+      ].filter(Boolean),
+    })).filter((row) => row.title), (row) => `${row.title}\u0000${row.subtitle}`);
+    const updates = asArray(children.source_updates).filter((row) => isObject(row) && row.date)
+      .map((row) => `${formatDate(row.date)} (${sourceName(row.source_id)})`);
     return {
       eyebrow: measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรมในรายการทั้งหมด",
       title: cleanText(detail.label),
@@ -543,12 +554,14 @@
         distinctLevels.length > 1 ? { label: "การอ่านระดับความพร้อม", value: "ต้นทางรายงานหลายระดับ ดูหลักฐานแยกตามแหล่งข้อมูลด้านล่าง" } : null,
         matchingLocations.length ? { label: `เหตุผลที่พบในจังหวัด${selectedProvince}`, value: `แหล่งข้อมูลระบุจังหวัด${selectedProvince}เป็นพื้นที่ที่เกี่ยวข้องกับรายการนี้` } : null,
         orderedLocations[0]?.title ? { label: "พื้นที่ตามแหล่งข้อมูล", value: orderedLocations[0].title } : null,
+        updates.length ? { label: "วันที่ปรับปรุงที่ต้นทางระบุ", value: `${updates.join(", ")} ไม่ใช่วันที่ใช้งาน` } : null,
       ].filter(Boolean),
       sections: [
         section("รายละเอียดและประโยชน์", "prose", descriptions),
         section("ระดับความพร้อมตามแหล่งข้อมูล", "cards", readiness),
         section("ผู้พัฒนาและผู้เกี่ยวข้อง", "cards", people),
         section("หน่วยงาน", "cards", organizations),
+        section("โครงการตามแหล่งข้อมูล", "cards", projects),
         section("พื้นที่ที่แหล่งข้อมูลระบุ", "cards", orderedLocations),
         section("รายการจากแหล่งข้อมูล", "cards", listings),
       ].filter(Boolean),
@@ -578,7 +591,9 @@
       title: sourceName(row.source_id),
       subtitle: cleanText(row.label),
     }));
+    const participations = participationRows(detail);
     const notices = baseNotices(detail);
+    if (participations.length) notices.push({ tone: "warning", text: PARTICIPATION_NOTICE });
     if (detail.flags?.person_relationships_withheld) notices.push({ tone: "info", text: "ไม่แสดงความเชื่อมโยงระดับบุคคล เพื่อคงขอบเขตข้อมูลสาธารณะที่ได้รับอนุมัติ" });
     if (detail.flags?.geography_not_borrowed_from_offerings && !locations.length) notices.push({ tone: "info", text: "ไม่มีที่ตั้งของผู้ประกอบการที่ยืนยันได้ ระบบจึงไม่นำที่ตั้งของสินค้ามาใช้แทน" });
     if (!descriptions.length) notices.push({ tone: "info", text: "แหล่งข้อมูลยังไม่มีรายละเอียดเพิ่มเติมเกี่ยวกับธุรกิจนี้" });
@@ -590,6 +605,7 @@
       sections: [
         section("เกี่ยวกับธุรกิจหรือกลุ่ม", "prose", descriptions),
         section("ที่ตั้งผู้ประกอบการ", "cards", locations),
+        section("โครงการที่เข้าร่วม", "timeline", participations),
         section("สินค้าและบริการที่เกี่ยวข้อง", "cards", offerings),
         section("พบในแหล่งข้อมูล", "cards", memberships),
       ].filter(Boolean),
@@ -604,13 +620,13 @@
     if (!amounts.length) return "ไม่ระบุราคา";
     const values = amounts.map((amount) => {
       if (amount.status === "unspecified" || String(amount.value) === "0" && amount.display_label) {
-        return "ไม่ระบุราคา เพราะแหล่งข้อมูลรายงานค่า 0";
+        return `ไม่ระบุราคา เพราะแหล่งข้อมูลรายงานค่า ${cleanText(amount.value) || "0"}`;
       }
       const numeric = Number(amount.value);
       if (Number.isFinite(numeric)) return `${numeric.toLocaleString("th-TH")} ${price.currency === "THB" ? "บาท" : price.currency || ""}`.trim();
       return cleanText(amount.display_label || amount.value);
     });
-    return unique(values).join(" – ");
+    return unique(values).join(" ถึง ");
   }
 
   function offeringPresentation(detail, provenance) {
@@ -657,9 +673,11 @@
     };
   }
 
-  function participationPresentation(detail, provenance) {
-    const locations = locationRows(detail);
-    const participations = asArray(detail.children?.participations).filter(isObject).map((row) => ({
+  // Learning area-based participations, shown on both the K05 and the C08 business detail.
+  const PARTICIPATION_NOTICE = "แหล่งข้อมูลระบุว่าธุรกิจนี้เข้าร่วมโครงการ แต่ไม่ได้ยืนยันว่าธุรกิจมีผลประกอบการหรือขีดความสามารถดีขึ้น";
+
+  function participationRows(detail) {
+    return asArray(detail.children?.participations).filter(isObject).map((row) => ({
       title: cleanText(row.project) || "โครงการที่เข้าร่วม",
       subtitle: row.fiscal_year_be ? `ปีงบประมาณ ${row.fiscal_year_be}` : "",
       facts: [
@@ -667,8 +685,13 @@
         row.source_id ? { label: "แหล่งข้อมูล", value: sourceName(row.source_id) } : null,
       ].filter(Boolean),
     }));
+  }
+
+  function participationPresentation(detail, provenance) {
+    const locations = locationRows(detail);
+    const participations = participationRows(detail);
     const notices = baseNotices(detail);
-    notices.push({ tone: "warning", text: "ข้อมูลนี้ยืนยันการเข้าร่วมโครงการ แต่ไม่ได้ยืนยันว่าธุรกิจมีผลประกอบการหรือขีดความสามารถดีขึ้น" });
+    notices.push({ tone: "warning", text: PARTICIPATION_NOTICE });
     if (detail.flags?.person_assessments_withheld) notices.push({ tone: "info", text: "ไม่แสดงผลประเมินระดับบุคคลในหน้าสาธารณะ" });
     return {
       eyebrow: "ธุรกิจหรือหน่วยธุรกิจที่เข้าร่วมโครงการ",

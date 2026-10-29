@@ -48,6 +48,7 @@ _THAI_UNITS = {
     "million_THB_per_month": "ล้านบาทต่อเดือน",
     "cluster": "คลัสเตอร์",
     "mapped_subject": "รายการ",
+    "household": "ครัวเรือน",
 }
 
 
@@ -372,6 +373,79 @@ def _provenance(snapshot: RevisionSnapshot, artifact_keys: list[str]) -> dict[st
     }
 
 
+# The innovation tab: list-only filters on topic k04 over each item's follow_up evidence (per source).
+# They narrow the list and its summary; the KPI result stays the scope's value.
+INNOVATION_TOPIC = "k04"
+INNOVATION_FILTERS = ("university", "trl", "source", "evidence")
+
+
+def _follow_up_rows(item: dict[str, Any], source: str | None) -> dict[str, dict[str, Any]]:
+    """The evidence an item's sources state; with a source filter, that source's only."""
+    rows = item.get("follow_up") or {}
+    return {source: rows[source]} if source else rows
+
+
+def _innovation_filter(
+    follow_up: dict[str, Any],
+    universities: dict[str, Any],
+    *,
+    university: str | None,
+    trl: str | None,
+    source: str | None,
+    evidence: str | None,
+):
+    """Validate the innovation filters and return a predicate over compact items."""
+    bands = {band["id"]: band for band in follow_up.get("trl_bands") or []}
+    fields = {row["id"]: row["field"] for row in follow_up.get("evidence") or []}
+    # the innovation sources (a topic file's own source_ids lists every F2 source)
+    sources = {source_id for row in follow_up.get("evidence") or [] for source_id in row.get("source_ids") or []}
+    if university is not None and university not in universities:
+        raise F2InvalidQuery("unknown university")
+    if trl is not None and trl not in bands:
+        raise F2InvalidQuery("unknown trl band")
+    if source is not None and source not in sources:
+        raise F2InvalidQuery("unknown source for this topic")
+    if evidence is not None and evidence not in fields:
+        raise F2InvalidQuery("unknown follow-up evidence")
+
+    def keep(item: dict[str, Any]) -> bool:
+        if university is not None and university not in (item.get("university_ids") or []):
+            return False
+        if source is not None and source not in (item.get("source_ids") or []):
+            return False
+        rows = _follow_up_rows(item, source)
+        if evidence is not None and not any(fields[evidence] in row for row in rows.values()):
+            return False
+        if trl is not None:
+            levels = {level for row in rows.values() for level in row.get("trl") or []}
+            band = bands[trl]
+            if band["min"] is None:
+                return not levels
+            # an innovation whose sources state several levels is in every band they fall in
+            return any(band["min"] <= level <= band["max"] for level in levels)
+        return True
+
+    return keep
+
+
+def _follow_up_summary(
+    items: list[dict[str, Any]], follow_up: dict[str, Any], source: str | None
+) -> dict[str, Any]:
+    """Per evidence kind, over every matching item (not one page): how many have it, out of how many come from a
+    source that carries it at all (eligible), so a card does not rank source coverage."""
+    rows_of = [_follow_up_rows(item, source) for item in items]
+    out = []
+    for kind in follow_up.get("evidence") or []:
+        carriers = set(kind.get("source_ids") or [])
+        eligible = [rows for rows in rows_of if carriers & set(rows)]
+        out.append({
+            "id": kind["id"],
+            "found": sum(any(kind["field"] in row for row in rows.values()) for rows in eligible),
+            "eligible": len(eligible),
+        })
+    return {"matching": len(items), "evidence": out}
+
+
 def get_overview(*, province: str | None = None, revision: str | None = None) -> dict[str, Any]:
     snapshot = _active_revision()
     _require_revision(snapshot, revision)
@@ -421,6 +495,9 @@ def get_overview(*, province: str | None = None, revision: str | None = None) ->
         "availability": "available",
         "headlines": headlines,
         "limitations": overview.get("limitations") or [],
+        "sources": overview.get("sources") or {},
+        "official": overview.get("official") or {},
+        "households": overview.get("households") or {},
         "provenance": _provenance(snapshot, ["f2/overview", "f2/geography"]),
     }
 
@@ -508,6 +585,10 @@ def get_topic(
     sort: str = "source",
     limit: int = PAGE_DEFAULT,
     offset: int = 0,
+    university: str | None = None,
+    trl: str | None = None,
+    source: str | None = None,
+    evidence: str | None = None,
     revision: str | None = None,
 ) -> dict[str, Any]:
     snapshot = _active_revision()
@@ -515,6 +596,10 @@ def get_topic(
     geography = _load_artifact(snapshot, "f2/geography")
     province = _validate_province(geography, province)
     topic, measure_id, contract = _topic_and_contract(snapshot, topic_id, measure_id)
+    innovation_filters = {"university": university, "trl": trl, "source": source, "evidence": evidence}
+    follow_up = topic.get("follow_up") if topic.get("topic_id") == INNOVATION_TOPIC else None
+    if follow_up is None and any(value is not None for value in innovation_filters.values()):
+        raise F2InvalidQuery("university, trl, source and evidence filter the innovation list only")
     requested = _requested_filters(
         province=province,
         category=category,
@@ -552,12 +637,25 @@ def get_topic(
         item_ids = list(dict.fromkeys(str(item_id) for item_id in selected_ids))
 
     compact_items = topic.get("items_by_id") or {}
+    filtered_ids = item_ids
+    university_names: dict[str, Any] = {}
+    if follow_up is not None:
+        universities = _universities(snapshot).get("universities") or {}
+        university_names = {key: row.get("name_th") for key, row in universities.items()}
+        keep = _innovation_filter(follow_up, universities, **innovation_filters)
+        filtered_ids = [item_id for item_id in item_ids if keep(compact_items.get(item_id) or {})]
+
+    def searched(item: dict[str, Any]) -> list[Any]:
+        # an innovation is also found by its project code
+        codes = [code for row in (item.get("follow_up") or {}).values() for code in row.get("project_codes") or []]
+        return [item.get("label"), *codes]
+
     normalized_query = _normalize_label(query)
     matched_ids = [
         item_id
-        for item_id in item_ids
+        for item_id in filtered_ids
         if not normalized_query
-        or normalized_query in _normalize_label((compact_items.get(item_id) or {}).get("label"))
+        or any(normalized_query in _normalize_label(value) for value in searched(compact_items.get(item_id) or {}))
     ]
     # Sort the complete filtered index before pagination; KPI results are unchanged.
     if sort != "source":
@@ -587,6 +685,10 @@ def get_topic(
                 "province_names_th": province_names,
             }
         )
+        if follow_up is not None:
+            page[-1]["university_names_th"] = [
+                university_names[key] for key in compact.get("university_ids") or [] if key in university_names
+            ]
         if measure_id == "K03":
             # Preview only dates already admitted in the reviewed public detail.
             artifact_key = (topic.get("detail_artifacts") or {}).get(item_id)
@@ -679,6 +781,7 @@ def get_topic(
         "limitations": topic.get("limitations") or [],
         "source_region_results": source_region_results,
         "source_dimension_breakdown": source_dimension_breakdown,
+        "follow_up": follow_up,
         "list": {
             "capability": list_capability,
             "sort": sort,
@@ -688,8 +791,15 @@ def get_topic(
             "limit": limit,
             "returned_count": len(page),
             "items": page,
+            **({
+                "filters": {key: value for key, value in innovation_filters.items() if value is not None},
+                "summary": _follow_up_summary(
+                    [compact_items.get(item_id) or {} for item_id in matched_ids], follow_up, source
+                ),
+            } if follow_up is not None else {}),
         },
-        "provenance": _provenance(snapshot, [f"f2/topic/{topic.get('topic_id')}", *sorted(preview_artifacts)]),
+        "provenance": _provenance(snapshot, [f"f2/topic/{topic.get('topic_id')}", *sorted(preview_artifacts),
+                                             *(["f2/universities"] if follow_up is not None else [])]),
     }
 
 
@@ -761,6 +871,169 @@ def get_detail(
             **_provenance(snapshot, artifact_keys),
             "sources": topic.get("sources") or [],
         },
+    }
+
+
+UNIVERSITY_LIST_MEASURE = "C04_LISTED"
+UNIVERSITY_LIST_TOPIC = "k04"
+
+
+def _universities(snapshot: RevisionSnapshot) -> dict[str, Any]:
+    if "f2/universities" not in snapshot.files:
+        raise F2NotFound("this F2 release has no university view")
+    return _load_artifact(snapshot, "f2/universities")
+
+
+def _university_summary(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "university_id": record.get("university_id"),
+        "name_th": record.get("name_th"),
+        "group": record.get("group"),
+        "counts": record.get("counts") or {},
+        "province_count": len(record.get("innovation_provinces") or []),
+    }
+
+
+def get_universities(*, province: str | None = None, revision: str | None = None) -> dict[str, Any]:
+    snapshot = _active_revision()
+    _require_revision(snapshot, revision)
+    data = _universities(snapshot)
+    records = (data.get("universities") or {}).values()
+    if province is not None:
+        return _universities_in_province(snapshot, data, records, province)
+    rows = [_university_summary(record) for record in records]
+    rows.sort(key=lambda row: (-int(row["counts"].get(UNIVERSITY_LIST_MEASURE) or 0), _normalize_label(row["name_th"])))
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "measure_ids": data.get("measure_ids") or [],
+        "measure_labels": data.get("measure_labels") or {},
+        "attribution_source_ids": data.get("attribution_source_ids") or [],
+        "coverage": data.get("coverage") or {},
+        "groups": data.get("groups") or {},
+        "notes": data.get("notes") or [],
+        "universities": rows,
+        "provenance": _provenance(snapshot, ["f2/universities"]),
+    }
+
+
+def _universities_in_province(
+    snapshot: RevisionSnapshot, data: dict[str, Any], records: Any, province: str
+) -> dict[str, Any]:
+    """The universities whose innovations a source places in one province: an innovation link, not where a
+    university is or works. An innovation with several universities counts for each of them."""
+    geography = _load_artifact(snapshot, "f2/geography")
+    code = _validate_province(geography, province)
+    topic = _load_artifact(snapshot, f"f2/topic/{UNIVERSITY_LIST_TOPIC}")
+    scoped = (topic.get("item_ids_by_measure_and_scope") or {}).get(UNIVERSITY_LIST_MEASURE, {})
+    in_province = {str(i) for i in scoped.get(f"province/{code}", [])}
+    rows, linked, sources = [], set(), set()
+    for record in records:
+        count = next((int(row.get("count") or 0) for row in record.get("innovation_provinces") or []
+                      if row.get("province_code") == code), 0)
+        if not count:
+            continue
+        rows.append({**_university_summary(record), "province_innovations": count})
+        linked |= in_province & {str(i) for i in (record.get("item_ids") or {}).get(UNIVERSITY_LIST_MEASURE) or []}
+        sources.update((record.get("source_ids_by_measure") or {}).get(UNIVERSITY_LIST_MEASURE) or [])
+    rows.sort(key=lambda row: (-row["province_innovations"], _normalize_label(row["name_th"])))
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "measure_ids": [UNIVERSITY_LIST_MEASURE],
+        "measure_labels": data.get("measure_labels") or {},
+        "attribution_source_ids": sorted(sources),
+        "coverage": {},
+        "groups": data.get("groups") or {},
+        "notes": data.get("notes") or [],
+        "province": {
+            "province_code": code,
+            "province_name_th": geography["provinces"][code].get("province_name_th"),
+            "innovations": len(in_province),
+            "innovations_with_university": len(linked),
+        },
+        "universities": rows,
+        "provenance": _provenance(snapshot, ["f2/universities", "f2/geography", f"f2/topic/{UNIVERSITY_LIST_TOPIC}"]),
+    }
+
+
+def get_university(
+    university_id: str,
+    *,
+    q: str | None = None,
+    limit: int = PAGE_DEFAULT,
+    offset: int = 0,
+    revision: str | None = None,
+) -> dict[str, Any]:
+    snapshot = _active_revision()
+    _require_revision(snapshot, revision)
+    data = _universities(snapshot)
+    record = (data.get("universities") or {}).get(university_id)
+    if not isinstance(record, dict):
+        raise F2NotFound("unknown university")
+    query = q or ""
+    if len(query) > QUERY_MAX:
+        raise F2InvalidQuery("q must not exceed 200 characters")
+    if limit < 1 or limit > PAGE_MAX or offset < 0:
+        raise F2InvalidQuery("invalid paging parameters")
+    geography = _load_artifact(snapshot, "f2/geography")
+    provinces = geography.get("provinces") or {}
+    topic = _load_artifact(snapshot, f"f2/topic/{UNIVERSITY_LIST_TOPIC}")
+    compact_items = topic.get("items_by_id") or {}
+    members = set((topic.get("item_ids_by_measure_and_scope") or {}).get(UNIVERSITY_LIST_MEASURE, {}).get("national", []))
+    item_ids = [str(i) for i in (record.get("item_ids") or {}).get(UNIVERSITY_LIST_MEASURE) or []]
+    if not set(item_ids) <= members:
+        raise F2DataError("F2 university items are not members of the published innovation list")
+    normalized_query = _normalize_label(query)
+    matched = sorted(
+        (
+            item_id
+            for item_id in item_ids
+            if not normalized_query
+            or normalized_query in _normalize_label((compact_items.get(item_id) or {}).get("label"))
+        ),
+        key=lambda item_id: (_normalize_label((compact_items.get(item_id) or {}).get("label")), item_id),
+    )
+    items = []
+    for item_id in matched[offset : offset + limit]:
+        compact = compact_items.get(item_id)
+        if isinstance(compact, dict):
+            items.append(
+                {
+                    "entity_id": item_id,
+                    **compact,
+                    "province_names_th": [
+                        provinces[code]["province_name_th"]
+                        for code in compact.get("province_codes") or []
+                        if code in provinces
+                    ],
+                }
+            )
+    university = {key: value for key, value in record.items() if key != "item_ids"}
+    university["innovation_provinces"] = [
+        {**row, "province_name_th": (provinces.get(row.get("province_code")) or {}).get("province_name_th")}
+        for row in record.get("innovation_provinces") or []
+    ]
+    return {
+        "revision": snapshot.revision,
+        "release_id": snapshot.release_id,
+        "availability": "available",
+        "university": university,
+        "group_label_th": ((data.get("groups") or {}).get(record.get("group")) or {}).get("label_th"),
+        "measure_labels": data.get("measure_labels") or {},
+        "list": {
+            "measure_id": UNIVERSITY_LIST_MEASURE,
+            "topic_id": UNIVERSITY_LIST_TOPIC,
+            "scoped_item_count": len(item_ids),
+            "matching_item_count": len(matched),
+            "offset": offset,
+            "limit": limit,
+            "returned_count": len(items),
+            "items": items,
+        },
+        "provenance": _provenance(snapshot, ["f2/universities", "f2/geography", f"f2/topic/{UNIVERSITY_LIST_TOPIC}"]),
     }
 
 
