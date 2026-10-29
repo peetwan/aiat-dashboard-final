@@ -86,7 +86,7 @@
   const IDENTITY_PRESENTATIONS = {
     source_record_only: { label: "ระบุตามข้อมูลต้นทาง", notice: "รายการนี้ระบุตามข้อมูลต้นทาง และยังไม่ได้เชื่อมโยงข้ามแหล่งข้อมูล", warning: false },
     kept_separate: { label: "ตรวจสอบแล้วว่าเป็นคนละรายการ", notice: "ตรวจสอบแล้วว่าเป็นคนละรายการ จึงนับแยก", warning: false },
-    unresolved: { label: "อาจซ้ำกับรายการอื่น — ยังนับแยก", notice: "หลักฐานยังไม่พอสำหรับการรวม จึงยังนับแยก", warning: true },
+    unresolved: { label: "อาจซ้ำกับรายการอื่น แต่ยังนับแยก", notice: "หลักฐานยังไม่พอสำหรับการรวม จึงยังนับแยก", warning: true },
     malformed_name: { label: "ไม่มีชื่อรายการจากแหล่งข้อมูล", notice: "แหล่งข้อมูลไม่มีชื่อที่นำมาแสดงได้", warning: true },
     grouped_family: { label: "จัดกลุ่มสินค้าและบริการแล้ว", notice: "", warning: false },
     reported_activity: { label: "กิจกรรมตามที่แหล่งข้อมูลรายงาน", notice: "", warning: false },
@@ -148,7 +148,7 @@
     if (location.district) parts.push(`อำเภอ${location.district}`);
     if (location.province) parts.push(`จังหวัด${location.province}`);
     if (!parts.length && location.label) parts.push(location.label);
-    return unique(parts).join(" · ");
+    return unique(parts).join(", ");
   }
 
   function publicLabel(value, fallback = "ไม่ระบุชื่อรายการ") {
@@ -207,7 +207,7 @@
         const url = safeUrl(row.url);
         if (!url) return [];
         const label = row.label_availability === "withheld"
-          ? "สื่ออ้างอิง — ไม่แสดงชื่อระหว่างการตรวจสอบ"
+          ? "สื่ออ้างอิง (ไม่แสดงชื่อระหว่างการตรวจสอบ)"
           : cleanText(row.label) || "เปิดสื่ออ้างอิง";
         return [{ label, url }];
       }),
@@ -538,7 +538,7 @@
       badges: unique([measureId === "K04" ? "นวัตกรรมพร้อมใช้" : "นวัตกรรม", ...(distinctLevels.length > 1 ? ["ระดับความพร้อมต่างกันตามหลักฐาน"] : readinessBadges), identityPresentation(detail).label]).slice(0, 5),
       facts: [
         measureId === "K04" ? { label: "เหตุผลที่อยู่ในตัวชี้วัด", value: qualifyingLevels.length
-          ? `มีหลักฐานที่ผ่านเกณฑ์: ${qualifyingLevels.join(" · ")} (รายละเอียดแยกตามแหล่งข้อมูลด้านล่าง)`
+          ? `มีหลักฐานที่ผ่านเกณฑ์: ${qualifyingLevels.join(", ")} (รายละเอียดแยกตามแหล่งข้อมูลด้านล่าง)`
           : "รายการนี้อยู่ในตัวชี้วัดนวัตกรรมพร้อมใช้ แต่รายละเอียดที่เผยแพร่ไม่ได้ระบุระดับที่ผ่านเกณฑ์" } : null,
         distinctLevels.length > 1 ? { label: "การอ่านระดับความพร้อม", value: "ต้นทางรายงานหลายระดับ ดูหลักฐานแยกตามแหล่งข้อมูลด้านล่าง" } : null,
         matchingLocations.length ? { label: `เหตุผลที่พบในจังหวัด${selectedProvince}`, value: `แหล่งข้อมูลระบุจังหวัด${selectedProvince}เป็นพื้นที่ที่เกี่ยวข้องกับรายการนี้` } : null,
@@ -604,7 +604,7 @@
     if (!amounts.length) return "ไม่ระบุราคา";
     const values = amounts.map((amount) => {
       if (amount.status === "unspecified" || String(amount.value) === "0" && amount.display_label) {
-        return "ไม่ระบุราคา — แหล่งข้อมูลรายงานค่า 0";
+        return "ไม่ระบุราคา เพราะแหล่งข้อมูลรายงานค่า 0";
       }
       const numeric = Number(amount.value);
       if (Number.isFinite(numeric)) return `${numeric.toLocaleString("th-TH")} ${price.currency === "THB" ? "บาท" : price.currency || ""}`.trim();
@@ -625,7 +625,7 @@
         subtitle: offering.membership_role === "variant" ? "รูปแบบหรือรุ่นย่อย" : "รายการสินค้าและบริการ",
         text: descriptionRows(offering.descriptions)[0]?.text || "",
         facts: [
-          prices.length ? { label: "ราคาที่แหล่งข้อมูลรายงาน", value: unique(prices).join(" · ") } : null,
+          prices.length ? { label: "ราคาที่แหล่งข้อมูลรายงาน", value: unique(prices).join(", ") } : null,
           categories.length ? { label: "หมวดหมู่", value: categories.join(", ") } : null,
           sellers.length ? { label: "ผู้ขายหรือผู้ดำเนินการ", value: unique(sellers).join(", ") } : null,
           location ? { label: "สถานที่ของรายการ", value: location } : null,

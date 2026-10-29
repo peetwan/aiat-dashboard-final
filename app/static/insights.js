@@ -205,7 +205,7 @@ function collectLooseData(payload) {
       source_id: source.source_id,
       source_name_th: source.name_th,
       title_th: source.name_th,
-      summary_th: [omission.labels_th?.join(" · "), omission.reason_th].filter(Boolean).join(" — "),
+      summary_th: [omission.labels_th?.join(", "), omission.reason_th].filter(Boolean).join(": "),
       record_count: omission.count,
       source_url: source.url,
     }));
@@ -260,7 +260,7 @@ function collectUnmappedProjection(payload) {
         scope: "unmapped",
         source_id: source.source_id,
         title_th: firstDefined(record.project_name, record.title, "รายการที่ไม่ระบุจังหวัด"),
-        summary_th: [record.business_name, record.research_unit].filter(Boolean).join(" · "),
+        summary_th: [record.business_name, record.research_unit].filter(Boolean).join(", "),
         source_url: record.source_url,
         display_metrics: [
           record.fiscal_year ? { label_th: "ปีงบประมาณ", display_value: record.fiscal_year } : null,
@@ -394,7 +394,7 @@ function renderLearningDashboard(payload) {
   document.getElementById("learningSummary").hidden = false;
   document.getElementById("learningSummaryGrid").innerHTML = cards.map((card) => `
     <article class="learning-summary-card">
-      <span>แหล่งที่ 10 · ข้อมูลเบื้องต้น</span>
+      <span>แหล่งที่ 10 (ข้อมูลเบื้องต้น)</span>
       <h3>${escapeHtml(card.title)}</h3>
       ${card.text ? `<p>${escapeHtml(compactText(card.text, 240))}</p>` : ""}
       <div>${card.metrics.map((metric) => `<small>${escapeHtml(metric.label)} <strong>${escapeHtml(metric.value)}</strong></small>`).join("")}</div>

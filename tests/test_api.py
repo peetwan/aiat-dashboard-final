@@ -139,6 +139,7 @@ def test_dashboard_and_endpoint_inventory():
         assert "ข้อมูลจังหวัดฉบับเต็ม" in province_page.text
         assert 'id="operations"' in province_page.text
         assert "/static/province.js" in province_page.text
+        assert 'rel="apple-touch-icon"' in province_page.text
         assert client.get("/province/999").status_code == 404
 
         insights_page = client.get("/insights")
@@ -149,6 +150,17 @@ def test_dashboard_and_endpoint_inventory():
         assert 'id="workDirectorySource"' in insights_page.text
         assert 'id="workDirectorySearch"' in insights_page.text
         assert "→" not in insights_page.text
+        assert "/static/insights.css?v=" in insights_page.text
+        assert "/static/insights.js?v=" in insights_page.text
+
+        versioned_asset = client.get("/static/touch.css?v=test")
+        assert versioned_asset.status_code == 200
+        assert versioned_asset.headers["cache-control"] == "public, max-age=604800"
+        plain_asset = client.get("/static/touch.css")
+        assert plain_asset.headers["cache-control"] == "public, max-age=0, must-revalidate"
+        touch_icon = client.get("/static/apple-touch-icon.png")
+        assert touch_icon.status_code == 200
+        assert touch_icon.headers["content-type"] == "image/png"
 
         sources = client.get("/api/sources").json()
         wallet = next(row for row in sources if row["source_id"] == "f2_wallet_all_realtime")

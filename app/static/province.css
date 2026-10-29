@@ -1,4 +1,8 @@
 :root {
+  /* phase 5.3: z-index scale ชุดเดียวกับ styles.css (map-ui < header < skip) */
+  --z-map-ui: 20;
+  --z-header: 30;
+  --z-skip: 1000;
   color-scheme: light;
   --ink: #17231d;
   --ink-soft: #314039;
@@ -60,7 +64,7 @@ a {
   position: fixed;
   left: 12px;
   top: -70px;
-  z-index: 100;
+  z-index: var(--z-skip);
   padding: 10px 14px;
   color: #fff;
   background: var(--ink);
@@ -74,7 +78,7 @@ a {
 .detail-topbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--z-header);
   min-height: 66px;
   display: flex;
   align-items: center;
@@ -165,7 +169,6 @@ a {
 .detail-topbar nav a:focus-visible {
   color: var(--ink);
   background: var(--canvas);
-  outline: none;
 }
 
 .detail-topbar nav .back-link {
@@ -192,7 +195,7 @@ a {
   margin: 0 0 12px;
   color: var(--accent);
   font-size: 11px;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.03em;
 }
 
@@ -211,8 +214,8 @@ a {
 .title-row h1 {
   margin: 0;
   font-size: clamp(44px, 6vw, 70px);
-  line-height: 1;
-  letter-spacing: -0.045em;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .title-row > span {
@@ -286,7 +289,7 @@ a {
 .section-nav {
   position: sticky;
   top: 66px;
-  z-index: 40;
+  z-index: var(--z-map-ui);
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   border: 1px solid var(--line);
@@ -320,7 +323,6 @@ a {
   color: var(--accent-strong);
   background: #fbfcfa;
   box-shadow: inset 0 -2px var(--accent);
-  outline: none;
 }
 
 .detail-loading {
@@ -362,6 +364,13 @@ a {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .detail-loading span {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 .detail-section {
   margin-top: 76px;
   padding-top: 50px;
@@ -379,7 +388,7 @@ a {
 .section-title small {
   color: var(--accent);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -387,8 +396,8 @@ a {
 .section-title h2 {
   margin: 4px 0 0;
   font-size: clamp(26px, 3.4vw, 38px);
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .section-title > p {
@@ -403,7 +412,7 @@ a {
   margin: 0;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -434,7 +443,7 @@ a {
 .demand-heading span {
   color: var(--accent);
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -921,7 +930,7 @@ a {
 .data-block > header span {
   color: var(--accent);
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
 }
 
@@ -964,7 +973,7 @@ a {
   display: block;
   color: var(--accent);
   font-size: 8.5px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1015,7 +1024,7 @@ a {
   color: var(--accent);
   cursor: pointer;
   font-size: 9.5px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .record-facts {
@@ -1057,7 +1066,7 @@ a {
   color: var(--accent);
   text-decoration: none;
   font-size: 9px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .record-source::after {
@@ -1116,7 +1125,6 @@ a {
   color: #fff;
   background: var(--ink);
   border-color: var(--ink);
-  outline: none;
 }
 
 .people-category-nav button[aria-pressed="true"] span {
@@ -1167,7 +1175,7 @@ a {
   border-radius: 7px;
   cursor: pointer;
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .load-more span {
@@ -1181,7 +1189,6 @@ a {
   color: #fff;
   background: var(--accent);
   border-color: var(--accent);
-  outline: none;
 }
 
 .missing-source-summary > div,
@@ -1224,7 +1231,7 @@ a {
 .dimension-panel > header span {
   color: var(--accent);
   font-size: 8.5px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1404,7 +1411,7 @@ a {
   background: var(--accent-soft);
   border-radius: 5px;
   font-size: 8.5px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .source-body {
@@ -1440,7 +1447,7 @@ a {
   margin-top: 11px;
   color: var(--accent);
   font-size: 9px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .operations-section {
@@ -1561,7 +1568,7 @@ a {
 .ops-pipeline span {
   color: #78c69b;
   font-size: 8.5px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -1610,7 +1617,7 @@ a {
   margin-top: 14px;
   color: #78c69b;
   font-size: 9.5px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .detail-error {
@@ -1655,7 +1662,7 @@ a {
 }
 
 .detail-footer a {
-  font-weight: 750;
+  font-weight: 700;
 }
 
 @media (max-width: 940px) {
@@ -1950,4 +1957,11 @@ a {
     background: #fff;
     border: 1px solid var(--line);
   }
+}
+
+/* Phase 3.2 และ 3.6: focus ring กลางของหน้าจังหวัด สีเข้มกลาง 2px
+   (ก่อนหน้านี้ 4 จุดตั้ง outline: none แล้วไม่มี ring ทดแทน ผู้ใช้คีย์บอร์ดมองไม่เห็นตำแหน่ง) */
+:is(a, button, input, select, textarea, summary, [tabindex="0"]):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }

@@ -508,3 +508,27 @@ def test_f2_dashboard_uses_scoped_api_and_safe_progressive_disclosure() -> None:
     assert 'id="f2FiltersToggle"' in template
     assert '.f2-filters-toggle:not([aria-expanded="true"]) + .f2-controls' in styles
     assert ".atlas-shell .f2-dashboard { top: 68px;" in styles
+
+
+def test_phase5_font_weights_z_scale_and_sheet_expand() -> None:
+    import re
+
+    for name in ["styles.css", "mobile.css", "departments.css", "f2.css", "province.css", "insights.css", "touch.css"]:
+        assert not re.search(r"font-weight:\s*(7[2-9]\d|[89]\d\d)", read(f"app/static/{name}")), name
+    for name in ["index.html", "province.html", "insights.html"]:
+        assert "Anuphan:wght@400;500;600;700&display=swap" in read(f"app/templates/{name}")
+    styles = read("app/static/styles.css")
+    for token in ["--z-map-ui: 20;", "--z-header: 30;", "--z-sheet: 40;", "--z-dock: 50;", "--z-modal: 100;", "--z-toast: 110;", "--z-skip: 1000;"]:
+        assert token in styles
+    assert "z-index: var(--z-dock);" in styles
+    assert "z-index: var(--z-sheet);" in styles
+    assert "z-index: var(--z-sheet);" in read("app/static/f2.css")
+    assert "z-index: var(--z-modal);" in read("app/static/f2.css")
+    assert "> .sheet-grip { display: none; }" in styles
+    assert read("app/templates/index.html").count('class="sheet-grip"') == 5
+    mobile = read("app/static/mobile.css")
+    assert "body.sheet-expanded .atlas-shell .department-panel" in mobile
+    assert "top: 68px;" in mobile
+    script = read("app/static/app.js")
+    assert "function setSheetExpanded(" in script
+    assert "initSheetExpand();" in script

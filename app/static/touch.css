@@ -1,0 +1,94 @@
+/* touch.css: baseline สำหรับจอสัมผัสทุกขนาด โหลดท้ายสุดของทุกหน้า (index, province, insights)
+   ไม่อยู่ใน @layer และโหลดหลัง departments.css กับ f2.css จึงชนะกฎเดิมที่ค่าเท่ากัน
+   ที่มา: docs/ui-audit-2026-10-28.md patch T (phase 0 ใน docs/ui-audit-phases-2026-10-28.md)
+   กฎในไฟล์นี้ไม่เปลี่ยน layout ใด ๆ เปลี่ยนเฉพาะพฤติกรรมตอนแตะและขนาดตัวอักษรใน input บนจอสัมผัส */
+
+/* 1. ตัดแฟลชสีเทาตอนแตะ, ห้ามเบราว์เซอร์ขยายตัวอักษรเองตอนหมุนจอ,
+      ห้ามหน้าทั้งหน้ากระเด้งหรือ pull-to-refresh (ชีตด้านในมี overscroll-behavior: contain อยู่แล้ว) */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+/* 2. ไม่รอ double-tap zoom บน control ทุกตัว click จึงยิงทันทีที่ปล่อยนิ้ว */
+button,
+a,
+input,
+select,
+textarea,
+summary,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+}
+
+/* 3. กดค้างบนปุ่มหรือ tab ต้องไม่เลือกข้อความและไม่เด้ง callout ของ iOS
+      ใส่เฉพาะ control ไม่ใส่ body เพราะผู้ใช้ต้องคัดลอกตัวเลขและข้อความในชีตได้ */
+button,
+summary,
+[role="button"],
+[role="tab"],
+.region-label {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 4. feedback ตอนกด: ย่อ 3% ทันทีที่นิ้วแตะ (ไม่ใช่ตอนปล่อย) และคืนตัวแบบ ease-out
+      ใช้ property scale แยกจาก transform เพื่อไม่ทับ translate หรือ rotate ที่ปุ่มบางตัวมีอยู่แล้ว
+      รายการ transition เป็น superset ของที่ปุ่มในโปรเจกต์ใช้อยู่ (color, background, border, shadow, transform) */
+button,
+[role="button"] {
+  transition:
+    scale 120ms cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+button:active,
+[role="button"]:active {
+  scale: 0.97;
+}
+
+/* แถวข้อความเต็มความกว้าง (ปุ่มตัวกรอง F2, ปุ่มช่วยอ่าน, breadcrumb) ย่อแล้วดูเพี้ยน ใช้จางแทน */
+.f2-filters-toggle:active,
+.f2-metric-help:active,
+.f2-advanced-toggle:active,
+.f2-breadcrumbs button:active,
+.f2-expand:active {
+  scale: 1;
+  opacity: 0.72;
+}
+
+/* reduced motion: ไม่ย่อ แต่ยังจางให้รู้ว่ากดติด */
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  [role="button"]:active {
+    scale: 1;
+    opacity: 0.72;
+  }
+}
+
+/* 5. iOS Safari ซูมเข้าเมื่อ focus input ที่ตัวอักษรเล็กกว่า 16px และไม่ซูมกลับ
+      ใช้ 16px เฉพาะจอสัมผัส desktop คงขนาดเดิมตามที่ออกแบบไว้
+      selector ยาว ๆ ด้านล่างมีไว้ชนะ f2.css, styles.css, province.css และ insights.css ที่ตั้งไว้ 11 ถึง 15px */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea,
+  .f2-controls :is(select, input),
+  .f2-topic-jump select,
+  .collection-tools input,
+  .collection-tools select,
+  .atlas-shell .f4-list-panel input,
+  .record-search input,
+  .work-directory-controls input,
+  .work-directory-controls select {
+    font-size: 16px;
+  }
+}

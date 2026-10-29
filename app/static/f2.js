@@ -173,7 +173,7 @@
   function metricContext(measure) {
     const name = provinceName(state.province);
     if (name && supportsProvince(measure)) return `ขอบเขต: จังหวัด${name}`;
-    if (name) return `ยังไม่มีตัวเลขจังหวัด${name} · เปิดดูข้อมูลประเทศไทยได้`;
+    if (name) return `ยังไม่มีตัวเลขจังหวัด${name} เปิดดูข้อมูลประเทศไทยได้`;
     return measure?.filter_contract?.supported_filters?.includes("source_region")
       ? "ขอบเขต: ประเทศไทย / ภูมิภาคตามต้นทาง"
       : "ขอบเขต: ประเทศไทย";
@@ -212,9 +212,17 @@
     });
   }
   function backToOverview(view) {
-    view.append(el("button", { type: "button", class: "f2-back-overview", text: "← กลับไปภาพรวม", onclick: () => setTab("overview") }));
+    view.append(el("button", { type: "button", class: "f2-back-overview", text: "กลับไปภาพรวม", onclick: () => setTab("overview") }));
   }
 
+  // phase 4.2 (docs/ui-audit-phases-2026-10-28.md): loading state keeps the shape of the loaded view
+  // (overview: metric cards 177px in two columns, list: 96px cards); the heading stays for screen readers.
+  function skeleton(view, heading, kind) {
+    const heights = kind === "list" ? [96, 96, 96] : [177, 177, 177, 177];
+    clear(view).append(el("div", { class: "f2-status f2-skeleton", role: "status", "aria-live": "polite" },
+      el("strong", { class: "sr-only", text: heading }),
+      el("div", { class: "skeleton-bars f2-skeleton-bars", "data-kind": kind, "aria-hidden": "true" }, ...heights.map((height) => el("span", { style: `min-height: ${height}px` })))));
+  }
   function status(view, heading, message, retry) {
     clear(view).append(el("div", { class: "f2-status", role: "status", "aria-live": "polite" }, el("strong", { text: heading }), el("p", { text: message }), retry ? el("button", { class: "f2-retry", type: "button", text: "ลองอีกครั้ง", onclick: retry }) : ""));
   }
@@ -487,7 +495,7 @@
     });
     const searchable = data?.list?.capability === "available" || (!data?.list && definition?.filter_contract?.detail_availability === "available");
     if (state.tab === "list" && searchable) {
-      const input = el("input", { id: "f2Search", type: "search", value: state.searchDraft, placeholder: "ค้นหาในรายการ", autocomplete: "off" });
+      const input = el("input", { id: "f2Search", type: "search", value: state.searchDraft, placeholder: "ค้นหาในรายการ", autocomplete: "off", enterkeyhint: "search", autocapitalize: "none", spellcheck: "false" });
       input.addEventListener("input", () => {
         state.searchDraft = input.value;
         clearTimeout(state.searchTimer);
@@ -597,8 +605,8 @@
     view.append(el("div", { class: "f2-topic-jump" }, el("label", { htmlFor: "f2TopicJump", text: "หัวข้อที่ต้องการดู" }, jump)));
     renderScopeNotice(view);
     view.append(el("details", { class: "f2-overview-guide" },
-      el("summary", { text: `วิธีอ่านภาพรวม${data.provenance?.release_date ? ` · ฉบับ ${data.provenance.release_date}` : ""}` }),
-      el("p", { class: "f2-overview-key", text: "0 หมายถึงนับได้ศูนย์ในข้อมูลชุดนี้ ส่วน — หมายถึงยังไม่มีตัวเลขที่รองรับสำหรับพื้นที่ที่เลือก" }),
+      el("summary", { text: `วิธีอ่านภาพรวม${data.provenance?.release_date ? ` (ฉบับ ${data.provenance.release_date})` : ""}` }),
+      el("p", { class: "f2-overview-key", text: "0 หมายถึงนับได้ศูนย์ในข้อมูลชุดนี้ ส่วน ไม่ระบุ หมายถึงยังไม่มีตัวเลขที่รองรับสำหรับพื้นที่ที่เลือก" }),
       el("p", { class: "f2-overview-key", text: "กรอบเส้นประคือตัวเลขประกอบ ซึ่งอาจใช้ข้อมูลคนละชุดหรือวิธีนับต่างกัน" }),
       el("p", { class: "f2-overview-key", text: "วันที่ฉบับข้อมูลเป็นวันที่จัดเตรียม ไม่ใช่ช่วงเวลาที่วัด ตัวเลขแต่ละชุดอาจครอบคลุมคนละช่วงเวลา ตรวจสอบช่วงเวลาจากที่มาของแต่ละตัวชี้วัด" }),
     ));
@@ -639,7 +647,7 @@
         });
         metric.append(
           el("span", { text: measureDisplayLabel(item) }),
-          el("strong", { text: valueText(result.display_value ?? result.value) || "—" }),
+          el("strong", { text: valueText(result.display_value ?? result.value) || "ไม่ระบุ" }),
         );
         if (item.unit || result.unit) metric.append(el("small", { text: item.unit || result.unit }));
         if (result.availability === "unavailable") metric.append(el("span", { class: "f2-metric-state", text: statusLabel(result.status || result.availability) }));
@@ -648,7 +656,7 @@
         }
         if (companion) metric.append(el("span", { class: "f2-metric-kind", text: "ข้อมูลประกอบ" }));
         metric.append(el("small", { class: "f2-metric-scope", text: metricContext(item) }));
-        metric.append(el("span", { class: "f2-metric-action", text: item.detail_availability === "available" ? "ดูรายการ →" : "ดูรายละเอียดตัวเลข →" }));
+        metric.append(el("span", { class: "f2-metric-action", text: item.detail_availability === "available" ? "ดูรายการทั้งหมด" : "ดูรายละเอียดตัวเลข" }));
         const wrapper = el("div", { class: "f2-metric-wrap" }, metric);
         group.append(wrapper);
         if (metricExplanation(item.measure_id)) {
@@ -676,7 +684,7 @@
         }
         appendMetric(item);
         visibleMeasures(item.companions || []).forEach((companion) => {
-          if (companion.measure_id === "C08_ASSESSED_PEOPLE") group.append(el("h4", { class: "f2-subgroup-title", text: "คะแนนของบุคคล — ไม่ใช่ผลลัพธ์ของธุรกิจ" }));
+          if (companion.measure_id === "C08_ASSESSED_PEOPLE") group.append(el("h4", { class: "f2-subgroup-title", text: "คะแนนของบุคคล ไม่ใช่ผลลัพธ์ของธุรกิจ" }));
           appendMetric(companion, true);
         });
         if (COMPANION_NOTES[item.measure_id]) group.append(el("p", { class: "f2-companion-note", text: COMPANION_NOTES[item.measure_id] }));
@@ -689,7 +697,7 @@
   }
   async function loadOverview() {
     if (!state.open) return;
-    status(views.overview, "กำลังโหลดภาพรวม", "กำลังขอข้อมูลจากระบบ");
+    skeleton(views.overview, "กำลังโหลดภาพรวม", "overview");
     try {
       const data = await request("/overview" + query({ province: state.province, revision: state.revision }), "overview");
       if (!data) return;
@@ -759,10 +767,10 @@
     const titleNote = sourceTitleNote(state.measure, model.title);
     if (titleNote) card.append(el("span", { class: "f2-item-source-note", text: titleNote }));
     if (model.context?.length) {
-      card.append(el("p", { class: "f2-item-context", text: model.context.join(" · ") }));
+      card.append(el("p", { class: "f2-item-context", text: model.context.join(", ") }));
     }
     const sources = (item.source_ids || []).map((id) => SOURCE_NAMES[id]).filter(Boolean);
-    if (sources.length) card.append(el("p", { class: "f2-item-preview", text: `ที่มา: ${[...new Set(sources)].join(" · ")}` }));
+    if (sources.length) card.append(el("p", { class: "f2-item-preview", text: `ที่มา: ${[...new Set(sources)].join(", ")}` }));
     if (state.measure === "K03") {
       const dates = item.activity_dates || [];
       const displayedDates = [...new Set(dates.map((row) => [row.start_date, row.end_date !== row.start_date ? row.end_date : ""].filter(Boolean).map(window.F2DetailPresenter.formatDate).join(" – ")))];
@@ -773,7 +781,7 @@
     if (model.warning) {
       card.append(el("span", { class: "f2-item-warning", text: model.warning }));
     }
-    if (id) card.append(el("span", { class: "f2-item-action", text: `${model.action} →` }));
+    if (id) card.append(el("span", { class: "f2-item-action", text: model.action }));
     return card;
   }
   function captureSearchFocus() {
@@ -825,14 +833,14 @@
     if (activeFilters) view.append(activeFilters);
     const searching = Boolean(state.filters.q);
     const resultNote = state.measure === C02_MEASURE_ID && requestedProvince
-      ? `${requestedProvince} ${formattedCount(data.result?.value) || "—"} คน · ทั้งประเทศ ${formattedCount(data.coverage?.national_total) || "—"} คน`
+      ? `${requestedProvince} ${formattedCount(data.result?.value) ? `${formattedCount(data.result?.value)} คน` : "ไม่ระบุ"}, ทั้งประเทศ ${formattedCount(data.coverage?.national_total) ? `${formattedCount(data.coverage?.national_total)} คน` : "ไม่ระบุ"}`
       : measureSupportsProvince && data.coverage?.province_sum_is_additive === false
         ? "ค่าระดับประเทศและผลรวมรายจังหวัดอาจไม่เท่ากัน"
         : "";
     view.append(section(
       "ผลตัวชี้วัด",
       cardFor(data.result, measureDisplayLabel(definition) || data.measure_id),
-      [resultNote, ["K09", "K10"].includes(state.measure) ? MONTH_NOTE : "", searching ? "ตัวเลขนี้คำนวณตามพื้นที่และตัวกรองข้างต้น โดยไม่เปลี่ยนตามคำค้นหาในรายการ" : ""].filter(Boolean).join(" · "),
+      [resultNote, ["K09", "K10"].includes(state.measure) ? MONTH_NOTE : "", searching ? "ตัวเลขนี้คำนวณตามพื้นที่และตัวกรองข้างต้น โดยไม่เปลี่ยนตามคำค้นหาในรายการ" : ""].filter(Boolean).join(" "),
     ));
     if (state.measure === "K10") view.append(el("p", { class: "f2-result-context", text: K10_EXCLUDED_AMOUNT_NOTE }));
     view.append(el("p", { class: "f2-result-context", text: state.filters.source_region
@@ -859,8 +867,8 @@
         const selected = String(row.source_region_id) === selectedRegion;
         return el("tr", { class: selected ? "f2-region-selected" : null },
           el("th", { scope: "row" }, row.label_th, selected ? el("span", { class: "f2-region-current", text: "เลือกอยู่" }) : ""),
-          el("td", { text: [row.result?.display_value || "—", row.result?.unit].filter(Boolean).join(" ") }),
-          el("td", { text: statusLabel(row.result?.status || row.result?.availability || "") || "—" }),
+          el("td", { text: row.result?.display_value ? [row.result.display_value, row.result.unit].filter(Boolean).join(" ") : "ไม่ระบุ" }),
+          el("td", { text: statusLabel(row.result?.status || row.result?.availability || "") || "ไม่ระบุ" }),
         );
       })));
       view.append(section("เปรียบเทียบทุกภูมิภาคตามต้นทาง", el("div", { class: "f2-table-scroll", tabindex: "0" }, table), "ตารางแสดงทุกภูมิภาคเพื่อเปรียบเทียบ โดยเน้นแถวที่เลือก ภูมิภาคตามต้นทางไม่ใช่ภาคของแดชบอร์ด"));
@@ -895,7 +903,7 @@
       view.append(section("รายการ", empty));
       return;
     }
-    view.append(el("p", { class: "f2-result-context", text: `เรียง: ${{ source: "ลำดับในชุดข้อมูล", name_asc: "ตามชื่อ (น้อยไปมาก)", name_desc: "ตามชื่อ (มากไปน้อย)" }[state.sort]} · เปลี่ยนได้ในตัวกรอง` }));
+    view.append(el("p", { class: "f2-result-context", text: `เรียง: ${{ source: "ลำดับในชุดข้อมูล", name_asc: "ตามชื่อ (น้อยไปมาก)", name_desc: "ตามชื่อ (มากไปน้อย)" }[state.sort]} (เปลี่ยนได้ในตัวกรอง)` }));
     view.append(section("รายการ", el("div", { class: "f2-item-list" }, items.map(itemCard)), el("p", { class: "f2-results-summary", role: "status", "aria-live": "polite", text: countSummary })));
     const previous = el("button", { type: "button", "aria-label": "หน้าก่อนหน้า", text: "ก่อนหน้า", disabled: !list.offset, onclick: () => { state.offset = Math.max(0, Number(list.offset || 0) - state.limit); writeUrl(true); loadTopic(); } });
     const next = el("button", { type: "button", "aria-label": "หน้าถัดไป", text: "ถัดไป", disabled: Number(list.offset || 0) + Number(list.returned_count || items.length) >= Number(list.matching_item_count || 0), onclick: () => { state.offset = Number(list.offset || 0) + Number(list.returned_count || items.length); writeUrl(true); loadTopic(); } });
@@ -920,7 +928,7 @@
   }
   async function loadTopic() {
     if (!state.open || state.tab !== "list" || !state.topic) { if (!state.topic) status(views.list, "ยังไม่มีหัวข้อรายการ", "เลือกตัวชี้วัดจากภาพรวมก่อน"); return; }
-    status(views.list, "กำลังโหลดรายการ", "กำลังขอข้อมูลตามเงื่อนไขที่เลือก");
+    skeleton(views.list, "กำลังโหลดรายการ", "list");
     try { const data = await request(`/topics/${encodeURIComponent(state.topic)}` + query(apiScope({ limit: state.limit, offset: state.offset, sort: state.sort })), "topic"); if (!data) return; state.topicData = data; state.revision = data.revision || state.revision; renderList(data); }
     catch (error) {
       if (error.stale || error.name === "AbortError") return;
@@ -1132,7 +1140,7 @@
       href: externalUrl(directSource.url),
       target: "_blank",
       rel: "noopener noreferrer",
-      text: directSource.kind === "record" ? "เปิดรายการต้นทาง ↗" : "เปิดเว็บไซต์แหล่งข้อมูล ↗",
+      text: directSource.kind === "record" ? "เปิดรายการต้นทาง" : "เปิดเว็บไซต์แหล่งข้อมูล",
     }));
     if ((model.badges || []).length) {
       intro.append(el("div", { class: "f2-detail-badges", "aria-label": "ประเภทและสถานะ" },

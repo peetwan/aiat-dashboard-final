@@ -2,23 +2,26 @@
 <html lang="th">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="แผนที่ข้อมูลสาธารณะรายจังหวัดสำหรับผู้บริหาร สำรวจตัวเลข หลักฐาน และแหล่งข้อมูลของแต่ละพื้นที่" />
-    <meta name="theme-color" content="#eef1ec" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f1f2ed" />
     <title>AIAT แผนที่ข้อมูลจังหวัด</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css" />
-    <link rel="stylesheet" href="/static/styles.css?v=legend-wrap-20260928-01" />
-    <link rel="stylesheet" href="/static/mobile.css?v=f1-20260903-04" media="(max-width: 720px)" />
-    <link rel="stylesheet" href="/static/departments.css?v=f4-tab-coverage-spacing-20260927-03" />
-    <link rel="stylesheet" href="/static/f2.css?v=20261001-f2-coverage-context-01" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261029-phase05d" />
+    <link rel="stylesheet" href="/static/mobile.css?v=20261029-phase05b" media="(max-width: 720px)" />
+    <link rel="stylesheet" href="/static/departments.css?v=20261029-phase05" />
+    <link rel="stylesheet" href="/static/f2.css?v=20261029-phase05" />
+    <link rel="stylesheet" href="/static/touch.css?v=20261028-03" />
   </head>
   <body>
-    <a class="skip-link" href="#provinceMap">ข้ามไปยังแผนที่</a>
+    <a class="skip-link" href="#provinceSelect">ข้ามไปยังตัวเลือกจังหวัด</a>
 
     <main class="atlas-shell">
       <div id="provinceMap" class="province-map" role="application" aria-label="แผนที่ข้อมูลสาธารณะรายจังหวัดของประเทศไทย"></div>
@@ -35,7 +38,7 @@
           <select id="provinceSelect" aria-label="เลือกจังหวัด">
             <option value="">เลือกจังหวัด</option>
           </select>
-          <span class="picker-chevron" aria-hidden="true">•••</span>
+          <span class="picker-chevron" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 6l4 4 4-4" /></svg></span>
         </label>
 
         <div class="header-meta">
@@ -87,6 +90,7 @@
 
       <aside class="department-panel department-panel--f1 f1-country-panel" id="f1CountryPanel" aria-hidden="true" hidden>
         <header class="department-panel-head f1-country-head">
+          <button type="button" class="sheet-grip" aria-expanded="false" aria-label="ขยายข้อมูลให้เต็มจอ"></button>
           <div>
             <span class="f1-kicker">ฝ่าย 1</span>
             <h2>ขจัดความยากจน</h2>
@@ -99,7 +103,11 @@
           <button type="button" id="f1RegionStep" disabled><b>2</b> เลือกภาค</button>
           <span><b>3</b> เลือกจังหวัด</span>
         </div>
-        <div class="f1-country-loading" id="f1CountryLoading">กำลังรวมข้อมูลฝ่าย 1</div>
+        <div class="f1-country-loading" id="f1CountryLoading" role="status" aria-live="polite">
+          <p id="f1CountryStatusMessage">กำลังรวมข้อมูลฝ่าย 1</p>
+          <div class="skeleton-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <button type="button" id="retryF1Overview" hidden>ลองอีกครั้ง</button>
+        </div>
         <div class="f1-country-content" id="f1CountryContent" hidden>
           <p class="f1-kpi-hint">กดหัวข้อ 1.1 ถึง 1.8 เพื่อดูรายละเอียดด้านล่าง</p>
           <div class="department-kpi-grid f1-country-kpis" id="f1CountryKpis"></div>
@@ -114,6 +122,7 @@
 
       <section class="department-panel department-panel--f4 f4-country-panel" id="f4CountryPanel" hidden aria-label="ภาพรวมเสริมพลังท้องถิ่น">
         <header class="department-panel-head f4-country-head">
+          <button type="button" class="sheet-grip" aria-expanded="false" aria-label="ขยายข้อมูลให้เต็มจอ"></button>
           <div>
             <span class="department-kicker department-kicker--f4" id="f4PanelKicker">ฝ่าย 4</span>
             <h2><span id="f4PanelTitle">เสริมพลังท้องถิ่น</span> <small id="f4ProvinceNameEn" hidden></small></h2>
@@ -223,7 +232,7 @@
           <section class="f4-list-panel">
             <header>
               <h3>เทคโนโลยีและนวัตกรรม</h3>
-              <input id="f4InnovationSearch" type="search" aria-label="ค้นหาเทคโนโลยีและนวัตกรรม" placeholder="ค้นหารายการ" autocomplete="off" />
+              <input id="f4InnovationSearch" type="search" aria-label="ค้นหาเทคโนโลยีและนวัตกรรม" placeholder="ค้นหารายการ" autocomplete="off" enterkeyhint="search" autocapitalize="none" spellcheck="false" />
             </header>
             <div class="f4-list-summary" id="f4InnovationListSummary"></div>
             <div class="f4-record-list" id="f4InnovationRows"></div>
@@ -261,7 +270,7 @@
           <section class="f4-list-panel">
             <header>
               <h3>รายการนวัตกรรมเชิงนโยบาย</h3>
-              <input id="f4PolicySearch" type="search" aria-label="ค้นหานวัตกรรมเชิงนโยบาย" placeholder="ค้นหารายการ" autocomplete="off" />
+              <input id="f4PolicySearch" type="search" aria-label="ค้นหานวัตกรรมเชิงนโยบาย" placeholder="ค้นหารายการ" autocomplete="off" enterkeyhint="search" autocapitalize="none" spellcheck="false" />
             </header>
             <div class="f4-list-summary" id="f4PolicyListSummary"></div>
             <div class="f4-record-list" id="f4PolicyRows"></div>
@@ -283,6 +292,7 @@
 
       <aside class="department-panel workspace-panel" id="workspacePanel" aria-hidden="true" hidden>
         <header class="department-panel-head workspace-panel-head">
+          <button type="button" class="sheet-grip" aria-expanded="false" aria-label="ขยายข้อมูลให้เต็มจอ"></button>
           <div>
             <span id="workspaceKicker">ฝ่าย 3</span>
             <h2 id="workspaceTitle">พื้นที่ข้อมูลฝ่าย 3</h2>
@@ -294,6 +304,7 @@
       </aside>
       <aside class="department-panel f2-dashboard" id="f2DashboardPanel" aria-hidden="true" hidden aria-label="ฝ่าย 2 การยกระดับเศรษฐกิจฐานราก">
         <header class="department-panel-head f2-head">
+          <button type="button" class="sheet-grip" aria-expanded="false" aria-label="ขยายข้อมูลให้เต็มจอ"></button>
           <div>
             <span>ฝ่าย 2</span>
             <h2>การยกระดับเศรษฐกิจฐานราก</h2>
@@ -330,12 +341,15 @@
       <button type="button" class="department-board-toggle workspace-board-toggle" id="showWorkspacePanel" hidden>ดูภาพรวมฝ่าย 2</button>
 
       <aside class="province-panel" id="provincePanel" aria-hidden="true" aria-live="polite">
-        <div class="panel-loading" id="panelLoading" hidden>
-          <span></span><span></span><span></span><span></span>
+        <div class="panel-loading" id="panelLoading" hidden aria-hidden="true">
+          <span class="skeleton-eyebrow"></span><span class="skeleton-title"></span>
+          <div class="skeleton-kpis"><span></span><span></span><span></span></div>
+          <span class="skeleton-section"></span>
         </div>
 
         <div class="panel-content" id="panelContent" hidden>
           <header class="panel-head">
+            <button type="button" class="sheet-grip" aria-expanded="false" aria-label="ขยายข้อมูลให้เต็มจอ"></button>
             <div>
               <span class="api-chip" id="provincePanelChip"><i></i> ข้อมูลจังหวัด</span>
             </div>
@@ -380,14 +394,17 @@
                 </section>
 
                 <section class="overview-funding" id="overviewFunding" hidden></section>
-                <a class="overview-full-cta" id="fullProvinceLink" href="#">
+                <a class="overview-full-cta" id="fullProvinceLink">
                   <span><strong>ดูข้อมูลจังหวัดทั้งหมด</strong><small>โครงการ คน และพื้นที่</small></span><b>เปิด</b>
                 </a>
               </div>
             </section>
 
             <section class="panel-view" data-panel-view="f1" hidden>
-              <div class="f1-province-loading" id="f1ProvinceLoading">กำลังโหลดข้อมูลฝ่าย 1 ของจังหวัดนี้</div>
+              <div class="f1-province-loading" id="f1ProvinceLoading" role="status" aria-live="polite">
+                <p id="f1ProvinceStatusMessage">กำลังโหลดข้อมูลฝ่าย 1 ของจังหวัดนี้</p>
+                <div class="skeleton-bars" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <div class="f1-province-content" id="f1ProvinceContent" hidden>
                 <div class="f1-province-toolbar" id="f1ProvinceToolbar">
                   <div class="f1-province-heading">
@@ -420,7 +437,7 @@
                 <div class="section-heading"><span>ทะเบียนโครงการพัฒนาระดับพื้นที่</span><small id="projectResultCount"></small></div>
                 <p class="section-method-note">จัดกลุ่มจากชื่อโครงการ ปีงบประมาณ และหน่วยวิจัย จำนวนผู้เข้าร่วมแสดงแยกต่างหาก</p>
                 <div class="collection-tools project-tools">
-                  <label><span>ค้นหาโครงการ หน่วยวิจัย ผู้เข้าร่วม หรือพื้นที่</span><input id="projectSearch" type="search" placeholder="ชื่อโครงการ หน่วยวิจัย กลุ่ม/ธุรกิจ อำเภอ ตำบล" autocomplete="off" /></label>
+                  <label><span>ค้นหาโครงการ หน่วยวิจัย ผู้เข้าร่วม หรือพื้นที่</span><input id="projectSearch" type="search" placeholder="ชื่อโครงการ หน่วยวิจัย กลุ่ม/ธุรกิจ อำเภอ ตำบล" autocomplete="off" enterkeyhint="search" autocapitalize="none" spellcheck="false" /></label>
                   <div class="filter-row">
                     <label><span>ปีงบประมาณ</span>
                       <select id="projectYearFilter"><option value="">ทุกปี</option></select>
@@ -473,7 +490,7 @@
               <div class="panel-section" id="cultureSection" hidden>
                 <div class="section-heading"><span>ทุนวัฒนธรรมในพื้นที่</span><small id="cultureResultCount"></small></div>
                 <div class="collection-tools">
-                  <label><span>ค้นหาทุนวัฒนธรรม</span><input id="cultureSearch" type="search" placeholder="ชื่อ แหล่ง หรืออำเภอ" autocomplete="off" /></label>
+                  <label><span>ค้นหาทุนวัฒนธรรม</span><input id="cultureSearch" type="search" placeholder="ชื่อ แหล่ง หรืออำเภอ" autocomplete="off" enterkeyhint="search" autocapitalize="none" spellcheck="false" /></label>
                 </div>
                 <div class="record-list" id="cultureItems"></div>
                 <button class="load-more" id="loadMoreCulture" type="button" hidden>แสดงรายการเพิ่มเติม</button>
@@ -509,7 +526,7 @@
               </div>
               <footer class="panel-footer">
                 <div><span class="candidate-dot"></span><p><strong>ข้อมูลเบื้องต้น</strong><small id="panelUpdated">กำลังตรวจสอบวันที่</small></p></div>
-                <a id="provinceApiLink" href="#" target="_blank" rel="noreferrer">ดูข้อมูล</a>
+                <a id="provinceApiLink" target="_blank" rel="noreferrer">ดูข้อมูล</a>
               </footer>
             </section>
           </div>
@@ -532,8 +549,8 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-    <script src="/static/f2-detail.js?v=20261001-f2-category-code-01" defer></script>
-    <script src="/static/f2.js?v=20261001-f2-coverage-context-01" defer></script>
-    <script src="/static/app.js?v=20261001-f2-category-code-01" defer></script>
+    <script src="/static/f2-detail.js?v=20261028-phase04" defer></script>
+    <script src="/static/f2.js?v=20261028-phase04" defer></script>
+    <script src="/static/app.js?v=20261029-phase05d" defer></script>
   </body>
 </html>
